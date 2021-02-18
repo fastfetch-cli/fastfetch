@@ -17,7 +17,8 @@ void printTerminalName(const char* pid)
     char name[256];
     char ppid[256];
 
-    fscanf(stat, "%*s (%[^)])%*s%s", name, ppid);
+    if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
+        return;
 
     fclose(stat);
 
