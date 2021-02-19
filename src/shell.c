@@ -5,6 +5,13 @@
 void ffPrintShell(FFstate* state)
 {
     char* shellPath = getenv("SHELL");
+    if(shellPath == NULL)
+    {
+        if(state->showErrors)
+            ffPrintError(state, "Shell", "getenv(\"SHELL\") == NULL");
+        return;
+    }
+
     char* shellName = strrchr(shellPath, '/');
 
     if(shellName == NULL)
@@ -13,5 +20,5 @@ void ffPrintShell(FFstate* state)
         ++shellName;
 
     ffPrintLogoAndKey(state, "Shell");
-    printf("%s\n", shellName);
+    puts(shellName);
 }

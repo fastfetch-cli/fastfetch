@@ -15,6 +15,4 @@ void ffPrintColors(FFstate* state)
         printf("\033[48;5;%dm   ", i);
 
     puts("\033[0m");
-    
-    puts("");
 }

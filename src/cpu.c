@@ -6,16 +6,32 @@ void ffPrintCPU(FFstate* state)
 {
     char name[256];
     ffParsePropFile("/proc/cpuinfo", "model name%*s %[^\n]", name);
+    if(name[0] == '\0')
+    {
+        if(state->showErrors)
+            ffPrintError(state, "CPU", "\"model name%*s %[^\\n]\" not found in \"/proc/cpuinfo\"");
+        return;
+    }
     
-    char frequency[256];
-    ffReadFile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", frequency, 256);
+    FILE* frequencyFile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", "r");
+    if(frequencyFile == NULL)
+    {
+        if(state->showErrors)
+            ffPrintError(state, "CPU", "fopen(\"/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq\", \"r\") == NULL");
+        return;
+    }
+    uint32_t frequency;
+    int scanned = fscanf(frequencyFile, "%u", &frequency);
+    if(scanned != 1)
+    {
+        if(state->showErrors)
+            ffPrintError(state, "CPU", "fscanf(frequencyFile, \"%s\", frequency) != 1");
+        return;
+    }
+    fclose(frequencyFile);
 
-    char cores[256];
-
-    uint32_t hz;
-    sscanf(frequency, "%u", &hz);      //in KHz
-    hz /= 1000;                        //to MHz
-    double ghz = (double) hz / 1000.0; //to GHz
+    frequency /= 1000;                        //to MHz
+    double ghz = (double) frequency / 1000.0; //to GHz
 
     ffPrintLogoAndKey(state, "CPU");
     printf("%s (%i) @ %.9gGHz\n", name, get_nprocs(), ghz);

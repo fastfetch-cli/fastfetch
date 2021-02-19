@@ -32,8 +32,8 @@ uint32_t ffReadFile(const char* fileName, char* buffer, uint32_t bufferSize)
     FILE* file = fopen(fileName, "r");
     if(file == NULL)
     {
-        fprintf(stderr, "Failed to open file: %s\n", fileName);
-        exit(3);
+        buffer[0] = '\0';
+        return 0;
     }
 
     uint32_t read = fread(buffer, sizeof(char), bufferSize, file);
@@ -46,15 +46,14 @@ uint32_t ffReadFile(const char* fileName, char* buffer, uint32_t bufferSize)
 
 void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 {
+    buffer[0] = '\0'; //If an error occures, this is the indicator
+
     char* line = NULL;
     size_t len;
 
     FILE* file = fopen(fileName, "r");
     if(file == NULL)
-    {
-        buffer[0] = '\0';
-        return;
-    }
+        return; // handle errors in higher functions
 
     while (getline(&line, &len, file) != -1)
     {
@@ -122,6 +121,25 @@ void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4)
     }
 }
 
+void ffPrintError(FFstate* state, const char* key, const char* message)
+{
+    ffPrintLogoAndKey(state, key);
+    printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s\n"FASTFETCH_TEXT_MODIFIER_RESET, message);
+}
+
+static void printHelp()
+{
+    puts(
+        "usage: fastfetch <options>\n"
+        "   -h,         --help:          shows this message and exits\n"
+        "   -l <name>,  --logo <name>:   sets the shown logo. Also changes the main color accordingly\n"
+        "   -c <color>, --color <color>: sets the color of the keys. Must be a linux console color code\n"
+        "               --show-errors:   if an error occurs, show it instead of discarding the category\n"
+        "               --list-logos:    lists the names of available logos and exits\n"
+        "               --print-logos:   prints available logos and exits\n"
+    );
+}
+
 int main(int argc, char** argv)
 {
     FFstate state;
@@ -132,11 +150,59 @@ int main(int argc, char** argv)
     state.passwd = getpwuid(getuid());
     uname(&state.utsname);
     sysinfo(&state.sysinfo);
-
-
-    //Configuration
     state.logo_seperator = 4;
     state.titleLength = 20; // This is overwritten by ffPrintTitle
+    state.showErrors = false;
+
+    for(int i = 1; i < argc; i++)
+    {
+        if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
+        {
+            printHelp();
+            return 0;
+        }
+        else if(strcmp(argv[i], "--list-logos") == 0)
+        {
+            ffListLogos();
+            return 0;
+        }
+        else if(strcmp(argv[i], "--print-logos") == 0)
+        {
+            ffPrintLogos();
+            return 0;
+        }
+        else if(strcmp(argv[i], "--show-errors") == 0)
+        {
+            state.showErrors = true;
+        }
+        else if(strcmp(argv[i], "--logo") == 0 || strcmp(argv[i], "-l") == 0)
+        {
+            if(i == argc - 1)
+            {
+                printf("Error: usage: %s <logo>\n", argv[i]);
+                return 40;
+            }
+
+            ffLoadLogoSet(&state, argv[i + 1]);
+            ++i;
+        }
+        else if(strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-c") == 0)
+        {
+            if(i == argc - 1)
+            {
+                printf("Error: usage: %s <color>\n", argv[i]);
+                return 41;
+            }
+            size_t len = strlen(argv[i + 1]);
+            if(len >= 10)
+            {
+                printf("Error: max color string length is 10, %zu given\n", len);
+                return 42;
+            }
+            strcpy(state.color, argv[i + 1]);
+            ++i;
+        }
+    }
 
     //Start the printing
     ffPrintTitle(&state);

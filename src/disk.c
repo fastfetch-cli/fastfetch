@@ -8,6 +8,8 @@ void ffPrintDisk(FFstate* state)
     int ret = statvfs("/", &fs);
     if(ret != 0)
     {
+        if(state->showErrors)
+            ffPrintError(state, "Disk (/)", "statvfs(\"/\", &fs) != 0");
         return;
     }
 

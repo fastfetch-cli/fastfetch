@@ -16,6 +16,7 @@
 #include <sys/sysinfo.h>
 
 #define FASTFETCH_TEXT_MODIFIER_BOLT  "\033[1m"
+#define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
 #define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
 
 typedef struct FFstate
@@ -28,6 +29,8 @@ typedef struct FFstate
 
     uint8_t logo_seperator;
     char color[10];
+
+    bool showErrors;
 
     uint8_t titleLength;
     struct passwd* passwd;
@@ -44,9 +47,12 @@ uint32_t ffReadFile(const char* fileName, char* buffer, uint32_t bufferSize);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFstate* state, const char* relativeFile, const char* regex, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);
+void ffPrintError(FFstate* state, const char* key, const char* message);
 
 void ffLoadLogoSet(FFstate* state, const char* logo);
 void ffLoadLogo(FFstate* state);
+void ffListLogos();
+void ffPrintLogos();
 
 void ffPrintBreak(FFstate* state);
 void ffPrintTitle(FFstate* state);

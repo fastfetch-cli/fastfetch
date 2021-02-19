@@ -8,9 +8,8 @@ static uint32_t get_num_dirs(const char* dirname) {
     struct dirent *entry;
 
     dirp = opendir(dirname);
-    if(dirp == NULL) {
-        fprintf(stderr, "Error opening directory: %s\n", dirname);
-    }
+    if(dirp == NULL)
+        return 0;
 
     while((entry = readdir(dirp)) != NULL) {
         if(entry->d_type == DT_DIR)

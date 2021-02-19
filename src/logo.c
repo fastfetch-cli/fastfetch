@@ -96,3 +96,13 @@ void ffPrintLogoLine(FFstate* state)
 
     ++state->current_row;
 }
+
+void ffListLogos()
+{
+    puts("not implemented");
+}
+
+void ffPrintLogos()
+{
+    puts("not implemented");
+}
