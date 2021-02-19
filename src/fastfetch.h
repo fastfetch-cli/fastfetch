@@ -42,8 +42,6 @@ typedef struct FFstate
 void ffPrintLogoLine(FFstate* state);
 void ffPrintKey(FFstate* state, const char* key);
 void ffPrintLogoAndKey(FFstate* state, const char* key);
-uint32_t ffTruncateLastNewline(char* buffer, uint32_t bufferSize);
-uint32_t ffReadFile(const char* fileName, char* buffer, uint32_t bufferSize);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFstate* state, const char* relativeFile, const char* regex, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);

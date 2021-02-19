@@ -13,37 +13,6 @@ void ffPrintLogoAndKey(FFstate* state, const char* key)
     ffPrintKey(state, key);
 }
 
-uint32_t ffTruncateLastNewline(char* buffer, uint32_t read)
-{
-    if(read == 0)
-        return read;
-
-    if(buffer[read - 1] == '\n')
-    {
-        buffer[read - 1] = '\0';
-        --read;
-    }
-
-    return read;
-}
-
-uint32_t ffReadFile(const char* fileName, char* buffer, uint32_t bufferSize)
-{
-    FILE* file = fopen(fileName, "r");
-    if(file == NULL)
-    {
-        buffer[0] = '\0';
-        return 0;
-    }
-
-    uint32_t read = fread(buffer, sizeof(char), bufferSize, file);
-    read = ffTruncateLastNewline(buffer, read);
-
-    fclose(file);
-
-    return read;
-}
-
 void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 {
     buffer[0] = '\0'; //If an error occures, this is the indicator
@@ -201,6 +170,11 @@ int main(int argc, char** argv)
             }
             strcpy(state.color, argv[i + 1]);
             ++i;
+        }
+        else
+        {
+            printf("Error: unknown options: %s\n", argv[i]);
+            return 43;
         }
     }
 
