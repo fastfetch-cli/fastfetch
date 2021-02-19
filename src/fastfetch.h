@@ -19,13 +19,20 @@
 #define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
 #define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
 
+typedef struct FFlogo
+{
+    uint8_t width;
+    uint8_t height;
+    char    chars[256][256];
+    char    name[128];
+    char    color[10];
+} FFlogo;
+
 typedef struct FFstate
 {
     uint8_t current_row;
 
-    uint8_t logo_width;
-    uint8_t logo_height;
-    char    logo_chars[256][256];
+    FFlogo logo;
 
     uint8_t logo_seperator;
     char color[10];

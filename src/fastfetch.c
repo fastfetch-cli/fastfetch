@@ -113,8 +113,7 @@ int main(int argc, char** argv)
 {
     FFstate state;
 
-    //init
-    ffLoadLogo(&state); //Use ffLoadLogoSet to specify an image. Note that this also overwrites color
+    ffLoadLogo(&state); //also sets color
     state.current_row = 0;
     state.passwd = getpwuid(getuid());
     uname(&state.utsname);
