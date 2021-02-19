@@ -20,5 +20,5 @@ void ffPrintDisk(FFstate* state)
 
     
     ffPrintLogoAndKey(state, "Disk (/)");
-    printf("%luGB / %luGB (%lu%%)\n", used, total, percentage);
+    printf("%uGB / %uGB (%u%%)\n", used, total, percentage);
 }

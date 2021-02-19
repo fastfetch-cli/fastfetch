@@ -13,7 +13,7 @@ void ffPrintCPU(FFstate* state)
     char cores[256];
 
     uint32_t hz;
-    sscanf(frequency, "%ul", &hz);     //in KHz
+    sscanf(frequency, "%u", &hz);      //in KHz
     hz /= 1000;                        //to MHz
     double ghz = (double) hz / 1000.0; //to GHz
 

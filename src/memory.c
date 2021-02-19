@@ -5,24 +5,24 @@ void ffPrintMemory(FFstate* state)
 {
     ffPrintLogoAndKey(state, "Memory");
 
-    FILE *meminfo = fopen("/proc/meminfo", "r");
+    FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL) {
         printf("[Error opening /proc/meminfo\n");
         return;
     }
 
-    char *line = NULL;
+    char* line = NULL;
     size_t len;
 
     uint32_t total, shared, memfree, buffers, cached, reclaimable;
 
     while (getline(&line, &len, meminfo) != -1) {
-        sscanf(line, "MemTotal: %lu", &total);
-        sscanf(line, "Shmem: %lu", &shared);
-        sscanf(line, "MemFree: %lu", &memfree);
-        sscanf(line, "Buffers: %lu", &buffers);
-        sscanf(line, "Cached: %lu", &cached);
-        sscanf(line, "SReclaimable: %lu", &reclaimable);
+        sscanf(line, "MemTotal: %u", &total);
+        sscanf(line, "Shmem: %u", &shared);
+        sscanf(line, "MemFree: %u", &memfree);
+        sscanf(line, "Buffers: %u", &buffers);
+        sscanf(line, "Cached: %u", &cached);
+        sscanf(line, "SReclaimable: %u", &reclaimable);
     }
 
     free(line);
@@ -32,5 +32,5 @@ void ffPrintMemory(FFstate* state)
     uint32_t total_mem = total / 1024;
     uint8_t percentage = (uint8_t) ((used_mem / (double) total_mem) * 100);
 
-    printf("%luMiB / %luMiB (%u%%)\n", used_mem, total_mem, percentage);
+    printf("%uMiB / %uMiB (%u%%)\n", used_mem, total_mem, percentage);
 }

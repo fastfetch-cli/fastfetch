@@ -8,7 +8,7 @@ void ffPrintBattery(FFstate* state)
     if(fullFile == NULL)
         return;
     uint32_t full;
-    scanned = fscanf(fullFile, "%lu", &full);
+    scanned = fscanf(fullFile, "%u", &full);
     if(scanned != 1)
         return;
     fclose(fullFile);
@@ -17,7 +17,7 @@ void ffPrintBattery(FFstate* state)
     if(nowFile == NULL)
         return;
     uint32_t now;
-    scanned = fscanf(nowFile, "%lu", &now);
+    scanned = fscanf(nowFile, "%u", &now);
     if(scanned != 1)
         return;
     fclose(nowFile);
@@ -34,5 +34,5 @@ void ffPrintBattery(FFstate* state)
     uint32_t percentage = (now / (double) full) * 100;
 
     ffPrintLogoAndKey(state, "Battery");
-    printf("%lu%% [%s]\n", percentage, status);
+    printf("%u%% [%s]\n", percentage, status);
 }
