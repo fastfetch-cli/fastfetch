@@ -74,9 +74,17 @@ static FFlogo* getLogos(uint8_t* size)
 void ffLoadLogoSet(FFstate* state, const char* logo)
 {
     if(strcmp(logo, "arch") == 0)
+    {
         loadArchLogo(&state->logo);
+    }
     else
+    {
+        if(state->showErrors)
+            printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", logo);
         loadUnknownLogo(&state->logo);
+    }
+
+    strcpy(state->color, state->logo.color);
 }
 
 void ffLoadLogo(FFstate* state)
