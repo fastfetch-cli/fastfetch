@@ -103,13 +103,37 @@ static void printHelp()
 {
     puts(
         "usage: fastfetch <options>\n"
-        "   -h,         --help:          shows this message and exits\n"
-        "   -l <name>,  --logo <name>:   sets the shown logo. Also changes the main color accordingly\n"
-        "   -c <color>, --color <color>: sets the color of the keys. Must be a linux console color code\n"
-        "               --show-errors:   if an error occurs, show it instead of discarding the category\n"
-        "               --list-logos:    lists the names of available logos and exits\n"
-        "               --print-logos:   prints available logos and exits\n"
+        "\n"
+        "   -h,           --help:           shows this message and exits\n"
+        "   -h <command>, --help <command>: shows help for a specific command and exits\n"
+        "   -l <name>,    --logo <name>:    sets the shown logo. Also changes the main color accordingly\n"
+        "   -c <color>,   --color <color>:  sets the color of the keys. Must be a linux console color code\n"
+        "                 --show-errors:    if an error occurs, show it instead of discarding the category\n"
+        "                 --list-logos:     lists the names of available logos and exits\n"
+        "                 --print-logos:    prints available logos and exits\n"
     );
+}
+
+static void printCommandHelpColor()
+{
+    puts(
+        "usage: fastfetch --color <color>\n"
+        "\n"
+        "<color> must be a color encoding for linux terminals. It is inserted between \"ESC[\" and \"m\".\n"
+        "Infos about them can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#Colors.\n"
+        "Examples:\n"
+        "   \"--color 35\":    sets the color to pink\n"
+        "   \"--color 4;92\":  sets the color to bright Green with underline\n"
+        "   \"--color 5;104\": blinking text on a blue background\n"
+    );
+}
+
+static void printCommandHelp(const char* command)
+{
+    if(strcmp(command, "c") == 0 || strcmp(command, "-c") == 0 || strcmp(command, "color") == 0 || strcmp(command, "--color") == 0)
+        printCommandHelpColor();
+    else
+        printf("No specific help for command %s provided\n", command);
 }
 
 int main(int argc, char** argv)
@@ -129,7 +153,11 @@ int main(int argc, char** argv)
     {
         if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
         {
-            printHelp();
+            if(i == argc - 1)
+                printHelp();
+            else
+                printCommandHelp(argv[i + 1]);
+
             return 0;
         }
         else if(strcmp(argv[i], "--list-logos") == 0)
@@ -165,12 +193,14 @@ int main(int argc, char** argv)
                 return 41;
             }
             size_t len = strlen(argv[i + 1]);
-            if(len >= 10)
+            if(len > 7)
             {
-                printf("Error: max color string length is 10, %zu given\n", len);
+                printf("Error: max color string length is 7, %zu given\n", len);
                 return 42;
             }
-            strcpy(state.color, argv[i + 1]);
+            char colorCode[10];
+            sprintf(colorCode, "\033[%sm", argv[i + 1]);
+            strcpy(state.color, colorCode);
             ++i;
         }
         else
