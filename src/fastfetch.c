@@ -104,13 +104,14 @@ static void printHelp()
     puts(
         "usage: fastfetch <options>\n"
         "\n"
-        "   -h,           --help:           shows this message and exits\n"
-        "   -h <command>, --help <command>: shows help for a specific command and exits\n"
-        "   -l <name>,    --logo <name>:    sets the shown logo. Also changes the main color accordingly\n"
-        "   -c <color>,   --color <color>:  sets the color of the keys. Must be a linux console color code\n"
-        "                 --show-errors:    if an error occurs, show it instead of discarding the category\n"
-        "                 --list-logos:     lists the names of available logos and exits\n"
-        "                 --print-logos:    prints available logos and exits\n"
+        "   -h,           --help:              shows this message and exits\n"
+        "   -h <command>, --help <command>:    shows help for a specific command and exits\n"
+        "   -l <name>,    --logo <name>:       sets the shown logo. Also changes the main color accordingly\n"
+        "   -c <color>,   --color <color>:     sets the color of the keys. Must be a linux console color code\n"
+        "   -s <width>,   --seperator <width>: sets the distance between logo and text\n"
+        "                 --show-errors:       if an error occurs, show it instead of discarding the category\n"
+        "                 --list-logos:        lists the names of available logos and exits\n"
+        "                 --print-logos:       prints available logos and exits\n"
     );
 }
 
@@ -125,6 +126,7 @@ static void printCommandHelpColor()
         "   \"--color 35\":    sets the color to pink\n"
         "   \"--color 4;92\":  sets the color to bright Green with underline\n"
         "   \"--color 5;104\": blinking text on a blue background\n"
+        "If no color is set, the main color of the logo will be used.\n"
     );
 }
 
@@ -179,34 +181,52 @@ int main(int argc, char** argv)
             if(i == argc - 1)
             {
                 printf("Error: usage: %s <logo>\n", argv[i]);
-                return 40;
+                return 41;
             }
 
             ffLoadLogoSet(&state, argv[i + 1]);
             ++i;
         }
-        else if(strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-c") == 0)
+        else if(strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--color") == 0)
         {
             if(i == argc - 1)
             {
                 printf("Error: usage: %s <color>\n", argv[i]);
-                return 41;
+                return 42;
             }
             size_t len = strlen(argv[i + 1]);
             if(len > 7)
             {
                 printf("Error: max color string length is 7, %zu given\n", len);
-                return 42;
+                return 43;
             }
-            char colorCode[10];
-            sprintf(colorCode, "\033[%sm", argv[i + 1]);
-            strcpy(state.color, colorCode);
+            sprintf(state.color, "\033[%sm", argv[i + 1]);
+            ++i;
+        }
+        else if(strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--seperator") == 0)
+        {
+            if(i == argc -1)
+            {
+                printf("Error: usage: %s <width>\n", argv[i]);
+                return 44;
+            }
+            size_t len = strlen(argv[i + 1]);
+            if(len > 3)
+            {
+                printf("Error: max seperator length is 3 digits (up to 255), %zu given\n", len);
+                return 45;
+            }
+            if(sscanf(argv[i + 1], "%2hhx", &state.logo_seperator) != 1)
+            {
+                printf("Error: couldn't parse %s to uint8_t\n", argv[i + 1]);
+                return 46;
+            }
             ++i;
         }
         else
         {
-            printf("Error: unknown options: %s\n", argv[i]);
-            return 43;
+            printf("Error: unknown option: %s\n", argv[i]);
+            return 40;
         }
     }
 
