@@ -10,12 +10,9 @@ void printTerminalName(FFstate* state, const char* pid)
     FILE* stat = fopen(file, "r");
     if(stat == NULL)
     {
-        if(state->showErrors)
-        {
-            char error[256];
-            sprintf(error, "fopen(\"%s\", \"r\") == NULL", file);
-            ffPrintError(state, "Terminal", error);
-        }
+        char error[256];
+        sprintf(error, "fopen(\"%s\", \"r\") == NULL", file);
+        ffPrintError(state, "Terminal", error);
         return;
     }
 
@@ -23,8 +20,7 @@ void printTerminalName(FFstate* state, const char* pid)
     char ppid[256];
     if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
     {
-        if(state->showErrors)
-            ffPrintError(state, "Terminal", "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        ffPrintError(state, "Terminal", "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
         return;
     }
 

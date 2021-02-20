@@ -7,8 +7,7 @@ void ffPrintShell(FFstate* state)
     char* shellPath = getenv("SHELL");
     if(shellPath == NULL)
     {
-        if(state->showErrors)
-            ffPrintError(state, "Shell", "getenv(\"SHELL\") == NULL");
+        ffPrintError(state, "Shell", "getenv(\"SHELL\") == NULL");
         return;
     }
 

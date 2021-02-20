@@ -6,8 +6,7 @@ void ffPrintLocale(FFstate* state)
     ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", locale);
     if(locale[0] == '\0')
     {
-        if(state->showErrors)
-            ffPrintError(state, "Locale", "\"LANG=%[^\\n]\" not found in \"/etc/locale.conf\"");
+        ffPrintError(state, "Locale", "\"LANG=%[^\\n]\" not found in \"/etc/locale.conf\"");
         return;
     }
 

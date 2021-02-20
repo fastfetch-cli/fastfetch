@@ -5,8 +5,7 @@ void ffPrintMemory(FFstate* state)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL) {
-        if(state->showErrors)
-            ffPrintError(state, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");
+        ffPrintError(state, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");
         return;
     }
 

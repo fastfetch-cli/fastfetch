@@ -92,6 +92,9 @@ void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4)
 
 void ffPrintError(FFstate* state, const char* key, const char* message)
 {
+    if(!state->showErrors)
+        return;
+
     ffPrintLogoAndKey(state, key);
     printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s\n"FASTFETCH_TEXT_MODIFIER_RESET, message);
 }

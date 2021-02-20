@@ -6,8 +6,7 @@ void ffPrintOS(FFstate* state)
     ffParsePropFile("/etc/os-release", "NAME=\"%[^\"]+", name);
     if(name[0] == '\0')
     {
-        if(state->showErrors)
-            ffPrintError(state, "OS", "\"NAME=\\\"%[^\\\"]+\" not found in \"/etc/os-release\"");
+        ffPrintError(state, "OS", "\"NAME=\\\"%[^\\\"]+\" not found in \"/etc/os-release\"");
         return;
     }
 

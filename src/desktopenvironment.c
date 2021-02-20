@@ -21,8 +21,7 @@ void ffPrintDesktopEnvironment(FFstate* state)
     const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
     if(currentDesktop == NULL)
     {
-        if(state->showErrors)
-            ffPrintError(state, "DE", "getenv(\"XDG_CURRENT_DESKTOP\") == NULL");
+        ffPrintError(state, "DE", "getenv(\"XDG_CURRENT_DESKTOP\") == NULL");
         return;
     }
 

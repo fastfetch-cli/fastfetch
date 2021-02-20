@@ -8,24 +8,21 @@ void ffPrintCPU(FFstate* state)
     ffParsePropFile("/proc/cpuinfo", "model name%*s %[^\n]", name);
     if(name[0] == '\0')
     {
-        if(state->showErrors)
-            ffPrintError(state, "CPU", "\"model name%*s %[^\\n]\" not found in \"/proc/cpuinfo\"");
+        ffPrintError(state, "CPU", "\"model name%*s %[^\\n]\" not found in \"/proc/cpuinfo\"");
         return;
     }
     
     FILE* frequencyFile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", "r");
     if(frequencyFile == NULL)
     {
-        if(state->showErrors)
-            ffPrintError(state, "CPU", "fopen(\"/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq\", \"r\") == NULL");
+        ffPrintError(state, "CPU", "fopen(\"/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq\", \"r\") == NULL");
         return;
     }
     uint32_t frequency;
     int scanned = fscanf(frequencyFile, "%u", &frequency);
     if(scanned != 1)
     {
-        if(state->showErrors)
-            ffPrintError(state, "CPU", "fscanf(frequencyFile, \"%s\", frequency) != 1");
+        ffPrintError(state, "CPU", "fscanf(frequencyFile, \"%s\", frequency) != 1");
         return;
     }
     fclose(frequencyFile);

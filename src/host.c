@@ -5,15 +5,13 @@ void ffPrintHost(FFstate* state)
     FILE* nameFile = fopen("/sys/devices/virtual/dmi/id/product_name", "r");
     if(nameFile == NULL)
     {
-        if(state->showErrors)
-            ffPrintError(state, "Host", "fopen(\"/sys/devices/virtual/dmi/id/product_name\", \"r\") == NULL");
+        ffPrintError(state, "Host", "fopen(\"/sys/devices/virtual/dmi/id/product_name\", \"r\") == NULL");
         return;
     }
     char name[256];
     if(fscanf(nameFile, "%[^\n]", name) != 1)
     {
-        if(state->showErrors)
-            ffPrintError(state, "Host", "fscanf(nameFile, \"%[^\\n]\", name) != 1");
+        ffPrintError(state, "Host", "fscanf(nameFile, \"%[^\\n]\", name) != 1");
         return;
     }
     fclose(nameFile);
