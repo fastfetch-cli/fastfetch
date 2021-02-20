@@ -115,7 +115,7 @@ void ffPrintLogoLine(FFstate* state)
             putchar(' ');   
     }
     
-    for(uint8_t i = 0; i < state->logo_seperator; i++)
+    for(uint16_t i = 0; i < state->logo_seperator; i++)
         putchar(' ');
 
     ++state->current_row;

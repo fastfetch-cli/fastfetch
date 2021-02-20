@@ -34,7 +34,7 @@ typedef struct FFstate
 
     FFlogo logo;
 
-    uint8_t logo_seperator;
+    uint16_t logo_seperator;
     char color[10];
 
     bool showErrors;

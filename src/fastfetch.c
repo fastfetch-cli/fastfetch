@@ -210,16 +210,10 @@ int main(int argc, char** argv)
                 printf("Error: usage: %s <width>\n", argv[i]);
                 return 44;
             }
-            size_t len = strlen(argv[i + 1]);
-            if(len > 3)
+            if(sscanf(argv[i + 1], "%hd", &state.logo_seperator) != 1)
             {
-                printf("Error: max seperator length is 3 digits (up to 255), %zu given\n", len);
+                printf("Error: couldn't parse %s to uint16_t\n", argv[i + 1]);
                 return 45;
-            }
-            if(sscanf(argv[i + 1], "%2hhx", &state.logo_seperator) != 1)
-            {
-                printf("Error: couldn't parse %s to uint8_t\n", argv[i + 1]);
-                return 46;
             }
             ++i;
         }
