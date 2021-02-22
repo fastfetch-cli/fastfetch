@@ -138,19 +138,20 @@ static void printCommandHelp(const char* command)
         printf("No specific help for command %s provided\n", command);
 }
 
-int main(int argc, char** argv)
+static void initState(FFstate* state)
 {
-    FFstate state;
+    ffLoadLogo(state); //also sets color
+    state->current_row = 0;
+    state->passwd = getpwuid(getuid());
+    uname(&state->utsname);
+    sysinfo(&state->sysinfo);
+    state->logo_seperator = 4;
+    state->titleLength = 20; // This is overwritten by ffPrintTitle
+    state->showErrors = false;
+}
 
-    ffLoadLogo(&state); //also sets color
-    state.current_row = 0;
-    state.passwd = getpwuid(getuid());
-    uname(&state.utsname);
-    sysinfo(&state.sysinfo);
-    state.logo_seperator = 4;
-    state.titleLength = 20; // This is overwritten by ffPrintTitle
-    state.showErrors = false;
-
+static void parseArguments(int argc, char** argv, FFstate* state)
+{
     for(int i = 1; i < argc; i++)
     {
         if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
@@ -160,31 +161,31 @@ int main(int argc, char** argv)
             else
                 printCommandHelp(argv[i + 1]);
 
-            return 0;
+            exit(0);
         }
         else if(strcmp(argv[i], "--list-logos") == 0)
         {
             ffListLogos();
-            return 0;
+            exit(0);
         }
         else if(strcmp(argv[i], "--print-logos") == 0)
         {
             ffPrintLogos();
-            return 0;
+            exit(0);
         }
         else if(strcmp(argv[i], "--show-errors") == 0)
         {
-            state.showErrors = true;
+            state->showErrors = true;
         }
         else if(strcmp(argv[i], "--logo") == 0 || strcmp(argv[i], "-l") == 0)
         {
             if(i == argc - 1)
             {
                 printf("Error: usage: %s <logo>\n", argv[i]);
-                return 41;
+                exit(41);
             }
 
-            ffLoadLogoSet(&state, argv[i + 1]);
+            ffLoadLogoSet(state, argv[i + 1]);
             ++i;
         }
         else if(strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--color") == 0)
@@ -192,15 +193,15 @@ int main(int argc, char** argv)
             if(i == argc - 1)
             {
                 printf("Error: usage: %s <color>\n", argv[i]);
-                return 42;
+                exit(42);
             }
             size_t len = strlen(argv[i + 1]);
             if(len > 7)
             {
                 printf("Error: max color string length is 7, %zu given\n", len);
-                return 43;
+                exit(43);
             }
-            sprintf(state.color, "\033[%sm", argv[i + 1]);
+            sprintf(state->color, "\033[%sm", argv[i + 1]);
             ++i;
         }
         else if(strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--seperator") == 0)
@@ -208,21 +209,28 @@ int main(int argc, char** argv)
             if(i == argc -1)
             {
                 printf("Error: usage: %s <width>\n", argv[i]);
-                return 44;
+                exit(44);
             }
-            if(sscanf(argv[i + 1], "%hd", &state.logo_seperator) != 1)
+            if(sscanf(argv[i + 1], "%hd", &state->logo_seperator) != 1)
             {
                 printf("Error: couldn't parse %s to uint16_t\n", argv[i + 1]);
-                return 45;
+                exit(45);
             }
             ++i;
         }
         else
         {
             printf("Error: unknown option: %s\n", argv[i]);
-            return 40;
+            exit(40);
         }
     }
+}
+
+int main(int argc, char** argv)
+{
+    FFstate state;
+    initState(&state);
+    parseArguments(argc, argv, &state);
 
     //Start the printing
     ffPrintTitle(&state);
