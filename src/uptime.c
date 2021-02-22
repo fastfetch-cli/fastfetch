@@ -2,10 +2,11 @@
 
 void ffPrintUptime(FFstate* state)
 {
+    ffPrintLogoAndKey(state, "Uptime");
 
     if(state->sysinfo.uptime < 60)
     {
-        printf("%ls seconds\n", state->sysinfo.uptime);
+        printf("%ld seconds\n", state->sysinfo.uptime);
         return;
     }
 
@@ -13,8 +14,6 @@ void ffPrintUptime(FFstate* state)
 	int hours = (state->sysinfo.uptime - (days * 86400)) / 3600; 
 	int minutes = (state->sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
 	
-    ffPrintLogoAndKey(state, "Uptime");
-
     if(days > 0)
         printf("%d day%s, ", days, days <= 1 ? "" : "s");
 
