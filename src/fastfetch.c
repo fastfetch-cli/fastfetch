@@ -268,9 +268,9 @@ static void parseArguments(int argc, char** argv, FFstate* state)
                 exit(42);
             }
             size_t len = strlen(argv[i + 1]);
-            if(len > 7)
+            if(len > 28)
             {
-                printf("Error: max color string length is 7, %zu given\n", len);
+                printf("Error: max color string length is 28, %zu given\n", len);
                 exit(43);
             }
             sprintf(state->color, "\033[%sm", argv[i + 1]);

@@ -4,7 +4,8 @@ project(fastfetch)
 
 include (${CMAKE_ROOT}/Modules/FindX11.cmake)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt") # for testing
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt")
 
 add_executable(fastfetch
     src/fastfetch.c

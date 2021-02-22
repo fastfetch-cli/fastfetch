@@ -25,7 +25,7 @@ typedef struct FFlogo
     uint8_t height;
     char    chars[256][256];
     char    name[128];
-    char    color[10];
+    char    color[32];
 } FFlogo;
 
 typedef struct FFstate
@@ -36,7 +36,7 @@ typedef struct FFstate
     //Configuration stuff
     FFlogo logo;
     uint16_t logo_seperator;
-    char color[10];
+    char color[32];
     uint8_t titleLength;
     bool showErrors;
     bool recache;
