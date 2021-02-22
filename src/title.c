@@ -11,7 +11,7 @@ void ffPrintTitle(FFstate* state)
 
     ffPrintLogoLine(state);
 
-    printf("%s"FASTFETCH_TEXT_MODIFIER_BOLT"%s"FASTFETCH_TEXT_MODIFIER_RESET"@%s"FASTFETCH_TEXT_MODIFIER_BOLT"%s"FASTFETCH_TEXT_MODIFIER_RESET"\n",
+    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"@"FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"\n",
         state->color, state->passwd->pw_name, state->color, hostname
     );
 }

@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "fastfetch_config.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -8,7 +9,7 @@
 
 void ffPrintKey(FFstate* state, const char* key)
 {
-    printf("%s"FASTFETCH_TEXT_MODIFIER_BOLT"%s"FASTFETCH_TEXT_MODIFIER_RESET": ", state->color, key);
+    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET": ", state->color, key);
 }
 
 void ffPrintLogoAndKey(FFstate* state, const char* key)
@@ -176,6 +177,7 @@ static void printHelp()
         "\n"
         "   -h,           --help:              shows this message and exits\n"
         "   -h <command>, --help <command>:    shows help for a specific command and exits\n"
+        "   -v            --version            prints the version of fastfetch and exits\n"
         "   -l <name>,    --logo <name>:       sets the shown logo. Also changes the main color accordingly\n"
         "   -c <color>,   --color <color>:     sets the color of the keys. Must be a linux console color code\n"
         "   -s <width>,   --seperator <width>: sets the distance between logo and text\n"
@@ -226,13 +228,18 @@ static void parseArguments(int argc, char** argv, FFstate* state)
 {
     for(int i = 1; i < argc; i++)
     {
-        if(strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
+        if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
         {
             if(i == argc - 1)
                 printHelp();
             else
                 printCommandHelp(argv[i + 1]);
 
+            exit(0);
+        }
+        else if(strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
+        {
+            puts(FASTFETCH_PROJECT_NAME" "FASTFETCH_PROJECT_VER);
             exit(0);
         }
         else if(strcmp(argv[i], "--list-logos") == 0)
@@ -249,7 +256,7 @@ static void parseArguments(int argc, char** argv, FFstate* state)
         {
             state->showErrors = true;
         }
-        else if(strcmp(argv[i], "--logo") == 0 || strcmp(argv[i], "-l") == 0)
+        else if(strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--logo") == 0)
         {
             if(i == argc - 1)
             {
