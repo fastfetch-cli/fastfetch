@@ -4,6 +4,8 @@ project(fastfetch)
 
 include (${CMAKE_ROOT}/Modules/FindX11.cmake)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
 add_executable(fastfetch
     src/fastfetch.c
     src/break.c

@@ -10,7 +10,7 @@ void printTerminalName(FFstate* state, const char* pid)
     FILE* stat = fopen(file, "r");
     if(stat == NULL)
     {
-        char error[256];
+        char error[300];
         sprintf(error, "fopen(\"%s\", \"r\") == NULL", file);
         ffPrintError(state, "Terminal", error);
         return;

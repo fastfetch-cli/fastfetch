@@ -35,7 +35,7 @@ void ffPrintFont(FFstate* state)
     
     char gtk3Pretty[256];
     if(gtk3[0] == '\0')
-        gtk3Pretty[0]== '\0';
+        gtk3Pretty[0] = '\0';
     else
         parseFont(gtk3, gtk3Pretty);
 

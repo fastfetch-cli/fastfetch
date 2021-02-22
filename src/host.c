@@ -27,7 +27,7 @@ void ffPrintHost(FFstate* state)
     {
         ssize_t len = strlen(host);
         host[len] = ' ';
-        fscanf(versionFile, "%[^\n]", host + len + 1);
+        if(fscanf(versionFile, "%[^\n]", host + len + 1) == 0); //fail silently, if reading of version fails, just show now version
         fclose(versionFile);
     }
 

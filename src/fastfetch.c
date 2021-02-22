@@ -103,7 +103,7 @@ void ffPrintError(FFstate* state, const char* key, const char* message)
     printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s\n"FASTFETCH_TEXT_MODIFIER_RESET, message);
 }
 
-static bool getCacheFileName(FFstate* state, const char* key, char* buffer)
+static void getCacheFileName(FFstate* state, const char* key, char* buffer)
 {
     const char* xdgCache = getenv("XDG_CACHE_HOME");
     if(xdgCache == NULL)
@@ -146,6 +146,8 @@ bool ffPrintCachedValue(FFstate* state, const char* key)
 
     ffPrintLogoAndKey(state, key);
     puts(value);
+
+    return true;
 }
 
 void ffSaveCachedValue(FFstate* state, const char* key, const char* value)
@@ -157,9 +159,14 @@ void ffSaveCachedValue(FFstate* state, const char* key, const char* value)
     if(fd == -1)
         return;
 
-    write(fd, value, strlen(value));
+    size_t len = strlen(value);
+
+    bool failed = write(fd, value, len) != len;
 
     close(fd);
+
+    if(failed)
+        unlink(fileName);
 }
 
 static void printHelp()
