@@ -21,8 +21,5 @@ void ffPrintShell(FFstate* state)
     else if(shellName[0] == '/')
         ++shellName;
 
-    ffSaveCachedValue(state, "Shell", shellName);
-
-    ffPrintLogoAndKey(state, "Shell");
-    puts(shellName);
+    ffPrintAndSaveCachedValue(state, "Shell", shellName);
 }

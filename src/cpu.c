@@ -35,8 +35,6 @@ void ffPrintCPU(FFstate* state)
 
     char value[1024];
     sprintf(value, "%s (%i) @ %.9gGHz", name, get_nprocs(), ghz);
-    ffSaveCachedValue(state, "CPU", value);
-
-    ffPrintLogoAndKey(state, "CPU");
-    puts(value);
+    
+    ffPrintAndSaveCachedValue(state, "CPU", value);
 }

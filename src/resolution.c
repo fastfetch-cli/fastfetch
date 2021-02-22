@@ -13,8 +13,5 @@ void ffPrintResolution(FFstate* state)
     char resolution[1024];
     sprintf(resolution, "%ix%i", screen->width, screen->height);
 
-    ffSaveCachedValue(state, "Resolution", resolution);
-
-    ffPrintLogoAndKey(state, "Resolution");
-    puts(resolution);
+    ffPrintAndSaveCachedValue(state, "Resolution", resolution);
 }

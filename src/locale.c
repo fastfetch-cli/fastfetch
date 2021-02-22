@@ -13,8 +13,5 @@ void ffPrintLocale(FFstate* state)
         return;
     }
 
-    ffSaveCachedValue(state, "Locale", locale);
-
-    ffPrintLogoAndKey(state, "Locale");
-    puts(locale);
+    ffPrintAndSaveCachedValue(state, "Locale", locale);
 }

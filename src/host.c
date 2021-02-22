@@ -31,8 +31,5 @@ void ffPrintHost(FFstate* state)
         fclose(versionFile);
     }
 
-    ffSaveCachedValue(state, "Host", host);
-
-    ffPrintLogoAndKey(state, "Host");
-    puts(host);
+    ffPrintAndSaveCachedValue(state, "Host", host);
 }

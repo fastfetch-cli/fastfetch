@@ -16,8 +16,5 @@ void ffPrintOS(FFstate* state)
     char os[1024];
     sprintf(os, "%s %s", name, state->utsname.machine);
 
-    ffSaveCachedValue(state, "OS", os);
-
-    ffPrintLogoAndKey(state, "OS");
-    puts(os);
+    ffPrintAndSaveCachedValue(state, "OS", os);
 }

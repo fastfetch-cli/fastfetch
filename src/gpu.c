@@ -31,10 +31,7 @@ static void handleGPU(FFstate* state, struct pci_access* pacc, struct pci_dev* d
 
     strcat(gpu, name);
 
-    ffSaveCachedValue(state, key, gpu);
-
-    ffPrintLogoAndKey(state, key);
-    puts(gpu);
+    ffPrintAndSaveCachedValue(state, key, gpu);
 }
 
 void ffPrintGPU(FFstate* state)

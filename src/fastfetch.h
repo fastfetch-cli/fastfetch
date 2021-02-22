@@ -56,7 +56,7 @@ void ffParsePropFileHome(FFstate* state, const char* relativeFile, const char* r
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);
 void ffPrintError(FFstate* state, const char* key, const char* message);
 bool ffPrintCachedValue(FFstate* state, const char* key);
-void ffSaveCachedValue(FFstate* state, const char* key, const char* value);
+void ffPrintAndSaveCachedValue(FFstate* state, const char* key, const char* value);
 
 void ffLoadLogoSet(FFstate* state, const char* logo);
 void ffLoadLogo(FFstate* state);

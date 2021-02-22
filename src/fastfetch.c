@@ -138,12 +138,14 @@ bool ffPrintCachedValue(FFstate* state, const char* key)
         return false;
 
     char value[1024];
-    if(read(fd, value, sizeof(value) - 1) < 1)
+
+    ssize_t readed = read(fd, value, sizeof(value) - 1);
+    if(readed < 1)
         return false;
 
-    value[1023] = '\n'; //Ensure that we end with a newline, even when we didn't fully read the file
-
     close(fd);
+
+    value[readed] = '\0'; //Somehow read doesn't alway do this
 
     ffPrintLogoAndKey(state, key);
     puts(value);
@@ -151,8 +153,11 @@ bool ffPrintCachedValue(FFstate* state, const char* key)
     return true;
 }
 
-void ffSaveCachedValue(FFstate* state, const char* key, const char* value)
+void ffPrintAndSaveCachedValue(FFstate* state, const char* key, const char* value)
 {
+    ffPrintLogoAndKey(state, key);
+    puts(value);
+
     char fileName[256];
     getCacheFileName(state, key, fileName);
 
