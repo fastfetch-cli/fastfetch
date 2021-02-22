@@ -30,19 +30,21 @@ typedef struct FFlogo
 
 typedef struct FFstate
 {
+    //Actual state stuff
     uint8_t current_row;
 
+    //Configuration stuff
     FFlogo logo;
-
     uint16_t logo_seperator;
     char color[10];
-
-    bool showErrors;
-
     uint8_t titleLength;
+    bool showErrors;
+    bool recache;
+
+    //Common stuff
     struct passwd* passwd;
     struct utsname utsname;
-    struct sysinfo sysinfo;    
+    struct sysinfo sysinfo;
 } FFstate;
 
 //Helper functions
@@ -53,6 +55,8 @@ void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFstate* state, const char* relativeFile, const char* regex, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);
 void ffPrintError(FFstate* state, const char* key, const char* message);
+bool ffPrintCachedValue(FFstate* state, const char* key);
+void ffSaveCachedValue(FFstate* state, const char* key, const char* value);
 
 void ffLoadLogoSet(FFstate* state, const char* logo);
 void ffLoadLogo(FFstate* state);

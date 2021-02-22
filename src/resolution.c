@@ -4,10 +4,17 @@
 
 void ffPrintResolution(FFstate* state)
 {
+    if(ffPrintCachedValue(state, "Resolution"))
+        return;
 
     Display* display = XOpenDisplay(NULL);
     Screen*   screen = DefaultScreenOfDisplay(display);
 
+    char resolution[1024];
+    sprintf(resolution, "%ix%i", screen->width, screen->height);
+
+    ffSaveCachedValue(state, "Resolution", resolution);
+
     ffPrintLogoAndKey(state, "Resolution");
-    printf("%ix%i\n", screen->width, screen->height);
+    puts(resolution);
 }

@@ -1,32 +1,38 @@
 #include "fastfetch.h"
 
+#include <string.h>
+
 void ffPrintHost(FFstate* state)
 {
+    if(ffPrintCachedValue(state, "Host"))
+        return;
+
+    char host[1024];
+
     FILE* nameFile = fopen("/sys/devices/virtual/dmi/id/product_name", "r");
     if(nameFile == NULL)
     {
         ffPrintError(state, "Host", "fopen(\"/sys/devices/virtual/dmi/id/product_name\", \"r\") == NULL");
         return;
     }
-    char name[256];
-    if(fscanf(nameFile, "%[^\n]", name) != 1)
+    if(fscanf(nameFile, "%[^\n]", host) != 1)
     {
         ffPrintError(state, "Host", "fscanf(nameFile, \"%[^\\n]\", name) != 1");
         return;
     }
     fclose(nameFile);
 
-    ffPrintLogoAndKey(state, "Host");
-    printf(name);  
-
     FILE* versionFile = fopen("/sys/devices/virtual/dmi/id/product_version", "r");
     if(versionFile != NULL)
     {
-        char version[256];
-        if(fscanf(versionFile, "%[^\n]", version) == 1)
-            printf(" %s", version);
+        ssize_t len = strlen(host);
+        host[len] = ' ';
+        fscanf(versionFile, "%[^\n]", host + len + 1);
         fclose(versionFile);
     }
-    
-    putchar('\n');
+
+    ffSaveCachedValue(state, "Host", host);
+
+    ffPrintLogoAndKey(state, "Host");
+    puts(host);
 }

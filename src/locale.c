@@ -2,6 +2,9 @@
 
 void ffPrintLocale(FFstate* state)
 {
+    if(ffPrintCachedValue(state, "Locale"))
+        return;
+
     char locale[256];
     ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", locale);
     if(locale[0] == '\0')
@@ -9,6 +12,8 @@ void ffPrintLocale(FFstate* state)
         ffPrintError(state, "Locale", "\"LANG=%[^\\n]\" not found in \"/etc/locale.conf\"");
         return;
     }
+
+    ffSaveCachedValue(state, "Locale", locale);
 
     ffPrintLogoAndKey(state, "Locale");
     puts(locale);

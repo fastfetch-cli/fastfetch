@@ -4,6 +4,9 @@
 
 void ffPrintCPU(FFstate* state)
 {
+    if(ffPrintCachedValue(state, "CPU"))
+        return;
+
     char name[256];
     ffParsePropFile("/proc/cpuinfo", "model name%*s %[^\n]", name);
     if(name[0] == '\0')
@@ -30,6 +33,10 @@ void ffPrintCPU(FFstate* state)
     frequency /= 1000;                        //to MHz
     double ghz = (double) frequency / 1000.0; //to GHz
 
+    char value[1024];
+    sprintf(value, "%s (%i) @ %.9gGHz", name, get_nprocs(), ghz);
+    ffSaveCachedValue(state, "CPU", value);
+
     ffPrintLogoAndKey(state, "CPU");
-    printf("%s (%i) @ %.9gGHz\n", name, get_nprocs(), ghz);
+    puts(value);
 }

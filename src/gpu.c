@@ -7,20 +7,34 @@ static void handleGPU(FFstate* state, struct pci_access* pacc, struct pci_dev* d
 {   
     char key[8];
     sprintf(key, "GPU%hu", counter);
-    ffPrintLogoAndKey(state, key);
-            
-    char vendor[1048];
+
+    if(ffPrintCachedValue(state, key))
+        return;
+
+    char gpu[1024];
+
+    char vendor[512];
     pci_lookup_name(pacc, vendor, sizeof(vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
 
-    char name[1048];
+    char name[512];
     pci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
 
     if(strcmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
-        printf("AMD ATI");
+    {
+        strcpy(gpu, "AMD ATI ");
+    }
     else
-        printf(vendor);
+    {
+        strcpy(gpu, vendor);
+        strcat(gpu, " ");
+    }
 
-    printf(" %s\n", name);
+    strcat(gpu, name);
+
+    ffSaveCachedValue(state, key, gpu);
+
+    ffPrintLogoAndKey(state, key);
+    puts(gpu);
 }
 
 void ffPrintGPU(FFstate* state)

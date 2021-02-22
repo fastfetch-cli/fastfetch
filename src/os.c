@@ -2,6 +2,9 @@
 
 void ffPrintOS(FFstate* state)
 {
+    if(ffPrintCachedValue(state, "OS"))
+        return;
+
     char name[256];
     ffParsePropFile("/etc/os-release", "NAME=\"%[^\"]+", name);
     if(name[0] == '\0')
@@ -10,6 +13,11 @@ void ffPrintOS(FFstate* state)
         return;
     }
 
+    char os[1024];
+    sprintf(os, "%s %s", name, state->utsname.machine);
+
+    ffSaveCachedValue(state, "OS", os);
+
     ffPrintLogoAndKey(state, "OS");
-    printf("%s %s\n", name, state->utsname.machine);
+    puts(os);
 }

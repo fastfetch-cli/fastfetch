@@ -1,6 +1,10 @@
 #include "fastfetch.h"
 
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 void ffPrintKey(FFstate* state, const char* key)
 {
@@ -99,6 +103,65 @@ void ffPrintError(FFstate* state, const char* key, const char* message)
     printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s\n"FASTFETCH_TEXT_MODIFIER_RESET, message);
 }
 
+static bool getCacheFileName(FFstate* state, const char* key, char* buffer)
+{
+    const char* xdgCache = getenv("XDG_CACHE_HOME");
+    if(xdgCache == NULL)
+    {
+        strcpy(buffer, state->passwd->pw_dir);
+        strcat(buffer, "/.cache");
+    }
+    else
+    {
+        strcpy(buffer, xdgCache);
+    }
+
+    mkdir(buffer, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+    
+    strcat(buffer, "/fastfetch/");
+    mkdir(buffer, S_IRWXU | S_IRGRP | S_IROTH);
+    
+    strcat(buffer, key);
+}
+
+bool ffPrintCachedValue(FFstate* state, const char* key)
+{
+    if(state->recache)
+        return false;
+
+    char fileName[256];
+    getCacheFileName(state, key, fileName);
+
+    int fd = open(fileName, O_RDONLY);
+    if(fd == -1)
+        return false;
+
+    char value[1024];
+    if(read(fd, value, sizeof(value) - 1) < 1)
+        return false;
+
+    value[1023] = '\n'; //Ensure that we end with a newline, even when we didn't fully read the file
+
+    close(fd);
+
+    ffPrintLogoAndKey(state, key);
+    puts(value);
+}
+
+void ffSaveCachedValue(FFstate* state, const char* key, const char* value)
+{
+    char fileName[256];
+    getCacheFileName(state, key, fileName);
+
+    int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(fd == -1)
+        return;
+
+    write(fd, value, strlen(value));
+
+    close(fd);
+}
+
 static void printHelp()
 {
     puts(
@@ -109,6 +172,7 @@ static void printHelp()
         "   -l <name>,    --logo <name>:       sets the shown logo. Also changes the main color accordingly\n"
         "   -c <color>,   --color <color>:     sets the color of the keys. Must be a linux console color code\n"
         "   -s <width>,   --seperator <width>: sets the distance between logo and text\n"
+        "   -r            --recache:           dont use cached values and generate new ones\n"
         "                 --show-errors:       if an error occurs, show it instead of discarding the category\n"
         "                 --list-logos:        lists the names of available logos and exits\n"
         "                 --print-logos:       prints available logos and exits\n"
@@ -148,6 +212,7 @@ static void initState(FFstate* state)
     state->logo_seperator = 4;
     state->titleLength = 20; // This is overwritten by ffPrintTitle
     state->showErrors = false;
+    state->recache = false;
 }
 
 static void parseArguments(int argc, char** argv, FFstate* state)
@@ -217,6 +282,10 @@ static void parseArguments(int argc, char** argv, FFstate* state)
                 exit(45);
             }
             ++i;
+        }
+        else if(strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--recache") == 0)
+        {
+            state->recache = true;
         }
         else
         {

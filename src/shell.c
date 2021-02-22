@@ -4,6 +4,9 @@
 
 void ffPrintShell(FFstate* state)
 {
+    if(ffPrintCachedValue(state, "Shell"))
+        return;
+
     char* shellPath = getenv("SHELL");
     if(shellPath == NULL)
     {
@@ -17,6 +20,8 @@ void ffPrintShell(FFstate* state)
         shellName = shellPath;
     else if(shellName[0] == '/')
         ++shellName;
+
+    ffSaveCachedValue(state, "Shell", shellName);
 
     ffPrintLogoAndKey(state, "Shell");
     puts(shellName);
