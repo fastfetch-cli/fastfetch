@@ -28,54 +28,55 @@ static void loadUnknownLogo(FFlogo* logo)
     strcpy(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"         \"\"            "FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-static void loadArchLogo(FFlogo* logo)
+static void loadNoneLogo(FFlogo* logo)
+{
+    logo->width = 0;
+    logo->height = 0;
+    strcpy(logo->name, "none");
+    strcpy(logo->color, "");
+}
+
+static void loadArchLogo(FFlogo* logo, bool doColor)
 {
     logo->width = 37;
     logo->height = 20;
     strcpy(logo->name, "arch");
+
+    const char* color = doColor ? "\033[36m" : "";
     strcpy(logo->color, "\033[36m");
-    strcpy(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m                  -`                 "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m                  -`                 "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m                 .o+`                "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m                `ooo/                "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m               `+oooo:               "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m              `+oooooo:              "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m              -+oooooo+:             "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m            `/:-:++oooo+:            "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m           `/++++/+++++++:           "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m          `/++++++++++++++:          "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m         `/+++ooooooooooooo/`        "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m        ./ooosssso++osssssso+`       "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m       .oossssso-````/ossssss+`      "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m      -osssssso.      :ssssssso.     "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m     :osssssss/        osssso+++.    "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m    /ossssssss/        +ssssooo/-    "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m  `/ossssso+/:-        -:/+osssso+-  "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m `+sso+:-`                 `.-/+oso: "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m`++:.                           `-/+/"FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"\033[36m.`                                 `/"FASTFETCH_TEXT_MODIFIER_RESET);
-}
 
-static FFlogo* getLogos(uint8_t* size)
-{
-    #define FASTFETCH_LOGO_AMOUNT 2
-
-    *size = FASTFETCH_LOGO_AMOUNT;
-    static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
-    
-    #undef FASTFETCH_LOGO_AMOUNT
-
-    loadUnknownLogo(&logos[0]);
-    loadArchLogo(&logos[1]);
-
-    return logos;
+    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  -`                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  -`                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 .o+`                "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                `ooo/                "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               `+oooo:               "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `+oooooo:              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              -+oooooo+:             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            `/:-:++oooo+:            "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s           `/++++/+++++++:           "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          `/++++++++++++++:          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s         `/+++ooooooooooooo/`        "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s        ./ooosssso++osssssso+`       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s       .oossssso-````/ossssss+`      "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s      -osssssso.      :ssssssso.     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s     :osssssss/        osssso+++.    "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s    /ossssssss/        +ssssooo/-    "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s  `/ossssso+/:-        -:/+osssso+-  "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s `+sso+:-`                 `.-/+oso: "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s`++:.                           `-/+/"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s.`                                 `/"FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
 void ffLoadLogoSet(FFstate* state, const char* logo)
 {
-    if(strcmp(logo, "arch") == 0)
+    if(strcasecmp(logo, "none") == 0)
     {
-        loadArchLogo(&state->logo);
+        loadNoneLogo(&state->logo);
+        state->logo_seperator = 0; //This is wanted in most cases, so just set it
+    }
+    else if(strcasecmp(logo, "arch") == 0)
+    {
+        loadArchLogo(&state->logo, state->colorLogo);
     }
     else
     {
@@ -83,8 +84,6 @@ void ffLoadLogoSet(FFstate* state, const char* logo)
             printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", logo);
         loadUnknownLogo(&state->logo);
     }
-
-    strcpy(state->color, state->logo.color);
 }
 
 void ffLoadLogo(FFstate* state)
@@ -105,13 +104,19 @@ void ffLoadLogo(FFstate* state)
 
 void ffPrintLogoLine(FFstate* state)
 {
+    for(int16_t i = 0; i < state->offsetx; i++)
+        putchar(' ');
+
+    int16_t cut = state->offsetx >= 0 ? 0 :
+        (state->logo.width > state->offsetx * -1 ? state->offsetx * -1 : state->logo.width);
+
     if(state->current_row < state->logo.height)
     {
-        printf(state->logo.chars[state->current_row]);
+        printf(state->logo.chars[state->current_row] + cut);
     }
     else
     {
-        for(uint8_t i = 0; i < state->logo.width; i++)
+        for(uint8_t i = 0; i < state->logo.width - cut; i++)
             putchar(' ');   
     }
     
@@ -121,23 +126,39 @@ void ffPrintLogoLine(FFstate* state)
     ++state->current_row;
 }
 
+static FFlogo* getLogos(uint8_t* size, bool color)
+{
+    #define FASTFETCH_LOGO_AMOUNT 3
+
+    *size = FASTFETCH_LOGO_AMOUNT;
+    static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
+    
+    #undef FASTFETCH_LOGO_AMOUNT
+
+    loadNoneLogo(&logos[0]);
+    loadUnknownLogo(&logos[1]);
+    loadArchLogo(&logos[2], color);
+
+    return logos;
+}
+
 void ffListLogos()
 {
     uint8_t size;
-    FFlogo* logos = getLogos(&size);
+    FFlogo* logos = getLogos(&size, false);
 
     for(uint8_t i = 0; i < size; i++)
         puts(logos[i].name);
 }
 
-void ffPrintLogos()
+void ffPrintLogos(bool doColor)
 {
     uint8_t size;
-    FFlogo* logos = getLogos(&size);
+    FFlogo* logos = getLogos(&size, doColor);
 
     for(uint8_t i = 0; i < size; i++)
     {
-        printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET":\n", logos[i].color, logos[i].name);
+        printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET":\n", doColor ? logos[i].color : "", logos[i].name);
         for(uint8_t k = 0; k < logos[i].height; k++)
             puts(logos[i].chars[k]);
         putchar('\n');

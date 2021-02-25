@@ -186,6 +186,9 @@ static void printHelp()
         "   -l <name>,    --logo <name>:       sets the shown logo. Also changes the main color accordingly\n"
         "   -c <color>,   --color <color>:     sets the color of the keys. Must be a linux console color code\n"
         "   -s <width>,   --seperator <width>: sets the distance between logo and text\n"
+        "   -x <offset>,  --offsetx <offset>:  sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
+        "                 --no-color:          disables all colors. This MUST be before -l/--logo or --print-logos\n"
+        "                 --no-color-logo:     disables the coloring of the logo. This MUST be before -l/--logo or --print-logos\n"
         "   -r            --recache:           dont use cached values and generate new ones\n"
         "                 --show-errors:       if an error occurs, show it instead of discarding the category\n"
         "                 --list-logos:        lists the names of available logos and exits\n"
@@ -218,19 +221,22 @@ static void printCommandHelp(const char* command)
 
 static void initState(FFstate* state)
 {
-    ffLoadLogo(state); //also sets color
     state->current_row = 0;
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
     state->logo_seperator = 4;
+    state->offsetx = 0;
     state->titleLength = 20; // This is overwritten by ffPrintTitle
+    state->colorLogo = true;
     state->showErrors = false;
     state->recache = false;
 }
 
 static void parseArguments(int argc, char** argv, FFstate* state)
 {
+    bool colorText = true;
+
     for(int i = 1; i < argc; i++)
     {
         if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
@@ -254,7 +260,7 @@ static void parseArguments(int argc, char** argv, FFstate* state)
         }
         else if(strcmp(argv[i], "--print-logos") == 0)
         {
-            ffPrintLogos();
+            ffPrintLogos(state->colorLogo);
             exit(0);
         }
         else if(strcmp(argv[i], "--show-errors") == 0)
@@ -302,9 +308,32 @@ static void parseArguments(int argc, char** argv, FFstate* state)
             }
             ++i;
         }
+        else if(strcmp(argv[i], "-x") == 0 || strcmp(argv[i], "--offsetx") == 0)
+        {
+            if(i == argc -1)
+            {
+                printf("Error: usage: %s <offset>\n", argv[i]);
+                exit(46);
+            }
+            if(sscanf(argv[i + 1], "%hi", &state->offsetx) != 1)
+            {
+                printf("Error: couldn't parse %s to int16_t\n", argv[i + 1]);
+                exit(47);
+            }
+            ++i;
+        }
         else if(strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--recache") == 0)
         {
             state->recache = true;
+        }
+        else if(strcmp(argv[i], "--no-color") == 0)
+        {
+            colorText = false;
+            state->colorLogo = false;
+        }
+        else if(strcmp(argv[i], "--no-color-logo") == 0)
+        {
+            state->colorLogo = false;
         }
         else
         {
@@ -312,6 +341,12 @@ static void parseArguments(int argc, char** argv, FFstate* state)
             exit(40);
         }
     }
+
+    ffLoadLogo(state); //We need to do this here, because of --no-color
+    if(colorText)
+        strcpy(state->color, state->logo.color);
+    else
+        state->color[0] = '\0';
 }
 
 int main(int argc, char** argv)

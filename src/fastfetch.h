@@ -36,8 +36,10 @@ typedef struct FFstate
     //Configuration stuff
     FFlogo logo;
     uint16_t logo_seperator;
+    int16_t offsetx;
     char color[32];
     uint8_t titleLength;
+    bool colorLogo;
     bool showErrors;
     bool recache;
 
@@ -61,7 +63,7 @@ void ffPrintAndSaveCachedValue(FFstate* state, const char* key, const char* valu
 void ffLoadLogoSet(FFstate* state, const char* logo);
 void ffLoadLogo(FFstate* state);
 void ffListLogos();
-void ffPrintLogos();
+void ffPrintLogos(bool color);
 
 void ffPrintBreak(FFstate* state);
 void ffPrintTitle(FFstate* state);
