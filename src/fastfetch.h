@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -76,27 +77,28 @@ void ffPrintLogos(bool color);
 #endif
 
 //Module functions
-void ffPrintBreak(FFinstance* state);
-void ffPrintTitle(FFinstance* state);
-void ffPrintSeperator(FFinstance* state);
-void ffPrintOS(FFinstance* state);
-void ffPrintHost(FFinstance* state);
-void ffPrintKernel(FFinstance* state);
-void ffPrintUptime(FFinstance* state);
-void ffPrintPackages(FFinstance* state);
-void ffPrintShell(FFinstance* state);
-void ffPrintResolution(FFinstance* state);
-void ffPrintDesktopEnvironment(FFinstance* state);
-void ffPrintTheme(FFinstance* state);
-void ffPrintIcons(FFinstance* state);
-void ffPrintFont(FFinstance* state);
-void ffPrintTerminal(FFinstance* state);
-void ffPrintCPU(FFinstance* state);
-void ffPrintGPU(FFinstance* state);
-void ffPrintMemory(FFinstance* state);
-void ffPrintDisk(FFinstance* state);
-void ffPrintBattery(FFinstance* state);
-void ffPrintLocale(FFinstance* state);
-void ffPrintColors(FFinstance* state);
+void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
+void ffPrintBreak(FFinstance* instance);
+void ffPrintTitle(FFinstance* instance);
+void ffPrintSeperator(FFinstance* instance);
+void ffPrintOS(FFinstance* instance);
+void ffPrintHost(FFinstance* instance);
+void ffPrintKernel(FFinstance* instance);
+void ffPrintUptime(FFinstance* instance);
+void ffPrintPackages(FFinstance* instance);
+void ffPrintShell(FFinstance* instance);
+void ffPrintResolution(FFinstance* instance);
+void ffPrintDesktopEnvironment(FFinstance* instance);
+void ffPrintTheme(FFinstance* instance);
+void ffPrintIcons(FFinstance* instance);
+void ffPrintFont(FFinstance* instance);
+void ffPrintTerminal(FFinstance* instance);
+void ffPrintCPU(FFinstance* instance);
+void ffPrintGPU(FFinstance* instance);
+void ffPrintMemory(FFinstance* instance);
+void ffPrintDisk(FFinstance* instance);
+void ffPrintBattery(FFinstance* instance);
+void ffPrintLocale(FFinstance* instance);
+void ffPrintColors(FFinstance* instance);
 
 #endif

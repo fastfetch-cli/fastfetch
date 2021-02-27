@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-#include <string.h>
+
 
 static void printKDE()
 {

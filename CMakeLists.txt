@@ -29,6 +29,7 @@ set(SRCS
     src/util.c
     src/logo.c
     src/modules/break.c
+    src/modules/custom.c
     src/modules/title.c
     src/modules/seperator.c
     src/modules/os.c

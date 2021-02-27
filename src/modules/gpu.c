@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-#include <string.h>
+
 #include <pci/pci.h>
 
 static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, uint16_t counter)

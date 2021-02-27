@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-#include <string.h>
+
 
 void printTerminalName(FFinstance* instance, const char* pid)
 {

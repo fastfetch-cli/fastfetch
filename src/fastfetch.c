@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "fastfetch_config.h"
 
-#include <string.h>
+
 
 static void printHelp()
 {
