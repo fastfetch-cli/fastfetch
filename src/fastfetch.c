@@ -2,7 +2,10 @@
 #include "fastfetch_config.h"
 
 #include <malloc.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 static void printHelp()
 {
@@ -215,6 +218,35 @@ static FILE* createStructureFile(const char* filename)
     return f;
 }
 
+static bool customValue(FFinstance* instance, const char* key, const char* valueDir)
+{
+    char fileName[256];
+    strcpy(fileName, valueDir);
+    strcat(fileName, key);
+
+    int fd = open(fileName, O_RDONLY);
+    if(fd == 0) //The file doesn't exist
+        return false;
+
+    char value[1024];
+    
+    ssize_t readed = read(fd, value, sizeof(value) - 1);
+    if(readed < 1)
+        return false;
+
+    close(fd);
+
+    if(value[readed - 1] == '\n')
+        value[readed - 1] = '\0';
+    else
+        value[readed] = '\0';
+
+    ffPrintLogoAndKey(instance, key);
+    puts(value);
+
+    return true;
+}
+
 static void parseLine(FFinstance* instance, const char* line)
 {
     if(strcasecmp(line, "break") == 0)
@@ -267,17 +299,22 @@ static void parseLine(FFinstance* instance, const char* line)
 
 static void parseStructureFile(FFinstance* instance)
 {
-    char configDir[256];
-    strcpy(configDir, instance->state.passwd->pw_dir);
-    strcat(configDir, "/.config");
+    char configFolder[256];
+    strcpy(configFolder, instance->state.passwd->pw_dir);
+    strcat(configFolder, "/.config");
 
-    mkdir(configDir, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
+    mkdir(configFolder, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
     
-    strcat(configDir, "/fastfetch/");
-    mkdir(configDir, S_IRWXU | S_IRGRP | S_IROTH);
+    strcat(configFolder, "/fastfetch/");
+    mkdir(configFolder, S_IRWXU | S_IRGRP | S_IROTH);
     
+    char valueDir[256];
+    strcpy(valueDir, configFolder);
+    strcat(valueDir, "values/");
+    mkdir(valueDir, S_IRWXU | S_IRGRP | S_IROTH);
+
     char structureFileName[256];
-    strcpy(structureFileName, configDir);
+    strcpy(structureFileName, configFolder);
     strcat(structureFileName, "structure");
 
     FILE* structureFile;
@@ -294,7 +331,9 @@ static void parseStructureFile(FFinstance* instance)
     {
         if(line[read - 1] == '\n')
             line[read - 1] = '\0';
-        parseLine(instance, line);
+        
+        if(!customValue(instance, line, valueDir))
+            parseLine(instance, line);
     }
 
     free(line);
