@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 
-void ffPrintBreak(FFstate* state)
+void ffPrintBreak(FFinstance* instance)
 {
-    ffPrintLogoLine(state);
+    ffPrintLogoLine(instance);
     putchar('\n');
 }

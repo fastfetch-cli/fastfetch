@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 
 #include <string.h>
-#include <malloc.h>
 
 static void printKDE()
 {
@@ -16,16 +15,16 @@ static void printKDE()
     printf("KDE Plasma %s", version);
 }
 
-void ffPrintDesktopEnvironment(FFstate* state)
+void ffPrintDesktopEnvironment(FFinstance* instance)
 {
     const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
     if(currentDesktop == NULL)
     {
-        ffPrintError(state, "DE", "getenv(\"XDG_CURRENT_DESKTOP\") == NULL");
+        ffPrintError(instance, "DE", "getenv(\"XDG_CURRENT_DESKTOP\") == NULL");
         return;
     }
 
-    ffPrintLogoAndKey(state, "DE");
+    ffPrintLogoAndKey(instance, "DE");
 
     if(strcmp(currentDesktop, "KDE") == 0)
         printKDE();

@@ -12,23 +12,17 @@ void ffInitState(FFstate* state)
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
-    state->logo_seperator = 4;
-    state->offsetx = 0;
-    state->titleLength = 20; // This is overwritten by ffPrintTitle
-    state->colorLogo = true;
-    state->showErrors = false;
-    state->recache = false;
 }
 
-void ffPrintKey(FFstate* state, const char* key)
+void ffPrintKey(FFconfig* config, const char* key)
 {
-    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET": ", state->color, key);
+    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET": ", config->color, key);
 }
 
-void ffPrintLogoAndKey(FFstate* state, const char* key)
+void ffPrintLogoAndKey(FFinstance* instance, const char* key)
 {
-    ffPrintLogoLine(state);
-    ffPrintKey(state, key);
+    ffPrintLogoLine(instance);
+    ffPrintKey(&instance->config, key);
 }
 
 void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
@@ -52,10 +46,10 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
     free(line);
 }
 
-void ffParsePropFileHome(FFstate* state, const char* relativeFile, const char* regex, char* buffer)
+void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
 {
     char absolutePath[512];
-    strcpy(absolutePath, state->passwd->pw_dir);
+    strcpy(absolutePath, instance->state.passwd->pw_dir);
     strcat(absolutePath, "/");
     strcat(absolutePath, relativeFile);
 
@@ -108,21 +102,21 @@ void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4)
     }
 }
 
-void ffPrintError(FFstate* state, const char* key, const char* message)
+void ffPrintError(FFinstance* instance, const char* key, const char* message)
 {
-    if(!state->showErrors)
+    if(!instance->config.showErrors)
         return;
 
-    ffPrintLogoAndKey(state, key);
+    ffPrintLogoAndKey(instance, key);
     printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s\n"FASTFETCH_TEXT_MODIFIER_RESET, message);
 }
 
-static void getCacheFileName(FFstate* state, const char* key, char* buffer)
+static void getCacheFileName(FFinstance* instance, const char* key, char* buffer)
 {
     const char* xdgCache = getenv("XDG_CACHE_HOME");
     if(xdgCache == NULL)
     {
-        strcpy(buffer, state->passwd->pw_dir);
+        strcpy(buffer, instance->state.passwd->pw_dir);
         strcat(buffer, "/.cache");
     }
     else
@@ -138,13 +132,13 @@ static void getCacheFileName(FFstate* state, const char* key, char* buffer)
     strcat(buffer, key);
 }
 
-bool ffPrintCachedValue(FFstate* state, const char* key)
+bool ffPrintCachedValue(FFinstance* instance, const char* key)
 {
-    if(state->recache)
+    if(instance->config.recache)
         return false;
 
     char fileName[256];
-    getCacheFileName(state, key, fileName);
+    getCacheFileName(instance, key, fileName);
 
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
@@ -160,19 +154,19 @@ bool ffPrintCachedValue(FFstate* state, const char* key)
 
     value[readed] = '\0'; //Somehow read doesn't alway do this
 
-    ffPrintLogoAndKey(state, key);
+    ffPrintLogoAndKey(instance, key);
     puts(value);
 
     return true;
 }
 
-void ffPrintAndSaveCachedValue(FFstate* state, const char* key, const char* value)
+void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value)
 {
-    ffPrintLogoAndKey(state, key);
+    ffPrintLogoAndKey(instance, key);
     puts(value);
 
     char fileName[256];
-    getCacheFileName(state, key, fileName);
+    getCacheFileName(instance, key, fileName);
 
     int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(fd == -1)

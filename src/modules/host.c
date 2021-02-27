@@ -2,9 +2,9 @@
 
 #include <string.h>
 
-void ffPrintHost(FFstate* state)
+void ffPrintHost(FFinstance* instance)
 {
-    if(ffPrintCachedValue(state, "Host"))
+    if(ffPrintCachedValue(instance, "Host"))
         return;
 
     char host[1024];
@@ -12,12 +12,12 @@ void ffPrintHost(FFstate* state)
     FILE* nameFile = fopen("/sys/devices/virtual/dmi/id/product_name", "r");
     if(nameFile == NULL)
     {
-        ffPrintError(state, "Host", "fopen(\"/sys/devices/virtual/dmi/id/product_name\", \"r\") == NULL");
+        ffPrintError(instance, "Host", "fopen(\"/sys/devices/virtual/dmi/id/product_name\", \"r\") == NULL");
         return;
     }
     if(fscanf(nameFile, "%[^\n]", host) != 1)
     {
-        ffPrintError(state, "Host", "fscanf(nameFile, \"%[^\\n]\", name) != 1");
+        ffPrintError(instance, "Host", "fscanf(nameFile, \"%[^\\n]\", name) != 1");
         return;
     }
     fclose(nameFile);
@@ -31,5 +31,5 @@ void ffPrintHost(FFstate* state)
         fclose(versionFile);
     }
 
-    ffPrintAndSaveCachedValue(state, "Host", host);
+    ffPrintAndSaveCachedValue(instance, "Host", host);
 }

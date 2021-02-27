@@ -3,12 +3,12 @@
 #include <string.h>
 #include <pci/pci.h>
 
-static void handleGPU(FFstate* state, struct pci_access* pacc, struct pci_dev* dev, uint16_t counter)
+static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, uint16_t counter)
 {   
     char key[8];
     sprintf(key, "GPU%hu", counter);
 
-    if(ffPrintCachedValue(state, key))
+    if(ffPrintCachedValue(instance, key))
         return;
 
     char gpu[1024];
@@ -31,10 +31,10 @@ static void handleGPU(FFstate* state, struct pci_access* pacc, struct pci_dev* d
 
     strcat(gpu, name);
 
-    ffPrintAndSaveCachedValue(state, key, gpu);
+    ffPrintAndSaveCachedValue(instance, key, gpu);
 }
 
-void ffPrintGPU(FFstate* state)
+void ffPrintGPU(FFinstance* instance)
 {
     uint16_t counter = 0;
 
@@ -54,7 +54,7 @@ void ffPrintGPU(FFstate* state)
             strcmp("3D controller", class)             == 0 ||
             strcmp("Display controller", class)        == 0 )
         {
-            handleGPU(state, pacc, dev, counter++);
+            handleGPU(instance, pacc, dev, counter++);
         }
     }
     pci_cleanup(pacc);

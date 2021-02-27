@@ -1,11 +1,11 @@
 #include "fastfetch.h"
 
 // Impl by: https://github.com/sam-barr/paleofetch/blob/b7c58a52c0de39b53c9b5f417889a5886d324bfa/paleofetch.c#L544
-void ffPrintMemory(FFstate* state)
+void ffPrintMemory(FFinstance* instance)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL) {
-        ffPrintError(state, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");
+        ffPrintError(instance, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");
         return;
     }
 
@@ -30,6 +30,6 @@ void ffPrintMemory(FFstate* state)
     uint32_t total_mem = total / 1024;
     uint8_t percentage = (uint8_t) ((used_mem / (double) total_mem) * 100);
 
-    ffPrintLogoAndKey(state, "Memory");
+    ffPrintLogoAndKey(instance, "Memory");
     printf("%uMiB / %uMiB (%u%%)\n", used_mem, total_mem, percentage);
 }

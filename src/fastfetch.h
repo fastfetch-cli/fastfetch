@@ -28,12 +28,8 @@ typedef struct FFlogo
     char    color[32];
 } FFlogo;
 
-typedef struct FFstate
+typedef struct FFconfig
 {
-    //Actual state stuff
-    uint8_t current_row;
-
-    //Configuration stuff
     FFlogo logo;
     uint16_t logo_seperator;
     int16_t offsetx;
@@ -42,51 +38,65 @@ typedef struct FFstate
     bool colorLogo;
     bool showErrors;
     bool recache;
+} FFconfig;
 
-    //Common stuff
+typedef struct FFstate
+{
+    uint8_t current_row;
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
 } FFstate;
 
+typedef struct FFinstance
+{
+    FFconfig config;
+    FFstate state;
+} FFinstance;
+
 //Util functions
 void ffInitState(FFstate* state);
-void ffPrintLogoLine(FFstate* state);
-void ffPrintKey(FFstate* state, const char* key);
-void ffPrintLogoAndKey(FFstate* state, const char* key);
+void ffPrintKey(FFconfig* config, const char* key);
+void ffPrintLogoAndKey(FFinstance* instance, const char* key);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
-void ffParsePropFileHome(FFstate* state, const char* relativeFile, const char* regex, char* buffer);
+void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);
-void ffPrintError(FFstate* state, const char* key, const char* message);
-bool ffPrintCachedValue(FFstate* state, const char* key);
-void ffPrintAndSaveCachedValue(FFstate* state, const char* key, const char* value);
+void ffPrintError(FFinstance* instance, const char* key, const char* message);
+bool ffPrintCachedValue(FFinstance* instance, const char* key);
+void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value);
 
-void ffLoadLogoSet(FFstate* state, const char* logo);
-void ffLoadLogo(FFstate* state);
+//Logo functions
+void ffLoadLogoSet(FFconfig* config, const char* logo);
+void ffLoadLogo(FFconfig* config);
+void ffPrintLogoLine(FFinstance* instance);
+
+#ifndef FLASHFETCH_BUILD_FLASHFATCH
 void ffListLogos();
 void ffPrintLogos(bool color);
+#endif
 
-void ffPrintBreak(FFstate* state);
-void ffPrintTitle(FFstate* state);
-void ffPrintSeperator(FFstate* state);
-void ffPrintOS(FFstate* state);
-void ffPrintHost(FFstate* state);
-void ffPrintKernel(FFstate* state);
-void ffPrintUptime(FFstate* state);
-void ffPrintPackages(FFstate* state);
-void ffPrintShell(FFstate* state);
-void ffPrintResolution(FFstate* state);
-void ffPrintDesktopEnvironment(FFstate* state);
-void ffPrintTheme(FFstate* state);
-void ffPrintIcons(FFstate* state);
-void ffPrintFont(FFstate* state);
-void ffPrintTerminal(FFstate* state);
-void ffPrintCPU(FFstate* state);
-void ffPrintGPU(FFstate* state);
-void ffPrintMemory(FFstate* state);
-void ffPrintDisk(FFstate* state);
-void ffPrintBattery(FFstate* state);
-void ffPrintLocale(FFstate* state);
-void ffPrintColors(FFstate* state);
+//Module functions
+void ffPrintBreak(FFinstance* state);
+void ffPrintTitle(FFinstance* state);
+void ffPrintSeperator(FFinstance* state);
+void ffPrintOS(FFinstance* state);
+void ffPrintHost(FFinstance* state);
+void ffPrintKernel(FFinstance* state);
+void ffPrintUptime(FFinstance* state);
+void ffPrintPackages(FFinstance* state);
+void ffPrintShell(FFinstance* state);
+void ffPrintResolution(FFinstance* state);
+void ffPrintDesktopEnvironment(FFinstance* state);
+void ffPrintTheme(FFinstance* state);
+void ffPrintIcons(FFinstance* state);
+void ffPrintFont(FFinstance* state);
+void ffPrintTerminal(FFinstance* state);
+void ffPrintCPU(FFinstance* state);
+void ffPrintGPU(FFinstance* state);
+void ffPrintMemory(FFinstance* state);
+void ffPrintDisk(FFinstance* state);
+void ffPrintBattery(FFinstance* state);
+void ffPrintLocale(FFinstance* state);
+void ffPrintColors(FFinstance* state);
 
 #endif

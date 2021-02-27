@@ -1,20 +1,20 @@
 #include "fastfetch.h"
 
-void ffPrintBattery(FFstate* state)
+void ffPrintBattery(FFinstance* instance)
 {
     int scanned;
 
     FILE* fullFile = fopen("/sys/class/power_supply/BAT0/charge_full", "r");
     if(fullFile == NULL)
     {
-        ffPrintError(state, "Battery", "fopen(\"/sys/class/power_supply/BAT0/charge_full\", \"r\") == NULL");
+        ffPrintError(instance, "Battery", "fopen(\"/sys/class/power_supply/BAT0/charge_full\", \"r\") == NULL");
         return;
     }
     uint32_t full;
     scanned = fscanf(fullFile, "%u", &full);
     if(scanned != 1)
     {
-        ffPrintError(state, "Battery", "fscanf(fullFile, \"%u\", &full) != 1");
+        ffPrintError(instance, "Battery", "fscanf(fullFile, \"%u\", &full) != 1");
         return;
     }
     fclose(fullFile);
@@ -22,14 +22,14 @@ void ffPrintBattery(FFstate* state)
     FILE* nowFile = fopen("/sys/class/power_supply/BAT0/charge_now", "r");
     if(nowFile == NULL)
     {
-        ffPrintError(state, "Battery", "fopen(\"/sys/class/power_supply/BAT0/charge_now\", \"r\") == NULL");
+        ffPrintError(instance, "Battery", "fopen(\"/sys/class/power_supply/BAT0/charge_now\", \"r\") == NULL");
         return;
     }
     uint32_t now;
     scanned = fscanf(nowFile, "%u", &now);
     if(scanned != 1)
     {
-        ffPrintError(state, "Battery", "fscanf(nowFile, \"%u\", &now) != 1");
+        ffPrintError(instance, "Battery", "fscanf(nowFile, \"%u\", &now) != 1");
         return;
     }
     fclose(nowFile);
@@ -37,20 +37,20 @@ void ffPrintBattery(FFstate* state)
     FILE* statusFile = fopen("/sys/class/power_supply/BAT0/status", "r");
     if(statusFile == NULL)
     {
-        ffPrintError(state, "Battery", "fopen(\"/sys/class/power_supply/BAT0/status\", \"r\") == NULL");
+        ffPrintError(instance, "Battery", "fopen(\"/sys/class/power_supply/BAT0/status\", \"r\") == NULL");
         return;
     }
     char status[256];
     scanned = fscanf(statusFile, "%s", status);
     if(scanned != 1)
     {
-        ffPrintError(state, "Battery", "fscanf(statusFile, \"%u\", &status) != 1");
+        ffPrintError(instance, "Battery", "fscanf(statusFile, \"%u\", &status) != 1");
         return;
     }
     fclose(statusFile);
 
     uint32_t percentage = (now / (double) full) * 100;
 
-    ffPrintLogoAndKey(state, "Battery");
+    ffPrintLogoAndKey(instance, "Battery");
     printf("%u%% [%s]\n", percentage, status);
 }

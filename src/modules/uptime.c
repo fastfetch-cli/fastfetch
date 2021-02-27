@@ -1,18 +1,18 @@
 #include "fastfetch.h"
 
-void ffPrintUptime(FFstate* state)
+void ffPrintUptime(FFinstance* instance)
 {
-    ffPrintLogoAndKey(state, "Uptime");
+    ffPrintLogoAndKey(instance, "Uptime");
 
-    if(state->sysinfo.uptime < 60)
+    if(instance->state.sysinfo.uptime < 60)
     {
-        printf("%ld seconds\n", state->sysinfo.uptime);
+        printf("%ld seconds\n", instance->state.sysinfo.uptime);
         return;
     }
 
-    int days = state->sysinfo.uptime / 86400;
-	int hours = (state->sysinfo.uptime - (days * 86400)) / 3600; 
-	int minutes = (state->sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
+    int days = instance->state.sysinfo.uptime / 86400;
+	int hours = (instance->state.sysinfo.uptime - (days * 86400)) / 3600; 
+	int minutes = (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
 	
     if(days > 0)
         printf("%d day%s, ", days, days <= 1 ? "" : "s");

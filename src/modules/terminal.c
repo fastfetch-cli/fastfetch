@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-void printTerminalName(FFstate* state, const char* pid)
+void printTerminalName(FFinstance* instance, const char* pid)
 {
     char file[256];
     sprintf(file, "/proc/%s/stat", pid);
@@ -12,7 +12,7 @@ void printTerminalName(FFstate* state, const char* pid)
     {
         char error[300];
         sprintf(error, "fopen(\"%s\", \"r\") == NULL", file);
-        ffPrintError(state, "Terminal", error);
+        ffPrintError(instance, "Terminal", error);
         return;
     }
 
@@ -20,7 +20,7 @@ void printTerminalName(FFstate* state, const char* pid)
     char ppid[256];
     if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
     {
-        ffPrintError(state, "Terminal", "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        ffPrintError(instance, "Terminal", "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
         return;
     }
 
@@ -37,11 +37,11 @@ void printTerminalName(FFstate* state, const char* pid)
         strcmp(name, "doas")   == 0 ||
         strcmp(name, "strace") == 0 )
     {
-        printTerminalName(state, ppid);
+        printTerminalName(instance, ppid);
         return;
     }
 
-    ffPrintLogoAndKey(state, "Terminal");
+    ffPrintLogoAndKey(instance, "Terminal");
     
     if(
         strcmp(name, "systemd") == 0 ||
@@ -56,9 +56,9 @@ void printTerminalName(FFstate* state, const char* pid)
     }
 }
 
-void ffPrintTerminal(FFstate* state)
+void ffPrintTerminal(FFinstance* instance)
 {
     char ppid[256];
     sprintf(ppid, "%i", getppid());
-    printTerminalName(state, ppid);
+    printTerminalName(instance, ppid);
 }

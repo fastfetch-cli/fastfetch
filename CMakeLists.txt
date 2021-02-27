@@ -25,8 +25,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src
 )
 
-add_executable(${PROJECT_NAME}
-    src/fastfetch.c
+set(SRCS
     src/util.c
     src/logo.c
     src/modules/break.c
@@ -53,7 +52,26 @@ add_executable(${PROJECT_NAME}
     src/modules/colors.c
 )
 
-target_link_libraries(${PROJECT_NAME}
+add_executable(fastfetch
+    src/fastfetch.c
+    ${SRCS}
+)
+
+target_link_libraries(fastfetch
+    ${CMAKE_DL_LIBS}
+    pci
+)
+
+add_executable(flashfetch
+    src/flashfetch.c
+    ${SRCS}
+)
+
+target_compile_definitions(flashfetch PUBLIC
+    FASTFETCH_BUILD_FLASHFETCH
+)
+
+target_link_libraries(flashfetch
     ${CMAKE_DL_LIBS}
     pci
 )

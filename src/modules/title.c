@@ -2,16 +2,16 @@
 
 #include <string.h>
 
-void ffPrintTitle(FFstate* state)
+void ffPrintTitle(FFinstance* instance)
 {
     char hostname[256];
     gethostname(hostname, 256);
 
-    state->titleLength = strlen(state->passwd->pw_name) + 1 + strlen(hostname);
+    instance->config.titleLength = strlen(instance->state.passwd->pw_name) + 1 + strlen(hostname);
 
-    ffPrintLogoLine(state);
+    ffPrintLogoLine(instance);
 
     printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"@"FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"\n",
-        state->color, state->passwd->pw_name, state->color, hostname
+        instance->config.color, instance->state.passwd->pw_name, instance->config.color, hostname
     );
 }

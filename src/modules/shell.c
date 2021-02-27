@@ -2,15 +2,15 @@
 
 #include <string.h>
 
-void ffPrintShell(FFstate* state)
+void ffPrintShell(FFinstance* instance)
 {
-    if(ffPrintCachedValue(state, "Shell"))
+    if(ffPrintCachedValue(instance, "Shell"))
         return;
 
     char* shellPath = getenv("SHELL");
     if(shellPath == NULL)
     {
-        ffPrintError(state, "Shell", "getenv(\"SHELL\") == NULL");
+        ffPrintError(instance, "Shell", "getenv(\"SHELL\") == NULL");
         return;
     }
 
@@ -21,5 +21,5 @@ void ffPrintShell(FFstate* state)
     else if(shellName[0] == '/')
         ++shellName;
 
-    ffPrintAndSaveCachedValue(state, "Shell", shellName);
+    ffPrintAndSaveCachedValue(instance, "Shell", shellName);
 }

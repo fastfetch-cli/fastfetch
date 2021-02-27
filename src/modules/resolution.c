@@ -34,29 +34,29 @@ short getCurrentRate(Display* display)
     return currentRate;
 }
 
-void ffPrintResolution(FFstate* state)
+void ffPrintResolution(FFinstance* instance)
 {
-    if(ffPrintCachedValue(state, "Resolution"))
+    if(ffPrintCachedValue(instance, "Resolution"))
         return;
 
     void* x11 = dlopen("libX11.so", RTLD_LAZY);
     if(x11 == NULL)
     {
-        ffPrintError(state, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
+        ffPrintError(instance, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
         return;
     }
 
     Display*(*ffXOpenDisplay)(const char*) = dlsym(x11, "XOpenDisplay");
     if(ffXOpenDisplay == NULL)
     {
-        ffPrintError(state, "Resolution", "dlsym(x11, \"XOpenDisplay\") == NULL");
+        ffPrintError(instance, "Resolution", "dlsym(x11, \"XOpenDisplay\") == NULL");
         return;
     }
 
     Display* display = ffXOpenDisplay(NULL);
     if(display == NULL)
     {
-        ffPrintError(state, "Resolution", "ffXOpenDisplay(NULL) == NULL");
+        ffPrintError(instance, "Resolution", "ffXOpenDisplay(NULL) == NULL");
         return;
     }
 
@@ -73,5 +73,5 @@ void ffPrintResolution(FFstate* state)
     else
         sprintf(resolution, "%ix%i @ %dHz", screen->width, screen->height, currentRate);
 
-    ffPrintAndSaveCachedValue(state, "Resolution", resolution);
+    ffPrintAndSaveCachedValue(instance, "Resolution", resolution);
 }

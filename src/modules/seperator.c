@@ -1,10 +1,10 @@
 #include "fastfetch.h"
 
-void ffPrintSeperator(FFstate* state)
+void ffPrintSeperator(FFinstance* instance)
 {
-    ffPrintLogoLine(state);
+    ffPrintLogoLine(instance);
 
-    for(uint8_t i = 0; i < state->titleLength; i++)
+    for(uint8_t i = 0; i < instance->config.titleLength; i++)
         putchar('-');
     putchar('\n');
 }

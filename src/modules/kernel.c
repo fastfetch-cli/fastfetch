@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 
-void ffPrintKernel(FFstate* state)
+void ffPrintKernel(FFinstance* instance)
 {
-    ffPrintLogoAndKey(state, "Kernel");
-    printf("%s\n", state->utsname.release);
+    ffPrintLogoAndKey(instance, "Kernel");
+    printf("%s\n", instance->state.utsname.release);
 }

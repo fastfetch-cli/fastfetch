@@ -47,7 +47,7 @@ static void printCommandHelp(const char* command)
         printf("No specific help for command %s provided\n", command);
 }
 
-static void parseArguments(int argc, char** argv, FFstate* state)
+static void parseArguments(int argc, char** argv, FFconfig* config)
 {
     bool colorText = true;
 
@@ -74,12 +74,12 @@ static void parseArguments(int argc, char** argv, FFstate* state)
         }
         else if(strcmp(argv[i], "--print-logos") == 0)
         {
-            ffPrintLogos(state->colorLogo);
+            ffPrintLogos(config->colorLogo);
             exit(0);
         }
         else if(strcmp(argv[i], "--show-errors") == 0)
         {
-            state->showErrors = true;
+            config->showErrors = true;
         }
         else if(strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--logo") == 0)
         {
@@ -89,7 +89,7 @@ static void parseArguments(int argc, char** argv, FFstate* state)
                 exit(41);
             }
 
-            ffLoadLogoSet(state, argv[i + 1]);
+            ffLoadLogoSet(config, argv[i + 1]);
             ++i;
         }
         else if(strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--color") == 0)
@@ -105,7 +105,7 @@ static void parseArguments(int argc, char** argv, FFstate* state)
                 printf("Error: max color string length is 28, %zu given\n", len);
                 exit(43);
             }
-            sprintf(state->color, "\033[%sm", argv[i + 1]);
+            sprintf(config->color, "\033[%sm", argv[i + 1]);
             ++i;
         }
         else if(strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--seperator") == 0)
@@ -115,7 +115,7 @@ static void parseArguments(int argc, char** argv, FFstate* state)
                 printf("Error: usage: %s <width>\n", argv[i]);
                 exit(44);
             }
-            if(sscanf(argv[i + 1], "%hd", &state->logo_seperator) != 1)
+            if(sscanf(argv[i + 1], "%hd", &config->logo_seperator) != 1)
             {
                 printf("Error: couldn't parse %s to uint16_t\n", argv[i + 1]);
                 exit(45);
@@ -129,7 +129,7 @@ static void parseArguments(int argc, char** argv, FFstate* state)
                 printf("Error: usage: %s <offset>\n", argv[i]);
                 exit(46);
             }
-            if(sscanf(argv[i + 1], "%hi", &state->offsetx) != 1)
+            if(sscanf(argv[i + 1], "%hi", &config->offsetx) != 1)
             {
                 printf("Error: couldn't parse %s to int16_t\n", argv[i + 1]);
                 exit(47);
@@ -138,16 +138,16 @@ static void parseArguments(int argc, char** argv, FFstate* state)
         }
         else if(strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--recache") == 0)
         {
-            state->recache = true;
+            config->recache = true;
         }
         else if(strcmp(argv[i], "--no-color") == 0)
         {
             colorText = false;
-            state->colorLogo = false;
+            config->colorLogo = false;
         }
         else if(strcmp(argv[i], "--no-color-logo") == 0)
         {
-            state->colorLogo = false;
+            config->colorLogo = false;
         }
         else
         {
@@ -156,42 +156,54 @@ static void parseArguments(int argc, char** argv, FFstate* state)
         }
     }
 
-    ffLoadLogo(state); //We need to do this here, because of --no-color
+    ffLoadLogo(config); //We need to do this here, because of --no-color
     if(colorText)
-        strcpy(state->color, state->logo.color);
+        strcpy(config->color, config->logo.color);
     else
-        state->color[0] = '\0';
+        config->color[0] = '\0';
+}
+
+static void defaultConfig(FFconfig* config)
+{
+    config->logo_seperator = 4;
+    config->offsetx = 0;
+    config->titleLength = 20; // This is overwritten by ffPrintTitle
+    config->colorLogo = true;
+    config->showErrors = false;
+    config->recache = false;
 }
 
 int main(int argc, char** argv)
 {
-    FFstate state;
-    ffInitState(&state);
-    parseArguments(argc, argv, &state);
+    FFinstance instance;
+    ffInitState(&instance.state);
+    defaultConfig(&instance.config);
+
+    parseArguments(argc, argv, &instance.config);
 
     //Start the printing
-    ffPrintTitle(&state);
-    ffPrintSeperator(&state);
-    ffPrintOS(&state);
-    ffPrintHost(&state);
-    ffPrintKernel(&state);
-    ffPrintUptime(&state);
-    ffPrintPackages(&state);
-    ffPrintShell(&state);
-    ffPrintResolution(&state);
-    ffPrintDesktopEnvironment(&state);
-    ffPrintTheme(&state);
-    ffPrintIcons(&state);
-    ffPrintFont(&state);
-    ffPrintTerminal(&state);
-    ffPrintCPU(&state);
-    ffPrintGPU(&state);
-    ffPrintMemory(&state);
-    ffPrintDisk(&state);
-    ffPrintBattery(&state);
-    ffPrintLocale(&state);
-    ffPrintBreak(&state);
-    ffPrintColors(&state);
+    ffPrintTitle(&instance);
+    ffPrintSeperator(&instance);
+    ffPrintOS(&instance);
+    ffPrintHost(&instance);
+    ffPrintKernel(&instance);
+    ffPrintUptime(&instance);
+    ffPrintPackages(&instance);
+    ffPrintShell(&instance);
+    ffPrintResolution(&instance);
+    ffPrintDesktopEnvironment(&instance);
+    ffPrintTheme(&instance);
+    ffPrintIcons(&instance);
+    ffPrintFont(&instance);
+    ffPrintTerminal(&instance);
+    ffPrintCPU(&instance);
+    ffPrintGPU(&instance);
+    ffPrintMemory(&instance);
+    ffPrintDisk(&instance);
+    ffPrintBattery(&instance);
+    ffPrintLocale(&instance);
+    ffPrintBreak(&instance);
+    ffPrintColors(&instance);
 
     return 0;
 }

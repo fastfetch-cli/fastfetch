@@ -2,13 +2,13 @@
 
 #include <sys/statvfs.h>
 
-void ffPrintDisk(FFstate* state)
+void ffPrintDisk(FFinstance* instance)
 {
     struct statvfs fs;
     int ret = statvfs("/", &fs);
     if(ret != 0)
     {
-        ffPrintError(state, "Disk (/)", "statvfs(\"/\", &fs) != 0");
+        ffPrintError(instance, "Disk (/)", "statvfs(\"/\", &fs) != 0");
         return;
     }
 
@@ -20,6 +20,6 @@ void ffPrintDisk(FFstate* state)
     const uint32_t percentage = (used / (double) total) * 100.0;
 
     
-    ffPrintLogoAndKey(state, "Disk (/)");
+    ffPrintLogoAndKey(instance, "Disk (/)");
     printf("%uGB / %uGB (%u%%)\n", used, total, percentage);
 }

@@ -31,9 +31,9 @@ static void printPacmanPackages()
         printf("%i (pacman) ", nums);
 }
 
-void ffPrintPackages(FFstate* state)
+void ffPrintPackages(FFinstance* instance)
 {
-    ffPrintLogoAndKey(state, "Packages");
+    ffPrintLogoAndKey(instance, "Packages");
     printPacmanPackages();
     putchar('\n');
 }

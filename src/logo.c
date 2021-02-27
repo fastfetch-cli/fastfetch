@@ -67,64 +67,66 @@ static void loadArchLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s.`                                 `/"FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
-void ffLoadLogoSet(FFstate* state, const char* logo)
+void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
     if(strcasecmp(logo, "none") == 0)
     {
-        loadNoneLogo(&state->logo);
-        state->logo_seperator = 0; //This is wanted in most cases, so just set it
+        loadNoneLogo(&config->logo);
+        config->logo_seperator = 0; //This is wanted in most cases, so just set it
     }
     else if(strcasecmp(logo, "arch") == 0)
     {
-        loadArchLogo(&state->logo, state->colorLogo);
+        loadArchLogo(&config->logo, config->colorLogo);
     }
     else
     {
-        if(state->showErrors)
+        if(config->showErrors)
             printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", logo);
-        loadUnknownLogo(&state->logo);
+        loadUnknownLogo(&config->logo);
     }
 }
 
-void ffLoadLogo(FFstate* state)
+void ffLoadLogo(FFconfig* config)
 {
     char id[256];
     ffParsePropFile("/etc/os-release", "ID=%[^\n]", id);
     if(id[0] == '\0')
     {
-        if(state->showErrors)
+        if(config->showErrors)
             puts(FASTFETCH_TEXT_MODIFIER_ERROR"Error: \"ID=%[^\\n]\" not found in \"/etc/os-release\""FASTFETCH_TEXT_MODIFIER_RESET);
-        loadUnknownLogo(&state->logo);
+        loadUnknownLogo(&config->logo);
     }
     else
     {
-        ffLoadLogoSet(state, id);
+        ffLoadLogoSet(config, id);
     }
 }
 
-void ffPrintLogoLine(FFstate* state)
+void ffPrintLogoLine(FFinstance* instance)
 {
-    for(int16_t i = 0; i < state->offsetx; i++)
+    for(int16_t i = 0; i < instance->config.offsetx; i++)
         putchar(' ');
 
-    int16_t cut = state->offsetx >= 0 ? 0 :
-        (state->logo.width > state->offsetx * -1 ? state->offsetx * -1 : state->logo.width);
+    int16_t cut = instance->config.offsetx >= 0 ? 0 :
+        (instance->config.logo.width > instance->config.offsetx * -1 ? instance->config.offsetx * -1 : instance->config.logo.width);
 
-    if(state->current_row < state->logo.height)
+    if(instance->state.current_row < instance->config.logo.height)
     {
-        printf(state->logo.chars[state->current_row] + cut);
+        printf(instance->config.logo.chars[instance->state.current_row] + cut);
     }
     else
     {
-        for(uint8_t i = 0; i < state->logo.width - cut; i++)
+        for(uint8_t i = 0; i < instance->config.logo.width - cut; i++)
             putchar(' ');   
     }
     
-    for(uint16_t i = 0; i < state->logo_seperator; i++)
+    for(uint16_t i = 0; i < instance->config.logo_seperator; i++)
         putchar(' ');
 
-    ++state->current_row;
+    ++instance->state.current_row;
 }
+
+#ifndef FASTFETCH_BUILD_FLASHFETCH
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
@@ -164,3 +166,5 @@ void ffPrintLogos(bool doColor)
         putchar('\n');
     }
 }
+
+#endif
