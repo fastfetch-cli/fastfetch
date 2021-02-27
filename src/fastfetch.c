@@ -184,6 +184,20 @@ static void defaultConfig(FFconfig* config)
     config->recache = false;
 }
 
+static void trimTrailingWhitespaces(char* buffer)
+{
+    uint32_t end = 0;
+
+    for(uint32_t i = 0; buffer[i] != '\0'; i++)
+    {
+        if(buffer[i] != ' ')
+            end = i;
+    }
+
+    if(buffer[end + 1] == ' ')
+        buffer[end + 1] = '\0';
+}
+
 static FILE* createStructureFile(const char* filename)
 {
     FILE* f = fopen(filename, "wr");
@@ -240,6 +254,8 @@ static bool customValue(FFinstance* instance, const char* key, const char* value
         value[readed - 1] = '\0';
     else
         value[readed] = '\0';
+
+    trimTrailingWhitespaces(value);
 
     ffPrintLogoAndKey(instance, key);
     puts(value);
@@ -331,6 +347,8 @@ static void parseStructureFile(FFinstance* instance)
     {
         if(line[read - 1] == '\n')
             line[read - 1] = '\0';
+
+        trimTrailingWhitespaces(line);
         
         if(!customValue(instance, line, valueDir))
             parseLine(instance, line);
