@@ -49,7 +49,8 @@ typedef struct FFstate
     struct sysinfo sysinfo;
 } FFstate;
 
-//Helper functions
+//Util functions
+void ffInitState(FFstate* state);
 void ffPrintLogoLine(FFstate* state);
 void ffPrintKey(FFstate* state, const char* key);
 void ffPrintLogoAndKey(FFstate* state, const char* key);

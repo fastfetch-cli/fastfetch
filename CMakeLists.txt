@@ -20,33 +20,37 @@ set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt") # for testing
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
-include_directories(${PROJECT_BINARY_DIR})
+include_directories(
+    ${PROJECT_BINARY_DIR}
+    ${PROJECT_SOURCE_DIR}/src
+)
 
 add_executable(${PROJECT_NAME}
     src/fastfetch.c
-    src/break.c
+    src/util.c
     src/logo.c
-    src/title.c
-    src/seperator.c
-    src/os.c
-    src/host.c
-    src/kernel.c
-    src/uptime.c
-    src/packages.c
-    src/shell.c
-    src/resolution.c
-    src/desktopenvironment.c
-    src/theme.c
-    src/icons.c
-    src/font.c
-    src/terminal.c
-    src/cpu.c
-    src/gpu.c
-    src/memory.c
-    src/disk.c
-    src/battery.c
-    src/locale.c
-    src/colors.c
+    src/modules/break.c
+    src/modules/title.c
+    src/modules/seperator.c
+    src/modules/os.c
+    src/modules/host.c
+    src/modules/kernel.c
+    src/modules/uptime.c
+    src/modules/packages.c
+    src/modules/shell.c
+    src/modules/resolution.c
+    src/modules/desktopenvironment.c
+    src/modules/theme.c
+    src/modules/icons.c
+    src/modules/font.c
+    src/modules/terminal.c
+    src/modules/cpu.c
+    src/modules/gpu.c
+    src/modules/memory.c
+    src/modules/disk.c
+    src/modules/battery.c
+    src/modules/locale.c
+    src/modules/colors.c
 )
 
 target_link_libraries(${PROJECT_NAME}
