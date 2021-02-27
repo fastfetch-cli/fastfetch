@@ -19,7 +19,7 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     char name[512];
     pci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
 
-    if(strcmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
+    if(strcasecmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
     {
         strcpy(gpu, "AMD ATI ");
     }
@@ -50,9 +50,9 @@ void ffPrintGPU(FFinstance* instance)
         char class[1024];
         pci_lookup_name(pacc, class, sizeof(class), PCI_LOOKUP_CLASS, dev->device_class);
         if(
-            strcmp("VGA compatible controller", class) == 0 ||
-            strcmp("3D controller", class)             == 0 ||
-            strcmp("Display controller", class)        == 0 )
+            strcasecmp("VGA compatible controller", class) == 0 ||
+            strcasecmp("3D controller", class)             == 0 ||
+            strcasecmp("Display controller", class)        == 0 )
         {
             handleGPU(instance, pacc, dev, counter++);
         }

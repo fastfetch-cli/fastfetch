@@ -26,7 +26,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "DE");
 
-    if(strcmp(currentDesktop, "KDE") == 0)
+    if(strcasecmp(currentDesktop, "KDE") == 0)
         printKDE();
     else
         printf("%s", currentDesktop);
@@ -34,13 +34,13 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     const char* sessionType = getenv("XDG_SESSION_TYPE");
     if(sessionType == NULL)
         putchar('\n');
-    else if(strcmp(sessionType, "wayland") == 0)
+    else if(strcasecmp(sessionType, "wayland") == 0)
         puts(" (Wayland)");
-    else if(strcmp(sessionType, "x11") == 0)
+    else if(strcasecmp(sessionType, "x11") == 0)
         puts(" (X11)");
-    else if(strcmp(sessionType, "tty") == 0)
+    else if(strcasecmp(sessionType, "tty") == 0)
         puts(" TTY");
-    else if(strcmp(sessionType, "mir") == 0)
+    else if(strcasecmp(sessionType, "mir") == 0)
         puts(" (Mir)");
     else
         printf(" (%s)\n", sessionType);

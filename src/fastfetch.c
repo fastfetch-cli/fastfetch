@@ -45,7 +45,7 @@ static void printCommandHelpColor()
 
 static void printCommandHelp(const char* command)
 {
-    if(strcmp(command, "c") == 0 || strcmp(command, "-c") == 0 || strcmp(command, "color") == 0 || strcmp(command, "--color") == 0)
+    if(strcasecmp(command, "c") == 0 || strcasecmp(command, "-c") == 0 || strcasecmp(command, "color") == 0 || strcasecmp(command, "--color") == 0)
         printCommandHelpColor();
     else
         printf("No specific help for command %s provided\n", command);
@@ -58,7 +58,7 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
 
     for(int i = 1; i < argc; i++)
     {
-        if(strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+        if(strcasecmp(argv[i], "-h") == 0 || strcasecmp(argv[i], "--help") == 0)
         {
             if(i == argc - 1)
                 printHelp();
@@ -67,26 +67,26 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
 
             exit(0);
         }
-        else if(strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
+        else if(strcasecmp(argv[i], "-v") == 0 || strcasecmp(argv[i], "--version") == 0)
         {
             puts(FASTFETCH_PROJECT_NAME" "FASTFETCH_PROJECT_VER);
             exit(0);
         }
-        else if(strcmp(argv[i], "--list-logos") == 0)
+        else if(strcasecmp(argv[i], "--list-logos") == 0)
         {
             ffListLogos();
             exit(0);
         }
-        else if(strcmp(argv[i], "--print-logos") == 0)
+        else if(strcasecmp(argv[i], "--print-logos") == 0)
         {
             ffPrintLogos(config->colorLogo);
             exit(0);
         }
-        else if(strcmp(argv[i], "--show-errors") == 0)
+        else if(strcasecmp(argv[i], "--show-errors") == 0)
         {
             config->showErrors = true;
         }
-        else if(strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--logo") == 0)
+        else if(strcasecmp(argv[i], "-l") == 0 || strcasecmp(argv[i], "--logo") == 0)
         {
             if(i == argc - 1)
             {
@@ -97,7 +97,7 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
             logoIndex = i + 1;
             ++i;
         }
-        else if(strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--color") == 0)
+        else if(strcasecmp(argv[i], "-c") == 0 || strcasecmp(argv[i], "--color") == 0)
         {
             if(i == argc - 1)
             {
@@ -113,7 +113,7 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
             sprintf(config->color, "\033[%sm", argv[i + 1]);
             ++i;
         }
-        else if(strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--seperator") == 0)
+        else if(strcasecmp(argv[i], "-s") == 0 || strcasecmp(argv[i], "--seperator") == 0)
         {
             if(i == argc -1)
             {
@@ -127,7 +127,7 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
             }
             ++i;
         }
-        else if(strcmp(argv[i], "-x") == 0 || strcmp(argv[i], "--offsetx") == 0)
+        else if(strcasecmp(argv[i], "-x") == 0 || strcasecmp(argv[i], "--offsetx") == 0)
         {
             if(i == argc -1)
             {
@@ -141,16 +141,16 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
             }
             ++i;
         }
-        else if(strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--recache") == 0)
+        else if(strcasecmp(argv[i], "-r") == 0 || strcasecmp(argv[i], "--recache") == 0)
         {
             config->recache = true;
         }
-        else if(strcmp(argv[i], "--no-color") == 0)
+        else if(strcasecmp(argv[i], "--no-color") == 0)
         {
             colorText = false;
             config->colorLogo = false;
         }
-        else if(strcmp(argv[i], "--no-color-logo") == 0)
+        else if(strcasecmp(argv[i], "--no-color-logo") == 0)
         {
             config->colorLogo = false;
         }
