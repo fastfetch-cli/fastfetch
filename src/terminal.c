@@ -27,14 +27,15 @@ void printTerminalName(FFstate* state, const char* pid)
     fclose(stat);
 
     if (
-        strcmp(name, "bash") == 0 ||
-        strcmp(name, "sh")   == 0 ||
-        strcmp(name, "zsh")  == 0 ||
-        strcmp(name, "ksh")  == 0 ||
-        strcmp(name, "fish") == 0 ||
-        strcmp(name, "sudo") == 0 ||
-        strcmp(name, "su")   == 0 ||
-        strcmp(name, "doas") == 0 )
+        strcmp(name, "bash")   == 0 ||
+        strcmp(name, "sh")     == 0 ||
+        strcmp(name, "zsh")    == 0 ||
+        strcmp(name, "ksh")    == 0 ||
+        strcmp(name, "fish")   == 0 ||
+        strcmp(name, "sudo")   == 0 ||
+        strcmp(name, "su")     == 0 ||
+        strcmp(name, "doas")   == 0 ||
+        strcmp(name, "strace") == 0 )
     {
         printTerminalName(state, ppid);
         return;
