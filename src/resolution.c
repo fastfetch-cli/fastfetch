@@ -41,15 +41,24 @@ void ffPrintResolution(FFstate* state)
 
     void* x11 = dlopen("libX11.so", RTLD_LAZY);
     if(x11 == NULL)
+    {
+        ffPrintError(state, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
         return;
+    }
 
     Display*(*ffXOpenDisplay)(const char*) = dlsym(x11, "XOpenDisplay");
     if(ffXOpenDisplay == NULL)
+    {
+        ffPrintError(state, "Resolution", "dlsym(x11, \"XOpenDisplay\") == NULL");
         return;
+    }
 
     Display* display = ffXOpenDisplay(NULL);
     if(display == NULL)
+    {
+        ffPrintError(state, "Resolution", "ffXOpenDisplay(NULL) == NULL");
         return;
+    }
 
     Screen*  screen  = DefaultScreenOfDisplay(display);
 
