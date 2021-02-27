@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-
-
 static void loadUnknownLogo(FFlogo* logo)
 {
     logo->width = 23;

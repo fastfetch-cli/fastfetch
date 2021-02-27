@@ -1,7 +1,8 @@
 #include "fastfetch.h"
 #include "fastfetch_config.h"
 
-
+#include <malloc.h>
+#include <sys/stat.h>
 
 static void printHelp()
 {
@@ -50,6 +51,7 @@ static void printCommandHelp(const char* command)
 static void parseArguments(int argc, char** argv, FFconfig* config)
 {
     bool colorText = true;
+    int logoIndex = -1;
 
     for(int i = 1; i < argc; i++)
     {
@@ -89,7 +91,7 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
                 exit(41);
             }
 
-            ffLoadLogoSet(config, argv[i + 1]);
+            logoIndex = i + 1;
             ++i;
         }
         else if(strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--color") == 0)
@@ -156,7 +158,13 @@ static void parseArguments(int argc, char** argv, FFconfig* config)
         }
     }
 
-    ffLoadLogo(config); //We need to do this here, because of --no-color
+    //Load logo after parsing because of --no-color and --no-color-logo
+    if(logoIndex >= 0)
+        ffLoadLogoSet(config, argv[logoIndex]);
+    else
+        ffLoadLogo(config);
+
+    //We need to do this after loading the logo
     if(colorText)
         strcpy(config->color, config->logo.color);
     else
@@ -173,37 +181,132 @@ static void defaultConfig(FFconfig* config)
     config->recache = false;
 }
 
+static FILE* createStructureFile(const char* filename)
+{
+    FILE* f = fopen(filename, "wr");
+
+    fputs(
+        "Title\n"
+        "Seperator\n"
+        "OS\n"
+        "Host\n"
+        "Kernel\n"
+        "Uptime\n"
+        "Packages\n"
+        "Shell\n"
+        "Resolution\n"
+        "DesktopEnvironment\n"
+        "Theme\n"
+        "Icons\n"
+        "Font\n"
+        "Terminal\n"
+        "CPU\n"
+        "GPU\n"
+        "Memory\n"
+        "Disk\n"
+        "Battery\n"
+        "Locale\n"
+        "Break\n"
+        "Colors\n"
+    ,f);
+
+    fseek(f, 0, SEEK_SET);
+
+    return f;
+}
+
+static void parseLine(FFinstance* instance, const char* line)
+{
+    if(strcasecmp(line, "break") == 0)
+        ffPrintBreak(instance);
+    else if(strcasecmp(line, "title") == 0)
+        ffPrintTitle(instance);
+    else if(strcasecmp(line, "seperator") == 0)
+        ffPrintSeperator(instance);
+    else if(strcasecmp(line, "os") == 0)
+        ffPrintOS(instance);
+    else if(strcasecmp(line, "host") == 0)
+        ffPrintHost(instance);
+    else if(strcasecmp(line, "kernel") == 0)
+        ffPrintKernel(instance);
+    else if(strcasecmp(line, "uptime") == 0)
+        ffPrintUptime(instance);
+    else if(strcasecmp(line, "packages") == 0)
+        ffPrintPackages(instance);
+    else if(strcasecmp(line, "shell") == 0)
+        ffPrintShell(instance);
+    else if(strcasecmp(line, "resolution") == 0)
+        ffPrintResolution(instance);
+    else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
+        ffPrintDesktopEnvironment(instance);
+    else if(strcasecmp(line, "theme") == 0)
+        ffPrintTheme(instance);
+    else if(strcasecmp(line, "icons") == 0)
+        ffPrintIcons(instance);
+    else if(strcasecmp(line, "font") == 0)
+        ffPrintFont(instance);
+    else if(strcasecmp(line, "terminal") == 0)
+        ffPrintTerminal(instance);
+    else if(strcasecmp(line, "cpu") == 0)
+        ffPrintCPU(instance);
+    else if(strcasecmp(line, "gpu") == 0)
+        ffPrintGPU(instance);
+    else if(strcasecmp(line, "memory") == 0)
+        ffPrintMemory(instance);
+    else if(strcasecmp(line, "disk") == 0)
+        ffPrintDisk(instance);
+    else if(strcasecmp(line, "battery") == 0)
+        ffPrintBattery(instance);
+    else if(strcasecmp(line, "locale") == 0)
+        ffPrintLocale(instance);
+    else if(strcasecmp(line, "colors") == 0)
+        ffPrintColors(instance);
+    else
+        ffPrintError(instance, line, "<no implementaion provided>");
+}
+
+static void parseStructureFile(FFinstance* instance)
+{
+    char configDir[256];
+    strcpy(configDir, instance->state.passwd->pw_dir);
+    strcat(configDir, "/.config");
+
+    mkdir(configDir, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
+    
+    strcat(configDir, "/fastfetch/");
+    mkdir(configDir, S_IRWXU | S_IRGRP | S_IROTH);
+    
+    char structureFileName[256];
+    strcpy(structureFileName, configDir);
+    strcat(structureFileName, "structure");
+
+    FILE* structureFile;
+    if(access(structureFileName, F_OK) != 0)
+        structureFile = createStructureFile(structureFileName);
+    else
+        structureFile = fopen(structureFileName, "r");
+
+    char* line = NULL;
+    size_t len;
+    ssize_t read;
+
+    while ((read = getline(&line, &len, structureFile)) != -1)
+    {
+        if(line[read - 1] == '\n')
+            line[read - 1] = '\0';
+        parseLine(instance, line);
+    }
+
+    free(line);
+    fclose(structureFile);
+}
+
 int main(int argc, char** argv)
 {
     FFinstance instance;
     ffInitState(&instance.state);
     defaultConfig(&instance.config);
-
     parseArguments(argc, argv, &instance.config);
-
-    //Start the printing
-    ffPrintTitle(&instance);
-    ffPrintSeperator(&instance);
-    ffPrintOS(&instance);
-    ffPrintHost(&instance);
-    ffPrintKernel(&instance);
-    ffPrintUptime(&instance);
-    ffPrintPackages(&instance);
-    ffPrintShell(&instance);
-    ffPrintResolution(&instance);
-    ffPrintDesktopEnvironment(&instance);
-    ffPrintTheme(&instance);
-    ffPrintIcons(&instance);
-    ffPrintFont(&instance);
-    ffPrintTerminal(&instance);
-    ffPrintCPU(&instance);
-    ffPrintGPU(&instance);
-    ffPrintMemory(&instance);
-    ffPrintDisk(&instance);
-    ffPrintBattery(&instance);
-    ffPrintLocale(&instance);
-    ffPrintBreak(&instance);
-    ffPrintColors(&instance);
-
+    parseStructureFile(&instance);
     return 0;
 }

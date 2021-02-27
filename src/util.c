@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-
+#include <malloc.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -108,7 +108,7 @@ void ffPrintError(FFinstance* instance, const char* key, const char* message)
         return;
 
     ffPrintLogoAndKey(instance, key);
-    printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s\n"FASTFETCH_TEXT_MODIFIER_RESET, message);
+    printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s"FASTFETCH_TEXT_MODIFIER_RESET"\n", message);
 }
 
 static void getCacheFileName(FFinstance* instance, const char* key, char* buffer)
