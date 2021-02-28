@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-
-
 static void printKDE()
 {
     char version[256];
@@ -17,6 +15,11 @@ static void printKDE()
 
 void ffPrintDesktopEnvironment(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "DE"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     const char* currentDesktop = getenv("XDG_CURRENT_DESKTOP");
     if(currentDesktop == NULL)
     {

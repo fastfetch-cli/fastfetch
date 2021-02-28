@@ -2,6 +2,11 @@
 
 void ffPrintBattery(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "Battery"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     int scanned;
 
     FILE* fullFile = fopen("/sys/class/power_supply/BAT0/charge_full", "r");

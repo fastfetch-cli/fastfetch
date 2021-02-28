@@ -1,9 +1,12 @@
 #include "fastfetch.h"
 
-
-
 void ffPrintTheme(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "Theme"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     char plasma[256];
     ffParsePropFileHome(instance, ".config/kdeglobals", "Name=%[^\n]", plasma);
     

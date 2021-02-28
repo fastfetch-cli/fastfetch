@@ -63,8 +63,10 @@ void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);
 void ffPrintError(FFinstance* instance, const char* key, const char* message);
+void ffTrimTrailingWhitespace(char* buffer);
 bool ffPrintCachedValue(FFinstance* instance, const char* key);
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value);
+bool ffPrintCustomValue(FFinstance* instance, const char* key);
 
 //Logo functions
 void ffLoadLogoSet(FFconfig* config, const char* logo);

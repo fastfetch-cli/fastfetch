@@ -2,6 +2,11 @@
 
 void ffPrintKernel(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "Kernel"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     ffPrintLogoAndKey(instance, "Kernel");
-    printf("%s\n", instance->state.utsname.release);
+    puts(instance->state.utsname.release);
 }

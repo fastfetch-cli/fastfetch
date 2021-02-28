@@ -184,20 +184,6 @@ static void defaultConfig(FFconfig* config)
     config->recache = false;
 }
 
-static void trimTrailingWhitespaces(char* buffer)
-{
-    uint32_t end = 0;
-
-    for(uint32_t i = 0; buffer[i] != '\0'; i++)
-    {
-        if(buffer[i] != ' ')
-            end = i;
-    }
-
-    if(buffer[end + 1] == ' ')
-        buffer[end + 1] = '\0';
-}
-
 static FILE* createStructureFile(const char* filename)
 {
     FILE* f = fopen(filename, "wr");
@@ -230,37 +216,6 @@ static FILE* createStructureFile(const char* filename)
     fseek(f, 0, SEEK_SET);
 
     return f;
-}
-
-static bool customValue(FFinstance* instance, const char* key, const char* valueDir)
-{
-    char fileName[256];
-    strcpy(fileName, valueDir);
-    strcat(fileName, key);
-
-    int fd = open(fileName, O_RDONLY);
-    if(fd == 0) //The file doesn't exist
-        return false;
-
-    char value[1024];
-    
-    ssize_t readed = read(fd, value, sizeof(value) - 1);
-    if(readed < 1)
-        return false;
-
-    close(fd);
-
-    if(value[readed - 1] == '\n')
-        value[readed - 1] = '\0';
-    else
-        value[readed] = '\0';
-
-    trimTrailingWhitespaces(value);
-
-    ffPrintLogoAndKey(instance, key);
-    puts(value);
-
-    return true;
 }
 
 static void parseLine(FFinstance* instance, const char* line)
@@ -348,9 +303,9 @@ static void parseStructureFile(FFinstance* instance)
         if(line[read - 1] == '\n')
             line[read - 1] = '\0';
 
-        trimTrailingWhitespaces(line);
+        ffTrimTrailingWhitespace(line);
         
-        if(!customValue(instance, line, valueDir))
+        if(!ffPrintCustomValue(instance, line))
             parseLine(instance, line);
     }
 

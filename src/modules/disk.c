@@ -4,6 +4,11 @@
 
 void ffPrintDisk(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "Disk (/)"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     struct statvfs fs;
     int ret = statvfs("/", &fs);
     if(ret != 0)

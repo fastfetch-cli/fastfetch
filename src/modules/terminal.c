@@ -58,6 +58,11 @@ void printTerminalName(FFinstance* instance, const char* pid)
 
 void ffPrintTerminal(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "Terminal"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     char ppid[256];
     sprintf(ppid, "%i", getppid());
     printTerminalName(instance, ppid);

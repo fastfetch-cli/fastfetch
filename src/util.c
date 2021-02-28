@@ -111,48 +111,133 @@ void ffPrintError(FFinstance* instance, const char* key, const char* message)
     printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s"FASTFETCH_TEXT_MODIFIER_RESET"\n", message);
 }
 
-static void getCacheFileName(FFinstance* instance, const char* key, char* buffer)
+void ffTrimTrailingWhitespace(char* buffer)
 {
+    uint32_t end = 0;
+
+    for(uint32_t i = 0; buffer[i] != '\0'; i++)
+    {
+        if(buffer[i] != ' ')
+            end = i;
+    }
+
+    if(buffer[end + 1] == ' ')
+        buffer[end + 1] = '\0';
+}
+
+static void getFileContent(const char* fileName, char* buffer, uint32_t bufferSize)
+{
+    buffer[0] = '\0';
+
+    int fd = open(fileName, O_RDONLY);
+    if(fd == -1)
+        return;
+
+    ssize_t readed = read(fd, buffer, bufferSize - 1);
+    if(readed < 1)
+        return;
+
+    close(fd);
+
+    if(buffer[readed - 1] == '\n')
+        buffer[readed - 1] = '\0';
+    else
+        buffer[readed] = '\0';
+
+    ffTrimTrailingWhitespace(buffer);
+}
+
+static const char* getCacheDir(FFinstance* instance)
+{
+    static char cache[256];
+    static bool init = false;
+    if(init)
+        return cache;
+
     const char* xdgCache = getenv("XDG_CACHE_HOME");
     if(xdgCache == NULL)
     {
-        strcpy(buffer, instance->state.passwd->pw_dir);
-        strcat(buffer, "/.cache");
+        strcpy(cache, instance->state.passwd->pw_dir);
+        strcat(cache, "/.cache");
     }
     else
     {
-        strcpy(buffer, xdgCache);
+        strcpy(cache, xdgCache);
     }
 
-    mkdir(buffer, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+    mkdir(cache, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
     
-    strcat(buffer, "/fastfetch/");
-    mkdir(buffer, S_IRWXU | S_IRGRP | S_IROTH);
+    strcat(cache, "/fastfetch/");
+    mkdir(cache, S_IRWXU | S_IRGRP | S_IROTH);
+
+    init = true;
+    return cache;
+}
+
+static const char* getConfigDir(FFinstance* instance)
+{
+    static char config[256];
+    static bool init = false;
+    if(init)
+        return config;
+
+    const char* xdgConfig = getenv("XDG_CONFIG_HOME");
+    if(xdgConfig == NULL)
+    {
+        strcpy(config, instance->state.passwd->pw_dir);
+        strcat(config, "/.config");
+    }
+    else
+    {
+        strcpy(config, xdgConfig);
+    }
+
+    mkdir(config, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
     
-    strcat(buffer, key);
+    strcat(config, "/fastfetch/");
+    mkdir(config, S_IRWXU | S_IRGRP | S_IROTH);
+
+    init = true;
+    return config;
+}
+
+bool ffPrintCustomValue(FFinstance* instance, const char* key)
+{
+    char fileName[256];
+    strcpy(fileName, getConfigDir(instance));
+    strcat(fileName, key);
+
+    char value[1024];
+    getFileContent(fileName, value, sizeof(value));
+
+    if(value[0] == '\0')
+        return false;
+
+    ffPrintLogoAndKey(instance, key);
+    puts(value);
+
+    return true;
 }
 
 bool ffPrintCachedValue(FFinstance* instance, const char* key)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, key))
+        return true;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     if(instance->config.recache)
         return false;
 
     char fileName[256];
-    getCacheFileName(instance, key, fileName);
-
-    int fd = open(fileName, O_RDONLY);
-    if(fd == -1)
-        return false;
+    strcpy(fileName, getCacheDir(instance));
+    strcat(fileName, key);
 
     char value[1024];
+    getFileContent(fileName, value, sizeof(value));
 
-    ssize_t readed = read(fd, value, sizeof(value) - 1);
-    if(readed < 1)
+    if(value[0] == '\0')
         return false;
-
-    close(fd);
-
-    value[readed] = '\0'; //Somehow read doesn't alway do this
 
     ffPrintLogoAndKey(instance, key);
     puts(value);
@@ -166,7 +251,8 @@ void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char
     puts(value);
 
     char fileName[256];
-    getCacheFileName(instance, key, fileName);
+    strcpy(fileName, getCacheDir(instance));
+    strcat(fileName, key);
 
     int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(fd == -1)

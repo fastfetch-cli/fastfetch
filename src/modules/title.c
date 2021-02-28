@@ -1,9 +1,12 @@
 #include "fastfetch.h"
 
-
-
 void ffPrintTitle(FFinstance* instance)
 {
+    #ifdef FASTFETCH_BUILD_FLASHFETCH
+    if(ffPrintCustomValue(instance, "Title"))
+        return;
+    #endif // FASTFETCH_BUILD_FLASHFETCH
+
     char hostname[256];
     gethostname(hostname, 256);
 
