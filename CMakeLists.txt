@@ -60,7 +60,6 @@ add_executable(fastfetch
 
 target_link_libraries(fastfetch
     ${CMAKE_DL_LIBS}
-    pci
 )
 
 add_executable(flashfetch
@@ -74,5 +73,4 @@ target_compile_definitions(flashfetch PUBLIC
 
 target_link_libraries(flashfetch
     ${CMAKE_DL_LIBS}
-    pci
 )
