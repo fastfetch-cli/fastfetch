@@ -125,7 +125,7 @@ void ffTrimTrailingWhitespace(char* buffer)
         buffer[end + 1] = '\0';
 }
 
-static void getFileContent(const char* fileName, char* buffer, uint32_t bufferSize)
+void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize)
 {
     buffer[0] = '\0';
 
@@ -205,10 +205,11 @@ bool ffPrintCustomValue(FFinstance* instance, const char* key)
 {
     char fileName[256];
     strcpy(fileName, getConfigDir(instance));
+    strcat(fileName, "values/");
     strcat(fileName, key);
 
     char value[1024];
-    getFileContent(fileName, value, sizeof(value));
+    ffGetFileContent(fileName, value, sizeof(value));
 
     if(value[0] == '\0')
         return false;
@@ -234,7 +235,7 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     strcat(fileName, key);
 
     char value[1024];
-    getFileContent(fileName, value, sizeof(value));
+    ffGetFileContent(fileName, value, sizeof(value));
 
     if(value[0] == '\0')
         return false;

@@ -59,6 +59,7 @@ typedef struct FFinstance
 void ffInitState(FFstate* state);
 void ffPrintKey(FFconfig* config, const char* key);
 void ffPrintLogoAndKey(FFinstance* instance, const char* key);
+void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);

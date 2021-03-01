@@ -7,55 +7,49 @@ void ffPrintBattery(FFinstance* instance)
         return;
     #endif // FASTFETCH_BUILD_FLASHFETCH
 
-    int scanned;
+    char model[256];
+    ffGetFileContent("/sys/class/power_supply/BAT0/model_name", model, sizeof(model));
+    
+    char technology[32];
+    ffGetFileContent("/sys/class/power_supply/BAT0/technology", technology, sizeof(technology));
 
-    FILE* fullFile = fopen("/sys/class/power_supply/BAT0/charge_full", "r");
-    if(fullFile == NULL)
-    {
-        ffPrintError(instance, "Battery", "fopen(\"/sys/class/power_supply/BAT0/charge_full\", \"r\") == NULL");
-        return;
-    }
-    uint32_t full;
-    scanned = fscanf(fullFile, "%u", &full);
-    if(scanned != 1)
-    {
-        ffPrintError(instance, "Battery", "fscanf(fullFile, \"%u\", &full) != 1");
-        return;
-    }
-    fclose(fullFile);
+    char capacity[32];
+    ffGetFileContent("/sys/class/power_supply/BAT0/capacity", capacity, sizeof(capacity));
 
-    FILE* nowFile = fopen("/sys/class/power_supply/BAT0/charge_now", "r");
-    if(nowFile == NULL)
-    {
-        ffPrintError(instance, "Battery", "fopen(\"/sys/class/power_supply/BAT0/charge_now\", \"r\") == NULL");
-        return;
-    }
-    uint32_t now;
-    scanned = fscanf(nowFile, "%u", &now);
-    if(scanned != 1)
-    {
-        ffPrintError(instance, "Battery", "fscanf(nowFile, \"%u\", &now) != 1");
-        return;
-    }
-    fclose(nowFile);
+    char status[32];
+    ffGetFileContent("/sys/class/power_supply/BAT0/status", status, sizeof(status));
 
-    FILE* statusFile = fopen("/sys/class/power_supply/BAT0/status", "r");
-    if(statusFile == NULL)
+    if(model[0] == '\0' && capacity[0] == '\0' && status[0] == '\0')
     {
-        ffPrintError(instance, "Battery", "fopen(\"/sys/class/power_supply/BAT0/status\", \"r\") == NULL");
+        ffPrintError(instance, "Battery", "No file in /sys/class/power_supply/BAT0/ could be read");
         return;
     }
-    char status[256];
-    scanned = fscanf(statusFile, "%s", status);
-    if(scanned != 1)
-    {
-        ffPrintError(instance, "Battery", "fscanf(statusFile, \"%u\", &status) != 1");
-        return;
-    }
-    fclose(statusFile);
-
-    uint32_t percentage = (now / (double) full) * 100;
 
     ffPrintLogoAndKey(instance, "Battery");
-    printf("%u%% [%s]\n", percentage, status);
+
+    if(model[0] != '\0')
+    {
+        printf("%s ", model);
+        
+        if(technology[0] != '\0')
+            printf("(%s) ", technology);
+    }
+
+    if(capacity[0] != '\0')
+    {
+        printf("[%s%%", capacity);
+    
+        if(status[0] == '\0')
+            puts("]");
+        else
+            printf("; %s]\n", status);
+    }
+    else
+    {
+        if(status[0] != '\0')
+            printf("%s", status);
+        else
+            putchar('\n');
+    }
+
 }
