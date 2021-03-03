@@ -39,6 +39,13 @@ typedef struct FFconfig
     bool colorLogo;
     bool showErrors;
     bool recache;
+
+    bool batteryShowManufacturer;
+    bool batteryShowModel;
+    bool batteryShowTechnology;
+    bool batteryShowCapacity;
+    bool batteryShowStatus;
+
 } FFconfig;
 
 typedef struct FFstate
@@ -57,6 +64,7 @@ typedef struct FFinstance
 
 //Util functions
 void ffInitState(FFstate* state);
+void ffDefaultConfig(FFconfig* config);
 void ffPrintKey(FFconfig* config, const char* key);
 void ffPrintLogoAndKey(FFinstance* instance, const char* key);
 void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize);

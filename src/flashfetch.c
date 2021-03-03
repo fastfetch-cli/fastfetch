@@ -6,15 +6,10 @@ int main(int argc, char** argv)
 {
     FFinstance instance;
     ffInitState(&instance.state);
+    ffDefaultConfig(&instance.config);
 
     //Configuration
-
-    instance.config.logo_seperator = 4;
-    instance.config.offsetx = 0;
-    instance.config.titleLength = 20; // This is overwritten by ffPrintTitle
-    instance.config.colorLogo = true;
-    instance.config.showErrors = false;
-    instance.config.recache = false;
+    
     ffLoadLogoSet(&instance.config, "arch");
     strcpy(instance.config.color, instance.config.logo.color); //Use the primary color of the logo as key color
 

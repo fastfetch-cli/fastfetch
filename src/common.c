@@ -14,6 +14,23 @@ void ffInitState(FFstate* state)
     sysinfo(&state->sysinfo);
 }
 
+void ffDefaultConfig(FFconfig* config)
+{
+    config->color[0] = '\0';
+    config->logo_seperator = 4;
+    config->offsetx = 0;
+    config->titleLength = 20; // This is overwritten by ffPrintTitle
+    config->colorLogo = true;
+    config->showErrors = false;
+    config->recache = false;
+
+    config->batteryShowManufacturer = true;
+    config->batteryShowModel = true;
+    config->batteryShowTechnology = true;
+    config->batteryShowCapacity = true;
+    config->batteryShowStatus = true;
+}
+
 void ffPrintKey(FFconfig* config, const char* key)
 {
     printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET": ", config->color, key);

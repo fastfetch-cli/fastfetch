@@ -29,25 +29,38 @@ typedef struct FFdata
 static void printHelp()
 {
     puts(
-        "usage: fastfetch <options>\n"
+        "Usage: fastfetch <options>\n"
         "\n"
-        "   -h,           --help:                  shows this message and exits\n"
-        "   -h <command>, --help <command>:        shows help for a specific command and exits\n"
-        "   -v            --version:               prints the version of fastfetch and exits\n"
-        "                 --list-logos:            list available logos and exits\n"
-        "                 --print-logos:           shows available logos and exits\n"
-        "                 --print-default-config:  prints the default config and exits\n"
+        "Informative options:\n"
+        "   -h,           --help:                 shows this message and exits\n"
+        "   -h <command>, --help <command>:       shows help for a specific command and exits\n"
+        "   -v            --version:              prints the version of fastfetch and exits\n"
+        "                 --list-logos:           list available logos and exits\n"
+        "                 --print-logos:          shows available logos and exits\n"
+        "                 --print-default-config: prints the default config and exits\n"
+        "\n"
+        "General options:\n"
         "                 --structure <structure>: sets the structure of the fetch. Must be a colon seperated list of keys\n"
         "                 --set <key=value>:       hard set the value of an key\n"
-        "   -l <name>,    --logo <name>:           sets the shown logo. Also changes the main color accordingly\n"
-        "   -c <color>,   --color <color>:         sets the color of the keys. Must be a linux console color code\n"
+        "   -c <color>,   --color <color>:         sets the color of the keys. Must be a linux console color code (+)\n"
         "   -s <width>,   --seperator <width>:     sets the distance between logo and text\n"
         "   -x <offset>,  --offsetx <offset>:      sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
         "                 --show-errors <?value>:  print occuring errors\n"
-        "                 --color-logo <?value>:   if set to false, the logo will be black / white\n"
         "   -r <?value>   --recache <?value>:      if set to true, no cached values will be used\n"
         "\n"
+        "Logo options:\n"
+        "   -l <name>,    --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
+        "                 --color-logo <?value>: if set to false, the logo will be black / white\n"
+        "\n"
+        "Battery options:\n"
+        "   --battery-manufacturer <?value>: Show the manufacturer of the battery, if possible\n"
+        "   --battery-model <?value>:        Show the model of the battery, if possible\n"
+        "   --battery-technology <?value>:   Show the technology of the battery, if possible\n"
+        "   --battery-capacity <?value>:     Show the capacity of the battery, if possible\n"
+        "   --battery-status <?value>:       Show the status of the battery, if possible\n"
+        "\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
+        "An (+) at the end indicates that more help can be printed with --help <option>\n"
         "All options can be make permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
     );
 }
@@ -73,17 +86,6 @@ static void printCommandHelp(const char* command)
         printCommandHelpColor();
     else
         printf("No specific help for command %s provided\n", command);
-}
-
-static void defaultConfig(FFconfig* config)
-{
-    config->color[0] = '\0';
-    config->logo_seperator = 4;
-    config->offsetx = 0;
-    config->titleLength = 20; // This is overwritten by ffPrintTitle
-    config->colorLogo = true;
-    config->showErrors = false;
-    config->recache = false;
 }
 
 static bool parseBoolean(const char* str)
@@ -277,6 +279,41 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else
             instance->config.recache = parseBoolean(value);
     }
+    else if(strcasecmp(key, "--battery-manufacturer") == 0)
+    {
+        if(value == NULL)
+            instance->config.batteryShowManufacturer = true;
+        else
+            instance->config.batteryShowManufacturer = parseBoolean(value);
+    }
+    else if(strcasecmp(key, "--battery-model") == 0)
+    {
+        if(value == NULL)
+            instance->config.batteryShowModel = true;
+        else
+            instance->config.batteryShowModel = parseBoolean(value);
+    }
+    else if(strcasecmp(key, "--battery-technology") == 0)
+    {
+        if(value == NULL)
+            instance->config.batteryShowTechnology = true;
+        else
+            instance->config.batteryShowTechnology = parseBoolean(value);
+    }
+    else if(strcasecmp(key, "--battery-capacity") == 0)
+    {
+        if(value == NULL)
+            instance->config.batteryShowCapacity = true;
+        else
+            instance->config.batteryShowCapacity = parseBoolean(value);
+    }
+    else if(strcasecmp(key, "--battery-status") == 0)
+    {
+        if(value == NULL)
+            instance->config.batteryShowStatus = true;
+        else
+            instance->config.batteryShowStatus = parseBoolean(value);
+    }
     else
     {
         printf("Error: unknown option: %s\n", key);
@@ -406,7 +443,7 @@ int main(int argc, const char** argv)
 {
     FFinstance instance;
     ffInitState(&instance.state);
-    defaultConfig(&instance.config);
+    ffDefaultConfig(&instance.config);
 
     FFdata data;
     ffValuestoreInit(&data.valuestore);
