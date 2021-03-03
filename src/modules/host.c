@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-
-
 void ffPrintHost(FFinstance* instance)
 {
     if(ffPrintCachedValue(instance, "Host"))

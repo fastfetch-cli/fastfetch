@@ -67,7 +67,6 @@ void ffPrintError(FFinstance* instance, const char* key, const char* message);
 void ffTrimTrailingWhitespace(char* buffer);
 bool ffPrintCachedValue(FFinstance* instance, const char* key);
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value);
-bool ffPrintCustomValue(FFinstance* instance, const char* key);
 
 //Logo functions
 void ffLoadLogoSet(FFconfig* config, const char* logo);

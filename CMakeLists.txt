@@ -26,7 +26,7 @@ include_directories(
 )
 
 set(SRCS
-    src/util.c
+    src/common.c
     src/logo.c
     src/modules/break.c
     src/modules/custom.c
@@ -55,6 +55,7 @@ set(SRCS
 
 add_executable(fastfetch
     src/fastfetch.c
+    src/util/FFvaluestore.c
     ${SRCS}
 )
 

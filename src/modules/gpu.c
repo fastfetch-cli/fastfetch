@@ -107,4 +107,6 @@ void ffPrintGPU(FFinstance* instance)
         }
     }
     ffpci_cleanup(pacc);
+
+    dlclose(pci);
 }

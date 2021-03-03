@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-
-
 void ffPrintShell(FFinstance* instance)
 {
     if(ffPrintCachedValue(instance, "Shell"))

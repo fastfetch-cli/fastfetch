@@ -174,59 +174,8 @@ static const char* getCacheDir(FFinstance* instance)
     return cache;
 }
 
-static const char* getConfigDir(FFinstance* instance)
-{
-    static char config[256];
-    static bool init = false;
-    if(init)
-        return config;
-
-    const char* xdgConfig = getenv("XDG_CONFIG_HOME");
-    if(xdgConfig == NULL)
-    {
-        strcpy(config, instance->state.passwd->pw_dir);
-        strcat(config, "/.config");
-    }
-    else
-    {
-        strcpy(config, xdgConfig);
-    }
-
-    mkdir(config, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
-    
-    strcat(config, "/fastfetch/");
-    mkdir(config, S_IRWXU | S_IRGRP | S_IROTH);
-
-    init = true;
-    return config;
-}
-
-bool ffPrintCustomValue(FFinstance* instance, const char* key)
-{
-    char fileName[256];
-    strcpy(fileName, getConfigDir(instance));
-    strcat(fileName, "values/");
-    strcat(fileName, key);
-
-    char value[1024];
-    ffGetFileContent(fileName, value, sizeof(value));
-
-    if(value[0] == '\0')
-        return false;
-
-    ffPrintLogoAndKey(instance, key);
-    puts(value);
-
-    return true;
-}
-
 bool ffPrintCachedValue(FFinstance* instance, const char* key)
 {
-    #ifdef FASTFETCH_BUILD_FLASHFETCH
-    if(ffPrintCustomValue(instance, key))
-        return true;
-    #endif // FASTFETCH_BUILD_FLASHFETCH
-
     if(instance->config.recache)
         return false;
 

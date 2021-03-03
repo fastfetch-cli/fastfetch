@@ -33,11 +33,6 @@ static void printPacmanPackages()
 
 void ffPrintPackages(FFinstance* instance)
 {
-    #ifdef FASTFETCH_BUILD_FLASHFETCH
-    if(ffPrintCustomValue(instance, "Packages"))
-        return;
-    #endif // FASTFETCH_BUILD_FLASHFETCH
-
     ffPrintLogoAndKey(instance, "Packages");
     printPacmanPackages();
     putchar('\n');

@@ -2,11 +2,6 @@
 
 void ffPrintBattery(FFinstance* instance)
 {
-    #ifdef FASTFETCH_BUILD_FLASHFETCH
-    if(ffPrintCustomValue(instance, "Battery"))
-        return;
-    #endif // FASTFETCH_BUILD_FLASHFETCH
-
     char model[256];
     ffGetFileContent("/sys/class/power_supply/BAT0/model_name", model, sizeof(model));
     

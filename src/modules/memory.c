@@ -3,11 +3,6 @@
 // Impl by: https://github.com/sam-barr/paleofetch/blob/b7c58a52c0de39b53c9b5f417889a5886d324bfa/paleofetch.c#L544
 void ffPrintMemory(FFinstance* instance)
 {
-    #ifdef FASTFETCH_BUILD_FLASHFETCH
-    if(ffPrintCustomValue(instance, "Memory"))
-        return;
-    #endif // FASTFETCH_BUILD_FLASHFETCH
-
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL) {
         ffPrintError(instance, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");

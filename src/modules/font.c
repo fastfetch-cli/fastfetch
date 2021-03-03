@@ -16,11 +16,6 @@ static void parseFont(char* font, char* buffer)
 
 void ffPrintFont(FFinstance* instance)
 {
-    #ifdef FASTFETCH_BUILD_FLASHFETCH
-    if(ffPrintCustomValue(instance, "Font"))
-        return;
-    #endif // FASTFETCH_BUILD_FLASHFETCH
-
     char plasma[256];
     ffParsePropFileHome(instance, ".config/kdeglobals", "font=%[^\n]", plasma);
 

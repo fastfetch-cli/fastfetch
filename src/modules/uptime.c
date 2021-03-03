@@ -2,11 +2,6 @@
 
 void ffPrintUptime(FFinstance* instance)
 {
-    #ifdef FASTFETCH_BUILD_FLASHFETCH
-    if(ffPrintCustomValue(instance, "Uptime"))
-        return;
-    #endif // FASTFETCH_BUILD_FLASHFETCH
-
     ffPrintLogoAndKey(instance, "Uptime");
 
     if(instance->state.sysinfo.uptime < 60)
