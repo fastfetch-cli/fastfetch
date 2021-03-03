@@ -11,12 +11,29 @@
 #define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:Theme:Icons:Font:Terminal:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
-    "--structure "FASTFETCH_DEFAULT_STRUCTURE"\n" \
-    "--seperator 4\n" \
-    "--offsetx 0\n" \
-    "--color-logo true\n" \
-    "--recache false\n" \
-    "--show-errors false\n"
+    "## Fastfetch configuration\n" \
+    "## Put arguments here to make them permanently.\n" \
+    "## Direct arguments will overwrite the corresponding ones in this files\n" \
+    "## Each line is whitespace trimmed on beginn and end.\n" \
+    "## Empty lines or lines starting with # are ignored.\n" \
+    "## There are more arguments possible than listed here, take a look at fastfetch --help!\n" \
+    "\n" \
+    "## General options:\n" \
+    "# --structure "FASTFETCH_DEFAULT_STRUCTURE"\n" \
+    "# --seperator 4\n" \
+    "# --offsetx 0\n" \
+    "# --recache false\n" \
+    "# --show-errors false\n" \
+    "\n" \
+    "## Logo options:\n" \
+    "# --color-logo true\n" \
+    "\n" \
+    "## Battery options:\n" \
+    "# --battery-manufacturer true\n" \
+    "# --battery-model true\n" \
+    "# --battery-technology true\n" \
+    "# --battery-capacity true\n" \
+    "# --battery-status true\n"
 
 //Things only needed by fastfetch
 typedef struct FFdata
@@ -364,8 +381,13 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
             line[read] = '\0';
 
         ffTrimTrailingWhitespace(line);
-        if(line[0] == '\0')
-            return;
+
+        //This trims leading whitespace
+        while(line[0] == ' ')
+            ++line;
+
+        if(line[0] == '\0' || line[0] == '#')
+            continue;
 
         char* firstIndex = strchr(line, ' ');   
     
