@@ -38,7 +38,7 @@ static void printHelp()
         "                 --print-logos:           shows available logos and exits\n"
         "                 --print-default-config:  prints the default config and exits\n"
         "                 --structure <structure>: sets the structure of the fetch. Must be a colon seperated list of keys\n"
-        "                 --set <key=value>:       hard set the value of an key"
+        "                 --set <key=value>:       hard set the value of an key\n"
         "   -l <name>,    --logo <name>:           sets the shown logo. Also changes the main color accordingly\n"
         "   -c <color>,   --color <color>:         sets the color of the keys. Must be a linux console color code\n"
         "   -s <width>,   --seperator <width>:     sets the distance between logo and text\n"
@@ -48,7 +48,6 @@ static void printHelp()
         "   -r <?value>   --recache <?value>:      if set to true, no cached values will be used\n"
         "\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
-        "\n"
         "All options can be make permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
     );
 }
