@@ -3,7 +3,7 @@
 #include "X11/extensions/Xrandr.h"
 #include "dlfcn.h"
 
-short getCurrentRate(Display* display)
+static short getCurrentRate(Display* display)
 {
     void* xrandr = dlopen("libXrandr.so", RTLD_LAZY);
     if(xrandr == NULL)

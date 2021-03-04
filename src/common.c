@@ -29,6 +29,7 @@ void ffDefaultConfig(FFconfig* config)
     config->batteryShowTechnology = true;
     config->batteryShowCapacity = true;
     config->batteryShowStatus = true;
+    config->batteryFormat[0] = '\0';
 }
 
 void ffPrintKey(FFconfig* config, const char* key)

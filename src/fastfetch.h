@@ -40,6 +40,7 @@ typedef struct FFconfig
     bool showErrors;
     bool recache;
 
+    char batteryFormat[32];
     bool batteryShowManufacturer;
     bool batteryShowModel;
     bool batteryShowTechnology;

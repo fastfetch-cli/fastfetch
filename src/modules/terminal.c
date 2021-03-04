@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-void printTerminalName(FFinstance* instance, const char* pid)
+static void printTerminalName(FFinstance* instance, const char* pid)
 {
     char file[256];
     sprintf(file, "/proc/%s/stat", pid);

@@ -65,6 +65,13 @@ static void printBattery(FFinstance* instance, uint8_t index)
 
     ffPrintLogoAndKey(instance, key);
 
+    if(instance->config.batteryFormat[0] != '\0')
+    {
+        printf(instance->config.batteryFormat, manufactor, model, technology, capacity, status);
+        putchar('\n');
+        return;
+    }
+
     if(manufactor[0] != '\0')
         printf("%s ", manufactor);
 

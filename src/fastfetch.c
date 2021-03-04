@@ -75,6 +75,7 @@ static void printHelp()
         "   --battery-technology <?value>:   Show the technology of the battery, if possible\n"
         "   --battery-capacity <?value>:     Show the capacity of the battery, if possible\n"
         "   --battery-status <?value>:       Show the status of the battery, if possible\n"
+        "   --battery-formart <format>:      Provide the printf format string for battery output (+)\n"
         "\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
         "An (+) at the end indicates that more help can be printed with --help <option>\n"
@@ -82,7 +83,7 @@ static void printHelp()
     );
 }
 
-static void printCommandHelpColor()
+static inline void printCommandHelpColor()
 {
     puts(
         "usage: fastfetch --color <color>\n"
@@ -97,10 +98,25 @@ static void printCommandHelpColor()
     );
 }
 
+static inline void printCommandHelpBatteryFormat()
+{
+    puts(
+        "usage fastfetch --battery-format <format>\n"
+        "\n"
+        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
+        "The arguments passed to printf are 5 strings in following order:\n"
+        "manufacturer, model, technology, capacity, status\n"
+        "If an value was disabled via battery-* argument, or could not be determined, it will be an zero length string.\n"
+        "The default value is something like \"%s %s (%s) [%s; %s]\"."
+    );
+}
+
 static void printCommandHelp(const char* command)
 {
-    if(strcasecmp(command, "c") == 0 || strcasecmp(command, "-c") == 0 || strcasecmp(command, "color") == 0 || strcasecmp(command, "--color") == 0)
+    if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
         printCommandHelpColor();
+    else if(strcasecmp(command, "battery-format") == 0)
+        printCommandHelpBatteryFormat();
     else
         printf("No specific help for command %s provided\n", command);
 }
@@ -330,6 +346,21 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.batteryShowStatus = true;
         else
             instance->config.batteryShowStatus = parseBoolean(value);
+    }
+    else if(strcasecmp(key, "--battery-format") == 0)
+    {
+        if(value == NULL)
+        {
+            printf("Error: usage: %s <format>\n", key);
+            exit(48);
+        }
+        size_t len = strlen(value);
+        if(len > 32)
+        {
+            printf("max battery format string length is 32, %zu given\n", len);
+            exit(49);
+        }
+        strcpy(instance->config.batteryFormat, value);
     }
     else
     {

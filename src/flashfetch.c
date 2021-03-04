@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-#include "string.h"
-
 int main(int argc, char** argv)
 {
     FFinstance instance;

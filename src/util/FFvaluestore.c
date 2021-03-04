@@ -24,10 +24,7 @@ void ffValuestoreSet(FFvaluestore* vs, const char* name, const char* value)
 
     if(vs->size == vs->capacity)
     {
-        FFvaluestorePair* pairs = (FFvaluestorePair*) calloc(vs->capacity * 2, sizeof(FFvaluestorePair));
-        memcpy(pairs, vs->pairs, sizeof(FFvaluestorePair) * vs->size);
-        free(vs->pairs);
-        vs->pairs = pairs;
+        vs->pairs = realloc(vs->pairs, vs->capacity * sizeof(FFvaluestorePair) * 2);
         vs->capacity *= 2;
     }
 
