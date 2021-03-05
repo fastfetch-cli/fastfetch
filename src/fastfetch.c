@@ -17,6 +17,8 @@
     "## Each line is whitespace trimmed on beginn and end.\n" \
     "## Empty lines or lines starting with # are ignored.\n" \
     "## There are more arguments possible than listed here, take a look at fastfetch --help!\n" \
+    "## This version of the file was shipped with "FASTFETCH_PROJECT_VERSION".\n" \
+    "## Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current defaults.\n" \
     "\n" \
     "## General options:\n" \
     "# --structure "FASTFETCH_DEFAULT_STRUCTURE"\n" \
@@ -202,7 +204,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-v") == 0 || strcasecmp(key, "--version") == 0)
     {
-        puts(FASTFETCH_PROJECT_NAME" "FASTFETCH_PROJECT_VER);
+        puts(FASTFETCH_PROJECT_NAME" "FASTFETCH_PROJECT_VERSION);
         exit(0);
     }
     else if(strcasecmp(key, "--list-logos") == 0)
