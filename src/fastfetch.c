@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:Theme:Icons:Font:Terminal:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
+#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:Theme:Icons:Font:Terminal:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
     "## Fastfetch configuration\n" \
@@ -75,7 +75,7 @@ static void printHelp()
         "   --battery-technology <?value>:   Show the technology of the battery, if possible\n"
         "   --battery-capacity <?value>:     Show the capacity of the battery, if possible\n"
         "   --battery-status <?value>:       Show the status of the battery, if possible\n"
-        "   --battery-formart <format>:      Provide the printf format string for battery output (+)\n"
+        "   --battery-format <format>:       Provide the printf format string for battery output (+)\n"
         "\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
         "An (+) at the end indicates that more help can be printed with --help <option>\n"
@@ -161,6 +161,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintResolution(instance);
     else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
         ffPrintDesktopEnvironment(instance);
+    else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)
+        ffPrintWM(instance);
     else if(strcasecmp(line, "theme") == 0)
         ffPrintTheme(instance);
     else if(strcasecmp(line, "icons") == 0)

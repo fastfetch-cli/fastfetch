@@ -100,6 +100,7 @@ void ffPrintPackages(FFinstance* instance);
 void ffPrintShell(FFinstance* instance);
 void ffPrintResolution(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
+void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);

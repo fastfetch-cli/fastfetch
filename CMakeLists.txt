@@ -40,6 +40,7 @@ set(SRCS
     src/modules/shell.c
     src/modules/resolution.c
     src/modules/desktopenvironment.c
+    src/modules/wm.c
     src/modules/theme.c
     src/modules/icons.c
     src/modules/font.c
