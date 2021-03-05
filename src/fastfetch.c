@@ -31,6 +31,9 @@
     "## Logo options:\n" \
     "# --color-logo true\n" \
     "\n" \
+    "## Shell options:\n" \
+    "# --shell-path false\n" \
+    "\n" \
     "## Battery options:\n" \
     "# --battery-manufacturer true\n" \
     "# --battery-model true\n" \
@@ -72,6 +75,9 @@ static void printHelp()
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
+        "\n"
+        "Shell options:\n"
+        "    --shell-path <?value>: Show the full path of the shell\n"
         "\n"
         "Battery options:\n"
         "   --battery-manufacturer <?value>: Show the manufacturer of the battery, if possible\n"
@@ -340,6 +346,13 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else
             instance->config.recache = parseBoolean(value);
     }
+    else if(strcasecmp(key, "--shell-path") == 0)
+    {
+        if(value == NULL)
+            instance->config.shellShowPath = true;
+        else
+            instance->config.shellShowPath = parseBoolean(value);
+    }
     else if(strcasecmp(key, "--battery-manufacturer") == 0)
     {
         if(value == NULL)
@@ -466,7 +479,7 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
             while(*valueStart == ' ')
                 ++valueStart;
 
-            //If we want whitespace in values, we need to quote it. This is done to keep consistency whith shell.
+            //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
             if(*valueStart == '"')
             {
                 char* last = valueStart + strlen(valueStart) - 1;
@@ -553,7 +566,7 @@ int main(int argc, const char** argv)
 
     parseConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
-    applyData(&instance, &data);
+    applyData(&instance, &data); //Here we do things that need to be done after parsing all options
 
     run(&instance, &data);
 

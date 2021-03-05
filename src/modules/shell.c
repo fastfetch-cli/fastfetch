@@ -12,12 +12,20 @@ void ffPrintShell(FFinstance* instance)
         return;
     }
 
-    char* shellName = strrchr(shellPath, '/');
+    char* value;
 
-    if(shellName == NULL)
-        shellName = shellPath;
-    else if(shellName[0] == '/')
-        ++shellName;
+    if(!instance->config.shellShowPath)
+    {
+        char* shellName = strrchr(shellPath, '/');
+        if(shellName != NULL)
+            value = ++shellName;
+        else
+            value = shellPath;
+    }
+    else
+    {
+        value = shellPath;
+    }
 
-    ffPrintAndSaveCachedValue(instance, "Shell", shellName);
+    ffPrintAndSaveCachedValue(instance, "Shell", value);
 }

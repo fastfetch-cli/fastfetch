@@ -25,6 +25,8 @@ void ffDefaultConfig(FFconfig* config)
     config->showErrors = false;
     config->recache = false;
 
+    config->shellShowPath = false;
+
     config->batteryShowManufacturer = true;
     config->batteryShowModel = true;
     config->batteryShowTechnology = true;
