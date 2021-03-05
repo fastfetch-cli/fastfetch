@@ -17,7 +17,8 @@ void ffInitState(FFstate* state)
 void ffDefaultConfig(FFconfig* config)
 {
     config->color[0] = '\0';
-    config->logo_seperator = 4;
+    config->logo_spacer = 4;
+    strcpy(config->seperator, ": ");
     config->offsetx = 0;
     config->titleLength = 20; // This is overwritten by ffPrintTitle
     config->colorLogo = true;
@@ -34,7 +35,7 @@ void ffDefaultConfig(FFconfig* config)
 
 void ffPrintKey(FFconfig* config, const char* key)
 {
-    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET": ", config->color, key);
+    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"%s", config->color, key, config->seperator);
 }
 
 void ffPrintLogoAndKey(FFinstance* instance, const char* key)

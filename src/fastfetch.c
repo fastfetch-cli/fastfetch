@@ -22,7 +22,8 @@
     "\n" \
     "## General options:\n" \
     "# --structure "FASTFETCH_DEFAULT_STRUCTURE"\n" \
-    "# --seperator 4\n" \
+    "# --spacer 4\n" \
+    "# --seperator \": \"\n" \
     "# --offsetx 0\n" \
     "# --recache false\n" \
     "# --show-errors false\n" \
@@ -59,17 +60,18 @@ static void printHelp()
         "                 --print-default-config: prints the default config and exits\n"
         "\n"
         "General options:\n"
-        "                 --structure <structure>: sets the structure of the fetch. Must be a colon seperated list of keys\n"
-        "                 --set <key=value>:       hard set the value of an key\n"
-        "   -c <color>,   --color <color>:         sets the color of the keys. Must be a linux console color code (+)\n"
-        "   -s <width>,   --seperator <width>:     sets the distance between logo and text\n"
-        "   -x <offset>,  --offsetx <offset>:      sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
-        "                 --show-errors <?value>:  print occuring errors\n"
-        "   -r <?value>   --recache <?value>:      if set to true, no cached values will be used\n"
+        "                --structure <structure>: sets the structure of the fetch. Must be a colon seperated list of keys\n"
+        "                --set <key=value>:       hard set the value of an key\n"
+        "   -c <color>,  --color <color>:         sets the color of the keys. Must be a linux console color code (+)\n"
+        "                --spacer <width>:        sets the distance between logo and text\n"
+        "   -s <str>,    --seperator <str>:       sets the seperator between key and value. Default is a colon with a space\n"
+        "   -x <offset>, --offsetx <offset>:      sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
+        "                --show-errors <?value>:  print occuring errors\n"
+        "   -r <?value>  --recache <?value>:      if set to true, no cached values will be used\n"
         "\n"
         "Logo options:\n"
-        "   -l <name>,    --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
-        "                 --color-logo <?value>: if set to false, the logo will be black / white\n"
+        "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
+        "              --color-logo <?value>: if set to false, the logo will be black / white\n"
         "\n"
         "Battery options:\n"
         "   --battery-manufacturer <?value>: Show the manufacturer of the battery, if possible\n"
@@ -234,7 +236,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         if(value == NULL)
         {
             printf("Error: usage: %s <logo>\n", key);
-            exit(41);
+            exit(401);
         }
 
         strcpy(data->logoName, value);
@@ -251,40 +253,55 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         if(value == NULL)
         {
             printf("Error: usage: %s <color>\n", key);
-            exit(42);
+            exit(402);
         }
         size_t len = strlen(value);
         if(len > 28)
         {
             printf("Error: max color string length is 28, %zu given\n", len);
-            exit(43);
+            exit(403);
         }
         sprintf(instance->config.color, "\033[%sm", value);
+    }
+    else if(strcasecmp(key, "--spacer") == 0)
+    {
+        if(value == NULL)
+        {
+            printf("Error: usage: %s <width>\n", key);
+            exit(404);
+        }
+        if(sscanf(value, "%hd", &instance->config.logo_spacer) != 1)
+        {
+            printf("Error: couldn't parse %s to uint16_t\n", value);
+            exit(405);
+        }
     }
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--seperator") == 0)
     {
         if(value == NULL)
         {
-            printf("Error: usage: %s <width>\n", key);
-            exit(44);
+            printf("Error: usage: %s <seperator>\n", key);
+            exit(406);
         }
-        if(sscanf(value, "%hd", &instance->config.logo_seperator) != 1)
+        size_t len = strlen(value);
+        if(len > 15)
         {
-            printf("Error: couldn't parse %s to uint16_t\n", value);
-            exit(45);
+            printf("Error: max seperator length is 15, %zu given\n", len);
+            exit(407);
         }
+        strcpy(instance->config.seperator, value);
     }
     else if(strcasecmp(key, "-x") == 0 || strcasecmp(key, "--offsetx") == 0)
     {
         if(value == NULL)
         {
             printf("Error: usage: %s <offset>\n", key);
-            exit(46);
+            exit(408);
         }
         if(sscanf(value, "%hi", &instance->config.offsetx) != 1)
         {
             printf("Error: couldn't parse %s to int16_t\n", value);
-            exit(47);
+            exit(409);
         }
     }
     else if(strcasecmp(key, "--structure") == 0)
@@ -292,7 +309,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         if(value == NULL)
         {
             printf("Error: usage: %s <structure>\n", key);
-            exit(46);
+            exit(410);
         }
         strcpy(data->structure, value);
     }
@@ -301,10 +318,17 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         if(value == NULL)
         {
             printf("Error: usage: %s <key=value>\n", key);
-            exit(47);
+            exit(411);
         }
 
         char* seperator = strchr(value, '=');
+
+        if(seperator == NULL)
+        {
+            printf("Error: usage: %s <key=value>, '=' missing\n", key);
+            exit(412);
+        }
+
         *seperator = '\0';
 
         ffValuestoreSet(&data->valuestore, value, seperator + 1);
@@ -356,20 +380,20 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         if(value == NULL)
         {
             printf("Error: usage: %s <format>\n", key);
-            exit(48);
+            exit(413);
         }
         size_t len = strlen(value);
         if(len > 32)
         {
             printf("max battery format string length is 32, %zu given\n", len);
-            exit(49);
+            exit(414);
         }
         strcpy(instance->config.batteryFormat, value);
     }
     else
     {
         printf("Error: unknown option: %s\n", key);
-        exit(40);
+        exit(400);
     }
 }
 
@@ -404,11 +428,14 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
     
     FILE* file = fopen(fileName, "r");
 
-    char* line = NULL;
+    char* lineStart = NULL;
     size_t len = 0;
     ssize_t read;
 
-    while ((read = getline(&line, &len, file)) != -1) {
+    while ((read = getline(&lineStart, &len, file)) != -1) {
+
+        //We need to copy lineStart because we modify this value, but need the original for free
+        char* line = lineStart;
 
         if(line[read - 1] == '\n')
             line[read - 1] = '\0';
@@ -418,27 +445,44 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
         ffTrimTrailingWhitespace(line);
 
         //This trims leading whitespace
-        while(line[0] == ' ')
+        while(*line == ' ')
             ++line;
 
         if(line[0] == '\0' || line[0] == '#')
             continue;
 
-        char* firstIndex = strchr(line, ' ');   
-    
-        if(firstIndex == NULL)
+        char* valueStart = strchr(line, ' ');
+        if(valueStart == NULL)
         {
             parseOption(instance, data, line, NULL);
         }
         else
         {
-            *firstIndex = '\0';
-            parseOption(instance, data, line, firstIndex + 1);
+            //Seperate key and value by simply replacing the first space with a \0
+            *valueStart = '\0';
+            ++valueStart;
+
+            //Trim whitespace at beginn of value
+            while(*valueStart == ' ')
+                ++valueStart;
+
+            //If we want whitespace in values, we need to quote it. This is done to keep consistency whith shell.
+            if(*valueStart == '"')
+            {
+                char* last = valueStart + strlen(valueStart) - 1;
+                if(*last == '"')
+                {
+                    ++valueStart;
+                    *last = '\0';
+                }
+            }
+
+            parseOption(instance, data, line, valueStart);
         }
     }
 
-    if(line)
-        free(line);
+    if(lineStart != NULL)
+        free(lineStart);
 
     fclose(file);
 }
@@ -505,7 +549,7 @@ int main(int argc, const char** argv)
     FFdata data;
     ffValuestoreInit(&data.valuestore);
     data.structure[0] = '\0'; //We use this in run to detect if a structure was set
-    data.logoName[0] = '\0';
+    data.logoName[0] = '\0';  //We use this in applyData to detect if a logo was set
 
     parseConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);

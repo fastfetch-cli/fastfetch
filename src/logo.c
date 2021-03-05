@@ -70,7 +70,7 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     if(strcasecmp(logo, "none") == 0)
     {
         loadNoneLogo(&config->logo);
-        config->logo_seperator = 0; //This is wanted in most cases, so just set it
+        config->logo_spacer = 0; //This is wanted in most cases, so just set it
     }
     else if(strcasecmp(logo, "arch") == 0)
     {
@@ -118,7 +118,7 @@ void ffPrintLogoLine(FFinstance* instance)
             putchar(' ');   
     }
     
-    for(uint16_t i = 0; i < instance->config.logo_seperator; i++)
+    for(uint16_t i = 0; i < instance->config.logo_spacer; i++)
         putchar(' ');
 
     ++instance->state.current_row;

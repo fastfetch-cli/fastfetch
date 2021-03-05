@@ -32,7 +32,8 @@ typedef struct FFlogo
 typedef struct FFconfig
 {
     FFlogo logo;
-    uint16_t logo_seperator;
+    uint16_t logo_spacer;
+    char seperator[16];
     int16_t offsetx;
     char color[32];
     uint8_t titleLength;
