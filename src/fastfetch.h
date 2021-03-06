@@ -31,6 +31,7 @@ typedef struct FFlogo
 
 typedef struct FFconfig
 {
+    //General
     FFlogo logo;
     uint16_t logo_spacer;
     char seperator[16];
@@ -40,9 +41,15 @@ typedef struct FFconfig
     bool colorLogo;
     bool showErrors;
     bool recache;
+    bool cacheSave; //This is only set to true when using arguments, because we dont want so save this values
 
+    //OS
+    bool osShowArchitecture;
+
+    //Shell
     bool shellShowPath;
 
+    //Battery
     char batteryFormat[32];
     bool batteryShowManufacturer;
     bool batteryShowModel;

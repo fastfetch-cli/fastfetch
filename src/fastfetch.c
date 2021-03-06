@@ -31,6 +31,9 @@
     "## Logo options:\n" \
     "# --color-logo true\n" \
     "\n" \
+    "## OS options:\n" \
+    "# --os-architecture true\n" \
+    "\n" \
     "## Shell options:\n" \
     "# --shell-path false\n" \
     "\n" \
@@ -75,6 +78,9 @@ static void printHelp()
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
+        "\n"
+        "OS options:\n"
+        "    --os-architecture <?value>: Show the architecture of the os\n"
         "\n"
         "Shell options:\n"
         "    --shell-path <?value>: Show the full path of the shell\n"
@@ -341,10 +347,24 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
+        //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache   
         if(value == NULL)
+        {
             instance->config.recache = true;
+            instance->config.cacheSave = true;
+        }
         else
+        {
             instance->config.recache = parseBoolean(value);
+            instance->config.cacheSave = instance->config.recache;
+        }
+    }
+    else if(strcasecmp(key, "--os-architecture") == 0)
+    {
+        if(value == NULL)
+            instance->config.osShowArchitecture = true;
+        else
+            instance->config.osShowArchitecture = parseBoolean(value);
     }
     else if(strcasecmp(key, "--shell-path") == 0)
     {
@@ -502,6 +522,15 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)
 {
+    //This is generally a good idea, because cached values most likely contain values generated with other arguments
+    //Hovwever we dont do this with arguments in the config file, because they are more likely to stay the same
+    //If caching is _really_ wanted (e.g. a call in .bashrc with arguments), one can still set --recache false
+    if(argc > 1)
+    {
+        instance->config.recache = true;
+        instance->config.cacheSave = false;
+    }
+
     for(int i = 1; i < argc; i++)
     {
         if(i == argc - 1 || argv[i + 1][0] == '-')

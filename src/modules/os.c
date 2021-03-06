@@ -14,7 +14,11 @@ void ffPrintOS(FFinstance* instance)
     }
 
     char os[1024];
-    sprintf(os, "%s %s", name, instance->state.utsname.machine);
+
+    if(instance->config.osShowArchitecture)
+        sprintf(os, "%s %s", name, instance->state.utsname.machine);
+    else
+        strcpy(os, name);
 
     ffPrintAndSaveCachedValue(instance, "OS", os);
 }

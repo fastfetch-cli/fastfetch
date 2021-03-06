@@ -24,6 +24,9 @@ void ffDefaultConfig(FFconfig* config)
     config->colorLogo = true;
     config->showErrors = false;
     config->recache = false;
+    config->cacheSave = true;
+
+    config->osShowArchitecture = true;
 
     config->shellShowPath = false;
 
@@ -220,6 +223,9 @@ void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char
 {
     ffPrintLogoAndKey(instance, key);
     puts(value);
+
+    if(!instance->config.cacheSave)
+        return;
 
     char fileName[256];
     strcpy(fileName, getCacheDir(instance));

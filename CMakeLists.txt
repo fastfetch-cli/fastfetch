@@ -20,6 +20,7 @@ set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt") # for testing
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
+
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
