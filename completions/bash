@@ -1,0 +1,127 @@
+#/usr/bin/env bash
+
+__fastfetch_complete_help()
+{
+    local __ff_helps=(
+        "color"
+        "battery-format"
+    )
+    COMPREPLY=($(compgen -W "${__ff_helps[*]}" "$CURRENT_WORD"))
+}
+
+__fastfetch_complete_bool()
+{
+    COMPREPLY=($(compgen -W "true false" "$CURRENT_WORD"))
+}
+
+__fastfetch_complete_string()
+{
+    if [[ $CURRENT_WORD != "" ]]; then
+        COMPREPLY=("$CURRENT_WORD")
+    fi
+}
+
+__fastfetch_complete_logo()
+{
+    COMPREPLY=($(compgen -W "$(fastfetch --list-logos)" "$CURRENT_WORD"))
+}
+
+__fastfetch_complete_option()
+{
+    local FF_OPTIONS_ALL=(
+        "${FF_OPTIONS_BOOL[@]}"
+        "${FF_OPTIONS_STRING[@]}"
+        "${FF_OPTIONS_LOGO[@]}"
+    )
+
+    if [[ $WORD_COUND < 3 ]]; then
+        FF_OPTIONS_ALL+=(
+            "${FF_OPTIONS_SINGLE[@]}"
+            "${FF_OPTIONS_HELP[@]}"
+        )
+    fi
+
+    COMPREPLY=($(compgen -W "${FF_OPTIONS_ALL[*]}" -- "$CURRENT_WORD"))
+}
+
+__fastfetch_previous_matches()
+{
+    for ff_option in "$@"; do
+        if [[ $ff_option == $PREVIOUS_WORD ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+__fastfetch_completion()
+{
+    local CURRENT_WORD="${COMP_WORDS[$COMP_CWORD]}"
+    local PREVIOUS_WORD="${COMP_WORDS[$COMP_CWORD - 1]}"
+    local WORD_COUND="${#COMP_WORDS[@]}"
+
+    local FF_OPTIONS_SINGLE=(
+        "-v"
+        "--version"
+        "--list-logos"
+        "--print-logos"
+        "--print-default-config"
+    )
+
+    local FF_OPTIONS_HELP=(
+        "-h"
+        "--help"
+    )
+
+    local FF_OPTIONS_BOOL=(
+        "-r"
+        "--recache"
+        "--show-errors"
+        "--color-logo"
+        "--os-architecture"
+        "--shell-path"
+        "--battery-manufacturer"
+        "--battery-model"
+        "--battery-technology"
+        "--battery-capacity"
+        "--battery-status"
+    )
+
+    local FF_OPTIONS_STRING=(
+        "-c"
+        "--color"
+        "--spacer"
+        "-s"
+        "--seperator"
+        "-x"
+        "--offsetx"
+        "--battery-format"
+        "--structure"
+        "--set"
+    )
+
+    local FF_OPTIONS_LOGO=(
+        "-l"
+        "--logo"
+    )
+
+    if __fastfetch_previous_matches "${FF_OPTIONS_SINGLE[@]}"; then
+        return
+    elif [[ ${COMP_WORDS[$COMP_CWORD - 2]} == "--help" || ${COMP_WORDS[$COMP_CWORD - 2]} == "-h" ]]; then
+        return
+    elif [[ $CURRENT_WORD == "-"* ]]; then
+        __fastfetch_complete_option
+    elif __fastfetch_previous_matches "${FF_OPTIONS_HELP[@]}"; then
+        __fastfetch_complete_help
+    elif __fastfetch_previous_matches "${FF_OPTIONS_BOOL[@]}"; then
+        __fastfetch_complete_bool
+    elif __fastfetch_previous_matches "${FF_OPTIONS_STRING[@]}"; then
+        __fastfetch_complete_string
+    elif __fastfetch_previous_matches "${FF_OPTIONS_LOGO[@]}"; then
+        __fastfetch_complete_logo
+    else
+        __fastfetch_complete_option
+    fi
+}
+
+complete -F __fastfetch_completion fastfetch
