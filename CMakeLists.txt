@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(fastfetch)
 
+option(BUILD_TESTS "Build test programs" OFF)
+
 execute_process(
     COMMAND git rev-list --count HEAD
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -17,7 +19,9 @@ execute_process(
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt") # for testing
+if(BUILD_TESTS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt")
+endif(BUILD_TESTS)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
@@ -77,3 +81,14 @@ target_compile_definitions(flashfetch PUBLIC
 target_link_libraries(flashfetch
     ${CMAKE_DL_LIBS}
 )
+
+if(BUILD_TESTS)
+    add_executable(fastfetch-test-performance
+        tests/performance.c
+        ${SRCS}
+    )
+
+    target_link_libraries(fastfetch-test-performance
+        ${CMAKE_DL_LIBS}
+    )
+endif(BUILD_TESTS)
