@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 __fastfetch_complete_help()
 {
@@ -6,12 +6,12 @@ __fastfetch_complete_help()
         "color"
         "battery-format"
     )
-    COMPREPLY=($(compgen -W "${__ff_helps[*]}" "$CURRENT_WORD"))
+    COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
 
 __fastfetch_complete_bool()
 {
-    COMPREPLY=($(compgen -W "true false" "$CURRENT_WORD"))
+    COMPREPLY=($(compgen -W "true false" -- "$CURRENT_WORD"))
 }
 
 __fastfetch_complete_string()
@@ -23,7 +23,7 @@ __fastfetch_complete_string()
 
 __fastfetch_complete_logo()
 {
-    COMPREPLY=($(compgen -W "$(fastfetch --list-logos)" "$CURRENT_WORD"))
+    COMPREPLY=($(compgen -W "$(fastfetch --list-logos)" -- "$CURRENT_WORD"))
 }
 
 __fastfetch_complete_option()
@@ -34,12 +34,20 @@ __fastfetch_complete_option()
         "${FF_OPTIONS_LOGO[@]}"
     )
 
-    if [[ $WORD_COUND < 3 ]]; then
+    if [[ $WORD_COUND -lt 3 ]]; then
         FF_OPTIONS_ALL+=(
             "${FF_OPTIONS_SINGLE[@]}"
             "${FF_OPTIONS_HELP[@]}"
         )
     fi
+
+    for ff_word in ${COMP_WORDS[@]}; do
+        if [[ $ff_word == $CURRENT_WORD ]]; then
+            break
+        fi
+
+        FF_OPTIONS_ALL=("${FF_OPTIONS_ALL[@]/$ff_word}")
+    done
 
     COMPREPLY=($(compgen -W "${FF_OPTIONS_ALL[*]}" -- "$CURRENT_WORD"))
 }
@@ -47,7 +55,7 @@ __fastfetch_complete_option()
 __fastfetch_previous_matches()
 {
     for ff_option in "$@"; do
-        if [[ $ff_option == $PREVIOUS_WORD ]]; then
+        if [[ $ff_option == "$PREVIOUS_WORD" ]]; then
             return 0
         fi
     done
@@ -107,7 +115,7 @@ __fastfetch_completion()
 
     if __fastfetch_previous_matches "${FF_OPTIONS_SINGLE[@]}"; then
         return
-    elif [[ ${COMP_WORDS[$COMP_CWORD - 2]} == "--help" || ${COMP_WORDS[$COMP_CWORD - 2]} == "-h" ]]; then
+    elif [[ $WORD_COUND -gt 3 && ( ${COMP_WORDS[$COMP_CWORD - 2]} == "--help" || ${COMP_WORDS[$COMP_CWORD - 2]} == "-h" ) ]]; then
         return
     elif [[ $CURRENT_WORD == "-"* ]]; then
         __fastfetch_complete_option
