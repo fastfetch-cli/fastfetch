@@ -37,6 +37,10 @@
     "## Host options:\n" \
     "# --host-version true\n" \
     "\n" \
+    "## Kernel options:\n" \
+    "# --kernel-release true\n" \
+    "# --kernel-version false\n" \
+    "\n" \
     "## Shell options:\n" \
     "# --shell-path false\n" \
     "\n" \
@@ -87,6 +91,10 @@ static void printHelp()
         "\n"
         "Host options:\n"
         "   --host-version <?value>: Show the version of the host platform, if possible. Most likely, this will be the BIOS version\n"
+        "\n"
+        "Kernel options:\n"
+        "   --kernel-release <?value>: Shows the release of the kernel\n"
+        "   --kernel-version <?value>: Shows the build version of the kernel\n"
         "\n"
         "Shell options:\n"
         "    --shell-path <?value>: Show the full path of the shell\n"
@@ -145,11 +153,14 @@ static void printCommandHelp(const char* command)
 
 static bool parseBoolean(const char* str)
 {
-    return
+    if(str == NULL)
+        return true;
+
+    return (
         strcasecmp(str, "true") == 0 ||
         strcasecmp(str, "yes")  == 0 ||
         strcasecmp(str, "1")    == 0
-    ;
+    );
 }
 
 static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
@@ -242,13 +253,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         puts(FASTFETCH_DEFAULT_CONFIG);
         exit(0);
     }
-    else if(strcasecmp(key, "--show-errors") == 0)
-    {
-        if(value == NULL)
-            instance->config.showErrors = true;
-        else
-            instance->config.showErrors = parseBoolean(value);
-    }
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
     {
         if(value == NULL)
@@ -258,13 +262,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         }
 
         strcpy(data->logoName, value);
-    }
-    else if(strcasecmp(key, "--color-logo") == 0)
-    {
-        if(value == NULL)
-            instance->config.colorLogo = true;
-        else
-            instance->config.colorLogo = parseBoolean(value);
     }
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
     {
@@ -354,73 +351,33 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
         //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache   
-        if(value == NULL)
-        {
-            instance->config.recache = true;
-            instance->config.cacheSave = true;
-        }
-        else
-        {
-            instance->config.recache = parseBoolean(value);
-            instance->config.cacheSave = instance->config.recache;
-        }
+        instance->config.recache = parseBoolean(value);
+        instance->config.cacheSave = instance->config.recache;
     }
+    else if(strcasecmp(key, "--show-errors") == 0)
+        instance->config.showErrors = parseBoolean(value);
+    else if(strcasecmp(key, "--color-logo") == 0)
+        instance->config.colorLogo = parseBoolean(value);
     else if(strcasecmp(key, "--os-architecture") == 0)
-    {
-        if(value == NULL)
-            instance->config.osShowArchitecture = true;
-        else
-            instance->config.osShowArchitecture = parseBoolean(value);
-    }
+        instance->config.osShowArchitecture = parseBoolean(value);
     else if(strcasecmp(key, "--host-version") == 0)
-    {
-        if(value == NULL)
-            instance->config.hostShowVersion = true;
-        else
-            instance->config.hostShowVersion = parseBoolean(value);
-    }
+        instance->config.hostShowVersion = parseBoolean(value);
+    else if(strcasecmp(key, "--kernel-release") == 0)
+        instance->config.kernelShowRelease = parseBoolean(value);
+    else if(strcasecmp(key, "--kernel-version") == 0)
+        instance->config.kernelShowVersion = parseBoolean(value);
     else if(strcasecmp(key, "--shell-path") == 0)
-    {
-        if(value == NULL)
-            instance->config.shellShowPath = true;
-        else
-            instance->config.shellShowPath = parseBoolean(value);
-    }
+        instance->config.shellShowPath = parseBoolean(value);
     else if(strcasecmp(key, "--battery-manufacturer") == 0)
-    {
-        if(value == NULL)
-            instance->config.batteryShowManufacturer = true;
-        else
-            instance->config.batteryShowManufacturer = parseBoolean(value);
-    }
+        instance->config.batteryShowManufacturer = parseBoolean(value);
     else if(strcasecmp(key, "--battery-model") == 0)
-    {
-        if(value == NULL)
-            instance->config.batteryShowModel = true;
-        else
-            instance->config.batteryShowModel = parseBoolean(value);
-    }
+        instance->config.batteryShowModel = parseBoolean(value);
     else if(strcasecmp(key, "--battery-technology") == 0)
-    {
-        if(value == NULL)
-            instance->config.batteryShowTechnology = true;
-        else
-            instance->config.batteryShowTechnology = parseBoolean(value);
-    }
+        instance->config.batteryShowTechnology = parseBoolean(value);
     else if(strcasecmp(key, "--battery-capacity") == 0)
-    {
-        if(value == NULL)
-            instance->config.batteryShowCapacity = true;
-        else
-            instance->config.batteryShowCapacity = parseBoolean(value);
-    }
+        instance->config.batteryShowCapacity = parseBoolean(value);
     else if(strcasecmp(key, "--battery-status") == 0)
-    {
-        if(value == NULL)
-            instance->config.batteryShowStatus = true;
-        else
-            instance->config.batteryShowStatus = parseBoolean(value);
-    }
+        instance->config.batteryShowStatus = parseBoolean(value);
     else if(strcasecmp(key, "--battery-format") == 0)
     {
         if(value == NULL)

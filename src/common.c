@@ -30,6 +30,9 @@ void ffDefaultConfig(FFconfig* config)
 
     config->hostShowVersion = true;
 
+    config->kernelShowRelease = true;
+    config->kernelShowVersion = false;
+
     config->shellShowPath = false;
 
     config->batteryShowManufacturer = true;

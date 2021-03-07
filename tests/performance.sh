@@ -1,4 +1,3 @@
-rm -rf tests/build/
 mkdir -p tests/build/
 cd tests/build/
 cmake ../.. -DBUILD_TESTS=ON

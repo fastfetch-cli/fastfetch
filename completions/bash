@@ -88,6 +88,8 @@ __fastfetch_completion()
         "--color-logo"
         "--os-architecture"
         "--host-version"
+        "--kernel-release"
+        "--kernel-version"
         "--shell-path"
         "--battery-manufacturer"
         "--battery-model"
