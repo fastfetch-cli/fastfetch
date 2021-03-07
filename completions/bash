@@ -87,6 +87,7 @@ __fastfetch_completion()
         "--show-errors"
         "--color-logo"
         "--os-architecture"
+        "--host-version"
         "--shell-path"
         "--battery-manufacturer"
         "--battery-model"

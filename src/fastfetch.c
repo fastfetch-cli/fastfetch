@@ -34,6 +34,9 @@
     "## OS options:\n" \
     "# --os-architecture true\n" \
     "\n" \
+    "## Host options:\n" \
+    "# --host-version true\n" \
+    "\n" \
     "## Shell options:\n" \
     "# --shell-path false\n" \
     "\n" \
@@ -81,6 +84,9 @@ static void printHelp()
         "\n"
         "OS options:\n"
         "    --os-architecture <?value>: Show the architecture of the os\n"
+        "\n"
+        "Host options:\n"
+        "   --host-version <?value>: Show the version of the host platform, if possible. Most likely, this will be the BIOS version\n"
         "\n"
         "Shell options:\n"
         "    --shell-path <?value>: Show the full path of the shell\n"
@@ -365,6 +371,13 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.osShowArchitecture = true;
         else
             instance->config.osShowArchitecture = parseBoolean(value);
+    }
+    else if(strcasecmp(key, "--host-version") == 0)
+    {
+        if(value == NULL)
+            instance->config.hostShowVersion = true;
+        else
+            instance->config.hostShowVersion = parseBoolean(value);
     }
     else if(strcasecmp(key, "--shell-path") == 0)
     {

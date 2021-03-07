@@ -28,6 +28,8 @@ void ffDefaultConfig(FFconfig* config)
 
     config->osShowArchitecture = true;
 
+    config->hostShowVersion = true;
+
     config->shellShowPath = false;
 
     config->batteryShowManufacturer = true;
