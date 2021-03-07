@@ -8,9 +8,9 @@ The output on my personal machine with default configurations looks like this:
 ## Customization
 
 With customization and speed being two competing goals, this project actually builds two executables.  
-The main one being `fastfetch`, which can be greatly configured via flags. This flags even can be made persistant in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
-The second executable build is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. This configuration can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
-At the moment the performance speed is measurable, but too small to be human recognizable. But the lap will get bigger with more and more options coming and on slow machines this will actually make a difference.
+The main one being `fastfetch`, which can be greatly configured via flags. These flags even can be made persistant in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
+The second executable being build is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
+At the moment the performance difference is measurable, but too small to be human recognizable. But the lap will get bigger with more and more options coming and on slow machines this may actually make a difference.
 
 ## Dependencies
 
@@ -23,10 +23,10 @@ Following libraries are used if present:
 ## Building
 
 fastfetch uses [`cmake`](https://cmake.org/) for building. The simplies steps to build the entire project are:  
-> `mkdir -p build/`  
-> `cd build/`  
-> `cmake ..`  
-> `cmake --build .`  
+&emsp;&emsp;`mkdir -p build/`  
+&emsp;&emsp;`cd build/`  
+&emsp;&emsp;`cmake ..`  
+&emsp;&emsp;`cmake --build .`  
   
 this will produce `build/fastfetch` and `build/flashfetch`, both standalone executables.  
 Command line completions for bash can be found in [`completions/bash`](completions/bash).  
