@@ -2,7 +2,7 @@
 
 static void getTerminalName(FFinstance* instance, const char* pid, char* terminal, char* error)
 {
-    char file[256];
+    char file[234];
     sprintf(file, "/proc/%s/stat", pid);
 
     FILE* stat = fopen(file, "r");

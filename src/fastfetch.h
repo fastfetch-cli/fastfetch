@@ -56,13 +56,20 @@ typedef struct FFconfig
     //Shell
     bool shellShowPath;
 
+    //Packages
+    bool packagesCombined;
+    bool packagesCombinedNames;
+    bool packagesPacman;
+    bool packagesFlatpak;
+    char packagesFormat[32];
+
     //Battery
-    char batteryFormat[32];
     bool batteryShowManufacturer;
     bool batteryShowModel;
     bool batteryShowTechnology;
     bool batteryShowCapacity;
     bool batteryShowStatus;
+    char batteryFormat[32];
 
 } FFconfig;
 

@@ -37,6 +37,12 @@ void ffDefaultConfig(FFconfig* config)
 
     config->shellShowPath = false;
 
+    config->packagesCombined = false;
+    config->packagesCombinedNames = true;
+    config->packagesPacman = true;
+    config->packagesFlatpak = true;
+    config->packagesFormat[0] = '\0';
+
     config->batteryShowManufacturer = true;
     config->batteryShowModel = true;
     config->batteryShowTechnology = true;

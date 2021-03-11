@@ -17,8 +17,8 @@ static void printKonsole(FFinstance* instance)
     ffParsePropFileHome(instance, profilePath, "Font=%[^\n]", font);
     if(font[0] == '\0')
     {
-        char error[256];
-        sprintf(error, "Terminal Font", "Couldn't find \"Font=%[^\n]\" in \"%s\"", profilePath);
+        char error[289];
+        sprintf(error, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
         ffPrintError(instance, "Terminal Font", error);
     }
 

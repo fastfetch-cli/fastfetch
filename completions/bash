@@ -5,6 +5,7 @@ __fastfetch_complete_help()
     local __ff_helps=(
         "color"
         "battery-format"
+        "packages-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -91,6 +92,10 @@ __fastfetch_completion()
         "--kernel-release"
         "--kernel-version"
         "--shell-path"
+        "--packages-combined"
+        "--packages-combined-names"
+        "--packages-pacman"
+        "--packages-flatpak"
         "--battery-manufacturer"
         "--battery-model"
         "--battery-technology"
@@ -106,6 +111,7 @@ __fastfetch_completion()
         "--seperator"
         "-x"
         "--offsetx"
+        "--packages-format"
         "--battery-format"
         "--structure"
         "--set"

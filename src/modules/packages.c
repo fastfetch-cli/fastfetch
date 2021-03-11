@@ -23,17 +23,76 @@ static uint32_t get_num_dirs(const char* dirname) {
     return num_dirs;
 }
 
-
-static void printPacmanPackages()
-{
-    uint32_t nums = get_num_dirs("/var/lib/pacman/local");
-    if(nums > 0)
-        printf("%i (pacman) ", nums);
-}
-
 void ffPrintPackages(FFinstance* instance)
 {
+    uint32_t pacman = instance->config.packagesPacman ? get_num_dirs("/var/lib/pacman/local") : 0;
+    uint32_t flatpak = instance->config.packagesFlatpak ? get_num_dirs("/var/lib/flatpak/app") : 0;
+
+    uint32_t all = pacman + flatpak;
+
+    if(all == 0)
+    {
+        ffPrintError(instance, "Packages", "No packages from known package managers found");
+        return;
+    }
+
     ffPrintLogoAndKey(instance, "Packages");
-    printPacmanPackages();
-    putchar('\n');
+
+    if(instance->config.packagesCombined)
+    {
+        if(instance->config.packagesFormat[0] != '\0')
+        {
+            printf(instance->config.packagesFormat, all);
+            putchar('\n');
+            return;
+        }
+
+        printf("%u", all);
+
+        if(instance->config.packagesCombinedNames)
+        {
+            printf(" (");
+            
+            #define FF_PRINT_PACKAGE(name) \
+                if(name > 0) \
+                { \
+                    printf(#name); \
+                    if((all = all - name) > 0) \
+                        printf(", "); \
+                } \
+
+            FF_PRINT_PACKAGE(pacman)
+            FF_PRINT_PACKAGE(flatpak)
+
+            #undef FF_PRINT_PACKAGE
+
+            printf(")");
+        }
+
+        putchar('\n');
+    }
+    else
+    {
+        if(instance->config.packagesFormat[0] != '\0')
+        {
+            printf(instance->config.packagesFormat, pacman, flatpak);
+            putchar('\n');
+            return;
+        }
+
+        #define FF_PRINT_PACKAGE(name) \
+            if(name > 0) \
+            { \
+                printf("%u ("#name")", name); \
+                if((all = all - name) > 0) \
+                    printf(", "); \
+            };
+
+        FF_PRINT_PACKAGE(pacman)
+        FF_PRINT_PACKAGE(flatpak)
+
+        #undef FF_PRINT_PACKAGE
+
+        putchar('\n');
+    }
 }

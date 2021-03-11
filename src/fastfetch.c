@@ -44,6 +44,12 @@
     "## Shell options:\n" \
     "# --shell-path false\n" \
     "\n" \
+    "## Packages options:\n" \
+    "# --packages-combined false\n" \
+    "# --packages-combined-names true\n" \
+    "# --packages-pacman true\n" \
+    "# --packages-flatpak true\n" \
+    "\n" \
     "## Battery options:\n" \
     "# --battery-manufacturer true\n" \
     "# --battery-model true\n" \
@@ -59,7 +65,7 @@ typedef struct FFdata
     char logoName[32];
 } FFdata;
 
-static void printHelp()
+static inline void printHelp()
 {
     puts(
         "Usage: fastfetch <options>\n"
@@ -98,6 +104,13 @@ static void printHelp()
         "\n"
         "Shell options:\n"
         "    --shell-path <?value>: Show the full path of the shell\n"
+        "\n"
+        "Packages options:\n"
+        "   --packages-combined <?value>:       Show the sum of all packages\n"
+        "   --packages-combined-names <?value>: Show the names of the package managers after the sum if in packages-combined mode\n"
+        "   --packages-pacman <?value>:         Count pacman packages\n"
+        "   --packages-flatpak <?value>:        Count flatpak packages\n"
+        "   --packages-format <format>:         Provide the printf format string for packages output (+)\n"
         "\n"
         "Battery options:\n"
         "   --battery-manufacturer <?value>: Show the manufacturer of the battery, if possible\n"
@@ -141,17 +154,33 @@ static inline void printCommandHelpBatteryFormat()
     );
 }
 
-static void printCommandHelp(const char* command)
+static inline void printCommandHelpPackagesFormat()
+{
+    puts(
+        "usage: fastfetch --packages-format <format>\n"
+        "\n"
+        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
+        "if --packages-combined is set to false, the numbers of packages are passed to printf in following order as uint32_t:\n"
+        "pacman, flatpak\n"
+        "else, the total number of packages is passed as uint32_t\n"
+        "if an value is disabled via a packages-* argument, or could not be determined, zero is passed\n"
+        "The default value is something like \"%u (pacman), %u (flatpack)\""
+    );
+}
+
+static inline void printCommandHelp(const char* command)
 {
     if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
         printCommandHelpColor();
     else if(strcasecmp(command, "battery-format") == 0)
         printCommandHelpBatteryFormat();
+    else if(strcasecmp(command, "packages-format") == 0)
+        printCommandHelpPackagesFormat();
     else
         printf("No specific help for command %s provided\n", command);
 }
 
-static bool parseBoolean(const char* str)
+static inline bool optionParseBoolean(const char* str)
 {
     if(str == NULL)
         return true;
@@ -161,6 +190,22 @@ static bool parseBoolean(const char* str)
         strcasecmp(str, "yes")  == 0 ||
         strcasecmp(str, "1")    == 0
     );
+}
+
+static inline void optionParseString(const char* key, const char* value, char* target, uint32_t capacity)
+{
+    if(value == NULL)
+    {
+        printf("Error: usage: %s <str>\n", key);
+        exit(477);
+    }
+    size_t len = strlen(value);
+    if(len > capacity)
+    {
+        printf("max string length for %s is %u, %zu given\n", key, capacity, len);
+        exit(478);
+    }
+    strcpy(target, value);
 }
 
 static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
@@ -255,16 +300,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         puts(FASTFETCH_DEFAULT_CONFIG);
         exit(0);
     }
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
-    {
-        if(value == NULL)
-        {
-            printf("Error: usage: %s <logo>\n", key);
-            exit(401);
-        }
-
-        strcpy(data->logoName, value);
-    }
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
     {
         if(value == NULL)
@@ -293,21 +328,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             exit(405);
         }
     }
-    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--seperator") == 0)
-    {
-        if(value == NULL)
-        {
-            printf("Error: usage: %s <seperator>\n", key);
-            exit(406);
-        }
-        size_t len = strlen(value);
-        if(len > 15)
-        {
-            printf("Error: max seperator length is 15, %zu given\n", len);
-            exit(407);
-        }
-        strcpy(instance->config.seperator, value);
-    }
     else if(strcasecmp(key, "-x") == 0 || strcasecmp(key, "--offsetx") == 0)
     {
         if(value == NULL)
@@ -320,15 +340,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             printf("Error: couldn't parse %s to int16_t\n", value);
             exit(409);
         }
-    }
-    else if(strcasecmp(key, "--structure") == 0)
-    {
-        if(value == NULL)
-        {
-            printf("Error: usage: %s <structure>\n", key);
-            exit(410);
-        }
-        strcpy(data->structure, value);
     }
     else if(strcasecmp(key, "--set") == 0)
     {
@@ -353,48 +364,51 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
         //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache   
-        instance->config.recache = parseBoolean(value);
+        instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = instance->config.recache;
     }
+    else if(strcasecmp(key, "--structure") == 0)
+        optionParseString(key, value, data->structure, sizeof(data->structure));
+    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
+        optionParseString(key, value, data->logoName, sizeof(instance->config.logo));
+    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--seperator") == 0)
+        optionParseString(key, value, instance->config.seperator, sizeof(instance->config.seperator));
     else if(strcasecmp(key, "--show-errors") == 0)
-        instance->config.showErrors = parseBoolean(value);
+        instance->config.showErrors = optionParseBoolean(value);
     else if(strcasecmp(key, "--color-logo") == 0)
-        instance->config.colorLogo = parseBoolean(value);
+        instance->config.colorLogo = optionParseBoolean(value);
     else if(strcasecmp(key, "--os-architecture") == 0)
-        instance->config.osShowArchitecture = parseBoolean(value);
+        instance->config.osShowArchitecture = optionParseBoolean(value);
     else if(strcasecmp(key, "--host-version") == 0)
-        instance->config.hostShowVersion = parseBoolean(value);
+        instance->config.hostShowVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--kernel-release") == 0)
-        instance->config.kernelShowRelease = parseBoolean(value);
+        instance->config.kernelShowRelease = optionParseBoolean(value);
     else if(strcasecmp(key, "--kernel-version") == 0)
-        instance->config.kernelShowVersion = parseBoolean(value);
+        instance->config.kernelShowVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--shell-path") == 0)
-        instance->config.shellShowPath = parseBoolean(value);
+        instance->config.shellShowPath = optionParseBoolean(value);
+    else if(strcasecmp(key, "--packages-combined") == 0)
+        instance->config.packagesCombined = optionParseBoolean(value);
+    else if(strcasecmp(key, "--packages-combined-names") == 0)
+        instance->config.packagesCombinedNames = optionParseBoolean(value);
+    else if(strcasecmp(key, "--packages-pacman") == 0)
+        instance->config.packagesPacman = optionParseBoolean(value);
+    else if(strcasecmp(key, "--packages-flatpak") == 0)
+        instance->config.packagesFlatpak = optionParseBoolean(value);
+    else if(strcasecmp(key, "--packages-format") == 0)
+        optionParseString(key, value, instance->config.packagesFormat, sizeof(instance->config.packagesFormat));
     else if(strcasecmp(key, "--battery-manufacturer") == 0)
-        instance->config.batteryShowManufacturer = parseBoolean(value);
+        instance->config.batteryShowManufacturer = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-model") == 0)
-        instance->config.batteryShowModel = parseBoolean(value);
+        instance->config.batteryShowModel = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-technology") == 0)
-        instance->config.batteryShowTechnology = parseBoolean(value);
+        instance->config.batteryShowTechnology = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-capacity") == 0)
-        instance->config.batteryShowCapacity = parseBoolean(value);
+        instance->config.batteryShowCapacity = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-status") == 0)
-        instance->config.batteryShowStatus = parseBoolean(value);
+        instance->config.batteryShowStatus = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-format") == 0)
-    {
-        if(value == NULL)
-        {
-            printf("Error: usage: %s <format>\n", key);
-            exit(413);
-        }
-        size_t len = strlen(value);
-        if(len > 32)
-        {
-            printf("max battery format string length is 32, %zu given\n", len);
-            exit(414);
-        }
-        strcpy(instance->config.batteryFormat, value);
-    }
+        optionParseString(key, value, instance->config.batteryFormat, sizeof(instance->config.batteryFormat));
     else
     {
         printf("Error: unknown option: %s\n", key);
