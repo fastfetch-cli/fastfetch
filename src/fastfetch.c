@@ -161,10 +161,9 @@ static inline void printCommandHelpPackagesFormat()
         "\n"
         "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
         "if --packages-combined is set to false, the numbers of packages are passed to printf in following order as uint32_t:\n"
-        "pacman, flatpak\n"
-        "else, the total number of packages is passed as uint32_t\n"
+        "all, pacman, flatpak, all\n"
         "if an value is disabled via a packages-* argument, or could not be determined, zero is passed\n"
-        "The default value is something like \"%u (pacman), %u (flatpack)\""
+        "The default value is something like \"%.0s%u (pacman), %u (flatpack)\""
     );
 }
 
@@ -390,7 +389,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--packages-combined") == 0)
         instance->config.packagesCombined = optionParseBoolean(value);
     else if(strcasecmp(key, "--packages-combined-names") == 0)
+    {
+        instance->config.packagesCombined = true;
         instance->config.packagesCombinedNames = optionParseBoolean(value);
+    }
     else if(strcasecmp(key, "--packages-pacman") == 0)
         instance->config.packagesPacman = optionParseBoolean(value);
     else if(strcasecmp(key, "--packages-flatpak") == 0)

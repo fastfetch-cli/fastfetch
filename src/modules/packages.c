@@ -38,15 +38,15 @@ void ffPrintPackages(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Packages");
 
+    if(instance->config.packagesFormat[0] != '\0')
+    {
+        printf(instance->config.packagesFormat, all, pacman, flatpak, all);
+        putchar('\n');
+        return;
+    }
+
     if(instance->config.packagesCombined)
     {
-        if(instance->config.packagesFormat[0] != '\0')
-        {
-            printf(instance->config.packagesFormat, all);
-            putchar('\n');
-            return;
-        }
-
         printf("%u", all);
 
         if(instance->config.packagesCombinedNames)
@@ -73,13 +73,6 @@ void ffPrintPackages(FFinstance* instance)
     }
     else
     {
-        if(instance->config.packagesFormat[0] != '\0')
-        {
-            printf(instance->config.packagesFormat, pacman, flatpak);
-            putchar('\n');
-            return;
-        }
-
         #define FF_PRINT_PACKAGE(name) \
             if(name > 0) \
             { \
