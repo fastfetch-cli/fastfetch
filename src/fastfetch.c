@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:Theme:Icons:Font:Terminal:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
+#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
     "## Fastfetch configuration\n" \
@@ -204,6 +204,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintFont(instance);
     else if(strcasecmp(line, "terminal") == 0)
         ffPrintTerminal(instance);
+    else if(strcasecmp(line, "terminalfont") == 0)
+        ffPrintTerminalFont(instance);
     else if(strcasecmp(line, "cpu") == 0)
         ffPrintCPU(instance);
     else if(strcasecmp(line, "gpu") == 0)

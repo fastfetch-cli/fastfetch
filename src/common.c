@@ -12,6 +12,8 @@ void ffInitState(FFstate* state)
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
+    state->terminal.value = NULL;
+    state->terminal.error = NULL;
 }
 
 void ffDefaultConfig(FFconfig* config)
@@ -129,6 +131,20 @@ void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4)
     {
         printf("%s [GTK4]", gtk4);
     }
+}
+
+void ffParseFont(char* font, char* buffer)
+{
+    char name[64];
+    char size[32];
+    int scanned = sscanf(font, "%[^,], %[^,]", name, size);
+    
+    if(scanned == 0)
+        strcpy(buffer, font);
+    else if(scanned == 1)
+        strcpy(buffer, name);
+    else
+        sprintf(buffer, "%s (%spt)", name, size);
 }
 
 void ffPrintError(FFinstance* instance, const char* key, const char* message)

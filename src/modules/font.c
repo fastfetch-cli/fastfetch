@@ -1,19 +1,5 @@
 #include "fastfetch.h"
 
-static void parseFont(char* font, char* buffer)
-{
-    char name[64];
-    char size[32];
-    int scanned = sscanf(font, "%[^,], %[^,]", name, size);
-    
-    if(scanned == 0)
-        strcpy(buffer, font);
-    else if(scanned == 1)
-        strcpy(buffer, name);
-    else
-        sprintf(buffer, "%s (%spt)", name, size);
-}
-
 void ffPrintFont(FFinstance* instance)
 {
     char plasma[256];
@@ -26,7 +12,7 @@ void ffPrintFont(FFinstance* instance)
     if(gtk2[0] == '\0')
         gtk2Pretty[0] = '\0';
     else
-        parseFont(gtk2, gtk2Pretty);
+        ffParseFont(gtk2, gtk2Pretty);
 
     char gtk3[256];
     ffParsePropFileHome(instance, ".config/gtk-3.0/settings.ini", "gtk-font-name=%[^\n]", gtk3);
@@ -35,7 +21,7 @@ void ffPrintFont(FFinstance* instance)
     if(gtk3[0] == '\0')
         gtk3Pretty[0] = '\0';
     else
-        parseFont(gtk3, gtk3Pretty);
+        ffParseFont(gtk3, gtk3Pretty);
 
     char gtk4[256];
     ffParsePropFileHome(instance, ".config/gtk-4.0/settings.ini", "gtk-font-name=%[^\n]", gtk4);
@@ -44,7 +30,7 @@ void ffPrintFont(FFinstance* instance)
     if(gtk4Pretty[0] == '\0')
         gtk4Pretty[0] = '\0';
     else
-        parseFont(gtk4, gtk4Pretty);
+        ffParseFont(gtk4, gtk4Pretty);
     
     ffPrintLogoAndKey(instance, "Font");
 
@@ -55,7 +41,7 @@ void ffPrintFont(FFinstance* instance)
     else
     {
         char plasmaPretty[256];
-        parseFont(plasma, plasmaPretty);
+        ffParseFont(plasma, plasmaPretty);
         printf("%s [Plasma], ", plasmaPretty);
     }
 

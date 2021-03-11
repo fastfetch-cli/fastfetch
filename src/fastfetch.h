@@ -66,12 +66,20 @@ typedef struct FFconfig
 
 } FFconfig;
 
+typedef struct FFvalue
+{
+    char* value;
+    char* error;
+} FFvalue;
+
 typedef struct FFstate
 {
     uint8_t current_row;
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
+
+    FFvalue terminal;
 } FFstate;
 
 typedef struct FFinstance
@@ -88,6 +96,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* key);
 void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
+void ffParseFont(char* font, char* buffer);
 void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4);
 void ffPrintError(FFinstance* instance, const char* key, const char* message);
 void ffTrimTrailingWhitespace(char* buffer);
@@ -105,6 +114,9 @@ void ffPrintLogos(bool color);
 #endif
 
 //Module functions
+
+void ffPopulateTerminal(FFinstance* instance);
+
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
 void ffPrintTitle(FFinstance* instance);
@@ -122,6 +134,7 @@ void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
+void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintCPU(FFinstance* instance);
 void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);

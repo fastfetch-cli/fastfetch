@@ -28,6 +28,7 @@ int main(int argc, char** argv)
     ffPrintIcons(&instance);
     ffPrintFont(&instance);
     ffPrintTerminal(&instance);
+    ffPrintTerminalFont(&instance);
     ffPrintCPU(&instance);
     ffPrintGPU(&instance);
     ffPrintMemory(&instance);

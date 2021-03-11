@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-static void printTerminalName(FFinstance* instance, const char* pid)
+static void getTerminalName(FFinstance* instance, const char* pid, char* terminal, char* error)
 {
     char file[256];
     sprintf(file, "/proc/%s/stat", pid);
@@ -8,9 +8,7 @@ static void printTerminalName(FFinstance* instance, const char* pid)
     FILE* stat = fopen(file, "r");
     if(stat == NULL)
     {
-        char error[300];
         sprintf(error, "fopen(\"%s\", \"r\") == NULL", file);
-        ffPrintError(instance, "Terminal", error);
         return;
     }
 
@@ -18,7 +16,7 @@ static void printTerminalName(FFinstance* instance, const char* pid)
     char ppid[256];
     if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
     {
-        ffPrintError(instance, "Terminal", "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        strcpy(error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
         return;
     }
 
@@ -35,28 +33,62 @@ static void printTerminalName(FFinstance* instance, const char* pid)
         strcasecmp(name, "doas")   == 0 ||
         strcasecmp(name, "strace") == 0 )
     {
-        printTerminalName(instance, ppid);
+        getTerminalName(instance, ppid, terminal, error);
         return;
     }
-
-    ffPrintLogoAndKey(instance, "Terminal");
     
     if(
         strcasecmp(name, "systemd") == 0 ||
         strcasecmp(name, "init")    == 0 ||
+        strcasecmp(name, "login")   == 0 ||
+        strcasecmp(name, "0")       == 0 ||
         strcasecmp(ppid, "0")       == 0 )
     {
-        puts("TTY");
+        strcpy(terminal, "TTY");
     }
     else
     {
-        puts(name);
+        strcpy(terminal, name);
     }
+}
+
+void ffPopulateTerminal(FFinstance* instance)
+{
+    if(instance->state.terminal.value != NULL || instance->state.terminal.error != NULL)
+        return;
+
+    static char terminal[256];
+    static char error[256];
+
+    terminal[0] = '\0';
+    error[0] = '\0';
+
+    char ppid[256];
+    sprintf(ppid, "%i", getppid());
+    getTerminalName(instance, ppid, terminal, error);
+
+    if(terminal[0] != '\0')
+        instance->state.terminal.value = terminal;
+
+    if(error[0] != '\0')
+        instance->state.terminal.error = error;
 }
 
 void ffPrintTerminal(FFinstance* instance)
 {
-    char ppid[256];
-    sprintf(ppid, "%i", getppid());
-    printTerminalName(instance, ppid);
+    ffPopulateTerminal(instance);
+    
+    if(instance->state.terminal.value != NULL)
+    {
+        ffPrintLogoAndKey(instance, "Terminal");
+        puts(instance->state.terminal.value);
+    }
+    else if(instance->state.terminal.error != NULL)
+    {
+        ffPrintError(instance, "Terminal", instance->state.terminal.error);
+    }
+    else
+    {
+        ffPrintError(instance, "Terminal", "ffPopulateTerminal failed");
+    }
 }

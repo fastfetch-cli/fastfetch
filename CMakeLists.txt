@@ -50,6 +50,7 @@ set(SRCS
     src/modules/icons.c
     src/modules/font.c
     src/modules/terminal.c
+    src/modules/terminalfont.c
     src/modules/cpu.c
     src/modules/gpu.c
     src/modules/memory.c
