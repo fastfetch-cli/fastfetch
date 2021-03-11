@@ -22,6 +22,11 @@ __fastfetch_complete_string()
     fi
 }
 
+__fastfetch_complete_path()
+{
+    COMPREPLY=($(compgen -A file -- "$CURRENT_WORD"))
+}
+
 __fastfetch_complete_logo()
 {
     COMPREPLY=($(compgen -W "$(fastfetch --list-logos)" -- "$CURRENT_WORD"))
@@ -32,6 +37,7 @@ __fastfetch_complete_option()
     local FF_OPTIONS_ALL=(
         "${FF_OPTIONS_BOOL[@]}"
         "${FF_OPTIONS_STRING[@]}"
+        "${FF_OPTIONS_PATH[@]}"
         "${FF_OPTIONS_LOGO[@]}"
     )
 
@@ -91,11 +97,12 @@ __fastfetch_completion()
         "--host-version"
         "--kernel-release"
         "--kernel-version"
-        "--shell-path"
         "--packages-combined"
         "--packages-combined-names"
         "--packages-pacman"
         "--packages-flatpak"
+        "--shell-path"
+        "--resolution-refreshrate"
         "--battery-manufacturer"
         "--battery-model"
         "--battery-technology"
@@ -112,9 +119,15 @@ __fastfetch_completion()
         "-x"
         "--offsetx"
         "--packages-format"
+        "--resolution-format"
         "--battery-format"
         "--structure"
         "--set"
+    )
+
+    local FF_OPTIONS_PATH=(
+        "--resolution-libX11"
+        "--resolution-libXrandr"
     )
 
     local FF_OPTIONS_LOGO=(
@@ -134,6 +147,8 @@ __fastfetch_completion()
         __fastfetch_complete_bool
     elif __fastfetch_previous_matches "${FF_OPTIONS_STRING[@]}"; then
         __fastfetch_complete_string
+    elif __fastfetch_previous_matches "${FF_OPTIONS_PATH[@]}"; then
+        __fastfetch_complete_path
     elif __fastfetch_previous_matches "${FF_OPTIONS_LOGO[@]}"; then
         __fastfetch_complete_logo
     else

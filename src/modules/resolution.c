@@ -3,9 +3,13 @@
 #include "X11/extensions/Xrandr.h"
 #include "dlfcn.h"
 
-static short getCurrentRate(Display* display)
+static short getCurrentRate(FFinstance* instance, Display* display)
 {
-    void* xrandr = dlopen("libXrandr.so", RTLD_LAZY);
+    void* xrandr;
+    if(instance->config.resolutionLibXrandr[0] != '\0')
+        xrandr = dlopen(instance->config.resolutionLibXrandr, RTLD_LAZY);
+    else
+        xrandr = dlopen("libXrandr.so", RTLD_LAZY);
     if(xrandr == NULL)
         return 0;
 
@@ -39,7 +43,11 @@ void ffPrintResolution(FFinstance* instance)
     if(ffPrintCachedValue(instance, "Resolution"))
         return;
 
-    void* x11 = dlopen("libX11.so", RTLD_LAZY);
+    void* x11;
+    if(instance->config.resolutionLibX11[0] != '\0')
+        x11 = dlopen(instance->config.resolutionLibX11, RTLD_LAZY);
+    else
+        x11 = dlopen("libX11.so", RTLD_LAZY);
     if(x11 == NULL)
     {
         ffPrintError(instance, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
@@ -62,13 +70,15 @@ void ffPrintResolution(FFinstance* instance)
 
     Screen*  screen  = DefaultScreenOfDisplay(display);
 
-    short currentRate = getCurrentRate(display);
+    short currentRate = instance->config.resolutionShowRefreshRate ? getCurrentRate(instance, display) : 0;
 
     dlclose(x11);
 
     char resolution[1024];
 
-    if(currentRate == 0)
+    if(instance->config.resolutionFormat[0] != '\0')
+        sprintf(resolution, instance->config.resolutionFormat, screen->width, screen->height, currentRate);
+    else if(currentRate == 0)
         sprintf(resolution, "%ix%i", screen->width, screen->height);
     else
         sprintf(resolution, "%ix%i @ %dHz", screen->width, screen->height, currentRate);

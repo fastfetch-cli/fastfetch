@@ -41,14 +41,19 @@
     "# --kernel-release true\n" \
     "# --kernel-version false\n" \
     "\n" \
-    "## Shell options:\n" \
-    "# --shell-path false\n" \
-    "\n" \
     "## Packages options:\n" \
     "# --packages-combined false\n" \
     "# --packages-combined-names true\n" \
     "# --packages-pacman true\n" \
     "# --packages-flatpak true\n" \
+    "\n" \
+    "## Shell options:\n" \
+    "# --shell-path false\n" \
+    "\n" \
+    "## Resolution options:\n" \
+    "# --resolution-refreshrate true\n" \
+    "# --resolution-libX11 libX11.so\n"\
+    "# --resolution-libXrandr libXrandr.so\n" \
     "\n" \
     "## Battery options:\n" \
     "# --battery-manufacturer true\n" \
@@ -102,15 +107,21 @@ static inline void printHelp()
         "   --kernel-release <?value>: Shows the release of the kernel\n"
         "   --kernel-version <?value>: Shows the build version of the kernel\n"
         "\n"
-        "Shell options:\n"
-        "    --shell-path <?value>: Show the full path of the shell\n"
-        "\n"
         "Packages options:\n"
         "   --packages-combined <?value>:       Show the sum of all packages\n"
         "   --packages-combined-names <?value>: Show the names of the package managers after the sum if in packages-combined mode\n"
         "   --packages-pacman <?value>:         Count pacman packages\n"
         "   --packages-flatpak <?value>:        Count flatpak packages\n"
         "   --packages-format <format>:         Provide the printf format string for packages output (+)\n"
+        "\n"
+        "Shell options:\n"
+        "    --shell-path <?value>: Show the full path of the shell\n"
+        "\n"
+        "Resolution optins:\n"
+        "   --resolution-refreshrate <?value>: Show the refresh rate of the monitor\n"
+        "   --resolution-libX11 <path>:        Set the path to the x11 library to load\n"
+        "   --resolution-libXrandr <path>:     Set the path to the xrandr library to load\n"
+        "   --resolution-format <format>:      Provide the printf format string for resolution output (+)\n"
         "\n"
         "Battery options:\n"
         "   --battery-manufacturer <?value>: Show the manufacturer of the battery, if possible\n"
@@ -167,6 +178,19 @@ static inline void printCommandHelpPackagesFormat()
     );
 }
 
+static inline void printCommandHelpResolutionFormat()
+{
+    puts(
+        "usage: fastfetch --resolution-format <format>\n"
+        "\n"
+        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
+        "the values passed to printf are in following order:\n"
+        "width (int), height (int), refreshRate (short)\n"
+        "if refresh rate is disabled, or could not be determined, zero is passed\n"
+        "The default value is something like \"%ix%i @ %dHz\""
+    );
+}
+
 static inline void printCommandHelp(const char* command)
 {
     if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
@@ -175,6 +199,8 @@ static inline void printCommandHelp(const char* command)
         printCommandHelpBatteryFormat();
     else if(strcasecmp(command, "packages-format") == 0)
         printCommandHelpPackagesFormat();
+    else if(strcasecmp(command, "resolution-format") == 0)
+        printCommandHelpResolutionFormat();
     else
         printf("No specific help for command %s provided\n", command);
 }
@@ -384,8 +410,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.kernelShowRelease = optionParseBoolean(value);
     else if(strcasecmp(key, "--kernel-version") == 0)
         instance->config.kernelShowVersion = optionParseBoolean(value);
-    else if(strcasecmp(key, "--shell-path") == 0)
-        instance->config.shellShowPath = optionParseBoolean(value);
     else if(strcasecmp(key, "--packages-combined") == 0)
         instance->config.packagesCombined = optionParseBoolean(value);
     else if(strcasecmp(key, "--packages-combined-names") == 0)
@@ -394,11 +418,21 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.packagesCombinedNames = optionParseBoolean(value);
     }
     else if(strcasecmp(key, "--packages-pacman") == 0)
-        instance->config.packagesPacman = optionParseBoolean(value);
+        instance->config.packagesShowPacman = optionParseBoolean(value);
     else if(strcasecmp(key, "--packages-flatpak") == 0)
-        instance->config.packagesFlatpak = optionParseBoolean(value);
+        instance->config.packagesShowFlatpak = optionParseBoolean(value);
     else if(strcasecmp(key, "--packages-format") == 0)
         optionParseString(key, value, instance->config.packagesFormat, sizeof(instance->config.packagesFormat));
+    else if(strcasecmp(key, "--shell-path") == 0)
+        instance->config.shellShowPath = optionParseBoolean(value);
+    else if(strcasecmp(key, "--resolution-refreshrate") == 0)
+        instance->config.resolutionShowRefreshRate = optionParseBoolean(value);
+    else if(strcasecmp(key, "--resolution-libX11") == 0)
+        optionParseString(key, value, instance->config.resolutionLibX11, sizeof(instance->config.resolutionLibX11));
+    else if(strcasecmp(key, "--resolution-libXrandr") == 0)
+        optionParseString(key, value, instance->config.resolutionLibXrandr, sizeof(instance->config.resolutionLibXrandr));
+    else if(strcasecmp(key, "--resolution-format") == 0)
+        optionParseString(key, value, instance->config.resolutionFormat, sizeof(instance->config.resolutionFormat));
     else if(strcasecmp(key, "--battery-manufacturer") == 0)
         instance->config.batteryShowManufacturer = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-model") == 0)

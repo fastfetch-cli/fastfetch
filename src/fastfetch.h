@@ -53,15 +53,21 @@ typedef struct FFconfig
     bool kernelShowRelease;
     bool kernelShowVersion;
 
-    //Shell
-    bool shellShowPath;
-
     //Packages
     bool packagesCombined;
     bool packagesCombinedNames;
-    bool packagesPacman;
-    bool packagesFlatpak;
+    bool packagesShowPacman;
+    bool packagesShowFlatpak;
     char packagesFormat[32];
+
+    //Shell
+    bool shellShowPath;
+    
+    //Resolution
+    bool resolutionShowRefreshRate;
+    char resolutionLibX11[64];
+    char resolutionLibXrandr[64];
+    char resolutionFormat[32];
 
     //Battery
     bool batteryShowManufacturer;

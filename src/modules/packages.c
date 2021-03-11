@@ -25,8 +25,8 @@ static uint32_t get_num_dirs(const char* dirname) {
 
 void ffPrintPackages(FFinstance* instance)
 {
-    uint32_t pacman = instance->config.packagesPacman ? get_num_dirs("/var/lib/pacman/local") : 0;
-    uint32_t flatpak = instance->config.packagesFlatpak ? get_num_dirs("/var/lib/flatpak/app") : 0;
+    uint32_t pacman = instance->config.packagesShowPacman ? get_num_dirs("/var/lib/pacman/local") : 0;
+    uint32_t flatpak = instance->config.packagesShowFlatpak ? get_num_dirs("/var/lib/flatpak/app") : 0;
 
     uint32_t all = pacman + flatpak;
 

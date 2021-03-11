@@ -35,13 +35,18 @@ void ffDefaultConfig(FFconfig* config)
     config->kernelShowRelease = true;
     config->kernelShowVersion = false;
 
-    config->shellShowPath = false;
-
     config->packagesCombined = false;
     config->packagesCombinedNames = true;
-    config->packagesPacman = true;
-    config->packagesFlatpak = true;
+    config->packagesShowPacman = true;
+    config->packagesShowFlatpak = true;
     config->packagesFormat[0] = '\0';
+
+    config->shellShowPath = false;
+
+    config->resolutionShowRefreshRate = true;
+    config->resolutionLibX11[0] = '\0';
+    config->resolutionLibXrandr[0] = '\0';
+    config->resolutionFormat[0] = '\0';
 
     config->batteryShowManufacturer = true;
     config->batteryShowModel = true;
