@@ -98,7 +98,8 @@ static inline void printHelp()
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
         "\n"
         "OS options:\n"
-        "    --os-architecture <?value>: Show the architecture of the os\n"
+        "   --os-architecture <?value>: Show the architecture of the os\n"
+        "   --os-format <format>:       Provide the printf format string for os output (+)\n"
         "\n"
         "Host options:\n"
         "   --host-version <?value>: Show the version of the host platform, if possible. Most likely, this will be the BIOS version\n"
@@ -152,6 +153,19 @@ static inline void printCommandHelpColor()
     );
 }
 
+static inline void printCommandHelpOsFormat()
+{
+    puts(
+        "usage fastfetch --os-format <format>\n"
+        "\n"
+        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
+        "The arguments passed to printf are 2 strings in following order:\n"
+        "name, architecture\n"
+        "If an value could not be determined, it will be an zero length string.\n"
+        "The default value is something like \"%s %s\"."
+    );
+}
+
 static inline void printCommandHelpBatteryFormat()
 {
     puts(
@@ -195,6 +209,8 @@ static inline void printCommandHelp(const char* command)
 {
     if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
         printCommandHelpColor();
+    else if(strcasecmp(command, "os-format") == 0)
+        printCommandHelpOsFormat();
     else if(strcasecmp(command, "battery-format") == 0)
         printCommandHelpBatteryFormat();
     else if(strcasecmp(command, "packages-format") == 0)
@@ -404,6 +420,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.colorLogo = optionParseBoolean(value);
     else if(strcasecmp(key, "--os-architecture") == 0)
         instance->config.osShowArchitecture = optionParseBoolean(value);
+    else if(strcasecmp(key, "--os-format") == 0)
+        optionParseString(key, value, instance->config.osFormat, sizeof(instance->config.osFormat));
     else if(strcasecmp(key, "--host-version") == 0)
         instance->config.hostShowVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--kernel-release") == 0)

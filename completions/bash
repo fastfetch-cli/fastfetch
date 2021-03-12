@@ -6,6 +6,7 @@ __fastfetch_complete_help()
         "color"
         "battery-format"
         "packages-format"
+        "os-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -118,6 +119,7 @@ __fastfetch_completion()
         "--seperator"
         "-x"
         "--offsetx"
+        "--os-format"
         "--packages-format"
         "--resolution-format"
         "--battery-format"

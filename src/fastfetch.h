@@ -45,6 +45,7 @@ typedef struct FFconfig
 
     //OS
     bool osShowArchitecture;
+    char osFormat[32];
 
     //Host
     bool hostShowVersion;

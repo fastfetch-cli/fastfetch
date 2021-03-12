@@ -29,6 +29,7 @@ void ffDefaultConfig(FFconfig* config)
     config->cacheSave = true;
 
     config->osShowArchitecture = true;
+    config->osFormat[0] = '\0';
 
     config->hostShowVersion = true;
 
