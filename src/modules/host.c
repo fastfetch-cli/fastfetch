@@ -5,19 +5,39 @@ void ffPrintHost(FFinstance* instance)
     if(ffPrintCachedValue(instance, "Host"))
         return;
 
-    char host[256];
-    ffGetFileContent("/sys/devices/virtual/dmi/id/product_name", host, sizeof(host) - 32); //We subtract 32 to have at least this padding for the version
-    if(host[0] == '\0')
-    {
-        ffPrintError(instance, "Host", "ffGetFileContent(\"/sys/devices/virtual/dmi/id/product_name\", host, sizeof(host)) failed");
-        return;
-    }
+    char family[256];
+    ffGetFileContent("/sys/devices/virtual/dmi/id/product_family", family, sizeof(family));
 
-    if(instance->config.hostShowVersion)
+    char name[256];
+    ffGetFileContent("/sys/devices/virtual/dmi/id/product_name", name, sizeof(name));
+    
+    char version[256];
+    if(instance->config.hostShowVersion || instance->config.hostFormat[0] != '\0')
+        ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", version, sizeof(version));
+    else
+        version[0] = '\0';
+
+    char host[1024];
+
+    if(instance->config.hostFormat[0] != '\0')
     {
-        size_t len = strlen(host);
-        host[len++] = ' ';
-        ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", host + len, sizeof(host) - len);
+        snprintf(host, sizeof(host), instance->config.hostFormat, family, name, version);
+    }
+    else if(family[0] == '\0' && name[0] == '\0')
+    {
+        ffPrintError(instance, "Host", "neither family nor name could be determined");
+        return;
+    }else if(family[0] != '\0' && name[0] != '\0')
+    {
+        snprintf(host, sizeof(host), "%s %s %s", family, name, instance->config.hostShowVersion ? version : "");
+    }
+    else if(family[0] != '\0')
+    {
+        snprintf(host, sizeof(host), "%s %s", family, instance->config.hostShowVersion ? version : "");
+    }
+    else
+    {
+        snprintf(host, sizeof(host), "%s %s", name, instance->config.hostShowVersion ? version : "");
     }
 
     ffPrintAndSaveCachedValue(instance, "Host", host);

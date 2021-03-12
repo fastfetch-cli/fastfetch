@@ -103,6 +103,7 @@ static inline void printHelp()
         "\n"
         "Host options:\n"
         "   --host-version <?value>: Show the version of the host platform, if possible. Most likely, this will be the BIOS version\n"
+        "   --host-format <format>:  Provide the printf format string for host output (+)\n"
         "\n"
         "Kernel options:\n"
         "   --kernel-release <?value>: Shows the release of the kernel\n"
@@ -166,6 +167,19 @@ static inline void printCommandHelpOsFormat()
     );
 }
 
+static inline void printCommandHelpHostFormat()
+{
+    puts(
+        "usage fastfetch --host-format <format>\n"
+        "\n"
+        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
+        "The arguments passed to printf are 3 strings in following order:\n"
+        "family, name, version\n"
+        "If an value could not be determined, it will be an zero length string.\n"
+        "The default value is something like \"%s %s %s\"."
+    );
+}
+
 static inline void printCommandHelpBatteryFormat()
 {
     puts(
@@ -211,6 +225,8 @@ static inline void printCommandHelp(const char* command)
         printCommandHelpColor();
     else if(strcasecmp(command, "os-format") == 0)
         printCommandHelpOsFormat();
+    else if(strcasecmp(command, "host-format") == 0)
+        printCommandHelpHostFormat();
     else if(strcasecmp(command, "battery-format") == 0)
         printCommandHelpBatteryFormat();
     else if(strcasecmp(command, "packages-format") == 0)
@@ -424,6 +440,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, instance->config.osFormat, sizeof(instance->config.osFormat));
     else if(strcasecmp(key, "--host-version") == 0)
         instance->config.hostShowVersion = optionParseBoolean(value);
+    else if(strcasecmp(key, "--host-format") == 0)
+        optionParseString(key, value, instance->config.hostFormat, sizeof(instance->config.hostFormat));
     else if(strcasecmp(key, "--kernel-release") == 0)
         instance->config.kernelShowRelease = optionParseBoolean(value);
     else if(strcasecmp(key, "--kernel-version") == 0)

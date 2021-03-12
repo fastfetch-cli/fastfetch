@@ -49,6 +49,7 @@ typedef struct FFconfig
 
     //Host
     bool hostShowVersion;
+    char hostFormat[32];
 
     //Kernel
     bool kernelShowRelease;

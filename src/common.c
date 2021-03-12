@@ -32,6 +32,7 @@ void ffDefaultConfig(FFconfig* config)
     config->osFormat[0] = '\0';
 
     config->hostShowVersion = true;
+    config->hostFormat[0] = '\0';
 
     config->kernelShowRelease = true;
     config->kernelShowVersion = false;
