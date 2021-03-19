@@ -96,6 +96,39 @@ static void loadArtixLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[19],  FASTFETCH_TEXT_MODIFIER_BOLT"%s'`                                  `'"FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadUbuntuLogo(FFlogo *logo, bool doColor)
+{
+    logo->width = 40;
+    logo->height = 20;
+    strcpy(logo->name, "ubuntu");
+
+    /* color = red; color2 = white */
+    const char* color = doColor ? "\033[91m" : "";
+    const char* color2 = doColor ? "\033[97m" : "";
+    strcpy(logo->color, "\033[91m");
+
+    sprintf(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"%s             .-/+oossssoo+/-.           "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"%s         `:+ssssssssssssssssss+:`       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT"%s       -+ssssssssssssssssssyyssss+-     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"%s     .ossssssssssssssssssd%sMMMNy%ssssso.   "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"%s   /sssssssssss%shdmmNNmmyNMMMMh%sssssss/   "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"%s  +sssssssss%shmydMMMMMMMNddddy%sssssssss+  "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"%s /ssssssss%shNMMMyhhyyyyhmNMMMNh%sssssssss/ "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"%s.ssssssss%sdMMMNh%sssssssssss%shNMMMd%sssssssss."FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
+    sprintf(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"%s+ssss%shhhyNMMNy%sssssssssssss%syNMMMy%ssssssss+"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
+    sprintf(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"%soss%syNMMMNyMMh%sssssssssssssss%shmmmh%sssssssso"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%soss%syNMMMNyMMh%sssssssssssssss%shmmmh%sssssssso"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s+ssss%shhhyNMMNy%sssssssssssss%syNMMMy%ssssssss+"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s.ssssssss%sdMMMNh%sssssssssss%shNMMMd%sssssssss."FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s /ssssssss%shNMMMyhhyyyyhdNMMMNh%sssssssss/ "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s  +sssssssss%sdmydMMMMMMMMddddy%sssssssss+  "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s   /sssssssssss%shdmNNNNmyNMMMMh%sssssss/   "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s    .ossssssssssssssssss%sdMMMNy%ssssso.    "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s     -+sssssssssssssssss%syyy%sssss+-       "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s       `:+ssssssssssssssssss+:`         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s           .-/+oossssoo+/-.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+}
+
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
     if(strcasecmp(logo, "none") == 0)
@@ -110,6 +143,10 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     else if(strcasecmp(logo, "artix") == 0)
     {
         loadArtixLogo(&config->logo, config->colorLogo);
+    }
+    else if(strcasecmp(logo, "ubuntu") == 0)
+    {
+        loadUbuntuLogo(&config->logo, config->colorLogo);
     }
     else
     {
@@ -163,7 +200,7 @@ void ffPrintLogoLine(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 3
+    #define FASTFETCH_LOGO_AMOUNT 5
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
@@ -174,6 +211,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadUnknownLogo(&logos[1]);
     loadArchLogo(&logos[2], color);
     loadArtixLogo(&logos[3], color);
+    loadUbuntuLogo(&logos[4], color);
 
     return logos;
 }
