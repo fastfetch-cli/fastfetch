@@ -67,7 +67,7 @@ static void loadArchLogo(FFlogo* logo, bool doColor)
 
 static void loadArtixLogo(FFlogo* logo, bool doColor)
 {
-    logo->width = 40;
+    logo->width = 38;
     logo->height = 20;
     strcpy(logo->name, "artix");
 
@@ -84,16 +84,16 @@ static void loadArtixLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            ':;:iiiioxxxoo'           "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `'.;::ioxxoo''          "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          '-.      `':;jiooo'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[10],  FASTFETCH_TEXT_MODIFIER_BOLT"%s        'oooio-..     `'i:io'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       'ooooxxxxoio:,.   `'-;'        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12],  FASTFETCH_TEXT_MODIFIER_BOLT"%s      'ooooxxxxxkkxoooIi:-.  `'       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     'ooooxxxxxkkkkxoiiiiiji'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14],  FASTFETCH_TEXT_MODIFIER_BOLT"%s    'ooooxxxxxkxxoiiii:'`     .i'     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15],  FASTFETCH_TEXT_MODIFIER_BOLT"%s   'ooooxxxxxoi:::'`       .;ioxo'    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16],  FASTFETCH_TEXT_MODIFIER_BOLT"%s  'ooooxooi::'`         .:iiixkxxo'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[17],  FASTFETCH_TEXT_MODIFIER_BOLT"%s 'ooooi:'`                `'';ioxxo'  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[18],  FASTFETCH_TEXT_MODIFIER_BOLT"%s'i:'`                          '':io' "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[19],  FASTFETCH_TEXT_MODIFIER_BOLT"%s'`                                  `'"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s        'oooio-..     `'i:io'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s       'ooooxxxxoio:,.   `'-;'        "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s      'ooooxxxxxkkxoooIi:-.  `'       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s     'ooooxxxxxkkkkxoiiiiiji'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    'ooooxxxxxkxxoiiii:'`     .i'     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s   'ooooxxxxxoi:::'`       .;ioxo'    "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s  'ooooxooi::'`         .:iiixkxxo'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s 'ooooi:'`                `'';ioxxo'  "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s'i:'`                          '':io' "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s'`                                  `'"FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
 static void loadUbuntuLogo(FFlogo *logo, bool doColor)
