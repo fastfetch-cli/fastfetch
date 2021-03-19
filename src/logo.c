@@ -216,7 +216,7 @@ void ffPrintLogoLine(FFinstance* instance)
 
     if(instance->state.current_row < instance->config.logo.height)
     {
-        printf(instance->config.logo.chars[instance->state.current_row] + cut);
+        printf("%s", instance->config.logo.chars[instance->state.current_row] + cut);
     }
     else
     {
