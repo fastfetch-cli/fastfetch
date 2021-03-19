@@ -11,63 +11,21 @@
 #define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
-    "## Fastfetch configuration\n" \
-    "## Put arguments here to make them permanently.\n" \
-    "## Direct arguments will overwrite the corresponding ones in this files\n" \
-    "## Each line is whitespace trimmed on beginn and end.\n" \
-    "## Empty lines or lines starting with # are ignored.\n" \
-    "## There are more arguments possible than listed here, take a look at fastfetch --help!\n" \
-    "## This version of the file was shipped with "FASTFETCH_PROJECT_VERSION".\n" \
-    "## Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current defaults.\n" \
-    "\n" \
-    "## General options:\n" \
-    "# --structure "FASTFETCH_DEFAULT_STRUCTURE"\n" \
-    "# --spacer 4\n" \
-    "# --seperator \": \"\n" \
-    "# --offsetx 0\n" \
-    "# --recache false\n" \
-    "# --show-errors false\n" \
-    "\n" \
-    "## Logo options:\n" \
-    "# --color-logo true\n" \
-    "\n" \
-    "## OS options:\n" \
-    "# --os-architecture true\n" \
-    "\n" \
-    "## Host options:\n" \
-    "# --host-version true\n" \
-    "\n" \
-    "## Kernel options:\n" \
-    "# --kernel-release true\n" \
-    "# --kernel-version false\n" \
-    "\n" \
-    "## Packages options:\n" \
-    "# --packages-combined false\n" \
-    "# --packages-combined-names true\n" \
-    "# --packages-pacman true\n" \
-    "# --packages-flatpak true\n" \
-    "\n" \
-    "## Shell options:\n" \
-    "# --shell-path false\n" \
-    "\n" \
-    "## Resolution options:\n" \
-    "# --resolution-refreshrate true\n" \
-    "# --resolution-libX11 libX11.so\n"\
-    "# --resolution-libXrandr libXrandr.so\n" \
-    "\n" \
-    "## Battery options:\n" \
-    "# --battery-manufacturer true\n" \
-    "# --battery-model true\n" \
-    "# --battery-technology true\n" \
-    "# --battery-capacity true\n" \
-    "# --battery-status true\n"
+    "# Fastfetch configuration\n" \
+    "# Put arguments here to make them permanently (one per line). \n" \
+    "# Direct arguments will overwrite the corresponding ones in this files\n" \
+    "# Each line is whitespace trimmed on beginn and end.\n" \
+    "# Empty lines or lines starting with # are ignored.\n" \
+    "# There are more arguments possible than listed here, take a look at fastfetch --help!\n" \
+    "# This version of the file was shipped with "FASTFETCH_PROJECT_VERSION".\n" \
+    "# Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current defaults.\n"
 
 //Things only needed by fastfetch
 typedef struct FFdata
 {
     FFvaluestore valuestore;
-    char structure[2048];
-    char logoName[32];
+    FFstrbuf structure;
+    FFstrbuf logoName;
 } FFdata;
 
 static inline void printHelp()
@@ -97,41 +55,32 @@ static inline void printHelp()
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
         "\n"
-        "OS options:\n"
-        "   --os-architecture <?value>: Show the architecture of the os\n"
-        "   --os-format <format>:       Provide the printf format string for os output (+)\n"
+        "Format options: Provide the format string for custom output (+)\n"
+        "   --os-format <format>\n"
+        "   --host-format <format>\n"
+        "   --kernel-format <format>\n"
+        "   --uptime-format <format>\n"
+        "   --packages-format <format>\n"
+        "   --shell-format <format>\n"
+        "   --resolution-format <format>\n"
+        "   --de-format <format>\n"
+        "   --wm-format <format>\n"
+        "   --theme-format <format>\n"
+        "   --icons-format <format>\n"
+        "   --font-format <format>\n"
+        "   --terminal-format <format>\n"
+        "   --terminal-font-format <format>\n"
+        "   --cpu-format <format>\n"
+        "   --gpu-format <format>\n"
+        "   --memory-format <format>\n"
+        "   --disk-format <format>\n"
+        "   --battery-format <format>\n"
+        "   --locale-format <format>\n"
         "\n"
-        "Host options:\n"
-        "   --host-version <?value>: Show the version of the host platform, if possible. Most likely, this will be the BIOS version\n"
-        "   --host-format <format>:  Provide the printf format string for host output (+)\n"
-        "\n"
-        "Kernel options:\n"
-        "   --kernel-release <?value>: Shows the release of the kernel\n"
-        "   --kernel-version <?value>: Shows the build version of the kernel\n"
-        "\n"
-        "Packages options:\n"
-        "   --packages-combined <?value>:       Show the sum of all packages\n"
-        "   --packages-combined-names <?value>: Show the names of the package managers after the sum if in packages-combined mode\n"
-        "   --packages-pacman <?value>:         Count pacman packages\n"
-        "   --packages-flatpak <?value>:        Count flatpak packages\n"
-        "   --packages-format <format>:         Provide the printf format string for packages output (+)\n"
-        "\n"
-        "Shell options:\n"
-        "    --shell-path <?value>: Show the full path of the shell\n"
-        "\n"
-        "Resolution optins:\n"
-        "   --resolution-refreshrate <?value>: Show the refresh rate of the monitor\n"
-        "   --resolution-libX11 <path>:        Set the path to the x11 library to load\n"
-        "   --resolution-libXrandr <path>:     Set the path to the xrandr library to load\n"
-        "   --resolution-format <format>:      Provide the printf format string for resolution output (+)\n"
-        "\n"
-        "Battery options:\n"
-        "   --battery-manufacturer <?value>: Show the manufacturer of the battery, if possible\n"
-        "   --battery-model <?value>:        Show the model of the battery, if possible\n"
-        "   --battery-technology <?value>:   Show the technology of the battery, if possible\n"
-        "   --battery-capacity <?value>:     Show the capacity of the battery, if possible\n"
-        "   --battery-status <?value>:       Show the status of the battery, if possible\n"
-        "   --battery-format <format>:       Provide the printf format string for battery output (+)\n"
+        "Library optins: Set the path of a library to load\n"
+        "   --lib-PCI <path>\n"
+        "   --lib-X11 <path>:\n"
+        "   --lib-Xrandr <path>:\n"
         "\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
         "An (+) at the end indicates that more help can be printed with --help <option>\n"
@@ -157,65 +106,140 @@ static inline void printCommandHelpColor()
 static inline void printCommandHelpOsFormat()
 {
     puts(
-        "usage fastfetch --os-format <format>\n"
-        "\n"
-        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
-        "The arguments passed to printf are 2 strings in following order:\n"
-        "name, architecture\n"
-        "If an value could not be determined, it will be an zero length string.\n"
-        "The default value is something like \"%s %s\"."
+        "TBD"
     );
 }
 
 static inline void printCommandHelpHostFormat()
 {
     puts(
-        "usage fastfetch --host-format <format>\n"
-        "\n"
-        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
-        "The arguments passed to printf are 3 strings in following order:\n"
-        "family, name, version\n"
-        "If an value could not be determined, it will be an zero length string.\n"
-        "The default value is something like \"%s %s %s\"."
+        "TBD"
     );
 }
 
-static inline void printCommandHelpBatteryFormat()
+static inline void printCommandHelpKernelFormat()
 {
     puts(
-        "usage fastfetch --battery-format <format>\n"
-        "\n"
-        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
-        "The arguments passed to printf are 5 strings in following order:\n"
-        "manufacturer, model, technology, capacity, status\n"
-        "If an value was disabled via battery-* argument, or could not be determined, it will be an zero length string.\n"
-        "The default value is something like \"%s %s (%s) [%s; %s]\"."
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpUptimeFormat()
+{
+    puts(
+        "TBD"
     );
 }
 
 static inline void printCommandHelpPackagesFormat()
 {
     puts(
-        "usage: fastfetch --packages-format <format>\n"
-        "\n"
-        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
-        "if --packages-combined is set to false, the numbers of packages are passed to printf in following order as uint32_t:\n"
-        "all, pacman, flatpak, all\n"
-        "if an value is disabled via a packages-* argument, or could not be determined, zero is passed\n"
-        "The default value is something like \"%.0s%u (pacman), %u (flatpack)\""
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpShellFormat()
+{
+    puts(
+        "TBD"
     );
 }
 
 static inline void printCommandHelpResolutionFormat()
 {
     puts(
-        "usage: fastfetch --resolution-format <format>\n"
-        "\n"
-        "<format> is a string of maximum length 32, which is passed to printf as the format string.\n"
-        "the values passed to printf are in following order:\n"
-        "width (int), height (int), refreshRate (short)\n"
-        "if refresh rate is disabled, or could not be determined, zero is passed\n"
-        "The default value is something like \"%ix%i @ %dHz\""
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpDEFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpWMFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpThemeFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpIconsFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpFontFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpTerminalFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpTerminalFontFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpCPUFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpGPUFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpMemoryFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpDiskFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpBatteryFormat()
+{
+    puts(
+        "TBD"
+    );
+}
+
+static inline void printCommandHelpLocaleFormat()
+{
+    puts(
+        "TBD"
     );
 }
 
@@ -227,12 +251,42 @@ static inline void printCommandHelp(const char* command)
         printCommandHelpOsFormat();
     else if(strcasecmp(command, "host-format") == 0)
         printCommandHelpHostFormat();
-    else if(strcasecmp(command, "battery-format") == 0)
-        printCommandHelpBatteryFormat();
+    else if(strcasecmp(command, "kernel-format") == 0)
+        printCommandHelpKernelFormat();
+    else if(strcasecmp(command, "uptime-format") == 0)
+        printCommandHelpUptimeFormat();
     else if(strcasecmp(command, "packages-format") == 0)
         printCommandHelpPackagesFormat();
+    else if(strcasecmp(command, "shell-format") == 0)
+        printCommandHelpShellFormat();
     else if(strcasecmp(command, "resolution-format") == 0)
         printCommandHelpResolutionFormat();
+    else if(strcasecmp(command, "de-format") == 0)
+        printCommandHelpDEFormat();
+    else if(strcasecmp(command, "wm-format") == 0)
+        printCommandHelpWMFormat();
+    else if(strcasecmp(command, "theme-format") == 0)
+        printCommandHelpThemeFormat();
+    else if(strcasecmp(command, "icons-format") == 0)
+        printCommandHelpIconsFormat();
+    else if(strcasecmp(command, "font-format") == 0)
+        printCommandHelpFontFormat();
+    else if(strcasecmp(command, "terminal-format") == 0)
+        printCommandHelpTerminalFormat();
+    else if(strcasecmp(command, "terminal-font-format") == 0)
+        printCommandHelpTerminalFontFormat();
+    else if(strcasecmp(command, "cpu-format") == 0)
+        printCommandHelpCPUFormat();
+    else if(strcasecmp(command, "gpu-format") == 0)
+        printCommandHelpGPUFormat();
+    else if(strcasecmp(command, "memory-format") == 0)
+        printCommandHelpMemoryFormat();
+    else if(strcasecmp(command, "disk-format") == 0)
+        printCommandHelpDiskFormat();
+    else if(strcasecmp(command, "battery-format") == 0)
+        printCommandHelpBatteryFormat();
+    else if(strcasecmp(command, "locale-format") == 0)
+        printCommandHelpLocaleFormat();
     else
         printf("No specific help for command %s provided\n", command);
 }
@@ -249,81 +303,14 @@ static inline bool optionParseBoolean(const char* str)
     );
 }
 
-static inline void optionParseString(const char* key, const char* value, char* target, uint32_t capacity)
+static inline void optionParseString(const char* key, const char* value, FFstrbuf* buffer)
 {
     if(value == NULL)
     {
         printf("Error: usage: %s <str>\n", key);
         exit(477);
     }
-    size_t len = strlen(value);
-    if(len > capacity)
-    {
-        printf("max string length for %s is %u, %zu given\n", key, capacity, len);
-        exit(478);
-    }
-    strcpy(target, value);
-}
-
-static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
-{
-    const char* setValue = ffValuestoreGet(&data->valuestore, line);
-    if(setValue != NULL)
-    {
-        ffPrintCustom(instance, line, setValue);
-        return;
-    }
-
-    if(strcasecmp(line, "break") == 0)
-        ffPrintBreak(instance);
-    else if(strcasecmp(line, "title") == 0)
-        ffPrintTitle(instance);
-    else if(strcasecmp(line, "seperator") == 0)
-        ffPrintSeperator(instance);
-    else if(strcasecmp(line, "os") == 0)
-        ffPrintOS(instance);
-    else if(strcasecmp(line, "host") == 0)
-        ffPrintHost(instance);
-    else if(strcasecmp(line, "kernel") == 0)
-        ffPrintKernel(instance);
-    else if(strcasecmp(line, "uptime") == 0)
-        ffPrintUptime(instance);
-    else if(strcasecmp(line, "packages") == 0)
-        ffPrintPackages(instance);
-    else if(strcasecmp(line, "shell") == 0)
-        ffPrintShell(instance);
-    else if(strcasecmp(line, "resolution") == 0)
-        ffPrintResolution(instance);
-    else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
-        ffPrintDesktopEnvironment(instance);
-    else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)
-        ffPrintWM(instance);
-    else if(strcasecmp(line, "theme") == 0)
-        ffPrintTheme(instance);
-    else if(strcasecmp(line, "icons") == 0)
-        ffPrintIcons(instance);
-    else if(strcasecmp(line, "font") == 0)
-        ffPrintFont(instance);
-    else if(strcasecmp(line, "terminal") == 0)
-        ffPrintTerminal(instance);
-    else if(strcasecmp(line, "terminalfont") == 0)
-        ffPrintTerminalFont(instance);
-    else if(strcasecmp(line, "cpu") == 0)
-        ffPrintCPU(instance);
-    else if(strcasecmp(line, "gpu") == 0)
-        ffPrintGPU(instance);
-    else if(strcasecmp(line, "memory") == 0)
-        ffPrintMemory(instance);
-    else if(strcasecmp(line, "disk") == 0)
-        ffPrintDisk(instance);
-    else if(strcasecmp(line, "battery") == 0)
-        ffPrintBattery(instance);
-    else if(strcasecmp(line, "locale") == 0)
-        ffPrintLocale(instance);
-    else if(strcasecmp(line, "colors") == 0)
-        ffPrintColors(instance);
-    else
-        ffPrintError(instance, line, "<no implementaion provided>");
+    ffStrbufSetS(buffer, value);
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -356,21 +343,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         puts(FASTFETCH_DEFAULT_CONFIG);
         exit(0);
-    }
-    else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
-    {
-        if(value == NULL)
-        {
-            printf("Error: usage: %s <color>\n", key);
-            exit(402);
-        }
-        size_t len = strlen(value);
-        if(len > 28)
-        {
-            printf("Error: max color string length is 28, %zu given\n", len);
-            exit(403);
-        }
-        sprintf(instance->config.color, "\033[%sm", value);
     }
     else if(strcasecmp(key, "--spacer") == 0)
     {
@@ -424,63 +396,64 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = instance->config.recache;
     }
-    else if(strcasecmp(key, "--structure") == 0)
-        optionParseString(key, value, data->structure, sizeof(data->structure));
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
-        optionParseString(key, value, data->logoName, sizeof(instance->config.logo));
-    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--seperator") == 0)
-        optionParseString(key, value, instance->config.seperator, sizeof(instance->config.seperator));
     else if(strcasecmp(key, "--show-errors") == 0)
         instance->config.showErrors = optionParseBoolean(value);
     else if(strcasecmp(key, "--color-logo") == 0)
         instance->config.colorLogo = optionParseBoolean(value);
-    else if(strcasecmp(key, "--os-architecture") == 0)
-        instance->config.osShowArchitecture = optionParseBoolean(value);
+    else if(strcasecmp(key, "--structure") == 0)
+        optionParseString(key, value, &data->structure);
+    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
+        optionParseString(key, value, &data->logoName);
+    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--seperator") == 0)
+        optionParseString(key, value, &instance->config.seperator);
+    else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
+        optionParseString(key, value, &instance->config.color);
     else if(strcasecmp(key, "--os-format") == 0)
-        optionParseString(key, value, instance->config.osFormat, sizeof(instance->config.osFormat));
-    else if(strcasecmp(key, "--host-version") == 0)
-        instance->config.hostShowVersion = optionParseBoolean(value);
+        optionParseString(key, value, &instance->config.osFormat);
     else if(strcasecmp(key, "--host-format") == 0)
-        optionParseString(key, value, instance->config.hostFormat, sizeof(instance->config.hostFormat));
-    else if(strcasecmp(key, "--kernel-release") == 0)
-        instance->config.kernelShowRelease = optionParseBoolean(value);
-    else if(strcasecmp(key, "--kernel-version") == 0)
-        instance->config.kernelShowVersion = optionParseBoolean(value);
-    else if(strcasecmp(key, "--packages-combined") == 0)
-        instance->config.packagesCombined = optionParseBoolean(value);
-    else if(strcasecmp(key, "--packages-combined-names") == 0)
-    {
-        instance->config.packagesCombined = true;
-        instance->config.packagesCombinedNames = optionParseBoolean(value);
-    }
-    else if(strcasecmp(key, "--packages-pacman") == 0)
-        instance->config.packagesShowPacman = optionParseBoolean(value);
-    else if(strcasecmp(key, "--packages-flatpak") == 0)
-        instance->config.packagesShowFlatpak = optionParseBoolean(value);
+        optionParseString(key, value, &instance->config.hostFormat);
+    else if(strcasecmp(key, "--kernel-format") == 0)
+        optionParseString(key, value, &instance->config.kernelFormat);
+    else if(strcasecmp(key, "--uptime-format") == 0)
+        optionParseString(key, value, &instance->config.uptimeFormat);
     else if(strcasecmp(key, "--packages-format") == 0)
-        optionParseString(key, value, instance->config.packagesFormat, sizeof(instance->config.packagesFormat));
-    else if(strcasecmp(key, "--shell-path") == 0)
-        instance->config.shellShowPath = optionParseBoolean(value);
-    else if(strcasecmp(key, "--resolution-refreshrate") == 0)
-        instance->config.resolutionShowRefreshRate = optionParseBoolean(value);
-    else if(strcasecmp(key, "--resolution-libX11") == 0)
-        optionParseString(key, value, instance->config.resolutionLibX11, sizeof(instance->config.resolutionLibX11));
-    else if(strcasecmp(key, "--resolution-libXrandr") == 0)
-        optionParseString(key, value, instance->config.resolutionLibXrandr, sizeof(instance->config.resolutionLibXrandr));
+        optionParseString(key, value, &instance->config.packagesFormat);
+    else if(strcasecmp(key, "--shell-format") == 0)
+        optionParseString(key, value, &instance->config.shellFormat);
     else if(strcasecmp(key, "--resolution-format") == 0)
-        optionParseString(key, value, instance->config.resolutionFormat, sizeof(instance->config.resolutionFormat));
-    else if(strcasecmp(key, "--battery-manufacturer") == 0)
-        instance->config.batteryShowManufacturer = optionParseBoolean(value);
-    else if(strcasecmp(key, "--battery-model") == 0)
-        instance->config.batteryShowModel = optionParseBoolean(value);
-    else if(strcasecmp(key, "--battery-technology") == 0)
-        instance->config.batteryShowTechnology = optionParseBoolean(value);
-    else if(strcasecmp(key, "--battery-capacity") == 0)
-        instance->config.batteryShowCapacity = optionParseBoolean(value);
-    else if(strcasecmp(key, "--battery-status") == 0)
-        instance->config.batteryShowStatus = optionParseBoolean(value);
+        optionParseString(key, value, &instance->config.resolutionFormat);
+    else if(strcasecmp(key, "--de-format") == 0)
+        optionParseString(key, value, &instance->config.deFormat);
+    else if(strcasecmp(key, "--wm-format") == 0)
+        optionParseString(key, value, &instance->config.wmFormat);
+    else if(strcasecmp(key, "--theme-format") == 0)
+        optionParseString(key, value, &instance->config.themeFormat);
+    else if(strcasecmp(key, "--icons-format") == 0)
+        optionParseString(key, value, &instance->config.iconsFormat);
+    else if(strcasecmp(key, "--font-format") == 0)
+        optionParseString(key, value, &instance->config.fontFormat);
+    else if(strcasecmp(key, "--terminal-format") == 0)
+        optionParseString(key, value, &instance->config.terminalFormat);
+    else if(strcasecmp(key, "--terminal-font-format") == 0)
+        optionParseString(key, value, &instance->config.termFontFormat);
+    else if(strcasecmp(key, "--cpu-format") == 0)
+        optionParseString(key, value, &instance->config.cpuFormat);
+    else if(strcasecmp(key, "--gpu-format") == 0)
+        optionParseString(key, value, &instance->config.gpuFormat);
+    else if(strcasecmp(key, "--memory-format") == 0)
+        optionParseString(key, value, &instance->config.memoryFormat);
+    else if(strcasecmp(key, "--disk-format") == 0)
+        optionParseString(key, value, &instance->config.diskFormat);
     else if(strcasecmp(key, "--battery-format") == 0)
-        optionParseString(key, value, instance->config.batteryFormat, sizeof(instance->config.batteryFormat));
+        optionParseString(key, value, &instance->config.batteryFormat);
+    else if(strcasecmp(key, "--locale-format") == 0)
+        optionParseString(key, value, &instance->config.localeFormat);
+    else if(strcasecmp(key, "--lib-PCI") == 0)
+        optionParseString(key, value, &instance->config.libPCI);
+    else if(strcasecmp(key, "--lib-X11") == 0)
+        optionParseString(key, value, &instance->config.libX11);
+    else if(strcasecmp(key, "--lib-Xrandr") == 0)
+        optionParseString(key, value, &instance->config.libXrandr);
     else
     {
         printf("Error: unknown option: %s\n", key);
@@ -606,22 +579,83 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 static void applyData(FFinstance* instance, FFdata* data)
 {
     //We must do this after parsing all options because of color options
-    if(data->logoName[0] == '\0')
+    if(ffStrbufIsEmpty(&data->logoName))
         ffLoadLogo(&instance->config);
     else
-        ffLoadLogoSet(&instance->config, data->logoName);
+        ffLoadLogoSet(&instance->config, data->logoName.chars);
 
     //This must be done after loading the logo
-    if(instance->config.color[0] == '\0')
-        strcpy(instance->config.color, instance->config.logo.color);
+    if(ffStrbufIsEmpty(&instance->config.color))
+        ffStrbufSetS(&instance->config.color, instance->config.logo.color);
+}
+
+static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
+{
+    const char* setValue = ffValuestoreGet(&data->valuestore, line);
+    if(setValue != NULL)
+    {
+        ffPrintCustom(instance, line, setValue);
+        return;
+    }
+
+    if(strcasecmp(line, "break") == 0)
+        ffPrintBreak(instance);
+    else if(strcasecmp(line, "title") == 0)
+        ffPrintTitle(instance);
+    else if(strcasecmp(line, "seperator") == 0)
+        ffPrintSeperator(instance);
+    else if(strcasecmp(line, "os") == 0)
+        ffPrintOS(instance);
+    else if(strcasecmp(line, "host") == 0)
+        ffPrintHost(instance);
+    else if(strcasecmp(line, "kernel") == 0)
+        ffPrintKernel(instance);
+    else if(strcasecmp(line, "uptime") == 0)
+        ffPrintUptime(instance);
+    else if(strcasecmp(line, "packages") == 0)
+        ffPrintPackages(instance);
+    else if(strcasecmp(line, "shell") == 0)
+        ffPrintShell(instance);
+    else if(strcasecmp(line, "resolution") == 0)
+        ffPrintResolution(instance);
+    else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
+        ffPrintDesktopEnvironment(instance);
+    else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)
+        ffPrintWM(instance);
+    else if(strcasecmp(line, "theme") == 0)
+        ffPrintTheme(instance);
+    else if(strcasecmp(line, "icons") == 0)
+        ffPrintIcons(instance);
+    else if(strcasecmp(line, "font") == 0)
+        ffPrintFont(instance);
+    else if(strcasecmp(line, "terminal") == 0)
+        ffPrintTerminal(instance);
+    else if(strcasecmp(line, "terminalfont") == 0)
+        ffPrintTerminalFont(instance);
+    else if(strcasecmp(line, "cpu") == 0)
+        ffPrintCPU(instance);
+    else if(strcasecmp(line, "gpu") == 0)
+        ffPrintGPU(instance);
+    else if(strcasecmp(line, "memory") == 0)
+        ffPrintMemory(instance);
+    else if(strcasecmp(line, "disk") == 0)
+        ffPrintDisk(instance);
+    else if(strcasecmp(line, "battery") == 0)
+        ffPrintBattery(instance);
+    else if(strcasecmp(line, "locale") == 0)
+        ffPrintLocale(instance);
+    else if(strcasecmp(line, "colors") == 0)
+        ffPrintColors(instance);
+    else
+        ffPrintError(instance, line, "<no implementaion provided>");
 }
 
 static void run(FFinstance* instance, FFdata* data)
 {
-    if(data->structure[0] == '\0')
-        strcpy(data->structure, FASTFETCH_DEFAULT_STRUCTURE);
+    if(ffStrbufIsEmpty(&data->structure))
+        ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
     
-    char* remaining = data->structure;
+    char* remaining = data->structure.chars;
     char* colon = NULL;
 
     while(true)
@@ -648,8 +682,8 @@ int main(int argc, const char** argv)
 
     FFdata data;
     ffValuestoreInit(&data.valuestore);
-    data.structure[0] = '\0'; //We use this in run to detect if a structure was set
-    data.logoName[0] = '\0';  //We use this in applyData to detect if a logo was set
+    ffStrbufInit(&data.structure);
+    ffStrbufInitA(&data.logoName, 2048);
 
     parseConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);

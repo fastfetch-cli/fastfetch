@@ -25,8 +25,8 @@ static uint32_t get_num_dirs(const char* dirname) {
 
 void ffPrintPackages(FFinstance* instance)
 {
-    uint32_t pacman = instance->config.packagesShowPacman ? get_num_dirs("/var/lib/pacman/local") : 0;
-    uint32_t flatpak = instance->config.packagesShowFlatpak ? get_num_dirs("/var/lib/flatpak/app") : 0;
+    uint32_t pacman = get_num_dirs("/var/lib/pacman/local");
+    uint32_t flatpak = get_num_dirs("/var/lib/flatpak/app");
 
     uint32_t all = pacman + flatpak;
 
@@ -36,50 +36,17 @@ void ffPrintPackages(FFinstance* instance)
         return;
     }
 
-    ffPrintLogoAndKey(instance, "Packages");
-
-    if(instance->config.packagesFormat[0] != '\0')
+    if(ffStrbufIsEmpty(&instance->config.packagesFormat))
     {
-        printf(instance->config.packagesFormat, all, pacman, flatpak, all);
-        putchar('\n');
-        return;
-    }
+        ffPrintLogoAndKey(instance, "Packages");
 
-    if(instance->config.packagesCombined)
-    {
-        printf("%u", all);
-
-        if(instance->config.packagesCombinedNames)
-        {
-            printf(" (");
-            
-            #define FF_PRINT_PACKAGE(name) \
-                if(name > 0) \
-                { \
-                    printf(#name); \
-                    if((all = all - name) > 0) \
-                        printf(", "); \
-                } \
-
-            FF_PRINT_PACKAGE(pacman)
-            FF_PRINT_PACKAGE(flatpak)
-
-            #undef FF_PRINT_PACKAGE
-
-            printf(")");
-        }
-
-        putchar('\n');
-    }
-    else
-    {
         #define FF_PRINT_PACKAGE(name) \
-            if(name > 0) \
-            { \
-                printf("%u ("#name")", name); \
-                if((all = all - name) > 0) \
-                    printf(", "); \
-            };
+        if(name > 0) \
+        { \
+            printf("%u ("#name")", name); \
+            if((all = all - name) > 0) \
+                printf(", "); \
+        };
 
         FF_PRINT_PACKAGE(pacman)
         FF_PRINT_PACKAGE(flatpak)
@@ -87,5 +54,19 @@ void ffPrintPackages(FFinstance* instance)
         #undef FF_PRINT_PACKAGE
 
         putchar('\n');
+        return;
     }
+
+    FFstrbuf packages;
+    ffStrbufInit(&packages);
+
+    ffParseFormatString(&packages, &instance->config.packagesFormat, 3,
+        (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
+        (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &pacman},
+        (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}   
+    );
+
+    ffPrintLogoAndKey(instance, "Packages");
+    ffStrbufWriteTo(&packages, stdout);
+    ffStrbufDestroy(&packages);
 }

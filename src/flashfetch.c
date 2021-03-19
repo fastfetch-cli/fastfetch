@@ -7,12 +7,10 @@ int main(int argc, char** argv)
     ffDefaultConfig(&instance.config);
 
     //Configuration
-    
     ffLoadLogoSet(&instance.config, "arch");
-    strcpy(instance.config.color, instance.config.logo.color); //Use the primary color of the logo as key color
-
+    ffStrbufSetS(&instance.config.color, instance.config.logo.color); //Use the primary color of the logo as key color
+    
     //Printing
-
     ffPrintTitle(&instance);
     ffPrintSeperator(&instance);
     ffPrintOS(&instance);

@@ -163,7 +163,7 @@ void ffPrintLogoLine(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 3
+    #define FASTFETCH_LOGO_AMOUNT 4
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];

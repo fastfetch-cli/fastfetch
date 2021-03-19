@@ -12,33 +12,40 @@ void ffPrintHost(FFinstance* instance)
     ffGetFileContent("/sys/devices/virtual/dmi/id/product_name", name, sizeof(name));
     
     char version[256];
-    if(instance->config.hostShowVersion || instance->config.hostFormat[0] != '\0')
-        ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", version, sizeof(version));
-    else
-        version[0] = '\0';
+    ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", version, sizeof(version));
 
-    char host[1024];
-
-    if(instance->config.hostFormat[0] != '\0')
-    {
-        snprintf(host, sizeof(host), instance->config.hostFormat, family, name, version);
-    }
-    else if(family[0] == '\0' && name[0] == '\0')
+    if(family[0] == '\0' && name[0] == '\0')
     {
         ffPrintError(instance, "Host", "neither family nor name could be determined");
         return;
-    }else if(family[0] != '\0' && name[0] != '\0')
+    }
+
+    ffPrintLogoAndKey(instance, "Host");
+
+    FFstrbuf host;
+    ffStrbufInit(&host);
+
+    if(!ffStrbufIsEmpty(&instance->config.hostFormat))
     {
-        snprintf(host, sizeof(host), "%s %s %s", family, name, instance->config.hostShowVersion ? version : "");
+        ffParseFormatString(&host, &instance->config.hostFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, family},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, version}
+        );
+    }
+    else if(family[0] != '\0' && name[0] != '\0')
+    {
+        ffStrbufSetF(&host, "%s %s %s", family, name, version);
     }
     else if(family[0] != '\0')
     {
-        snprintf(host, sizeof(host), "%s %s", family, instance->config.hostShowVersion ? version : "");
+        ffStrbufSetF(&host, "%s %s", family, version);
     }
     else
     {
-        snprintf(host, sizeof(host), "%s %s", name, instance->config.hostShowVersion ? version : "");
+        ffStrbufSetF(&host, "%s %s", name, version);
     }
 
-    ffPrintAndSaveCachedValue(instance, "Host", host);
+    ffPrintAndSaveCachedValue(instance, "Host", host.chars);
+    ffStrbufDestroy(&host);
 }

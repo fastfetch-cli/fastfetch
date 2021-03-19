@@ -14,7 +14,7 @@ At the moment the performance difference is measurable, but too small to be huma
 
 ## Supported logos
 
-Currently, `fastfetch` supports the `Arch` and the `Artix` logos only. Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/logos.c`](src/logos.c).
+Currently, `fastfetch` supports the `Arch` and the `Artix` logos only. Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/logos.c`](src/logo.c).
 
 ## Dependencies
 

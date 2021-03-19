@@ -2,14 +2,23 @@
 
 void ffPrintKernel(FFinstance* instance)
 {
-    ffPrintLogoAndKey(instance, "Kernel");
-
-    if(instance->config.kernelShowRelease && instance->config.kernelShowVersion)
-        printf("%s %s\n", instance->state.utsname.release, instance->state.utsname.version);
-    else if(instance->config.kernelShowRelease)
+    if(ffStrbufIsEmpty(&instance->config.kernelFormat))
+    {
+        ffPrintLogoAndKey(instance, "Kernel");
         puts(instance->state.utsname.release);
-    else if(instance->config.kernelShowVersion)
-        puts(instance->state.utsname.version);
-    else
-        puts(instance->state.utsname.sysname);
+        return;
+    }
+
+    FFstrbuf kernel;
+    ffStrbufInit(&kernel);
+
+    ffParseFormatString(&kernel, &instance->config.kernelFormat, 3,
+        (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
+        (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.release},
+        (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.version}
+    );
+
+    ffPrintLogoAndKey(instance, "Kernel");
+    ffStrbufWriteTo(&kernel, stdout);
+    ffStrbufDestroy(&kernel);
 }

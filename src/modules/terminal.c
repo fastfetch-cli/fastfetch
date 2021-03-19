@@ -54,7 +54,7 @@ static void getTerminalName(FFinstance* instance, const char* pid, char* termina
 
 void ffPopulateTerminal(FFinstance* instance)
 {
-    if(instance->state.terminal.value != NULL || instance->state.terminal.error != NULL)
+    if(instance->state.terminal.calculated)
         return;
 
     static char terminal[256];
@@ -68,27 +68,41 @@ void ffPopulateTerminal(FFinstance* instance)
     getTerminalName(instance, ppid, terminal, error);
 
     if(terminal[0] != '\0')
-        instance->state.terminal.value = terminal;
+        ffStrbufSetS(&instance->state.terminal.value, terminal);
 
     if(error[0] != '\0')
         instance->state.terminal.error = error;
+
+    instance->state.terminal.calculated = true;
 }
 
 void ffPrintTerminal(FFinstance* instance)
 {
     ffPopulateTerminal(instance);
-    
-    if(instance->state.terminal.value != NULL)
-    {
-        ffPrintLogoAndKey(instance, "Terminal");
-        puts(instance->state.terminal.value);
-    }
-    else if(instance->state.terminal.error != NULL)
+
+    if(instance->state.terminal.error != NULL)
     {
         ffPrintError(instance, "Terminal", instance->state.terminal.error);
+        return;
+    }
+
+    ffPrintLogoAndKey(instance, "Terminal");
+    
+    if(ffStrbufIsEmpty(&instance->config.terminalFormat))
+    {
+        ffStrbufWriteTo(&instance->state.terminal.value, stdout);
     }
     else
     {
-        ffPrintError(instance, "Terminal", "ffPopulateTerminal failed");
+        FFstrbuf terminal;
+        ffStrbufInit(&terminal);
+
+        ffParseFormatString(&terminal, &instance->config.terminalFormat, 1,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.terminal.value}
+        );
+
+        ffStrbufWriteTo(&terminal, stdout);
     }
+
+    putchar('\n');
 }

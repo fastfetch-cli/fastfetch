@@ -19,14 +19,40 @@ void ffPrintIcons(FFinstance* instance)
     ffParsePropFileHome(instance, ".config/gtk-4.0/settings.ini", "gtk-icon-theme-name=%[^\n]", gtk4);
     if(gtk4[0] == '\0')
         strcpy(gtk4, "Adwaita");
-    
+
+    FFstrbuf gtkPretty;
+    ffStrbufInit(&gtkPretty);
+    ffFormatGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
+
     ffPrintLogoAndKey(instance, "Icons");
 
-    if(plasma[0] == '\0')
-        printf("Breeze [Plasma], ");
-    else
-        printf("%s [Plasma], ", plasma);
+    if(ffStrbufIsEmpty(&instance->config.iconsFormat))
+    {
+        if(plasma[0] == '\0')
+            printf("Breeze [Plasma], ");
+        else
+            printf("%s [Plasma], ", plasma);
 
-    ffPrintGtkPretty(gtk2, gtk3, gtk4);
+        ffStrbufWriteTo(&gtkPretty, stdout);
+    }
+    else
+    {
+        FFstrbuf icons;
+        ffStrbufInit(&icons);
+
+        ffParseFormatString(&icons, &instance->config.iconsFormat, 5,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk4},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
+        );
+
+        ffStrbufWriteTo(&icons, stdout);
+        ffStrbufDestroy(&icons);
+    }
+
     putchar('\n');
+
+    ffStrbufDestroy(&gtkPretty);
 }
