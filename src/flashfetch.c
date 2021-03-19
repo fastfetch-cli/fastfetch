@@ -36,5 +36,6 @@ int main(int argc, char** argv)
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 
+    ffFinish(&instance);
     return 0;
 }

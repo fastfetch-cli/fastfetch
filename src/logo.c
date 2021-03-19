@@ -230,6 +230,15 @@ void ffPrintLogoLine(FFinstance* instance)
     ++instance->state.current_row;
 }
 
+void ffPrintRemainingLogo(FFinstance* instance)
+{
+    while(instance->state.current_row < instance->config.logo.height)
+    {
+        ffPrintLogoLine(instance);
+        putchar('\n');
+    }
+}
+
 #ifndef FASTFETCH_BUILD_FLASHFETCH
 
 static FFlogo* getLogos(uint8_t* size, bool color)

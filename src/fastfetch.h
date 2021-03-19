@@ -43,6 +43,7 @@ typedef struct FFconfig
     bool showErrors;
     bool recache;
     bool cacheSave; //This is only set to true when using arguments, because we dont want so save this values
+    bool printRemainingLogo;
 
     FFstrbuf osFormat;
     FFstrbuf hostFormat;
@@ -125,11 +126,13 @@ void ffTrimTrailingWhitespace(char* buffer);
 bool ffPrintCachedValue(FFinstance* instance, const char* key);
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value);
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
+void ffFinish(FFinstance* instance);
 
 //Logo functions
 void ffLoadLogoSet(FFconfig* config, const char* logo);
 void ffLoadLogo(FFconfig* config);
 void ffPrintLogoLine(FFinstance* instance);
+void ffPrintRemainingLogo(FFinstance* instance);
 
 #ifndef FLASHFETCH_BUILD_FLASHFATCH
 void ffListLogos();

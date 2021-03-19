@@ -30,6 +30,7 @@ void ffDefaultConfig(FFconfig* config)
     config->showErrors = false;
     config->recache = false;
     config->cacheSave = true;
+    config->printRemainingLogo = true;
 
     ffStrbufInit(&config->osFormat);
     ffStrbufInit(&config->hostFormat);
@@ -55,6 +56,47 @@ void ffDefaultConfig(FFconfig* config)
     ffStrbufInitA(&config->libPCI, 256);
     ffStrbufInitA(&config->libX11, 256);
     ffStrbufInitA(&config->libXrandr, 256);
+}
+
+static void ffCleanup(FFinstance* instance)
+{
+    ffStrbufDestroy(&instance->config.color);
+    ffStrbufDestroy(&instance->config.seperator);
+
+    ffStrbufDestroy(&instance->config.osFormat);
+    ffStrbufDestroy(&instance->config.hostFormat);
+    ffStrbufDestroy(&instance->config.kernelFormat);
+    ffStrbufDestroy(&instance->config.uptimeFormat);
+    ffStrbufDestroy(&instance->config.packagesFormat);
+    ffStrbufDestroy(&instance->config.shellFormat);
+    ffStrbufDestroy(&instance->config.resolutionFormat);
+    ffStrbufDestroy(&instance->config.deFormat);
+    ffStrbufDestroy(&instance->config.wmFormat);
+    ffStrbufDestroy(&instance->config.themeFormat);
+    ffStrbufDestroy(&instance->config.iconsFormat);
+    ffStrbufDestroy(&instance->config.fontFormat);
+    ffStrbufDestroy(&instance->config.terminalFormat);
+    ffStrbufDestroy(&instance->config.termFontFormat);
+    ffStrbufDestroy(&instance->config.cpuFormat);
+    ffStrbufDestroy(&instance->config.gpuFormat);
+    ffStrbufDestroy(&instance->config.memoryFormat);
+    ffStrbufDestroy(&instance->config.diskFormat);
+    ffStrbufDestroy(&instance->config.batteryFormat);
+    ffStrbufDestroy(&instance->config.localeFormat);
+
+    ffStrbufDestroy(&instance->config.libPCI);
+    ffStrbufDestroy(&instance->config.libX11);
+    ffStrbufDestroy(&instance->config.libXrandr);
+
+    ffStrbufDestroy(&instance->state.terminal.value);
+}
+
+void ffFinish(FFinstance* instance)
+{
+    if(instance->config.printRemainingLogo)
+        ffPrintRemainingLogo(instance);
+
+    ffCleanup(instance);
 }
 
 void ffPrintKey(FFconfig* config, const char* key)

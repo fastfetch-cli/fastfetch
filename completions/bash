@@ -109,11 +109,7 @@ __fastfetch_completion()
         "--recache"
         "--show-errors"
         "--color-logo"
-        "--battery-manufacturer"
-        "--battery-model"
-        "--battery-technology"
-        "--battery-capacity"
-        "--battery-status"
+        "--print-remaining-logo"
     )
 
     local FF_OPTIONS_STRING=(
