@@ -246,7 +246,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadArchLogo(&logos[2], color);
     loadArtixLogo(&logos[3], color);
     loadUbuntuLogo(&logos[4], color);
-    loadDebianLogo(&logos[4], color);
+    loadDebianLogo(&logos[5], color);
 
     return logos;
 }
