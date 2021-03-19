@@ -67,7 +67,7 @@ static void loadArchLogo(FFlogo* logo, bool doColor)
 
 static void loadArtixLogo(FFlogo* logo, bool doColor)
 {
-    logo->width = 39;
+    logo->width = 38;
     logo->height = 20;
     strcpy(logo->name, "artix");
 
