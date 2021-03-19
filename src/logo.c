@@ -129,6 +129,36 @@ static void loadUbuntuLogo(FFlogo *logo, bool doColor)
     sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s           .-/+oossssoo+/-.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadDebianLogo(FFlogo *logo, bool doColor)
+{
+    logo->width = 27;
+    logo->height = 17;
+    strcpy(logo->name, "debian");
+
+    /* color = red; color2 = white */
+    const char* color = doColor ? "\033[91m" : "";
+    const char* color2 = doColor ? "\033[97m" : "";
+    strcpy(logo->color, "\033[91m");
+
+    sprintf(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"%s       _,met$$$$$gg.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"%s    ,g$$$$$$$$$$$$$$$P.    "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT"%s  ,g$$P\"     \"\"\"Y$$.\".     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"%s ,$$P'              `$$$.  "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"%s',$$P       ,ggs.     `$$b:"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"%s`d$$'     ,$P\"'   %s.%s    $$$ "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"%s $$P      d$'     %s,%s    $$P "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"%s $$:      $$.   %s-%s    ,d$$' "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"%s $$;      Y$b._   _,d$P'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"%s Y$$.    %s`.%s`\"Y$$$$P\"'      "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s `$$b      %s\"-.__%s           "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s  `Y$$                     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s   `Y$$.                   "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s     `$$b.                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s       `Y$$b.              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s          `\"Y$b._          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s             `\"\"\"          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+}
+
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
     if(strcasecmp(logo, "none") == 0)
@@ -147,6 +177,10 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     else if(strcasecmp(logo, "ubuntu") == 0)
     {
         loadUbuntuLogo(&config->logo, config->colorLogo);
+    }
+    else if(strcasecmp(logo, "debian") == 0)
+    {
+        loadDebianLogo(&config->logo, config->colorLogo);
     }
     else
     {
@@ -200,7 +234,7 @@ void ffPrintLogoLine(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 5
+    #define FASTFETCH_LOGO_AMOUNT 6
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
@@ -212,6 +246,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadArchLogo(&logos[2], color);
     loadArtixLogo(&logos[3], color);
     loadUbuntuLogo(&logos[4], color);
+    loadDebianLogo(&logos[4], color);
 
     return logos;
 }
