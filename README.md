@@ -15,7 +15,7 @@ At the moment the performance difference is measurable, but too small to be huma
 ## Supported logos
 
 Currently, `fastfetch` supports the following logos:
-- `Arch`;
+- `Arch`
 - `Artix`
 - `Ubuntu`
 - `Debian`
