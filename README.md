@@ -12,6 +12,10 @@ The main one being `fastfetch`, which can be greatly configured via flags. These
 The second executable being build is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
 At the moment the performance difference is measurable, but too small to be human recognizable. But the lap will get bigger with more and more options coming and on slow machines this may actually make a difference.
 
+## Supported logos
+
+Currently, `fastfetch` supports the `Arch` and the `Artix` logos only. Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/logos.c`](src/logos.c).
+
 ## Dependencies
 
 In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is `libdl` which is automatically shipped with every linux system.  
@@ -23,10 +27,12 @@ Following libraries are used if present:
 ## Building
 
 fastfetch uses [`cmake`](https://cmake.org/) for building. The simplies steps to build the entire project are:  
-&emsp;&emsp;`mkdir -p build/`  
-&emsp;&emsp;`cd build/`  
-&emsp;&emsp;`cmake ..`  
-&emsp;&emsp;`cmake --build .`  
+```bash
+mkdir -p build && \
+cd build && \
+cmake .. && \
+cmake --build .
+```
   
 this will produce `build/fastfetch` and `build/flashfetch`, both standalone executables.  
 Command line completions for bash can be found in [`completions/bash`](completions/bash).  
