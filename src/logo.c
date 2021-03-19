@@ -67,23 +67,23 @@ static void loadArchLogo(FFlogo* logo, bool doColor)
 
 static void loadArtixLogo(FFlogo* logo, bool doColor)
 {
-    logo->width = 39;
+    logo->width = 40;
     logo->height = 20;
     strcpy(logo->name, "artix");
 
     const char* color = doColor ? "\033[36m" : "";
     strcpy(logo->color, "\033[36m");
 
-    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   '                   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  'o'                  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 'ooo'                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                'ooxoo'                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               'ooxxxoo'               "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              'oookkxxoo'              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             'oiioxkkxxoo'             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            ':;:iiiioxxxoo'            "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `'.;::ioxxoo''           "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          '-.      `':;jiooo'          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   '                  "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  'o'                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 'ooo'                "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                'ooxoo'               "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               'ooxxxoo'              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              'oookkxxoo'             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             'oiioxkkxxoo'            "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            ':;:iiiioxxxoo'           "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `'.;::ioxxoo''          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          '-.      `':;jiooo'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[10],  FASTFETCH_TEXT_MODIFIER_BOLT"%s        'oooio-..     `'i:io'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[11],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       'ooooxxxxoio:,.   `'-;'        "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[12],  FASTFETCH_TEXT_MODIFIER_BOLT"%s      'ooooxxxxxkkxoooIi:-.  `'       "FASTFETCH_TEXT_MODIFIER_RESET, color);
@@ -150,9 +150,9 @@ void ffPrintLogoLine(FFinstance* instance)
     else
     {
         for(uint8_t i = 0; i < instance->config.logo.width - cut; i++)
-            putchar(' ');   
+            putchar(' ');
     }
-    
+
     for(uint16_t i = 0; i < instance->config.logo_spacer; i++)
         putchar(' ');
 
@@ -167,7 +167,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
-    
+
     #undef FASTFETCH_LOGO_AMOUNT
 
     loadNoneLogo(&logos[0]);
@@ -202,3 +202,4 @@ void ffPrintLogos(bool doColor)
 }
 
 #endif
+
