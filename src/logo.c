@@ -74,26 +74,26 @@ static void loadArtixLogo(FFlogo* logo, bool doColor)
     const char* color = doColor ? "\033[36m" : "";
     strcpy(logo->color, "\033[36m");
 
-    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   '                   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  'o'                  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 'ooo'                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                'ooxoo'                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               'ooxxxoo'               "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              'oookkxxoo'              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             'oiioxkkxxoo'             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            ':;:iiiioxxxoo'            "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `'.;::ioxxoo''           "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          '-.      `':;jiooo'          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[10],  FASTFETCH_TEXT_MODIFIER_BOLT"%s        'oooio-..     `'i:io'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       'ooooxxxxoio:,.   `'-;'        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12],  FASTFETCH_TEXT_MODIFIER_BOLT"%s      'ooooxxxxxkkxoooIi:-.  `'       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     'ooooxxxxxkkkkxoiiiiiji'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14],  FASTFETCH_TEXT_MODIFIER_BOLT"%s    'ooooxxxxxkxxoiiii:'`     .i'     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15],  FASTFETCH_TEXT_MODIFIER_BOLT"%s   'ooooxxxxxoi:::'`       .;ioxo'    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16],  FASTFETCH_TEXT_MODIFIER_BOLT"%s  'ooooxooi::'`         .:iiixkxxo'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[17],  FASTFETCH_TEXT_MODIFIER_BOLT"%s 'ooooi:'`                `'';ioxxo'  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[18],  FASTFETCH_TEXT_MODIFIER_BOLT"%s'i:'`                          '':io' "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[19],  FASTFETCH_TEXT_MODIFIER_BOLT"%s'`                                  `'"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   '                  "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  'o'                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 'ooo'                "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                'ooxoo'               "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               'ooxxxoo'              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              'oookkxxoo'             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             'oiioxkkxxoo'            "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            ':;:iiiioxxxoo'           "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `'.;::ioxxoo''          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          '-.      `':;jiooo'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s        'oooio-..     `'i:io'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s       'ooooxxxxoio:,.   `'-;'        "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s      'ooooxxxxxkkxoooIi:-.  `'       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s     'ooooxxxxxkkkkxoiiiiiji'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    'ooooxxxxxkxxoiiii:'`     .i'     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s   'ooooxxxxxoi:::'`       .;ioxo'    "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s  'ooooxooi::'`         .:iiixkxxo'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s 'ooooi:'`                `'';ioxxo'  "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s'i:'`                          '':io' "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s'`                                  `'"FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
 void ffLoadLogoSet(FFconfig* config, const char* logo)
