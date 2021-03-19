@@ -12,20 +12,38 @@ void ffPrintShell(FFinstance* instance)
         return;
     }
 
-    char* value;
+    char empty[1];
+    empty[0] = '\0';
 
-    if(!instance->config.shellShowPath)
+    char* shellName = strrchr(shellPath, '/');
+    if(shellName == NULL)
     {
-        char* shellName = strrchr(shellPath, '/');
-        if(shellName != NULL)
-            value = ++shellName;
-        else
-            value = shellPath;
+        shellName = shellPath;
+        shellPath = empty;
     }
     else
     {
-        value = shellPath;
+        *shellName = '\0';
+        ++shellName;
     }
 
-    ffPrintAndSaveCachedValue(instance, "Shell", value);
+    ffPrintLogoAndKey(instance, "Shell");
+
+    FFstrbuf shell;
+    ffStrbufInit(&shell);
+
+    if(!ffStrbufIsEmpty(&instance->config.shellFormat))
+    {
+        ffParseFormatString(&shell, &instance->config.shellFormat, 2,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, shellPath},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, shellName}
+        );
+    }
+    else
+    {
+        ffStrbufSetS(&shell, shellName);
+    }
+
+    ffPrintAndSaveCachedValue(instance, "Shell", shell.chars);
+    ffStrbufDestroy(&shell);
 }

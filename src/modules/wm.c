@@ -2,12 +2,14 @@
 
 #include <dirent.h>
 
-static void parseProcessName(const char* name, char* buffer)
+static bool parseProcessName(FFstrbuf* name)
 {
-    if(strcasecmp(name, "kwin_wayland") == 0)
-        strcpy(buffer, "KWin (Wayland)");
-    else if(strcasecmp(name, "kwin_x11") == 0)
-        strcpy(buffer, "KWin (X11)");        
+    if(ffStrbufIgnCaseCompS(name, "kwin_wayland") == 0 || ffStrbufIgnCaseCompS(name, "kwin_x11") == 0)
+        ffStrbufSetS(name, "KWin");
+    else
+        return false;
+
+    return true;        
 }
 
 void ffPrintWM(FFinstance* instance)
@@ -21,8 +23,10 @@ void ffPrintWM(FFinstance* instance)
 
     struct dirent* dirent;
 
-    char name[32];
-    name[0] = '\0';
+    FFstrbuf name;
+    ffStrbufInit(&name);
+
+    bool found = false;
 
     while((dirent = readdir(proc)) != NULL)
     {
@@ -35,24 +39,39 @@ void ffPrintWM(FFinstance* instance)
         char comm[17]; //MAX_COMM_LENGTH is 17 + null terminator
         ffGetFileContent(path, comm, sizeof(comm));
 
-        if(comm[0] == '\0')
-            continue;
+        ffStrbufSetS(&name, comm);
 
-        parseProcessName(comm, name);
-
-        if(name[0] != '\0')
+        if((found = parseProcessName(&name)))
             break;
     }
 
     closedir(proc);
 
-    if(name[0] == '\0')
+    if(!found)
     {
         ffPrintError(instance, "WM", "No process name matches the name of known display managers");
+        return;
+    }
+
+    if(ffStrbufIsEmpty(&instance->config.wmFormat))
+    {
+        ffPrintLogoAndKey(instance, "WM");
+        ffStrbufWriteTo(&name, stdout);
     }
     else
     {
+        FFstrbuf wm;
+        ffStrbufInit(&wm);
+
+        ffParseFormatString(&wm, &instance->config.wmFormat, 1,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name}
+        );
+
         ffPrintLogoAndKey(instance, "WM");
-        puts(name);
+        ffStrbufWriteTo(&wm, stdout);
+        
+        ffStrbufDestroy(&wm);
     }
+
+    putchar('\n');
 }

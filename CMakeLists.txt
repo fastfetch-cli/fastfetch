@@ -33,6 +33,7 @@ include_directories(
 set(SRCS
     src/common.c
     src/logo.c
+    src/util/FFstrbuf.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -44,7 +45,7 @@ set(SRCS
     src/modules/packages.c
     src/modules/shell.c
     src/modules/resolution.c
-    src/modules/desktopenvironment.c
+    src/modules/de.c
     src/modules/wm.c
     src/modules/theme.c
     src/modules/icons.c

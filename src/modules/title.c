@@ -10,6 +10,6 @@ void ffPrintTitle(FFinstance* instance)
     ffPrintLogoLine(instance);
 
     printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"@"FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"\n",
-        instance->config.color, instance->state.passwd->pw_name, instance->config.color, hostname
+        instance->config.color.chars, instance->state.passwd->pw_name, instance->config.color.chars, hostname
     );
 }

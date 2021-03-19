@@ -2,26 +2,46 @@
 
 void ffPrintUptime(FFinstance* instance)
 {
-    ffPrintLogoAndKey(instance, "Uptime");
 
-    if(instance->state.sysinfo.uptime < 60)
+    uint32_t days    =  instance->state.sysinfo.uptime / 86400;
+	uint32_t hours   = (instance->state.sysinfo.uptime - (days * 86400)) / 3600; 
+    uint32_t minutes = (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
+    uint32_t seconds =  instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
+
+    if(ffStrbufIsEmpty(&instance->config.uptimeFormat))
     {
-        printf("%ld seconds\n", instance->state.sysinfo.uptime);
-        return;
+        ffPrintLogoAndKey(instance, "Uptime");
+
+        if(days == 0 && hours == 0 && minutes == 0)
+        {
+            printf("%u seconds\n", seconds);
+        }
+        else
+        {
+            if(days > 0)
+                printf("%u day%s, ", days, days <= 1 ? "" : "s");
+            if(hours > 0)
+                printf("%u hour%s, ", hours, hours <= 1 ? "" : "s");
+            if(minutes > 0)
+                printf("%u min%s", minutes, minutes <= 1 ? "" : "s");
+            putchar('\n');
+        }
     }
+    else
+    {
+        FFstrbuf uptime;
+        ffStrbufInit(&uptime);
 
-    int days = instance->state.sysinfo.uptime / 86400;
-	int hours = (instance->state.sysinfo.uptime - (days * 86400)) / 3600; 
-	int minutes = (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
-	
-    if(days > 0)
-        printf("%d day%s, ", days, days <= 1 ? "" : "s");
 
-    if(hours > 0)
-        printf("%d hour%s, ", hours, hours <= 1 ? "" : "s");
+        ffParseFormatString(&uptime, &instance->config.uptimeFormat, 4,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &days},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &hours},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &minutes},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &seconds}
+        );
 
-    if(minutes > 0)
-        printf("%d min%s", minutes, minutes <= 1 ? "" : "s");
-
-    putchar('\n');
+        ffPrintLogoAndKey(instance, "Uptime");
+        ffStrbufWriteTo(&uptime, stdout);
+        ffStrbufDestroy(&uptime);
+    }
 }

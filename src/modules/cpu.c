@@ -31,8 +31,26 @@ void ffPrintCPU(FFinstance* instance)
     frequency /= 1000;                        //to MHz
     double ghz = (double) frequency / 1000.0; //to GHz
 
-    char value[1024];
-    sprintf(value, "%s (%i) @ %.9gGHz", name, get_nprocs(), ghz);
+    int numProcs = get_nprocs();
+
+    ffPrintLogoAndKey(instance, "CPU");
+
+    FFstrbuf cpu;
+    ffStrbufInit(&cpu);
+
+    if(ffStrbufIsEmpty(&instance->config.cpuFormat))
+    {
+        ffStrbufSetF(&cpu, "%s (%i) @ %.9gGHz", name, numProcs, ghz);
+    }
+    else
+    {   
+        ffParseFormatString(&cpu, &instance->config.cpuFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &numProcs},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &ghz}
+        );
+    }
     
-    ffPrintAndSaveCachedValue(instance, "CPU", value);
+    ffPrintAndSaveCachedValue(instance, "CPU", cpu.chars);
+    ffStrbufDestroy(&cpu);
 }

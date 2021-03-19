@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <stdarg.h>
 
 void ffInitState(FFstate* state)
 {
@@ -12,15 +13,17 @@ void ffInitState(FFstate* state)
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
-    state->terminal.value = NULL;
+    
+    ffStrbufInit(&state->terminal.value);
     state->terminal.error = NULL;
+    state->terminal.calculated = false;
 }
 
 void ffDefaultConfig(FFconfig* config)
 {
-    config->color[0] = '\0';
+    ffStrbufInit(&config->color);
     config->logo_spacer = 4;
-    strcpy(config->seperator, ": ");
+    ffStrbufInitS(&config->seperator, ": ");
     config->offsetx = 0;
     config->titleLength = 20; // This is overwritten by ffPrintTitle
     config->colorLogo = true;
@@ -28,39 +31,35 @@ void ffDefaultConfig(FFconfig* config)
     config->recache = false;
     config->cacheSave = true;
 
-    config->osShowArchitecture = true;
-    config->osFormat[0] = '\0';
+    ffStrbufInit(&config->osFormat);
+    ffStrbufInit(&config->hostFormat);
+    ffStrbufInit(&config->kernelFormat);
+    ffStrbufInit(&config->uptimeFormat);
+    ffStrbufInit(&config->packagesFormat);
+    ffStrbufInit(&config->shellFormat);
+    ffStrbufInit(&config->resolutionFormat);
+    ffStrbufInit(&config->deFormat);
+    ffStrbufInit(&config->wmFormat);
+    ffStrbufInit(&config->themeFormat);
+    ffStrbufInit(&config->iconsFormat);
+    ffStrbufInit(&config->fontFormat);
+    ffStrbufInit(&config->terminalFormat);
+    ffStrbufInit(&config->termFontFormat);
+    ffStrbufInit(&config->cpuFormat);
+    ffStrbufInit(&config->gpuFormat);
+    ffStrbufInit(&config->memoryFormat);
+    ffStrbufInit(&config->diskFormat);
+    ffStrbufInit(&config->batteryFormat);
+    ffStrbufInit(&config->localeFormat);
 
-    config->hostShowVersion = true;
-    config->hostFormat[0] = '\0';
-
-    config->kernelShowRelease = true;
-    config->kernelShowVersion = false;
-
-    config->packagesCombined = false;
-    config->packagesCombinedNames = true;
-    config->packagesShowPacman = true;
-    config->packagesShowFlatpak = true;
-    config->packagesFormat[0] = '\0';
-
-    config->shellShowPath = false;
-
-    config->resolutionShowRefreshRate = true;
-    config->resolutionLibX11[0] = '\0';
-    config->resolutionLibXrandr[0] = '\0';
-    config->resolutionFormat[0] = '\0';
-
-    config->batteryShowManufacturer = true;
-    config->batteryShowModel = true;
-    config->batteryShowTechnology = true;
-    config->batteryShowCapacity = true;
-    config->batteryShowStatus = true;
-    config->batteryFormat[0] = '\0';
+    ffStrbufInitA(&config->libPCI, 256);
+    ffStrbufInitA(&config->libX11, 256);
+    ffStrbufInitA(&config->libXrandr, 256);
 }
 
 void ffPrintKey(FFconfig* config, const char* key)
 {
-    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"%s", config->color, key, config->seperator);
+    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"%s", config->color.chars, key, config->seperator.chars);
 }
 
 void ffPrintLogoAndKey(FFinstance* instance, const char* key)
@@ -105,44 +104,44 @@ static inline bool strSet(const char* str)
     return str != NULL && str[0] != '\0';
 }
 
-void ffPrintGtkPretty(const char* gtk2, const char* gtk3, const char* gtk4)
+void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4)
 {
     if(strSet(gtk2) && strSet(gtk3) && strSet(gtk4))
     {
         if((strcmp(gtk2, gtk3) == 0) && (strcmp(gtk2, gtk4) == 0))
-            printf("%s [GTK2/3/4]", gtk2);
+            ffStrbufSetF(buffer, "%s [GTK2/3/4]", gtk2);
         else if(strcmp(gtk2, gtk3) == 0)
-            printf("%s [GTK2/3], %s [GTK4]", gtk2, gtk4);
+            ffStrbufSetF(buffer, "%s [GTK2/3], %s [GTK4]", gtk2, gtk4);
         else if(strcmp(gtk3, gtk4) == 0)
-            printf("%s [GTK2], %s [GTK3/4]", gtk2, gtk3);
+            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3/4]", gtk2, gtk3);
         else
-            printf("%s [GTK2], %s [GTK3], %s [GTK4]", gtk2, gtk3, gtk4);
+            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3], %s [GTK4]", gtk2, gtk3, gtk4);
     }
     else if(strSet(gtk2) && strSet(gtk3))
     {
         if(strcmp(gtk2, gtk3) == 0)
-            printf("%s [GTK2/3]", gtk2);
+            ffStrbufSetF(buffer, "%s [GTK2/3]", gtk2);
         else
-            printf("%s [GTK2], %s [GTK3]", gtk2, gtk3);
+            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3]", gtk2, gtk3);
     }
     else if(strSet(gtk3) && strSet(gtk4))
     {
         if(strcmp(gtk3, gtk4) == 0)
-            printf("%s [GTK3/4]", gtk3);
+            ffStrbufSetF(buffer, "%s [GTK3/4]", gtk3);
         else
-            printf("%s [GTK3], %s [GTK4]", gtk3, gtk4);
+            ffStrbufSetF(buffer, "%s [GTK3], %s [GTK4]", gtk3, gtk4);
     }
     else if(strSet(gtk2))
     {
-        printf("%s [GTK2]", gtk2);
+        ffStrbufSetF(buffer, "%s [GTK2]", gtk2);
     }
     else if(strSet(gtk3))
     {
-        printf("%s [GTK3]", gtk3);
+        ffStrbufSetF(buffer, "%s [GTK3]", gtk3);
     }
     else if(strSet(gtk4))
     {
-        printf("%s [GTK4]", gtk4);
+        ffStrbufSetF(buffer, "%s [GTK4]", gtk4);
     }
 }
 
@@ -160,13 +159,21 @@ void ffParseFont(char* font, char* buffer)
         sprintf(buffer, "%s (%spt)", name, size);
 }
 
-void ffPrintError(FFinstance* instance, const char* key, const char* message)
+void ffPrintError(FFinstance* instance, const char* key, const char* message, ...)
 {
     if(!instance->config.showErrors)
         return;
 
     ffPrintLogoAndKey(instance, key);
-    printf(FASTFETCH_TEXT_MODIFIER_ERROR"%s"FASTFETCH_TEXT_MODIFIER_RESET"\n", message);
+
+    va_list arguments;
+    va_start(arguments, message);
+
+    printf(FASTFETCH_TEXT_MODIFIER_ERROR);
+    vprintf(message, arguments);
+    puts(FASTFETCH_TEXT_MODIFIER_RESET);
+
+    va_end(arguments);
 }
 
 void ffTrimTrailingWhitespace(char* buffer)
@@ -237,12 +244,13 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     if(instance->config.recache)
         return false;
 
-    char fileName[256];
-    strcpy(fileName, getCacheDir(instance));
-    strcat(fileName, key);
+    FFstrbuf filename;
+    ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
 
     char value[1024];
-    ffGetFileContent(fileName, value, sizeof(value));
+    ffGetFileContent(filename.chars, value, sizeof(value));
+
+    ffStrbufDestroy(&filename);
 
     if(value[0] == '\0')
         return false;
@@ -255,17 +263,15 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
 
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value)
 {
-    ffPrintLogoAndKey(instance, key);
     puts(value);
 
     if(!instance->config.cacheSave)
         return;
 
-    char fileName[256];
-    strcpy(fileName, getCacheDir(instance));
-    strcat(fileName, key);
+    FFstrbuf filename;
+    ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
 
-    int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int fd = open(filename.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(fd == -1)
         return;
 
@@ -276,5 +282,113 @@ void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char
     close(fd);
 
     if(failed)
-        unlink(fileName);
+        unlink(filename.chars);
+
+    ffStrbufDestroy(&filename);
+}
+
+void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...)
+{
+    va_list argp;
+    va_start(argp, numArgs);
+
+    FFformatarg arguments[numArgs];
+
+    for(uint32_t i = 0; i < numArgs; i++)
+        arguments[i] = (FFformatarg) va_arg(argp, FFformatarg);
+
+    va_end(argp);
+
+    uint32_t argCounter = 1; //First arg is 1 in fomat string
+
+    for(uint32_t i = 0; i < formatstr->length; ++i)
+    {
+        if(formatstr->chars[i] != '{')
+        {
+            ffStrbufAppendC(buffer, formatstr->chars[i]);
+            continue;
+        }
+
+        ++i;
+
+        if(formatstr->chars[i] == '{')
+        {
+            ffStrbufAppendC(buffer, '{');
+            continue;
+        }
+
+        uint32_t argIndex;
+
+        if(formatstr->chars[i] == '}')
+        {
+            argIndex = argCounter++;
+        }
+        else
+        {
+            FFstrbuf argnumstr;
+            ffStrbufInit(&argnumstr);
+            
+            while(true)
+            {
+                ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
+
+                if(formatstr->chars[i] == '}')
+                    break;
+
+                if(formatstr->chars[i] == '\0')
+                {   
+                    fprintf(stderr, "Error: format string \"%s\" ends with an uncomplete placeholder %s\n", formatstr->chars, argnumstr.chars);
+                    ffStrbufDestroy(buffer);
+                    exit(802);
+                }
+            }
+
+            if(ffStrbufGetC(&argnumstr, 0) == '-')
+            {
+                fprintf(stderr, "Error: format string \"%s\" placeholder value \"%s\" is negative\n", formatstr->chars, argnumstr.chars);
+                ffStrbufDestroy(buffer);
+                exit(803);
+            }
+
+            if(sscanf(argnumstr.chars, "%u", &argIndex) != 1)
+            {
+                fprintf(stderr, "Error: format string \"%s\" placeholder value \"%s\" could not be parsed to uint32_t\n", formatstr->chars, argnumstr.chars);
+                ffStrbufDestroy(buffer);
+                exit(804);
+            }
+
+            ffStrbufDestroy(&argnumstr);
+        }
+            
+        if(argIndex == 0)
+            argIndex = 1;
+
+        if(argIndex > numArgs)
+        {
+            fprintf(stderr, "Error: format string \"%s\" placeholder {%u} wants higher argument than number of arguments (%u)\n", formatstr->chars, argIndex, numArgs);
+            ffStrbufDestroy(buffer);
+            exit(805);
+        }
+
+        FFformatarg arg = arguments[argIndex - 1];
+
+        if(arg.type == FF_FORMAT_ARG_TYPE_INT)
+            ffStrbufAppendF(buffer, "%i", *(int*)arg.value);
+        else if(arg.type == FF_FORMAT_ARG_TYPE_UINT)
+            ffStrbufAppendF(buffer, "%u", *(uint32_t*)arg.value);
+        else if(arg.type == FF_FORMAT_ARG_TYPE_UINT8)
+            ffStrbufAppendF(buffer, "%u", *(uint8_t*)arg.value);
+        else if(arg.type == FF_FORMAT_ARG_TYPE_STRING)
+            ffStrbufAppendF(buffer, "%s", (const char*)arg.value);
+        else if(arg.type == FF_FORMAT_ARG_TYPE_STRBUF)
+            ffStrbufAppend(buffer, (FFstrbuf*)arg.value);
+        else if(arg.type == FF_FORMAT_ARG_TYPE_DOUBLE)
+            ffStrbufAppendF(buffer, "%.9g", *(double*)arg.value);
+        else
+        {
+            fprintf(stderr, "Error: format string \"%s\" argument is not implemented\n", formatstr->chars);
+            ffStrbufDestroy(buffer);
+            exit(806);
+        }
+    }
 }

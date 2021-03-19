@@ -3,11 +3,11 @@
 #include "X11/extensions/Xrandr.h"
 #include "dlfcn.h"
 
-static short getCurrentRate(FFinstance* instance, Display* display)
+static int getCurrentRate(FFinstance* instance, Display* display)
 {
     void* xrandr;
-    if(instance->config.resolutionLibXrandr[0] != '\0')
-        xrandr = dlopen(instance->config.resolutionLibXrandr, RTLD_LAZY);
+    if(!ffStrbufIsEmpty(&instance->config.libXrandr))
+        xrandr = dlopen(instance->config.libXrandr.chars, RTLD_LAZY);
     else
         xrandr = dlopen("libXrandr.so", RTLD_LAZY);
     if(xrandr == NULL)
@@ -35,7 +35,7 @@ static short getCurrentRate(FFinstance* instance, Display* display)
 
     dlclose(xrandr);
 
-    return currentRate;
+    return (int) currentRate;
 }
 
 void ffPrintResolution(FFinstance* instance)
@@ -44,8 +44,8 @@ void ffPrintResolution(FFinstance* instance)
         return;
 
     void* x11;
-    if(instance->config.resolutionLibX11[0] != '\0')
-        x11 = dlopen(instance->config.resolutionLibX11, RTLD_LAZY);
+    if(!ffStrbufIsEmpty(&instance->config.libX11))
+        x11 = dlopen(instance->config.libX11.chars, RTLD_LAZY);
     else
         x11 = dlopen("libX11.so", RTLD_LAZY);
     if(x11 == NULL)
@@ -70,18 +70,32 @@ void ffPrintResolution(FFinstance* instance)
 
     Screen*  screen  = DefaultScreenOfDisplay(display);
 
-    short currentRate = instance->config.resolutionShowRefreshRate ? getCurrentRate(instance, display) : 0;
+    int currentRate = getCurrentRate(instance, display);
 
     dlclose(x11);
 
-    char resolution[1024];
+    ffPrintLogoAndKey(instance, "Resolution");
 
-    if(instance->config.resolutionFormat[0] != '\0')
-        sprintf(resolution, instance->config.resolutionFormat, screen->width, screen->height, currentRate);
-    else if(currentRate == 0)
-        sprintf(resolution, "%ix%i", screen->width, screen->height);
+    FFstrbuf resolution;
+    ffStrbufInit(&resolution);
+
+    if(!ffStrbufIsEmpty(&instance->config.resolutionFormat))
+    {
+
+        ffParseFormatString(&resolution, &instance->config.resolutionFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &screen->width},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &screen->height},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &currentRate}
+        );
+    }
     else
-        sprintf(resolution, "%ix%i @ %dHz", screen->width, screen->height, currentRate);
+    {
+        ffStrbufAppendF(&resolution, "%ix%i", screen->width, screen->height);
 
-    ffPrintAndSaveCachedValue(instance, "Resolution", resolution);
+        if(currentRate > 0)
+            ffStrbufAppendF(&resolution, " @ %iHz", currentRate);
+    }
+
+    ffPrintAndSaveCachedValue(instance, "Resolution", resolution.chars);
+    ffStrbufDestroy(&resolution);
 }

@@ -20,7 +20,7 @@ Currently, `fastfetch` supports the following logos:
 - `Ubuntu`
 - `Debian`
 
-Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/logos.c`](src/logos.c).
+Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/logo.c`](src/logo.c).
 
 ## Dependencies
 

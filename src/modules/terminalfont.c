@@ -1,5 +1,28 @@
 #include "fastfetch.h"
 
+static void printTerminalFont(FFinstance* instance, char* font)
+{
+    ffPrintLogoAndKey(instance, "Terminal font");
+
+    if(ffStrbufIsEmpty(&instance->config.termFontFormat))
+    {
+        puts(font);
+    }
+    else
+    {
+        FFstrbuf termfont;
+        ffStrbufInit(&termfont);
+
+        ffParseFormatString(&termfont, &instance->config.termFontFormat, 1,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font}
+        );
+
+        ffStrbufWriteTo(&termfont, stdout);
+        putchar('\n');
+        ffStrbufDestroy(&termfont);
+    }
+}
+
 static void printKonsole(FFinstance* instance)
 {
     char profile[128];
@@ -17,16 +40,14 @@ static void printKonsole(FFinstance* instance)
     ffParsePropFileHome(instance, profilePath, "Font=%[^\n]", font);
     if(font[0] == '\0')
     {
-        char error[289];
-        sprintf(error, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
-        ffPrintError(instance, "Terminal Font", error);
+        ffPrintError(instance, "Terminal Font", "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
+        return;
     }
 
     char fontPretty[128];
     ffParseFont(font, fontPretty);
 
-    ffPrintLogoAndKey(instance, "Terminal Font");
-    puts(fontPretty);
+    printTerminalFont(instance, fontPretty);
 }
 
 static void printTTY(FFinstance* instance)
@@ -36,8 +57,7 @@ static void printTTY(FFinstance* instance)
     if(font[0] == '\0')
         strcpy(font, "hardware-supplied VGA font");
     
-    ffPrintLogoAndKey(instance, "Terminal Font");
-    puts(font);
+    printTerminalFont(instance, font);
 }
 
 void ffPrintTerminalFont(FFinstance* instance)
@@ -47,21 +67,13 @@ void ffPrintTerminalFont(FFinstance* instance)
     if(instance->state.terminal.error != NULL)
     {
         ffPrintError(instance, "Terminal Font", "Terminal Font needs successfull terminal detection");
-    }
-    else if(instance->state.terminal.value == NULL)
-    {
-        ffPrintError(instance, "Terminal Font", "ffPopulateTerminal failed");
+        return;
     }
 
-    if(strcasecmp(instance->state.terminal.value, "konsole") == 0)
+    if(ffStrbufIgnCaseCompS(&instance->state.terminal.value, "konsole") == 0)
         printKonsole(instance);
-    else if(strcasecmp(instance->state.terminal.value, "TTY") == 0)
+    else if(ffStrbufIgnCaseCompS(&instance->state.terminal.value, "TTY") == 0)
         printTTY(instance);
     else
-    {
-        char error[256];
-        sprintf(error, "Unknown terminal: %s", instance->state.terminal.value);
-        ffPrintError(instance, "Terminal Font", error);
-    }
-
+        ffPrintError(instance, "Terminal Font", "Unknown terminal: %s", instance->state.terminal.value);
 }

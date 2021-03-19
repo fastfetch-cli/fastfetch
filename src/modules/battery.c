@@ -5,59 +5,34 @@
 static void printBattery(FFinstance* instance, uint8_t index)
 {
     char manufactor[128];
-    if(instance->config.batteryShowManufacturer)
-    {
-        char manufactorPath[42];
-        sprintf(manufactorPath, "/sys/class/power_supply/BAT%i/manufacturer", index);
-        ffGetFileContent(manufactorPath, manufactor, sizeof(manufactor));
-    }
-    else
-        manufactor[0] = '\0';
+    char manufactorPath[42];
+    sprintf(manufactorPath, "/sys/class/power_supply/BAT%i/manufacturer", index);
+    ffGetFileContent(manufactorPath, manufactor, sizeof(manufactor));
 
     char model[128];
-    if(instance->config.batteryShowModel)
-    {
-        char modelPath[40];
-        sprintf(modelPath, "/sys/class/power_supply/BAT%i/model_name", index);
-        ffGetFileContent(modelPath, model, sizeof(model));
-    }
-    else
-        model[0] = '\0';
+    char modelPath[40];
+    sprintf(modelPath, "/sys/class/power_supply/BAT%i/model_name", index);
+    ffGetFileContent(modelPath, model, sizeof(model));
 
     char technology[32];
-    if(instance->config.batteryShowTechnology)
-    {
-        char technologyPath[40];
-        sprintf(technologyPath, "/sys/class/power_supply/BAT%i/technology", index);
-        ffGetFileContent(technologyPath, technology, sizeof(technology));
-    }
-    else
-        technology[0] = '\0';
+    char technologyPath[40];
+    sprintf(technologyPath, "/sys/class/power_supply/BAT%i/technology", index);
+    ffGetFileContent(technologyPath, technology, sizeof(technology));
 
     char capacity[32];
-    if(instance->config.batteryShowCapacity)
-    {
-        char capacityPath[38];
-        sprintf(capacityPath, "/sys/class/power_supply/BAT%i/capacity", index);
-        ffGetFileContent(capacityPath, capacity, sizeof(capacity));
-    }
-    else
-        capacity[0] = '\0';
+    char capacityPath[38];
+    sprintf(capacityPath, "/sys/class/power_supply/BAT%i/capacity", index);
+    ffGetFileContent(capacityPath, capacity, sizeof(capacity));
 
     char status[32];
-    if(instance->config.batteryShowStatus)
-    {
-        char statusPath[36];
-        sprintf(statusPath, "/sys/class/power_supply/BAT%i/status", index);
-        ffGetFileContent(statusPath, status, sizeof(status));
-    }
-    else
-        status[0] = '\0';
+    char statusPath[36];
+    sprintf(statusPath, "/sys/class/power_supply/BAT%i/status", index);
+    ffGetFileContent(statusPath, status, sizeof(status));
 
     char key[10];
     sprintf(key, "Battery %i", index);
 
-    if(manufactor[0] == '\0' && model[0] == '\0' && technology[0] == '\0' && capacity[0] == '\0' && status[0] == '\0')
+    if(manufactor[0] == '\0' && model[0] == '\0' && technology[0] == '\0' && capacity[0] == '\0' && status[0] == '\0' && ffStrbufIsEmpty(&instance->config.batteryFormat))
     {
         ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
         return;
@@ -65,37 +40,50 @@ static void printBattery(FFinstance* instance, uint8_t index)
 
     ffPrintLogoAndKey(instance, key);
 
-    if(instance->config.batteryFormat[0] != '\0')
+    if(ffStrbufIsEmpty(&instance->config.batteryFormat))
     {
-        printf(instance->config.batteryFormat, manufactor, model, technology, capacity, status);
-        putchar('\n');
-        return;
-    }
+        if(manufactor[0] != '\0')
+            printf("%s ", manufactor);
 
-    if(manufactor[0] != '\0')
-        printf("%s ", manufactor);
+        if(model[0] != '\0')
+            printf("%s ", model);
 
-    if(model[0] != '\0')
-        printf("%s ", model);
+        if(technology[0] != '\0')
+            printf("(%s) ", technology);
 
-    if(technology[0] != '\0')
-        printf("(%s) ", technology);
-
-    if(capacity[0] != '\0')
-    {
-        printf("[%s%%", capacity);
-    
-        if(status[0] == '\0')
-            puts("]");
+        if(capacity[0] != '\0')
+        {
+            printf("[%s%%", capacity);
+        
+            if(status[0] == '\0')
+                puts("]");
+            else
+                printf("; %s]\n", status);
+        }
         else
-            printf("; %s]\n", status);
+        {
+            if(status[0] != '\0')
+                printf("%s", status);
+            else
+                putchar('\n');
+        }
     }
     else
     {
-        if(status[0] != '\0')
-            printf("%s", status);
-        else
-            putchar('\n');
+        FFstrbuf battery;
+        ffStrbufInit(&battery);
+
+        ffParseFormatString(&battery, &instance->config.batteryFormat, 5,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, manufactor},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, model},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, technology},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, capacity},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, status}
+        );
+
+        ffStrbufWriteTo(&battery, stdout);
+        putchar('\n');
+        ffStrbufDestroy(&battery);
     }
 }
 

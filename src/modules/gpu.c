@@ -11,32 +11,46 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     if(ffPrintCachedValue(instance, key))
         return;
 
-    char gpu[1024];
+    FFstrbuf gpu;
+    ffStrbufInit(&gpu);
 
     char vendor[512];
     ffpci_lookup_name(pacc, vendor, sizeof(vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
 
+    char vendorPretty[512];
+    if(strcasecmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
+        strcpy(vendorPretty, "AMD ATI");
+    else
+        strcpy(vendorPretty, vendor);
+
     char name[512];
     ffpci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
 
-    if(strcasecmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
+    ffPrintLogoAndKey(instance, "GPU");
+
+    if(ffStrbufIsEmpty(&instance->config.gpuFormat))
     {
-        strcpy(gpu, "AMD ATI ");
+        ffStrbufSetF(&gpu, "%s %s", vendorPretty, name);
     }
     else
     {
-        strcpy(gpu, vendor);
-        strcat(gpu, " ");
+        ffParseFormatString(&gpu, &instance->config.gpuFormat, 2, 
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name}
+        );
     }
 
-    strcat(gpu, name);
-
-    ffPrintAndSaveCachedValue(instance, key, gpu);
+    ffPrintAndSaveCachedValue(instance, key, gpu.chars);
+    ffStrbufDestroy(&gpu);
 }
 
 void ffPrintGPU(FFinstance* instance)
 {
-    void* pci = dlopen("libpci.so", RTLD_LAZY);
+    void* pci;
+    if(ffStrbufIsEmpty(&instance->config.libPCI))
+        pci = dlopen("libpci.so", RTLD_LAZY);
+    else
+        pci = dlopen(instance->config.libPCI.chars, RTLD_LAZY);
     if(pci == NULL)
     {
         ffPrintError(instance, "GPU", "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");

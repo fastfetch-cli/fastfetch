@@ -4,6 +4,12 @@ void ffPrintFont(FFinstance* instance)
 {
     char plasma[256];
     ffParsePropFileHome(instance, ".config/kdeglobals", "font=%[^\n]", plasma);
+    
+    char plasmaPretty[256];
+    if(plasma[0] == '\0')
+        strcpy(plasmaPretty, "Noto Sans (10pt)");
+    else
+        ffParseFont(plasma, plasmaPretty);
 
     char gtk2[256];
     ffParsePropFileHome(instance, ".gtkrc-2.0", "gtk-font-name=\"%[^\"]+", gtk2);
@@ -32,19 +38,34 @@ void ffPrintFont(FFinstance* instance)
     else
         ffParseFont(gtk4, gtk4Pretty);
     
+    FFstrbuf gtkPretty;
+    ffStrbufInit(&gtkPretty);
+    ffFormatGtkPretty(&gtkPretty, gtk2Pretty, gtk3Pretty, gtk4Pretty);
+
     ffPrintLogoAndKey(instance, "Font");
 
-    if(plasma[0] == '\0')
+    if(ffStrbufIsEmpty(&instance->config.fontFormat))
     {
-        printf("Noto Sans (10pt) [Plasma], ");
+        printf("%s [Plasma], ", plasmaPretty);
+        ffStrbufWriteTo(&gtkPretty, stdout);
     }
     else
     {
-        char plasmaPretty[256];
-        ffParseFont(plasma, plasmaPretty);
-        printf("%s [Plasma], ", plasmaPretty);
+        FFstrbuf font;
+        ffStrbufInit(&font);
+
+        ffParseFormatString(&font, &instance->config.fontFormat, 5,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasmaPretty},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2Pretty},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3Pretty},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk4Pretty},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
+        );
+
+        ffStrbufWriteTo(&font, stdout);
+        ffStrbufDestroy(&font);
     }
 
-    ffPrintGtkPretty(gtk2Pretty, gtk3Pretty, gtk4Pretty);
     putchar('\n');
+    ffStrbufDestroy(&gtkPretty);
 }
