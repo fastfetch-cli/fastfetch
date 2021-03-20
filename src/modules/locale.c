@@ -12,6 +12,7 @@ void ffPrintLocale(FFinstance* instance)
    char localeCode[256];
 
     FILE *fp;
+    /* Try to open /etc/locale.conf in read-only mode */
     fp = fopen("/etc/locale.conf", "r");
 
     /* File does not exist */
@@ -21,13 +22,8 @@ void ffPrintLocale(FFinstance* instance)
     	ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", localeCode);
     }
 
-    /*
-    if(localeCode[0] == '\0' && ffStrbufIsEmpty(&instance->config.localeFormat))
-    {
-        ffPrintError(instance, "Locale", "\"LANG=%[^\\n]\" not found in \"/etc/locale.conf\"");
-        return;
-    }
-    */
+    /* Free pointer to file */
+    fclose(fp);
 
     ffPrintLogoAndKey(instance, "Locale");
 
