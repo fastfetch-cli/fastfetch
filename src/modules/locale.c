@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "fastfetch.h"
 
 void ffPrintLocale(FFinstance* instance)
@@ -5,13 +9,25 @@ void ffPrintLocale(FFinstance* instance)
     if(ffPrintCachedValue(instance, "Locale"))
         return;
 
-    char localeCode[256];
-    ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", localeCode);
+   char localeCode[256];
+
+    FILE *fp;
+    fp = fopen("/etc/locale.conf", "r");
+
+    /* File does not exist */
+    if (fp == NULL) {
+	    strcpy(localeCode, getenv("LANG"));
+    } else {
+    	ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", localeCode);
+    }
+
+    /*
     if(localeCode[0] == '\0' && ffStrbufIsEmpty(&instance->config.localeFormat))
     {
         ffPrintError(instance, "Locale", "\"LANG=%[^\\n]\" not found in \"/etc/locale.conf\"");
         return;
     }
+    */
 
     ffPrintLogoAndKey(instance, "Locale");
 
