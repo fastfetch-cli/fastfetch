@@ -2,17 +2,17 @@
 
 void ffPrintLocale(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, "Locale"))
-        return;
+	if(ffPrintCachedValue(instance, "Locale"))
+		return;
 
-   char localeCode[256];
+	char localeCode[256];
 
-    /* Try to open /etc/locale.conf in read-only mode */
-    FILE *fp;
-    fp = fopen("/etc/locale.conf", "r");
+	/* Try to open /etc/locale.conf in read-only mode */
+	FILE *fp;
+	fp = fopen("/etc/locale.conf", "r");
 
-    /* File does not exist */
-    if (fp == NULL) {
+	/* File does not exist */
+	if (fp == NULL) {
 	/* Check if LANG exists */
 	if (getenv("LANG") != NULL)
 		strcpy(localeCode, getenv("LANG"));
@@ -31,31 +31,31 @@ void ffPrintLocale(FFinstance* instance)
 	/* User has broken system */
 	else
 		ffPrintError(instance, "Locale", "Locale not found!");
-    /* /etc/locale.conf exists */
-    } else {
+	/* /etc/locale.conf exists */
+	} else {
 	ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", localeCode);
-    }
+	}
 
-    /* Free pointer to file */
-    fclose(fp);
+	/* Free pointer to file */
+	fclose(fp);
 
-    ffPrintLogoAndKey(instance, "Locale");
+	ffPrintLogoAndKey(instance, "Locale");
 
-    FFstrbuf locale;
-    ffStrbufInit(&locale);
+	FFstrbuf locale;
+	ffStrbufInit(&locale);
 
-    if(ffStrbufIsEmpty(&instance->config.localeFormat))
-    {
-        ffStrbufSetS(&locale, localeCode);
-    }
-    else
-    {
-        ffParseFormatString(&locale, &instance->config.localeFormat, 1,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, localeCode}
-        );
-    }
+	if(ffStrbufIsEmpty(&instance->config.localeFormat))
+	{
+		ffStrbufSetS(&locale, localeCode);
+	}
+	else
+	{
+		ffParseFormatString(&locale, &instance->config.localeFormat, 1,
+			(FFformatarg){FF_FORMAT_ARG_TYPE_STRING, localeCode}
+		);
+	}
 
 
-    ffPrintAndSaveCachedValue(instance, "Locale", locale.chars);
-    ffStrbufDestroy(&locale);
+	ffPrintAndSaveCachedValue(instance, "Locale", locale.chars);
+	ffStrbufDestroy(&locale);
 }
