@@ -305,6 +305,7 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
 
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value)
 {
+    ffPrintLogoAndKey(instance, key);
     ffStrbufWriteTo(value, stdout);
     putchar('\n');
 

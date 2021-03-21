@@ -27,8 +27,6 @@ void ffPrintShell(FFinstance* instance)
         ++shellName;
     }
 
-    ffPrintLogoAndKey(instance, "Shell");
-
     FF_STRBUF_CREATE(shell);
 
     if(!ffStrbufIsEmpty(&instance->config.shellFormat))

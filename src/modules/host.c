@@ -20,8 +20,6 @@ void ffPrintHost(FFinstance* instance)
         return;
     }
 
-    ffPrintLogoAndKey(instance, "Host");
-
     FF_STRBUF_CREATE(host);
 
     if(!ffStrbufIsEmpty(&instance->config.hostFormat))

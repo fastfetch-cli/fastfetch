@@ -39,8 +39,6 @@ void ffPrintLocale(FFinstance* instance)
 		fclose(fp);
 	}
 
-	ffPrintLogoAndKey(instance, "Locale");
-
 	FF_STRBUF_CREATE(locale);
 
 	if(ffStrbufIsEmpty(&instance->config.localeFormat))

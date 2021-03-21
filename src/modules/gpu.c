@@ -11,8 +11,6 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     if(ffPrintCachedValue(instance, key))
         return;
 
-    FF_STRBUF_CREATE(gpu);
-
     char vendor[512];
     ffpci_lookup_name(pacc, vendor, sizeof(vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
 
@@ -25,7 +23,7 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     char name[512];
     ffpci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
 
-    ffPrintLogoAndKey(instance, "GPU");
+    FF_STRBUF_CREATE(gpu);
 
     if(ffStrbufIsEmpty(&instance->config.gpuFormat))
     {

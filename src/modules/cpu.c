@@ -33,8 +33,6 @@ void ffPrintCPU(FFinstance* instance)
 
     int numProcs = get_nprocs();
 
-    ffPrintLogoAndKey(instance, "CPU");
-
     FF_STRBUF_CREATE(cpu);
 
     if(ffStrbufIsEmpty(&instance->config.cpuFormat))

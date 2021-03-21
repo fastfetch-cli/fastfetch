@@ -74,8 +74,6 @@ void ffPrintResolution(FFinstance* instance)
 
     dlclose(x11);
 
-    ffPrintLogoAndKey(instance, "Resolution");
-
     FF_STRBUF_CREATE(resolution);
 
     if(!ffStrbufIsEmpty(&instance->config.resolutionFormat))

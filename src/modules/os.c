@@ -13,8 +13,6 @@ void ffPrintOS(FFinstance* instance)
         return;
     }
 
-    ffPrintLogoAndKey(instance, "OS");
-
     FF_STRBUF_CREATE(os);
 
     if(!ffStrbufIsEmpty(&instance->config.osFormat))
