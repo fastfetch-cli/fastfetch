@@ -262,6 +262,33 @@ int ffStrbufIgnCaseCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp)
     return strncasecmp(strbuf->chars, comp, length);
 }
 
+void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
+{
+    uint32_t index = 0;
+    while(strbuf->chars[index] == c && index < strbuf->length)
+        ++index;
+
+    if(index == 0)
+        return;
+
+    memcpy(strbuf->chars, strbuf->chars + index, index);
+    strbuf->length -= index;
+}
+
+void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
+{   
+
+    while(strbuf->length > 0 && strbuf->chars[strbuf->length - 1] == c)
+        --strbuf->length;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufTrim(FFstrbuf* strbuf, char c)
+{
+    ffStrbufTrimRight(strbuf, c);
+    ffStrbufTrimLeft(strbuf, c);
+}
+
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);

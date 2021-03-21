@@ -4,36 +4,42 @@
 
 static void printBattery(FFinstance* instance, uint8_t index)
 {
-    char manufactor[128];
+    FF_STRBUF_CREATE(manufactor);
     char manufactorPath[42];
     sprintf(manufactorPath, "/sys/class/power_supply/BAT%i/manufacturer", index);
-    ffGetFileContent(manufactorPath, manufactor, sizeof(manufactor));
+    ffGetFileContent(manufactorPath, &manufactor);
 
-    char model[128];
+    FF_STRBUF_CREATE(model);
     char modelPath[40];
     sprintf(modelPath, "/sys/class/power_supply/BAT%i/model_name", index);
-    ffGetFileContent(modelPath, model, sizeof(model));
+    ffGetFileContent(modelPath, &model);
 
-    char technology[32];
+    FF_STRBUF_CREATE(technology);
     char technologyPath[40];
     sprintf(technologyPath, "/sys/class/power_supply/BAT%i/technology", index);
-    ffGetFileContent(technologyPath, technology, sizeof(technology));
+    ffGetFileContent(technologyPath, &technology);
 
-    char capacity[32];
+    FF_STRBUF_CREATE(capacity);
     char capacityPath[38];
     sprintf(capacityPath, "/sys/class/power_supply/BAT%i/capacity", index);
-    ffGetFileContent(capacityPath, capacity, sizeof(capacity));
+    ffGetFileContent(capacityPath, &capacity);
 
-    char status[32];
+    FF_STRBUF_CREATE(status);
     char statusPath[36];
     sprintf(statusPath, "/sys/class/power_supply/BAT%i/status", index);
-    ffGetFileContent(statusPath, status, sizeof(status));
+    ffGetFileContent(statusPath, &status);
 
     char key[10];
     sprintf(key, "Battery %i", index);
 
-    if(manufactor[0] == '\0' && model[0] == '\0' && technology[0] == '\0' && capacity[0] == '\0' && status[0] == '\0' && ffStrbufIsEmpty(&instance->config.batteryFormat))
-    {
+    if(
+        ffStrbufIsEmpty(&manufactor) &&
+        ffStrbufIsEmpty(&model) &&
+        ffStrbufIsEmpty(&technology) &&
+        ffStrbufIsEmpty(&capacity) && 
+        ffStrbufIsEmpty(&status) &&
+        ffStrbufIsEmpty(&instance->config.batteryFormat)
+    ) {
         ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
         return;
     }
@@ -42,49 +48,54 @@ static void printBattery(FFinstance* instance, uint8_t index)
 
     if(ffStrbufIsEmpty(&instance->config.batteryFormat))
     {
-        if(manufactor[0] != '\0')
-            printf("%s ", manufactor);
+        if(!ffStrbufIsEmpty(&manufactor))
+            printf("%s ", manufactor.chars);
 
-        if(model[0] != '\0')
-            printf("%s ", model);
+        if(!ffStrbufIsEmpty(&model))
+            printf("%s ", manufactor.chars);
 
-        if(technology[0] != '\0')
-            printf("(%s) ", technology);
+        if(!ffStrbufIsEmpty(&technology))
+            printf("(%s) ", technology.chars);
 
-        if(capacity[0] != '\0')
+        if(!ffStrbufIsEmpty(&capacity))
         {
-            printf("[%s%%", capacity);
+            printf("[%s%%", capacity.chars);
         
-            if(status[0] == '\0')
+            if(ffStrbufIsEmpty(&status))
                 puts("]");
             else
-                printf("; %s]\n", status);
+                printf("; %s]\n", status.chars);
         }
         else
         {
-            if(status[0] != '\0')
-                printf("%s", status);
+            if(!ffStrbufIsEmpty(&status))
+                printf("[%s]", status.chars);
             else
                 putchar('\n');
         }
     }
     else
     {
-        FFstrbuf battery;
-        ffStrbufInit(&battery);
+        FF_STRBUF_CREATE(battery);
 
         ffParseFormatString(&battery, &instance->config.batteryFormat, 5,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, manufactor},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, model},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, technology},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, capacity},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, status}
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &manufactor},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &model},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &technology},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &capacity},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &status}
         );
 
         ffStrbufWriteTo(&battery, stdout);
         putchar('\n');
         ffStrbufDestroy(&battery);
     }
+
+    ffStrbufDestroy(&manufactor);
+    ffStrbufDestroy(&model);
+    ffStrbufDestroy(&technology);
+    ffStrbufDestroy(&capacity);
+    ffStrbufDestroy(&status);
 }
 
 void ffPrintBattery(FFinstance* instance)

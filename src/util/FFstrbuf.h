@@ -17,6 +17,8 @@ typedef struct FFstrbuf
     char* chars;
 } FFstrbuf;
 
+#define FF_STRBUF_CREATE(name) FFstrbuf name; ffStrbufInit(&name);
+
 void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitS(FFstrbuf* strbuf, const char* value);
 void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* value);
@@ -58,6 +60,10 @@ int ffStrbufCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp);
 int ffStrbufIgnCaseComp(FFstrbuf* strbuf, FFstrbuf* comp);
 int ffStrbufIgnCaseCompS(FFstrbuf* strbuf, const char* comp);
 int ffStrbufIgnCaseCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp);
+
+void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
+void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
+void ffStrbufTrim(FFstrbuf* strbuf, char c);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
 

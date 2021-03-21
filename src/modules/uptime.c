@@ -29,9 +29,7 @@ void ffPrintUptime(FFinstance* instance)
     }
     else
     {
-        FFstrbuf uptime;
-        ffStrbufInit(&uptime);
-
+        FF_STRBUF_CREATE(uptime);
 
         ffParseFormatString(&uptime, &instance->config.uptimeFormat, 4,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &days},

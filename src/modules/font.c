@@ -38,8 +38,7 @@ void ffPrintFont(FFinstance* instance)
     else
         ffParseFont(gtk4, gtk4Pretty);
     
-    FFstrbuf gtkPretty;
-    ffStrbufInit(&gtkPretty);
+    FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2Pretty, gtk3Pretty, gtk4Pretty);
 
     ffPrintLogoAndKey(instance, "Font");
@@ -51,8 +50,7 @@ void ffPrintFont(FFinstance* instance)
     }
     else
     {
-        FFstrbuf font;
-        ffStrbufInit(&font);
+        FF_STRBUF_CREATE(font);
 
         ffParseFormatString(&font, &instance->config.fontFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasmaPretty},

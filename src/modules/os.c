@@ -15,8 +15,7 @@ void ffPrintOS(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "OS");
 
-    FFstrbuf os;
-    ffStrbufInit(&os);
+    FF_STRBUF_CREATE(os);
 
     if(!ffStrbufIsEmpty(&instance->config.osFormat))
     {

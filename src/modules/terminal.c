@@ -94,8 +94,7 @@ void ffPrintTerminal(FFinstance* instance)
     }
     else
     {
-        FFstrbuf terminal;
-        ffStrbufInit(&terminal);
+        FF_STRBUF_CREATE(terminal);
 
         ffParseFormatString(&terminal, &instance->config.terminalFormat, 1,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.terminal.value}

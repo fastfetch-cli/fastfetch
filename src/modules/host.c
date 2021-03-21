@@ -5,16 +5,16 @@ void ffPrintHost(FFinstance* instance)
     if(ffPrintCachedValue(instance, "Host"))
         return;
 
-    char family[256];
-    ffGetFileContent("/sys/devices/virtual/dmi/id/product_family", family, sizeof(family));
+    FF_STRBUF_CREATE(family);
+    ffGetFileContent("/sys/devices/virtual/dmi/id/product_family", &family);
 
-    char name[256];
-    ffGetFileContent("/sys/devices/virtual/dmi/id/product_name", name, sizeof(name));
+    FF_STRBUF_CREATE(name);
+    ffGetFileContent("/sys/devices/virtual/dmi/id/product_name", &name);
     
-    char version[256];
-    ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", version, sizeof(version));
+    FF_STRBUF_CREATE(version);
+    ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", &version);
 
-    if(family[0] == '\0' && name[0] == '\0')
+    if(ffStrbufIsEmpty(&family) && ffStrbufIsEmpty(&name) && ffStrbufIsEmpty(&instance->config.hostFormat))
     {
         ffPrintError(instance, "Host", "neither family nor name could be determined");
         return;
@@ -22,30 +22,33 @@ void ffPrintHost(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Host");
 
-    FFstrbuf host;
-    ffStrbufInit(&host);
+    FF_STRBUF_CREATE(host);
 
     if(!ffStrbufIsEmpty(&instance->config.hostFormat))
     {
         ffParseFormatString(&host, &instance->config.hostFormat, 3,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, family},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, version}
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &family},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &version}
         );
     }
-    else if(family[0] != '\0' && name[0] != '\0')
+    else if(!ffStrbufIsEmpty(&family) && !ffStrbufIsEmpty(&name))
     {
-        ffStrbufSetF(&host, "%s %s %s", family, name, version);
+        ffStrbufSetF(&host, "%s %s %s", family.chars, name.chars, version.chars);
     }
-    else if(family[0] != '\0')
+    else if(!ffStrbufIsEmpty(&family))
     {
-        ffStrbufSetF(&host, "%s %s", family, version);
+        ffStrbufSetF(&host, "%s %s", family.chars, version.chars);
     }
     else
     {
-        ffStrbufSetF(&host, "%s %s", name, version);
+        ffStrbufSetF(&host, "%s %s", name.chars, version.chars);
     }
 
     ffPrintAndSaveCachedValue(instance, "Host", host.chars);
     ffStrbufDestroy(&host);
+
+    ffStrbufDestroy(&family);
+    ffStrbufDestroy(&name);
+    ffStrbufDestroy(&version);
 }

@@ -35,8 +35,7 @@ void ffPrintCPU(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "CPU");
 
-    FFstrbuf cpu;
-    ffStrbufInit(&cpu);
+    FF_STRBUF_CREATE(cpu);
 
     if(ffStrbufIsEmpty(&instance->config.cpuFormat))
     {

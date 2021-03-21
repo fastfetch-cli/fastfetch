@@ -10,8 +10,7 @@ static void printTerminalFont(FFinstance* instance, char* font)
     }
     else
     {
-        FFstrbuf termfont;
-        ffStrbufInit(&termfont);
+        FF_STRBUF_CREATE(termfont);
 
         ffParseFormatString(&termfont, &instance->config.termFontFormat, 1,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font}

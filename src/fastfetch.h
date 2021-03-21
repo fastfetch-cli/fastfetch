@@ -116,7 +116,7 @@ void ffInitState(FFstate* state);
 void ffDefaultConfig(FFconfig* config);
 void ffPrintKey(FFconfig* config, const char* key);
 void ffPrintLogoAndKey(FFinstance* instance, const char* key);
-void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize);
+void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 void ffParseFont(char* font, char* buffer);

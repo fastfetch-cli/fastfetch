@@ -20,9 +20,7 @@ void ffPrintTheme(FFinstance* instance)
     if(gtk4[0] == '\0')
         strcpy(gtk4, "Adwaita");
 
-    FFstrbuf gtkPretty;
-    ffStrbufInit(&gtkPretty);
-
+    FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
 
     ffPrintLogoAndKey(instance, "Theme");
@@ -36,8 +34,7 @@ void ffPrintTheme(FFinstance* instance)
     }
     else
     {
-        FFstrbuf theme;
-        ffStrbufInit(&theme);
+        FF_STRBUF_CREATE(theme);
 
         ffParseFormatString(&theme, &instance->config.themeFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
@@ -48,6 +45,8 @@ void ffPrintTheme(FFinstance* instance)
         );
 
         ffStrbufWriteTo(&theme, stdout);
+
+        ffStrbufDestroy(&theme);
     }
     
     putchar('\n');

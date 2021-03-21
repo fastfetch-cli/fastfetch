@@ -23,8 +23,7 @@ void ffPrintWM(FFinstance* instance)
 
     struct dirent* dirent;
 
-    FFstrbuf name;
-    ffStrbufInit(&name);
+    FF_STRBUF_CREATE(name);
 
     bool found = false;
 
@@ -36,10 +35,7 @@ void ffPrintWM(FFinstance* instance)
         char path[20];
         sprintf(path, "/proc/%.8s/comm", dirent->d_name);
 
-        char comm[17]; //MAX_COMM_LENGTH is 17 + null terminator
-        ffGetFileContent(path, comm, sizeof(comm));
-
-        ffStrbufSetS(&name, comm);
+        ffGetFileContent(path, &name);
 
         if((found = parseProcessName(&name)))
             break;
@@ -60,8 +56,7 @@ void ffPrintWM(FFinstance* instance)
     }
     else
     {
-        FFstrbuf wm;
-        ffStrbufInit(&wm);
+        FF_STRBUF_CREATE(wm);
 
         ffParseFormatString(&wm, &instance->config.wmFormat, 1,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name}
@@ -74,4 +69,5 @@ void ffPrintWM(FFinstance* instance)
     }
 
     putchar('\n');
+    ffStrbufDestroy(&name);
 }

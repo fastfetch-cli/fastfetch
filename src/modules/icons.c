@@ -20,8 +20,7 @@ void ffPrintIcons(FFinstance* instance)
     if(gtk4[0] == '\0')
         strcpy(gtk4, "Adwaita");
 
-    FFstrbuf gtkPretty;
-    ffStrbufInit(&gtkPretty);
+    FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
 
     ffPrintLogoAndKey(instance, "Icons");
@@ -37,9 +36,8 @@ void ffPrintIcons(FFinstance* instance)
     }
     else
     {
-        FFstrbuf icons;
-        ffStrbufInit(&icons);
-
+        FF_STRBUF_CREATE(icons);
+        
         ffParseFormatString(&icons, &instance->config.iconsFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},

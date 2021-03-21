@@ -232,26 +232,23 @@ void ffTrimTrailingWhitespace(char* buffer)
         buffer[end + 1] = '\0';
 }
 
-void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize)
+void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
 {
-    buffer[0] = '\0';
-
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return;
 
-    ssize_t readed = read(fd, buffer, bufferSize - 1);
-    if(readed < 1)
-        return;
+    ssize_t readed;
+    while((readed = read(fd, buffer->chars, buffer->allocated)) == buffer->allocated && readed > 0)
+        ffStrbufEnsureCapacity(buffer, buffer->allocated * 2);
+
+    if(readed >= 0)
+        buffer->length = readed;
+
+    ffStrbufTrimRight(buffer, '\n');
+    ffStrbufTrimRight(buffer, ' ');
 
     close(fd);
-
-    if(buffer[readed - 1] == '\n')
-        buffer[readed - 1] = '\0';
-    else
-        buffer[readed] = '\0';
-
-    ffTrimTrailingWhitespace(buffer);
 }
 
 static const char* getCacheDir(FFinstance* instance)
@@ -289,17 +286,21 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     FFstrbuf filename;
     ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
 
-    char value[1024];
-    ffGetFileContent(filename.chars, value, sizeof(value));
+    FF_STRBUF_CREATE(value);
+    ffGetFileContent(filename.chars, &value);
 
     ffStrbufDestroy(&filename);
 
-    if(value[0] == '\0')
+    if(ffStrbufIsEmpty(&value))
+    {
+        ffStrbufDestroy(&value);
         return false;
+    }
 
     ffPrintLogoAndKey(instance, key);
-    puts(value);
-
+    ffStrbufWriteTo(&value, stdout);
+    putchar('\n');
+    ffStrbufDestroy(&value);
     return true;
 }
 

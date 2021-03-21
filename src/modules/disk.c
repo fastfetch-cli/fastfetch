@@ -27,8 +27,7 @@ void ffPrintDisk(FFinstance* instance)
     }
     else
     {
-        FFstrbuf disk;
-        ffStrbufInit(&disk);
+        FF_STRBUF_CREATE(disk);
 
         ffParseFormatString(&disk, &instance->config.diskFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &used},
