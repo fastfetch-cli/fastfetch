@@ -116,7 +116,7 @@ __fastfetch_completion()
     local FF_OPTIONS_STRING=(
         "-c"
         "--color"
-        "--spacer"
+        "--spacing"
         "-s"
         "--seperator"
         "-x"

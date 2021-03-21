@@ -22,7 +22,7 @@ void ffInitState(FFstate* state)
 void ffDefaultConfig(FFconfig* config)
 {
     ffStrbufInit(&config->color);
-    config->logo_spacer = 4;
+    config->logo_spacing = 4;
     ffStrbufInitS(&config->seperator, ": ");
     config->offsetx = 0;
     config->titleLength = 20; // This is overwritten by ffPrintTitle

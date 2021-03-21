@@ -45,7 +45,7 @@ static inline void printHelp()
         "                --structure <structure>:         sets the structure of the fetch. Must be a colon seperated list of keys\n"
         "                --set <key=value>:               hard set the value of an key\n"
         "   -c <color>,  --color <color>:                 sets the color of the keys. Must be a linux console color code (+)\n"
-        "                --spacer <width>:                sets the distance between logo and text\n"
+        "                --spacing <width>:               sets the distance between logo and text\n"
         "   -s <str>,    --seperator <str>:               sets the seperator between key and value. Default is a colon with a space\n"
         "   -x <offset>, --offsetx <offset>:              sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
         "                --show-errors <?value>:          print occuring errors\n"
@@ -247,14 +247,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         puts(FASTFETCH_DEFAULT_CONFIG);
         exit(0);
     }
-    else if(strcasecmp(key, "--spacer") == 0)
+    else if(strcasecmp(key, "--spacing") == 0)
     {
         if(value == NULL)
         {
             printf("Error: usage: %s <width>\n", key);
             exit(404);
         }
-        if(sscanf(value, "%hd", &instance->config.logo_spacer) != 1)
+        if(sscanf(value, "%hd", &instance->config.logo_spacing) != 1)
         {
             printf("Error: couldn't parse %s to uint16_t\n", value);
             exit(405);
