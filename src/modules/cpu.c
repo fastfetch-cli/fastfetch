@@ -50,6 +50,6 @@ void ffPrintCPU(FFinstance* instance)
         );
     }
     
-    ffPrintAndSaveCachedValue(instance, "CPU", cpu.chars);
+    ffPrintAndSaveCachedValue(instance, "CPU", &cpu);
     ffStrbufDestroy(&cpu);
 }

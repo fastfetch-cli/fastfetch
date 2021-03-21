@@ -45,7 +45,7 @@ void ffPrintHost(FFinstance* instance)
         ffStrbufSetF(&host, "%s %s", name.chars, version.chars);
     }
 
-    ffPrintAndSaveCachedValue(instance, "Host", host.chars);
+    ffPrintAndSaveCachedValue(instance, "Host", &host);
     ffStrbufDestroy(&host);
 
     ffStrbufDestroy(&family);

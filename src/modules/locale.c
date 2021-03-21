@@ -55,6 +55,6 @@ void ffPrintLocale(FFinstance* instance)
 	}
 
 
-	ffPrintAndSaveCachedValue(instance, "Locale", locale.chars);
+	ffPrintAndSaveCachedValue(instance, "Locale", &locale);
 	ffStrbufDestroy(&locale);
 }

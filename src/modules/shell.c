@@ -43,6 +43,6 @@ void ffPrintShell(FFinstance* instance)
         ffStrbufSetS(&shell, shellName);
     }
 
-    ffPrintAndSaveCachedValue(instance, "Shell", shell.chars);
+    ffPrintAndSaveCachedValue(instance, "Shell", &shell);
     ffStrbufDestroy(&shell);
 }

@@ -95,6 +95,6 @@ void ffPrintResolution(FFinstance* instance)
             ffStrbufAppendF(&resolution, " @ %iHz", currentRate);
     }
 
-    ffPrintAndSaveCachedValue(instance, "Resolution", resolution.chars);
+    ffPrintAndSaveCachedValue(instance, "Resolution", &resolution);
     ffStrbufDestroy(&resolution);
 }

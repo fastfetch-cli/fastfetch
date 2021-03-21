@@ -20,6 +20,7 @@ typedef struct FFstrbuf
 #define FF_STRBUF_CREATE(name) FFstrbuf name; ffStrbufInit(&name);
 
 void ffStrbufInit(FFstrbuf* strbuf);
+void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
 void ffStrbufInitS(FFstrbuf* strbuf, const char* value);
 void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufInitC(FFstrbuf* strbuf, const char c);
@@ -36,14 +37,14 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 void ffStrbufClear(FFstrbuf* strbuf);
 bool ffStrbufIsEmpty(FFstrbuf* strbuf);
 
-void ffStrbufSet(FFstrbuf* strbuf, FFstrbuf* value);
+void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufSetS(FFstrbuf* strbuf, const char* value);
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSetC(FFstrbuf* strbuf, const char c);
 void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufSetVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
-void ffStrbufAppend(FFstrbuf* strbuf, FFstrbuf* value);
+void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendC(FFstrbuf* strbuf, const char c);
@@ -54,10 +55,10 @@ char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index);
 
 void ffStrbufWriteTo(FFstrbuf* strbuf, FILE* file);
 
-int ffStrbufComp(FFstrbuf* strbuf, FFstrbuf* comp);
+int ffStrbufComp(FFstrbuf* strbuf, const FFstrbuf* comp);
 int ffStrbufCompS(FFstrbuf* strbuf, const char* comp);
 int ffStrbufCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp);
-int ffStrbufIgnCaseComp(FFstrbuf* strbuf, FFstrbuf* comp);
+int ffStrbufIgnCaseComp(FFstrbuf* strbuf, const FFstrbuf* comp);
 int ffStrbufIgnCaseCompS(FFstrbuf* strbuf, const char* comp);
 int ffStrbufIgnCaseCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp);
 

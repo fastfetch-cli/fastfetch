@@ -39,7 +39,7 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, key, gpu.chars);
+    ffPrintAndSaveCachedValue(instance, key, &gpu);
     ffStrbufDestroy(&gpu);
 }
 

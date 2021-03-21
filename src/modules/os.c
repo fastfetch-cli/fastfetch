@@ -29,6 +29,6 @@ void ffPrintOS(FFinstance* instance)
         ffStrbufSetF(&os, "%s %s", name, instance->state.utsname.machine);
     }
 
-    ffPrintAndSaveCachedValue(instance, "OS", os.chars);
+    ffPrintAndSaveCachedValue(instance, "OS", &os);
     ffStrbufDestroy(&os);
 }

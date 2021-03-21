@@ -251,31 +251,28 @@ void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
     close(fd);
 }
 
-static const char* getCacheDir(FFinstance* instance)
+static const FFstrbuf* getCacheDir(FFinstance* instance)
 {
-    static char cache[256];
+    static FFstrbuf cacheDir;
     static bool init = false;
     if(init)
-        return cache;
+        return &cacheDir;
 
-    const char* xdgCache = getenv("XDG_CACHE_HOME");
-    if(xdgCache == NULL)
+    ffStrbufInitS(&cacheDir, getenv("XDG_CACHE_HOME"));
+
+    if(ffStrbufIsEmpty(&cacheDir))
     {
-        strcpy(cache, instance->state.passwd->pw_dir);
-        strcat(cache, "/.cache");
-    }
-    else
-    {
-        strcpy(cache, xdgCache);
+        ffStrbufSetS(&cacheDir, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&cacheDir, "/.cache/");
     }
 
-    mkdir(cache, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
-    
-    strcat(cache, "/fastfetch/");
-    mkdir(cache, S_IRWXU | S_IRGRP | S_IROTH);
+    mkdir(cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+
+    ffStrbufAppendS(&cacheDir, "fastfetch/");
+    mkdir(cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
 
     init = true;
-    return cache;
+    return &cacheDir;
 }
 
 bool ffPrintCachedValue(FFinstance* instance, const char* key)
@@ -283,13 +280,15 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     if(instance->config.recache)
         return false;
 
-    FFstrbuf filename;
-    ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
+    FFstrbuf cacheFile;
+    ffStrbufInit(&cacheFile);
+    ffStrbufAppend(&cacheFile, getCacheDir(instance));
+    ffStrbufAppendS(&cacheFile, key);
 
     FF_STRBUF_CREATE(value);
-    ffGetFileContent(filename.chars, &value);
+    ffGetFileContent(cacheFile.chars, &value);
 
-    ffStrbufDestroy(&filename);
+    ffStrbufDestroy(&cacheFile);
 
     if(ffStrbufIsEmpty(&value))
     {
@@ -304,30 +303,31 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     return true;
 }
 
-void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value)
+void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value)
 {
-    puts(value);
+    ffStrbufWriteTo(value, stdout);
+    putchar('\n');
 
     if(!instance->config.cacheSave)
         return;
 
-    FFstrbuf filename;
-    ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
+    FFstrbuf cacheFile;
+    ffStrbufInit(&cacheFile);
+    ffStrbufAppend(&cacheFile, getCacheDir(instance));
+    ffStrbufAppendS(&cacheFile, key);
 
-    int fd = open(filename.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int fd = open(cacheFile.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(fd == -1)
         return;
 
-    size_t len = strlen(value);
-
-    bool failed = write(fd, value, len) != len;
+    bool failed = write(fd, value->chars, value->length) != value->length;
 
     close(fd);
 
     if(failed)
-        unlink(filename.chars);
+        unlink(cacheFile.chars);
 
-    ffStrbufDestroy(&filename);
+    ffStrbufDestroy(&cacheFile);
 }
 
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...)

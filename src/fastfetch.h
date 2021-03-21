@@ -124,7 +124,7 @@ void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, con
 void ffPrintError(FFinstance* instance, const char* key, const char* message, ...);
 void ffTrimTrailingWhitespace(char* buffer);
 bool ffPrintCachedValue(FFinstance* instance, const char* key);
-void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value);
+void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value);
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
 void ffFinish(FFinstance* instance);
 
