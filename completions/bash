@@ -4,6 +4,7 @@ __fastfetch_complete_help()
 {
     local __ff_helps=(
         "color"
+        "format"
         "os-format"
         "host-format"
         "kernel-format"

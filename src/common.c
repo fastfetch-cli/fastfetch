@@ -370,33 +370,20 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
             FFstrbuf argnumstr;
             ffStrbufInit(&argnumstr);
             
-            while(true)
-            {
+            while(formatstr->chars[i] != '}' && formatstr->chars[i] != '\0')
                 ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
 
-                if(formatstr->chars[i] == '}')
-                    break;
-
-                if(formatstr->chars[i] == '\0')
-                {   
-                    fprintf(stderr, "Error: format string \"%s\" ends with an uncomplete placeholder %s\n", formatstr->chars, argnumstr.chars);
-                    ffStrbufDestroy(buffer);
-                    exit(802);
-                }
-            }
-
-            if(ffStrbufGetC(&argnumstr, 0) == '-')
-            {
-                fprintf(stderr, "Error: format string \"%s\" placeholder value \"%s\" is negative\n", formatstr->chars, argnumstr.chars);
-                ffStrbufDestroy(buffer);
-                exit(803);
-            }
-
-            if(sscanf(argnumstr.chars, "%u", &argIndex) != 1)
-            {
-                fprintf(stderr, "Error: format string \"%s\" placeholder value \"%s\" could not be parsed to uint32_t\n", formatstr->chars, argnumstr.chars);
-                ffStrbufDestroy(buffer);
-                exit(804);
+            if(
+                ffStrbufGetC(&argnumstr, 0) == '-' ||
+                sscanf(argnumstr.chars, "%u", &argIndex) != 1 ||
+                argIndex > numArgs
+            ) {
+                ffStrbufAppendC(buffer, '{');
+                ffStrbufAppend(buffer, &argnumstr);
+                if(formatstr->chars[i] != '\0')
+                    ffStrbufAppendC(buffer, '}');
+                ffStrbufDestroy(&argnumstr);
+                continue;
             }
 
             ffStrbufDestroy(&argnumstr);
@@ -404,13 +391,6 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
             
         if(argIndex == 0)
             argIndex = 1;
-
-        if(argIndex > numArgs)
-        {
-            fprintf(stderr, "Error: format string \"%s\" placeholder {%u} wants higher argument than number of arguments (%u)\n", formatstr->chars, argIndex, numArgs);
-            ffStrbufDestroy(buffer);
-            exit(805);
-        }
 
         FFformatarg arg = arguments[argIndex - 1];
 
