@@ -38,8 +38,7 @@ void ffPrintMemory(FFinstance* instance)
     }
     else
     {
-        FFstrbuf memory;
-        ffStrbufInit(&memory);
+        FF_STRBUF_CREATE(memory);
 
         ffParseFormatString(&memory, &instance->config.memoryFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &used_mem},

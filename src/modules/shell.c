@@ -27,10 +27,7 @@ void ffPrintShell(FFinstance* instance)
         ++shellName;
     }
 
-    ffPrintLogoAndKey(instance, "Shell");
-
-    FFstrbuf shell;
-    ffStrbufInit(&shell);
+    FF_STRBUF_CREATE(shell);
 
     if(!ffStrbufIsEmpty(&instance->config.shellFormat))
     {
@@ -44,6 +41,6 @@ void ffPrintShell(FFinstance* instance)
         ffStrbufSetS(&shell, shellName);
     }
 
-    ffPrintAndSaveCachedValue(instance, "Shell", shell.chars);
+    ffPrintAndSaveCachedValue(instance, "Shell", &shell);
     ffStrbufDestroy(&shell);
 }

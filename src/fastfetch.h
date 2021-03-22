@@ -34,7 +34,7 @@ typedef struct FFlogo
 typedef struct FFconfig
 {
     FFlogo logo;
-    uint16_t logo_spacer;
+    uint16_t logo_spacing;
     FFstrbuf seperator;
     int16_t offsetx;
     FFstrbuf color;
@@ -116,7 +116,7 @@ void ffInitState(FFstate* state);
 void ffDefaultConfig(FFconfig* config);
 void ffPrintKey(FFconfig* config, const char* key);
 void ffPrintLogoAndKey(FFinstance* instance, const char* key);
-void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize);
+void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 void ffParseFont(char* font, char* buffer);
@@ -124,7 +124,7 @@ void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, con
 void ffPrintError(FFinstance* instance, const char* key, const char* message, ...);
 void ffTrimTrailingWhitespace(char* buffer);
 bool ffPrintCachedValue(FFinstance* instance, const char* key);
-void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value);
+void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value);
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
 void ffFinish(FFinstance* instance);
 

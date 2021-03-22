@@ -45,7 +45,7 @@ static inline void printHelp()
         "                --structure <structure>:         sets the structure of the fetch. Must be a colon seperated list of keys\n"
         "                --set <key=value>:               hard set the value of an key\n"
         "   -c <color>,  --color <color>:                 sets the color of the keys. Must be a linux console color code (+)\n"
-        "                --spacer <width>:                sets the distance between logo and text\n"
+        "                --spacing <width>:               sets the distance between logo and text\n"
         "   -s <str>,    --seperator <str>:               sets the seperator between key and value. Default is a colon with a space\n"
         "   -x <offset>, --offsetx <offset>:              sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
         "                --show-errors <?value>:          print occuring errors\n"
@@ -80,8 +80,8 @@ static inline void printHelp()
         "\n"
         "Library optins: Set the path of a library to load\n"
         "   --lib-PCI <path>\n"
-        "   --lib-X11 <path>:\n"
-        "   --lib-Xrandr <path>:\n"
+        "   --lib-X11 <path>\n"
+        "   --lib-Xrandr <path>\n"
         "\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
         "An (+) at the end indicates that more help can be printed with --help <option>\n"
@@ -104,190 +104,92 @@ static inline void printCommandHelpColor()
     );
 }
 
-static inline void printCommandHelpOsFormat()
+static inline void printCommandHelpFormat()
 {
     puts(
-        "TBD"
+        "A format string is string that contains placeholder for values.\n"
+        "These placeholders beginn with a '{', contain the index of the value and end with a '}'.\n"
+        "For example the format string \"Values: {1} ({2})\", with the values \"First\" and \"My second val\", will produce \"Values: First (My second val)\".\n"
+        "The format string can contain placeholdes in any oder and multiple occurences.\n"
+        "To include spaces when setting from command line, surround the whole string with double quotes (\").\n"
+        "\n"
+        "If the value index is missing, meaning the placeholder is \"{}\", an internal counter sets the value index.\n"
+        "This means, that the format string \"Values: {1} ({2})\" is equivalent to \"Values: {} ({})\".\n"
+        "Note that this counter only counts empty placeholders, so the format string \"{2} {} {}\" will contain the second value, then the first, and then again the second.\n"
+        "\n"
+        "To make formatting easier, a double open curly brace (\"{{\") will be printed as a single open curly brace and not counted as the beginn of a placeholder.\n"
+        "If a value index is missformatted or wants a non existing value, it will be printed as is, with the curly braces around it.\n"
+        "If the last placeholder isn't closed, it will be printed as is, with the open curly braces at the start.\n"
+        "\n"
+        "Format string is also the way to go to set a fixed value, just use one without placeholders.\n"
+        "For example when running in headless mode you could use \"--resolution-format \"Preferred\"."
     );
 }
 
-static inline void printCommandHelpHostFormat()
+static void constructAndPrintCommandHelpFormat(const char* name, const char* def, uint32_t numArgs, ...)
 {
-    puts(
-        "TBD"
-    );
-}
+    va_list argp;
+    va_start(argp, numArgs);
 
-static inline void printCommandHelpKernelFormat()
-{
-    puts(
-        "TBD"
-    );
-}
+    printf("--%s-format:\n", name);
+    printf("Sets the format string for %s output.\n", name);
+    puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
+    puts("Following values are passed:");
 
-static inline void printCommandHelpUptimeFormat()
-{
-    puts(
-        "TBD"
-    );
-}
+    for(uint32_t i = 1; i <= numArgs; i++)
+        printf("        {%u}: %s\n", i, va_arg(argp, const char*));
 
-static inline void printCommandHelpPackagesFormat()
-{
-    puts(
-        "TBD"
-    );
-}
+    printf("The default is something like \"%s\".\n", def);
 
-static inline void printCommandHelpShellFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpResolutionFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpDEFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpWMFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpThemeFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpIconsFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpFontFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpTerminalFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpTerminalFontFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpCPUFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpGPUFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpMemoryFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpDiskFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpBatteryFormat()
-{
-    puts(
-        "TBD"
-    );
-}
-
-static inline void printCommandHelpLocaleFormat()
-{
-    puts(
-        "TBD"
-    );
+    va_end(argp);
 }
 
 static inline void printCommandHelp(const char* command)
 {
     if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
         printCommandHelpColor();
+    else if(strcasecmp(command, "format") == 0)
+        printCommandHelpFormat();
     else if(strcasecmp(command, "os-format") == 0)
-        printCommandHelpOsFormat();
+        constructAndPrintCommandHelpFormat("os", "{} {}", 2, "Name of the OS", "Architecture of the OS");
     else if(strcasecmp(command, "host-format") == 0)
-        printCommandHelpHostFormat();
+        constructAndPrintCommandHelpFormat("host", "{} {} {}", 3, "Host family", "Host name", "Host version");
     else if(strcasecmp(command, "kernel-format") == 0)
-        printCommandHelpKernelFormat();
+        constructAndPrintCommandHelpFormat("kernel", "{2}", 3, "Kernel sysname", "Kernel release", "Kernel version");
     else if(strcasecmp(command, "uptime-format") == 0)
-        printCommandHelpUptimeFormat();
+        constructAndPrintCommandHelpFormat("uptime", "{} days {} hours {} mins", 4, "Days", "Hours", "Minutes", "Seconds");
     else if(strcasecmp(command, "packages-format") == 0)
-        printCommandHelpPackagesFormat();
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (flatpak)", 3, "Number of all packages", "Number of pacman packages", "Number of flatpak packages");
     else if(strcasecmp(command, "shell-format") == 0)
-        printCommandHelpShellFormat();
+        constructAndPrintCommandHelpFormat("shell", "{2}", 2, "Shell path (without name)", "Shell name");
     else if(strcasecmp(command, "resolution-format") == 0)
-        printCommandHelpResolutionFormat();
+        constructAndPrintCommandHelpFormat("resolution", "{}x{} @ {}Hz", 3, "Screen width", "Screen height", "Screen refresh rate");
     else if(strcasecmp(command, "de-format") == 0)
-        printCommandHelpDEFormat();
+        constructAndPrintCommandHelpFormat("de", "{} {} ({})", 3, "DE name", "DE version", "Name of display server");
     else if(strcasecmp(command, "wm-format") == 0)
-        printCommandHelpWMFormat();
+        constructAndPrintCommandHelpFormat("wm", "{}", 1, "WM name");
     else if(strcasecmp(command, "theme-format") == 0)
-        printCommandHelpThemeFormat();
+        constructAndPrintCommandHelpFormat("theme", "{} [Plasma], {5}", 5, "Plasma theme", "GTK2 theme", "GTK3 theme", "GTK4 theme", "Combined GTK themes");
     else if(strcasecmp(command, "icons-format") == 0)
-        printCommandHelpIconsFormat();
+        constructAndPrintCommandHelpFormat("icons", "{} [Plasma], {5}", 5, "Plasma icons", "GTK2 icons", "GTK3 icons", "GTK4 icons", "Combined GTK icons");
     else if(strcasecmp(command, "font-format") == 0)
-        printCommandHelpFontFormat();
+        constructAndPrintCommandHelpFormat("font", "{} [Plasma], {5}", 5, "Plasma font", "GTK2 font", "GTK3 font", "GTK4 font", "Combined GTK fonts");
     else if(strcasecmp(command, "terminal-format") == 0)
-        printCommandHelpTerminalFormat();
+        constructAndPrintCommandHelpFormat("terminal", "{}", 1, "Terminal name");
     else if(strcasecmp(command, "terminal-font-format") == 0)
-        printCommandHelpTerminalFontFormat();
+        constructAndPrintCommandHelpFormat("terminal-font", "{}", 1, "Terminal font name");
     else if(strcasecmp(command, "cpu-format") == 0)
-        printCommandHelpCPUFormat();
+        constructAndPrintCommandHelpFormat("cpu", "{} ({}) @ {}GHz", 3, "CPU name", "CPU logical core count", "CPU frequency");
     else if(strcasecmp(command, "gpu-format") == 0)
-        printCommandHelpGPUFormat();
+        constructAndPrintCommandHelpFormat("gpu", "{} {}", 2, "GPU vendor", "GPU name");
     else if(strcasecmp(command, "memory-format") == 0)
-        printCommandHelpMemoryFormat();
+        constructAndPrintCommandHelpFormat("memory", "{}MiB / {}MiB ({}%)", 3, "Used memory", "Total memory", "Used memory percentage");
     else if(strcasecmp(command, "disk-format") == 0)
-        printCommandHelpDiskFormat();
+        constructAndPrintCommandHelpFormat("disk", "{}GB / {}GB ({}%)", 3, "Used disk space", "Total disk space", "Used disk space percentage");
     else if(strcasecmp(command, "battery-format") == 0)
-        printCommandHelpBatteryFormat();
+        constructAndPrintCommandHelpFormat("battery", "{} {} ({}) [{}%; {}]", 5, "Battery manufactor", "Battery model", "Battery technology", "Battery capacity", "Battery status");
     else if(strcasecmp(command, "locale-format") == 0)
-        printCommandHelpLocaleFormat();
+        constructAndPrintCommandHelpFormat("locale", "{}", 1, "Locale code");
     else
         printf("No specific help for command %s provided\n", command);
 }
@@ -345,14 +247,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         puts(FASTFETCH_DEFAULT_CONFIG);
         exit(0);
     }
-    else if(strcasecmp(key, "--spacer") == 0)
+    else if(strcasecmp(key, "--spacing") == 0)
     {
         if(value == NULL)
         {
             printf("Error: usage: %s <width>\n", key);
             exit(404);
         }
-        if(sscanf(value, "%hd", &instance->config.logo_spacer) != 1)
+        if(sscanf(value, "%hd", &instance->config.logo_spacing) != 1)
         {
             printf("Error: couldn't parse %s to uint16_t\n", value);
             exit(405);

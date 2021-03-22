@@ -17,11 +17,8 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     if(ffStrbufIsEmpty(&sessionDesktop))
         ffStrbufSetS(&sessionDesktop, getenv("XDG_SESSION_DESKTOP"));
 
-    FFstrbuf sessionVersion;
-    ffStrbufInit(&sessionVersion);
-
-    FFstrbuf sessionType;
-    ffStrbufInit(&sessionType);
+    FF_STRBUF_CREATE(sessionVersion);
+    FF_STRBUF_CREATE(sessionType);
 
     if(ffStrbufIgnCaseCompS(&sessionDesktop, "KDE") == 0)
         getKDE(&sessionDesktop, &sessionVersion, &sessionType);
@@ -72,8 +69,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, "DE");
 
-        FFstrbuf de;
-        ffStrbufInit(&de);
+        FF_STRBUF_CREATE(de);
 
         ffParseFormatString(&de, &instance->config.deFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionDesktop},

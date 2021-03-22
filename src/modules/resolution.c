@@ -74,10 +74,7 @@ void ffPrintResolution(FFinstance* instance)
 
     dlclose(x11);
 
-    ffPrintLogoAndKey(instance, "Resolution");
-
-    FFstrbuf resolution;
-    ffStrbufInit(&resolution);
+    FF_STRBUF_CREATE(resolution);
 
     if(!ffStrbufIsEmpty(&instance->config.resolutionFormat))
     {
@@ -96,6 +93,6 @@ void ffPrintResolution(FFinstance* instance)
             ffStrbufAppendF(&resolution, " @ %iHz", currentRate);
     }
 
-    ffPrintAndSaveCachedValue(instance, "Resolution", resolution.chars);
+    ffPrintAndSaveCachedValue(instance, "Resolution", &resolution);
     ffStrbufDestroy(&resolution);
 }

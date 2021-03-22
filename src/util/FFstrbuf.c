@@ -9,6 +9,12 @@ void ffStrbufInit(FFstrbuf* strbuf)
     ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
 }
 
+void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
+{
+    ffStrbufInitA(strbuf, src->allocated);
+    ffStrbufAppend(strbuf, src);
+}
+
 void ffStrbufInitS(FFstrbuf* strbuf, const char* value)
 {
     ffStrbufInitAS(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC, value);
@@ -98,7 +104,7 @@ bool ffStrbufIsEmpty(FFstrbuf* strbuf)
     return strbuf->length == 0;
 }
 
-void ffStrbufSet(FFstrbuf* strbuf, FFstrbuf* value)
+void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
 {
     ffStrbufClear(strbuf);
     ffStrbufAppendNS(strbuf, value->length, value->chars);
@@ -137,7 +143,7 @@ void ffStrbufSetVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     ffStrbufAppendVF(strbuf, format, arguments);
 }
 
-void ffStrbufAppend(FFstrbuf* strbuf, FFstrbuf* value)
+void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
 {
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
@@ -232,7 +238,7 @@ void ffStrbufWriteTo(FFstrbuf* strbuf, FILE* file)
     fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
 }
 
-int ffStrbufComp(FFstrbuf* strbuf, FFstrbuf* comp)
+int ffStrbufComp(FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufCompNS(strbuf, comp->length, comp->chars);
 }
@@ -247,7 +253,7 @@ int ffStrbufCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp)
     return strncasecmp(strbuf->chars, comp, length);
 }
 
-int ffStrbufIgnCaseComp(FFstrbuf* strbuf, FFstrbuf* comp)
+int ffStrbufIgnCaseComp(FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufIgnCaseCompNS(strbuf, comp->length, comp->chars);
 }
@@ -260,6 +266,33 @@ int ffStrbufIgnCaseCompS(FFstrbuf* strbuf, const char* comp)
 int ffStrbufIgnCaseCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp)
 {
     return strncasecmp(strbuf->chars, comp, length);
+}
+
+void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
+{
+    uint32_t index = 0;
+    while(strbuf->chars[index] == c && index < strbuf->length)
+        ++index;
+
+    if(index == 0)
+        return;
+
+    memcpy(strbuf->chars, strbuf->chars + index, index);
+    strbuf->length -= index;
+}
+
+void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
+{   
+
+    while(strbuf->length > 0 && strbuf->chars[strbuf->length - 1] == c)
+        --strbuf->length;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufTrim(FFstrbuf* strbuf, char c)
+{
+    ffStrbufTrimRight(strbuf, c);
+    ffStrbufTrimLeft(strbuf, c);
 }
 
 void ffStrbufDestroy(FFstrbuf* strbuf)

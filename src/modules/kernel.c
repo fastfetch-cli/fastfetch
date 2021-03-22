@@ -9,8 +9,7 @@ void ffPrintKernel(FFinstance* instance)
         return;
     }
 
-    FFstrbuf kernel;
-    ffStrbufInit(&kernel);
+    FF_STRBUF_CREATE(kernel);
 
     ffParseFormatString(&kernel, &instance->config.kernelFormat, 3,
         (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
@@ -20,5 +19,6 @@ void ffPrintKernel(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Kernel");
     ffStrbufWriteTo(&kernel, stdout);
+    putchar('\n');
     ffStrbufDestroy(&kernel);
 }

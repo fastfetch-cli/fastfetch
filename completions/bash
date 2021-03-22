@@ -4,6 +4,7 @@ __fastfetch_complete_help()
 {
     local __ff_helps=(
         "color"
+        "format"
         "os-format"
         "host-format"
         "kernel-format"
@@ -115,7 +116,7 @@ __fastfetch_completion()
     local FF_OPTIONS_STRING=(
         "-c"
         "--color"
-        "--spacer"
+        "--spacing"
         "-s"
         "--seperator"
         "-x"

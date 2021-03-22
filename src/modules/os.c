@@ -13,10 +13,7 @@ void ffPrintOS(FFinstance* instance)
         return;
     }
 
-    ffPrintLogoAndKey(instance, "OS");
-
-    FFstrbuf os;
-    ffStrbufInit(&os);
+    FF_STRBUF_CREATE(os);
 
     if(!ffStrbufIsEmpty(&instance->config.osFormat))
     {
@@ -30,6 +27,6 @@ void ffPrintOS(FFinstance* instance)
         ffStrbufSetF(&os, "%s %s", name, instance->state.utsname.machine);
     }
 
-    ffPrintAndSaveCachedValue(instance, "OS", os.chars);
+    ffPrintAndSaveCachedValue(instance, "OS", &os);
     ffStrbufDestroy(&os);
 }

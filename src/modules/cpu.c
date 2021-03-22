@@ -33,10 +33,7 @@ void ffPrintCPU(FFinstance* instance)
 
     int numProcs = get_nprocs();
 
-    ffPrintLogoAndKey(instance, "CPU");
-
-    FFstrbuf cpu;
-    ffStrbufInit(&cpu);
+    FF_STRBUF_CREATE(cpu);
 
     if(ffStrbufIsEmpty(&instance->config.cpuFormat))
     {
@@ -51,6 +48,6 @@ void ffPrintCPU(FFinstance* instance)
         );
     }
     
-    ffPrintAndSaveCachedValue(instance, "CPU", cpu.chars);
+    ffPrintAndSaveCachedValue(instance, "CPU", &cpu);
     ffStrbufDestroy(&cpu);
 }

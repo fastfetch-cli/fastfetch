@@ -22,7 +22,7 @@ void ffInitState(FFstate* state)
 void ffDefaultConfig(FFconfig* config)
 {
     ffStrbufInit(&config->color);
-    config->logo_spacer = 4;
+    config->logo_spacing = 4;
     ffStrbufInitS(&config->seperator, ": ");
     config->offsetx = 0;
     config->titleLength = 20; // This is overwritten by ffPrintTitle
@@ -232,53 +232,47 @@ void ffTrimTrailingWhitespace(char* buffer)
         buffer[end + 1] = '\0';
 }
 
-void ffGetFileContent(const char* fileName, char* buffer, uint32_t bufferSize)
+void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
 {
-    buffer[0] = '\0';
-
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return;
 
-    ssize_t readed = read(fd, buffer, bufferSize - 1);
-    if(readed < 1)
-        return;
+    ssize_t readed;
+    while((readed = read(fd, buffer->chars, buffer->allocated)) == buffer->allocated && readed > 0)
+        ffStrbufEnsureCapacity(buffer, buffer->allocated * 2);
+
+    if(readed >= 0)
+        buffer->length = readed;
+
+    ffStrbufTrimRight(buffer, '\n');
+    ffStrbufTrimRight(buffer, ' ');
 
     close(fd);
-
-    if(buffer[readed - 1] == '\n')
-        buffer[readed - 1] = '\0';
-    else
-        buffer[readed] = '\0';
-
-    ffTrimTrailingWhitespace(buffer);
 }
 
-static const char* getCacheDir(FFinstance* instance)
+static const FFstrbuf* getCacheDir(FFinstance* instance)
 {
-    static char cache[256];
+    static FFstrbuf cacheDir;
     static bool init = false;
     if(init)
-        return cache;
+        return &cacheDir;
 
-    const char* xdgCache = getenv("XDG_CACHE_HOME");
-    if(xdgCache == NULL)
+    ffStrbufInitS(&cacheDir, getenv("XDG_CACHE_HOME"));
+
+    if(ffStrbufIsEmpty(&cacheDir))
     {
-        strcpy(cache, instance->state.passwd->pw_dir);
-        strcat(cache, "/.cache");
-    }
-    else
-    {
-        strcpy(cache, xdgCache);
+        ffStrbufSetS(&cacheDir, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&cacheDir, "/.cache/");
     }
 
-    mkdir(cache, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
-    
-    strcat(cache, "/fastfetch/");
-    mkdir(cache, S_IRWXU | S_IRGRP | S_IROTH);
+    mkdir(cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+
+    ffStrbufAppendS(&cacheDir, "fastfetch/");
+    mkdir(cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
 
     init = true;
-    return cache;
+    return &cacheDir;
 }
 
 bool ffPrintCachedValue(FFinstance* instance, const char* key)
@@ -286,47 +280,55 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     if(instance->config.recache)
         return false;
 
-    FFstrbuf filename;
-    ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
+    FFstrbuf cacheFile;
+    ffStrbufInit(&cacheFile);
+    ffStrbufAppend(&cacheFile, getCacheDir(instance));
+    ffStrbufAppendS(&cacheFile, key);
 
-    char value[1024];
-    ffGetFileContent(filename.chars, value, sizeof(value));
+    FF_STRBUF_CREATE(value);
+    ffGetFileContent(cacheFile.chars, &value);
 
-    ffStrbufDestroy(&filename);
+    ffStrbufDestroy(&cacheFile);
 
-    if(value[0] == '\0')
+    if(ffStrbufIsEmpty(&value))
+    {
+        ffStrbufDestroy(&value);
         return false;
+    }
 
     ffPrintLogoAndKey(instance, key);
-    puts(value);
-
+    ffStrbufWriteTo(&value, stdout);
+    putchar('\n');
+    ffStrbufDestroy(&value);
     return true;
 }
 
-void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, const char* value)
+void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value)
 {
-    puts(value);
+    ffPrintLogoAndKey(instance, key);
+    ffStrbufWriteTo(value, stdout);
+    putchar('\n');
 
     if(!instance->config.cacheSave)
         return;
 
-    FFstrbuf filename;
-    ffStrbufInitF(&filename, "%s%s", getCacheDir(instance), key);
+    FFstrbuf cacheFile;
+    ffStrbufInit(&cacheFile);
+    ffStrbufAppend(&cacheFile, getCacheDir(instance));
+    ffStrbufAppendS(&cacheFile, key);
 
-    int fd = open(filename.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int fd = open(cacheFile.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(fd == -1)
         return;
 
-    size_t len = strlen(value);
-
-    bool failed = write(fd, value, len) != len;
+    bool failed = write(fd, value->chars, value->length) != value->length;
 
     close(fd);
 
     if(failed)
-        unlink(filename.chars);
+        unlink(cacheFile.chars);
 
-    ffStrbufDestroy(&filename);
+    ffStrbufDestroy(&cacheFile);
 }
 
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...)
@@ -370,33 +372,20 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
             FFstrbuf argnumstr;
             ffStrbufInit(&argnumstr);
             
-            while(true)
-            {
+            while(formatstr->chars[i] != '}' && formatstr->chars[i] != '\0')
                 ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
 
-                if(formatstr->chars[i] == '}')
-                    break;
-
-                if(formatstr->chars[i] == '\0')
-                {   
-                    fprintf(stderr, "Error: format string \"%s\" ends with an uncomplete placeholder %s\n", formatstr->chars, argnumstr.chars);
-                    ffStrbufDestroy(buffer);
-                    exit(802);
-                }
-            }
-
-            if(ffStrbufGetC(&argnumstr, 0) == '-')
-            {
-                fprintf(stderr, "Error: format string \"%s\" placeholder value \"%s\" is negative\n", formatstr->chars, argnumstr.chars);
-                ffStrbufDestroy(buffer);
-                exit(803);
-            }
-
-            if(sscanf(argnumstr.chars, "%u", &argIndex) != 1)
-            {
-                fprintf(stderr, "Error: format string \"%s\" placeholder value \"%s\" could not be parsed to uint32_t\n", formatstr->chars, argnumstr.chars);
-                ffStrbufDestroy(buffer);
-                exit(804);
+            if(
+                ffStrbufGetC(&argnumstr, 0) == '-' ||
+                sscanf(argnumstr.chars, "%u", &argIndex) != 1 ||
+                argIndex > numArgs
+            ) {
+                ffStrbufAppendC(buffer, '{');
+                ffStrbufAppend(buffer, &argnumstr);
+                if(formatstr->chars[i] != '\0')
+                    ffStrbufAppendC(buffer, '}');
+                ffStrbufDestroy(&argnumstr);
+                continue;
             }
 
             ffStrbufDestroy(&argnumstr);
@@ -404,13 +393,6 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
             
         if(argIndex == 0)
             argIndex = 1;
-
-        if(argIndex > numArgs)
-        {
-            fprintf(stderr, "Error: format string \"%s\" placeholder {%u} wants higher argument than number of arguments (%u)\n", formatstr->chars, argIndex, numArgs);
-            ffStrbufDestroy(buffer);
-            exit(805);
-        }
 
         FFformatarg arg = arguments[argIndex - 1];
 

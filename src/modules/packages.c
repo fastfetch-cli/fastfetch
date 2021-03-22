@@ -57,8 +57,7 @@ void ffPrintPackages(FFinstance* instance)
         return;
     }
 
-    FFstrbuf packages;
-    ffStrbufInit(&packages);
+    FF_STRBUF_CREATE(packages);
 
     ffParseFormatString(&packages, &instance->config.packagesFormat, 3,
         (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
