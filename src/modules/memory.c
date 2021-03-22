@@ -46,8 +46,7 @@ void ffPrintMemory(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &percentage}
         );
 
-        ffStrbufWriteTo(&memory, stdout);
-        putchar('\n');
+        ffStrbufPutTo(&memory, stdout);
         ffStrbufDestroy(&memory);
     }
 }

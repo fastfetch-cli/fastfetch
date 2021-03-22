@@ -52,7 +52,7 @@ void ffPrintWM(FFinstance* instance)
     if(ffStrbufIsEmpty(&instance->config.wmFormat))
     {
         ffPrintLogoAndKey(instance, "WM");
-        ffStrbufWriteTo(&name, stdout);
+        ffStrbufPutTo(&name, stdout);
     }
     else
     {
@@ -63,11 +63,9 @@ void ffPrintWM(FFinstance* instance)
         );
 
         ffPrintLogoAndKey(instance, "WM");
-        ffStrbufWriteTo(&wm, stdout);
-        
+        ffStrbufPutTo(&wm, stdout);
         ffStrbufDestroy(&wm);
     }
 
-    putchar('\n');
     ffStrbufDestroy(&name);
 }

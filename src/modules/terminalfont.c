@@ -16,8 +16,7 @@ static void printTerminalFont(FFinstance* instance, char* font)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font}
         );
 
-        ffStrbufWriteTo(&termfont, stdout);
-        putchar('\n');
+        ffStrbufPutTo(&termfont, stdout);
         ffStrbufDestroy(&termfont);
     }
 }

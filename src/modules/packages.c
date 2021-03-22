@@ -66,6 +66,6 @@ void ffPrintPackages(FFinstance* instance)
     );
 
     ffPrintLogoAndKey(instance, "Packages");
-    ffStrbufWriteTo(&packages, stdout);
+    ffStrbufPutTo(&packages, stdout);
     ffStrbufDestroy(&packages);
 }

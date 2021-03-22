@@ -64,6 +64,8 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
 
         if(!ffStrbufIsEmpty(&sessionType))
             printf("(%s)", sessionType.chars);
+
+        putchar('\n');
     }
     else
     {
@@ -77,11 +79,9 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionType}
         );
 
-        ffStrbufWriteTo(&de, stdout);
+        ffStrbufPutTo(&de, stdout);
         ffStrbufDestroy(&de);
     }
-    putchar('\n');
-
     ffStrbufDestroy(&sessionType);
     ffStrbufDestroy(&sessionVersion);
     ffStrbufDestroy(&sessionDesktop);

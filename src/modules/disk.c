@@ -35,8 +35,7 @@ void ffPrintDisk(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &percentage}
         );
 
-        ffStrbufWriteTo(&disk, stdout);
-        putchar('\n');
+        ffStrbufPutTo(&disk, stdout);
         ffStrbufDestroy(&disk);
     }
 }

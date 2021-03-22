@@ -86,8 +86,7 @@ static void printBattery(FFinstance* instance, uint8_t index)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &status}
         );
 
-        ffStrbufWriteTo(&battery, stdout);
-        putchar('\n');
+        ffStrbufPutTo(&battery, stdout);
         ffStrbufDestroy(&battery);
     }
 

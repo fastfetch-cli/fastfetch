@@ -30,7 +30,7 @@ void ffPrintTheme(FFinstance* instance)
         if(plasma[0] != '\0')
             printf("%s [Plasma], ", plasma);
 
-        ffStrbufWriteTo(&gtkPretty, stdout);
+        ffStrbufPutTo(&gtkPretty, stdout);
     }
     else
     {
@@ -44,10 +44,7 @@ void ffPrintTheme(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
 
-        ffStrbufWriteTo(&theme, stdout);
-
+        ffStrbufPutTo(&theme, stdout);
         ffStrbufDestroy(&theme);
     }
-    
-    putchar('\n');
 }

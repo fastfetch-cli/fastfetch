@@ -300,8 +300,7 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
     }
 
     ffPrintLogoAndKey(instance, key);
-    ffStrbufWriteTo(&value, stdout);
-    putchar('\n');
+    ffStrbufPutTo(&value, stdout);
     ffStrbufDestroy(&value);
     return true;
 }
@@ -309,8 +308,7 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value)
 {
     ffPrintLogoAndKey(instance, key);
-    ffStrbufWriteTo(value, stdout);
-    putchar('\n');
+    ffStrbufPutTo(value, stdout);
 
     if(!instance->config.cacheSave)
         return;

@@ -90,7 +90,7 @@ void ffPrintTerminal(FFinstance* instance)
     
     if(ffStrbufIsEmpty(&instance->config.terminalFormat))
     {
-        ffStrbufWriteTo(&instance->state.terminal.value, stdout);
+        ffStrbufPutTo(&instance->state.terminal.value, stdout);
     }
     else
     {
@@ -100,8 +100,6 @@ void ffPrintTerminal(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.terminal.value}
         );
 
-        ffStrbufWriteTo(&terminal, stdout);
+        ffStrbufPutTo(&terminal, stdout);
     }
-
-    putchar('\n');
 }

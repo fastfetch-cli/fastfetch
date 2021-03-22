@@ -238,6 +238,12 @@ void ffStrbufWriteTo(FFstrbuf* strbuf, FILE* file)
     fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
 }
 
+void ffStrbufPutTo(FFstrbuf* strbuf, FILE* file)
+{
+    fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
+    fputc('\n', file);
+}
+
 int ffStrbufComp(FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufCompNS(strbuf, comp->length, comp->chars);

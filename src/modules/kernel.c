@@ -18,7 +18,6 @@ void ffPrintKernel(FFinstance* instance)
     );
 
     ffPrintLogoAndKey(instance, "Kernel");
-    ffStrbufWriteTo(&kernel, stdout);
-    putchar('\n');
+    ffStrbufPutTo(&kernel, stdout);
     ffStrbufDestroy(&kernel);
 }

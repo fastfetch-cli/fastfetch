@@ -32,7 +32,7 @@ void ffPrintIcons(FFinstance* instance)
         else
             printf("%s [Plasma], ", plasma);
 
-        ffStrbufWriteTo(&gtkPretty, stdout);
+        ffStrbufPutTo(&gtkPretty, stdout);
     }
     else
     {
@@ -46,11 +46,9 @@ void ffPrintIcons(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
 
-        ffStrbufWriteTo(&icons, stdout);
+        ffStrbufPutTo(&icons, stdout);
         ffStrbufDestroy(&icons);
     }
-
-    putchar('\n');
 
     ffStrbufDestroy(&gtkPretty);
 }

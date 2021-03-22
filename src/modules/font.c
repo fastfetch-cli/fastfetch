@@ -46,7 +46,7 @@ void ffPrintFont(FFinstance* instance)
     if(ffStrbufIsEmpty(&instance->config.fontFormat))
     {
         printf("%s [Plasma], ", plasmaPretty);
-        ffStrbufWriteTo(&gtkPretty, stdout);
+        ffStrbufPutTo(&gtkPretty, stdout);
     }
     else
     {
@@ -60,10 +60,9 @@ void ffPrintFont(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
 
-        ffStrbufWriteTo(&font, stdout);
+        ffStrbufPutTo(&font, stdout);
         ffStrbufDestroy(&font);
     }
 
-    putchar('\n');
     ffStrbufDestroy(&gtkPretty);
 }

@@ -39,7 +39,7 @@ void ffPrintUptime(FFinstance* instance)
         );
 
         ffPrintLogoAndKey(instance, "Uptime");
-        ffStrbufWriteTo(&uptime, stdout);
+        ffStrbufPutTo(&uptime, stdout);
         ffStrbufDestroy(&uptime);
     }
 }
