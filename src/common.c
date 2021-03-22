@@ -239,8 +239,11 @@ void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
         return;
 
     ssize_t readed;
-    while((readed = read(fd, buffer->chars, buffer->allocated)) == buffer->allocated && readed > 0)
+    while((readed = read(fd, buffer->chars, buffer->allocated)) == buffer->allocated)
+    {
         ffStrbufEnsureCapacity(buffer, buffer->allocated * 2);
+        lseek(fd, 0, SEEK_SET);
+    }
 
     if(readed >= 0)
         buffer->length = readed;
@@ -281,7 +284,7 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
         return false;
 
     FFstrbuf cacheFile;
-    ffStrbufInit(&cacheFile);
+    ffStrbufInitA(&cacheFile, 128);
     ffStrbufAppend(&cacheFile, getCacheDir(instance));
     ffStrbufAppendS(&cacheFile, key);
 
