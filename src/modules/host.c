@@ -14,15 +14,9 @@ void ffPrintHost(FFinstance* instance)
     FF_STRBUF_CREATE(version);
     ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", &version);
 
-    if(ffStrbufIsEmpty(&family) && ffStrbufIsEmpty(&name) && ffStrbufIsEmpty(&instance->config.hostFormat))
-    {
-        ffPrintError(instance, "Host", "neither family nor name could be determined");
-        return;
-    }
-
     FF_STRBUF_CREATE(host);
 
-    if(!ffStrbufIsEmpty(&instance->config.hostFormat))
+    if(ffStrbufIsEmpty(&instance->config.hostFormat))
     {
         ffParseFormatString(&host, &instance->config.hostFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &family},
@@ -30,17 +24,33 @@ void ffPrintHost(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &version}
         );
     }
-    else if(!ffStrbufIsEmpty(&family) && !ffStrbufIsEmpty(&name))
-    {
-        ffStrbufSetF(&host, "%s %s %s", family.chars, name.chars, version.chars);
-    }
-    else if(!ffStrbufIsEmpty(&family))
-    {
-        ffStrbufSetF(&host, "%s %s", family.chars, version.chars);
-    }
     else
     {
-        ffStrbufSetF(&host, "%s %s", name.chars, version.chars);
+        if(ffStrbufIsEmpty(&family) && ffStrbufIsEmpty(&name))
+        {
+            ffPrintError(instance, "Host", "neither family nor name could be determined");
+            return;
+        }
+        else if(ffStrbufIsEmpty(&name))
+        {
+            ffStrbufAppend(&host, &family);
+        }
+        else if(ffStrbufIsEmpty(&family))
+        {
+            ffStrbufAppend(&host, &name);
+        }
+        else
+        {
+            ffStrbufAppend(&host, &family);
+            ffStrbufAppendC(&host, ' ');
+            ffStrbufAppend(&host, &name);
+        }
+
+        if(!ffStrbufIsEmpty(&version) && ffStrbufIgnCaseCompS(&version, "None") != 0)
+        {
+            ffStrbufAppendC(&host, ' ');
+            ffStrbufAppend(&host, &version);
+        }
     }
 
     ffPrintAndSaveCachedValue(instance, "Host", &host);
