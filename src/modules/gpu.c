@@ -25,7 +25,7 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
 
     FF_STRBUF_CREATE(gpu);
 
-    if(ffStrbufIsEmpty(&instance->config.gpuFormat))
+    if(instance->config.gpuFormat.length == 0)
     {
         ffStrbufSetF(&gpu, "%s %s", vendorPretty, name);
     }
@@ -44,7 +44,7 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
 void ffPrintGPU(FFinstance* instance)
 {
     void* pci;
-    if(ffStrbufIsEmpty(&instance->config.libPCI))
+    if(instance->config.libPCI.length == 0)
         pci = dlopen("libpci.so", RTLD_LAZY);
     else
         pci = dlopen(instance->config.libPCI.chars, RTLD_LAZY);

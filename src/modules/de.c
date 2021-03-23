@@ -14,7 +14,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
 {
     FFstrbuf sessionDesktop;
     ffStrbufInitS(&sessionDesktop, getenv("XDG_CURRENT_DESKTOP"));
-    if(ffStrbufIsEmpty(&sessionDesktop))
+    if(sessionDesktop.length == 0)
         ffStrbufSetS(&sessionDesktop, getenv("XDG_SESSION_DESKTOP"));
 
     FF_STRBUF_CREATE(sessionVersion);
@@ -23,7 +23,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     if(ffStrbufIgnCaseCompS(&sessionDesktop, "KDE") == 0)
         getKDE(&sessionDesktop, &sessionVersion, &sessionType);
 
-    if(ffStrbufIsEmpty(&sessionType))
+    if(sessionType.length == 0)
     {
         const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
         if(strcasecmp(xdgSessionType, "wayland") == 0)
@@ -38,9 +38,9 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
             ffStrbufSetS(&sessionType, xdgSessionType);
     }
 
-    if(ffStrbufIsEmpty(&instance->config.deFormat))
+    if(instance->config.deFormat.length == 0)
     {
-        if(ffStrbufIsEmpty(&sessionDesktop) && ffStrbufIsEmpty(&sessionType))
+        if(sessionDesktop.length == 0 && sessionType.length == 0)
         {
             ffPrintError(instance, "DE", "Neither DE nor Display Server could be determined");
             return;
@@ -48,21 +48,21 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
 
         ffPrintLogoAndKey(instance, "DE");
 
-        if(!ffStrbufIsEmpty(&sessionDesktop))
+        if(sessionDesktop.length > 0)
         {
             ffStrbufWriteTo(&sessionDesktop, stdout);
 
-            if(!ffStrbufIsEmpty(&sessionVersion))
+            if(sessionVersion.length > 0)
             {
                 putchar(' ');
                 ffStrbufWriteTo(&sessionVersion, stdout);
             }
 
-            if(!ffStrbufIsEmpty(&sessionType))
+            if(sessionType.length > 0)
                 putchar(' ');
         }
 
-        if(!ffStrbufIsEmpty(&sessionType))
+        if(sessionType.length > 0)
             printf("(%s)", sessionType.chars);
 
         putchar('\n');

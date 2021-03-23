@@ -49,7 +49,7 @@ void ffPrintWM(FFinstance* instance)
         return;
     }
 
-    if(ffStrbufIsEmpty(&instance->config.wmFormat))
+    if(instance->config.wmFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "WM");
         ffStrbufPutTo(&name, stdout);

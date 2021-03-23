@@ -35,7 +35,6 @@ void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
 void ffStrbufClear(FFstrbuf* strbuf);
-bool ffStrbufIsEmpty(FFstrbuf* strbuf);
 
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufSetS(FFstrbuf* strbuf, const char* value);

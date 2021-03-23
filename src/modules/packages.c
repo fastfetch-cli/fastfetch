@@ -36,7 +36,7 @@ void ffPrintPackages(FFinstance* instance)
         return;
     }
 
-    if(ffStrbufIsEmpty(&instance->config.packagesFormat))
+    if(instance->config.packagesFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "Packages");
 

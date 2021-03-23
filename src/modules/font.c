@@ -43,7 +43,7 @@ void ffPrintFont(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Font");
 
-    if(ffStrbufIsEmpty(&instance->config.fontFormat))
+    if(instance->config.fontFormat.length == 0)
     {
         printf("%s [Plasma], ", plasmaPretty);
         ffStrbufPutTo(&gtkPretty, stdout);

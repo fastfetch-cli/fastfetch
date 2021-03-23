@@ -21,7 +21,7 @@ void ffPrintDisk(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Disk (/)");
 
-    if(ffStrbufIsEmpty(&instance->config.diskFormat))
+    if(instance->config.diskFormat.length == 0)
     {
         printf("%uGB / %uGB (%u%%)\n", used, total, percentage);
     }

@@ -25,7 +25,7 @@ void ffPrintIcons(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Icons");
 
-    if(ffStrbufIsEmpty(&instance->config.iconsFormat))
+    if(instance->config.iconsFormat.length == 0)
     {
         if(plasma[0] == '\0')
             printf("Breeze [Plasma], ");

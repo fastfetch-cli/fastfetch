@@ -263,7 +263,7 @@ static const FFstrbuf* getCacheDir(FFinstance* instance)
 
     ffStrbufInitS(&cacheDir, getenv("XDG_CACHE_HOME"));
 
-    if(ffStrbufIsEmpty(&cacheDir))
+    if(cacheDir.length == 0)
     {
         ffStrbufSetS(&cacheDir, instance->state.passwd->pw_dir);
         ffStrbufAppendS(&cacheDir, "/.cache/");
@@ -293,7 +293,7 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
 
     ffStrbufDestroy(&cacheFile);
 
-    if(ffStrbufIsEmpty(&value))
+    if(value.length == 0)
     {
         ffStrbufDestroy(&value);
         return false;

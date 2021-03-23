@@ -2,7 +2,7 @@
 
 void ffPrintKernel(FFinstance* instance)
 {
-    if(ffStrbufIsEmpty(&instance->config.kernelFormat))
+    if(instance->config.kernelFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "Kernel");
         puts(instance->state.utsname.release);

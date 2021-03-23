@@ -16,26 +16,18 @@ void ffPrintHost(FFinstance* instance)
 
     FF_STRBUF_CREATE(host);
 
-    if(ffStrbufIsEmpty(&instance->config.hostFormat))
+    if(instance->config.hostFormat.length == 0)
     {
-        ffParseFormatString(&host, &instance->config.hostFormat, 3,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &family},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &version}
-        );
-    }
-    else
-    {
-        if(ffStrbufIsEmpty(&family) && ffStrbufIsEmpty(&name))
+        if(family.length == 0 && name.length == 0)
         {
             ffPrintError(instance, "Host", "neither family nor name could be determined");
             return;
         }
-        else if(ffStrbufIsEmpty(&name))
+        else if(name.length == 0)
         {
             ffStrbufAppend(&host, &family);
         }
-        else if(ffStrbufIsEmpty(&family))
+        else if(family.length == 0)
         {
             ffStrbufAppend(&host, &name);
         }
@@ -46,11 +38,22 @@ void ffPrintHost(FFinstance* instance)
             ffStrbufAppend(&host, &name);
         }
 
-        if(!ffStrbufIsEmpty(&version) && ffStrbufIgnCaseCompS(&version, "None") != 0)
-        {
+        if(
+            version.length > 0 &&
+            ffStrbufIgnCaseCompS(&version, "None") != 0 &&
+            ffStrbufIgnCaseCompS(&version, "To be filled by O.E.M.") != 0
+        ) {
             ffStrbufAppendC(&host, ' ');
             ffStrbufAppend(&host, &version);
         }
+    }
+    else
+    {
+        ffParseFormatString(&host, &instance->config.hostFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &family},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &version}
+        );
     }
 
     ffPrintAndSaveCachedValue(instance, "Host", &host);

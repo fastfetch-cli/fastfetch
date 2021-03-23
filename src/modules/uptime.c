@@ -8,7 +8,7 @@ void ffPrintUptime(FFinstance* instance)
     uint32_t minutes = (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
     uint32_t seconds =  instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
 
-    if(ffStrbufIsEmpty(&instance->config.uptimeFormat))
+    if(instance->config.uptimeFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "Uptime");
 

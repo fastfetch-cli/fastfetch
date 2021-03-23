@@ -99,11 +99,6 @@ void ffStrbufClear(FFstrbuf* strbuf)
     strbuf->length = 0;
 }
 
-bool ffStrbufIsEmpty(FFstrbuf* strbuf)
-{
-    return strbuf->length == 0;
-}
-
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
 {
     ffStrbufClear(strbuf);

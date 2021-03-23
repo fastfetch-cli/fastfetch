@@ -33,12 +33,12 @@ static void printBattery(FFinstance* instance, uint8_t index)
     sprintf(key, "Battery %i", index);
 
     if(
-        ffStrbufIsEmpty(&manufactor) &&
-        ffStrbufIsEmpty(&model) &&
-        ffStrbufIsEmpty(&technology) &&
-        ffStrbufIsEmpty(&capacity) && 
-        ffStrbufIsEmpty(&status) &&
-        ffStrbufIsEmpty(&instance->config.batteryFormat)
+        manufactor.length == 0 &&
+        model.length      == 0 &&
+        technology.length == 0 &&
+        capacity.length   == 0 && 
+        status.length     == 0 &&
+        instance->config.batteryFormat.length == 0
     ) {
         ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
         return;
@@ -46,29 +46,29 @@ static void printBattery(FFinstance* instance, uint8_t index)
 
     ffPrintLogoAndKey(instance, key);
 
-    if(ffStrbufIsEmpty(&instance->config.batteryFormat))
+    if(instance->config.batteryFormat.length == 0)
     {
-        if(!ffStrbufIsEmpty(&manufactor))
+        if(manufactor.length > 0)
             printf("%s ", manufactor.chars);
 
-        if(!ffStrbufIsEmpty(&model))
+        if(model.length > 0)
             printf("%s ", manufactor.chars);
 
-        if(!ffStrbufIsEmpty(&technology))
+        if(technology.length > 0)
             printf("(%s) ", technology.chars);
 
-        if(!ffStrbufIsEmpty(&capacity))
+        if(capacity.length > 0)
         {
             printf("[%s%%", capacity.chars);
         
-            if(ffStrbufIsEmpty(&status))
+            if(status.length == 0)
                 puts("]");
             else
                 printf("; %s]\n", status.chars);
         }
         else
         {
-            if(!ffStrbufIsEmpty(&status))
+            if(status.length > 0)
                 printf("[%s]", status.chars);
             else
                 putchar('\n');

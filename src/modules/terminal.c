@@ -88,7 +88,7 @@ void ffPrintTerminal(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Terminal");
     
-    if(ffStrbufIsEmpty(&instance->config.terminalFormat))
+    if(instance->config.terminalFormat.length == 0)
     {
         ffStrbufPutTo(&instance->state.terminal.value, stdout);
     }

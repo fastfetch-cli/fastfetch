@@ -484,13 +484,13 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 static void applyData(FFinstance* instance, FFdata* data)
 {
     //We must do this after parsing all options because of color options
-    if(ffStrbufIsEmpty(&data->logoName))
+    if(data->logoName.length == 0)
         ffLoadLogo(&instance->config);
     else
         ffLoadLogoSet(&instance->config, data->logoName.chars);
 
     //This must be done after loading the logo
-    if(ffStrbufIsEmpty(&instance->config.color))
+    if(instance->config.color.length == 0)
         ffStrbufSetS(&instance->config.color, instance->config.logo.color);
 }
 
@@ -557,7 +557,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
 
 static void run(FFinstance* instance, FFdata* data)
 {
-    if(ffStrbufIsEmpty(&data->structure))
+    if(data->structure.length == 0)
         ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
     
     char* remaining = data->structure.chars;

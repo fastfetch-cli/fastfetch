@@ -25,7 +25,7 @@ void ffPrintTheme(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Theme");
 
-    if(ffStrbufIsEmpty(&instance->config.themeFormat))
+    if(instance->config.themeFormat.length == 0)
     {
         if(plasma[0] != '\0')
             printf("%s [Plasma], ", plasma);

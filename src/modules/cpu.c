@@ -35,7 +35,7 @@ void ffPrintCPU(FFinstance* instance)
 
     FF_STRBUF_CREATE(cpu);
 
-    if(ffStrbufIsEmpty(&instance->config.cpuFormat))
+    if(instance->config.cpuFormat.length == 0)
     {
         ffStrbufSetF(&cpu, "%s (%i) @ %.9gGHz", name, numProcs, ghz);
     }

@@ -29,16 +29,16 @@ void ffPrintShell(FFinstance* instance)
 
     FF_STRBUF_CREATE(shell);
 
-    if(!ffStrbufIsEmpty(&instance->config.shellFormat))
+    if(instance->config.shellFormat.length == 0)
+    {
+        ffStrbufSetS(&shell, shellName);
+    }
+    else
     {
         ffParseFormatString(&shell, &instance->config.shellFormat, 2,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, shellPath},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, shellName}
         );
-    }
-    else
-    {
-        ffStrbufSetS(&shell, shellName);
     }
 
     ffPrintAndSaveCachedValue(instance, "Shell", &shell);

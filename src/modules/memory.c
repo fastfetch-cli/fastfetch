@@ -32,7 +32,7 @@ void ffPrintMemory(FFinstance* instance)
 
     ffPrintLogoAndKey(instance, "Memory");
 
-    if(ffStrbufIsEmpty(&instance->config.memoryFormat))
+    if(instance->config.memoryFormat.length == 0)
     {
         printf("%uMiB / %uMiB (%u%%)\n", used_mem, total_mem, percentage);
     }

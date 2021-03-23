@@ -4,7 +4,7 @@ static void printTerminalFont(FFinstance* instance, char* font)
 {
     ffPrintLogoAndKey(instance, "Terminal font");
 
-    if(ffStrbufIsEmpty(&instance->config.termFontFormat))
+    if(instance->config.termFontFormat.length == 0)
     {
         puts(font);
     }

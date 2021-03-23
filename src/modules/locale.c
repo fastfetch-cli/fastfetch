@@ -41,7 +41,7 @@ void ffPrintLocale(FFinstance* instance)
 
 	FF_STRBUF_CREATE(locale);
 
-	if(ffStrbufIsEmpty(&instance->config.localeFormat))
+	if(instance->config.localeFormat.length == 0)
 	{
 		ffStrbufSetS(&locale, localeCode);
 	}
