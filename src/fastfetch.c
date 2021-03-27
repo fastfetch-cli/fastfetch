@@ -34,15 +34,17 @@ static inline void printHelp()
         "Usage: fastfetch <options>\n"
         "\n"
         "Informative options:\n"
-        "   -h,           --help:                 shows this message and exits\n"
-        "   -h <command>, --help <command>:       shows help for a specific command and exits\n"
-        "   -v            --version:              prints the version of fastfetch and exits\n"
-        "                 --list-logos:           list available logos and exits\n"
-        "                 --print-logos:          shows available logos and exits\n"
-        "                 --print-default-config: prints the default config and exits\n"
+        "   -h,           --help:                    shows this message and exits\n"
+        "   -h <command>, --help <command>:          shows help for a specific command and exits\n"
+        "   -v            --version:                 prints the version of fastfetch and exits\n"
+        "                 --list-logos:              list available logos and exits\n"
+        "                 --print-logos:             shows available logos and exits\n"
+        "                 --print-default-config:    prints the default config and exits\n"
+        "                 --print-default-structure: prints the default stucture and exits\n"
+        "                 --print-available-modules: prints a list of available modules and exits\n"
         "\n"
         "General options:\n"
-        "                --structure <structure>:         sets the structure of the fetch. Must be a colon seperated list of keys\n"
+        "                --structure <structure>:         sets the structure of the fetch. Must be a colon seperated list of keys. Use --print-available-modules to show the default\n"
         "                --set <key=value>:               hard set the value of an key\n"
         "   -c <color>,  --color <color>:                 sets the color of the keys. Must be a linux console color code (+)\n"
         "                --spacing <width>:               sets the distance between logo and text\n"
@@ -127,6 +129,38 @@ static inline void printCommandHelpFormat()
         "\n"
         "Format string is also the way to go to set a fixed value, just use one without placeholders.\n"
         "For example when running in headless mode you could use \"--resolution-format \"Preferred\"."
+    );
+}
+
+static inline void printAvailableModules()
+{
+    puts(
+        "Battery\n"
+        "Break\n"
+        "Colors\n"
+        "CPU\n"
+        "DE\n"
+        "Disk\n"
+        "Font\n"
+        "GPU\n"
+        "Host\n"
+        "Icons\n"
+        "Kernel\n"
+        "Locale\n"
+        "Memory\n"
+        "OS\n"
+        "Packages\n"
+        "Resolution\n"
+        "Seperator\n"
+        "Shell\n"
+        "Terminal\n"
+        "TerminalFont\n"
+        "Theme\n"
+        "Title\n"
+        "Uptime\n"
+        "WM\n"
+        "\n"
+        "+ Additional defined by --set"
     );
 }
 
@@ -264,6 +298,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--print-default-config") == 0)
     {
         puts(FASTFETCH_DEFAULT_CONFIG);
+        exit(0);
+    }
+    else if(strcasecmp(key, "--print-default-structure") == 0)
+    {
+        puts(FASTFETCH_DEFAULT_STRUCTURE);
+        exit(0);
+    }
+    else if(strcasecmp(key, "--print-available-modules") == 0)
+    {
+        printAvailableModules();
         exit(0);
     }
     else if(strcasecmp(key, "--spacing") == 0)

@@ -99,6 +99,8 @@ __fastfetch_completion()
         "--list-logos"
         "--print-logos"
         "--print-default-config"
+        "--print-default-structure"
+        "--print-available-modules"
     )
 
     local FF_OPTIONS_HELP=(
