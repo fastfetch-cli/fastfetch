@@ -218,20 +218,6 @@ void ffPrintError(FFinstance* instance, const char* key, const char* message, ..
     va_end(arguments);
 }
 
-void ffTrimTrailingWhitespace(char* buffer)
-{
-    uint32_t end = 0;
-
-    for(uint32_t i = 0; buffer[i] != '\0'; i++)
-    {
-        if(buffer[i] != ' ')
-            end = i;
-    }
-
-    if(buffer[end + 1] == ' ')
-        buffer[end + 1] = '\0';
-}
-
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
 {
     int fd = open(fileName, O_RDONLY);

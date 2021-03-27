@@ -401,29 +401,20 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
     size_t len = 0;
     ssize_t read;
 
-    while ((read = getline(&lineStart, &len, file)) != -1) {
+    while ((read = getline(&lineStart, &len, file)) != -1)
+    {
+        FFstrbuf line;
+        ffStrbufInitS(&line, lineStart);
+        ffStrbufTrimRight(&line, '\n');
+        ffStrbufTrim(&line, ' ');
 
-        //We need to copy lineStart because we modify this value, but need the original for free
-        char* line = lineStart;
-
-        if(line[read - 1] == '\n')
-            line[read - 1] = '\0';
-        else
-            line[read] = '\0';
-
-        ffTrimTrailingWhitespace(line);
-
-        //This trims leading whitespace
-        while(*line == ' ')
-            ++line;
-
-        if(line[0] == '\0' || line[0] == '#')
+        if(line.length == 0 || line.chars[0] == '#')
             continue;
 
-        char* valueStart = strchr(line, ' ');
+        char* valueStart = strchr(line.chars, ' ');
         if(valueStart == NULL)
         {
-            parseOption(instance, data, line, NULL);
+            parseOption(instance, data, line.chars, NULL);
         }
         else
         {
@@ -438,16 +429,19 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
             //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
             if(*valueStart == '"')
             {
-                char* last = valueStart + strlen(valueStart) - 1;
+                char* last = line.chars + line.length - 1;
                 if(*last == '"')
                 {
                     ++valueStart;
                     *last = '\0';
+                    --line.length;
                 }
             }
 
-            parseOption(instance, data, line, valueStart);
+            parseOption(instance, data, line.chars, valueStart);
         }
+
+        ffStrbufDestroy(&line);
     }
 
     if(lineStart != NULL)
