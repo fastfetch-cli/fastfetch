@@ -29,26 +29,25 @@ void ffPrintOS(FFinstance* instance)
 
     while (getline(&line, &len, osRelease) != -1)
     {
-        sscanf(line, "NAME=\"%[^\"]+", name);
         sscanf(line, "NAME=%[^\n]", name);
-        sscanf(line, "PRETTY_NAME=\"%[^\"]+", prettyName);
+        sscanf(line, "NAME=\"%[^\"]+", name);
         sscanf(line, "PRETTY_NAME=%[^\n]", prettyName);
-        sscanf(line, "ID=\"%[^\"]+", id);
+        sscanf(line, "PRETTY_NAME=\"%[^\"]+", prettyName);
         sscanf(line, "ID=%[^\n]", id);
-        sscanf(line, "ID_LIKE=\"%[^\"]+", idLike);
+        sscanf(line, "ID=\"%[^\"]+", id);
         sscanf(line, "ID_LIKE=%[^\n]", idLike);
-        sscanf(line, "VARIANT=\"%[^\"]+", variant);
+        sscanf(line, "ID_LIKE=\"%[^\"]+", idLike);
         sscanf(line, "VARIANT=%[^\n]", variant);
-        sscanf(line, "VARIANT_ID=\"%[^\"]+", variantId);
+        sscanf(line, "VARIANT=\"%[^\"]+", variant);
         sscanf(line, "VARIANT_ID=%[^\n]", variantId);
-        sscanf(line, "VERSION=\"%[^\"]+", version);
+        sscanf(line, "VARIANT_ID=\"%[^\"]+", variantId);
         sscanf(line, "VERSION=%[^\n]", version);
-        sscanf(line, "VERSION_ID=\"%[^\"]+", versionId);
+        sscanf(line, "VERSION=\"%[^\"]+", version);
         sscanf(line, "VERSION_ID=%[^\n]", versionId);
-        sscanf(line, "VERSION_CODENAME=\"%[^\"]+", versionCodename);
+        sscanf(line, "VERSION_ID=\"%[^\"]+", versionId);
         sscanf(line, "VERSION_CODENAME=%[^\n]", versionCodename);
-        sscanf(line, "BUILD_ID=\"%[^\"]+", buildId);
         sscanf(line, "BUILD_ID=%[^\n]", buildId);
+        sscanf(line, "BUILD_ID=\"%[^\"]+", buildId);
     }
 
     fclose(osRelease);
