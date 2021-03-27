@@ -13,7 +13,7 @@ void ffInitState(FFstate* state)
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
-    
+
     ffStrbufInit(&state->terminal.value);
     state->terminal.error = NULL;
     state->terminal.calculated = false;
@@ -193,7 +193,7 @@ void ffParseFont(char* font, char* buffer)
     char name[64];
     char size[32];
     int scanned = sscanf(font, "%[^,], %[^,]", name, size);
-    
+
     if(scanned == 0)
         strcpy(buffer, font);
     else if(scanned == 1)
@@ -361,14 +361,14 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
                 ffStrbufAppendS(buffer, "{}");
                 continue;
             }
-            
+
             argIndex = argCounter++;
         }
         else
         {
             FFstrbuf argnumstr;
             ffStrbufInit(&argnumstr);
-            
+
             while(formatstr->chars[i] != '}' && i < formatstr->length)
                 ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
 
@@ -388,7 +388,7 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
 
             ffStrbufDestroy(&argnumstr);
         }
-            
+
         if(argIndex == 0)
             argIndex = 1;
 

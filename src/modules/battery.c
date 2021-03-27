@@ -38,7 +38,7 @@ static void printBattery(FFinstance* instance, uint8_t index)
             manufactor.length == 0 &&
             model.length      == 0 &&
             technology.length == 0 &&
-            capacity.length   == 0 && 
+            capacity.length   == 0 &&
             status.length     == 0
         ) {
             ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
@@ -59,7 +59,7 @@ static void printBattery(FFinstance* instance, uint8_t index)
         if(capacity.length > 0)
         {
             printf("[%s%%", capacity.chars);
-        
+
             if(status.length == 0)
                 puts("]");
             else

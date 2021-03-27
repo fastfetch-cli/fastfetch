@@ -17,7 +17,7 @@
 int main(int argc, char** argv)
 {
     FFinstance instance;
-    
+
     FASTFETCH_TEST_PERFORMANCE(
         puts("Initialization");
         ffInitState(&instance.state);

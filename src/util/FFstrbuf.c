@@ -40,7 +40,7 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
 
     strbuf->allocated = allocate;
     strbuf->chars = (char*) malloc(sizeof(char) * strbuf->allocated);
-    
+
     ffStrbufClear(strbuf);
 }
 
@@ -168,7 +168,7 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     {
         if(value[i] == '\0')
             break;
-        
+
         strbuf->chars[strbuf->length++] = value[i];
     }
     strbuf->chars[strbuf->length] = '\0';
@@ -204,7 +204,7 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     int written = vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length, format, localArguments);
 
     va_end(localArguments);
-    
+
     if(strbuf->length + written >= strbuf->allocated)
     {
         ffStrbufEnsureCapacity(strbuf, strbuf->allocated * 2);
@@ -283,7 +283,7 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 }
 
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
-{   
+{
 
     while(strbuf->length > 0 && strbuf->chars[strbuf->length - 1] == c)
         --strbuf->length;

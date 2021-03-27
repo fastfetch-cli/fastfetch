@@ -314,7 +314,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
-        //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache   
+        //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache
         instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = instance->config.recache;
     }
@@ -400,7 +400,7 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
         strcpy(fileName, xdgConfig);
     }
     mkdir(fileName, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
-    
+
     strcat(fileName, "/fastfetch/");
     mkdir(fileName, S_IRWXU | S_IRGRP | S_IROTH);
 
@@ -413,7 +413,7 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
         fclose(file);
         return;
     }
-    
+
     FILE* file = fopen(fileName, "r");
 
     char* lineStart = NULL;
@@ -572,19 +572,19 @@ static void run(FFinstance* instance, FFdata* data)
 {
     if(data->structure.length == 0)
         ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
-    
+
     char* remaining = data->structure.chars;
     char* colon = NULL;
 
     while(true)
     {
         colon = strchr(remaining, ':');
-        
+
         if(colon != NULL)
             *colon = '\0';
-        
+
         parseStructureCommand(instance, data, remaining);
-        
+
         if(colon != NULL)
             remaining = colon + 1;
         else

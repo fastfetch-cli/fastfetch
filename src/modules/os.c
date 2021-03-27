@@ -52,7 +52,7 @@ void ffPrintOS(FFinstance* instance)
     }
 
     fclose(osRelease);
-    
+
     if(line != NULL)
         free(line);
 
@@ -71,7 +71,7 @@ void ffPrintOS(FFinstance* instance)
         else
         {
             if(name[0] != '\0')
-                ffStrbufAppendS(&os, name); 
+                ffStrbufAppendS(&os, name);
             else
                 ffStrbufAppendS(&os, id);
 

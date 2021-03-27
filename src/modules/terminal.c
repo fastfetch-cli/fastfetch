@@ -36,7 +36,7 @@ static void getTerminalName(FFinstance* instance, const char* pid, char* termina
         getTerminalName(instance, ppid, terminal, error);
         return;
     }
-    
+
     if(
         strcasecmp(name, "systemd") == 0 ||
         strcasecmp(name, "init")    == 0 ||
@@ -85,7 +85,7 @@ void ffPrintTerminal(FFinstance* instance)
         ffPrintError(instance, "Terminal", instance->state.terminal.error);
         return;
     }
-    
+
     if(instance->config.terminalFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "Terminal");

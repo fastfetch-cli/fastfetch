@@ -66,7 +66,7 @@ typedef struct FFconfig
     FFstrbuf diskFormat;
     FFstrbuf batteryFormat;
     FFstrbuf localeFormat;
-    
+
     FFstrbuf libPCI;
     FFstrbuf libX11;
     FFstrbuf libXrandr;

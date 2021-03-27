@@ -15,7 +15,7 @@ static uint32_t get_num_dirs(const char* dirname) {
         if(entry->d_type == DT_DIR)
             ++num_dirs;
     }
-   
+
     num_dirs -= 2; // accounting for . and ..
 
     closedir(dirp);
@@ -60,7 +60,7 @@ void ffPrintPackages(FFinstance* instance)
         ffPrintFormatString(instance, "Packages", &instance->config.packagesFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &pacman},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}   
-        );   
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}
+        );
     }
 }

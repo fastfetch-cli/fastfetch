@@ -4,7 +4,7 @@ void ffPrintTheme(FFinstance* instance)
 {
     char plasma[256];
     ffParsePropFileHome(instance, ".config/kdeglobals", "Name=%[^\n]", plasma);
-    
+
     char gtk2[256];
     ffParsePropFileHome(instance, ".gtkrc-2.0", "gtk-theme-name=\"%[^\"]+", gtk2);
     if(gtk2[0] == '\0')

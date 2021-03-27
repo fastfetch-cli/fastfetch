@@ -4,7 +4,7 @@ void ffPrintIcons(FFinstance* instance)
 {
     char plasma[256];
     ffParsePropFileHome(instance, ".config/kdeglobals", "Theme=%[^\n]", plasma);
-    
+
     char gtk2[256];
     ffParsePropFileHome(instance, ".gtkrc-2.0", "gtk-icon-theme-name=\"%[^\"]+", gtk2);
     if(gtk2[0] == '\0')
@@ -26,7 +26,7 @@ void ffPrintIcons(FFinstance* instance)
     if(instance->config.iconsFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "Icons");
-        
+
         if(plasma[0] == '\0')
             printf("Breeze [Plasma], ");
         else

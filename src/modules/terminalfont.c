@@ -48,14 +48,14 @@ static void printTTY(FFinstance* instance)
     ffParsePropFile("/etc/vconsole.conf", "Font=%[^\n]", font);
     if(font[0] == '\0')
         strcpy(font, "hardware-supplied VGA font");
-    
+
     printTerminalFont(instance, font);
 }
 
 void ffPrintTerminalFont(FFinstance* instance)
 {
     ffPopulateTerminal(instance);
-    
+
     if(instance->state.terminal.error != NULL)
     {
         ffPrintError(instance, "Terminal Font", "Terminal Font needs successfull terminal detection");

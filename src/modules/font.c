@@ -4,7 +4,7 @@ void ffPrintFont(FFinstance* instance)
 {
     char plasma[256];
     ffParsePropFileHome(instance, ".config/kdeglobals", "font=%[^\n]", plasma);
-    
+
     char plasmaPretty[256];
     if(plasma[0] == '\0')
         strcpy(plasmaPretty, "Noto Sans (10pt)");
@@ -13,7 +13,7 @@ void ffPrintFont(FFinstance* instance)
 
     char gtk2[256];
     ffParsePropFileHome(instance, ".gtkrc-2.0", "gtk-font-name=\"%[^\"]+", gtk2);
-    
+
     char gtk2Pretty[256];
     if(gtk2[0] == '\0')
         gtk2Pretty[0] = '\0';
@@ -22,7 +22,7 @@ void ffPrintFont(FFinstance* instance)
 
     char gtk3[256];
     ffParsePropFileHome(instance, ".config/gtk-3.0/settings.ini", "gtk-font-name=%[^\n]", gtk3);
-    
+
     char gtk3Pretty[256];
     if(gtk3[0] == '\0')
         gtk3Pretty[0] = '\0';
@@ -37,7 +37,7 @@ void ffPrintFont(FFinstance* instance)
         gtk4Pretty[0] = '\0';
     else
         ffParseFont(gtk4, gtk4Pretty);
-    
+
     FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2Pretty, gtk3Pretty, gtk4Pretty);
 

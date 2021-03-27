@@ -12,7 +12,7 @@ void ffPrintCPU(FFinstance* instance)
         ffPrintError(instance, "CPU", "\"model name%*s %[^\\n]\" not found in \"/proc/cpuinfo\"");
         return;
     }
-    
+
     FILE* frequencyFile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq", "r");
     if(frequencyFile == NULL)
     {
@@ -40,14 +40,14 @@ void ffPrintCPU(FFinstance* instance)
         ffStrbufSetF(&cpu, "%s (%i) @ %.9gGHz", name, numProcs, ghz);
     }
     else
-    {   
+    {
         ffParseFormatString(&cpu, &instance->config.cpuFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name},
             (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &numProcs},
             (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &ghz}
         );
     }
-    
+
     ffPrintAndSaveCachedValue(instance, "CPU", &cpu);
     ffStrbufDestroy(&cpu);
 }

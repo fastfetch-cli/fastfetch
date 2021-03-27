@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 
 static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, uint16_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
-{   
+{
     char key[8];
     sprintf(key, "GPU%hu", counter);
 
@@ -31,7 +31,7 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     }
     else
     {
-        ffParseFormatString(&gpu, &instance->config.gpuFormat, 2, 
+        ffParseFormatString(&gpu, &instance->config.gpuFormat, 2,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name}
         );

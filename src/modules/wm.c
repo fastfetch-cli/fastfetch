@@ -9,7 +9,7 @@ static bool parseProcessName(FFstrbuf* name)
     else
         return false;
 
-    return true;        
+    return true;
 }
 
 void ffPrintWM(FFinstance* instance)

@@ -10,7 +10,7 @@ void ffPrintHost(FFinstance* instance)
 
     FF_STRBUF_CREATE(name);
     ffGetFileContent("/sys/devices/virtual/dmi/id/product_name", &name);
-    
+
     FF_STRBUF_CREATE(version);
     ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", &version);
 
