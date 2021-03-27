@@ -155,7 +155,22 @@ static inline void printCommandHelp(const char* command)
     else if(strcasecmp(command, "format") == 0)
         printCommandHelpFormat();
     else if(strcasecmp(command, "os-format") == 0)
-        constructAndPrintCommandHelpFormat("os", "{} {}", 2, "Name of the OS", "Architecture of the OS");
+    {
+        constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
+            "System name, typically just Linux",
+            "Name of the OS",
+            "Pretty name of the OS",
+            "ID of the OS",
+            "ID like of the OS",
+            "Variant of the OS",
+            "Variant ID of the OS",
+            "Version of the OS",
+            "Version ID of the OS",
+            "Version codename of the OS",
+            "Build ID of the OS",
+            "Architecture of the OS"
+        );
+    }
     else if(strcasecmp(command, "host-format") == 0)
         constructAndPrintCommandHelpFormat("host", "{} {} {}", 3, "Host family", "Host name", "Host version");
     else if(strcasecmp(command, "kernel-format") == 0)

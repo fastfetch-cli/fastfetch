@@ -128,7 +128,8 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
     }
 
     fclose(file);
-    free(line);
+    if(line != NULL)
+        free(line);
 }
 
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
