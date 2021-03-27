@@ -293,6 +293,9 @@ bool ffPrintCachedValue(FFinstance* instance, const char* key)
 
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value)
 {
+    if(value->length == 0)
+        return;
+
     ffPrintLogoAndKey(instance, key);
     ffStrbufPutTo(value, stdout);
 
@@ -318,17 +321,11 @@ void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* 
     ffStrbufDestroy(&cacheFile);
 }
 
-void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...)
+void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp)
 {
-    va_list argp;
-    va_start(argp, numArgs);
-
     FFformatarg arguments[numArgs];
-
     for(uint32_t i = 0; i < numArgs; i++)
         arguments[i] = (FFformatarg) va_arg(argp, FFformatarg);
-
-    va_end(argp);
 
     uint32_t argCounter = 1; //First arg is 1 in fomat string
 
@@ -338,6 +335,12 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
         {
             ffStrbufAppendC(buffer, formatstr->chars[i]);
             continue;
+        }
+
+        if(i == formatstr->length - 1)
+        {
+            ffStrbufAppendC(buffer, '{');
+            continue; //This will always stop the loop
         }
 
         ++i;
@@ -352,6 +355,12 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
 
         if(formatstr->chars[i] == '}')
         {
+            if(argCounter > numArgs)
+            {
+                ffStrbufAppendS(buffer, "{}");
+                continue;
+            }
+            
             argIndex = argCounter++;
         }
         else
@@ -359,17 +368,18 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
             FFstrbuf argnumstr;
             ffStrbufInit(&argnumstr);
             
-            while(formatstr->chars[i] != '}' && formatstr->chars[i] != '\0')
+            while(formatstr->chars[i] != '}' && i < formatstr->length)
                 ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
 
             if(
+                argnumstr.length == 0 ||
                 ffStrbufGetC(&argnumstr, 0) == '-' ||
                 sscanf(argnumstr.chars, "%u", &argIndex) != 1 ||
                 argIndex > numArgs
             ) {
                 ffStrbufAppendC(buffer, '{');
                 ffStrbufAppend(buffer, &argnumstr);
-                if(formatstr->chars[i] != '\0')
+                if(formatstr->chars[i] == '}') // We dont have a closing { when ending because whole format string is over
                     ffStrbufAppendC(buffer, '}');
                 ffStrbufDestroy(&argnumstr);
                 continue;
@@ -402,4 +412,35 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
             exit(806);
         }
     }
+
+    ffStrbufTrimRight(buffer, ' ');
+}
+
+void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...)
+{
+    va_list argp;
+    va_start(argp, numArgs);
+    ffParseFormatStringV(buffer, formatstr, numArgs, argp);
+    va_end(argp);
+}
+
+void ffPrintFormatString(FFinstance* instance, const char* key, FFstrbuf* formatstr, uint32_t numArgs, ...)
+{
+    FFstrbuf buffer;
+    ffStrbufInitA(&buffer, 256);
+
+    va_list argp;
+    va_start(argp, numArgs);
+
+    ffParseFormatStringV(&buffer, formatstr, numArgs, argp);
+
+    va_end(argp);
+
+    if(buffer.length > 0)
+    {
+        ffPrintLogoAndKey(instance, key);
+        ffStrbufPutTo(&buffer, stdout);
+    }
+
+    ffStrbufDestroy(&buffer);
 }

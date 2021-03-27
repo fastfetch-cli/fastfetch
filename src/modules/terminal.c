@@ -85,21 +85,16 @@ void ffPrintTerminal(FFinstance* instance)
         ffPrintError(instance, "Terminal", instance->state.terminal.error);
         return;
     }
-
-    ffPrintLogoAndKey(instance, "Terminal");
     
     if(instance->config.terminalFormat.length == 0)
     {
+        ffPrintLogoAndKey(instance, "Terminal");
         ffStrbufPutTo(&instance->state.terminal.value, stdout);
     }
     else
     {
-        FF_STRBUF_CREATE(terminal);
-
-        ffParseFormatString(&terminal, &instance->config.terminalFormat, 1,
+        ffPrintFormatString(instance, "Terminal", &instance->config.terminalFormat, 1,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.terminal.value}
         );
-
-        ffStrbufPutTo(&terminal, stdout);
     }
 }

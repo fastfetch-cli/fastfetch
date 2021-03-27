@@ -6,18 +6,13 @@ void ffPrintKernel(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, "Kernel");
         puts(instance->state.utsname.release);
-        return;
     }
-
-    FF_STRBUF_CREATE(kernel);
-
-    ffParseFormatString(&kernel, &instance->config.kernelFormat, 3,
-        (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
-        (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.release},
-        (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.version}
-    );
-
-    ffPrintLogoAndKey(instance, "Kernel");
-    ffStrbufPutTo(&kernel, stdout);
-    ffStrbufDestroy(&kernel);
+    else
+    {
+        ffPrintFormatString(instance, "Kernel", &instance->config.kernelFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.release},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.version}
+        );
+    }
 }

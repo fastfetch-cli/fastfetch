@@ -23,10 +23,10 @@ void ffPrintTheme(FFinstance* instance)
     FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
 
-    ffPrintLogoAndKey(instance, "Theme");
-
     if(instance->config.themeFormat.length == 0)
     {
+        ffPrintLogoAndKey(instance, "Theme");
+
         if(plasma[0] != '\0')
             printf("%s [Plasma], ", plasma);
 
@@ -34,17 +34,12 @@ void ffPrintTheme(FFinstance* instance)
     }
     else
     {
-        FF_STRBUF_CREATE(theme);
-
-        ffParseFormatString(&theme, &instance->config.themeFormat, 5,
+        ffPrintFormatString(instance, "Theme", &instance->config.themeFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk4},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
-
-        ffStrbufPutTo(&theme, stdout);
-        ffStrbufDestroy(&theme);
     }
 }

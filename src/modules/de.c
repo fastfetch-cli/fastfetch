@@ -69,18 +69,11 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     }
     else
     {
-        ffPrintLogoAndKey(instance, "DE");
-
-        FF_STRBUF_CREATE(de);
-
-        ffParseFormatString(&de, &instance->config.deFormat, 3,
+        ffPrintFormatString(instance, "DE", &instance->config.deFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionDesktop},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionVersion},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionType}
         );
-
-        ffStrbufPutTo(&de, stdout);
-        ffStrbufDestroy(&de);
     }
     ffStrbufDestroy(&sessionType);
     ffStrbufDestroy(&sessionVersion);

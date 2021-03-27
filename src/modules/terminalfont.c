@@ -2,22 +2,16 @@
 
 static void printTerminalFont(FFinstance* instance, char* font)
 {
-    ffPrintLogoAndKey(instance, "Terminal font");
-
     if(instance->config.termFontFormat.length == 0)
     {
+        ffPrintLogoAndKey(instance, "Terminal font");
         puts(font);
     }
     else
     {
-        FF_STRBUF_CREATE(termfont);
-
-        ffParseFormatString(&termfont, &instance->config.termFontFormat, 1,
+        ffPrintFormatString(instance, "Terminal font", &instance->config.termFontFormat, 1,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font}
         );
-
-        ffStrbufPutTo(&termfont, stdout);
-        ffStrbufDestroy(&termfont);
     }
 }
 

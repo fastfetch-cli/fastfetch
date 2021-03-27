@@ -32,22 +32,21 @@ static void printBattery(FFinstance* instance, uint8_t index)
     char key[10];
     sprintf(key, "Battery %i", index);
 
-    if(
-        manufactor.length == 0 &&
-        model.length      == 0 &&
-        technology.length == 0 &&
-        capacity.length   == 0 && 
-        status.length     == 0 &&
-        instance->config.batteryFormat.length == 0
-    ) {
-        ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
-        return;
-    }
-
-    ffPrintLogoAndKey(instance, key);
-
     if(instance->config.batteryFormat.length == 0)
     {
+        if(
+            manufactor.length == 0 &&
+            model.length      == 0 &&
+            technology.length == 0 &&
+            capacity.length   == 0 && 
+            status.length     == 0
+        ) {
+            ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
+            return;
+        }
+
+        ffPrintLogoAndKey(instance, key);
+
         if(manufactor.length > 0)
             printf("%s ", manufactor.chars);
 
@@ -76,18 +75,13 @@ static void printBattery(FFinstance* instance, uint8_t index)
     }
     else
     {
-        FF_STRBUF_CREATE(battery);
-
-        ffParseFormatString(&battery, &instance->config.batteryFormat, 5,
+        ffPrintFormatString(instance, key, &instance->config.batteryFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &manufactor},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &model},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &technology},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &capacity},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &status}
         );
-
-        ffStrbufPutTo(&battery, stdout);
-        ffStrbufDestroy(&battery);
     }
 
     ffStrbufDestroy(&manufactor);

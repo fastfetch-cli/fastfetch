@@ -121,6 +121,10 @@ static inline void printCommandHelpFormat()
         "If a value index is missformatted or wants a non existing value, it will be printed as is, with the curly braces around it.\n"
         "If the last placeholder isn't closed, it will be printed as is, with the open curly braces at the start.\n"
         "\n"
+        "If an format string evaluates to an empty value, the whole line in the output will be discarded.\n"
+        "You can therefore use --host-format \" \" to disable host output.\n"
+        "Note that --host-format \"\" would evaluate as not set, and therefore use the built in host format\n"
+        "\n"
         "Format string is also the way to go to set a fixed value, just use one without placeholders.\n"
         "For example when running in headless mode you could use \"--resolution-format \"Preferred\"."
     );

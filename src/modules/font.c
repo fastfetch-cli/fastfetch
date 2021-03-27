@@ -41,27 +41,21 @@ void ffPrintFont(FFinstance* instance)
     FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2Pretty, gtk3Pretty, gtk4Pretty);
 
-    ffPrintLogoAndKey(instance, "Font");
-
     if(instance->config.fontFormat.length == 0)
     {
+        ffPrintLogoAndKey(instance, "Font");
         printf("%s [Plasma], ", plasmaPretty);
         ffStrbufPutTo(&gtkPretty, stdout);
     }
     else
     {
-        FF_STRBUF_CREATE(font);
-
-        ffParseFormatString(&font, &instance->config.fontFormat, 5,
+        ffPrintFormatString(instance, "Font", &instance->config.fontFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasmaPretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2Pretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3Pretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk4Pretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
-
-        ffStrbufPutTo(&font, stdout);
-        ffStrbufDestroy(&font);
     }
 
     ffStrbufDestroy(&gtkPretty);

@@ -30,23 +30,17 @@ void ffPrintMemory(FFinstance* instance)
     uint32_t total_mem = total / 1024;
     uint8_t percentage = (uint8_t) ((used_mem / (double) total_mem) * 100);
 
-    ffPrintLogoAndKey(instance, "Memory");
-
     if(instance->config.memoryFormat.length == 0)
     {
+        ffPrintLogoAndKey(instance, "Memory");
         printf("%uMiB / %uMiB (%u%%)\n", used_mem, total_mem, percentage);
     }
     else
     {
-        FF_STRBUF_CREATE(memory);
-
-        ffParseFormatString(&memory, &instance->config.memoryFormat, 3,
+        ffPrintFormatString(instance, "Memory", &instance->config.memoryFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &used_mem},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &total_mem},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &percentage}
         );
-
-        ffStrbufPutTo(&memory, stdout);
-        ffStrbufDestroy(&memory);
     }
 }

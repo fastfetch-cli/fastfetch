@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include <sys/types.h>
@@ -124,7 +125,9 @@ void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, con
 void ffPrintError(FFinstance* instance, const char* key, const char* message, ...);
 bool ffPrintCachedValue(FFinstance* instance, const char* key);
 void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value);
+void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp);
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
+void ffPrintFormatString(FFinstance* instance, const char* key, FFstrbuf* formatstr, uint32_t numArgs, ...);
 void ffFinish(FFinstance* instance);
 
 //Logo functions

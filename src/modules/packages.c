@@ -30,14 +30,14 @@ void ffPrintPackages(FFinstance* instance)
 
     uint32_t all = pacman + flatpak;
 
-    if(all == 0)
-    {
-        ffPrintError(instance, "Packages", "No packages from known package managers found");
-        return;
-    }
-
     if(instance->config.packagesFormat.length == 0)
     {
+        if(all == 0)
+        {
+            ffPrintError(instance, "Packages", "No packages from known package managers found");
+            return;
+        }
+
         ffPrintLogoAndKey(instance, "Packages");
 
         #define FF_PRINT_PACKAGE(name) \
@@ -54,18 +54,13 @@ void ffPrintPackages(FFinstance* instance)
         #undef FF_PRINT_PACKAGE
 
         putchar('\n');
-        return;
     }
-
-    FF_STRBUF_CREATE(packages);
-
-    ffParseFormatString(&packages, &instance->config.packagesFormat, 3,
-        (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
-        (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &pacman},
-        (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}   
-    );
-
-    ffPrintLogoAndKey(instance, "Packages");
-    ffStrbufPutTo(&packages, stdout);
-    ffStrbufDestroy(&packages);
+    else
+    {
+        ffPrintFormatString(instance, "Packages", &instance->config.packagesFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &pacman},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}   
+        );   
+    }
 }

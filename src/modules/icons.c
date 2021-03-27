@@ -23,10 +23,10 @@ void ffPrintIcons(FFinstance* instance)
     FF_STRBUF_CREATE(gtkPretty);
     ffFormatGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
 
-    ffPrintLogoAndKey(instance, "Icons");
-
     if(instance->config.iconsFormat.length == 0)
     {
+        ffPrintLogoAndKey(instance, "Icons");
+        
         if(plasma[0] == '\0')
             printf("Breeze [Plasma], ");
         else
@@ -36,18 +36,13 @@ void ffPrintIcons(FFinstance* instance)
     }
     else
     {
-        FF_STRBUF_CREATE(icons);
-        
-        ffParseFormatString(&icons, &instance->config.iconsFormat, 5,
+        ffPrintFormatString(instance, "Icons", &instance->config.iconsFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk4},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
-
-        ffStrbufPutTo(&icons, stdout);
-        ffStrbufDestroy(&icons);
     }
 
     ffStrbufDestroy(&gtkPretty);
