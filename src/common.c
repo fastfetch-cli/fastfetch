@@ -134,12 +134,14 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
 {
-    char absolutePath[512];
-    strcpy(absolutePath, instance->state.passwd->pw_dir);
-    strcat(absolutePath, "/");
-    strcat(absolutePath, relativeFile);
+    FF_STRBUF_CREATE(absolutePath);
+    ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
+    ffStrbufAppendC(&absolutePath, '/');
+    ffStrbufAppendS(&absolutePath, relativeFile);
 
-    ffParsePropFile(absolutePath, regex, buffer);
+    ffParsePropFile(absolutePath.chars, regex, buffer);
+
+    ffStrbufDestroy(&absolutePath);
 }
 
 static inline bool strSet(const char* str)

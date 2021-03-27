@@ -387,34 +387,34 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseConfigFile(FFinstance* instance, FFdata* data)
 {
-    char fileName[256];
+    FF_STRBUF_CREATE(filename);
 
     const char* xdgConfig = getenv("XDG_CONFIG_HOME");
     if(xdgConfig == NULL)
     {
-        strcpy(fileName, instance->state.passwd->pw_dir);
-        strcat(fileName, "/.config");
+        ffStrbufAppendS(&filename, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&filename, "/.config");
     }
     else
     {
-        strcpy(fileName, xdgConfig);
+        ffStrbufAppendS(&filename, xdgConfig);
     }
-    mkdir(fileName, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
+    mkdir(filename.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
 
-    strcat(fileName, "/fastfetch/");
-    mkdir(fileName, S_IRWXU | S_IRGRP | S_IROTH);
+    ffStrbufAppendS(&filename, "/fastfetch/");
+    mkdir(filename.chars, S_IRWXU | S_IRGRP | S_IROTH);
 
-    strcat(fileName, "config.conf");
+    ffStrbufAppendS(&filename, "config.conf");
 
-    if(access(fileName, F_OK) != 0)
+    if(access(filename.chars, F_OK) != 0)
     {
-        FILE* file = fopen(fileName, "w");
+        FILE* file = fopen(filename.chars, "w");
         fputs(FASTFETCH_DEFAULT_CONFIG, file);
         fclose(file);
         return;
     }
 
-    FILE* file = fopen(fileName, "r");
+    FILE* file = fopen(filename.chars, "r");
 
     char* lineStart = NULL;
     size_t len = 0;
@@ -467,6 +467,8 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
         free(lineStart);
 
     fclose(file);
+
+    ffStrbufDestroy(&filename);
 }
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)
