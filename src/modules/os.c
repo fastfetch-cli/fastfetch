@@ -46,6 +46,7 @@ void ffPrintOS(FFinstance* instance)
         sscanf(line, "VERSION_ID=%[^\n]", versionId);
         sscanf(line, "VERSION_ID=\"%[^\"]+", versionId);
         sscanf(line, "VERSION_CODENAME=%[^\n]", versionCodename);
+        sscanf(line, "VERSION_CODENAME=\"%[^\"]+", versionCodename);
         sscanf(line, "BUILD_ID=%[^\n]", buildId);
         sscanf(line, "BUILD_ID=\"%[^\"]+", buildId);
     }
