@@ -226,14 +226,14 @@ void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
         return;
 
     ssize_t readed;
-    while((readed = read(fd, buffer->chars, buffer->allocated)) == buffer->allocated)
+    while((readed = read(fd, buffer->chars + buffer->length, buffer->allocated - buffer->length)) == (buffer->allocated - buffer->length))
     {
+        buffer->length += readed;
         ffStrbufEnsureCapacity(buffer, buffer->allocated * 2);
-        lseek(fd, 0, SEEK_SET);
     }
 
     if(readed >= 0)
-        buffer->length = readed;
+        buffer->length += readed;
 
     ffStrbufTrimRight(buffer, '\n');
     ffStrbufTrimRight(buffer, ' ');
