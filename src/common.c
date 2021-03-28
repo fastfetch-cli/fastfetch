@@ -225,7 +225,7 @@ void ffPrintError(FFinstance* instance, const char* key, const char* message, ..
     va_end(arguments);
 }
 
-void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
+void ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
 {
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
@@ -245,6 +245,12 @@ void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
     ffStrbufTrimRight(buffer, ' ');
 
     close(fd);
+}
+
+void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
+{
+    ffStrbufClear(buffer);
+    ffAppendFileContent(fileName, buffer);
 }
 
 static const FFstrbuf* getCacheDir(FFinstance* instance)

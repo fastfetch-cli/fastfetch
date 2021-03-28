@@ -222,7 +222,7 @@ static inline void printCommandHelp(const char* command)
     else if(strcasecmp(command, "de-format") == 0)
         constructAndPrintCommandHelpFormat("de", "{} {} ({})", 3, "DE name", "DE version", "Name of display server");
     else if(strcasecmp(command, "wm-format") == 0)
-        constructAndPrintCommandHelpFormat("wm", "{}", 1, "WM name");
+        constructAndPrintCommandHelpFormat("wm", "{2}", 2, "WM process name", "WM pretty name");
     else if(strcasecmp(command, "theme-format") == 0)
         constructAndPrintCommandHelpFormat("theme", "{} [Plasma], {5}", 5, "Plasma theme", "GTK2 theme", "GTK3 theme", "GTK4 theme", "Combined GTK themes");
     else if(strcasecmp(command, "icons-format") == 0)

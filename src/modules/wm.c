@@ -2,16 +2,6 @@
 
 #include <dirent.h>
 
-static bool parseProcessName(FFstrbuf* name)
-{
-    if(ffStrbufIgnCaseCompS(name, "kwin_wayland") == 0 || ffStrbufIgnCaseCompS(name, "kwin_x11") == 0)
-        ffStrbufSetS(name, "KWin");
-    else
-        return false;
-
-    return true;
-}
-
 void ffPrintWM(FFinstance* instance)
 {
     DIR* proc = opendir("/proc/");
@@ -23,9 +13,8 @@ void ffPrintWM(FFinstance* instance)
 
     struct dirent* dirent;
 
-    FF_STRBUF_CREATE(name);
-
-    bool found = false;
+    FF_STRBUF_CREATE(processName);
+    FF_STRBUF_CREATE(prettyName);
 
     while((dirent = readdir(proc)) != NULL)
     {
@@ -35,9 +24,12 @@ void ffPrintWM(FFinstance* instance)
         char path[20];
         sprintf(path, "/proc/%.8s/comm", dirent->d_name);
 
-        ffGetFileContent(path, &name);
+        ffGetFileContent(path, &processName);
 
-        if((found = parseProcessName(&name)))
+        if(ffStrbufIgnCaseCompS(&processName, "kwin_wayland") == 0 || ffStrbufIgnCaseCompS(&processName, "kwin_x11") == 0)
+            ffStrbufSetS(&prettyName, "KWin");
+
+        if(prettyName.length > 0)
             break;
     }
 
@@ -45,21 +37,23 @@ void ffPrintWM(FFinstance* instance)
 
     if(instance->config.wmFormat.length == 0)
     {
-        if(!found)
+        if(prettyName.length == 0)
         {
             ffPrintError(instance, "WM", "No process name matches the name of known display managers");
             return;
         }
 
         ffPrintLogoAndKey(instance, "WM");
-        ffStrbufPutTo(&name, stdout);
+        ffStrbufPutTo(&prettyName, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, "WM", &instance->config.wmFormat, 1,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name}
+        ffPrintFormatString(instance, "WM", &instance->config.wmFormat, 2,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &processName},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &prettyName}
         );
     }
 
-    ffStrbufDestroy(&name);
+    ffStrbufDestroy(&processName);
+    ffStrbufDestroy(&prettyName);
 }
