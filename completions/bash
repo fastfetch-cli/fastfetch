@@ -146,6 +146,7 @@ __fastfetch_completion()
         "--disk-format"
         "--battery-format"
         "--locale-format"
+        "--disk-folders"
     )
 
     local FF_OPTIONS_PATH=(

@@ -87,7 +87,6 @@ void ffPrintCPU(FFinstance* instance)
         if(ghz == 0)
             ghz = infoMinFreq;
 
-
         if(namePretty.length > 0)
             ffStrbufAppend(&cpu, &namePretty);
         else if(name[0] != '\0')

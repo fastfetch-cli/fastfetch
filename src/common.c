@@ -56,6 +56,8 @@ void ffDefaultConfig(FFconfig* config)
     ffStrbufInitA(&config->libPCI, 256);
     ffStrbufInitA(&config->libX11, 256);
     ffStrbufInitA(&config->libXrandr, 256);
+
+    ffStrbufInitA(&config->diskFolders, 128);
 }
 
 static void ffCleanup(FFinstance* instance)
@@ -87,6 +89,8 @@ static void ffCleanup(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libX11);
     ffStrbufDestroy(&instance->config.libXrandr);
+
+    ffStrbufDestroy(&instance->config.diskFolders);
 
     ffStrbufDestroy(&instance->state.terminal.value);
 }

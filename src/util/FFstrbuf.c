@@ -333,6 +333,16 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
     }
 }
 
+uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c)
+{
+    for(uint32_t i = 0; i < strbuf->length; i++)
+    {
+        if(strbuf->chars[i] == c)
+            return i;
+    }
+    return strbuf->length;
+}
+
 uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c)
 {
     //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true

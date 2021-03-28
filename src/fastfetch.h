@@ -71,6 +71,8 @@ typedef struct FFconfig
     FFstrbuf libX11;
     FFstrbuf libXrandr;
 
+    FFstrbuf diskFolders;
+
 } FFconfig;
 
 typedef struct FFvalue

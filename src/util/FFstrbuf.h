@@ -68,6 +68,7 @@ void ffStrbufTrim(FFstrbuf* strbuf, char c);
 
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
 
+uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c);
 uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c);
 
 void ffStrbufLimitLength(FFstrbuf* strbuf, uint32_t length);
