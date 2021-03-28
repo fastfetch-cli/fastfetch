@@ -333,14 +333,19 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
     }
 }
 
-uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c)
+uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c)
 {
-    for(uint32_t i = 0; i < strbuf->length; i++)
+    for(uint32_t i = start; i < strbuf->length; i++)
     {
         if(strbuf->chars[i] == c)
             return i;
     }
     return strbuf->length;
+}
+
+uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c)
+{
+    return ffStrbufFirstIndexAfterC(strbuf, 0, c);
 }
 
 uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c)

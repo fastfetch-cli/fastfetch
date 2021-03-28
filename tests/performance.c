@@ -28,6 +28,9 @@ int main(int argc, char** argv)
         puts("Configuration");
         ffLoadLogoSet(&instance.config, "arch");
         ffStrbufSetS(&instance.config.color, instance.config.logo.color);
+        instance.config.showErrors = true;
+        instance.config.recache = true;
+        instance.config.cacheSave = false;
     )
 
     FASTFETCH_TEST_PERFORMANCE(ffPrintTitle(&instance))

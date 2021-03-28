@@ -478,36 +478,37 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
         if(line.length == 0 || line.chars[0] == '#')
             continue;
 
-        char* valueStart = strchr(line.chars, ' ');
-        if(valueStart == NULL)
+        uint32_t firstSpace = ffStrbufFirstIndexC(&line, ' ');
+
+        if(firstSpace >= line.length)
         {
             parseOption(instance, data, line.chars, NULL);
+            ffStrbufDestroy(&line);
+            continue;
         }
-        else
-        {
-            //Seperate key and value by simply replacing the first space with a \0
-            *valueStart = '\0';
+
+        //Seperate key and value by simply replacing the first space with a \0
+        char* valueStart = &line.chars[firstSpace];
+        *valueStart = '\0';
+        ++valueStart;
+
+        //Trim whitespace at beginn of value
+        while(*valueStart == ' ')
             ++valueStart;
 
-            //Trim whitespace at beginn of value
-            while(*valueStart == ' ')
-                ++valueStart;
-
-            //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
-            if(*valueStart == '"')
+        //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
+        if(*valueStart == '"')
+        {
+            char* last = line.chars + line.length - 1;
+            if(*last == '"')
             {
-                char* last = line.chars + line.length - 1;
-                if(*last == '"')
-                {
-                    ++valueStart;
-                    *last = '\0';
-                    --line.length;
-                }
+                ++valueStart;
+                *last = '\0';
+                --line.length;
             }
-
-            parseOption(instance, data, line.chars, valueStart);
         }
 
+        parseOption(instance, data, line.chars, valueStart);
         ffStrbufDestroy(&line);
     }
 
@@ -623,22 +624,15 @@ static void run(FFinstance* instance, FFdata* data)
     if(data->structure.length == 0)
         ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
 
-    char* remaining = data->structure.chars;
-    char* colon = NULL;
-
-    while(true)
+    uint32_t lastIndex = 0;
+    while (lastIndex < data->structure.length)
     {
-        colon = strchr(remaining, ':');
+        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&data->structure, lastIndex, ':');
+        data->structure.chars[colonIndex] = '\0';
 
-        if(colon != NULL)
-            *colon = '\0';
+        parseStructureCommand(instance, data, data->structure.chars + lastIndex);
 
-        parseStructureCommand(instance, data, remaining);
-
-        if(colon != NULL)
-            remaining = colon + 1;
-        else
-            break;
+        lastIndex = colonIndex + 1;
     }
 }
 
