@@ -25,7 +25,7 @@ void ffPrintOS(FFinstance* instance)
         osRelease = fopen("/usr/lib/os-release", "r");
 
     char* line = NULL;
-    size_t len;
+    size_t len = 0;
 
     while (getline(&line, &len, osRelease) != -1)
     {

@@ -66,6 +66,12 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
 void ffStrbufTrim(FFstrbuf* strbuf, char c);
 
+void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
+
+uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c);
+
+void ffStrbufLimitLength(FFstrbuf* strbuf, uint32_t length);
+
 void ffStrbufDestroy(FFstrbuf* strbuf);
 
 #endif

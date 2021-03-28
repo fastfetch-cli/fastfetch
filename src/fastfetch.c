@@ -232,7 +232,7 @@ static inline void printCommandHelp(const char* command)
     else if(strcasecmp(command, "terminal-font-format") == 0)
         constructAndPrintCommandHelpFormat("terminal-font", "{}", 1, "Terminal font name");
     else if(strcasecmp(command, "cpu-format") == 0)
-        constructAndPrintCommandHelpFormat("cpu", "{} ({}) @ {}GHz", 3, "CPU name", "CPU logical core count", "CPU frequency");
+        constructAndPrintCommandHelpFormat("cpu", "{2} ({4}) @ {7}GHz", 11, "CPU name", "Prettified CPU name", "CPU Vendor name (Vendor ID)", "CPU logical core count online", "CPU logical core count configured", "CPU physical core count", "frequency bios limit", "frequency scaling max", "frequency scaling min", "frequency info max", "frequency info min");
     else if(strcasecmp(command, "gpu-format") == 0)
         constructAndPrintCommandHelpFormat("gpu", "{} {}", 2, "GPU vendor", "GPU name");
     else if(strcasecmp(command, "memory-format") == 0)

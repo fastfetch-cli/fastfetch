@@ -115,7 +115,7 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
     buffer[0] = '\0'; //If an error occures, this is the indicator
 
     char* line = NULL;
-    size_t len;
+    size_t len = 0;
 
     FILE* file = fopen(fileName, "r");
     if(file == NULL)

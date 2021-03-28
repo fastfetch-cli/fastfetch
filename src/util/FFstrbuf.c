@@ -278,7 +278,7 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
     if(index == 0)
         return;
 
-    memcpy(strbuf->chars, strbuf->chars + index, index);
+    memmove(strbuf->chars, strbuf->chars + index, index);
     strbuf->length -= index;
 }
 
@@ -294,6 +294,63 @@ void ffStrbufTrim(FFstrbuf* strbuf, char c)
 {
     ffStrbufTrimRight(strbuf, c);
     ffStrbufTrimLeft(strbuf, c);
+}
+
+static bool strbufRemoveTest(FFstrbuf* strbuf, uint32_t i, const char* substr)
+{
+    uint32_t k;
+    for(k = 0; substr[k] != '\0'; k++)
+    {
+        if(i + k > strbuf->length)
+            return false;
+
+        if(strbuf->chars[i + k] != substr[k])
+            return false;
+    }
+
+    memmove(&strbuf->chars[i], &strbuf->chars[i + k], strbuf->length - i - k);
+    strbuf->length -= k;
+    strbuf->chars[strbuf->length] = '\0';
+    return true;
+}
+
+void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
+{
+    const char* strings[numStrings];
+
+    va_list argp;
+    va_start(argp, numStrings);
+
+    for(uint32_t i = 0; i < numStrings; i++)
+        strings[i] = va_arg(argp, const char*);
+
+    va_end(argp);
+
+    for(uint32_t i = 0; i < strbuf->length; i++)
+    {
+        for(uint32_t k = 0; k < numStrings; k++)
+            while(strbufRemoveTest(strbuf, i, strings[k]));
+    }
+}
+
+uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c)
+{
+    //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true
+    for(uint32_t i = strbuf->length; i > 0; i--)
+    {
+        if(strbuf->chars[i - 1] == c)
+            return i - 1;
+    }
+    return strbuf->length;
+}
+
+void ffStrbufLimitLength(FFstrbuf* strbuf, uint32_t length)
+{
+    if(strbuf->length <= length)
+        return;
+
+    strbuf->length = length;
+    strbuf->chars[strbuf->length] = '\0';
 }
 
 void ffStrbufDestroy(FFstrbuf* strbuf)
