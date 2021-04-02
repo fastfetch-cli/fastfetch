@@ -72,7 +72,14 @@ uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c
 uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c);
 uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c);
 
-void ffStrbufLimitLength(FFstrbuf* strbuf, uint32_t length);
+void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
+void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c);
+void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
+void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c);
+
+bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start);
+bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start);
+bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
 

@@ -230,7 +230,7 @@ static inline void printCommandHelp(const char* command)
     else if(strcasecmp(command, "font-format") == 0)
         constructAndPrintCommandHelpFormat("font", "{} [Plasma], {5}", 5, "Plasma font", "GTK2 font", "GTK3 font", "GTK4 font", "Combined GTK fonts");
     else if(strcasecmp(command, "terminal-format") == 0)
-        constructAndPrintCommandHelpFormat("terminal", "{}", 1, "Terminal name");
+        constructAndPrintCommandHelpFormat("terminal", "{3}", 3, "Terminal executable name", "Terminal process name", "Terminal name");
     else if(strcasecmp(command, "terminal-font-format") == 0)
         constructAndPrintCommandHelpFormat("terminal-font", "{}", 1, "Terminal font name");
     else if(strcasecmp(command, "cpu-format") == 0)

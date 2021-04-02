@@ -13,10 +13,6 @@ void ffInitState(FFstate* state)
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
-
-    ffStrbufInit(&state->terminal.value);
-    state->terminal.error = NULL;
-    state->terminal.calculated = false;
 }
 
 void ffDefaultConfig(FFconfig* config)
@@ -91,8 +87,6 @@ static void ffCleanup(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libXrandr);
 
     ffStrbufDestroy(&instance->config.diskFolders);
-
-    ffStrbufDestroy(&instance->state.terminal.value);
 }
 
 void ffFinish(FFinstance* instance)

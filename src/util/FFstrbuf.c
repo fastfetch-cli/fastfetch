@@ -359,13 +359,73 @@ uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c)
     return strbuf->length;
 }
 
-void ffStrbufLimitLength(FFstrbuf* strbuf, uint32_t length)
+void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
 {
-    if(strbuf->length <= length)
+    if(strbuf->length <= index)
         return;
 
-    strbuf->length = length;
+    strbuf->length = index;
     strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c)
+{
+    ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
+}
+
+bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start)
+{
+    return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
+}
+
+void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
+{
+    if(index >= strbuf->length)
+    {
+        ffStrbufClear(strbuf);
+        return;
+    }
+
+    memmove(strbuf->chars, strbuf->chars + index + 1, strbuf->length - index - 1);
+    strbuf->length -= (index + 1);
+}
+
+void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c)
+{
+    uint32_t index = ffStrbufLastIndexC(strbuf, c);
+    if(index < strbuf->length)
+        ffStrbufSubstrAfter(strbuf, index);
+}
+
+static inline bool testSame(FFstrbuf* strbuf, uint32_t i, const char* str)
+{
+    if(i > strbuf->length)
+        return false;
+
+    if(strbuf->chars[i] != str[i])
+        return false;
+
+    return true;
+}
+
+bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start)
+{
+    for(uint32_t i = 0; start[i] != '\0'; i++)
+    {
+        if(!testSame(strbuf, i, start))
+            return false;
+    }
+    return true;
+}
+
+bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start)
+{
+    for(uint32_t i = 0; i < length; i++)
+    {
+        if(!testSame(strbuf, i, start))
+            return false;
+    }
+    return true;
 }
 
 void ffStrbufDestroy(FFstrbuf* strbuf)

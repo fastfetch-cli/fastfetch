@@ -75,21 +75,12 @@ typedef struct FFconfig
 
 } FFconfig;
 
-typedef struct FFvalue
-{
-    FFstrbuf value;
-    char* error;
-    bool calculated;
-} FFvalue;
-
 typedef struct FFstate
 {
     uint8_t current_row;
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
-
-    FFvalue terminal;
 } FFstate;
 
 typedef struct FFinstance
@@ -146,7 +137,7 @@ void ffPrintLogos(bool color);
 
 //Module functions
 
-void ffPopulateTerminal(FFinstance* instance);
+void ffGetTerminal(FFinstance* instance, FFstrbuf** exeName, FFstrbuf** processName, FFstrbuf** error);
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);

@@ -54,7 +54,7 @@ void ffPrintCPU(FFinstance* instance)
     ffStrbufRemoveStrings(&namePretty, 11,
         "(R)", "(r)", "(TM)", "(tm)", " CPU", " FPU", " Processor", " Dual-Core", " Quad-Core", " Six-Core", " Eight-Core"
     );
-    ffStrbufLimitLength(&namePretty, ffStrbufLastIndexC(&namePretty, '@')); //Cut the speed output in the name as we append our own
+    ffStrbufSubstrBeforeFirstC(&namePretty, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&namePretty, ' '); //If we removed the @ in previous step there was most likely a space before it
 
     double biosLimit      = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/bios_limit");

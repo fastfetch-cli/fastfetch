@@ -1,14 +1,14 @@
 #include "fastfetch.h"
 
-static void getTerminalName(FFinstance* instance, const char* pid, char* terminal, char* error)
+static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exeName, FFstrbuf* processName, FFstrbuf* error)
 {
-    char file[234];
-    sprintf(file, "/proc/%s/stat", pid);
+    char statFile[234];
+    sprintf(statFile, "/proc/%s/stat", pid);
 
-    FILE* stat = fopen(file, "r");
+    FILE* stat = fopen(statFile, "r");
     if(stat == NULL)
     {
-        sprintf(error, "fopen(\"%s\", \"r\") == NULL", file);
+        ffStrbufSetF(error, "fopen(\"%s\", \"r\") == NULL", statFile);
         return;
     }
 
@@ -16,7 +16,7 @@ static void getTerminalName(FFinstance* instance, const char* pid, char* termina
     char ppid[256];
     if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
     {
-        strcpy(error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        ffStrbufSetS(error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
         return;
     }
 
@@ -33,68 +33,82 @@ static void getTerminalName(FFinstance* instance, const char* pid, char* termina
         strcasecmp(name, "doas")   == 0 ||
         strcasecmp(name, "strace") == 0 )
     {
-        getTerminalName(instance, ppid, terminal, error);
+        getTerminalName(instance, ppid, exeName, processName, error);
         return;
     }
 
-    if(
-        strcasecmp(name, "systemd") == 0 ||
-        strcasecmp(name, "init")    == 0 ||
-        strcasecmp(name, "login")   == 0 ||
-        strcasecmp(name, "0")       == 0 ||
-        strcasecmp(ppid, "0")       == 0 )
-    {
-        strcpy(terminal, "TTY");
-    }
-    else
-    {
-        strcpy(terminal, name);
-    }
+    char cmdlineFile[234];
+    sprintf(cmdlineFile, "/proc/%s/cmdline", pid);
+
+    ffGetFileContent(cmdlineFile, exeName);
+    ffStrbufSubstrBeforeFirstC(exeName, '\0');
+    ffStrbufSubstrAfterLastC(exeName, '/');
+
+    ffStrbufSetS(processName, name);
 }
 
-void ffPopulateTerminal(FFinstance* instance)
+void ffGetTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
 {
-    if(instance->state.terminal.calculated)
+    static FFstrbuf exeName;
+    static FFstrbuf processName;
+    static FFstrbuf error;
+    static bool init = false;
+
+    if(exeNamePtr != NULL)
+        *exeNamePtr = &exeName;
+
+    if(processNamePtr != NULL)
+        *processNamePtr = &processName;
+
+    if(errorPtr != NULL)
+        *errorPtr = &error;
+
+    if(init)
         return;
 
-    static char terminal[256];
-    static char error[256];
-
-    terminal[0] = '\0';
-    error[0] = '\0';
+    ffStrbufInit(&exeName);
+    ffStrbufInit(&processName);
 
     char ppid[256];
     sprintf(ppid, "%i", getppid());
-    getTerminalName(instance, ppid, terminal, error);
 
-    if(terminal[0] != '\0')
-        ffStrbufSetS(&instance->state.terminal.value, terminal);
+    getTerminalName(instance, ppid, &exeName, &processName, &error);
 
-    if(error[0] != '\0')
-        instance->state.terminal.error = error;
-
-    instance->state.terminal.calculated = true;
+    init = true;
 }
 
 void ffPrintTerminal(FFinstance* instance)
 {
-    ffPopulateTerminal(instance);
+    FFstrbuf* exeName;
+    FFstrbuf* processName;
+    FFstrbuf* error;
 
-    if(instance->state.terminal.error != NULL)
-    {
-        ffPrintError(instance, "Terminal", instance->state.terminal.error);
-        return;
-    }
+    ffGetTerminal(instance, &exeName, &processName, &error);
+
+    FFstrbuf* name;
+
+    if(ffStrbufStartsWith(exeName, processName))
+        name = exeName;
+    else
+        name = processName;
 
     if(instance->config.terminalFormat.length == 0)
     {
+        if(error->length > 0)
+        {
+            ffPrintError(instance, "Terminal", error->chars);
+            return;
+        }
+
         ffPrintLogoAndKey(instance, "Terminal");
-        ffStrbufPutTo(&instance->state.terminal.value, stdout);
+        ffStrbufPutTo(name, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, "Terminal", &instance->config.terminalFormat, 1,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.terminal.value}
+        ffPrintFormatString(instance, "Terminal", &instance->config.terminalFormat, 3,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, exeName},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, processName},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, name}
         );
     }
 }
