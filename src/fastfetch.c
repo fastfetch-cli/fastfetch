@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
+#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
     "# Fastfetch configuration\n" \
@@ -68,6 +68,7 @@ static inline void printHelp()
         "   --resolution-format <format>\n"
         "   --de-format <format>\n"
         "   --wm-format <format>\n"
+        "   --wm-theme-format <format>\n"
         "   --theme-format <format>\n"
         "   --icons-format <format>\n"
         "   --font-format <format>\n"
@@ -84,23 +85,24 @@ static inline void printHelp()
         "   --os-key <key>\n"
         "   --host-key <key>\n"
         "   --kernel-key <key>\n"
-        "   --uptime-format <key>\n"
-        "   --packages-format <key>\n"
-        "   --shell-format <key>\n"
-        "   --resolution-format <key>\n"
-        "   --de-format <key>\n"
-        "   --wm-format <key>\n"
-        "   --theme-format <key>\n"
-        "   --icons-format <key>\n"
-        "   --font-format <key>\n"
-        "   --terminal-format <key>\n"
-        "   --terminal-font-format <key>\n"
-        "   --cpu-format <key>\n"
-        "   --gpu-format <key>: takes the gpu index as format argument\n"
-        "   --memory-format <key>\n"
-        "   --disk-format <key>: takes the mount path as format argument\n"
-        "   --battery-format <key>: takes the battery index as format argument\n"
-        "   --locale-format <key>\n"
+        "   --uptime-key <key>\n"
+        "   --packages-key <key>\n"
+        "   --shell-key <key>\n"
+        "   --resolution-key <key>\n"
+        "   --de-key <key>\n"
+        "   --wm-key <key>\n"
+        "   --wm-theme-key <key>\n"
+        "   --theme-key <key>\n"
+        "   --icons-key <key>\n"
+        "   --font-key <key>\n"
+        "   --terminal-key <key>\n"
+        "   --terminal-font-key <key>\n"
+        "   --cpu-key <key>\n"
+        "   --gpu-key <key>: takes the gpu index as format argument\n"
+        "   --memory-key <key>\n"
+        "   --disk-key <key>: takes the mount path as format argument\n"
+        "   --battery-key <key>: takes the battery index as format argument\n"
+        "   --locale-key <key>\n"
         "\n"
         "Library optins: Set the path of a library to load\n"
         "   --lib-PCI <path>\n"
@@ -184,6 +186,7 @@ static inline void printAvailableModules()
         "Title\n"
         "Uptime\n"
         "WM\n"
+        "WMTheme\n"
         "\n"
         "+ Additional defined by --set"
     );
@@ -291,6 +294,12 @@ static inline void printCommandHelp(const char* command)
         constructAndPrintCommandHelpFormat("wm", "{2}", 2,
             "WM process name",
             "WM pretty name"
+        );
+    }
+    else if(strcasecmp(command, "wm-theme-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("wm-theme", "{}", 1,
+            "WM theme name"
         );
     }
     else if(strcasecmp(command, "theme-format") == 0)
@@ -565,6 +574,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.wmFormat);
     else if(strcasecmp(key, "--wm-key") == 0)
         optionParseString(key, value, &instance->config.wmKey);
+    else if(strcasecmp(key, "--wm-theme-format") == 0)
+        optionParseString(key, value, &instance->config.wmThemeFormat);
+    else if(strcasecmp(key, "--wm-theme-key") == 0)
+        optionParseString(key, value, &instance->config.wmThemeKey);
     else if(strcasecmp(key, "--theme-format") == 0)
         optionParseString(key, value, &instance->config.themeFormat);
     else if(strcasecmp(key, "--theme-key") == 0)
@@ -788,6 +801,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintWM(instance);
     else if(strcasecmp(line, "theme") == 0)
         ffPrintTheme(instance);
+    else if(strcasecmp(line, "wmtheme") == 0)
+        ffPrintWMTheme(instance);
     else if(strcasecmp(line, "icons") == 0)
         ffPrintIcons(instance);
     else if(strcasecmp(line, "font") == 0)

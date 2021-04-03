@@ -47,7 +47,7 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exe
     ffStrbufSetS(processName, name);
 }
 
-void ffGetTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
+void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
 {
     static FFstrbuf exeName;
     static FFstrbuf processName;
@@ -65,16 +65,17 @@ void ffGetTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** proce
 
     if(init)
         return;
+    init = true;
 
     ffStrbufInit(&exeName);
     ffStrbufInit(&processName);
+    ffStrbufInit(&error);
 
     char ppid[256];
     sprintf(ppid, "%i", getppid());
 
     getTerminalName(instance, ppid, &exeName, &processName, &error);
 
-    init = true;
 }
 
 void ffPrintTerminal(FFinstance* instance)
@@ -83,7 +84,7 @@ void ffPrintTerminal(FFinstance* instance)
     FFstrbuf* processName;
     FFstrbuf* error;
 
-    ffGetTerminal(instance, &exeName, &processName, &error);
+    ffCalculateTerminal(instance, &exeName, &processName, &error);
 
     if(error->length > 0)
     {

@@ -144,6 +144,8 @@ __fastfetch_completion()
         "--de-key"
         "--wm-format"
         "--wm-key"
+        "--wm-theme-format"
+        "--wm-theme-key"
         "--theme-format"
         "--theme-key"
         "--icons-format"

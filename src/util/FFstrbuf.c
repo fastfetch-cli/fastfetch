@@ -390,6 +390,7 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
 
     memmove(strbuf->chars, strbuf->chars + index + 1, strbuf->length - index - 1);
     strbuf->length -= (index + 1);
+    strbuf->chars[strbuf->length] = '\0';
 }
 
 void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c)

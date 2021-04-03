@@ -47,6 +47,8 @@ void ffDefaultConfig(FFconfig* config)
     ffStrbufInitA(&config->deKey, 1);
     ffStrbufInitA(&config->wmFormat, 1);
     ffStrbufInitA(&config->wmKey, 1);
+    ffStrbufInitA(&config->wmThemeFormat, 1);
+    ffStrbufInitA(&config->wmThemeKey, 1);
     ffStrbufInitA(&config->themeFormat, 1);
     ffStrbufInitA(&config->themeKey, 1);
     ffStrbufInitA(&config->iconsFormat, 1);

@@ -54,29 +54,19 @@ static void printTTY(FFinstance* instance)
 
 void ffPrintTerminalFont(FFinstance* instance)
 {
-    FFstrbuf* procName;
-    FFstrbuf* error;
-    ffGetTerminal(instance, NULL, &procName, &error);
+    FFstrbuf* terminalExeName;
+    ffCalculateTerminal(instance, &terminalExeName, NULL, NULL);
 
-    if(error->length > 0)
+    if(terminalExeName->length == 0)
     {
-        if(instance->config.termFontFormat.length == 0)
-            ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Terminal Font needs successfull terminal detection");
-        else
-            printTerminalFont(instance, "");
-
+        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Terminal font needs successfull terminal detection");
         return;
     }
 
-    if(ffStrbufIgnCaseCompS(procName, "konsole") == 0)
+    if(ffStrbufIgnCaseCompS(terminalExeName, "konsole") == 0)
         printKonsole(instance);
-    else if(ffStrbufIgnCaseCompS(procName, "login") == 0)
+    else if(ffStrbufIgnCaseCompS(terminalExeName, "login") == 0)
         printTTY(instance);
     else
-    {
-        if(instance->config.termFontFormat.length > 0)
-            printTerminalFont(instance, "");
-        else
-            ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Unknown terminal: %s", error->chars);
-    }
+        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Unknown terminal: %s", terminalExeName->chars);
 }

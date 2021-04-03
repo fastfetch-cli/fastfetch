@@ -47,6 +47,7 @@ set(SRCS
     src/modules/resolution.c
     src/modules/de.c
     src/modules/wm.c
+    src/modules/wmtheme.c
     src/modules/theme.c
     src/modules/icons.c
     src/modules/font.c

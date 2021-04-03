@@ -22,6 +22,7 @@ int main(int argc, char** argv)
     ffPrintResolution(&instance);
     ffPrintDesktopEnvironment(&instance);
     ffPrintWM(&instance);
+    ffPrintWMTheme(&instance);
     ffPrintTheme(&instance);
     ffPrintIcons(&instance);
     ffPrintFont(&instance);

@@ -64,6 +64,8 @@ typedef struct FFconfig
     FFstrbuf deKey;
     FFstrbuf wmFormat;
     FFstrbuf wmKey;
+    FFstrbuf wmThemeFormat;
+    FFstrbuf wmThemeKey;
     FFstrbuf themeFormat;
     FFstrbuf themeKey;
     FFstrbuf iconsFormat;
@@ -157,7 +159,8 @@ void ffPrintLogos(bool color);
 
 //Module functions
 
-void ffGetTerminal(FFinstance* instance, FFstrbuf** exeName, FFstrbuf** processName, FFstrbuf** error);
+void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr);
+void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr);
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
@@ -172,6 +175,7 @@ void ffPrintShell(FFinstance* instance);
 void ffPrintResolution(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);
+void ffPrintWMTheme(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);
