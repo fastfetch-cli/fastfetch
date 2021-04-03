@@ -94,13 +94,13 @@ void ffFinish(FFinstance* instance)
 
 void ffPrintKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey)
 {
-    printf(FASTFETCH_TEXT_MODIFIER_BOLT);
+    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
     ffStrbufWriteTo(&instance->config.color, stdout);
     if(customKey == NULL || customKey->length == 0)
-        printf(defKey);
+        fputs(defKey, stdout);
     else
         ffStrbufWriteTo(customKey, stdout);
-    printf(FASTFETCH_TEXT_MODIFIER_RESET);
+    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
     ffStrbufWriteTo(&instance->config.seperator, stdout);
 }
 

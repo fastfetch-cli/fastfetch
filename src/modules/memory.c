@@ -10,7 +10,7 @@ void ffPrintMemory(FFinstance* instance)
     }
 
     char* line = NULL;
-    size_t len;
+    size_t len = 0;
 
     uint32_t total, shared, memfree, buffers, cached, reclaimable;
 
@@ -23,7 +23,9 @@ void ffPrintMemory(FFinstance* instance)
         sscanf(line, "SReclaimable: %u", &reclaimable);
     }
 
-    free(line);
+    if(line != NULL)
+        free(line);
+
     fclose(meminfo);
 
     uint32_t used_mem = (total + shared - memfree - buffers - cached - reclaimable) / 1024;

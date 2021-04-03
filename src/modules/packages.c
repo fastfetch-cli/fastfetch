@@ -30,14 +30,14 @@ void ffPrintPackages(FFinstance* instance)
 
     uint32_t all = pacman + flatpak;
 
+    if(all == 0)
+    {
+        ffPrintError(instance,  &instance->config.packagesKey, "Packages", "No packages from known package managers found");
+        return;
+    }
+
     if(instance->config.packagesFormat.length == 0)
     {
-        if(all == 0)
-        {
-            ffPrintError(instance,  &instance->config.packagesKey, "Packages", "No packages from known package managers found");
-            return;
-        }
-
         ffPrintLogoAndKey(instance, &instance->config.packagesKey, "Packages");
 
         #define FF_PRINT_PACKAGE(name) \

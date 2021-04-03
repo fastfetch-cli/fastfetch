@@ -85,6 +85,12 @@ void ffPrintTerminal(FFinstance* instance)
 
     ffGetTerminal(instance, &exeName, &processName, &error);
 
+    if(error->length > 0)
+    {
+        ffPrintError(instance, &instance->config.terminalKey, "Terminal", error->chars);
+        return;
+    }
+
     FFstrbuf* name;
 
     if(ffStrbufStartsWith(exeName, processName))
@@ -94,12 +100,6 @@ void ffPrintTerminal(FFinstance* instance)
 
     if(instance->config.terminalFormat.length == 0)
     {
-        if(error->length > 0)
-        {
-            ffPrintError(instance, &instance->config.terminalKey, "Terminal", error->chars);
-            return;
-        }
-
         ffPrintLogoAndKey(instance, &instance->config.terminalKey, "Terminal");
         ffStrbufPutTo(name, stdout);
     }

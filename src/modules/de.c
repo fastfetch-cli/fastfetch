@@ -12,8 +12,9 @@ static void getKDE(FFstrbuf* name, FFstrbuf* version, FFstrbuf* type)
 
 void ffPrintDesktopEnvironment(FFinstance* instance)
 {
-    FFstrbuf sessionDesktop;
-    ffStrbufInitS(&sessionDesktop, getenv("XDG_CURRENT_DESKTOP"));
+    FF_STRBUF_CREATE(sessionDesktop);
+    ffStrbufAppendS(&sessionDesktop, getenv("XDG_CURRENT_DESKTOP"));
+
     if(sessionDesktop.length == 0)
         ffStrbufSetS(&sessionDesktop, getenv("XDG_SESSION_DESKTOP"));
 
@@ -38,13 +39,17 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
             ffStrbufSetS(&sessionType, xdgSessionType);
     }
 
+    if(sessionDesktop.length == 0 && sessionType.length == 0)
+    {
+        ffPrintError(instance, &instance->config.deKey, "DE", "No relevant XDG_SESSION_* environment variable set");
+        ffStrbufDestroy(&sessionDesktop);
+        ffStrbufDestroy(&sessionVersion);
+        ffStrbufDestroy(&sessionType);
+        return;
+    }
+
     if(instance->config.deFormat.length == 0)
     {
-        if(sessionDesktop.length == 0 && sessionType.length == 0)
-        {
-            ffPrintError(instance, &instance->config.deKey, "DE", "Neither DE nor Display Server could be determined");
-            return;
-        }
 
         ffPrintLogoAndKey(instance, &instance->config.deKey, "DE");
 
@@ -75,7 +80,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionType}
         );
     }
-    ffStrbufDestroy(&sessionType);
-    ffStrbufDestroy(&sessionVersion);
     ffStrbufDestroy(&sessionDesktop);
+    ffStrbufDestroy(&sessionVersion);
+    ffStrbufDestroy(&sessionType);
 }

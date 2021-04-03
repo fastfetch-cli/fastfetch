@@ -35,14 +35,14 @@ void ffPrintWM(FFinstance* instance)
 
     closedir(proc);
 
+    if(prettyName.length == 0)
+    {
+        ffPrintError(instance, &instance->config.wmKey, "WM", "No process name matches the name of known display managers");
+        return;
+    }
+
     if(instance->config.wmFormat.length == 0)
     {
-        if(prettyName.length == 0)
-        {
-            ffPrintError(instance, &instance->config.wmKey, "WM", "No process name matches the name of known display managers");
-            return;
-        }
-
         ffPrintLogoAndKey(instance, &instance->config.wmKey, "WM");
         ffStrbufPutTo(&prettyName, stdout);
     }

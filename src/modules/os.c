@@ -5,6 +5,17 @@ void ffPrintOS(FFinstance* instance)
     if(ffPrintCachedValue(instance, &instance->config.osKey, "OS"))
         return;
 
+    FILE* osRelease = fopen("/etc/os-release", "r");
+
+    if(osRelease == NULL)
+        osRelease = fopen("/usr/lib/os-release", "r");
+
+    if(osRelease == NULL)
+    {
+        ffPrintError(instance, &instance->config.osKey, "OS", "couldn't read /etc/os-release nor /usr/lib/os-release");
+        return;
+    }
+
     // Documentation of the fields:
     // https://www.freedesktop.org/software/systemd/man/os-release.html
 
@@ -18,11 +29,6 @@ void ffPrintOS(FFinstance* instance)
     char versionId[128];       versionId[0] = '\0';
     char versionCodename[128]; versionCodename[0] = '\0';
     char buildId[128];         buildId[0] = '\0';
-
-    FILE* osRelease = fopen("/etc/os-release", "r");
-
-    if(osRelease == NULL)
-        osRelease = fopen("/usr/lib/os-release", "r");
 
     char* line = NULL;
     size_t len = 0;
@@ -51,10 +57,10 @@ void ffPrintOS(FFinstance* instance)
         sscanf(line, "BUILD_ID=\"%[^\"]+", buildId);
     }
 
-    fclose(osRelease);
-
     if(line != NULL)
         free(line);
+
+    fclose(osRelease);
 
     FF_STRBUF_CREATE(os);
 

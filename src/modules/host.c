@@ -14,16 +14,17 @@ void ffPrintHost(FFinstance* instance)
     FF_STRBUF_CREATE(version);
     ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", &version);
 
+    if(family.length == 0 && name.length == 0)
+    {
+        ffPrintError(instance, &instance->config.hostKey, "Host", "neither family nor name could be determined");
+        return;
+    }
+
     FF_STRBUF_CREATE(host);
 
     if(instance->config.hostFormat.length == 0)
     {
-        if(family.length == 0 && name.length == 0)
-        {
-            ffPrintError(instance, &instance->config.hostKey, "Host", "neither family nor name could be determined");
-            return;
-        }
-        else if(name.length == 0)
+        if(name.length == 0)
         {
             ffStrbufAppend(&host, &family);
         }

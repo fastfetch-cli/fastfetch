@@ -339,18 +339,20 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "cpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("cpu", "{2} ({4}) @ {7}GHz", 11,
+        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {13}GHz", 13,
             "CPU name",
             "Prettified CPU name",
             "CPU Vendor name (Vendor ID)",
             "CPU logical core count online",
             "CPU logical core count configured",
             "CPU physical core count",
+            "Always set core count"
             "frequency bios limit",
             "frequency scaling max",
             "frequency scaling min",
             "frequency info max",
-            "frequency info min"
+            "frequency info min",
+            "Always set frequeny"
         );
     }
     else if(strcasecmp(command, "gpu-format") == 0)

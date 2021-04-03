@@ -2,6 +2,23 @@
 
 #include <sys/statvfs.h>
 
+static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, bool showFolderPath)
+{
+    if(instance->config.diskKey.length == 0)
+    {
+        if(showFolderPath)
+            ffStrbufAppendF(key, "Disk (%s)", folderPath);
+        else
+            ffStrbufSetS(key, "Disk");
+    }
+    else
+    {
+        ffParseFormatString(key, &instance->config.diskKey, 1,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, folderPath}
+        );
+    }
+}
+
 static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs)
 {
     const uint32_t GB = 1024 * 1024 * 1024;
@@ -29,24 +46,10 @@ static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs
     }
 }
 
-static void createKey(FFinstance* instance, FFstrbuf* key, const char* folderPath)
-{
-    if(instance->config.diskKey.length == 0)
-    {
-        ffStrbufAppendF(key, "Disk (%s)", folderPath);
-    }
-    else
-    {
-        ffParseFormatString(key, &instance->config.diskKey, 1,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, folderPath}
-        );
-    }
-}
-
 static void printStatvfsCreateKey(FFinstance* instance, const char* folderPath, struct statvfs* fs)
 {
     FF_STRBUF_CREATE(key);
-    createKey(instance, &key, folderPath);
+    getKey(instance, &key, folderPath, true);
     printStatvfs(instance, &key, fs);
     ffStrbufDestroy(&key);
 }
@@ -54,13 +57,13 @@ static void printStatvfsCreateKey(FFinstance* instance, const char* folderPath, 
 static void printFolder(FFinstance* instance, const char* folderPath)
 {
     FF_STRBUF_CREATE(key);
-    createKey(instance, &key, folderPath);
+    getKey(instance, &key, folderPath, true);
 
     struct statvfs fs;
     int ret = statvfs(folderPath, &fs);
     if(ret != 0 && instance->config.diskFormat.length == 0)
     {
-        ffPrintError(instance, &key, NULL, "statvfs(\"%s\", &fs) != 0", folderPath);
+        ffPrintError(instance, &key, NULL, "statvfs(\"%s\", &fs) != 0 (%i)", folderPath, ret);
         ffStrbufDestroy(&key);
         return;
     }
@@ -73,6 +76,7 @@ void ffPrintDisk(FFinstance* instance)
 {
     if(instance->config.diskFolders.length == 0)
     {
+
         struct statvfs fsRoot;
         int rootRet = statvfs("/", &fsRoot);
 
@@ -81,7 +85,10 @@ void ffPrintDisk(FFinstance* instance)
 
         if(rootRet != 0 && homeRet != 0)
         {
-            ffPrintError(instance, NULL, "Disk", "statvfs failed for both / and /home");
+            FF_STRBUF_CREATE(key);
+            getKey(instance, &key, "/", false);
+            ffPrintError(instance, &key, NULL, "statvfs failed for both / and /home");
+            ffStrbufDestroy(&key);
             return;
         }
 
