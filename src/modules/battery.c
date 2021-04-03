@@ -70,7 +70,7 @@ static void printBattery(FFinstance* instance, uint8_t index)
             printf("%s ", manufactor.chars);
 
         if(model.length > 0)
-            printf("%s ", manufactor.chars);
+            printf("%s ", model.chars);
 
         if(technology.length > 0)
             printf("(%s) ", technology.chars);
