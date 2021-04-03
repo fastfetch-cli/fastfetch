@@ -9,7 +9,7 @@ void ffPrintUptime(FFinstance* instance)
 
     if(instance->config.uptimeFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "Uptime");
+        ffPrintLogoAndKey(instance, &instance->config.uptimeKey, "Uptime");
 
         if(days == 0 && hours == 0 && minutes == 0)
         {
@@ -28,7 +28,7 @@ void ffPrintUptime(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, "Uptime", &instance->config.uptimeFormat, 4,
+        ffPrintFormatString(instance, &instance->config.uptimeKey, "Uptime", &instance->config.uptimeFormat, 4,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &days},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &hours},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &minutes},

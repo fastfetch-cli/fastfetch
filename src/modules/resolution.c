@@ -40,7 +40,7 @@ static int getCurrentRate(FFinstance* instance, Display* display)
 
 void ffPrintResolution(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, "Resolution"))
+    if(ffPrintCachedValue(instance, &instance->config.resolutionFormat, "Resolution"))
         return;
 
     void* x11;
@@ -50,21 +50,21 @@ void ffPrintResolution(FFinstance* instance)
         x11 = dlopen(instance->config.libX11.chars, RTLD_LAZY);
     if(x11 == NULL)
     {
-        ffPrintError(instance, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
+        ffPrintError(instance, &instance->config.resolutionFormat, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
         return;
     }
 
     Display*(*ffXOpenDisplay)(const char*) = dlsym(x11, "XOpenDisplay");
     if(ffXOpenDisplay == NULL)
     {
-        ffPrintError(instance, "Resolution", "dlsym(x11, \"XOpenDisplay\") == NULL");
+        ffPrintError(instance, &instance->config.resolutionFormat, "Resolution", "dlsym(x11, \"XOpenDisplay\") == NULL");
         return;
     }
 
     Display* display = ffXOpenDisplay(NULL);
     if(display == NULL)
     {
-        ffPrintError(instance, "Resolution", "ffXOpenDisplay(NULL) == NULL");
+        ffPrintError(instance, &instance->config.resolutionFormat, "Resolution", "ffXOpenDisplay(NULL) == NULL");
         return;
     }
 
@@ -92,6 +92,6 @@ void ffPrintResolution(FFinstance* instance)
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, "Resolution", &resolution);
+    ffPrintAndSaveCachedValue(instance, &instance->config.resolutionKey, "Resolution", &resolution);
     ffStrbufDestroy(&resolution);
 }

@@ -43,13 +43,13 @@ void ffPrintFont(FFinstance* instance)
 
     if(instance->config.fontFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "Font");
+        ffPrintLogoAndKey(instance, &instance->config.fontKey, "Font");
         printf("%s [Plasma], ", plasmaPretty);
         ffStrbufPutTo(&gtkPretty, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, "Font", &instance->config.fontFormat, 5,
+        ffPrintFormatString(instance, &instance->config.fontKey, "Font", &instance->config.fontFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasmaPretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2Pretty},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3Pretty},

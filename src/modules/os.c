@@ -2,7 +2,7 @@
 
 void ffPrintOS(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, "OS"))
+    if(ffPrintCachedValue(instance, &instance->config.osKey, "OS"))
         return;
 
     // Documentation of the fields:
@@ -124,6 +124,6 @@ void ffPrintOS(FFinstance* instance)
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, "OS", &os);
+    ffPrintAndSaveCachedValue(instance, &instance->config.osKey, "OS", &os);
     ffStrbufDestroy(&os);
 }

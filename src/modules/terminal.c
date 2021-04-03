@@ -96,16 +96,16 @@ void ffPrintTerminal(FFinstance* instance)
     {
         if(error->length > 0)
         {
-            ffPrintError(instance, "Terminal", error->chars);
+            ffPrintError(instance, &instance->config.terminalKey, "Terminal", error->chars);
             return;
         }
 
-        ffPrintLogoAndKey(instance, "Terminal");
+        ffPrintLogoAndKey(instance, &instance->config.terminalKey, "Terminal");
         ffStrbufPutTo(name, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, "Terminal", &instance->config.terminalFormat, 3,
+        ffPrintFormatString(instance, &instance->config.terminalKey, "Terminal", &instance->config.terminalFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, exeName},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, processName},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, name}

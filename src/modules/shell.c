@@ -2,13 +2,13 @@
 
 void ffPrintShell(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, "Shell"))
+    if(ffPrintCachedValue(instance, &instance->config.shellKey, "Shell"))
         return;
 
     char* shellPath = getenv("SHELL");
     if(shellPath == NULL)
     {
-        ffPrintError(instance, "Shell", "getenv(\"SHELL\") == NULL");
+        ffPrintError(instance, &instance->config.shellKey, "Shell", "getenv(\"SHELL\") == NULL");
         return;
     }
 
@@ -41,6 +41,6 @@ void ffPrintShell(FFinstance* instance)
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, "Shell", &shell);
+    ffPrintAndSaveCachedValue(instance, &instance->config.shellKey, "Shell", &shell);
     ffStrbufDestroy(&shell);
 }

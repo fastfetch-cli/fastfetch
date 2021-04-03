@@ -25,7 +25,7 @@ void ffPrintIcons(FFinstance* instance)
 
     if(instance->config.iconsFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "Icons");
+        ffPrintLogoAndKey(instance, &instance->config.iconsKey, "Icons");
 
         if(plasma[0] == '\0')
             printf("Breeze [Plasma], ");
@@ -36,7 +36,7 @@ void ffPrintIcons(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, "Icons", &instance->config.iconsFormat, 5,
+        ffPrintFormatString(instance, &instance->config.iconsKey, "Icons", &instance->config.iconsFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3},

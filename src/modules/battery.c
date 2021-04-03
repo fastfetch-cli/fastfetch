@@ -6,31 +6,42 @@ static void printBattery(FFinstance* instance, uint8_t index)
 {
     FF_STRBUF_CREATE(manufactor);
     char manufactorPath[42];
-    sprintf(manufactorPath, "/sys/class/power_supply/BAT%i/manufacturer", index);
+    sprintf(manufactorPath, "/sys/class/power_supply/BAT%hhu/manufacturer", index);
     ffGetFileContent(manufactorPath, &manufactor);
 
     FF_STRBUF_CREATE(model);
     char modelPath[40];
-    sprintf(modelPath, "/sys/class/power_supply/BAT%i/model_name", index);
+    sprintf(modelPath, "/sys/class/power_supply/BAT%hhu/model_name", index);
     ffGetFileContent(modelPath, &model);
 
     FF_STRBUF_CREATE(technology);
     char technologyPath[40];
-    sprintf(technologyPath, "/sys/class/power_supply/BAT%i/technology", index);
+    sprintf(technologyPath, "/sys/class/power_supply/BAT%hhu/technology", index);
     ffGetFileContent(technologyPath, &technology);
 
     FF_STRBUF_CREATE(capacity);
     char capacityPath[38];
-    sprintf(capacityPath, "/sys/class/power_supply/BAT%i/capacity", index);
+    sprintf(capacityPath, "/sys/class/power_supply/BAT%hhu/capacity", index);
     ffGetFileContent(capacityPath, &capacity);
 
     FF_STRBUF_CREATE(status);
     char statusPath[36];
-    sprintf(statusPath, "/sys/class/power_supply/BAT%i/status", index);
+    sprintf(statusPath, "/sys/class/power_supply/BAT%hhu/status", index);
     ffGetFileContent(statusPath, &status);
 
-    char key[10];
-    sprintf(key, "Battery %i", index);
+    uint8_t indexPlusOne = index + 1;
+
+    FF_STRBUF_CREATE(key);
+    if(instance->config.batteryKey.length == 0)
+    {
+        ffStrbufAppendF(&key, "Battery %hhu", indexPlusOne);
+    }
+    else
+    {
+        ffParseFormatString(&key, &instance->config.batteryKey, 1,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &indexPlusOne}
+        );
+    }
 
     if(instance->config.batteryFormat.length == 0)
     {
@@ -41,11 +52,11 @@ static void printBattery(FFinstance* instance, uint8_t index)
             capacity.length   == 0 &&
             status.length     == 0
         ) {
-            ffPrintError(instance, key, "No file in /sys/class/power_supply/BAT0/ could be read or all battery options are disabled");
+            ffPrintError(instance, &key, NULL, "No file in /sys/class/power_supply/BAT%hhu/ could be read or all battery options are disabled", index);
             return;
         }
 
-        ffPrintLogoAndKey(instance, key);
+        ffPrintLogoAndKey(instance, &key, NULL);
 
         if(manufactor.length > 0)
             printf("%s ", manufactor.chars);
@@ -75,7 +86,7 @@ static void printBattery(FFinstance* instance, uint8_t index)
     }
     else
     {
-        ffPrintFormatString(instance, key, &instance->config.batteryFormat, 5,
+        ffPrintFormatString(instance, &key, NULL, &instance->config.batteryFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &manufactor},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &model},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &technology},
@@ -89,10 +100,12 @@ static void printBattery(FFinstance* instance, uint8_t index)
     ffStrbufDestroy(&technology);
     ffStrbufDestroy(&capacity);
     ffStrbufDestroy(&status);
+    ffStrbufDestroy(&key);
 }
 
 void ffPrintBattery(FFinstance* instance)
 {
+    uint8_t batteryCounter = 0;
     for(uint8_t i = 0; i < 5; i++)
     {
         char path[30];
@@ -101,8 +114,29 @@ void ffPrintBattery(FFinstance* instance)
         DIR* dir = opendir(path);
         if(dir != NULL)
         {
-            printBattery(instance, i);
+            printBattery(instance, batteryCounter++);
             closedir(dir);
         }
+    }
+
+    if(batteryCounter == 0)
+    {
+        if(!instance->config.showErrors)
+            return;
+
+        FF_STRBUF_CREATE(key);
+        if(instance->config.batteryKey.length == 0)
+        {
+            ffStrbufSetS(&key, "Battery");
+        }
+        else
+        {
+            ffParseFormatString(&key, &instance->config.batteryKey, 1,
+                (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &batteryCounter}
+            );
+        }
+
+        ffPrintError(instance, &key, NULL, "No battery found in /sys/class/power_supply/");
+        ffStrbufDestroy(&key);
     }
 }

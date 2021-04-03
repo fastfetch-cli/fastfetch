@@ -2,7 +2,7 @@
 
 void ffPrintHost(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, "Host"))
+    if(ffPrintCachedValue(instance, &instance->config.hostKey, "Host"))
         return;
 
     FF_STRBUF_CREATE(family);
@@ -20,7 +20,7 @@ void ffPrintHost(FFinstance* instance)
     {
         if(family.length == 0 && name.length == 0)
         {
-            ffPrintError(instance, "Host", "neither family nor name could be determined");
+            ffPrintError(instance, &instance->config.hostKey, "Host", "neither family nor name could be determined");
             return;
         }
         else if(name.length == 0)
@@ -56,7 +56,7 @@ void ffPrintHost(FFinstance* instance)
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, "Host", &host);
+    ffPrintAndSaveCachedValue(instance, &instance->config.hostKey, "Host", &host);
     ffStrbufDestroy(&host);
 
     ffStrbufDestroy(&family);

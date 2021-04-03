@@ -7,7 +7,7 @@ void ffPrintWM(FFinstance* instance)
     DIR* proc = opendir("/proc/");
     if(proc == NULL)
     {
-        ffPrintError(instance, "WM", "opendir(\"/proc/\") == NULL");
+        ffPrintError(instance, &instance->config.wmKey, "WM", "opendir(\"/proc/\") == NULL");
         return;
     }
 
@@ -39,16 +39,16 @@ void ffPrintWM(FFinstance* instance)
     {
         if(prettyName.length == 0)
         {
-            ffPrintError(instance, "WM", "No process name matches the name of known display managers");
+            ffPrintError(instance, &instance->config.wmKey, "WM", "No process name matches the name of known display managers");
             return;
         }
 
-        ffPrintLogoAndKey(instance, "WM");
+        ffPrintLogoAndKey(instance, &instance->config.wmKey, "WM");
         ffStrbufPutTo(&prettyName, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, "WM", &instance->config.wmFormat, 2,
+        ffPrintFormatString(instance, &instance->config.wmKey, "WM", &instance->config.wmFormat, 2,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &processName},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &prettyName}
         );

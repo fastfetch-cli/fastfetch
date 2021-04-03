@@ -28,65 +28,60 @@ void ffDefaultConfig(FFconfig* config)
     config->cacheSave = true;
     config->printRemainingLogo = true;
 
-    ffStrbufInit(&config->osFormat);
-    ffStrbufInit(&config->hostFormat);
-    ffStrbufInit(&config->kernelFormat);
-    ffStrbufInit(&config->uptimeFormat);
-    ffStrbufInit(&config->packagesFormat);
-    ffStrbufInit(&config->shellFormat);
-    ffStrbufInit(&config->resolutionFormat);
-    ffStrbufInit(&config->deFormat);
-    ffStrbufInit(&config->wmFormat);
-    ffStrbufInit(&config->themeFormat);
-    ffStrbufInit(&config->iconsFormat);
-    ffStrbufInit(&config->fontFormat);
-    ffStrbufInit(&config->terminalFormat);
-    ffStrbufInit(&config->termFontFormat);
-    ffStrbufInit(&config->cpuFormat);
-    ffStrbufInit(&config->gpuFormat);
-    ffStrbufInit(&config->memoryFormat);
-    ffStrbufInit(&config->diskFormat);
-    ffStrbufInit(&config->batteryFormat);
-    ffStrbufInit(&config->localeFormat);
+    //Since most of these properties are unlikely to be used at once, give them minimal heap space (the \0 character)
+    ffStrbufInitA(&config->osFormat, 1);
+    ffStrbufInitA(&config->osKey, 1);
+    ffStrbufInitA(&config->hostFormat, 1);
+    ffStrbufInitA(&config->hostKey, 1);
+    ffStrbufInitA(&config->kernelFormat, 1);
+    ffStrbufInitA(&config->kernelKey, 1);
+    ffStrbufInitA(&config->uptimeFormat, 1);
+    ffStrbufInitA(&config->uptimeKey, 1);
+    ffStrbufInitA(&config->packagesFormat, 1);
+    ffStrbufInitA(&config->packagesKey, 1);
+    ffStrbufInitA(&config->shellFormat, 1);
+    ffStrbufInitA(&config->shellKey, 1);
+    ffStrbufInitA(&config->resolutionFormat, 1);
+    ffStrbufInitA(&config->resolutionKey, 1);
+    ffStrbufInitA(&config->deFormat, 1);
+    ffStrbufInitA(&config->deKey, 1);
+    ffStrbufInitA(&config->wmFormat, 1);
+    ffStrbufInitA(&config->wmKey, 1);
+    ffStrbufInitA(&config->themeFormat, 1);
+    ffStrbufInitA(&config->themeKey, 1);
+    ffStrbufInitA(&config->iconsFormat, 1);
+    ffStrbufInitA(&config->iconsKey, 1);
+    ffStrbufInitA(&config->fontFormat, 1);
+    ffStrbufInitA(&config->fontKey, 1);
+    ffStrbufInitA(&config->terminalFormat, 1);
+    ffStrbufInitA(&config->terminalKey, 1);
+    ffStrbufInitA(&config->termFontFormat, 1);
+    ffStrbufInitA(&config->termFontKey, 1);
+    ffStrbufInitA(&config->cpuFormat, 1);
+    ffStrbufInitA(&config->cpuKey, 1);
+    ffStrbufInitA(&config->gpuFormat, 1);
+    ffStrbufInitA(&config->gpuKey, 1);
+    ffStrbufInitA(&config->memoryFormat, 1);
+    ffStrbufInitA(&config->memoryKey, 1);
+    ffStrbufInitA(&config->diskFormat, 1);
+    ffStrbufInitA(&config->diskKey, 1);
+    ffStrbufInitA(&config->batteryFormat, 1);
+    ffStrbufInitA(&config->batteryKey, 1);
+    ffStrbufInitA(&config->localeFormat, 1);
+    ffStrbufInitA(&config->localeKey, 1);
 
-    ffStrbufInitA(&config->libPCI, 256);
-    ffStrbufInitA(&config->libX11, 256);
-    ffStrbufInitA(&config->libXrandr, 256);
+    ffStrbufInitA(&config->libPCI, 1);
+    ffStrbufInitA(&config->libX11, 1);
+    ffStrbufInitA(&config->libXrandr, 1);
 
-    ffStrbufInitA(&config->diskFolders, 128);
+    ffStrbufInitA(&config->diskFolders, 1);
 }
 
 static void ffCleanup(FFinstance* instance)
 {
-    ffStrbufDestroy(&instance->config.color);
-    ffStrbufDestroy(&instance->config.seperator);
-
-    ffStrbufDestroy(&instance->config.osFormat);
-    ffStrbufDestroy(&instance->config.hostFormat);
-    ffStrbufDestroy(&instance->config.kernelFormat);
-    ffStrbufDestroy(&instance->config.uptimeFormat);
-    ffStrbufDestroy(&instance->config.packagesFormat);
-    ffStrbufDestroy(&instance->config.shellFormat);
-    ffStrbufDestroy(&instance->config.resolutionFormat);
-    ffStrbufDestroy(&instance->config.deFormat);
-    ffStrbufDestroy(&instance->config.wmFormat);
-    ffStrbufDestroy(&instance->config.themeFormat);
-    ffStrbufDestroy(&instance->config.iconsFormat);
-    ffStrbufDestroy(&instance->config.fontFormat);
-    ffStrbufDestroy(&instance->config.terminalFormat);
-    ffStrbufDestroy(&instance->config.termFontFormat);
-    ffStrbufDestroy(&instance->config.cpuFormat);
-    ffStrbufDestroy(&instance->config.gpuFormat);
-    ffStrbufDestroy(&instance->config.memoryFormat);
-    ffStrbufDestroy(&instance->config.diskFormat);
-    ffStrbufDestroy(&instance->config.batteryFormat);
-    ffStrbufDestroy(&instance->config.localeFormat);
-
-    ffStrbufDestroy(&instance->config.libPCI);
-    ffStrbufDestroy(&instance->config.libX11);
-    ffStrbufDestroy(&instance->config.libXrandr);
-
-    ffStrbufDestroy(&instance->config.diskFolders);
+    // Place for cleaning up
+    // I dont destroy the global strbufs, because the OS is typically faster doing it after the program terminates
+    // This eliminates one function call per strbuf + setting things like length to 0
 }
 
 void ffFinish(FFinstance* instance)
@@ -97,15 +92,120 @@ void ffFinish(FFinstance* instance)
     ffCleanup(instance);
 }
 
-void ffPrintKey(FFconfig* config, const char* key)
+void ffPrintKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey)
 {
-    printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET"%s", config->color.chars, key, config->seperator.chars);
+    printf(FASTFETCH_TEXT_MODIFIER_BOLT);
+    ffStrbufWriteTo(&instance->config.color, stdout);
+    if(customKey == NULL || customKey->length == 0)
+        printf(defKey);
+    else
+        ffStrbufWriteTo(customKey, stdout);
+    printf(FASTFETCH_TEXT_MODIFIER_RESET);
+    ffStrbufWriteTo(&instance->config.seperator, stdout);
 }
 
-void ffPrintLogoAndKey(FFinstance* instance, const char* key)
+void ffPrintLogoAndKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey)
 {
     ffPrintLogoLine(instance);
-    ffPrintKey(&instance->config, key);
+    ffPrintKey(instance, customKey, defKey);
+}
+
+void ffPrintError(FFinstance* instance, FFstrbuf* customKey, const char* defKey, const char* message, ...)
+{
+    if(!instance->config.showErrors)
+        return;
+
+    ffPrintLogoAndKey(instance, customKey, defKey);
+
+    va_list arguments;
+    va_start(arguments, message);
+
+    printf(FASTFETCH_TEXT_MODIFIER_ERROR);
+    vprintf(message, arguments);
+    puts(FASTFETCH_TEXT_MODIFIER_RESET);
+
+    va_end(arguments);
+}
+
+static const FFstrbuf* getCacheDir(FFinstance* instance)
+{
+    static FFstrbuf cacheDir;
+    static bool init = false;
+    if(init)
+        return &cacheDir;
+
+    ffStrbufInitS(&cacheDir, getenv("XDG_CACHE_HOME"));
+
+    if(cacheDir.length == 0)
+    {
+        ffStrbufSetS(&cacheDir, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&cacheDir, "/.cache/");
+    }
+
+    mkdir(cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+
+    ffStrbufAppendS(&cacheDir, "fastfetch/");
+    mkdir(cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
+
+    init = true;
+    return &cacheDir;
+}
+
+bool ffPrintCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey)
+{
+    if(instance->config.recache)
+        return false;
+
+    FFstrbuf cacheFile;
+    ffStrbufInitA(&cacheFile, 128);
+    ffStrbufAppend(&cacheFile, getCacheDir(instance));
+    ffStrbufAppendS(&cacheFile, defKey);
+
+    FF_STRBUF_CREATE(value);
+    ffGetFileContent(cacheFile.chars, &value);
+
+    ffStrbufDestroy(&cacheFile);
+
+    if(value.length == 0)
+    {
+        ffStrbufDestroy(&value);
+        return false;
+    }
+
+    ffPrintLogoAndKey(instance, customKey, defKey);
+    ffStrbufPutTo(&value, stdout);
+    ffStrbufDestroy(&value);
+    return true;
+}
+
+void ffPrintAndSaveCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* value)
+{
+    if(value->length == 0)
+        return;
+
+    ffPrintLogoAndKey(instance, customKey, defKey);
+    ffStrbufPutTo(value, stdout);
+
+    if(!instance->config.cacheSave)
+        return;
+
+    FFstrbuf cacheFile;
+    ffStrbufInit(&cacheFile);
+    ffStrbufAppend(&cacheFile, getCacheDir(instance));
+    ffStrbufAppendS(&cacheFile, defKey);
+
+    int fd = open(cacheFile.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(fd == -1)
+        return;
+
+    bool failed = write(fd, value->chars, value->length) != value->length;
+
+    close(fd);
+
+    if(failed)
+        unlink(cacheFile.chars);
+
+    ffStrbufDestroy(&cacheFile);
 }
 
 void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
@@ -142,83 +242,6 @@ void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffStrbufDestroy(&absolutePath);
 }
 
-static inline bool strSet(const char* str)
-{
-    return str != NULL && str[0] != '\0';
-}
-
-void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4)
-{
-    if(strSet(gtk2) && strSet(gtk3) && strSet(gtk4))
-    {
-        if((strcmp(gtk2, gtk3) == 0) && (strcmp(gtk2, gtk4) == 0))
-            ffStrbufSetF(buffer, "%s [GTK2/3/4]", gtk2);
-        else if(strcmp(gtk2, gtk3) == 0)
-            ffStrbufSetF(buffer, "%s [GTK2/3], %s [GTK4]", gtk2, gtk4);
-        else if(strcmp(gtk3, gtk4) == 0)
-            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3/4]", gtk2, gtk3);
-        else
-            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3], %s [GTK4]", gtk2, gtk3, gtk4);
-    }
-    else if(strSet(gtk2) && strSet(gtk3))
-    {
-        if(strcmp(gtk2, gtk3) == 0)
-            ffStrbufSetF(buffer, "%s [GTK2/3]", gtk2);
-        else
-            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3]", gtk2, gtk3);
-    }
-    else if(strSet(gtk3) && strSet(gtk4))
-    {
-        if(strcmp(gtk3, gtk4) == 0)
-            ffStrbufSetF(buffer, "%s [GTK3/4]", gtk3);
-        else
-            ffStrbufSetF(buffer, "%s [GTK3], %s [GTK4]", gtk3, gtk4);
-    }
-    else if(strSet(gtk2))
-    {
-        ffStrbufSetF(buffer, "%s [GTK2]", gtk2);
-    }
-    else if(strSet(gtk3))
-    {
-        ffStrbufSetF(buffer, "%s [GTK3]", gtk3);
-    }
-    else if(strSet(gtk4))
-    {
-        ffStrbufSetF(buffer, "%s [GTK4]", gtk4);
-    }
-}
-
-void ffParseFont(char* font, char* buffer)
-{
-    char name[64];
-    char size[32];
-    int scanned = sscanf(font, "%[^,], %[^,]", name, size);
-
-    if(scanned == 0)
-        strcpy(buffer, font);
-    else if(scanned == 1)
-        strcpy(buffer, name);
-    else
-        sprintf(buffer, "%s (%spt)", name, size);
-}
-
-void ffPrintError(FFinstance* instance, const char* key, const char* message, ...)
-{
-    if(!instance->config.showErrors)
-        return;
-
-    ffPrintLogoAndKey(instance, key);
-
-    va_list arguments;
-    va_start(arguments, message);
-
-    printf(FASTFETCH_TEXT_MODIFIER_ERROR);
-    vprintf(message, arguments);
-    puts(FASTFETCH_TEXT_MODIFIER_RESET);
-
-    va_end(arguments);
-}
-
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
 {
     int fd = open(fileName, O_RDONLY);
@@ -245,87 +268,6 @@ void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
     ffAppendFileContent(fileName, buffer);
-}
-
-static const FFstrbuf* getCacheDir(FFinstance* instance)
-{
-    static FFstrbuf cacheDir;
-    static bool init = false;
-    if(init)
-        return &cacheDir;
-
-    ffStrbufInitS(&cacheDir, getenv("XDG_CACHE_HOME"));
-
-    if(cacheDir.length == 0)
-    {
-        ffStrbufSetS(&cacheDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&cacheDir, "/.cache/");
-    }
-
-    mkdir(cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
-
-    ffStrbufAppendS(&cacheDir, "fastfetch/");
-    mkdir(cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
-
-    init = true;
-    return &cacheDir;
-}
-
-bool ffPrintCachedValue(FFinstance* instance, const char* key)
-{
-    if(instance->config.recache)
-        return false;
-
-    FFstrbuf cacheFile;
-    ffStrbufInitA(&cacheFile, 128);
-    ffStrbufAppend(&cacheFile, getCacheDir(instance));
-    ffStrbufAppendS(&cacheFile, key);
-
-    FF_STRBUF_CREATE(value);
-    ffGetFileContent(cacheFile.chars, &value);
-
-    ffStrbufDestroy(&cacheFile);
-
-    if(value.length == 0)
-    {
-        ffStrbufDestroy(&value);
-        return false;
-    }
-
-    ffPrintLogoAndKey(instance, key);
-    ffStrbufPutTo(&value, stdout);
-    ffStrbufDestroy(&value);
-    return true;
-}
-
-void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value)
-{
-    if(value->length == 0)
-        return;
-
-    ffPrintLogoAndKey(instance, key);
-    ffStrbufPutTo(value, stdout);
-
-    if(!instance->config.cacheSave)
-        return;
-
-    FFstrbuf cacheFile;
-    ffStrbufInit(&cacheFile);
-    ffStrbufAppend(&cacheFile, getCacheDir(instance));
-    ffStrbufAppendS(&cacheFile, key);
-
-    int fd = open(cacheFile.chars, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if(fd == -1)
-        return;
-
-    bool failed = write(fd, value->chars, value->length) != value->length;
-
-    close(fd);
-
-    if(failed)
-        unlink(cacheFile.chars);
-
-    ffStrbufDestroy(&cacheFile);
 }
 
 void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp)
@@ -431,7 +373,7 @@ void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs
     va_end(argp);
 }
 
-void ffPrintFormatString(FFinstance* instance, const char* key, FFstrbuf* formatstr, uint32_t numArgs, ...)
+void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...)
 {
     FFstrbuf buffer;
     ffStrbufInitA(&buffer, 256);
@@ -445,9 +387,69 @@ void ffPrintFormatString(FFinstance* instance, const char* key, FFstrbuf* format
 
     if(buffer.length > 0)
     {
-        ffPrintLogoAndKey(instance, key);
+        ffPrintLogoAndKey(instance, customKey, defKey);
         ffStrbufPutTo(&buffer, stdout);
     }
 
     ffStrbufDestroy(&buffer);
+}
+
+static inline bool strSet(const char* str)
+{
+    return str != NULL && str[0] != '\0';
+}
+
+void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4)
+{
+    if(strSet(gtk2) && strSet(gtk3) && strSet(gtk4))
+    {
+        if((strcmp(gtk2, gtk3) == 0) && (strcmp(gtk2, gtk4) == 0))
+            ffStrbufSetF(buffer, "%s [GTK2/3/4]", gtk2);
+        else if(strcmp(gtk2, gtk3) == 0)
+            ffStrbufSetF(buffer, "%s [GTK2/3], %s [GTK4]", gtk2, gtk4);
+        else if(strcmp(gtk3, gtk4) == 0)
+            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3/4]", gtk2, gtk3);
+        else
+            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3], %s [GTK4]", gtk2, gtk3, gtk4);
+    }
+    else if(strSet(gtk2) && strSet(gtk3))
+    {
+        if(strcmp(gtk2, gtk3) == 0)
+            ffStrbufSetF(buffer, "%s [GTK2/3]", gtk2);
+        else
+            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3]", gtk2, gtk3);
+    }
+    else if(strSet(gtk3) && strSet(gtk4))
+    {
+        if(strcmp(gtk3, gtk4) == 0)
+            ffStrbufSetF(buffer, "%s [GTK3/4]", gtk3);
+        else
+            ffStrbufSetF(buffer, "%s [GTK3], %s [GTK4]", gtk3, gtk4);
+    }
+    else if(strSet(gtk2))
+    {
+        ffStrbufSetF(buffer, "%s [GTK2]", gtk2);
+    }
+    else if(strSet(gtk3))
+    {
+        ffStrbufSetF(buffer, "%s [GTK3]", gtk3);
+    }
+    else if(strSet(gtk4))
+    {
+        ffStrbufSetF(buffer, "%s [GTK4]", gtk4);
+    }
+}
+
+void ffParseFont(char* font, char* buffer)
+{
+    char name[64];
+    char size[32];
+    int scanned = sscanf(font, "%[^,], %[^,]", name, size);
+
+    if(scanned == 0)
+        strcpy(buffer, font);
+    else if(scanned == 1)
+        strcpy(buffer, name);
+    else
+        sprintf(buffer, "%s (%spt)", name, size);
 }

@@ -3,12 +3,24 @@
 #include <pci/pci.h>
 #include <dlfcn.h>
 
-static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, uint16_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
+static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, uint32_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
 {
-    char key[8];
-    sprintf(key, "GPU%hu", counter);
+    char cacheKey[8];
+    sprintf(cacheKey, "GPU%u", counter);
 
-    if(ffPrintCachedValue(instance, key))
+    FF_STRBUF_CREATE(key);
+    if(instance->config.gpuKey.length == 0)
+    {
+        ffStrbufAppendF(&key, "GPU %u", counter);
+    }
+    else
+    {
+        ffParseFormatString(&key, &instance->config.gpuKey, 1,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &counter}
+        );
+    }
+
+    if(ffPrintCachedValue(instance, &key, cacheKey))
         return;
 
     char vendor[512];
@@ -37,8 +49,9 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, key, &gpu);
+    ffPrintAndSaveCachedValue(instance, &key, cacheKey, &gpu);
     ffStrbufDestroy(&gpu);
+    ffStrbufDestroy(&key);
 }
 
 void ffPrintGPU(FFinstance* instance)
@@ -50,53 +63,53 @@ void ffPrintGPU(FFinstance* instance)
         pci = dlopen(instance->config.libPCI.chars, RTLD_LAZY);
     if(pci == NULL)
     {
-        ffPrintError(instance, "GPU", "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");
         return;
     }
 
     struct pci_access*(*ffpci_alloc)() = dlsym(pci, "pci_alloc");
     if(ffpci_alloc == NULL)
     {
-        ffPrintError(instance, "GPU", "dlsym(pci, \"pci_alloc\") == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlsym(pci, \"pci_alloc\") == NULL");
         return;
     }
 
     void(*ffpci_init)(struct pci_access*) = dlsym(pci, "pci_init");
     if(ffpci_init == NULL)
     {
-        ffPrintError(instance, "GPU", "dlsym(pci, \"pci_init\") == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlsym(pci, \"pci_init\") == NULL");
         return;
     }
 
     void(*ffpci_scan_bus)(struct pci_access*) = dlsym(pci, "pci_scan_bus");
     if(ffpci_scan_bus == NULL)
     {
-        ffPrintError(instance, "GPU", "dlsym(pci, \"pci_init\") == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlsym(pci, \"pci_init\") == NULL");
         return;
     }
 
     int(*ffpci_fill_info)(struct pci_dev*, int) = dlsym(pci, "pci_fill_info");
     if(ffpci_fill_info == NULL)
     {
-        ffPrintError(instance, "GPU", "dlsym(pci, \"pci_fill_info\") == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlsym(pci, \"pci_fill_info\") == NULL");
         return;
     }
 
     char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...) = dlsym(pci, "pci_lookup_name");
     if(ffpci_lookup_name == NULL)
     {
-        ffPrintError(instance, "GPU", "dlsym(pci, \"pci_lookup_name\") == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlsym(pci, \"pci_lookup_name\") == NULL");
         return;
     }
 
     void(*ffpci_cleanup)(struct pci_access*) = dlsym(pci, "pci_cleanup");
     if(ffpci_cleanup == NULL)
     {
-        ffPrintError(instance, "GPU", "dlsym(pci, \"pci_cleanup\") == NULL");
+        ffPrintError(instance, NULL, "GPU", "dlsym(pci, \"pci_cleanup\") == NULL");
         return;
     }
 
-    uint16_t counter = 0;
+    uint32_t counter = 0;
 
     struct pci_access *pacc;
     struct pci_dev *dev;

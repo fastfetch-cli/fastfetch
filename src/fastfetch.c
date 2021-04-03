@@ -80,10 +80,33 @@ static inline void printHelp()
         "   --battery-format <format>\n"
         "   --locale-format <format>\n"
         "\n"
+        "Key options: Provide a custom key for an output\n"
+        "   --os-key <key>\n"
+        "   --host-key <key>\n"
+        "   --kernel-key <key>\n"
+        "   --uptime-format <key>\n"
+        "   --packages-format <key>\n"
+        "   --shell-format <key>\n"
+        "   --resolution-format <key>\n"
+        "   --de-format <key>\n"
+        "   --wm-format <key>\n"
+        "   --theme-format <key>\n"
+        "   --icons-format <key>\n"
+        "   --font-format <key>\n"
+        "   --terminal-format <key>\n"
+        "   --terminal-font-format <key>\n"
+        "   --cpu-format <key>\n"
+        "   --gpu-format <key>: takes the gpu index as format argument\n"
+        "   --memory-format <key>\n"
+        "   --disk-format <key>: takes the mount path as format argument\n"
+        "   --battery-format <key>: takes the battery index as format argument\n"
+        "   --locale-format <key>\n"
+        "\n"
         "Library optins: Set the path of a library to load\n"
         "   --lib-PCI <path>\n"
         "   --lib-X11 <path>\n"
         "   --lib-Xrandr <path>\n"
+        "\n"
         "Module specific options:\n"
         "   --disk-folders <folders>: A colon seperated list of folder paths for the disk output. Default is \"/:/home\"\n"
         "\n"
@@ -208,45 +231,170 @@ static inline void printCommandHelp(const char* command)
         );
     }
     else if(strcasecmp(command, "host-format") == 0)
-        constructAndPrintCommandHelpFormat("host", "{} {} {}", 3, "Host family", "Host name", "Host version");
+    {
+        constructAndPrintCommandHelpFormat("host", "{} {} {}", 3,
+            "Host family",
+            "Host name",
+            "Host version"
+        );
+    }
     else if(strcasecmp(command, "kernel-format") == 0)
-        constructAndPrintCommandHelpFormat("kernel", "{2}", 3, "Kernel sysname", "Kernel release", "Kernel version");
+    {
+        constructAndPrintCommandHelpFormat("kernel", "{2}", 3,
+            "Kernel sysname",
+            "Kernel release",
+            "Kernel version"
+        );
+    }
     else if(strcasecmp(command, "uptime-format") == 0)
-        constructAndPrintCommandHelpFormat("uptime", "{} days {} hours {} mins", 4, "Days", "Hours", "Minutes", "Seconds");
+    {
+        constructAndPrintCommandHelpFormat("uptime", "{} days {} hours {} mins", 4,
+            "Days",
+            "Hours",
+            "Minutes",
+            "Seconds"
+        );
+    }
     else if(strcasecmp(command, "packages-format") == 0)
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (flatpak)", 3, "Number of all packages", "Number of pacman packages", "Number of flatpak packages");
+    {
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (flatpak)", 3,
+            "Number of all packages",
+            "Number of pacman packages",
+            "Number of flatpak packages"
+        );
+    }
     else if(strcasecmp(command, "shell-format") == 0)
-        constructAndPrintCommandHelpFormat("shell", "{2}", 2, "Shell path (without name)", "Shell name");
+    {
+        constructAndPrintCommandHelpFormat("shell", "{2}", 2,
+            "Shell path (without name)",
+            "Shell name"
+        );
+    }
     else if(strcasecmp(command, "resolution-format") == 0)
-        constructAndPrintCommandHelpFormat("resolution", "{}x{} @ {}Hz", 3, "Screen width", "Screen height", "Screen refresh rate");
+    {
+        constructAndPrintCommandHelpFormat("resolution", "{}x{} @ {}Hz", 3,
+            "Screen width",
+            "Screen height",
+            "Screen refresh rate"
+        );
+    }
     else if(strcasecmp(command, "de-format") == 0)
-        constructAndPrintCommandHelpFormat("de", "{} {} ({})", 3, "DE name", "DE version", "Name of display server");
+    {
+        constructAndPrintCommandHelpFormat("de", "{} {} ({})", 3,
+            "DE name",
+            "DE version",
+            "Name of display server"
+        );
+    }
     else if(strcasecmp(command, "wm-format") == 0)
-        constructAndPrintCommandHelpFormat("wm", "{2}", 2, "WM process name", "WM pretty name");
+    {
+        constructAndPrintCommandHelpFormat("wm", "{2}", 2,
+            "WM process name",
+            "WM pretty name"
+        );
+    }
     else if(strcasecmp(command, "theme-format") == 0)
-        constructAndPrintCommandHelpFormat("theme", "{} [Plasma], {5}", 5, "Plasma theme", "GTK2 theme", "GTK3 theme", "GTK4 theme", "Combined GTK themes");
+    {
+        constructAndPrintCommandHelpFormat("theme", "{} [Plasma], {5}", 5,
+            "Plasma theme",
+            "GTK2 theme",
+            "GTK3 theme",
+            "GTK4 theme",
+            "Combined GTK themes"
+        );
+    }
     else if(strcasecmp(command, "icons-format") == 0)
-        constructAndPrintCommandHelpFormat("icons", "{} [Plasma], {5}", 5, "Plasma icons", "GTK2 icons", "GTK3 icons", "GTK4 icons", "Combined GTK icons");
+    {
+        constructAndPrintCommandHelpFormat("icons", "{} [Plasma], {5}", 5,
+            "Plasma icons",
+            "GTK2 icons",
+            "GTK3 icons",
+            "GTK4 icons",
+            "Combined GTK icons"
+        );
+    }
     else if(strcasecmp(command, "font-format") == 0)
-        constructAndPrintCommandHelpFormat("font", "{} [Plasma], {5}", 5, "Plasma font", "GTK2 font", "GTK3 font", "GTK4 font", "Combined GTK fonts");
+    {
+        constructAndPrintCommandHelpFormat("font", "{} [Plasma], {5}", 5,
+            "Plasma font",
+            "GTK2 font",
+            "GTK3 font",
+            "GTK4 font",
+            "Combined GTK fonts"
+        );
+    }
     else if(strcasecmp(command, "terminal-format") == 0)
-        constructAndPrintCommandHelpFormat("terminal", "{3}", 3, "Terminal executable name", "Terminal process name", "Terminal name");
+    {
+        constructAndPrintCommandHelpFormat("terminal", "{3}", 3,
+            "Terminal executable name",
+            "Terminal process name",
+            "Terminal name"
+        );
+    }
     else if(strcasecmp(command, "terminal-font-format") == 0)
-        constructAndPrintCommandHelpFormat("terminal-font", "{}", 1, "Terminal font name");
+    {
+        constructAndPrintCommandHelpFormat("terminal-font", "{}", 1,
+            "Terminal font name"
+        );
+    }
     else if(strcasecmp(command, "cpu-format") == 0)
-        constructAndPrintCommandHelpFormat("cpu", "{2} ({4}) @ {7}GHz", 11, "CPU name", "Prettified CPU name", "CPU Vendor name (Vendor ID)", "CPU logical core count online", "CPU logical core count configured", "CPU physical core count", "frequency bios limit", "frequency scaling max", "frequency scaling min", "frequency info max", "frequency info min");
+    {
+        constructAndPrintCommandHelpFormat("cpu", "{2} ({4}) @ {7}GHz", 11,
+            "CPU name",
+            "Prettified CPU name",
+            "CPU Vendor name (Vendor ID)",
+            "CPU logical core count online",
+            "CPU logical core count configured",
+            "CPU physical core count",
+            "frequency bios limit",
+            "frequency scaling max",
+            "frequency scaling min",
+            "frequency info max",
+            "frequency info min"
+        );
+    }
     else if(strcasecmp(command, "gpu-format") == 0)
-        constructAndPrintCommandHelpFormat("gpu", "{} {}", 2, "GPU vendor", "GPU name");
+    {
+        constructAndPrintCommandHelpFormat("gpu", "{} {}", 2,
+            "GPU vendor",
+            "GPU name"
+        );
+    }
     else if(strcasecmp(command, "memory-format") == 0)
-        constructAndPrintCommandHelpFormat("memory", "{}MiB / {}MiB ({}%)", 3, "Used memory", "Total memory", "Used memory percentage");
+    {
+        constructAndPrintCommandHelpFormat("memory", "{}MiB / {}MiB ({}%)", 3,
+            "Used memory",
+            "Total memory",
+            "Used memory percentage"
+        );
+    }
     else if(strcasecmp(command, "disk-format") == 0)
-        constructAndPrintCommandHelpFormat("disk", "{}GB / {}GB ({4}%)", 4, "Used disk space", "Total disk space", "Number of files", "Used disk space percentage");
+    {
+        constructAndPrintCommandHelpFormat("disk", "{}GB / {}GB ({4}%)", 4,
+            "Used disk space",
+            "Total disk space",
+            "Number of files",
+            "Used disk space percentage"
+        );
+    }
     else if(strcasecmp(command, "battery-format") == 0)
-        constructAndPrintCommandHelpFormat("battery", "{} {} ({}) [{}%; {}]", 5, "Battery manufactor", "Battery model", "Battery technology", "Battery capacity", "Battery status");
+    {
+        constructAndPrintCommandHelpFormat("battery", "{} {} ({}) [{}%; {}]", 5,
+            "Battery manufactor",
+            "Battery model",
+            "Battery technology",
+            "Battery capacity",
+            "Battery status"
+        );
+    }
     else if(strcasecmp(command, "locale-format") == 0)
-        constructAndPrintCommandHelpFormat("locale", "{}", 1, "Locale code");
+    {
+        constructAndPrintCommandHelpFormat("locale", "{}", 1,
+            "Locale code"
+        );
+    }
     else
-        printf("No specific help for command %s provided\n", command);
+        fprintf(stderr, "No specific help for command %s provided\n", command);
 }
 
 static inline bool optionParseBoolean(const char* str)
@@ -265,9 +413,10 @@ static inline void optionParseString(const char* key, const char* value, FFstrbu
 {
     if(value == NULL)
     {
-        printf("Error: usage: %s <str>\n", key);
+        fprintf(stderr, "Error: usage: %s <str>\n", key);
         exit(477);
     }
+    ffStrbufEnsureCapacity(buffer, 64); //This is not needed as ffStrbufSetS will resize capacity if needed, but giving an higher start should improve performance
     ffStrbufSetS(buffer, value);
 }
 
@@ -316,12 +465,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         if(value == NULL)
         {
-            printf("Error: usage: %s <width>\n", key);
+            fprintf(stderr, "Error: usage: %s <width>\n", key);
             exit(404);
         }
         if(sscanf(value, "%hd", &instance->config.logo_spacing) != 1)
         {
-            printf("Error: couldn't parse %s to uint16_t\n", value);
+            fprintf(stderr, "Error: couldn't parse %s to uint16_t\n", value);
             exit(405);
         }
     }
@@ -329,12 +478,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         if(value == NULL)
         {
-            printf("Error: usage: %s <offset>\n", key);
+            fprintf(stderr, "Error: usage: %s <offset>\n", key);
             exit(408);
         }
         if(sscanf(value, "%hi", &instance->config.offsetx) != 1)
         {
-            printf("Error: couldn't parse %s to int16_t\n", value);
+            fprintf(stderr, "Error: couldn't parse %s to int16_t\n", value);
             exit(409);
         }
     }
@@ -342,7 +491,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         if(value == NULL)
         {
-            printf("Error: usage: %s <key=value>\n", key);
+            fprintf(stderr, "Error: usage: %s <key=value>\n", key);
             exit(411);
         }
 
@@ -350,7 +499,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
         if(seperator == NULL)
         {
-            printf("Error: usage: %s <key=value>, '=' missing\n", key);
+            fprintf(stderr, "Error: usage: %s <key=value>, '=' missing\n", key);
             exit(412);
         }
 
@@ -380,44 +529,84 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.color);
     else if(strcasecmp(key, "--os-format") == 0)
         optionParseString(key, value, &instance->config.osFormat);
+    else if(strcasecmp(key, "--os-key") == 0)
+        optionParseString(key, value, &instance->config.osKey);
     else if(strcasecmp(key, "--host-format") == 0)
         optionParseString(key, value, &instance->config.hostFormat);
+    else if(strcasecmp(key, "--host-key") == 0)
+        optionParseString(key, value, &instance->config.hostKey);
     else if(strcasecmp(key, "--kernel-format") == 0)
         optionParseString(key, value, &instance->config.kernelFormat);
+    else if(strcasecmp(key, "--kernel-key") == 0)
+        optionParseString(key, value, &instance->config.kernelKey);
     else if(strcasecmp(key, "--uptime-format") == 0)
         optionParseString(key, value, &instance->config.uptimeFormat);
+    else if(strcasecmp(key, "--uptime-key") == 0)
+        optionParseString(key, value, &instance->config.uptimeKey);
     else if(strcasecmp(key, "--packages-format") == 0)
         optionParseString(key, value, &instance->config.packagesFormat);
+    else if(strcasecmp(key, "--packages-key") == 0)
+        optionParseString(key, value, &instance->config.packagesKey);
     else if(strcasecmp(key, "--shell-format") == 0)
         optionParseString(key, value, &instance->config.shellFormat);
+    else if(strcasecmp(key, "--shell-key") == 0)
+        optionParseString(key, value, &instance->config.shellKey);
     else if(strcasecmp(key, "--resolution-format") == 0)
         optionParseString(key, value, &instance->config.resolutionFormat);
+    else if(strcasecmp(key, "--resolution-key") == 0)
+        optionParseString(key, value, &instance->config.resolutionKey);
     else if(strcasecmp(key, "--de-format") == 0)
         optionParseString(key, value, &instance->config.deFormat);
+    else if(strcasecmp(key, "--de-key") == 0)
+        optionParseString(key, value, &instance->config.deKey);
     else if(strcasecmp(key, "--wm-format") == 0)
         optionParseString(key, value, &instance->config.wmFormat);
+    else if(strcasecmp(key, "--wm-key") == 0)
+        optionParseString(key, value, &instance->config.wmKey);
     else if(strcasecmp(key, "--theme-format") == 0)
         optionParseString(key, value, &instance->config.themeFormat);
+    else if(strcasecmp(key, "--theme-key") == 0)
+        optionParseString(key, value, &instance->config.themeKey);
     else if(strcasecmp(key, "--icons-format") == 0)
         optionParseString(key, value, &instance->config.iconsFormat);
+    else if(strcasecmp(key, "--icons-key") == 0)
+        optionParseString(key, value, &instance->config.iconsKey);
     else if(strcasecmp(key, "--font-format") == 0)
         optionParseString(key, value, &instance->config.fontFormat);
+    else if(strcasecmp(key, "--font-key") == 0)
+        optionParseString(key, value, &instance->config.fontKey);
     else if(strcasecmp(key, "--terminal-format") == 0)
         optionParseString(key, value, &instance->config.terminalFormat);
+    else if(strcasecmp(key, "--terminal-key") == 0)
+        optionParseString(key, value, &instance->config.terminalKey);
     else if(strcasecmp(key, "--terminal-font-format") == 0)
         optionParseString(key, value, &instance->config.termFontFormat);
+    else if(strcasecmp(key, "--terminal-font-key") == 0)
+        optionParseString(key, value, &instance->config.termFontKey);
     else if(strcasecmp(key, "--cpu-format") == 0)
         optionParseString(key, value, &instance->config.cpuFormat);
+    else if(strcasecmp(key, "--cpu-key") == 0)
+        optionParseString(key, value, &instance->config.cpuKey);
     else if(strcasecmp(key, "--gpu-format") == 0)
         optionParseString(key, value, &instance->config.gpuFormat);
+    else if(strcasecmp(key, "--gpu-key") == 0)
+        optionParseString(key, value, &instance->config.gpuKey);
     else if(strcasecmp(key, "--memory-format") == 0)
         optionParseString(key, value, &instance->config.memoryFormat);
+    else if(strcasecmp(key, "--memory-key") == 0)
+        optionParseString(key, value, &instance->config.memoryKey);
     else if(strcasecmp(key, "--disk-format") == 0)
         optionParseString(key, value, &instance->config.diskFormat);
+    else if(strcasecmp(key, "--disk-key") == 0)
+        optionParseString(key, value, &instance->config.diskKey);
     else if(strcasecmp(key, "--battery-format") == 0)
         optionParseString(key, value, &instance->config.batteryFormat);
+    else if(strcasecmp(key, "--battery-key") == 0)
+        optionParseString(key, value, &instance->config.batteryKey);
     else if(strcasecmp(key, "--locale-format") == 0)
         optionParseString(key, value, &instance->config.localeFormat);
+    else if(strcasecmp(key, "--locale-key") == 0)
+        optionParseString(key, value, &instance->config.localeKey);
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-X11") == 0)
@@ -428,7 +617,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.diskFolders);
     else
     {
-        printf("Error: unknown option: %s\n", key);
+        fprintf(stderr, "Error: unknown option: %s\n", key);
         exit(400);
     }
 }
@@ -616,7 +805,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else
-        ffPrintError(instance, line, "<no implementaion provided>");
+        ffPrintError(instance, NULL, line, "<no implementaion provided>");
 }
 
 static void run(FFinstance* instance, FFdata* data)

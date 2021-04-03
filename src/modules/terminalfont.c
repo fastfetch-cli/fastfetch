@@ -4,12 +4,12 @@ static void printTerminalFont(FFinstance* instance, char* font)
 {
     if(instance->config.termFontFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "Terminal font");
+        ffPrintLogoAndKey(instance, &instance->config.termFontKey, "Terminal font");
         puts(font);
     }
     else
     {
-        ffPrintFormatString(instance, "Terminal font", &instance->config.termFontFormat, 1,
+        ffPrintFormatString(instance, &instance->config.termFontKey, "Terminal font", &instance->config.termFontFormat, 1,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font}
         );
     }
@@ -21,7 +21,7 @@ static void printKonsole(FFinstance* instance)
     ffParsePropFileHome(instance, ".config/konsolerc", "DefaultProfile=%[^\n]", profile);
     if(profile[0] == '\0')
     {
-        ffPrintError(instance, "Terminal Font", "Couldn't find \"DefaultProfile=%[^\n]\" in \".config/konsolerc\"");
+        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Couldn't find \"DefaultProfile=%[^\n]\" in \".config/konsolerc\"");
         return;
     }
 
@@ -32,7 +32,7 @@ static void printKonsole(FFinstance* instance)
     ffParsePropFileHome(instance, profilePath, "Font=%[^\n]", font);
     if(font[0] == '\0')
     {
-        ffPrintError(instance, "Terminal Font", "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
+        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
         return;
     }
 
@@ -61,7 +61,7 @@ void ffPrintTerminalFont(FFinstance* instance)
     if(error->length > 0)
     {
         if(instance->config.termFontFormat.length == 0)
-            ffPrintError(instance, "Terminal Font", "Terminal Font needs successfull terminal detection");
+            ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Terminal Font needs successfull terminal detection");
         else
             printTerminalFont(instance, "");
 
@@ -77,6 +77,6 @@ void ffPrintTerminalFont(FFinstance* instance)
         if(instance->config.termFontFormat.length > 0)
             printTerminalFont(instance, "");
         else
-            ffPrintError(instance, "Terminal Font", "Unknown terminal: %s", error->chars);
+            ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Unknown terminal: %s", error->chars);
     }
 }

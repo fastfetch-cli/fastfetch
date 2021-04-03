@@ -47,25 +47,45 @@ typedef struct FFconfig
     bool printRemainingLogo;
 
     FFstrbuf osFormat;
+    FFstrbuf osKey;
     FFstrbuf hostFormat;
+    FFstrbuf hostKey;
     FFstrbuf kernelFormat;
+    FFstrbuf kernelKey;
     FFstrbuf uptimeFormat;
+    FFstrbuf uptimeKey;
     FFstrbuf packagesFormat;
+    FFstrbuf packagesKey;
     FFstrbuf shellFormat;
+    FFstrbuf shellKey;
     FFstrbuf resolutionFormat;
+    FFstrbuf resolutionKey;
     FFstrbuf deFormat;
+    FFstrbuf deKey;
     FFstrbuf wmFormat;
+    FFstrbuf wmKey;
     FFstrbuf themeFormat;
+    FFstrbuf themeKey;
     FFstrbuf iconsFormat;
+    FFstrbuf iconsKey;
     FFstrbuf fontFormat;
+    FFstrbuf fontKey;
     FFstrbuf terminalFormat;
+    FFstrbuf terminalKey;
     FFstrbuf termFontFormat;
+    FFstrbuf termFontKey;
     FFstrbuf cpuFormat;
+    FFstrbuf cpuKey;
     FFstrbuf gpuFormat;
+    FFstrbuf gpuKey;
     FFstrbuf memoryFormat;
+    FFstrbuf memoryKey;
     FFstrbuf diskFormat;
+    FFstrbuf diskKey;
     FFstrbuf batteryFormat;
+    FFstrbuf batteryKey;
     FFstrbuf localeFormat;
+    FFstrbuf localeKey;
 
     FFstrbuf libPCI;
     FFstrbuf libX11;
@@ -102,26 +122,26 @@ typedef enum FFformatargtype
 typedef struct FFformatarg
 {
     FFformatargtype type;
-    void* value;
+    const void* value;
 } FFformatarg;
 
-//Util functions
+//Common functions
 void ffInitState(FFstate* state);
 void ffDefaultConfig(FFconfig* config);
-void ffPrintKey(FFconfig* config, const char* key);
-void ffPrintLogoAndKey(FFinstance* instance, const char* key);
+void ffPrintKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
+void ffPrintLogoAndKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
+void ffPrintError(FFinstance* instance, FFstrbuf* customKey, const char* defKey, const char* message, ...);
+bool ffPrintCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
+void ffPrintAndSaveCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* value);
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
-void ffParseFont(char* font, char* buffer);
-void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4);
-void ffPrintError(FFinstance* instance, const char* key, const char* message, ...);
-bool ffPrintCachedValue(FFinstance* instance, const char* key);
-void ffPrintAndSaveCachedValue(FFinstance* instance, const char* key, FFstrbuf* value);
 void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp);
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
-void ffPrintFormatString(FFinstance* instance, const char* key, FFstrbuf* formatstr, uint32_t numArgs, ...);
+void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...);
+void ffParseFont(char* font, char* buffer);
+void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4);
 void ffFinish(FFinstance* instance);
 
 //Logo functions

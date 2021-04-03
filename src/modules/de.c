@@ -42,11 +42,11 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     {
         if(sessionDesktop.length == 0 && sessionType.length == 0)
         {
-            ffPrintError(instance, "DE", "Neither DE nor Display Server could be determined");
+            ffPrintError(instance, &instance->config.deKey, "DE", "Neither DE nor Display Server could be determined");
             return;
         }
 
-        ffPrintLogoAndKey(instance, "DE");
+        ffPrintLogoAndKey(instance, &instance->config.deKey, "DE");
 
         if(sessionDesktop.length > 0)
         {
@@ -69,7 +69,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, "DE", &instance->config.deFormat, 3,
+        ffPrintFormatString(instance, &instance->config.deFormat, "DE", &instance->config.deFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionDesktop},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionVersion},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionType}

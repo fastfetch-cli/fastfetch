@@ -5,7 +5,7 @@ void ffPrintMemory(FFinstance* instance)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL) {
-        ffPrintError(instance, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");
+        ffPrintError(instance, &instance->config.memoryKey, "Memory", "fopen(\"/proc/meminfo\", \"r\") == NULL");
         return;
     }
 
@@ -32,12 +32,12 @@ void ffPrintMemory(FFinstance* instance)
 
     if(instance->config.memoryFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "Memory");
+        ffPrintLogoAndKey(instance, &instance->config.memoryKey, "Memory");
         printf("%uMiB / %uMiB (%u%%)\n", used_mem, total_mem, percentage);
     }
     else
     {
-        ffPrintFormatString(instance, "Memory", &instance->config.memoryFormat, 3,
+        ffPrintFormatString(instance, &instance->config.memoryKey, "Memory", &instance->config.memoryFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &used_mem},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &total_mem},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &percentage}

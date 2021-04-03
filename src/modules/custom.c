@@ -2,6 +2,6 @@
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value)
 {
-    ffPrintLogoAndKey(instance, key);
+    ffPrintLogoAndKey(instance, NULL, key);
     puts(value);
 }

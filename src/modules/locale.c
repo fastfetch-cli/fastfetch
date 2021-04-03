@@ -2,7 +2,7 @@
 
 void ffPrintLocale(FFinstance* instance)
 {
-	if(ffPrintCachedValue(instance, "Locale"))
+	if(ffPrintCachedValue(instance, &instance->config.localeKey, "Locale"))
 		return;
 
 	char localeCode[256];
@@ -30,7 +30,7 @@ void ffPrintLocale(FFinstance* instance)
 			strcpy(localeCode, getenv("LC_MESSAGES"));
 		/* User has broken system */
 		else
-			ffPrintError(instance, "Locale", "Locale not found!");
+			ffPrintError(instance, &instance->config.localeKey, "Locale", "Locale not found!");
 		/* /etc/locale.conf exists */
 	} else {
 		ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", localeCode);
@@ -52,6 +52,6 @@ void ffPrintLocale(FFinstance* instance)
 		);
 	}
 
-	ffPrintAndSaveCachedValue(instance, "Locale", &locale);
+	ffPrintAndSaveCachedValue(instance, &instance->config.localeKey, "Locale", &locale);
 	ffStrbufDestroy(&locale);
 }

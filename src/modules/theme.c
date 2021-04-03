@@ -25,7 +25,7 @@ void ffPrintTheme(FFinstance* instance)
 
     if(instance->config.themeFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "Theme");
+        ffPrintLogoAndKey(instance, &instance->config.themeKey, "Theme");
 
         if(plasma[0] != '\0')
             printf("%s [Plasma], ", plasma);
@@ -34,7 +34,7 @@ void ffPrintTheme(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, "Theme", &instance->config.themeFormat, 5,
+        ffPrintFormatString(instance, &instance->config.themeKey, "Theme", &instance->config.themeFormat, 5,
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3},

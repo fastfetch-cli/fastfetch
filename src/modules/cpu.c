@@ -20,7 +20,7 @@ static double getGhz(const char* file)
 
 void ffPrintCPU(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, "CPU"))
+    if(ffPrintCachedValue(instance, &instance->config.cpuKey, "CPU"))
         return;
 
     char name[256];   name[0] = '\0';
@@ -100,7 +100,7 @@ void ffPrintCPU(FFinstance* instance)
             ffStrbufAppendS(&cpu, " unknwon processor");
         else
         {
-            ffPrintError(instance, "CPU", "No CPU info found in /proc/cpuinfo");
+            ffPrintError(instance, &instance->config.cpuKey, "CPU", "No CPU info found in /proc/cpuinfo");
             ffStrbufDestroy(&cpu);
             ffStrbufDestroy(&namePretty);
             return;
@@ -129,7 +129,7 @@ void ffPrintCPU(FFinstance* instance)
         );
     }
 
-    ffPrintAndSaveCachedValue(instance, "CPU", &cpu);
+    ffPrintAndSaveCachedValue(instance, &instance->config.cpuKey, "CPU", &cpu);
     ffStrbufDestroy(&cpu);
 
     ffStrbufDestroy(&namePretty);

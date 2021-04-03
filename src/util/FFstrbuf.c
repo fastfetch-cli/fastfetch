@@ -88,6 +88,8 @@ void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t allocate)
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 {
     uint32_t allocate = strbuf->allocated;
+    if(allocate < 2)
+        allocate = 2;
     while((strbuf->length + free) > allocate)
         allocate *= 2;
     ffStrbufEnsureCapacity(strbuf, allocate);

@@ -34,11 +34,11 @@ void ffPrintPackages(FFinstance* instance)
     {
         if(all == 0)
         {
-            ffPrintError(instance, "Packages", "No packages from known package managers found");
+            ffPrintError(instance,  &instance->config.packagesKey, "Packages", "No packages from known package managers found");
             return;
         }
 
-        ffPrintLogoAndKey(instance, "Packages");
+        ffPrintLogoAndKey(instance, &instance->config.packagesKey, "Packages");
 
         #define FF_PRINT_PACKAGE(name) \
         if(name > 0) \
@@ -57,7 +57,7 @@ void ffPrintPackages(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, "Packages", &instance->config.packagesFormat, 3,
+        ffPrintFormatString(instance, &instance->config.packagesKey, "Packages", &instance->config.packagesFormat, 3,
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &pacman},
             (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}
