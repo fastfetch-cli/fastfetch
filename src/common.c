@@ -134,7 +134,7 @@ static const FFstrbuf* getCacheDir(FFinstance* instance)
     if(init)
         return &cacheDir;
 
-    ffStrbufInitS(&cacheDir, getenv("XDG_CACHE_HOME"));
+    ffStrbufInitAS(&cacheDir, 64, getenv("XDG_CACHE_HOME"));
 
     if(cacheDir.length == 0)
     {
@@ -161,7 +161,8 @@ bool ffPrintCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* d
     ffStrbufAppend(&cacheFile, getCacheDir(instance));
     ffStrbufAppendS(&cacheFile, defKey);
 
-    FF_STRBUF_CREATE(value);
+    FFstrbuf value;
+    ffStrbufInitA(&value, 128);
     ffGetFileContent(cacheFile.chars, &value);
 
     ffStrbufDestroy(&cacheFile);
@@ -232,7 +233,8 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
 {
-    FF_STRBUF_CREATE(absolutePath);
+    FFstrbuf absolutePath;
+    ffStrbufInitA(&absolutePath, 64);
     ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
     ffStrbufAppendC(&absolutePath, '/');
     ffStrbufAppendS(&absolutePath, relativeFile);

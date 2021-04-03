@@ -35,7 +35,8 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     char name[512];
     ffpci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
 
-    FF_STRBUF_CREATE(gpu);
+    FFstrbuf gpu;
+    ffStrbufInitA(&gpu, 128);
 
     if(instance->config.gpuFormat.length == 0)
     {

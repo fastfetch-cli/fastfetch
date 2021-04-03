@@ -624,7 +624,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseConfigFile(FFinstance* instance, FFdata* data)
 {
-    FF_STRBUF_CREATE(filename);
+    FFstrbuf filename;
+    ffStrbufInitA(&filename, 64);
 
     const char* xdgConfig = getenv("XDG_CONFIG_HOME");
     if(xdgConfig == NULL)
@@ -657,10 +658,12 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
     size_t len = 0;
     ssize_t read;
 
+    FFstrbuf line;
+    ffStrbufInitA(&line, 128); //The default structure line needs this size
+
     while ((read = getline(&lineStart, &len, file)) != -1)
     {
-        FFstrbuf line;
-        ffStrbufInitS(&line, lineStart);
+        ffStrbufSetS(&line, lineStart);
         ffStrbufTrimRight(&line, '\n');
         ffStrbufTrim(&line, ' ');
 
@@ -698,8 +701,9 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
         }
 
         parseOption(instance, data, line.chars, valueStart);
-        ffStrbufDestroy(&line);
     }
+
+    ffStrbufDestroy(&line);
 
     if(lineStart != NULL)
         free(lineStart);
@@ -833,8 +837,8 @@ int main(int argc, const char** argv)
 
     FFdata data;
     ffValuestoreInit(&data.valuestore);
-    ffStrbufInit(&data.structure);
-    ffStrbufInitA(&data.logoName, 2048);
+    ffStrbufInitA(&data.structure, 256);
+    ffStrbufInit(&data.logoName);
 
     parseConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);

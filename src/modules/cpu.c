@@ -49,7 +49,7 @@ void ffPrintCPU(FFinstance* instance)
     fclose(cpuinfo);
 
     FFstrbuf namePretty;
-    ffStrbufInitA(&namePretty, 256);
+    ffStrbufInitA(&namePretty, 64);
     ffStrbufAppendS(&namePretty, name);
     ffStrbufRemoveStrings(&namePretty, 11,
         "(R)", "(r)", "(TM)", "(tm)", " CPU", " FPU", " Processor", " Dual-Core", " Quad-Core", " Six-Core", " Eight-Core"
@@ -66,7 +66,8 @@ void ffPrintCPU(FFinstance* instance)
     int numProcsOnline = get_nprocs();
     int numProcsAvailable = get_nprocs_conf();
 
-    FF_STRBUF_CREATE(cpu);
+    FFstrbuf cpu;
+    ffStrbufInitA(&cpu, 128);
 
     if(instance->config.cpuFormat.length == 0)
     {

@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define FASTFETCH_STRBUF_DEFAULT_ALLOC 64
+#define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
 typedef struct FFstrbuf
 {
