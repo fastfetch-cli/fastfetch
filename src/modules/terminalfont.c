@@ -1,18 +1,30 @@
 #include "fastfetch.h"
 
-static void printTerminalFont(FFinstance* instance, char* font)
+static void printTerminalFont(FFinstance* instance, const char* font)
 {
+    FF_STRBUF_CREATE(name);
+    double size;
+    ffParseFont(font, &name, &size);
+    FF_STRBUF_CREATE(pretty);
+    ffFontPretty(&pretty, &name, size);
+
     if(instance->config.termFontFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, &instance->config.termFontKey, "Terminal font");
-        puts(font);
+        ffStrbufPutTo(&pretty, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.termFontKey, "Terminal font", &instance->config.termFontFormat, 1,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font}
+        ffPrintFormatString(instance, &instance->config.termFontKey, "Terminal font", &instance->config.termFontFormat, 4,
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &size},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &pretty}
         );
     }
+
+    ffStrbufDestroy(&name);
+    ffStrbufDestroy(&pretty);
 }
 
 static void printKonsole(FFinstance* instance)
@@ -36,10 +48,7 @@ static void printKonsole(FFinstance* instance)
         return;
     }
 
-    char fontPretty[128];
-    ffParseFont(font, fontPretty);
-
-    printTerminalFont(instance, fontPretty);
+    printTerminalFont(instance, font);
 }
 
 static void printTTY(FFinstance* instance)

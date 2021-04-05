@@ -324,12 +324,24 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "font-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("font", "{} [Plasma], {5}", 5,
-            "Plasma font",
-            "GTK2 font",
-            "GTK3 font",
-            "GTK4 font",
-            "Combined GTK fonts"
+        constructAndPrintCommandHelpFormat("font", "{4}, {17}", 17,
+            "Plasma as in resource file",
+            "Plasma name",
+            "Plasma size",
+            "Plasma name and size pretty together",
+            "GTK2 as in resource file",
+            "GTK2 name",
+            "GTK2 size",
+            "GTK2 name and size pretty together",
+            "GTK3 as in resource file",
+            "GTK3 name",
+            "GTK3 size",
+            "GTK3 name and size pretty together",
+            "GTK4 as in resource file",
+            "GTK4 name",
+            "GTK4 size",
+            "GTK4 name and size pretty together",
+            "GTK 2/3/4 name and size pretty together"
         );
     }
     else if(strcasecmp(command, "terminal-format") == 0)
@@ -342,8 +354,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "terminal-font-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("terminal-font", "{}", 1,
-            "Terminal font name"
+        constructAndPrintCommandHelpFormat("terminal-font", "{4}", 4,
+            "Terminal font as in resource file",
+            "Terminal font name",
+            "Termianl font size",
+            "Terminal font name and size pretty together"
         );
     }
     else if(strcasecmp(command, "cpu-format") == 0)

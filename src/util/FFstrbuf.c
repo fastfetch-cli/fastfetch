@@ -431,6 +431,11 @@ bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start)
     return true;
 }
 
+void ffStrbufRecalculateLength(FFstrbuf* strbuf)
+{
+    for(strbuf->length = 0; strbuf->chars[strbuf->length] != '\0'; ++strbuf->length);
+}
+
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);

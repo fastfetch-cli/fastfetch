@@ -142,8 +142,8 @@ void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
 void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp);
 void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
 void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...);
-void ffParseFont(char* font, char* buffer);
-void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4);
+void ffParseFont(const char* font, FFstrbuf* name, double* size);
+void ffFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 void ffFinish(FFinstance* instance);
 
 //Logo functions
@@ -156,6 +156,14 @@ void ffPrintRemainingLogo(FFinstance* instance);
 void ffListLogos();
 void ffPrintLogos(bool color);
 #endif
+
+//Helper functions
+
+void ffCalculateGTK2(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+void ffCalculateGTK4(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+void ffCalculateGTK3(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+
+void ffFormatGtkPretty(FFstrbuf* buffer, FFstrbuf* gtk2, FFstrbuf* gtk3, FFstrbuf* gtk4);
 
 //Module functions
 

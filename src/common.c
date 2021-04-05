@@ -357,7 +357,7 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
         else if(arg.type == FF_FORMAT_ARG_TYPE_STRBUF)
             ffStrbufAppend(buffer, (FFstrbuf*)arg.value);
         else if(arg.type == FF_FORMAT_ARG_TYPE_DOUBLE)
-            ffStrbufAppendF(buffer, "%.9g", *(double*)arg.value);
+            ffStrbufAppendF(buffer, "%g", *(double*)arg.value);
         else
         {
             fprintf(stderr, "Error: format string \"%s\" argument is not implemented\n", formatstr->chars);
@@ -398,62 +398,25 @@ void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* 
     ffStrbufDestroy(&buffer);
 }
 
-static inline bool strSet(const char* str)
+void ffParseFont(const char* font, FFstrbuf* name, double* size)
 {
-    return str != NULL && str[0] != '\0';
-}
+    ffStrbufEnsureCapacity(name, 32);
 
-void ffFormatGtkPretty(FFstrbuf* buffer, const char* gtk2, const char* gtk3, const char* gtk4)
-{
-    if(strSet(gtk2) && strSet(gtk3) && strSet(gtk4))
-    {
-        if((strcmp(gtk2, gtk3) == 0) && (strcmp(gtk2, gtk4) == 0))
-            ffStrbufSetF(buffer, "%s [GTK2/3/4]", gtk2);
-        else if(strcmp(gtk2, gtk3) == 0)
-            ffStrbufSetF(buffer, "%s [GTK2/3], %s [GTK4]", gtk2, gtk4);
-        else if(strcmp(gtk3, gtk4) == 0)
-            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3/4]", gtk2, gtk3);
-        else
-            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3], %s [GTK4]", gtk2, gtk3, gtk4);
-    }
-    else if(strSet(gtk2) && strSet(gtk3))
-    {
-        if(strcmp(gtk2, gtk3) == 0)
-            ffStrbufSetF(buffer, "%s [GTK2/3]", gtk2);
-        else
-            ffStrbufSetF(buffer, "%s [GTK2], %s [GTK3]", gtk2, gtk3);
-    }
-    else if(strSet(gtk3) && strSet(gtk4))
-    {
-        if(strcmp(gtk3, gtk4) == 0)
-            ffStrbufSetF(buffer, "%s [GTK3/4]", gtk3);
-        else
-            ffStrbufSetF(buffer, "%s [GTK3], %s [GTK4]", gtk3, gtk4);
-    }
-    else if(strSet(gtk2))
-    {
-        ffStrbufSetF(buffer, "%s [GTK2]", gtk2);
-    }
-    else if(strSet(gtk3))
-    {
-        ffStrbufSetF(buffer, "%s [GTK3]", gtk3);
-    }
-    else if(strSet(gtk4))
-    {
-        ffStrbufSetF(buffer, "%s [GTK4]", gtk4);
-    }
-}
+    int scanned = sscanf(font, "%[^,], %lf", name->chars, size);
 
-void ffParseFont(char* font, char* buffer)
-{
-    char name[64];
-    char size[32];
-    int scanned = sscanf(font, "%[^,], %[^,]", name, size);
+    ffStrbufRecalculateLength(name);
+
+    if(scanned < 2)
+        *size = 0.0;
 
     if(scanned == 0)
-        strcpy(buffer, font);
-    else if(scanned == 1)
-        strcpy(buffer, name);
-    else
-        sprintf(buffer, "%s (%spt)", name, size);
+        ffStrbufSetS(name, font);
+}
+
+void ffFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size)
+{
+    ffStrbufAppend(buffer, name);
+    ffStrbufAppendS(buffer, " (");
+    ffStrbufAppendF(buffer, "%g", size);
+    ffStrbufAppendS(buffer, "pt)");
 }

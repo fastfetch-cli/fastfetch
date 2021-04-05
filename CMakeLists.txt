@@ -34,6 +34,7 @@ set(SRCS
     src/common.c
     src/logo.c
     src/util/FFstrbuf.c
+    src/helpers/gtk.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
