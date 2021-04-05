@@ -10,22 +10,32 @@ static int getCurrentRate(FFinstance* instance, Display* display)
         xrandr = dlopen("libXrandr.so", RTLD_LAZY);
     else
         xrandr = dlopen(instance->config.libXrandr.chars, RTLD_LAZY);
+
     if(xrandr == NULL)
         return 0;
 
-    Window root = RootWindow(display, 0);
-
     XRRScreenConfiguration*(*ffXRRGetScreenInfo)(Display*, Window) = dlsym(xrandr, "XRRGetScreenInfo");
     if(ffXRRGetScreenInfo == NULL)
+    {
+        dlclose(xrandr);
         return 0;
+    }
 
     short(*ffXRRConfigCurrentRate)(XRRScreenConfiguration*) = dlsym(xrandr, "XRRConfigCurrentRate");
     if(ffXRRConfigCurrentRate == NULL)
+    {
+        dlclose(xrandr);
         return 0;
+    }
+
+    Window root = RootWindow(display, 0);
 
     XRRScreenConfiguration* xrrscreenconf = ffXRRGetScreenInfo(display, root);
     if(xrrscreenconf == NULL)
+    {
+        dlclose(xrandr);
         return 0;
+    }
 
     short currentRate = ffXRRConfigCurrentRate(xrrscreenconf);
 
@@ -48,6 +58,7 @@ void ffPrintResolution(FFinstance* instance)
         x11 = dlopen("libX11.so", RTLD_LAZY);
     else
         x11 = dlopen(instance->config.libX11.chars, RTLD_LAZY);
+
     if(x11 == NULL)
     {
         ffPrintError(instance, &instance->config.resolutionFormat, "Resolution", "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
@@ -57,6 +68,7 @@ void ffPrintResolution(FFinstance* instance)
     Display*(*ffXOpenDisplay)(const char*) = dlsym(x11, "XOpenDisplay");
     if(ffXOpenDisplay == NULL)
     {
+        dlclose(x11);
         ffPrintError(instance, &instance->config.resolutionFormat, "Resolution", "dlsym(x11, \"XOpenDisplay\") == NULL");
         return;
     }
@@ -64,6 +76,7 @@ void ffPrintResolution(FFinstance* instance)
     Display* display = ffXOpenDisplay(NULL);
     if(display == NULL)
     {
+        dlclose(x11);
         ffPrintError(instance, &instance->config.resolutionFormat, "Resolution", "ffXOpenDisplay(NULL) == NULL");
         return;
     }

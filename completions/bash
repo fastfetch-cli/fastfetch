@@ -176,6 +176,7 @@ __fastfetch_completion()
         "--lib-PCI"
         "--lib-X11"
         "--lib-Xrandr"
+        "--lib-DConf"
     )
 
     local FF_OPTIONS_LOGO=(

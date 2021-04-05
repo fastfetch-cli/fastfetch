@@ -75,6 +75,7 @@ void ffDefaultConfig(FFconfig* config)
     ffStrbufInitA(&config->libPCI, 1);
     ffStrbufInitA(&config->libX11, 1);
     ffStrbufInitA(&config->libXrandr, 1);
+    ffStrbufInitA(&config->libDConf, 1);
 
     ffStrbufInitA(&config->diskFolders, 1);
 }

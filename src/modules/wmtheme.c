@@ -37,7 +37,7 @@ void ffPrintWMTheme(FFinstance* instance)
 
     if(wmName->length == 0)
     {
-        ffPrintError(instance, &instance->config.wmThemeKey, "WM Theme", "WM Theme needs sucessfull wm detection");
+        ffPrintError(instance, &instance->config.wmThemeKey, "WM Theme", "WM Theme needs sucessfull WM detection");
         return;
     }
 

@@ -1,5 +1,88 @@
 #include "fastfetch.h"
 
+#include "dconf/client/dconf-client.h"
+#include "dlfcn.h"
+
+static inline bool allPropertiesSet(FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
+{
+    return
+        themeNamePtr->length > 0 &&
+        iconsNamePtr->length > 0 &&
+        fontNamePtr->length > 0;
+}
+
+static void parseGTKDConfSettings(FFinstance* instance, FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
+{
+    static const gchar* themeName;
+    static const gchar* iconsName;
+    static const gchar* fontName;
+
+    static bool init = false;
+    if(init)
+    {
+        ffStrbufAppendS(themeNamePtr, themeName);
+        ffStrbufAppendS(iconsNamePtr, iconsName);
+        ffStrbufAppendS(fontNamePtr, fontName);
+        return;
+    }
+    init = true;
+
+    void* dconf;
+    if(instance->config.libDConf.length == 0)
+        dconf = dlopen("libdconf.so", RTLD_LAZY);
+    else
+        dconf = dlopen(instance->config.libDConf.chars, RTLD_LAZY);
+
+    if(dconf == NULL)
+        return;
+
+    DConfClient*(*ffdconf_client_new)(void) = dlsym(dconf, "dconf_client_new");
+    if(ffdconf_client_new == NULL)
+    {
+        dlclose(dconf);
+        return;
+    }
+
+    const gchar*(*ffg_variant_get_string)(GVariant*, gsize*) = dlsym(dconf, "g_variant_get_string");
+    if(ffg_variant_get_string == NULL)
+    {
+        dlclose(dconf);
+        return;
+    }
+
+    GVariant*(*ffdconf_client_read)(DConfClient*, const gchar*) = dlsym(dconf, "dconf_client_read");
+    if(ffdconf_client_read == NULL)
+    {
+        dlclose(dconf);
+        return;
+    }
+
+    DConfClient* dconfClient = ffdconf_client_new();
+    if(dconfClient == NULL)
+    {
+        dlclose(dconf);
+        return;
+    }
+
+    GVariant* themeNameVariant = ffdconf_client_read(dconfClient, "/org/gnome/desktop/interface/gtk-theme");
+    if(themeNameVariant != NULL)
+        themeName = ffg_variant_get_string(themeNameVariant, NULL);
+
+    GVariant* fontNameVariant = ffdconf_client_read(dconfClient, "/org/gnome/desktop/interface/font-name");
+    if(fontNameVariant != NULL)
+        fontName = ffg_variant_get_string(fontNameVariant, NULL);
+
+    GVariant* iconsNameVariant = ffdconf_client_read(dconfClient, "/org/gnome/desktop/interface/icon-theme");
+    if(iconsNameVariant != NULL)
+        iconsName = ffg_variant_get_string(iconsNameVariant, NULL);
+
+    dlclose(dconf);
+
+    ffStrbufAppendS(themeNamePtr, themeName);
+    ffStrbufAppendS(iconsNamePtr, iconsName);
+    ffStrbufAppendS(fontNamePtr, fontName);
+}
+
 static void parseGTKConfigFile(FFstrbuf* fileName, FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
 {
     FILE* file = fopen(fileName->chars, "r");
@@ -51,6 +134,8 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file1, ".0/settings.ini");
     parseGTKConfigFile(&file1, themeNamePtr, iconsNamePtr, fontNamePtr);
     ffStrbufDestroy(&file1);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+        return;
 
     // <configdir>/gtk-<version>.0/gtkrc
     FFstrbuf file2;
@@ -61,6 +146,8 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file2, ".0/gtkrc");
     parseGTKConfigFile(&file2, themeNamePtr, iconsNamePtr, fontNamePtr);
     ffStrbufDestroy(&file2);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+        return;
 
     // <configdir>/gtkrc-<version>.0
     FFstrbuf file3;
@@ -71,6 +158,8 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file3, ".0");
     parseGTKConfigFile(&file3, themeNamePtr, iconsNamePtr, fontNamePtr);
     ffStrbufDestroy(&file3);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+        return;
 
     // <configdir>/.gtkrc-<version>.0
     FFstrbuf file4;
@@ -118,9 +207,15 @@ static void calculateGTK(FFinstance* instance, const char* version, FFstrbuf* th
     }
 
     if(xdgIsDifferent)
+    {
         calculateGTKFromConfigDir(xdgConfigDir.chars, version, themeNamePtr, iconsNamePtr, fontNamePtr);
+        if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+            return;
+    }
 
     calculateGTKFromConfigDir(configDir.chars, version, themeNamePtr, iconsNamePtr, fontNamePtr);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+            return;
 
     // <homedir>/gtkrc-<version>.0
     FFstrbuf homeConfig1;
@@ -131,6 +226,8 @@ static void calculateGTK(FFinstance* instance, const char* version, FFstrbuf* th
     ffStrbufAppendS(&homeConfig1, ".0");
     parseGTKConfigFile(&homeConfig1, themeNamePtr, iconsNamePtr, fontNamePtr);
     ffStrbufDestroy(&homeConfig1);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+            return;
 
     // <homedir>/.gtkrc-<version>.0
     FFstrbuf homeConfig2;
@@ -141,6 +238,12 @@ static void calculateGTK(FFinstance* instance, const char* version, FFstrbuf* th
     ffStrbufAppendS(&homeConfig2, ".0");
     parseGTKConfigFile(&homeConfig2, themeNamePtr, iconsNamePtr, fontNamePtr);
     ffStrbufDestroy(&homeConfig2);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+            return;
+
+    parseGTKDConfSettings(instance, themeNamePtr, iconsNamePtr, fontNamePtr);
+    if(allPropertiesSet(themeNamePtr, iconsNamePtr, fontNamePtr))
+        return;
 
     calculateGTKFromConfigDir("/etc/", version, themeNamePtr, iconsNamePtr, fontNamePtr);
 }

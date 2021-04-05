@@ -108,10 +108,12 @@ static inline void printHelp()
         "   --lib-PCI <path>\n"
         "   --lib-X11 <path>\n"
         "   --lib-Xrandr <path>\n"
+        "   --lib-DConf <path>\n"
         "\n"
         "Module specific options:\n"
         "   --disk-folders <folders>: A colon seperated list of folder paths for the disk output. Default is \"/:/home\"\n"
         "\n"
+        "Parsing is not case sensetive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
         "An (+) at the end indicates that more help can be printed with --help <option>\n"
         "All options can be make permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
@@ -643,6 +645,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libX11);
     else if(strcasecmp(key, "--lib-Xrandr") == 0)
         optionParseString(key, value, &instance->config.libXrandr);
+    else if(strcasecmp(key, "--lib-DConf") == 0)
+        optionParseString(key, value, &instance->config.libDConf);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else

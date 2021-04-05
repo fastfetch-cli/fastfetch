@@ -29,6 +29,7 @@ Following libraries are used if present:
 * [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
 * [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
 * [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
+* [`libDConf`](https://developer.gnome.org/dconf/unstable/DConfClient.html): GTK theme/font/icons output on DEs which dont use config files (e.g. Gnome).
 
 ## Building
 

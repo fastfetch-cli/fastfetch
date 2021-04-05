@@ -74,6 +74,7 @@ void ffPrintGPU(FFinstance* instance)
         pci = dlopen("libpci.so", RTLD_LAZY);
     else
         pci = dlopen(instance->config.libPCI.chars, RTLD_LAZY);
+
     if(pci == NULL)
     {
         ffPrintError(instance, &key, NULL, "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");
@@ -83,6 +84,7 @@ void ffPrintGPU(FFinstance* instance)
     struct pci_access*(*ffpci_alloc)() = dlsym(pci, "pci_alloc");
     if(ffpci_alloc == NULL)
     {
+        dlclose(pci);
         ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_alloc\") == NULL");
         return;
     }
@@ -90,6 +92,7 @@ void ffPrintGPU(FFinstance* instance)
     void(*ffpci_init)(struct pci_access*) = dlsym(pci, "pci_init");
     if(ffpci_init == NULL)
     {
+        dlclose(pci);
         ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_init\") == NULL");
         return;
     }
@@ -97,6 +100,7 @@ void ffPrintGPU(FFinstance* instance)
     void(*ffpci_scan_bus)(struct pci_access*) = dlsym(pci, "pci_scan_bus");
     if(ffpci_scan_bus == NULL)
     {
+        dlclose(pci);
         ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_init\") == NULL");
         return;
     }
@@ -104,6 +108,7 @@ void ffPrintGPU(FFinstance* instance)
     int(*ffpci_fill_info)(struct pci_dev*, int) = dlsym(pci, "pci_fill_info");
     if(ffpci_fill_info == NULL)
     {
+        dlclose(pci);
         ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_fill_info\") == NULL");
         return;
     }
@@ -111,6 +116,7 @@ void ffPrintGPU(FFinstance* instance)
     char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...) = dlsym(pci, "pci_lookup_name");
     if(ffpci_lookup_name == NULL)
     {
+        dlclose(pci);
         ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_lookup_name\") == NULL");
         return;
     }
@@ -118,6 +124,7 @@ void ffPrintGPU(FFinstance* instance)
     void(*ffpci_cleanup)(struct pci_access*) = dlsym(pci, "pci_cleanup");
     if(ffpci_cleanup == NULL)
     {
+        dlclose(pci);
         ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_cleanup\") == NULL");
         return;
     }

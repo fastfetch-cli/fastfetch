@@ -25,9 +25,23 @@ endif(BUILD_TESTS)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
+find_package (PkgConfig QUIET)
+
+if(${PkgConfig_FOUND})
+    pkg_check_modules (GLIB2 QUIET glib-2.0)
+endif(${PkgConfig_FOUND})
+
+if(NOT DEFINED GLIB2_INCLUDE_DIRS)
+    set(GLIB2_INCLUDE_DIRS
+        /usr/include/glib-2.0/
+        /usr/lib/glib-2.0/include/
+    )
+endif(NOT DEFINED GLIB2_INCLUDE_DIRS)
+
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
+    ${GLIB2_INCLUDE_DIRS}
 )
 
 set(SRCS
