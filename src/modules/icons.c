@@ -41,10 +41,10 @@ void ffPrintIcons(FFinstance* instance)
     else
     {
         ffPrintFormatString(instance, &instance->config.iconsKey, "Icons", &instance->config.iconsFormat, 5,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk2},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk3},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, gtk4},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, plasma},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         );
     }

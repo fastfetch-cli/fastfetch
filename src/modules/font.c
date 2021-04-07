@@ -66,7 +66,7 @@ void ffPrintFont(FFinstance* instance)
     else
     {
         ffPrintFormatString(instance, &instance->config.fontKey, "Font", &instance->config.fontFormat, 17,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, plasma},
+            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, plasma},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &plasmaName},
             (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &plasmaSize},
             (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &plasmaPretty},
