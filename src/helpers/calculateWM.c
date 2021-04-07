@@ -39,6 +39,7 @@ void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** pr
     if(proc == NULL)
     {
         ffStrbufSetS(&error, "opendir(\"/proc/\") == NULL");
+        pthread_mutex_unlock(&mutex);
         return;
     }
 
@@ -64,10 +65,7 @@ void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** pr
     closedir(proc);
 
     if(prettyName.length == 0)
-    {
         ffStrbufSetS(&error, "No process name matches the name of known display managers");
-        return;
-    }
 
     pthread_mutex_unlock(&mutex);
 }

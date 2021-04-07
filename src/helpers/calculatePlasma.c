@@ -42,6 +42,7 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
     if(kdeglobals == NULL)
     {
         ffStrbufDestroy(&kdeglobalsFile);
+        pthread_mutex_unlock(&mutex);
         return;
     }
 
