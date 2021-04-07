@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1.0) # Threads::Threads is needed
 
 project(fastfetch)
 
@@ -19,16 +19,21 @@ execute_process(
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAFS} -Wall -O3")
+
 if(BUILD_TESTS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -march=native -O3 -pipe -fno-plt")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -pipe -fno-plt")
 endif(BUILD_TESTS)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
-find_package (PkgConfig QUIET)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+find_package (PkgConfig)
 
 if(${PkgConfig_FOUND})
-    pkg_check_modules (GLIB2 QUIET glib-2.0)
+    pkg_check_modules (GLIB2 glib-2.0)
 endif(${PkgConfig_FOUND})
 
 if(NOT DEFINED GLIB2_INCLUDE_DIRS)
@@ -88,6 +93,7 @@ add_executable(fastfetch
 
 target_link_libraries(fastfetch
     ${CMAKE_DL_LIBS}
+    Threads::Threads
 )
 
 add_executable(flashfetch
@@ -101,6 +107,7 @@ target_compile_definitions(flashfetch PUBLIC
 
 target_link_libraries(flashfetch
     ${CMAKE_DL_LIBS}
+    Threads::Threads
 )
 
 if(BUILD_TESTS)
@@ -111,5 +118,6 @@ if(BUILD_TESTS)
 
     target_link_libraries(fastfetch-test-performance
         ${CMAKE_DL_LIBS}
+        Threads::Threads
     )
 endif(BUILD_TESTS)

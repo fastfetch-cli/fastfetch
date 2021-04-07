@@ -33,6 +33,11 @@ int main(int argc, char** argv)
         instance.config.cacheSave = false;
     )
 
+    FASTFETCH_TEST_PERFORMANCE(
+        puts("Thread starting");
+        ffStartCalculationThreads(&instance);
+    )
+
     FASTFETCH_TEST_PERFORMANCE(ffPrintTitle(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintSeperator(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintOS(&instance))

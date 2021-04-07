@@ -1,9 +1,12 @@
 #include "fastfetch.h"
 
 #include <dirent.h>
+#include <pthread.h>
 
 void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
 {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
     static FFstrbuf prettyName;
     static FFstrbuf processName;
     static FFstrbuf error;
@@ -18,8 +21,14 @@ void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** pr
     if(errorPtr != NULL)
         *errorPtr = &error;
 
+    pthread_mutex_lock(&mutex);
+
     if(init)
+    {
+        pthread_mutex_unlock(&mutex);
         return;
+    }
+
     init = true;
 
     ffStrbufInit(&prettyName);
@@ -59,4 +68,6 @@ void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** pr
         ffStrbufSetS(&error, "No process name matches the name of known display managers");
         return;
     }
+
+    pthread_mutex_unlock(&mutex);
 }

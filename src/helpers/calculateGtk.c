@@ -2,6 +2,7 @@
 
 #include "dconf/client/dconf-client.h"
 #include "dlfcn.h"
+#include <pthread.h>
 
 static inline bool allPropertiesSet(FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
 {
@@ -13,16 +14,22 @@ static inline bool allPropertiesSet(FFstrbuf* themeNamePtr, FFstrbuf* iconsNameP
 
 static void parseGTKDConfSettings(FFinstance* instance, FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
 {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
     static const gchar* themeName;
     static const gchar* iconsName;
     static const gchar* fontName;
 
     static bool init = false;
+
+    pthread_mutex_lock(&mutex);
+
     if(init)
     {
         ffStrbufAppendS(themeNamePtr, themeName);
         ffStrbufAppendS(iconsNamePtr, iconsName);
         ffStrbufAppendS(fontNamePtr, fontName);
+        pthread_mutex_unlock(&mutex);
         return;
     }
     init = true;
@@ -81,6 +88,8 @@ static void parseGTKDConfSettings(FFinstance* instance, FFstrbuf* themeNamePtr, 
     ffStrbufAppendS(themeNamePtr, themeName);
     ffStrbufAppendS(iconsNamePtr, iconsName);
     ffStrbufAppendS(fontNamePtr, fontName);
+
+    pthread_mutex_unlock(&mutex);
 }
 
 static void parseGTKConfigFile(FFstrbuf* fileName, FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
@@ -249,19 +258,28 @@ static void calculateGTK(FFinstance* instance, const char* version, FFstrbuf* th
 }
 
 #define FF_CALCULATE_GTK_IMPL(version) \
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
     static FFstrbuf themeName; \
     static FFstrbuf iconsName; \
     static FFstrbuf fontName; \
-    if(themeNamePtr != NULL) *themeNamePtr = &themeName; \
-    if(iconsNamePtr != NULL) *iconsNamePtr = &iconsName; \
-    if(fontNamePtr != NULL) *fontNamePtr = &fontName; \
     static bool init = false; \
-    if(init) return; \
+    if(themeNamePtr != NULL) \
+        *themeNamePtr = &themeName; \
+    if(iconsNamePtr != NULL) \
+        *iconsNamePtr = &iconsName; \
+    if(fontNamePtr != NULL) \
+        *fontNamePtr = &fontName; \
+    pthread_mutex_lock(&mutex); \
+    if(init){ \
+        pthread_mutex_unlock(&mutex);\
+        return; \
+    } \
     init = true; \
     ffStrbufInit(&themeName); \
     ffStrbufInit(&iconsName); \
     ffStrbufInit(&fontName); \
-    calculateGTK(instance, #version, &themeName, &iconsName, &fontName);
+    calculateGTK(instance, #version, &themeName, &iconsName, &fontName); \
+    pthread_mutex_unlock(&mutex);
 
 void ffCalculateGTK2(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr)
 {

@@ -10,6 +10,9 @@ int main(int argc, char** argv)
     ffLoadLogoSet(&instance.config, "arch");
     ffStrbufSetS(&instance.config.color, instance.config.logo.color); //Use the primary color of the logo as key color
 
+    //Multithreading --> better performance
+    ffStartCalculationThreads(&instance);
+
     //Printing
     ffPrintTitle(&instance);
     ffPrintSeperator(&instance);

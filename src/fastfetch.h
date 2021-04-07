@@ -131,6 +131,7 @@ typedef struct FFformatarg
 //Common functions
 void ffInitState(FFstate* state);
 void ffDefaultConfig(FFconfig* config);
+void ffStartCalculationThreads(FFinstance* instance);
 void ffPrintKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
 void ffPrintLogoAndKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
 void ffPrintError(FFinstance* instance, FFstrbuf* customKey, const char* defKey, const char* message, ...);

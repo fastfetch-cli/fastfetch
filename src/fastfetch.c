@@ -26,6 +26,7 @@ typedef struct FFdata
     FFvaluestore valuestore;
     FFstrbuf structure;
     FFstrbuf logoName;
+    bool multithreading;
 } FFdata;
 
 static inline void printHelp()
@@ -53,6 +54,7 @@ static inline void printHelp()
         "                --show-errors <?value>:          print occuring errors\n"
         "   -r <?value>  --recache <?value>:              if set to true, no cached values will be used\n"
         "                --print-remaining-logo <?value>: print the remaining logo, if it is higher than the number of lines shown\n"
+        "                --multithreading <?value>:       use multiple threads to calculate values\n"
         "\n"
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
@@ -433,6 +435,7 @@ static inline bool optionParseBoolean(const char* str)
     return (
         strcasecmp(str, "true") == 0 ||
         strcasecmp(str, "yes")  == 0 ||
+        strcasecmp(str, "on")   == 0 ||
         strcasecmp(str, "1")    == 0
     );
 }
@@ -547,6 +550,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.colorLogo = optionParseBoolean(value);
     else if(strcasecmp(key, "--print-remaining-logo") == 0)
         instance->config.printRemainingLogo = optionParseBoolean(value);
+    else if(strcasecmp(key, "--multithreading") == 0)
+        data->multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
@@ -850,6 +855,9 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
 
 static void run(FFinstance* instance, FFdata* data)
 {
+    if(data->multithreading)
+        ffStartCalculationThreads(instance);
+
     if(data->structure.length == 0)
         ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
 
@@ -863,6 +871,16 @@ static void run(FFinstance* instance, FFdata* data)
 
         lastIndex = colonIndex + 1;
     }
+
+    ffFinish(instance);
+}
+
+static void initData(FFdata* data)
+{
+    ffValuestoreInit(&data->valuestore);
+    ffStrbufInitA(&data->structure, 256);
+    ffStrbufInit(&data->logoName);
+    data->multithreading = true;
 }
 
 int main(int argc, const char** argv)
@@ -872,19 +890,11 @@ int main(int argc, const char** argv)
     ffDefaultConfig(&instance.config);
 
     FFdata data;
-    ffValuestoreInit(&data.valuestore);
-    ffStrbufInitA(&data.structure, 256);
-    ffStrbufInit(&data.logoName);
+    initData(&data);
 
     parseConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
     applyData(&instance, &data); //Here we do things that need to be done after parsing all options
 
     run(&instance, &data);
-
-    ffFinish(&instance);
-
-    ffStrbufDestroy(&data.structure);
-    ffStrbufDestroy(&data.logoName);
-    ffValuestoreDelete(&data.valuestore);
 }

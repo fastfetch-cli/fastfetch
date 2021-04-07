@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <pthread.h>
+
 static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exeName, FFstrbuf* processName, FFstrbuf* error)
 {
     char statFile[234];
@@ -49,6 +51,8 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exe
 
 void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
 {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
     static FFstrbuf exeName;
     static FFstrbuf processName;
     static FFstrbuf error;
@@ -63,8 +67,13 @@ void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf**
     if(errorPtr != NULL)
         *errorPtr = &error;
 
+    pthread_mutex_lock(&mutex);
+
     if(init)
+    {
+        pthread_mutex_unlock(&mutex);
         return;
+    }
     init = true;
 
     ffStrbufInit(&exeName);
@@ -76,4 +85,5 @@ void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf**
 
     getTerminalName(instance, ppid, &exeName, &processName, &error);
 
+    pthread_mutex_unlock(&mutex);
 }
