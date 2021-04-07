@@ -2,8 +2,8 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
-    char plasma[256];
-    ffParsePropFileHome(instance, ".config/kdeglobals", "Theme=%[^\n]", plasma);
+    FFstrbuf* plasma;
+    ffCalculatePlasma(instance, NULL, &plasma, NULL);
 
     FFstrbuf* gtk2;
     ffCalculateGTK2(instance, NULL, &gtk2, NULL);
@@ -14,7 +14,7 @@ void ffPrintIcons(FFinstance* instance)
     FFstrbuf* gtk4;
     ffCalculateGTK4(instance, NULL, &gtk4, NULL);
 
-    if(plasma[0] == '\0' && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
+    if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
         ffPrintError(instance, &instance->config.iconsKey, "Icons", "No icons found");
         return;
@@ -27,10 +27,14 @@ void ffPrintIcons(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, &instance->config.iconsKey, "Icons");
 
-        if(plasma[0] == '\0')
-            printf("Breeze [Plasma], ");
-        else
-            printf("%s [Plasma], ", plasma);
+        if(plasma->length > 0)
+        {
+            ffStrbufWriteTo(plasma, stdout);
+            fputs(" [Plasma]", stdout);
+
+            if(gtkPretty.length > 0)
+                fputs(", ", stdout);
+        }
 
         ffStrbufPutTo(&gtkPretty, stdout);
     }

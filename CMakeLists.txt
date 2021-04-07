@@ -48,6 +48,7 @@ set(SRCS
     src/common.c
     src/logo.c
     src/util/FFstrbuf.c
+    src/helpers/calculatePlasma.c
     src/helpers/calculateGtk.c
     src/helpers/calculateTerminal.c
     src/helpers/calculateWM.c

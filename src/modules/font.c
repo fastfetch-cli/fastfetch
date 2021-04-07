@@ -4,20 +4,8 @@
 
 void ffPrintFont(FFinstance* instance)
 {
-    FF_STRBUF_CREATE(plasmaFile);
-    ffStrbufAppendS(&plasmaFile, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&plasmaFile, "/.config/kdeglobals");
-
-    //When using Noto Sans 10, the default font in KDE Plasma, the font entry is deleted from the config file instead of set.
-    //So the pure existence of the file sets this font value if not set other in the file itself.
-    bool plasmaFileExists = access(plasmaFile.chars, F_OK) == 0;
-
-    char plasma[256];
-    plasma[0] = '\0';
-    if(plasmaFileExists)
-        ffParsePropFile(plasmaFile.chars, "font=%[^\n]", plasma);
-
-    ffStrbufDestroy(&plasmaFile);
+    FFstrbuf* plasma;
+    ffCalculatePlasma(instance, NULL, NULL, &plasma);
 
     FFstrbuf* gtk2;
     ffCalculateGTK2(instance, NULL, NULL, &gtk2);
@@ -28,28 +16,17 @@ void ffPrintFont(FFinstance* instance)
     FFstrbuf* gtk4;
     ffCalculateGTK4(instance, NULL, NULL, &gtk4);
 
-    if(plasma[0] == '\0' && !plasmaFileExists && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
+    if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
         ffPrintError(instance, &instance->config.fontKey, "Font", "No fonts found");
         return;
     }
 
     FF_STRBUF_CREATE(plasmaName);
-    FF_STRBUF_CREATE(plasmaPretty);
     double plasmaSize;
-
-    if(plasma[0] == '\0' && plasmaFileExists)
-    {
-        strcpy(plasma, "Noto Sans, 10");
-        ffStrbufSetS(&plasmaName, "Noto Sans");
-        plasmaSize = 10;
-        ffStrbufSetS(&plasmaPretty, "Noto Sans (10pt)");
-    }
-    else
-    {
-        ffParseFont(plasma, &plasmaName, &plasmaSize);
-        ffFontPretty(&plasmaPretty, &plasmaName, plasmaSize);
-    }
+    ffParseFont(plasma->chars, &plasmaName, &plasmaSize);
+    FF_STRBUF_CREATE(plasmaPretty);
+    ffFontPretty(&plasmaPretty, &plasmaName, plasmaSize);
 
     FF_STRBUF_CREATE(gtk2Name);
     double gtk2Size;
@@ -76,7 +53,7 @@ void ffPrintFont(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, &instance->config.fontKey, "Font");
 
-        if(plasma[0] != '\0')
+        if(plasma->length > 0)
         {
             ffStrbufWriteTo(&plasmaPretty, stdout);
             fputs(" [Plasma]", stdout);
@@ -120,4 +97,6 @@ void ffPrintFont(FFinstance* instance)
 
     ffStrbufDestroy(&gtk3Name);
     ffStrbufDestroy(&gtk3Pretty);
+
+    ffStrbufDestroy(&gtkPretty);
 }

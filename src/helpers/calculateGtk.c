@@ -165,7 +165,7 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     FFstrbuf file4;
     ffStrbufInitA(&file4, 64);
     ffStrbufAppendS(&file4, configDir);
-    ffStrbufAppendS(&file4, "gtkrc-");
+    ffStrbufAppendS(&file4, ".gtkrc-");
     ffStrbufAppendS(&file4, version);
     ffStrbufAppendS(&file4, ".0");
     parseGTKConfigFile(&file4, themeNamePtr, iconsNamePtr, fontNamePtr);

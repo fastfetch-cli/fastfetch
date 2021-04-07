@@ -2,8 +2,8 @@
 
 void ffPrintTheme(FFinstance* instance)
 {
-    char plasma[256];
-    ffParsePropFileHome(instance, ".config/kdeglobals", "Name=%[^\n]", plasma);
+    FFstrbuf* plasma;
+    ffCalculatePlasma(instance, &plasma, NULL, NULL);
 
     FFstrbuf* gtk2;
     ffCalculateGTK2(instance, &gtk2, NULL, NULL);
@@ -14,7 +14,7 @@ void ffPrintTheme(FFinstance* instance)
     FFstrbuf* gtk4;
     ffCalculateGTK4(instance, &gtk4, NULL, NULL);
 
-    if(plasma[0] == '\0' && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
+    if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
         ffPrintError(instance, &instance->config.themeKey, "Theme", "No themes found");
         return;
@@ -27,8 +27,14 @@ void ffPrintTheme(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, &instance->config.themeKey, "Theme");
 
-        if(plasma[0] != '\0')
-            printf("%s [Plasma], ", plasma);
+        if(plasma->length > 0)
+        {
+            ffStrbufWriteTo(plasma, stdout);
+            fputs(" [Plasma]", stdout);
+
+            if(gtkPretty.length > 0)
+                fputs(", ", stdout);
+        }
 
         ffStrbufPutTo(&gtkPretty, stdout);
     }
