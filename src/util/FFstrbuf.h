@@ -81,6 +81,10 @@ bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start);
 bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start);
 bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start);
 
+bool ffStrbufStartsWithIgnCase(FFstrbuf* strbuf, FFstrbuf* start);
+bool ffStrbufStartsWithIgnCaseS(FFstrbuf* strbuf, const char* start);
+bool ffStrbufStartsWithIgnCaseNS(FFstrbuf* strbuf, uint32_t length, const char* start);
+
 void ffStrbufRecalculateLength(FFstrbuf* strbuf);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);

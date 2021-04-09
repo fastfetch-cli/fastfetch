@@ -3,7 +3,7 @@
 void ffPrintIcons(FFinstance* instance)
 {
     FFstrbuf* plasma;
-    ffCalculatePlasma(instance, NULL, &plasma, NULL);
+    ffCalculatePlasma(instance, NULL, NULL, &plasma, NULL);
 
     FFstrbuf* gtk2;
     ffCalculateGTK2(instance, NULL, &gtk2, NULL);

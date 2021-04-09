@@ -4,7 +4,7 @@
 
 static inline void* calculatePlasmaThreadMain(void* instance)
 {
-    ffCalculatePlasma((FFinstance*)instance, NULL, NULL, NULL);
+    ffCalculatePlasma((FFinstance*)instance, NULL, NULL, NULL, NULL);
     return NULL;
 }
 

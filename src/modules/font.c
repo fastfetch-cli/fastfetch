@@ -3,7 +3,7 @@
 void ffPrintFont(FFinstance* instance)
 {
     FFstrbuf* plasma;
-    ffCalculatePlasma(instance, NULL, NULL, &plasma);
+    ffCalculatePlasma(instance, NULL, NULL, NULL, &plasma);
 
     FFstrbuf* gtk2;
     ffCalculateGTK2(instance, NULL, NULL, &gtk2);

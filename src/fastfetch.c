@@ -308,8 +308,10 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "theme-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("theme", "{} [Plasma], {5}", 5,
+        constructAndPrintCommandHelpFormat("theme", "{} ({3}) [Plasma], {7}", 7,
             "Plasma theme",
+            "Plasma color scheme",
+            "Plasma color scheme pretty",
             "GTK2 theme",
             "GTK3 theme",
             "GTK4 theme",

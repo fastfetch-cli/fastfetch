@@ -1,6 +1,7 @@
 #include "FFstrbuf.h"
 
 #include <malloc.h>
+#include <ctype.h>
 #include <string.h>
 
 void ffStrbufInit(FFstrbuf* strbuf)
@@ -371,11 +372,6 @@ void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c)
     ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
 }
 
-bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start)
-{
-    return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
-}
-
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
 {
     if(index >= strbuf->length)
@@ -396,22 +392,19 @@ void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c)
         ffStrbufSubstrAfter(strbuf, index);
 }
 
-static inline bool testSame(FFstrbuf* strbuf, uint32_t i, const char* str)
+bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start)
 {
-    if(i > strbuf->length)
-        return false;
-
-    if(strbuf->chars[i] != str[i])
-        return false;
-
-    return true;
+    return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
 }
 
 bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start)
 {
     for(uint32_t i = 0; start[i] != '\0'; i++)
     {
-        if(!testSame(strbuf, i, start))
+        if(i >= strbuf->length)
+            return false;
+
+        if(strbuf->chars[i] != start[i])
             return false;
     }
     return true;
@@ -421,7 +414,41 @@ bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start)
 {
     for(uint32_t i = 0; i < length; i++)
     {
-        if(!testSame(strbuf, i, start))
+        if(i >= strbuf->length)
+            return false;
+
+        if(strbuf->chars[i] != start[i])
+            return false;
+    }
+    return true;
+}
+
+bool ffStrbufStartsWithIgnCase(FFstrbuf* strbuf, FFstrbuf* start)
+{
+    return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
+}
+
+bool ffStrbufStartsWithIgnCaseS(FFstrbuf* strbuf, const char* start)
+{
+    for(uint32_t i = 0; start[i] != '\0'; i++)
+    {
+        if(i >= strbuf->length)
+            return false;
+
+        if(tolower(strbuf->chars[i]) != tolower(start[i]))
+            return false;
+    }
+    return true;
+}
+
+bool ffStrbufStartsWithIgnCaseNS(FFstrbuf* strbuf, uint32_t length, const char* start)
+{
+    for(uint32_t i = 0; i < length; i++)
+    {
+        if(i >= strbuf->length)
+            return false;
+
+        if(tolower(strbuf->chars[i]) != tolower(start[i]))
             return false;
     }
     return true;

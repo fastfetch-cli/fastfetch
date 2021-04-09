@@ -1,18 +1,31 @@
 #include "fastfetch.h"
 
+#include <string.h>
 #include <pthread.h>
 
-void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr)
+typedef enum PlasmaCategory
+{
+    PLASMA_CATEGORY_GENERAL,
+    PLASMA_CATEGORY_KDE,
+    PLASMA_CATEGORY_ICONS,
+    PLASMA_CATEGORY_OTHER
+} PlasmaCategory;
+
+void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** colorNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
     static FFstrbuf themeName;
+    static FFstrbuf colorName;
     static FFstrbuf iconsName;
     static FFstrbuf fontName;
     static bool init = false;
 
     if(themeNamePtr != NULL)
         *themeNamePtr = &themeName;
+
+    if(colorNamePtr != NULL)
+        *colorNamePtr = &colorName;
 
     if(iconsNamePtr != NULL)
         *iconsNamePtr = &iconsName;
@@ -31,6 +44,7 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
     init = true;
 
     ffStrbufInit(&themeName);
+    ffStrbufInit(&colorName);
     ffStrbufInit(&iconsName);
     ffStrbufInit(&fontName);
 
@@ -49,19 +63,49 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
     char* line = NULL;
     size_t len = 0;
 
+    PlasmaCategory category = PLASMA_CATEGORY_OTHER;
+
     while(getline(&line, &len, kdeglobals) != -1)
     {
-        sscanf(line, "widgetStyle=%[^\n]", themeName.chars);
-        sscanf(line, "widgetStyle=\"%[^\"]+", themeName.chars);
+        if(line[0] == '[')
+        {
+            char categoryName[32];
+            sscanf(line, "[%[^]]", categoryName);
 
-        sscanf(line, "Theme=%[^\n]", iconsName.chars);
-        sscanf(line, "Theme=\"%[^\"]+", iconsName.chars);
+            if(strcasecmp(categoryName, "General") == 0)
+                category = PLASMA_CATEGORY_GENERAL;
+            else if(strcasecmp(categoryName, "KDE") == 0)
+                category = PLASMA_CATEGORY_KDE;
+            else if(strcasecmp(categoryName, "Icons") == 0)
+                category = PLASMA_CATEGORY_ICONS;
+            else
+                category = PLASMA_CATEGORY_OTHER;
 
-        sscanf(line, "font=%[^\n]", fontName.chars);
-        sscanf(line, "font=\"%[^\"]+", fontName.chars);
+            continue;
+        }
+
+        if(category == PLASMA_CATEGORY_KDE)
+        {
+            sscanf(line, "widgetStyle=%[^\n]", themeName.chars);
+            sscanf(line, "widgetStyle=\"%[^\"]+", themeName.chars);
+        }
+        else if(category == PLASMA_CATEGORY_GENERAL)
+        {
+            sscanf(line, "ColorScheme=%[^\n]", colorName.chars);
+            sscanf(line, "ColorScheme=\"%[^\"]+", colorName.chars);
+
+            sscanf(line, "font=%[^\n]", fontName.chars);
+            sscanf(line, "font=\"%[^\"]+", fontName.chars);
+        }
+        else if(category == PLASMA_CATEGORY_ICONS)
+        {
+            sscanf(line, "Theme=%[^\n]", iconsName.chars);
+            sscanf(line, "Theme=\"%[^\"]+", iconsName.chars);
+        }
     }
 
     ffStrbufRecalculateLength(&themeName);
+    ffStrbufRecalculateLength(&colorName);
     ffStrbufRecalculateLength(&iconsName);
     ffStrbufRecalculateLength(&fontName);
 
@@ -71,8 +115,17 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
     fclose(kdeglobals);
     ffStrbufDestroy(&kdeglobalsFile);
 
-    //When using Noto Sans 10, the default font in KDE Plasma, the font entry is deleted from the config file instead of set.
-    //So the pure existence of the file sets this font value if not set other in the file itself.
+    //In Plasma the default value is never set in the config file, but the whole key-value is discarded.
+    ///We must set these values by our self if the file exists (it always does here)
+    if(themeName.length == 0)
+        ffStrbufAppendS(&themeName, "Breeze");
+
+    if(colorName.length == 0)
+        ffStrbufAppendS(&colorName, "BreezeLight");
+
+    if(iconsName.length == 0)
+        ffStrbufAppendS(&iconsName, "Breeze");
+
     if(fontName.length == 0)
         ffStrbufAppendS(&fontName, "Noto Sans, 10");
 

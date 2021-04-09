@@ -170,7 +170,7 @@ void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
 //common/calculatePlasma.c
-void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** colorNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
 
 //common/calculateGTK.c
 void ffCalculateGTK2(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
