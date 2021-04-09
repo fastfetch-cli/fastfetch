@@ -20,11 +20,11 @@ Currently, `fastfetch` supports the following logos:
 - `Ubuntu`
 - `Debian`
 
-Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/logo.c`](src/logo.c).
+Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/common/logo.c`](src/common/logo.c).
 
 ## Dependencies
 
-In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is `libdl` which is automatically shipped with every linux system.  
+In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is [`glibc`](https://www.gnu.org/software/libc/) (`libc`, `libdl` and `libpthread` are actually used) which is automatically shipped with every linux system.  
 Following libraries are used if present:
 * [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
 * [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
