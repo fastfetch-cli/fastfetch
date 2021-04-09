@@ -16,12 +16,14 @@
 
 int main(int argc, char** argv)
 {
+    UNUSED(argc);
+    UNUSED(argv);
+
     FFinstance instance;
 
     FASTFETCH_TEST_PERFORMANCE(
         puts("Initialization");
-        ffInitState(&instance.state);
-        ffDefaultConfig(&instance.config);
+        ffInitInstance(&instance);
     )
 
     FASTFETCH_TEST_PERFORMANCE(

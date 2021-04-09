@@ -2,9 +2,12 @@
 
 int main(int argc, char** argv)
 {
+    //Disable compiler warnings
+    UNUSED(argc);
+    UNUSED(argv);
+
     FFinstance instance;
-    ffInitState(&instance.state);
-    ffDefaultConfig(&instance.config);
+    ffInitInstance(&instance);
 
     //Configuration
     ffLoadLogoSet(&instance.config, "arch");

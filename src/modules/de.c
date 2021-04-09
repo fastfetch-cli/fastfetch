@@ -1,7 +1,11 @@
 #include "fastfetch.h"
 
+#include <string.h>
+
 static void getKDE(FFstrbuf* name, FFstrbuf* version, FFstrbuf* type)
 {
+    UNUSED(type);
+
     ffStrbufSetS(name, "KDE Plasma");
 
     char versionBuf[256];

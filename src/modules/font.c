@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-#include <unistd.h>
-
 void ffPrintFont(FFinstance* instance)
 {
     FFstrbuf* plasma;
@@ -24,30 +22,30 @@ void ffPrintFont(FFinstance* instance)
 
     FF_STRBUF_CREATE(plasmaName);
     double plasmaSize;
-    ffParseFont(plasma->chars, &plasmaName, &plasmaSize);
+    ffGetFont(plasma->chars, &plasmaName, &plasmaSize);
     FF_STRBUF_CREATE(plasmaPretty);
-    ffFontPretty(&plasmaPretty, &plasmaName, plasmaSize);
+    ffGetFontPretty(&plasmaPretty, &plasmaName, plasmaSize);
 
     FF_STRBUF_CREATE(gtk2Name);
     double gtk2Size;
-    ffParseFont(gtk2->chars, &gtk2Name, &gtk2Size);
+    ffGetFont(gtk2->chars, &gtk2Name, &gtk2Size);
     FF_STRBUF_CREATE(gtk2Pretty);
-    ffFontPretty(&gtk2Pretty, &gtk2Name, gtk2Size);
+    ffGetFontPretty(&gtk2Pretty, &gtk2Name, gtk2Size);
 
     FF_STRBUF_CREATE(gtk3Name);
     double gtk3Size;
-    ffParseFont(gtk3->chars, &gtk3Name, &gtk3Size);
+    ffGetFont(gtk3->chars, &gtk3Name, &gtk3Size);
     FF_STRBUF_CREATE(gtk3Pretty);
-    ffFontPretty(&gtk3Pretty, &gtk3Name, gtk3Size);
+    ffGetFontPretty(&gtk3Pretty, &gtk3Name, gtk3Size);
 
     FF_STRBUF_CREATE(gtk4Name);
     double gtk4Size;
-    ffParseFont(gtk4->chars, &gtk4Name, &gtk4Size);
+    ffGetFont(gtk4->chars, &gtk4Name, &gtk4Size);
     FF_STRBUF_CREATE(gtk4Pretty);
-    ffFontPretty(&gtk4Pretty, &gtk4Name, gtk4Size);
+    ffGetFontPretty(&gtk4Pretty, &gtk4Name, gtk4Size);
 
     FF_STRBUF_CREATE(gtkPretty);
-    ffFormatGtkPretty(&gtkPretty, &gtk2Pretty, &gtk3Pretty, &gtk4Pretty);
+    ffGetGtkPretty(&gtkPretty, &gtk2Pretty, &gtk3Pretty, &gtk4Pretty);
 
     if(instance->config.fontFormat.length == 0)
     {

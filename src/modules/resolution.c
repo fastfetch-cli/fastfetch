@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 
-#include "X11/extensions/Xrandr.h"
-#include "dlfcn.h"
+#include <dlfcn.h>
+#include <X11/extensions/Xrandr.h>
 
 static int getCurrentRate(FFinstance* instance, Display* display)
 {

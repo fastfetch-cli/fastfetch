@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <string.h>
+
 void ffPrintShell(FFinstance* instance)
 {
     if(ffPrintCachedValue(instance, &instance->config.shellKey, "Shell"))

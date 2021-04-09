@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 
-#include "dconf/client/dconf-client.h"
-#include "dlfcn.h"
+#include <dlfcn.h>
 #include <pthread.h>
+#include <dconf/client/dconf-client.h>
 
 static inline bool allPropertiesSet(FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
 {

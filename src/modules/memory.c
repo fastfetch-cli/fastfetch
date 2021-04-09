@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-// Impl by: https://github.com/sam-barr/paleofetch/blob/b7c58a52c0de39b53c9b5f417889a5886d324bfa/paleofetch.c#L544
+// Impl inspired by: https://github.com/sam-barr/paleofetch/blob/b7c58a52c0de39b53c9b5f417889a5886d324bfa/paleofetch.c#L544
 void ffPrintMemory(FFinstance* instance)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");

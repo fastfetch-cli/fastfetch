@@ -1,5 +1,8 @@
 #include "fastfetch.h"
 
+#include <string.h>
+#include <unistd.h>
+
 void ffPrintTitle(FFinstance* instance)
 {
     char hostname[256];

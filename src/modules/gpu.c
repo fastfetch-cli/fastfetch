@@ -1,7 +1,8 @@
 #include "fastfetch.h"
 
-#include <pci/pci.h>
+#include <string.h>
 #include <dlfcn.h>
+#include <pci/pci.h>
 
 static void getKey(FFinstance* instance, FFstrbuf* key, uint8_t counter, bool showCounter)
 {

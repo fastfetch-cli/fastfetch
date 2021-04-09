@@ -19,10 +19,11 @@ execute_process(
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAFS} -Wall -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAFS} -Wall -Wextra -O3")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-O3")
 
 if(BUILD_TESTS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -pipe -fno-plt")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -mtune=native -pipe -fno-plt -Wconversion -Wpedantic")
 endif(BUILD_TESTS)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
@@ -49,14 +50,23 @@ include_directories(
     ${GLIB2_INCLUDE_DIRS}
 )
 
+link_libraries(
+    ${CMAKE_DL_LIBS}
+    Threads::Threads
+)
+
 set(SRCS
-    src/common.c
-    src/logo.c
     src/util/FFstrbuf.c
-    src/helpers/calculatePlasma.c
-    src/helpers/calculateGtk.c
-    src/helpers/calculateTerminal.c
-    src/helpers/calculateWM.c
+    src/common/init.c
+    src/common/threading.c
+    src/common/io.c
+    src/common/logo.c
+    src/common/format.c
+    src/common/parsing.c
+    src/common/calculatePlasma.c
+    src/common/calculateGtk.c
+    src/common/calculateTerminal.c
+    src/common/calculateWM.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -91,11 +101,6 @@ add_executable(fastfetch
     ${SRCS}
 )
 
-target_link_libraries(fastfetch
-    ${CMAKE_DL_LIBS}
-    Threads::Threads
-)
-
 add_executable(flashfetch
     src/flashfetch.c
     ${SRCS}
@@ -105,19 +110,9 @@ target_compile_definitions(flashfetch PUBLIC
     FASTFETCH_BUILD_FLASHFETCH
 )
 
-target_link_libraries(flashfetch
-    ${CMAKE_DL_LIBS}
-    Threads::Threads
-)
-
 if(BUILD_TESTS)
     add_executable(fastfetch-test-performance
         tests/performance.c
         ${SRCS}
-    )
-
-    target_link_libraries(fastfetch-test-performance
-        ${CMAKE_DL_LIBS}
-        Threads::Threads
     )
 endif(BUILD_TESTS)

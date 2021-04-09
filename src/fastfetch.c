@@ -2,8 +2,8 @@
 #include "fastfetch_config.h"
 #include "util/FFvaluestore.h"
 
+#include <string.h>
 #include <malloc.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -886,8 +886,7 @@ static void initData(FFdata* data)
 int main(int argc, const char** argv)
 {
     FFinstance instance;
-    ffInitState(&instance.state);
-    ffDefaultConfig(&instance.config);
+    ffInitInstance(&instance);
 
     FFdata data;
     initData(&data);

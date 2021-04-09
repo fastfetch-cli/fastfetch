@@ -1,12 +1,14 @@
 #include "fastfetch.h"
 
+#include <string.h>
+
 static void printTerminalFont(FFinstance* instance, const char* font)
 {
     FF_STRBUF_CREATE(name);
     double size;
-    ffParseFont(font, &name, &size);
+    ffGetFont(font, &name, &size);
     FF_STRBUF_CREATE(pretty);
-    ffFontPretty(&pretty, &name, size);
+    ffGetFontPretty(&pretty, &name, size);
 
     if(instance->config.termFontFormat.length == 0)
     {

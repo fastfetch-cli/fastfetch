@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <string.h>
+
 static double getGhz(const char* file)
 {
     FF_STRBUF_CREATE(content);

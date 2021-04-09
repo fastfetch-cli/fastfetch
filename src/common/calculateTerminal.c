@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <string.h>
+#include <unistd.h>
 #include <pthread.h>
 
 static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exeName, FFstrbuf* processName, FFstrbuf* error)

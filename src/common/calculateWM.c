@@ -5,6 +5,8 @@
 
 void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
 {
+    UNUSED(instance);
+
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
     static FFstrbuf prettyName;

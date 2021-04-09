@@ -21,7 +21,7 @@ void ffPrintIcons(FFinstance* instance)
     }
 
     FF_STRBUF_CREATE(gtkPretty);
-    ffFormatGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
+    ffGetGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
 
     if(instance->config.iconsFormat.length == 0)
     {

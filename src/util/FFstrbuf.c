@@ -1,7 +1,6 @@
 #include "FFstrbuf.h"
 
 #include <malloc.h>
-#include <stdlib.h>
 #include <string.h>
 
 void ffStrbufInit(FFstrbuf* strbuf)
@@ -34,8 +33,8 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
 {
     if(allocate == 0)
     {
-        fprintf(stderr, "ffStrbufInitA(): allocation size == 0");
-        exit(701);
+        fprintf(stderr, "ffStrbufInitA(): allocation size == 0, changing to 1");
+        allocate = 1;
     }
 
     strbuf->allocated = allocate;
@@ -222,10 +221,7 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index)
 {
     if(index >= strbuf->length)
-    {
-        fprintf(stderr, "ffStrbufGetC(): to high index");
-        exit(702);
-    }
+        return '\0';
 
     return strbuf->chars[index];
 }

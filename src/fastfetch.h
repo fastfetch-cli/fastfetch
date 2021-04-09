@@ -9,15 +9,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
-
-#include <sys/types.h>
-#include <unistd.h>
 #include <pwd.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
 #include "util/FFstrbuf.h"
+
+#define UNUSED(...) (void)(__VA_ARGS__)
 
 #define FASTFETCH_TEXT_MODIFIER_BOLT  "\033[1m"
 #define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
@@ -128,48 +126,66 @@ typedef struct FFformatarg
     const void* value;
 } FFformatarg;
 
-//Common functions
-void ffInitState(FFstate* state);
-void ffDefaultConfig(FFconfig* config);
+/*************************/
+/* Common util functions */
+/*************************/
+
+//common/init.c
+void ffInitInstance(FFinstance* instance);
+void ffFinish(FFinstance* instance);
+
+//common/threading.c
 void ffStartCalculationThreads(FFinstance* instance);
+
+//common/io.c
 void ffPrintKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
 void ffPrintLogoAndKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
 void ffPrintError(FFinstance* instance, FFstrbuf* customKey, const char* defKey, const char* message, ...);
-bool ffPrintCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
-void ffPrintAndSaveCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* value);
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
-void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp);
-void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
-void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...);
-void ffFormatGtkPretty(FFstrbuf* buffer, FFstrbuf* gtk2, FFstrbuf* gtk3, FFstrbuf* gtk4);
-void ffParseFont(const char* font, FFstrbuf* name, double* size);
-void ffFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
-void ffFinish(FFinstance* instance);
+bool ffPrintCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
+void ffPrintAndSaveCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* value);
 
-//Logo functions
+//common/logo.c
 void ffLoadLogoSet(FFconfig* config, const char* logo);
 void ffLoadLogo(FFconfig* config);
 void ffPrintLogoLine(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 
 #ifndef FLASHFETCH_BUILD_FLASHFATCH
-void ffListLogos();
-void ffPrintLogos(bool color);
+    void ffListLogos();
+    void ffPrintLogos(bool color);
 #endif
 
-//Helper functions
+//common/format.c
+void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp);
+void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
+void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...);
 
+//common/parsing.c
+void ffGetGtkPretty(FFstrbuf* buffer, FFstrbuf* gtk2, FFstrbuf* gtk3, FFstrbuf* gtk4);
+void ffGetFont(const char* font, FFstrbuf* name, double* size);
+void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
+
+//common/calculatePlasma.c
 void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+
+//common/calculateGTK.c
 void ffCalculateGTK2(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
 void ffCalculateGTK4(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
 void ffCalculateGTK3(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+
+//common/calculateWM.c
 void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr);
+
+//common/calculateTerminal.c
 void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr);
 
-//Module functions
+/********************/
+/* Module functions */
+/********************/
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);

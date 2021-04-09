@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <string.h>
+
 void ffPrintLocale(FFinstance* instance)
 {
 	if(ffPrintCachedValue(instance, &instance->config.localeKey, "Locale"))
