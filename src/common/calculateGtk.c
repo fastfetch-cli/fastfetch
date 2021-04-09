@@ -12,6 +12,19 @@ static inline bool allPropertiesSet(FFstrbuf* themeNamePtr, FFstrbuf* iconsNameP
         fontNamePtr->length > 0;
 }
 
+
+static inline void applyGTKDConfSettings(const gchar* themeName, FFstrbuf* themeNamePtr, const gchar* iconsName, FFstrbuf* iconsNamePtr, const gchar* fontName, FFstrbuf* fontNamePtr)
+{
+    if(themeNamePtr->length == 0)
+        ffStrbufAppendS(themeNamePtr, themeName);
+
+    if(iconsNamePtr->length == 0)
+        ffStrbufAppendS(iconsNamePtr, iconsName);
+
+    if(fontNamePtr->length == 0)
+        ffStrbufAppendS(fontNamePtr, fontName);
+}
+
 static void parseGTKDConfSettings(FFinstance* instance, FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -26,9 +39,7 @@ static void parseGTKDConfSettings(FFinstance* instance, FFstrbuf* themeNamePtr, 
 
     if(init)
     {
-        ffStrbufAppendS(themeNamePtr, themeName);
-        ffStrbufAppendS(iconsNamePtr, iconsName);
-        ffStrbufAppendS(fontNamePtr, fontName);
+        applyGTKDConfSettings(themeName, themeNamePtr, iconsName, iconsNamePtr, fontName, fontNamePtr);
         pthread_mutex_unlock(&mutex);
         return;
     }
@@ -85,10 +96,7 @@ static void parseGTKDConfSettings(FFinstance* instance, FFstrbuf* themeNamePtr, 
 
     dlclose(dconf);
 
-    ffStrbufAppendS(themeNamePtr, themeName);
-    ffStrbufAppendS(iconsNamePtr, iconsName);
-    ffStrbufAppendS(fontNamePtr, fontName);
-
+    applyGTKDConfSettings(themeName, themeNamePtr, iconsName, iconsNamePtr, fontName, fontNamePtr);
     pthread_mutex_unlock(&mutex);
 }
 
@@ -183,37 +191,32 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
 
 static void calculateGTK(FFinstance* instance, const char* version, FFstrbuf* themeNamePtr, FFstrbuf* iconsNamePtr, FFstrbuf* fontNamePtr)
 {
-    static FFstrbuf configDir;
-    static bool configDirInit = false;
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    if(!configDirInit)
+    static FFstrbuf configDir;
+    static FFstrbuf xdgConfigDir;
+    static bool xdgIsDifferent;
+    static bool init = false;
+
+    pthread_mutex_lock(&mutex);
+
+    if(!init)
     {
         ffStrbufInitA(&configDir, 64);
         ffStrbufAppendS(&configDir, instance->state.passwd->pw_dir);
         ffStrbufAppendS(&configDir, "/.config/");
-        configDirInit = true;
-    }
 
-    static FFstrbuf xdgConfigDir;
-    static bool xdgConfigDirInit = false;
-
-    if(!xdgConfigDirInit)
-    {
         ffStrbufInitA(&xdgConfigDir, 64);
         ffStrbufAppendS(&xdgConfigDir, getenv("XDG_CONFIG_HOME"));
         if(xdgConfigDir.length > 0 && xdgConfigDir.chars[xdgConfigDir.length - 1] != '/')
             ffStrbufAppendC(&xdgConfigDir, '/');
-        xdgConfigDirInit = true;
-    }
 
-    static bool xdgIsDifferent;
-    static bool xdgIsDifferentInit = false;
-
-    if(!xdgIsDifferentInit)
-    {
         xdgIsDifferent = ffStrbufComp(&configDir, &xdgConfigDir) != 0;
-        xdgConfigDirInit = true;
+
+        init = true;
     }
+
+    pthread_mutex_unlock(&mutex);
 
     if(xdgIsDifferent)
     {
