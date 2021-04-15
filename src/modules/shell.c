@@ -2,15 +2,18 @@
 
 #include <string.h>
 
+#define FF_SHELL_MODULE_NAME "Shell"
+#define FF_SHELL_NUM_FORMAT_ARGS 2
+
 void ffPrintShell(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, &instance->config.shellKey, "Shell"))
+    if(ffPrintFromCache(instance, FF_SHELL_MODULE_NAME, &instance->config.shellKey, &instance->config.shellFormat, FF_SHELL_NUM_FORMAT_ARGS))
         return;
 
     char* shellPath = getenv("SHELL");
     if(shellPath == NULL)
     {
-        ffPrintError(instance, &instance->config.shellKey, "Shell", "getenv(\"SHELL\") == NULL");
+        ffPrintError(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shellKey, &instance->config.shellFormat, FF_SHELL_NUM_FORMAT_ARGS, "getenv(\"SHELL\") == NULL");
         return;
     }
 
@@ -30,19 +33,12 @@ void ffPrintShell(FFinstance* instance)
     }
 
     FF_STRBUF_CREATE(shell);
+    ffStrbufSetS(&shell, shellName);
 
-    if(instance->config.shellFormat.length == 0)
-    {
-        ffStrbufSetS(&shell, shellName);
-    }
-    else
-    {
-        ffParseFormatString(&shell, &instance->config.shellFormat, 2,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, shellPath},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, shellName}
-        );
-    }
+    ffPrintAndSaveToCache(instance, FF_SHELL_MODULE_NAME, &instance->config.shellKey, &shell, &instance->config.shellFormat, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]){
+        {FF_FORMAT_ARG_TYPE_STRING, shellPath},
+        {FF_FORMAT_ARG_TYPE_STRING, shellName}
+    });
 
-    ffPrintAndSaveCachedValue(instance, &instance->config.shellKey, "Shell", &shell);
     ffStrbufDestroy(&shell);
 }

@@ -79,6 +79,7 @@ void ffInitInstance(FFinstance* instance)
 {
     initState(&instance->state);
     defaultConfig(&instance->config);
+    ffCacheValidate(instance);
 }
 
 static void ffCleanup(FFinstance* instance)

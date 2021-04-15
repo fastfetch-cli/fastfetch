@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "fastfetch_config.h"
 #include "util/FFvaluestore.h"
 
 #include <string.h>
@@ -376,7 +375,7 @@ static inline void printCommandHelp(const char* command)
             "CPU logical core count online",
             "CPU logical core count configured",
             "CPU physical core count",
-            "Always set core count"
+            "Always set core count",
             "frequency bios limit",
             "frequency scaling max",
             "frequency scaling min",
@@ -387,8 +386,9 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "gpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("gpu", "{} {}", 2,
+        constructAndPrintCommandHelpFormat("gpu", "{2} {3}", 3,
             "GPU vendor",
+            "GPU vendor pretty"
             "GPU name"
         );
     }
@@ -852,7 +852,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else
-        ffPrintError(instance, NULL, line, "<no implementaion provided>");
+        ffPrintError(instance, line, 0, NULL, NULL, 0, "<no implementation provided>");
 }
 
 static void run(FFinstance* instance, FFdata* data)

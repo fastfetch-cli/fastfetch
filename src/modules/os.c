@@ -1,8 +1,11 @@
 #include "fastfetch.h"
 
+#define FF_OS_MODULE_NAME "OS"
+#define FF_OS_NUM_FORMAT_ARGS 12
+
 void ffPrintOS(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, &instance->config.osKey, "OS"))
+    if(ffPrintFromCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS))
         return;
 
     FILE* osRelease = fopen("/etc/os-release", "r");
@@ -12,7 +15,7 @@ void ffPrintOS(FFinstance* instance)
 
     if(osRelease == NULL)
     {
-        ffPrintError(instance, &instance->config.osKey, "OS", "couldn't read /etc/os-release nor /usr/lib/os-release");
+        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, "couldn't read /etc/os-release nor /usr/lib/os-release");
         return;
     }
 
@@ -64,72 +67,66 @@ void ffPrintOS(FFinstance* instance)
 
     FF_STRBUF_CREATE(os);
 
-    if(instance->config.osFormat.length == 0)
+    if(prettyName[0] != '\0')
     {
-        if(prettyName[0] != '\0')
-        {
-            ffStrbufAppendS(&os, prettyName);
-        }
-        else if(name[0] == '\0' && id[0] == '\0')
-        {
-            ffStrbufAppendS(&os, instance->state.utsname.sysname);
-        }
-        else
-        {
-            if(name[0] != '\0')
-                ffStrbufAppendS(&os, name);
-            else
-                ffStrbufAppendS(&os, id);
-
-            if(version[0] != '\0')
-            {
-                ffStrbufAppendC(&os, ' ');
-                ffStrbufAppendS(&os, version);
-            }
-            else
-            {
-                if(versionId[0] != '\0')
-                {
-                    ffStrbufAppendC(&os, ' ');
-                    ffStrbufAppendS(&os, versionId);
-                }
-
-                if(variant[0] != '\0')
-                {
-                    ffStrbufAppendS(&os, " (");
-                    ffStrbufAppendS(&os, variant);
-                    ffStrbufAppendC(&os, ')');
-                }
-                else if(variantId[0] != '\0')
-                {
-                    ffStrbufAppendS(&os, " (");
-                    ffStrbufAppendS(&os, variantId);
-                    ffStrbufAppendC(&os, ')');
-                }
-            }
-        }
-
-        ffStrbufAppendC(&os, ' ');
-        ffStrbufAppendS(&os, instance->state.utsname.machine);
+        ffStrbufAppendS(&os, prettyName);
+    }
+    else if(name[0] == '\0' && id[0] == '\0')
+    {
+        ffStrbufAppendS(&os, instance->state.utsname.sysname);
     }
     else
     {
-        ffParseFormatString(&os, &instance->config.osFormat, 12,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, prettyName},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, id},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, idLike},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, variant},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, variantId},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, version},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, versionId},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, versionCodename},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, buildId},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.machine}
-        );
+        if(name[0] != '\0')
+            ffStrbufAppendS(&os, name);
+        else
+            ffStrbufAppendS(&os, id);
+
+        if(version[0] != '\0')
+        {
+            ffStrbufAppendC(&os, ' ');
+            ffStrbufAppendS(&os, version);
+        }
+        else
+        {
+            if(versionId[0] != '\0')
+            {
+                ffStrbufAppendC(&os, ' ');
+                ffStrbufAppendS(&os, versionId);
+            }
+
+            if(variant[0] != '\0')
+            {
+                ffStrbufAppendS(&os, " (");
+                ffStrbufAppendS(&os, variant);
+                ffStrbufAppendC(&os, ')');
+            }
+            else if(variantId[0] != '\0')
+            {
+                ffStrbufAppendS(&os, " (");
+                ffStrbufAppendS(&os, variantId);
+                ffStrbufAppendC(&os, ')');
+            }
+        }
     }
 
-    ffPrintAndSaveCachedValue(instance, &instance->config.osKey, "OS", &os);
+    ffStrbufAppendC(&os, ' ');
+    ffStrbufAppendS(&os, instance->state.utsname.machine);
+
+    ffPrintAndSaveToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        {FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
+        {FF_FORMAT_ARG_TYPE_STRING, name},
+        {FF_FORMAT_ARG_TYPE_STRING, prettyName},
+        {FF_FORMAT_ARG_TYPE_STRING, id},
+        {FF_FORMAT_ARG_TYPE_STRING, idLike},
+        {FF_FORMAT_ARG_TYPE_STRING, variant},
+        {FF_FORMAT_ARG_TYPE_STRING, variantId},
+        {FF_FORMAT_ARG_TYPE_STRING, version},
+        {FF_FORMAT_ARG_TYPE_STRING, versionId},
+        {FF_FORMAT_ARG_TYPE_STRING, versionCodename},
+        {FF_FORMAT_ARG_TYPE_STRING, buildId},
+        {FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.machine}
+    });
+
     ffStrbufDestroy(&os);
 }

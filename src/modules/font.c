@@ -1,5 +1,8 @@
 #include "fastfetch.h"
 
+#define FF_FONT_MODULE_NAME "Font"
+#define FF_FONT_NUM_FORMAT_ARGS 17
+
 void ffPrintFont(FFinstance* instance)
 {
     FFstrbuf* plasma;
@@ -16,7 +19,7 @@ void ffPrintFont(FFinstance* instance)
 
     if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
-        ffPrintError(instance, &instance->config.fontKey, "Font", "No fonts found");
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_FONT_NUM_FORMAT_ARGS, "No fonts found");
         return;
     }
 
@@ -49,8 +52,7 @@ void ffPrintFont(FFinstance* instance)
 
     if(instance->config.fontFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.fontKey, "Font");
-
+        ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey);
         if(plasma->length > 0)
         {
             ffStrbufWriteTo(&plasmaPretty, stdout);
@@ -63,25 +65,25 @@ void ffPrintFont(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.fontKey, "Font", &instance->config.fontFormat, 17,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, plasma},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &plasmaName},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &plasmaSize},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &plasmaPretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtk2Name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &gtk2Size},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtk2Pretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtk3Name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &gtk3Size},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtk3Pretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtk4Name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &gtk4Size},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtk4Pretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
-        );
+        ffPrintFormatString(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, NULL, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, plasma},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &plasmaName},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &plasmaSize},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &plasmaPretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk2Name},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &gtk2Size},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk2Pretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk3Name},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &gtk3Size},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk3Pretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk4Name},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &gtk4Size},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk4Pretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
+        });
     }
 
     ffStrbufDestroy(&plasmaName);
@@ -93,8 +95,8 @@ void ffPrintFont(FFinstance* instance)
     ffStrbufDestroy(&gtk3Name);
     ffStrbufDestroy(&gtk3Pretty);
 
-    ffStrbufDestroy(&gtk3Name);
-    ffStrbufDestroy(&gtk3Pretty);
+    ffStrbufDestroy(&gtk4Name);
+    ffStrbufDestroy(&gtk4Pretty);
 
     ffStrbufDestroy(&gtkPretty);
 }

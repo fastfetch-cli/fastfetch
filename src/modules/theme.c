@@ -1,5 +1,8 @@
 #include "fastfetch.h"
 
+#define FF_THEME_MODULE_NAME "Theme"
+#define FF_THEME_NUM_FORMAT_ARGS 7
+
 void ffPrintTheme(FFinstance* instance)
 {
     FFstrbuf* plasmaTheme;
@@ -17,7 +20,7 @@ void ffPrintTheme(FFinstance* instance)
 
     if(plasmaTheme->length == 0 && plasmaColor->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
-        ffPrintError(instance, &instance->config.themeKey, "Theme", "No themes found");
+        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey, &instance->config.themeFormat, FF_THEME_NUM_FORMAT_ARGS, "No themes found");
         return;
     }
 
@@ -34,7 +37,7 @@ void ffPrintTheme(FFinstance* instance)
 
     if(instance->config.themeFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.themeKey, "Theme");
+        ffPrintLogoAndKey(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey);
 
         if(plasmaTheme->length > 0)
         {
@@ -72,15 +75,15 @@ void ffPrintTheme(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.themeKey, "Theme", &instance->config.themeFormat, 7,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, plasmaTheme},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, plasmaColor},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &plasmaColorPretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
-        );
+        ffPrintFormatString(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey, &instance->config.themeFormat, NULL, FF_THEME_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, plasmaTheme},
+            {FF_FORMAT_ARG_TYPE_STRBUF, plasmaColor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &plasmaColorPretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
+        });
     }
 
     ffStrbufDestroy(&plasmaColorPretty);

@@ -1,8 +1,11 @@
 #include "fastfetch.h"
 
+#define FF_HOST_MODULE_NAME "Host"
+#define FF_HOST_NUM_FORMAT_ARGS 3
+
 void ffPrintHost(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, &instance->config.hostKey, "Host"))
+    if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS))
         return;
 
     FF_STRBUF_CREATE(family);
@@ -16,49 +19,41 @@ void ffPrintHost(FFinstance* instance)
 
     if(family.length == 0 && name.length == 0)
     {
-        ffPrintError(instance, &instance->config.hostKey, "Host", "neither family nor name could be determined");
+        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, "neither family nor name could be determined");
         return;
     }
 
     FF_STRBUF_CREATE(host);
 
-    if(instance->config.hostFormat.length == 0)
+    if(name.length == 0)
     {
-        if(name.length == 0)
-        {
-            ffStrbufAppend(&host, &family);
-        }
-        else if(family.length == 0)
-        {
-            ffStrbufAppend(&host, &name);
-        }
-        else
-        {
-            ffStrbufAppend(&host, &family);
-            ffStrbufAppendC(&host, ' ');
-            ffStrbufAppend(&host, &name);
-        }
-
-        if(
-            version.length > 0 &&
-            ffStrbufIgnCaseCompS(&version, "None") != 0 &&
-            ffStrbufIgnCaseCompS(&version, "To be filled by O.E.M.") != 0
-        ) {
-            ffStrbufAppendC(&host, ' ');
-            ffStrbufAppend(&host, &version);
-        }
+        ffStrbufAppend(&host, &family);
+    }
+    else if(family.length == 0)
+    {
+        ffStrbufAppend(&host, &name);
     }
     else
     {
-        ffParseFormatString(&host, &instance->config.hostFormat, 3,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &family},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &version}
-        );
+        ffStrbufAppend(&host, &family);
+        ffStrbufAppendC(&host, ' ');
+        ffStrbufAppend(&host, &name);
     }
 
-    ffPrintAndSaveCachedValue(instance, &instance->config.hostKey, "Host", &host);
-    ffStrbufDestroy(&host);
+    if(
+        version.length > 0 &&
+        ffStrbufIgnCaseCompS(&version, "None") != 0 &&
+        ffStrbufIgnCaseCompS(&version, "To be filled by O.E.M.") != 0
+    ) {
+        ffStrbufAppendC(&host, ' ');
+        ffStrbufAppend(&host, &version);
+    }
+
+    ffPrintAndSaveToCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &host, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        {FF_FORMAT_ARG_TYPE_STRBUF, &family},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &name},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &version}
+    });
 
     ffStrbufDestroy(&family);
     ffStrbufDestroy(&name);

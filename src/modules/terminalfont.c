@@ -2,6 +2,9 @@
 
 #include <string.h>
 
+#define FF_TERMFONT_MODULE_NAME "Terminal Font"
+#define FF_TERMFONT_NUM_FORMAT_ARGS 4
+
 static void printTerminalFont(FFinstance* instance, const char* font)
 {
     FF_STRBUF_CREATE(name);
@@ -12,17 +15,17 @@ static void printTerminalFont(FFinstance* instance, const char* font)
 
     if(instance->config.termFontFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.termFontKey, "Terminal font");
+        ffPrintLogoAndKey(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey);
         ffStrbufPutTo(&pretty, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.termFontKey, "Terminal font", &instance->config.termFontFormat, 4,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, font},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &size},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &pretty}
-        );
+        ffPrintFormatString(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, NULL, FF_TERMFONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRING, font},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &name},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &size},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &pretty}
+        });
     }
 
     ffStrbufDestroy(&name);
@@ -35,7 +38,7 @@ static void printKonsole(FFinstance* instance)
     ffParsePropFileHome(instance, ".config/konsolerc", "DefaultProfile=%[^\n]", profile);
     if(profile[0] == '\0')
     {
-        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Couldn't find \"DefaultProfile=%[^\n]\" in \".config/konsolerc\"");
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"DefaultProfile=%[^\n]\" in \".config/konsolerc\"");
         return;
     }
 
@@ -46,7 +49,7 @@ static void printKonsole(FFinstance* instance)
     ffParsePropFileHome(instance, profilePath, "Font=%[^\n]", font);
     if(font[0] == '\0')
     {
-        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
         return;
     }
 
@@ -70,7 +73,7 @@ void ffPrintTerminalFont(FFinstance* instance)
 
     if(terminalExeName->length == 0)
     {
-        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Terminal font needs successfull terminal detection");
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Terminal font needs successfull terminal detection");
         return;
     }
 
@@ -79,5 +82,5 @@ void ffPrintTerminalFont(FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(terminalExeName, "login") == 0)
         printTTY(instance);
     else
-        ffPrintError(instance, &instance->config.termFontKey, "Terminal Font", "Unknown terminal: %s", terminalExeName->chars);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Terminal Font", "Unknown terminal: %s", terminalExeName->chars);
 }

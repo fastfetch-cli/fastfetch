@@ -1,5 +1,8 @@
 #include "fastfetch.h"
 
+#define FF_TERMINAL_MODULE_NAME "Terminal"
+#define FF_TERMINAL_NUM_FORMAT_ARGS 3
+
 void ffPrintTerminal(FFinstance* instance)
 {
     FFstrbuf* exeName;
@@ -10,7 +13,7 @@ void ffPrintTerminal(FFinstance* instance)
 
     if(error->length > 0)
     {
-        ffPrintError(instance, &instance->config.terminalKey, "Terminal", error->chars);
+        ffPrintError(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, FF_TERMINAL_NUM_FORMAT_ARGS, error->chars);
         return;
     }
 
@@ -23,15 +26,15 @@ void ffPrintTerminal(FFinstance* instance)
 
     if(instance->config.terminalFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.terminalKey, "Terminal");
+        ffPrintLogoAndKey(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey);
         ffStrbufPutTo(name, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.terminalKey, "Terminal", &instance->config.terminalFormat, 3,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, exeName},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, processName},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, name}
-        );
+        ffPrintFormatString(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, NULL, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, exeName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, processName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, name}
+        });
     }
 }

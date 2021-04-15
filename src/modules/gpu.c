@@ -4,42 +4,23 @@
 #include <dlfcn.h>
 #include <pci/pci.h>
 
-static void getKey(FFinstance* instance, FFstrbuf* key, uint8_t counter, bool showCounter)
+#define FF_GPU_MODULE_NAME "GPU"
+#define FF_GPU_NUM_FORMAT_ARGS 3
+
+static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
 {
-    if(instance->config.gpuKey.length == 0)
-    {
-        if(showCounter)
-            ffStrbufAppendF(key, "GPU %hhu", counter);
-        else
-            ffStrbufSetS(key, "GPU");
-    }
-    else
-    {
-        ffParseFormatString(key, &instance->config.gpuKey, 1,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT8, &counter}
-        );
-    }
-}
-
-static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
-{
-    char cacheKey[8];
-    sprintf(cacheKey, "GPU%hhu", counter);
-
-    FF_STRBUF_CREATE(key);
-    getKey(instance, &key, counter, true);
-
-    if(ffPrintCachedValue(instance, &key, cacheKey))
-        return;
-
     char vendor[512];
     ffpci_lookup_name(pacc, vendor, sizeof(vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
 
-    char vendorPretty[512];
+    const char* vendorPretty;
     if(strcasecmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
-        strcpy(vendorPretty, "AMD ATI");
+        vendorPretty = "AMD ATI";
+    else if(strcasecmp(vendor, "NVIDIA Corporation") == 0)
+        vendorPretty = "Nvidia";
+    else if(strcasecmp(vendor, "Intel Corporation") == 0)
+        vendorPretty = "Intel";
     else
-        strcpy(vendorPretty, vendor);
+        vendorPretty = vendor;
 
     char name[512];
     ffpci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
@@ -47,28 +28,21 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
     FFstrbuf gpu;
     ffStrbufInitA(&gpu, 128);
 
-    if(instance->config.gpuFormat.length == 0)
-    {
-        ffStrbufSetF(&gpu, "%s %s", vendorPretty, name);
-    }
-    else
-    {
-        ffParseFormatString(&gpu, &instance->config.gpuFormat, 2,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name}
-        );
-    }
+    ffStrbufSetF(&gpu, "%s %s", vendorPretty, name);
 
-    ffPrintAndSaveCachedValue(instance, &key, cacheKey, &gpu);
+    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, counter, &instance->config.gpuKey, cache, &gpu, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+        {FF_FORMAT_ARG_TYPE_STRING, vendor},
+        {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
+        {FF_FORMAT_ARG_TYPE_STRING, name}
+    });
 
     ffStrbufDestroy(&gpu);
-    ffStrbufDestroy(&key);
 }
 
 void ffPrintGPU(FFinstance* instance)
 {
-    FF_STRBUF_CREATE(key);
-    getKey(instance, &key, 1, false);
+    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
+        return;
 
     void* pci;
     if(instance->config.libPCI.length == 0)
@@ -78,7 +52,7 @@ void ffPrintGPU(FFinstance* instance)
 
     if(pci == NULL)
     {
-        ffPrintError(instance, &key, NULL, "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");
         return;
     }
 
@@ -86,7 +60,7 @@ void ffPrintGPU(FFinstance* instance)
     if(ffpci_alloc == NULL)
     {
         dlclose(pci);
-        ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_alloc\") == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_alloc\") == NULL");
         return;
     }
 
@@ -94,7 +68,7 @@ void ffPrintGPU(FFinstance* instance)
     if(ffpci_init == NULL)
     {
         dlclose(pci);
-        ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_init\") == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_init\") == NULL");
         return;
     }
 
@@ -102,7 +76,7 @@ void ffPrintGPU(FFinstance* instance)
     if(ffpci_scan_bus == NULL)
     {
         dlclose(pci);
-        ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_init\") == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_init\") == NULL");
         return;
     }
 
@@ -110,7 +84,7 @@ void ffPrintGPU(FFinstance* instance)
     if(ffpci_fill_info == NULL)
     {
         dlclose(pci);
-        ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_fill_info\") == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_fill_info\") == NULL");
         return;
     }
 
@@ -118,7 +92,7 @@ void ffPrintGPU(FFinstance* instance)
     if(ffpci_lookup_name == NULL)
     {
         dlclose(pci);
-        ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_lookup_name\") == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_lookup_name\") == NULL");
         return;
     }
 
@@ -126,11 +100,14 @@ void ffPrintGPU(FFinstance* instance)
     if(ffpci_cleanup == NULL)
     {
         dlclose(pci);
-        ffPrintError(instance, &key, NULL, "dlsym(pci, \"pci_cleanup\") == NULL");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_cleanup\") == NULL");
         return;
     }
 
     uint8_t counter = 1;
+
+    FFcache cache;
+    ffCacheOpenWrite(instance, FF_GPU_MODULE_NAME, &cache);
 
     struct pci_access *pacc;
     struct pci_dev *dev;
@@ -148,13 +125,15 @@ void ffPrintGPU(FFinstance* instance)
             strcasecmp("3D controller", class)             == 0 ||
             strcasecmp("Display controller", class)        == 0 )
         {
-            handleGPU(instance, pacc, dev, counter++, ffpci_lookup_name);
+            handleGPU(instance, pacc, dev, &cache, counter++, ffpci_lookup_name);
         }
     }
     ffpci_cleanup(pacc);
 
+    ffCacheClose(&cache);
+
     dlclose(pci);
 
     if(counter == 1)
-        ffPrintError(instance, &key, NULL, "No GPU found");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPU found");
 }

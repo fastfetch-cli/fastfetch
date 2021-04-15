@@ -52,8 +52,8 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index);
 
-void ffStrbufWriteTo(FFstrbuf* strbuf, FILE* file);
-void ffStrbufPutTo(FFstrbuf* strbuf, FILE* file);
+void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
+void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
 int ffStrbufComp(FFstrbuf* strbuf, const FFstrbuf* comp);
 int ffStrbufCompS(FFstrbuf* strbuf, const char* comp);

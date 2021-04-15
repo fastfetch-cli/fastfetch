@@ -1,11 +1,7 @@
 #include "fastfetch.h"
 
-void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp)
+void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments)
 {
-    FFformatarg arguments[numArgs];
-    for(uint32_t i = 0; i < numArgs; i++)
-        arguments[i] = (FFformatarg) va_arg(argp, FFformatarg);
-
     uint32_t argCounter = 1; //First arg is 1 in fomat string
 
     for(uint32_t i = 0; i < formatstr->length; ++i)
@@ -51,11 +47,23 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
                 ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
 
             if(
+                ffStrbufIgnCaseCompS(&argnumstr, "e") == 0 ||
+                ffStrbufIgnCaseCompS(&argnumstr, "error") == 0 ||
+                ffStrbufIgnCaseCompS(&argnumstr, "0") == 0
+            ) {
+                ffStrbufAppend(buffer, error);
+                ffStrbufDestroy(&argnumstr);
+                continue;
+            }
+
+            //Test if argnumstr is valid
+            if(
                 argnumstr.length == 0 ||
                 ffStrbufGetC(&argnumstr, 0) == '-' ||
                 sscanf(argnumstr.chars, "%u", &argIndex) != 1 ||
                 argIndex > numArgs
             ) {
+                //Not valid
                 ffStrbufAppendC(buffer, '{');
                 ffStrbufAppend(buffer, &argnumstr);
                 if(formatstr->chars[i] == '}') // We dont have a closing { when ending because whole format string is over
@@ -67,9 +75,6 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
             ffStrbufDestroy(&argnumstr);
         }
 
-        if(argIndex == 0)
-            argIndex = 1;
-
         FFformatarg arg = arguments[argIndex - 1];
 
         if(arg.type == FF_FORMAT_ARG_TYPE_INT)
@@ -77,14 +82,14 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
         else if(arg.type == FF_FORMAT_ARG_TYPE_UINT)
             ffStrbufAppendF(buffer, "%u", *(uint32_t*)arg.value);
         else if(arg.type == FF_FORMAT_ARG_TYPE_UINT8)
-            ffStrbufAppendF(buffer, "%u", *(uint8_t*)arg.value);
+            ffStrbufAppendF(buffer, "%hhu", *(uint8_t*)arg.value);
         else if(arg.type == FF_FORMAT_ARG_TYPE_STRING)
             ffStrbufAppendF(buffer, "%s", (const char*)arg.value);
         else if(arg.type == FF_FORMAT_ARG_TYPE_STRBUF)
             ffStrbufAppend(buffer, (FFstrbuf*)arg.value);
         else if(arg.type == FF_FORMAT_ARG_TYPE_DOUBLE)
             ffStrbufAppendF(buffer, "%g", *(double*)arg.value);
-        else
+        else if(arg.type != FF_FORMAT_ARG_TYPE_NULL)
         {
             fprintf(stderr, "Error: format string \"%s\" argument is not implemented\n", formatstr->chars);
             ffStrbufDestroy(buffer);
@@ -93,33 +98,4 @@ void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArg
     }
 
     ffStrbufTrimRight(buffer, ' ');
-}
-
-void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...)
-{
-    va_list argp;
-    va_start(argp, numArgs);
-    ffParseFormatStringV(buffer, formatstr, numArgs, argp);
-    va_end(argp);
-}
-
-void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...)
-{
-    FFstrbuf buffer;
-    ffStrbufInitA(&buffer, 256);
-
-    va_list argp;
-    va_start(argp, numArgs);
-
-    ffParseFormatStringV(&buffer, formatstr, numArgs, argp);
-
-    va_end(argp);
-
-    if(buffer.length > 0)
-    {
-        ffPrintLogoAndKey(instance, customKey, defKey);
-        ffStrbufPutTo(&buffer, stdout);
-    }
-
-    ffStrbufDestroy(&buffer);
 }

@@ -2,6 +2,9 @@
 
 #include <string.h>
 
+#define FF_CPU_MODULE_NAME "CPU"
+#define FF_CPU_NUM_FORMAT_ARGS 13
+
 static double getGhz(const char* file)
 {
     FF_STRBUF_CREATE(content);
@@ -22,13 +25,13 @@ static double getGhz(const char* file)
 
 void ffPrintCPU(FFinstance* instance)
 {
-    if(ffPrintCachedValue(instance, &instance->config.cpuKey, "CPU"))
+    if(ffPrintFromCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS))
         return;
 
     FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
     {
-        ffPrintError(instance, &instance->config.cpuKey, "CPU", "fopen(\"/proc/cpuinfo\", \"r\") == NULL");
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "fopen(\"/proc/cpuinfo\", \"r\") == NULL");
         return;
     }
 
@@ -87,7 +90,7 @@ void ffPrintCPU(FFinstance* instance)
         numProcs <= 1 &&
         ghz <= 0
     ) {
-        ffPrintError(instance, &instance->config.cpuKey, "CPU", "No CPU info found in /proc/cpuinfo");
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "No CPU info found in /proc/cpuinfo");
         return;
     }
 
@@ -103,47 +106,40 @@ void ffPrintCPU(FFinstance* instance)
     FFstrbuf cpu;
     ffStrbufInitA(&cpu, 128);
 
-    if(instance->config.cpuFormat.length == 0)
+    if(namePretty.length > 0)
+        ffStrbufAppend(&cpu, &namePretty);
+    else if(name[0] != '\0')
+        ffStrbufAppendS(&cpu, name);
+    else if(vendor[0] != '\0')
     {
-
-        if(namePretty.length > 0)
-            ffStrbufAppend(&cpu, &namePretty);
-        else if(name[0] != '\0')
-            ffStrbufAppendS(&cpu, name);
-        else if(vendor[0] != '\0')
-        {
-            ffStrbufAppendS(&cpu, vendor);
-            ffStrbufAppendS(&cpu, " unknown processor");
-        }
-        else
-            ffStrbufAppendS(&cpu, " unknown processor");
-
-        if(numProcs > 1)
-            ffStrbufAppendF(&cpu, " (%i)", numProcs);
-
-        if(ghz > 0)
-            ffStrbufAppendF(&cpu, " @ %.9gGHz", ghz);
+        ffStrbufAppendS(&cpu, vendor);
+        ffStrbufAppendS(&cpu, " unknown processor");
     }
     else
-    {
-        ffParseFormatString(&cpu, &instance->config.cpuFormat, 13,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, name},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRING, vendor},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &numProcsOnline},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &numProcsAvailable},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &physicalCores},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &biosLimit},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_INT, &numProcs},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMaxFreq},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMinFreq},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &infoMaxFreq},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &infoMinFreq},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_DOUBLE, &ghz}
-        );
-    }
+        ffStrbufAppendS(&cpu, " unknown processor");
 
-    ffPrintAndSaveCachedValue(instance, &instance->config.cpuKey, "CPU", &cpu);
+    if(numProcs > 1)
+        ffStrbufAppendF(&cpu, " (%i)", numProcs);
+
+    if(ghz > 0)
+        ffStrbufAppendF(&cpu, " @ %.9gGHz", ghz);
+
+    ffPrintAndSaveToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &cpu, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+        {FF_FORMAT_ARG_TYPE_STRING, name},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
+        {FF_FORMAT_ARG_TYPE_STRING, vendor},
+        {FF_FORMAT_ARG_TYPE_INT, &numProcsOnline},
+        {FF_FORMAT_ARG_TYPE_INT, &numProcsAvailable},
+        {FF_FORMAT_ARG_TYPE_INT, &physicalCores},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &biosLimit},
+        {FF_FORMAT_ARG_TYPE_INT, &numProcs},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMaxFreq},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMinFreq},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &infoMaxFreq},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &infoMinFreq},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &ghz}
+    });
+
     ffStrbufDestroy(&namePretty);
     ffStrbufDestroy(&cpu);
 }

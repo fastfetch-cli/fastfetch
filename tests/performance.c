@@ -31,7 +31,7 @@ int main(int argc, char** argv)
         ffLoadLogoSet(&instance.config, "arch");
         ffStrbufSetS(&instance.config.color, instance.config.logo.color);
         instance.config.showErrors = true;
-        instance.config.recache = true;
+        instance.config.recache = argc == 1;
         instance.config.cacheSave = false;
     )
 

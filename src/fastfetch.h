@@ -13,6 +13,8 @@
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
+#include "fastfetch_config.h"
+
 #include "util/FFstrbuf.h"
 
 #define UNUSED(...) (void)(__VA_ARGS__)
@@ -37,7 +39,7 @@ typedef struct FFconfig
     FFstrbuf seperator;
     int16_t offsetx;
     FFstrbuf color;
-    uint8_t titleLength;
+    uint32_t titleLength;
     bool colorLogo;
     bool showErrors;
     bool recache;
@@ -117,7 +119,8 @@ typedef enum FFformatargtype
     FF_FORMAT_ARG_TYPE_INT,
     FF_FORMAT_ARG_TYPE_STRING,
     FF_FORMAT_ARG_TYPE_STRBUF,
-    FF_FORMAT_ARG_TYPE_DOUBLE
+    FF_FORMAT_ARG_TYPE_DOUBLE,
+    FF_FORMAT_ARG_TYPE_NULL
 } FFformatargtype;
 
 typedef struct FFformatarg
@@ -125,6 +128,12 @@ typedef struct FFformatarg
     FFformatargtype type;
     const void* value;
 } FFformatarg;
+
+typedef struct FFcache
+{
+    FILE* value;
+    FILE* split;
+} FFcache;
 
 /*************************/
 /* Common util functions */
@@ -138,15 +147,22 @@ void ffFinish(FFinstance* instance);
 void ffStartCalculationThreads(FFinstance* instance);
 
 //common/io.c
-void ffPrintKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
-void ffPrintLogoAndKey(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
-void ffPrintError(FFinstance* instance, FFstrbuf* customKey, const char* defKey, const char* message, ...);
+void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
+void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
+void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
+bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs);
+void ffPrintAndSaveToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
+void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
+
+void ffCacheValidate(FFinstance* instance);
+void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache);
+void ffCacheClose(FFcache* cache);
+
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
+
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
-bool ffPrintCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey);
-void ffPrintAndSaveCachedValue(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* value);
 
 //common/logo.c
 void ffLoadLogoSet(FFconfig* config, const char* logo);
@@ -160,9 +176,7 @@ void ffPrintRemainingLogo(FFinstance* instance);
 #endif
 
 //common/format.c
-void ffParseFormatStringV(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, va_list argp);
-void ffParseFormatString(FFstrbuf* buffer, FFstrbuf* formatstr, uint32_t numArgs, ...);
-void ffPrintFormatString(FFinstance* instance, FFstrbuf* customKey, const char* defKey, FFstrbuf* formatstr, uint32_t numArgs, ...);
+void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
 
 //common/parsing.c
 void ffGetGtkPretty(FFstrbuf* buffer, FFstrbuf* gtk2, FFstrbuf* gtk3, FFstrbuf* gtk4);

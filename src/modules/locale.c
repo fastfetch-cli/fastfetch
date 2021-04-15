@@ -2,58 +2,47 @@
 
 #include <string.h>
 
+#define FF_LOCALE_MODULE_NAME "Locale"
+#define FF_LOCALE_NUM_FORMAT_ARGS 1
+
 void ffPrintLocale(FFinstance* instance)
 {
-	if(ffPrintCachedValue(instance, &instance->config.localeKey, "Locale"))
-		return;
+	if(ffPrintFromCache(instance, FF_LOCALE_MODULE_NAME, &instance->config.localeKey, &instance->config.localeFormat, FF_LOCALE_NUM_FORMAT_ARGS))
+        return;
 
 	char localeCode[256];
 
-	/* Try to open /etc/locale.conf in read-only mode */
 	FILE *fp;
 	fp = fopen("/etc/locale.conf", "r");
 
-	/* File does not exist */
 	if (fp == NULL) {
-		/* Check if LANG exists */
 		if (getenv("LANG") != NULL)
 			strcpy(localeCode, getenv("LANG"));
-		/* Check if LC_ALL exists */
 		else if (getenv("LC_ALL") != NULL)
 			strcpy(localeCode, getenv("LC_ALL"));
-		/* Check if LC_CTYPE exists */
 		else if (getenv("LC_CTYPE") != NULL)
 			strcpy(localeCode, getenv("LC_CTYPE"));
-		/* Check if LC_CTYPE exists */
 		else if (getenv("LC_CTYPE") != NULL)
 			strcpy(localeCode, getenv("LC_CTYPE"));
-		/* Check if LC_MESSAGES exists */
 		else if (getenv("LC_MESSAGES") != NULL)
 			strcpy(localeCode, getenv("LC_MESSAGES"));
-		/* User has broken system */
-		else
-			ffPrintError(instance, &instance->config.localeKey, "Locale", "Locale not found!");
-		/* /etc/locale.conf exists */
 	} else {
 		ffParsePropFile("/etc/locale.conf", "LANG=%[^\n]", localeCode);
-
-		/* Free pointer to file */
 		fclose(fp);
 	}
 
+    if(localeCode[0] == '\0')
+    {
+        ffPrintError(instance, FF_LOCALE_MODULE_NAME, 0, &instance->config.localeKey, &instance->config.localeFormat, FF_LOCALE_NUM_FORMAT_ARGS, "No locale found");
+        return;
+    }
+
 	FF_STRBUF_CREATE(locale);
+    ffStrbufSetS(&locale, localeCode);
 
-	if(instance->config.localeFormat.length == 0)
-	{
-		ffStrbufSetS(&locale, localeCode);
-	}
-	else
-	{
-		ffParseFormatString(&locale, &instance->config.localeFormat, 1,
-			(FFformatarg){FF_FORMAT_ARG_TYPE_STRING, localeCode}
-		);
-	}
+    ffPrintAndSaveToCache(instance, FF_LOCALE_MODULE_NAME, &instance->config.localeKey, &locale, &instance->config.localeFormat, FF_LOCALE_NUM_FORMAT_ARGS, (FFformatarg[]){
+        {FF_FORMAT_ARG_TYPE_STRING, localeCode}
+    });
 
-	ffPrintAndSaveCachedValue(instance, &instance->config.localeKey, "Locale", &locale);
 	ffStrbufDestroy(&locale);
 }

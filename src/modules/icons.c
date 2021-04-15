@@ -1,5 +1,8 @@
 #include "fastfetch.h"
 
+#define FF_ICONS_MODULE_NAME "Icons"
+#define FF_ICONS_NUM_FORMAT_ARGS 5
+
 void ffPrintIcons(FFinstance* instance)
 {
     FFstrbuf* plasma;
@@ -16,7 +19,7 @@ void ffPrintIcons(FFinstance* instance)
 
     if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
-        ffPrintError(instance, &instance->config.iconsKey, "Icons", "No icons found");
+        ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey, &instance->config.iconsFormat, FF_ICONS_NUM_FORMAT_ARGS, "No icons could be found");
         return;
     }
 
@@ -25,7 +28,7 @@ void ffPrintIcons(FFinstance* instance)
 
     if(instance->config.iconsFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.iconsKey, "Icons");
+        ffPrintLogoAndKey(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey);
 
         if(plasma->length > 0)
         {
@@ -40,13 +43,13 @@ void ffPrintIcons(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.iconsKey, "Icons", &instance->config.iconsFormat, 5,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, plasma},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
-        );
+        ffPrintFormatString(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey, &instance->config.iconsFormat, NULL, FF_ICONS_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, plasma},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
+            {FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
+        });
     }
 
     ffStrbufDestroy(&gtkPretty);

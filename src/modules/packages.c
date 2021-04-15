@@ -2,6 +2,9 @@
 
 #include <dirent.h>
 
+#define FF_PACKAGES_MODULE_NAME "Packages"
+#define FF_PACKAGES_NUM_FORMAT_ARGS 3
+
 static uint32_t get_num_dirs(const char* dirname) {
     uint32_t num_dirs = 0;
     DIR * dirp;
@@ -32,13 +35,13 @@ void ffPrintPackages(FFinstance* instance)
 
     if(all == 0)
     {
-        ffPrintError(instance,  &instance->config.packagesKey, "Packages", "No packages from known package managers found");
+        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, FF_PACKAGES_NUM_FORMAT_ARGS, "No packages from known package managers found");
         return;
     }
 
     if(instance->config.packagesFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.packagesKey, "Packages");
+        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.batteryKey);
 
         #define FF_PRINT_PACKAGE(name) \
         if(name > 0) \
@@ -57,10 +60,10 @@ void ffPrintPackages(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.packagesKey, "Packages", &instance->config.packagesFormat, 3,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &all},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &pacman},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &flatpak}
-        );
+        ffPrintFormatString(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, NULL, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_UINT, &all},
+            {FF_FORMAT_ARG_TYPE_UINT, &pacman},
+            {FF_FORMAT_ARG_TYPE_UINT, &flatpak}
+        });
     }
 }

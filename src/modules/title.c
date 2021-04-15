@@ -8,7 +8,7 @@ void ffPrintTitle(FFinstance* instance)
     char hostname[256];
     gethostname(hostname, 256);
 
-    instance->config.titleLength = strlen(instance->state.passwd->pw_name) + 1 + strlen(hostname);
+    instance->config.titleLength = (uint32_t) strlen(instance->state.passwd->pw_name) + 1 + strlen(hostname);
 
     ffPrintLogoLine(instance);
 

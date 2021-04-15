@@ -1,5 +1,8 @@
 #include "fastfetch.h"
 
+#define FF_UPTIME_MODULE_NAME "Uptime"
+#define FF_UPTIME_NUM_FORMAT_ARGS 4
+
 void ffPrintUptime(FFinstance* instance)
 {
     uint32_t days    =  instance->state.sysinfo.uptime / 86400;
@@ -9,7 +12,7 @@ void ffPrintUptime(FFinstance* instance)
 
     if(instance->config.uptimeFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, &instance->config.uptimeKey, "Uptime");
+        ffPrintLogoAndKey(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptimeKey);
 
         if(days == 0 && hours == 0 && minutes == 0)
         {
@@ -28,11 +31,11 @@ void ffPrintUptime(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.uptimeKey, "Uptime", &instance->config.uptimeFormat, 4,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &days},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &hours},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &minutes},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_UINT, &seconds}
-        );
+        ffPrintFormatString(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptimeKey, &instance->config.uptimeFormat, NULL, FF_UPTIME_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_UINT, &days},
+            {FF_FORMAT_ARG_TYPE_UINT, &hours},
+            {FF_FORMAT_ARG_TYPE_UINT, &minutes},
+            {FF_FORMAT_ARG_TYPE_UINT, &seconds}
+        });
     }
 }

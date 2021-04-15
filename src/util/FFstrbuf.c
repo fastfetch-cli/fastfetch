@@ -203,7 +203,7 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     va_copy(localArguments, arguments);
 
     ffStrbufEnsureFree(strbuf, 256);
-    int written = vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length, format, localArguments);
+    uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length, format, localArguments);
 
     va_end(localArguments);
 
@@ -227,12 +227,12 @@ char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index)
     return strbuf->chars[index];
 }
 
-void ffStrbufWriteTo(FFstrbuf* strbuf, FILE* file)
+void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file)
 {
     fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
 }
 
-void ffStrbufPutTo(FFstrbuf* strbuf, FILE* file)
+void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
 {
     fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
     fputc('\n', file);
@@ -462,7 +462,4 @@ void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);
-    strbuf->allocated = 0;
-    strbuf->chars = NULL;
-    strbuf->length = 0;
 }

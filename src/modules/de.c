@@ -2,6 +2,9 @@
 
 #include <string.h>
 
+#define FF_DE_MODULE_NAME "DE"
+#define FF_DE_NUM_FORMAT_ARGS 3
+
 static void getKDE(FFstrbuf* name, FFstrbuf* version, FFstrbuf* type)
 {
     UNUSED(type);
@@ -45,7 +48,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
 
     if(sessionDesktop.length == 0 && sessionType.length == 0)
     {
-        ffPrintError(instance, &instance->config.deKey, "DE", "No relevant XDG_SESSION_* environment variable set");
+        ffPrintError(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, FF_DE_NUM_FORMAT_ARGS, "No relevant XDG_SESSION_* environment variable set");
         ffStrbufDestroy(&sessionDesktop);
         ffStrbufDestroy(&sessionVersion);
         ffStrbufDestroy(&sessionType);
@@ -55,7 +58,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     if(instance->config.deFormat.length == 0)
     {
 
-        ffPrintLogoAndKey(instance, &instance->config.deKey, "DE");
+        ffPrintLogoAndKey(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey);
 
         if(sessionDesktop.length > 0)
         {
@@ -78,12 +81,13 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, &instance->config.deFormat, "DE", &instance->config.deFormat, 3,
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionDesktop},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionVersion},
-            (FFformatarg){FF_FORMAT_ARG_TYPE_STRBUF, &sessionType}
-        );
+        ffPrintFormatString(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, NULL, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &sessionDesktop},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &sessionVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &sessionType}
+        });
     }
+
     ffStrbufDestroy(&sessionDesktop);
     ffStrbufDestroy(&sessionVersion);
     ffStrbufDestroy(&sessionType);
