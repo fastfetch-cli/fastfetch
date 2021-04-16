@@ -83,6 +83,14 @@ void ffInitInstance(FFinstance* instance)
     ffCacheValidate(instance);
 }
 
+void ffCalculatePlasmaAndGtk(FFinstance* instance)
+{
+    ffCalculatePlasma(instance);
+    ffCalculateGTK2(instance);
+    ffCalculateGTK3(instance);
+    ffCalculateGTK3(instance);
+}
+
 static void ffCleanup(FFinstance* instance)
 {
     UNUSED(instance);

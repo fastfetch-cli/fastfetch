@@ -5,34 +5,24 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
-    FFstrbuf* plasma;
-    ffCalculatePlasma(instance, NULL, NULL, &plasma, NULL);
+    ffCalculatePlasmaAndGtk(instance);
 
-    FFstrbuf* gtk2;
-    ffCalculateGTK2(instance, NULL, &gtk2, NULL);
-
-    FFstrbuf* gtk3;
-    ffCalculateGTK3(instance, NULL, &gtk3, NULL);
-
-    FFstrbuf* gtk4;
-    ffCalculateGTK4(instance, NULL, &gtk4, NULL);
-
-    if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
+    if(instance->state.plasma.icons.length == 0 && instance->state.gtk2.icons.length == 0 && instance->state.gtk3.icons.length == 0 && instance->state.gtk4.icons.length == 0)
     {
         ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey, &instance->config.iconsFormat, FF_ICONS_NUM_FORMAT_ARGS, "No icons could be found");
         return;
     }
 
     FF_STRBUF_CREATE(gtkPretty);
-    ffGetGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
+    ffGetGtkPretty(&gtkPretty, &instance->state.gtk2.icons, &instance->state.gtk3.icons, &instance->state.gtk4.icons);
 
     if(instance->config.iconsFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey);
 
-        if(plasma->length > 0)
+        if(instance->state.plasma.icons.length > 0)
         {
-            ffStrbufWriteTo(plasma, stdout);
+            ffStrbufWriteTo(&instance->state.plasma.icons, stdout);
             fputs(" [Plasma]", stdout);
 
             if(gtkPretty.length > 0)
@@ -44,10 +34,10 @@ void ffPrintIcons(FFinstance* instance)
     else
     {
         ffPrintFormatString(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey, &instance->config.iconsFormat, NULL, FF_ICONS_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, plasma},
-            {FF_FORMAT_ARG_TYPE_STRBUF, gtk2},
-            {FF_FORMAT_ARG_TYPE_STRBUF, gtk3},
-            {FF_FORMAT_ARG_TYPE_STRBUF, gtk4},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.plasma.icons},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.gtk2.icons},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.gtk3.icons},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.gtk4.icons},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         });
     }

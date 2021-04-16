@@ -35,17 +35,16 @@ static void printKWin(FFinstance* instance)
 
 void ffPrintWMTheme(FFinstance* instance)
 {
-    FFstrbuf* wmName;
-    ffCalculateWM(instance, &wmName, NULL, NULL);
+    ffCalculateWM(instance);
 
-    if(wmName->length == 0)
+    if(instance->state.wm.prettyName.length == 0)
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "WM Theme needs sucessfull WM detection");
         return;
     }
 
-    if(ffStrbufIgnCaseCompS(wmName, "KWin") == 0)
+    if(ffStrbufIgnCaseCompS(&instance->state.wm.prettyName, "KWin") == 0)
         printKWin(instance);
     else
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", wmName->chars);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", instance->state.wm.prettyName.chars);
 }

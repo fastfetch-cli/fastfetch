@@ -4,37 +4,37 @@
 
 static inline void* calculatePlasmaThreadMain(void* instance)
 {
-    ffCalculatePlasma((FFinstance*)instance, NULL, NULL, NULL, NULL);
+    ffCalculatePlasma((FFinstance*)instance);
     return NULL;
 }
 
 static inline void* calculateGTK2ThreadMain(void* instance)
 {
-    ffCalculateGTK2((FFinstance*)instance, NULL, NULL, NULL);
+    ffCalculateGTK2((FFinstance*)instance);
     return NULL;
 }
 
 static inline void* calculateGTK3ThreadMain(void* instance)
 {
-    ffCalculateGTK3((FFinstance*)instance, NULL, NULL, NULL);
+    ffCalculateGTK3((FFinstance*)instance);
     return NULL;
 }
 
 static inline void* calculateGTK4ThreadMain(void* instance)
 {
-    ffCalculateGTK4((FFinstance*)instance, NULL, NULL, NULL);
+    ffCalculateGTK4((FFinstance*)instance);
     return NULL;
 }
 
 static inline void* calculateWMThreadMain(void* instance)
 {
-    ffCalculateWM((FFinstance*)instance, NULL, NULL, NULL);
+    ffCalculateWM((FFinstance*)instance);
     return NULL;
 }
 
 static inline void* calculateTerminalThreadMain(void* instance)
 {
-    ffCalculateTerminal((FFinstance*)instance, NULL, NULL, NULL);
+    ffCalculateTerminal((FFinstance*)instance);
     return NULL;
 }
 

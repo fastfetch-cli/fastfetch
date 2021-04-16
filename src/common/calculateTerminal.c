@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exeName, FFstrbuf* processName, FFstrbuf* error)
+static void getTerminalName(FFinstance* instance, const char* pid)
 {
     char statFile[234];
     sprintf(statFile, "/proc/%s/stat", pid);
@@ -12,7 +12,7 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exe
     FILE* stat = fopen(statFile, "r");
     if(stat == NULL)
     {
-        ffStrbufSetF(error, "fopen(\"%s\", \"r\") == NULL", statFile);
+        ffStrbufSetF(&instance->state.terminal.error, "fopen(\"%s\", \"r\") == NULL", statFile);
         return;
     }
 
@@ -20,7 +20,7 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exe
     char ppid[256];
     if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
     {
-        ffStrbufSetS(error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        ffStrbufSetS(&instance->state.terminal.error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
         return;
     }
 
@@ -37,37 +37,24 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFstrbuf* exe
         strcasecmp(name, "doas")   == 0 ||
         strcasecmp(name, "strace") == 0 )
     {
-        getTerminalName(instance, ppid, exeName, processName, error);
+        getTerminalName(instance, ppid);
         return;
     }
 
     char cmdlineFile[234];
     sprintf(cmdlineFile, "/proc/%s/cmdline", pid);
 
-    ffGetFileContent(cmdlineFile, exeName);
-    ffStrbufSubstrBeforeFirstC(exeName, '\0');
-    ffStrbufSubstrAfterLastC(exeName, '/');
+    ffGetFileContent(cmdlineFile, &instance->state.terminal.exeName);
+    ffStrbufSubstrBeforeFirstC(&instance->state.terminal.exeName, '\0');
+    ffStrbufSubstrAfterLastC(&instance->state.terminal.exeName, '/');
 
-    ffStrbufSetS(processName, name);
+    ffStrbufSetS(&instance->state.terminal.processName, name);
 }
 
-void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr)
+void ffCalculateTerminal(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-    static FFstrbuf exeName;
-    static FFstrbuf processName;
-    static FFstrbuf error;
     static bool init = false;
-
-    if(exeNamePtr != NULL)
-        *exeNamePtr = &exeName;
-
-    if(processNamePtr != NULL)
-        *processNamePtr = &processName;
-
-    if(errorPtr != NULL)
-        *errorPtr = &error;
 
     pthread_mutex_lock(&mutex);
 
@@ -78,14 +65,14 @@ void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf**
     }
     init = true;
 
-    ffStrbufInit(&exeName);
-    ffStrbufInit(&processName);
-    ffStrbufInit(&error);
+    ffStrbufInit(&instance->state.terminal.exeName);
+    ffStrbufInit(&instance->state.terminal.processName);
+    ffStrbufInit(&instance->state.terminal.error);
 
     char ppid[256];
     sprintf(ppid, "%i", getppid());
 
-    getTerminalName(instance, ppid, &exeName, &processName, &error);
+    getTerminalName(instance, ppid);
 
     pthread_mutex_unlock(&mutex);
 }

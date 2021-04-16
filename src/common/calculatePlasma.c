@@ -11,27 +11,10 @@ typedef enum PlasmaCategory
     PLASMA_CATEGORY_OTHER
 } PlasmaCategory;
 
-void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** colorNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr)
+void ffCalculatePlasma(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-    static FFstrbuf themeName;
-    static FFstrbuf colorName;
-    static FFstrbuf iconsName;
-    static FFstrbuf fontName;
     static bool init = false;
-
-    if(themeNamePtr != NULL)
-        *themeNamePtr = &themeName;
-
-    if(colorNamePtr != NULL)
-        *colorNamePtr = &colorName;
-
-    if(iconsNamePtr != NULL)
-        *iconsNamePtr = &iconsName;
-
-    if(fontNamePtr != NULL)
-        *fontNamePtr = &fontName;
 
     pthread_mutex_lock(&mutex);
 
@@ -43,10 +26,10 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
 
     init = true;
 
-    ffStrbufInit(&themeName);
-    ffStrbufInit(&colorName);
-    ffStrbufInit(&iconsName);
-    ffStrbufInit(&fontName);
+    ffStrbufInit(&instance->state.plasma.widgetStyle);
+    ffStrbufInit(&instance->state.plasma.colorScheme);
+    ffStrbufInit(&instance->state.plasma.icons);
+    ffStrbufInit(&instance->state.plasma.font);
 
     FF_STRBUF_CREATE(kdeglobalsFile);
     ffStrbufAppendS(&kdeglobalsFile, instance->state.passwd->pw_dir);
@@ -86,28 +69,28 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
 
         if(category == PLASMA_CATEGORY_KDE)
         {
-            sscanf(line, "widgetStyle=%[^\n]", themeName.chars);
-            sscanf(line, "widgetStyle=\"%[^\"]+", themeName.chars);
+            sscanf(line, "widgetStyle=%[^\n]", instance->state.plasma.widgetStyle.chars);
+            sscanf(line, "widgetStyle=\"%[^\"]+", instance->state.plasma.widgetStyle.chars);
         }
         else if(category == PLASMA_CATEGORY_GENERAL)
         {
-            sscanf(line, "ColorScheme=%[^\n]", colorName.chars);
-            sscanf(line, "ColorScheme=\"%[^\"]+", colorName.chars);
+            sscanf(line, "ColorScheme=%[^\n]", instance->state.plasma.colorScheme.chars);
+            sscanf(line, "ColorScheme=\"%[^\"]+", instance->state.plasma.colorScheme.chars);
 
-            sscanf(line, "font=%[^\n]", fontName.chars);
-            sscanf(line, "font=\"%[^\"]+", fontName.chars);
+            sscanf(line, "font=%[^\n]", instance->state.plasma.font.chars);
+            sscanf(line, "font=\"%[^\"]+", instance->state.plasma.font.chars);
         }
         else if(category == PLASMA_CATEGORY_ICONS)
         {
-            sscanf(line, "Theme=%[^\n]", iconsName.chars);
-            sscanf(line, "Theme=\"%[^\"]+", iconsName.chars);
+            sscanf(line, "Theme=%[^\n]", instance->state.plasma.icons.chars);
+            sscanf(line, "Theme=\"%[^\"]+", instance->state.plasma.icons.chars);
         }
     }
 
-    ffStrbufRecalculateLength(&themeName);
-    ffStrbufRecalculateLength(&colorName);
-    ffStrbufRecalculateLength(&iconsName);
-    ffStrbufRecalculateLength(&fontName);
+    ffStrbufRecalculateLength(&instance->state.plasma.widgetStyle);
+    ffStrbufRecalculateLength(&instance->state.plasma.colorScheme);
+    ffStrbufRecalculateLength(&instance->state.plasma.icons);
+    ffStrbufRecalculateLength(&instance->state.plasma.font);
 
     if(line != NULL)
         free(line);
@@ -117,17 +100,17 @@ void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf**
 
     //In Plasma the default value is never set in the config file, but the whole key-value is discarded.
     ///We must set these values by our self if the file exists (it always does here)
-    if(themeName.length == 0)
-        ffStrbufAppendS(&themeName, "Breeze");
+    if(instance->state.plasma.widgetStyle.length == 0)
+        ffStrbufAppendS(&instance->state.plasma.widgetStyle, "Breeze");
 
-    if(colorName.length == 0)
-        ffStrbufAppendS(&colorName, "BreezeLight");
+    if(instance->state.plasma.colorScheme.length == 0)
+        ffStrbufAppendS(&instance->state.plasma.colorScheme, "BreezeLight");
 
-    if(iconsName.length == 0)
-        ffStrbufAppendS(&iconsName, "Breeze");
+    if(instance->state.plasma.icons.length == 0)
+        ffStrbufAppendS(&instance->state.plasma.icons, "Breeze");
 
-    if(fontName.length == 0)
-        ffStrbufAppendS(&fontName, "Noto Sans, 10");
+    if(instance->state.plasma.font.length == 0)
+        ffStrbufAppendS(&instance->state.plasma.font, "Noto Sans, 10");
 
     pthread_mutex_unlock(&mutex);
 }

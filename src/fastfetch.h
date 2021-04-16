@@ -99,12 +99,48 @@ typedef struct FFconfig
 
 } FFconfig;
 
+typedef struct FFgtkval
+{
+    FFstrbuf theme;
+    FFstrbuf icons;
+    FFstrbuf font;
+} FFgtkval;
+
 typedef struct FFstate
 {
     uint8_t current_row;
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
+
+    //Values needed in more than one module / calculated together / calculated in extra threads
+
+    struct
+    {
+        FFstrbuf widgetStyle;
+        FFstrbuf colorScheme;
+        FFstrbuf icons;
+        FFstrbuf font;
+    } plasma;
+
+    FFgtkval gtk2;
+    FFgtkval gtk3;
+    FFgtkval gtk4;
+
+    struct
+    {
+        FFstrbuf exeName;
+        FFstrbuf processName;
+        FFstrbuf error;
+    } terminal;
+
+    struct
+    {
+        FFstrbuf processName;
+        FFstrbuf prettyName;
+        FFstrbuf error;
+    } wm;
+
 } FFstate;
 
 typedef struct FFinstance
@@ -143,6 +179,7 @@ typedef struct FFcache
 //common/init.c
 void ffInitInstance(FFinstance* instance);
 void ffFinish(FFinstance* instance);
+void ffCalculatePlasmaAndGtk(FFinstance* instance);
 
 //common/threading.c
 void ffStartCalculationThreads(FFinstance* instance);
@@ -186,18 +223,18 @@ void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
 //common/calculatePlasma.c
-void ffCalculatePlasma(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** colorNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+void ffCalculatePlasma(FFinstance* instance);
 
 //common/calculateGTK.c
-void ffCalculateGTK2(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
-void ffCalculateGTK4(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
-void ffCalculateGTK3(FFinstance* instance, FFstrbuf** themeNamePtr, FFstrbuf** iconsNamePtr, FFstrbuf** fontNamePtr);
+void ffCalculateGTK2(FFinstance* instance);
+void ffCalculateGTK4(FFinstance* instance);
+void ffCalculateGTK3(FFinstance* instance);
 
 //common/calculateWM.c
-void ffCalculateWM(FFinstance* instance, FFstrbuf** prettyNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr);
+void ffCalculateWM(FFinstance* instance);
 
 //common/calculateTerminal.c
-void ffCalculateTerminal(FFinstance* instance, FFstrbuf** exeNamePtr, FFstrbuf** processNamePtr, FFstrbuf** errorPtr);
+void ffCalculateTerminal(FFinstance* instance);
 
 /********************/
 /* Module functions */
