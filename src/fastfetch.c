@@ -759,15 +759,6 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)
 {
-    //This is generally a good idea, because cached values most likely contain values generated with other arguments
-    //Hovwever we dont do this with arguments in the config file, because they are more likely to stay the same
-    //If caching is _really_ wanted (e.g. a call in .bashrc with arguments), one can still set --recache false
-    if(argc > 1)
-    {
-        instance->config.recache = true;
-        instance->config.cacheSave = false;
-    }
-
     for(int i = 1; i < argc; i++)
     {
         if(i == argc - 1 || argv[i + 1][0] == '-')
