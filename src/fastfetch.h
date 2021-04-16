@@ -177,6 +177,7 @@ void ffPrintRemainingLogo(FFinstance* instance);
 #endif
 
 //common/format.c
+void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
 
 //common/parsing.c

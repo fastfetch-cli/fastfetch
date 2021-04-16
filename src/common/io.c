@@ -250,21 +250,11 @@ void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8
 
     for(uint32_t i = 0; i < numArgs; i++)
     {
-        FFformatarg arg = arguments[i];
-
-        if(arg.type == FF_FORMAT_ARG_TYPE_INT)
-            fprintf(cache->split, "%i", *(int*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_UINT)
-            fprintf(cache->split, "%u", *(uint32_t*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_UINT8)
-            fprintf(cache->split, "%hhu", *(uint8_t*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_STRING)
-            fprintf(cache->split, "%s", (const char*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_STRBUF)
-            fprintf(cache->split, "%s", ((FFstrbuf*)arg.value)->chars);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_DOUBLE)
-            fprintf(cache->split, "%g", *(double*)arg.value);
-
+        FFstrbuf buffer;
+        ffStrbufInit(&buffer);
+        ffFormatAppendFormatArg(&buffer, &arguments[i]);
+        ffStrbufWriteTo(&buffer, cache->split);
+        ffStrbufDestroy(&buffer);
         fputc('\0', cache->split);
     }
 }

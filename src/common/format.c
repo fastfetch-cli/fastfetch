@@ -1,5 +1,27 @@
 #include "fastfetch.h"
 
+void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
+{
+    if(formatarg->type == FF_FORMAT_ARG_TYPE_INT)
+        ffStrbufAppendF(buffer, "%i", *(int*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT)
+        ffStrbufAppendF(buffer, "%u", *(uint32_t*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
+        ffStrbufAppendF(buffer, "%hhu", *(uint8_t*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRING)
+        ffStrbufAppendF(buffer, "%s", (const char*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRBUF)
+        ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
+        ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+    else if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
+    {
+        fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);
+        ffStrbufDestroy(buffer);
+        exit(806);
+    }
+}
+
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments)
 {
     uint32_t argCounter = 1; //First arg is 1 in fomat string
@@ -75,26 +97,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
             ffStrbufDestroy(&argnumstr);
         }
 
-        FFformatarg arg = arguments[argIndex - 1];
-
-        if(arg.type == FF_FORMAT_ARG_TYPE_INT)
-            ffStrbufAppendF(buffer, "%i", *(int*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_UINT)
-            ffStrbufAppendF(buffer, "%u", *(uint32_t*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_UINT8)
-            ffStrbufAppendF(buffer, "%hhu", *(uint8_t*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_STRING)
-            ffStrbufAppendF(buffer, "%s", (const char*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_STRBUF)
-            ffStrbufAppend(buffer, (FFstrbuf*)arg.value);
-        else if(arg.type == FF_FORMAT_ARG_TYPE_DOUBLE)
-            ffStrbufAppendF(buffer, "%g", *(double*)arg.value);
-        else if(arg.type != FF_FORMAT_ARG_TYPE_NULL)
-        {
-            fprintf(stderr, "Error: format string \"%s\" argument is not implemented\n", formatstr->chars);
-            ffStrbufDestroy(buffer);
-            exit(806);
-        }
+        ffFormatAppendFormatArg(buffer, &arguments[argIndex - 1]);
     }
 
     ffStrbufTrimRight(buffer, ' ');
