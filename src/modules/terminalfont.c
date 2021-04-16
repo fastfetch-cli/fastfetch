@@ -78,7 +78,7 @@ void ffPrintTerminalFont(FFinstance* instance)
 
     if(ffStrbufIgnCaseCompS(&instance->state.terminal.exeName, "konsole") == 0)
         printKonsole(instance);
-    else if(ffStrbufStartsWithIgnCaseS(&instance->state.terminal.exeName, "login") == 0)
+    else if(ffStrbufStartsWithIgnCaseS(&instance->state.terminal.exeName, "login"))
         printTTY(instance);
     else
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Terminal Font", "Unknown terminal: %s", instance->state.terminal.exeName.chars);
