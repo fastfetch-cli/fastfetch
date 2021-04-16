@@ -30,6 +30,7 @@ Following libraries are used if present:
 * [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
 * [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
 * [`libDConf`](https://developer.gnome.org/dconf/unstable/DConfClient.html): GTK theme/font/icons output on DEs which dont use config files (e.g. Gnome).
+* [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance + support for monitors with different refresh rates in wayland sessions.  
 
 ## Building
 

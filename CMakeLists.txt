@@ -78,6 +78,8 @@ set(SRCS
     src/modules/packages.c
     src/modules/shell.c
     src/modules/resolution.c
+    src/modules/resolution_x11.c
+    src/modules/resolution_wayland.c
     src/modules/de.c
     src/modules/wm.c
     src/modules/wmtheme.c

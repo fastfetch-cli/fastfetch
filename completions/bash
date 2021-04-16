@@ -178,6 +178,7 @@ __fastfetch_completion()
         "--lib-X11"
         "--lib-Xrandr"
         "--lib-DConf"
+        "--lib-wayland"
     )
 
     local FF_OPTIONS_LOGO=(

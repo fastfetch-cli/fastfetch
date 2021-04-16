@@ -178,10 +178,12 @@ bool printCachedFormat(FFinstance* instance, const char* moduleName, const FFstr
     ffStrbufInitA(&content, 512);
     ffAppendFileContent(cacheFilePath.chars, &content);
 
-    ffStrbufTrimRight(&content, '\0'); //Strbuf always appends a '\0' at the end. We want the last null byte to be at the position of the length
-
     if(content.length == 0)
         return false;
+
+    //Strbuf adds an extra nullbyte at chars[length]. We want this one to be the end of the last value to test for index == length
+    if(content.chars[content.length - 1] == '\0')
+        ffStrbufSubstrBefore(&content, content.length - 1);
 
     uint8_t moduleCounter = 1;
 
@@ -265,8 +267,6 @@ void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8
 
         fputc('\0', cache->split);
     }
-
-    fputc('\0', cache->split);
 }
 
 void ffPrintAndSaveToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments)

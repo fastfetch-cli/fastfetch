@@ -92,6 +92,7 @@ typedef struct FFconfig
     FFstrbuf libPCI;
     FFstrbuf libX11;
     FFstrbuf libXrandr;
+    FFstrbuf libWayland;
     FFstrbuf libDConf;
 
     FFstrbuf diskFolders;
