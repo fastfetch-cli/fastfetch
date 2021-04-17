@@ -161,6 +161,32 @@ static void loadDebianLogo(FFlogo *logo, bool doColor)
     sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s             `\"\"\"          "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadManjaroLogo(FFlogo *logo, bool doColor)
+{
+    logo->width = 28;
+    logo->height = 14;
+    strcpy(logo->name, "manjaro");
+
+    /* color = light green */
+    const char* color = doColor ? "\033[92m" : "";
+    strcpy(logo->color, "\033[92m");
+    
+	sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████            ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+	sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
+}
+
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
     if(strcasecmp(logo, "none") == 0)
@@ -183,6 +209,10 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     else if(strcasecmp(logo, "debian") == 0)
     {
         loadDebianLogo(&config->logo, config->colorLogo);
+    }
+    else if(strcasecmp(logo, "manjaro") == 0)
+    {
+        loadManjaroLogo(&config->logo, config->colorLogo);
     }
     else
     {
@@ -245,7 +275,7 @@ void ffPrintRemainingLogo(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 6
+    #define FASTFETCH_LOGO_AMOUNT 7
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
@@ -258,6 +288,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadArtixLogo(&logos[3], color);
     loadUbuntuLogo(&logos[4], color);
     loadDebianLogo(&logos[5], color);
+    loadManjaroLogo(&logos[6], color);
 
     return logos;
 }
