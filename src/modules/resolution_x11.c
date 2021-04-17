@@ -86,13 +86,6 @@ static int xrandrGetCurrentRate(void* xrandr, Display* display)
     if(ffXRRConfigCurrentRate == NULL)
         return 0;
 
-    XRRMonitorInfo*(*ffXRRGetMonitors)(Display*, Window, Bool, int*) = dlsym(xrandr, "XRRGetMonitors");
-    if(ffXRRGetMonitors == NULL)
-        return 0;
-
-    void(*ffXRRFreeMonitors)(XRRMonitorInfo*) = dlsym(xrandr, "XRRFreeMonitors");
-    if(ffXRRFreeMonitors == NULL)
-        return 0;
 
     XRRScreenConfiguration* xrrscreenconf = ffXRRGetScreenInfo(display, DefaultRootWindow(display));
     if(xrrscreenconf == NULL)
@@ -130,7 +123,7 @@ bool ffPrintResolutionXrandrBackend(FFinstance* instance)
         return false;
 
     int numberOfMonitors;
-    XRRMonitorInfo* monitors = ffXRRGetMonitors(display, RootWindow(display, 0), False, &numberOfMonitors);
+    XRRMonitorInfo* monitors = ffXRRGetMonitors(display, DefaultRootWindow(display), False, &numberOfMonitors);
     if(monitors == NULL)
     {
         xCloseDisplay(xrandr, display);
