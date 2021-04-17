@@ -97,9 +97,15 @@ void ffPrintCPU(FFinstance* instance)
     FFstrbuf namePretty;
     ffStrbufInitA(&namePretty, 64);
     ffStrbufAppendS(&namePretty, name);
-    ffStrbufRemoveStrings(&namePretty, 11,
-        "(R)", "(r)", "(TM)", "(tm)", " CPU", " FPU", " Processor", " Dual-Core", " Quad-Core", " Six-Core", " Eight-Core"
-    );
+
+    const char* removeStrings[] = {
+        "(R)", "(r)", "(TM)", "(tm)",
+        " CPU", " FPU", " Processor",
+        " Dual-Core", " Quad-Core", " Six-Core", " Eight-Core", " Ten-Core",
+        " 2-Core", " 4-Core", " 6-Core", " 8-Core", " 10-Core", " 12-Core", " 14-Core", " 16-Core"
+    };
+
+    ffStrbufRemoveStringsA(&namePretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
     ffStrbufSubstrBeforeFirstC(&namePretty, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&namePretty, ' '); //If we removed the @ in previous step there was most likely a space before it
 

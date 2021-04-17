@@ -313,23 +313,30 @@ static bool strbufRemoveTest(FFstrbuf* strbuf, uint32_t i, const char* substr)
     return true;
 }
 
-void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
+void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
 {
-    const char* strings[numStrings];
-
-    va_list argp;
-    va_start(argp, numStrings);
-
-    for(uint32_t i = 0; i < numStrings; i++)
-        strings[i] = va_arg(argp, const char*);
-
-    va_end(argp);
-
     for(uint32_t i = 0; i < strbuf->length; i++)
     {
         for(uint32_t k = 0; k < numStrings; k++)
             while(strbufRemoveTest(strbuf, i, strings[k]));
     }
+}
+
+void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments)
+{
+    const char* strings[numStrings];
+    for(uint32_t i = 0; i < numStrings; i++)
+        strings[i] = va_arg(arguments, const char*);
+
+    ffStrbufRemoveStringsA(strbuf, numStrings, strings);
+}
+
+void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
+{
+    va_list argp;
+    va_start(argp, numStrings);
+    ffStrbufRemoveStringsV(strbuf, numStrings, argp);
+    va_end(argp);
 }
 
 uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c)

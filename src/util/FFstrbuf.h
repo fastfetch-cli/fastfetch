@@ -66,6 +66,8 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
 void ffStrbufTrim(FFstrbuf* strbuf, char c);
 
+void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[]);
+void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments);
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
 
 uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c);
