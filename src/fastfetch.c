@@ -51,7 +51,8 @@ static inline void printHelp()
         "   -s <str>,    --seperator <str>:               sets the seperator between key and value. Default is a colon with a space\n"
         "   -x <offset>, --offsetx <offset>:              sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
         "                --show-errors <?value>:          print occuring errors\n"
-        "   -r <?value>  --recache <?value>:              if set to true, no cached values will be used\n"
+        "   -r <?value>  --recache <?value>:              generate new cached values\n"
+        "                --nocache <?value>:              dont use cached values, but also dont overwrite existing ones\n"
         "                --print-remaining-logo <?value>: print the remaining logo, if it is higher than the number of lines shown\n"
         "                --multithreading <?value>:       use multiple threads to calculate values\n"
         "\n"
@@ -548,6 +549,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache
         instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = instance->config.recache;
+    }
+    else if(strcasecmp(key, "--nocache") == 0)
+    {
+        instance->config.recache = optionParseBoolean(value);
+        instance->config.cacheSave = false;
     }
     else if(strcasecmp(key, "--show-errors") == 0)
         instance->config.showErrors = optionParseBoolean(value);

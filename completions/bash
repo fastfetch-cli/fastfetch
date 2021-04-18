@@ -111,6 +111,7 @@ __fastfetch_completion()
     local FF_OPTIONS_BOOL=(
         "-r"
         "--recache"
+        "--nocache"
         "--show-errors"
         "--color-logo"
         "--print-remaining-logo"
