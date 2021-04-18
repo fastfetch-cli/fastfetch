@@ -145,6 +145,20 @@ void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
+void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int))
+{
+    if(value == NULL)
+        return;
+
+    for(uint32_t i = 0; value[i] != '\0'; i++)
+    {
+        if(i % 16 == 0)
+            ffStrbufEnsureFree(strbuf, 16);
+        strbuf->chars[strbuf->length++] = transformFunc(value[i]);
+    }
+    strbuf->chars[strbuf->length] = '\0';
+}
+
 void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
 {
     if(value == NULL)

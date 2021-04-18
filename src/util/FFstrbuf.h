@@ -44,6 +44,7 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufSetVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value);
+void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendC(FFstrbuf* strbuf, const char c);

@@ -134,7 +134,7 @@ static inline void getCacheFileSplit(FFinstance* instance, const char* moduleNam
     ffStrbufAppendS(cacheFilePath, ".ffcs");
 }
 
-bool printCachedValue(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat)
+static bool printCachedValue(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat)
 {
     FFstrbuf cacheFilePath;
     ffStrbufInitA(&cacheFilePath, 64);
@@ -168,7 +168,7 @@ bool printCachedValue(FFinstance* instance, const char* moduleName, const FFstrb
     return moduleCounter > 1;
 }
 
-bool printCachedFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs)
+static bool printCachedFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs)
 {
     FFstrbuf cacheFilePath;
     ffStrbufInitA(&cacheFilePath, 64);
@@ -358,12 +358,8 @@ void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffStrbufDestroy(&absolutePath);
 }
 
-void ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
+void ffAppendFDContent(int fd, FFstrbuf* buffer)
 {
-    int fd = open(fileName, O_RDONLY);
-    if(fd == -1)
-        return;
-
     ssize_t readed;
     while((readed = read(fd, buffer->chars + buffer->length, buffer->allocated - buffer->length)) == (buffer->allocated - buffer->length))
     {
@@ -376,6 +372,15 @@ void ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
 
     ffStrbufTrimRight(buffer, '\n');
     ffStrbufTrimRight(buffer, ' ');
+}
+
+void ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
+{
+    int fd = open(fileName, O_RDONLY);
+    if(fd == -1)
+        return;
+
+    ffAppendFDContent(fd, buffer);
 
     close(fd);
 }

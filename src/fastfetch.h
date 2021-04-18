@@ -196,11 +196,15 @@ void ffCacheValidate(FFinstance* instance);
 void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache);
 void ffCacheClose(FFcache* cache);
 
+void ffAppendFDContent(int fd, FFstrbuf* buffer);
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
+
+//common/processing.c
+void ffProcessGetStdOut(FFstrbuf* buffer, char* const argv[]);
 
 //common/logo.c
 void ffLoadLogoSet(FFconfig* config, const char* logo);

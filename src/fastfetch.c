@@ -272,9 +272,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "shell-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("shell", "{2}", 2,
+        constructAndPrintCommandHelpFormat("shell", "{2} {4}", 4,
             "Shell path (without name)",
-            "Shell name"
+            "Shell name",
+            "Shell version raw",
+            "Shell version pretty"
         );
     }
     else if(strcasecmp(command, "resolution-format") == 0)

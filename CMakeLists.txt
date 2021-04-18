@@ -60,6 +60,7 @@ set(SRCS
     src/common/init.c
     src/common/threading.c
     src/common/io.c
+    src/common/processing.c
     src/common/logo.c
     src/common/format.c
     src/common/parsing.c
