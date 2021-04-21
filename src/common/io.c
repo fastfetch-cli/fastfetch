@@ -344,7 +344,7 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
     if(line != NULL)
     { // Strip unescaped quotes
 		int j = 0;
-		for (int i = 0; i < len; i ++)
+		for (int i = 0; i < len; i++)
 		{
 			if (buffer[i] != '"' && buffer[i] != '\\')
 			{ 
