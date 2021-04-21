@@ -342,7 +342,27 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 
     fclose(file);
     if(line != NULL)
+    { // Strip unescaped quotes
+		int j = 0;
+		for (int i = 0; i < len; i ++)
+		{
+			if (buffer[i] != '"' && buffer[i] != '\\')
+			{ 
+				buffer[j++] = buffer[i];
+			}
+			else if (buffer[i+1] == '"' && buffer[i] == '\\')
+			{ 
+				buffer[j++] = '"';
+			}
+			else if (buffer[i+1] != '"' && buffer[i] == '\\')
+			{ 
+				buffer[j++] = '\\';
+			}
+		}
+		if (j > 0) buffer[j] = 0;
+
         free(line);
+    }
 }
 
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
