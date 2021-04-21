@@ -187,6 +187,37 @@ static void loadManjaroLogo(FFlogo *logo, bool doColor)
 	sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadVoidLogo(FFlogo *logo, bool doColor)
+{
+    logo->width = 45;
+    logo->height = 18;
+    strcpy(logo->name, "void");
+
+    /* color = light green; color2 = gray */
+    const char* color = doColor ? "\033[92m" : "";
+    const char* color2 = doColor ? "\033[30m" : "";
+    strcpy(logo->color, "\033[92m");
+
+    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                __.;=====;.__                "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            _.=+==++=++=+=+===;.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             -=+++=+===+=+=+++++=_           "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s        .     -=:``     `--==+=++==.         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       _vi,    `            --+=++++:        "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s      .uvnvi.       _._       -==+==+.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     .vvnvnI`    .;==|==;.     :|=||=|.      "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s+QmQQm%spvvnv;%s _yYsyQQWUUQQQm #QmQ#%s:%sQQQWUV$QQm."FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2);
+    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s -QQWQW%spvvo%swZ?.wQQQE%s==<%sQWWQ/QWQW.QQWW%s(:%s jQWQE"FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2, color, color2);
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s  -$QQQQmmU'  jQQQ%s@+=<%sQWQQ)mQQQ.mQQQC%s+;%sjWQQ@'"FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s   -$WQ8Y%snI:%s   QWQQwgQQWV%s`%smWQQ.jQWQQgyyWW@!  "FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s     -1vvnvv.     `~+++`        ++|+++       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s      +vnvnnv,                 `-|===        "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s       +vnvnvns.           .      :=-        "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s        -Invnvvnsi..___..=sv=.     `         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s          +Invnvnvnnnnnnnnvvnn;.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s            ~|Invnvnvvnvvvnnv}+`             "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s               -~|{*l}*|~                    "FASTFETCH_TEXT_MODIFIER_RESET, color);
+}
+
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
     if(strcasecmp(logo, "none") == 0)
@@ -213,6 +244,10 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     else if(strcasecmp(logo, "manjaro") == 0)
     {
         loadManjaroLogo(&config->logo, config->colorLogo);
+    }
+    else if(strcasecmp(logo, "void") == 0)
+    {
+        loadVoidLogo(&config->logo, config->colorLogo);
     }
     else
     {
@@ -275,7 +310,7 @@ void ffPrintRemainingLogo(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 7
+    #define FASTFETCH_LOGO_AMOUNT 8
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
@@ -289,6 +324,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadUbuntuLogo(&logos[4], color);
     loadDebianLogo(&logos[5], color);
     loadManjaroLogo(&logos[6], color);
+    loadVoidLogo(&logos[7], color);
 
     return logos;
 }
