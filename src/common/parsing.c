@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-void ffGetGtkPretty(FFstrbuf* buffer, FFstrbuf* gtk2, FFstrbuf* gtk3, FFstrbuf* gtk4)
+void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)
 {
     if(gtk2->length > 0 && gtk3->length > 0 && gtk4->length > 0)
     {

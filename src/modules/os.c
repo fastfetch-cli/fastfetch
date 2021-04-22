@@ -8,103 +8,54 @@ void ffPrintOS(FFinstance* instance)
     if(ffPrintFromCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS))
         return;
 
-    FILE* osRelease = fopen("/etc/os-release", "r");
+    const FFOSResult* result = ffCalculateOS(instance);
 
-    if(osRelease == NULL)
-        osRelease = fopen("/usr/lib/os-release", "r");
-
-    if(osRelease == NULL)
+    if(result->error.length > 0)
     {
-        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, "couldn't read /etc/os-release nor /usr/lib/os-release");
+        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, result->error.chars);
         return;
     }
 
-    // Documentation of the fields:
-    // https://www.freedesktop.org/software/systemd/man/os-release.html
-
-    char name[128];            name[0] = '\0';
-    char prettyName[128];      prettyName[0] = '\0';
-    char id[128];              id[0] = '\0';
-    char idLike[128];          idLike[0] = '\0';
-    char variant[128];         variant[0] = '\0';
-    char variantId[128];       variantId[0] = '\0';
-    char version[128];         version[0] = '\0';
-    char versionId[128];       versionId[0] = '\0';
-    char versionCodename[128]; versionCodename[0] = '\0';
-    char buildId[128];         buildId[0] = '\0';
-
-    char* line = NULL;
-    size_t len = 0;
-
-    while (getline(&line, &len, osRelease) != -1)
-    {
-        sscanf(line, "NAME=%[^\n]", name);
-        sscanf(line, "NAME=\"%[^\"]+", name);
-        sscanf(line, "PRETTY_NAME=%[^\n]", prettyName);
-        sscanf(line, "PRETTY_NAME=\"%[^\"]+", prettyName);
-        sscanf(line, "ID=%[^\n]", id);
-        sscanf(line, "ID=\"%[^\"]+", id);
-        sscanf(line, "ID_LIKE=%[^\n]", idLike);
-        sscanf(line, "ID_LIKE=\"%[^\"]+", idLike);
-        sscanf(line, "VARIANT=%[^\n]", variant);
-        sscanf(line, "VARIANT=\"%[^\"]+", variant);
-        sscanf(line, "VARIANT_ID=%[^\n]", variantId);
-        sscanf(line, "VARIANT_ID=\"%[^\"]+", variantId);
-        sscanf(line, "VERSION=%[^\n]", version);
-        sscanf(line, "VERSION=\"%[^\"]+", version);
-        sscanf(line, "VERSION_ID=%[^\n]", versionId);
-        sscanf(line, "VERSION_ID=\"%[^\"]+", versionId);
-        sscanf(line, "VERSION_CODENAME=%[^\n]", versionCodename);
-        sscanf(line, "VERSION_CODENAME=\"%[^\"]+", versionCodename);
-        sscanf(line, "BUILD_ID=%[^\n]", buildId);
-        sscanf(line, "BUILD_ID=\"%[^\"]+", buildId);
-    }
-
-    if(line != NULL)
-        free(line);
-
-    fclose(osRelease);
-
     FF_STRBUF_CREATE(os);
 
-    if(prettyName[0] != '\0')
+    if(result->prettyName.length > 0)
     {
-        ffStrbufAppendS(&os, prettyName);
+        ffStrbufAppend(&os, &result->prettyName);
     }
-    else if(name[0] == '\0' && id[0] == '\0')
+    else if(result->name.length == 0 && result->id.length == 0)
     {
-        ffStrbufAppendS(&os, instance->state.utsname.sysname);
+        ffStrbufAppend(&os, &result->systemName);
     }
     else
     {
-        if(name[0] != '\0')
-            ffStrbufAppendS(&os, name);
+        if(result->name.length > 0)
+            ffStrbufAppend(&os, &result->name);
         else
-            ffStrbufAppendS(&os, id);
+            ffStrbufAppend(&os, &result->id);
 
-        if(version[0] != '\0')
+        if(result->version.length > 0)
         {
             ffStrbufAppendC(&os, ' ');
-            ffStrbufAppendS(&os, version);
+            ffStrbufAppend(&os, &result->version);
         }
         else
         {
-            if(versionId[0] != '\0')
+            if(result->versionID.length > 0)
             {
                 ffStrbufAppendC(&os, ' ');
-                ffStrbufAppendS(&os, versionId);
+                ffStrbufAppend(&os, &result->versionID);
             }
 
-            if(variant[0] != '\0')
+            if(result->variant.length > 0)
             {
                 ffStrbufAppendS(&os, " (");
-                ffStrbufAppendS(&os, variant);
+                ffStrbufAppend(&os, &result->variant);
                 ffStrbufAppendC(&os, ')');
             }
-            else if(variantId[0] != '\0')
+            else if(result->variantID.length > 0)
             {
                 ffStrbufAppendS(&os, " (");
-                ffStrbufAppendS(&os, variantId);
+                ffStrbufAppend(&os, &result->variantID);
                 ffStrbufAppendC(&os, ')');
             }
         }
@@ -114,18 +65,18 @@ void ffPrintOS(FFinstance* instance)
     ffStrbufAppendS(&os, instance->state.utsname.machine);
 
     ffPrintAndSaveToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
-        {FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.sysname},
-        {FF_FORMAT_ARG_TYPE_STRING, name},
-        {FF_FORMAT_ARG_TYPE_STRING, prettyName},
-        {FF_FORMAT_ARG_TYPE_STRING, id},
-        {FF_FORMAT_ARG_TYPE_STRING, idLike},
-        {FF_FORMAT_ARG_TYPE_STRING, variant},
-        {FF_FORMAT_ARG_TYPE_STRING, variantId},
-        {FF_FORMAT_ARG_TYPE_STRING, version},
-        {FF_FORMAT_ARG_TYPE_STRING, versionId},
-        {FF_FORMAT_ARG_TYPE_STRING, versionCodename},
-        {FF_FORMAT_ARG_TYPE_STRING, buildId},
-        {FF_FORMAT_ARG_TYPE_STRING, instance->state.utsname.machine}
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->id},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->idLike},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->variant},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->variantID},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->versionID},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->codename},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->buildID},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->architecture}
     });
 
     ffStrbufDestroy(&os);

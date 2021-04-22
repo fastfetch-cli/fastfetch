@@ -3,31 +3,31 @@
 #include <dirent.h>
 #include <pthread.h>
 
-void ffCalculateWM(FFinstance* instance)
+const FFWMResult* ffCalculateWM(FFinstance* instance)
 {
+    UNUSED(instance);
+
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFWMResult result;
     static bool init = false;
-
     pthread_mutex_lock(&mutex);
-
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return;
+        return &result;
     }
-
     init = true;
 
-    ffStrbufInit(&instance->state.wm.processName);
-    ffStrbufInit(&instance->state.wm.prettyName);
-    ffStrbufInit(&instance->state.wm.error);
+    ffStrbufInit(&result.processName);
+    ffStrbufInit(&result.prettyName);
+    ffStrbufInit(&result.error);
 
     DIR* proc = opendir("/proc/");
     if(proc == NULL)
     {
-        ffStrbufSetS(&instance->state.wm.error, "opendir(\"/proc/\") == NULL");
+        ffStrbufSetS(&result.error, "opendir(\"/proc/\") == NULL");
         pthread_mutex_unlock(&mutex);
-        return;
+        return &result;
     }
 
     struct dirent* dirent;
@@ -40,22 +40,24 @@ void ffCalculateWM(FFinstance* instance)
         char path[20];
         sprintf(path, "/proc/%.8s/comm", dirent->d_name);
 
-        ffGetFileContent(path, &instance->state.wm.processName);
+        ffGetFileContent(path, &result.processName);
 
-        if(ffStrbufIgnCaseCompS(&instance->state.wm.processName, "kwin_wayland") == 0 || ffStrbufIgnCaseCompS(&instance->state.wm.processName, "kwin_x11") == 0)
-            ffStrbufSetS(&instance->state.wm.prettyName, "KWin");
+        if(ffStrbufIgnCaseCompS(&result.processName, "kwin_wayland") == 0 || ffStrbufIgnCaseCompS(&result.processName, "kwin_x11") == 0)
+            ffStrbufSetS(&result.prettyName, "KWin");
 
-        if(instance->state.wm.prettyName.length > 0)
+        if(result.prettyName.length > 0)
             break;
     }
 
     closedir(proc);
 
-    if(instance->state.wm.prettyName.length == 0)
+    if(result.prettyName.length == 0)
     {
-        ffStrbufSetS(&instance->state.wm.error, "No process name matches the name of known display managers");
-        ffStrbufClear(&instance->state.wm.processName);
+        ffStrbufSetS(&result.error, "No process name matches the name of known display managers");
+        ffStrbufClear(&result.processName);
     }
 
     pthread_mutex_unlock(&mutex);
+
+    return &result;
 }

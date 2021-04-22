@@ -252,32 +252,32 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
     fputc('\n', file);
 }
 
-int ffStrbufComp(FFstrbuf* strbuf, const FFstrbuf* comp)
+int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufCompNS(strbuf, comp->length, comp->chars);
 }
 
-int ffStrbufCompS(FFstrbuf* strbuf, const char* comp)
+int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
 {
     return strcmp(strbuf->chars, comp);
 }
 
-int ffStrbufCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp)
+int ffStrbufCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp)
 {
     return strncasecmp(strbuf->chars, comp, length);
 }
 
-int ffStrbufIgnCaseComp(FFstrbuf* strbuf, const FFstrbuf* comp)
+int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufIgnCaseCompNS(strbuf, comp->length, comp->chars);
 }
 
-int ffStrbufIgnCaseCompS(FFstrbuf* strbuf, const char* comp)
+int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
 {
     return strcasecmp(strbuf->chars, comp);
 }
 
-int ffStrbufIgnCaseCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp)
+int ffStrbufIgnCaseCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp)
 {
     return strncasecmp(strbuf->chars, comp, length);
 }
@@ -413,12 +413,12 @@ void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c)
         ffStrbufSubstrAfter(strbuf, index);
 }
 
-bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start)
+bool ffStrbufStartsWith(const FFstrbuf* strbuf, const FFstrbuf* start)
 {
     return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
 }
 
-bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start)
+bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start)
 {
     for(uint32_t i = 0; start[i] != '\0'; i++)
     {
@@ -431,7 +431,7 @@ bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start)
     return true;
 }
 
-bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start)
+bool ffStrbufStartsWithNS(const FFstrbuf* strbuf, uint32_t length, const char* start)
 {
     for(uint32_t i = 0; i < length; i++)
     {
@@ -444,12 +444,12 @@ bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start)
     return true;
 }
 
-bool ffStrbufStartsWithIgnCase(FFstrbuf* strbuf, FFstrbuf* start)
+bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start)
 {
     return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
 }
 
-bool ffStrbufStartsWithIgnCaseS(FFstrbuf* strbuf, const char* start)
+bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start)
 {
     for(uint32_t i = 0; start[i] != '\0'; i++)
     {
@@ -462,7 +462,7 @@ bool ffStrbufStartsWithIgnCaseS(FFstrbuf* strbuf, const char* start)
     return true;
 }
 
-bool ffStrbufStartsWithIgnCaseNS(FFstrbuf* strbuf, uint32_t length, const char* start)
+bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const char* start)
 {
     for(uint32_t i = 0; i < length; i++)
     {

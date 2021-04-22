@@ -4,34 +4,34 @@
 #include <pthread.h>
 #include <dconf/client/dconf-client.h>
 
-static inline bool allPropertiesSet(FFgtkval* gtkval)
+static inline bool allPropertiesSet(FFGTKResult* result)
 {
     return
-        gtkval->theme.length > 0 &&
-        gtkval->icons.length > 0 &&
-        gtkval->font.length > 0;
+        result->theme.length > 0 &&
+        result->icons.length > 0 &&
+        result->font.length > 0;
 }
 
-static inline void initGtkval(FFgtkval* gtkval)
+static inline void initresult(FFGTKResult* result)
 {
-    ffStrbufInit(&gtkval->theme);
-    ffStrbufInit(&gtkval->icons);
-    ffStrbufInit(&gtkval->font);
+    ffStrbufInit(&result->theme);
+    ffStrbufInit(&result->icons);
+    ffStrbufInit(&result->font);
 }
 
-static inline void applyGTKDConfSettings(FFgtkval* gtkval, const gchar* themeName, const gchar* iconsName, const gchar* fontName)
+static inline void applyGTKDConfSettings(FFGTKResult* result, const gchar* themeName, const gchar* iconsName, const gchar* fontName)
 {
-    if(gtkval->theme.length == 0)
-        ffStrbufAppendS(&gtkval->theme, themeName);
+    if(result->theme.length == 0)
+        ffStrbufAppendS(&result->theme, themeName);
 
-    if(gtkval->icons.length == 0)
-        ffStrbufAppendS(&gtkval->icons, iconsName);
+    if(result->icons.length == 0)
+        ffStrbufAppendS(&result->icons, iconsName);
 
-    if(gtkval->font.length == 0)
-        ffStrbufAppendS(&gtkval->font, fontName);
+    if(result->font.length == 0)
+        ffStrbufAppendS(&result->font, fontName);
 }
 
-static void parseGTKDConfSettings(FFinstance* instance, FFgtkval* gtkval)
+static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -45,7 +45,7 @@ static void parseGTKDConfSettings(FFinstance* instance, FFgtkval* gtkval)
 
     if(init)
     {
-        applyGTKDConfSettings(gtkval, themeName, iconsName, fontName);
+        applyGTKDConfSettings(result, themeName, iconsName, fontName);
         pthread_mutex_unlock(&mutex);
         return;
     }
@@ -102,11 +102,11 @@ static void parseGTKDConfSettings(FFinstance* instance, FFgtkval* gtkval)
 
     dlclose(dconf);
 
-    applyGTKDConfSettings(gtkval, themeName, iconsName, fontName);
+    applyGTKDConfSettings(result, themeName, iconsName, fontName);
     pthread_mutex_unlock(&mutex);
 }
 
-static void parseGTKConfigFile(FFstrbuf* fileName, FFgtkval* gtkval)
+static void parseGTKConfigFile(FFstrbuf* fileName, FFGTKResult* result)
 {
     FILE* file = fopen(fileName->chars, "r");
     if(file == NULL)
@@ -117,22 +117,22 @@ static void parseGTKConfigFile(FFstrbuf* fileName, FFgtkval* gtkval)
 
     while(getline(&line, &len, file) != -1)
     {
-        if(gtkval->theme.length == 0)
+        if(result->theme.length == 0)
         {
-            sscanf(line, "gtk-theme-name=%[^\n]", gtkval->theme.chars);
-            sscanf(line, "gtk-theme-name=\"%[^\"]+", gtkval->theme.chars);
+            sscanf(line, "gtk-theme-name=%[^\n]", result->theme.chars);
+            sscanf(line, "gtk-theme-name=\"%[^\"]+", result->theme.chars);
         }
 
-        if(gtkval->icons.length == 0)
+        if(result->icons.length == 0)
         {
-            sscanf(line, "gtk-icon-theme-name=%[^\n]", gtkval->icons.chars);
-            sscanf(line, "gtk-icon-theme-name=\"%[^\"]+", gtkval->icons.chars);
+            sscanf(line, "gtk-icon-theme-name=%[^\n]", result->icons.chars);
+            sscanf(line, "gtk-icon-theme-name=\"%[^\"]+", result->icons.chars);
         }
 
-        if(gtkval->font.length == 0)
+        if(result->font.length == 0)
         {
-            sscanf(line, "gtk-font-name=%[^\n]", gtkval->font.chars);
-            sscanf(line, "gtk-font-name=\"%[^\"]+", gtkval->font.chars);
+            sscanf(line, "gtk-font-name=%[^\n]", result->font.chars);
+            sscanf(line, "gtk-font-name=\"%[^\"]+", result->font.chars);
         }
     }
 
@@ -141,12 +141,12 @@ static void parseGTKConfigFile(FFstrbuf* fileName, FFgtkval* gtkval)
 
     fclose(file);
 
-    ffStrbufRecalculateLength(&gtkval->theme);
-    ffStrbufRecalculateLength(&gtkval->icons);
-    ffStrbufRecalculateLength(&gtkval->font);
+    ffStrbufRecalculateLength(&result->theme);
+    ffStrbufRecalculateLength(&result->icons);
+    ffStrbufRecalculateLength(&result->font);
 }
 
-static void calculateGTKFromConfigDir(const char* configDir, const char* version, FFgtkval* gtkval)
+static void calculateGTKFromConfigDir(const char* configDir, const char* version, FFGTKResult* result)
 {
     // <configdir>/gtk-<version>.0/settings.ini
     FFstrbuf file1;
@@ -155,9 +155,9 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file1, "/gtk-");
     ffStrbufAppendS(&file1, version);
     ffStrbufAppendS(&file1, ".0/settings.ini");
-    parseGTKConfigFile(&file1, gtkval);
+    parseGTKConfigFile(&file1, result);
     ffStrbufDestroy(&file1);
-    if(allPropertiesSet(gtkval))
+    if(allPropertiesSet(result))
         return;
 
     // <configdir>/gtk-<version>.0/gtkrc
@@ -167,9 +167,9 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file2, "/gtk-");
     ffStrbufAppendS(&file2, version);
     ffStrbufAppendS(&file2, ".0/gtkrc");
-    parseGTKConfigFile(&file2, gtkval);
+    parseGTKConfigFile(&file2, result);
     ffStrbufDestroy(&file2);
-    if(allPropertiesSet(gtkval))
+    if(allPropertiesSet(result))
         return;
 
     // <configdir>/gtkrc-<version>.0
@@ -179,9 +179,9 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file3, "/gtkrc-");
     ffStrbufAppendS(&file3, version);
     ffStrbufAppendS(&file3, ".0");
-    parseGTKConfigFile(&file3, gtkval);
+    parseGTKConfigFile(&file3, result);
     ffStrbufDestroy(&file3);
-    if(allPropertiesSet(gtkval))
+    if(allPropertiesSet(result))
         return;
 
     // <configdir>/.gtkrc-<version>.0
@@ -191,11 +191,11 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufAppendS(&file4, "/.gtkrc-");
     ffStrbufAppendS(&file4, version);
     ffStrbufAppendS(&file4, ".0");
-    parseGTKConfigFile(&file4, gtkval);
+    parseGTKConfigFile(&file4, result);
     ffStrbufDestroy(&file4);
 }
 
-static void calculateGTK(FFinstance* instance, const char* version, FFgtkval* gtkval)
+static void calculateGTK(FFinstance* instance, const char* version, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -204,7 +204,7 @@ static void calculateGTK(FFinstance* instance, const char* version, FFgtkval* gt
     static bool xdgIsDifferent;
     static bool init = false;
 
-    initGtkval(gtkval);
+    initresult(result);
 
     pthread_mutex_lock(&mutex);
 
@@ -228,52 +228,57 @@ static void calculateGTK(FFinstance* instance, const char* version, FFgtkval* gt
     if(xdgIsDifferent)
     {
         // $XDG_CONFIG_HOME
-        calculateGTKFromConfigDir(xdgConfigDir.chars, version, gtkval);
-        if(allPropertiesSet(gtkval))
+        calculateGTKFromConfigDir(xdgConfigDir.chars, version, result);
+        if(allPropertiesSet(result))
             return;
     }
 
     // /home/<user>/.config
-    calculateGTKFromConfigDir(configDir.chars, version, gtkval);
-    if(allPropertiesSet(gtkval))
+    calculateGTKFromConfigDir(configDir.chars, version, result);
+    if(allPropertiesSet(result))
             return;
 
     // /home/<user>
-    calculateGTKFromConfigDir(instance->state.passwd->pw_dir, version, gtkval);
-    if(allPropertiesSet(gtkval))
+    calculateGTKFromConfigDir(instance->state.passwd->pw_dir, version, result);
+    if(allPropertiesSet(result))
             return;
 
-    parseGTKDConfSettings(instance, gtkval);
-    if(allPropertiesSet(gtkval))
+    parseGTKDConfSettings(instance, result);
+    if(allPropertiesSet(result))
         return;
 
     // /etc
-    calculateGTKFromConfigDir("/etc/", version, gtkval);
+    calculateGTKFromConfigDir("/etc/", version, result);
 }
 
 #define FF_CALCULATE_GTK_IMPL(version) \
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
+    static FFGTKResult result; \
     static bool init = false; \
     pthread_mutex_lock(&mutex); \
     if(init){ \
         pthread_mutex_unlock(&mutex);\
-        return; \
+        return &result; \
     } \
     init = true; \
-    calculateGTK(instance, #version, &instance->state.gtk##version); \
-    pthread_mutex_unlock(&mutex);
+    ffStrbufInit(&result.theme); \
+    ffStrbufInit(&result.icons); \
+    ffStrbufInit(&result.font); \
+    calculateGTK(instance, #version, &result); \
+    pthread_mutex_unlock(&mutex); \
+    return &result;
 
-void ffCalculateGTK2(FFinstance* instance)
+const FFGTKResult* ffCalculateGTK2(FFinstance* instance)
 {
     FF_CALCULATE_GTK_IMPL(2)
 }
 
-void ffCalculateGTK3(FFinstance* instance)
+const FFGTKResult* ffCalculateGTK3(FFinstance* instance)
 {
     FF_CALCULATE_GTK_IMPL(3)
 }
 
-void ffCalculateGTK4(FFinstance* instance)
+const FFGTKResult* ffCalculateGTK4(FFinstance* instance)
 {
     FF_CALCULATE_GTK_IMPL(4)
 }

@@ -170,7 +170,7 @@ static void loadManjaroLogo(FFlogo *logo, bool doColor)
     /* color = light green */
     const char* color = doColor ? "\033[92m" : "";
     strcpy(logo->color, "\033[92m");
-    
+
 	sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
 	sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
 	sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
@@ -226,29 +226,19 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
         config->logo_spacing = 0; //This is wanted in most cases, so just set it
     }
     else if(strcasecmp(logo, "arch") == 0)
-    {
         loadArchLogo(&config->logo, config->colorLogo);
-    }
     else if(strcasecmp(logo, "artix") == 0)
-    {
         loadArtixLogo(&config->logo, config->colorLogo);
-    }
     else if(strcasecmp(logo, "ubuntu") == 0)
-    {
         loadUbuntuLogo(&config->logo, config->colorLogo);
-    }
     else if(strcasecmp(logo, "debian") == 0)
-    {
         loadDebianLogo(&config->logo, config->colorLogo);
-    }
     else if(strcasecmp(logo, "manjaro") == 0)
-    {
         loadManjaroLogo(&config->logo, config->colorLogo);
-    }
     else if(strcasecmp(logo, "void") == 0)
-    {
         loadVoidLogo(&config->logo, config->colorLogo);
-    }
+    else if(strcasecmp(logo, "unknown") == 0)
+        loadUnknownLogo(&config->logo);
     else
     {
         if(config->showErrors)
@@ -257,20 +247,45 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     }
 }
 
-void ffLoadLogo(FFconfig* config)
+void ffLoadLogo(FFinstance* instance)
 {
-    char id[256];
-    ffParsePropFile("/etc/os-release", "ID=%[^\n]", id);
-    if(id[0] == '\0')
+    FFstrbuf cacheFilePath;
+    ffStrbufInitA(&cacheFilePath, 64);
+    ffGetCacheFilePath(instance, "logo.ffcl", NULL, &cacheFilePath);
+
+    if(!instance->config.recache)
     {
-        if(config->showErrors)
-            puts(FASTFETCH_TEXT_MODIFIER_ERROR"Error: \"ID=%[^\\n]\" not found in \"/etc/os-release\""FASTFETCH_TEXT_MODIFIER_RESET);
-        loadUnknownLogo(&config->logo);
+        FFstrbuf content;
+        ffStrbufInit(&content);
+        ffAppendFileContent(cacheFilePath.chars, &content);
+
+        if(content.length > 0)
+        {
+            ffLoadLogoSet(&instance->config, content.chars);
+            ffStrbufDestroy(&content);
+            ffStrbufDestroy(&cacheFilePath);
+            return;
+        }
+
+        ffStrbufDestroy(&content);
+    }
+
+    const FFOSResult* result = ffCalculateOS(instance);
+
+    if(result->id.length > 0)
+    {
+        ffLoadLogoSet(&instance->config, result->id.chars);
+        ffWriteFileContent(cacheFilePath.chars, &result->id);
+    }
+    else if(result->name.length > 0)
+    {
+        ffLoadLogoSet(&instance->config, result->name.chars);
+        ffWriteFileContent(cacheFilePath.chars, &result->name);
     }
     else
-    {
-        ffLoadLogoSet(config, id);
-    }
+        loadUnknownLogo(&instance->config.logo);
+
+    ffStrbufDestroy(&cacheFilePath);
 }
 
 void ffPrintLogoLine(FFinstance* instance)

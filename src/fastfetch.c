@@ -90,7 +90,7 @@ static inline void printHelp()
         "   --uptime-key <key>\n"
         "   --packages-key <key>\n"
         "   --shell-key <key>\n"
-        "   --resolution-key <key>\n"
+        "   --resolution-key <key>: takes the resolution index as argument\n"
         "   --de-key <key>\n"
         "   --wm-key <key>\n"
         "   --wm-theme-key <key>\n"
@@ -785,7 +785,7 @@ static void applyData(FFinstance* instance, FFdata* data)
 {
     //We must do this after parsing all options because of color options
     if(data->logoName.length == 0)
-        ffLoadLogo(&instance->config);
+        ffLoadLogo(instance);
     else
         ffLoadLogoSet(&instance->config, data->logoName.chars);
 

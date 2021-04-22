@@ -6,6 +6,9 @@
 #include <sys/stat.h>
 #include <pthread.h>
 
+#define FF_IO_CACHE_VALUE_EXTENSION "ffcv"
+#define FF_IO_CACHE_SPLIT_EXTENSION "ffcs"
+
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat)
 {
     ffPrintLogoLine(instance);
@@ -120,29 +123,41 @@ static void appendCacheDir(FFinstance* instance, FFstrbuf* buffer)
     ffStrbufAppend(buffer, &cacheDir);
 }
 
-static inline void getCacheFileValue(FFinstance* instance, const char* moduleName, FFstrbuf* cacheFilePath)
+void ffGetCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
-    appendCacheDir(instance, cacheFilePath);
-    ffStrbufAppendS(cacheFilePath, moduleName);
-    ffStrbufAppendS(cacheFilePath, ".ffcv");
+    appendCacheDir(instance, buffer);
+    ffStrbufAppendS(buffer, moduleName);
+
+    if(extension != NULL)
+    {
+        ffStrbufAppendC(buffer, '.');
+        ffStrbufAppendS(buffer, extension);
+    }
 }
 
-static inline void getCacheFileSplit(FFinstance* instance, const char* moduleName, FFstrbuf* cacheFilePath)
+void ffReadCacheFile(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
-    appendCacheDir(instance, cacheFilePath);
-    ffStrbufAppendS(cacheFilePath, moduleName);
-    ffStrbufAppendS(cacheFilePath, ".ffcs");
+    FFstrbuf path;
+    ffStrbufInitA(&path, 64);
+    ffGetCacheFilePath(instance, moduleName, extension, &path);
+    ffAppendFileContent(path.chars, buffer);
+    ffStrbufDestroy(&path);
+}
+
+void ffWriteCacheFile(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* content)
+{
+    FFstrbuf path;
+    ffStrbufInitA(&path, 64);
+    ffGetCacheFilePath(instance, moduleName, extension, &path);
+    ffWriteFileContent(path.chars, content);
+    ffStrbufDestroy(&path);
 }
 
 static bool printCachedValue(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat)
 {
-    FFstrbuf cacheFilePath;
-    ffStrbufInitA(&cacheFilePath, 64);
-    getCacheFileValue(instance, moduleName, &cacheFilePath);
-
     FFstrbuf content;
     ffStrbufInitA(&content, 512);
-    ffAppendFileContent(cacheFilePath.chars, &content);
+    ffReadCacheFile(instance, moduleName, FF_IO_CACHE_VALUE_EXTENSION, &content);
 
     ffStrbufTrimRight(&content, '\0'); //Strbuf always appends a '\0' at the end. We want the last null byte to be at the position of the length
 
@@ -163,27 +178,20 @@ static bool printCachedValue(FFinstance* instance, const char* moduleName, const
     }
 
     ffStrbufDestroy(&content);
-    ffStrbufDestroy(&cacheFilePath);
 
     return moduleCounter > 1;
 }
 
 static bool printCachedFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs)
 {
-    FFstrbuf cacheFilePath;
-    ffStrbufInitA(&cacheFilePath, 64);
-    getCacheFileSplit(instance, moduleName, &cacheFilePath);
-
     FFstrbuf content;
     ffStrbufInitA(&content, 512);
-    ffAppendFileContent(cacheFilePath.chars, &content);
+    ffReadCacheFile(instance, moduleName, FF_IO_CACHE_SPLIT_EXTENSION, &content);
+
+    ffStrbufTrimRight(&content, '\0'); //Strbuf always appends a '\0' at the end. We want the last null byte to be at the position of the length
 
     if(content.length == 0)
         return false;
-
-    //Strbuf adds an extra nullbyte at chars[length]. We want this one to be the end of the last value to test for index == length
-    if(content.chars[content.length - 1] == '\0')
-        ffStrbufSubstrBefore(&content, content.length - 1);
 
     uint8_t moduleCounter = 1;
 
@@ -211,7 +219,6 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
     }
 
     ffStrbufDestroy(&content);
-    ffStrbufDestroy(&cacheFilePath);
 
     return moduleCounter > 1;
 }
@@ -269,47 +276,44 @@ void ffPrintAndSaveToCache(FFinstance* instance, const char* moduleName, const F
 
 void ffCacheValidate(FFinstance* instance)
 {
-    FFstrbuf cacheFilePath;
-    ffStrbufInitA(&cacheFilePath, 64);
-    appendCacheDir(instance, &cacheFilePath);
-    ffStrbufAppendS(&cacheFilePath, "cacheversion.ffv");
+    FFstrbuf path;
+    ffStrbufInitA(&path, 64);
+    ffGetCacheFilePath(instance, "cacheversion", "ffv", &path);
 
     FFstrbuf content;
     ffStrbufInit(&content);
-    ffAppendFileContent(cacheFilePath.chars, &content);
+    ffAppendFileContent(path.chars, &content);
 
     if(ffStrbufCompS(&content, FASTFETCH_PROJECT_VERSION) == 0)
     {
         ffStrbufDestroy(&content);
-        ffStrbufDestroy(&cacheFilePath);
+        ffStrbufDestroy(&path);
         return;
     }
 
     instance->config.recache = true;
 
-    FILE* versionFile = fopen(cacheFilePath.chars, "w");
-    if(versionFile == NULL)
-        return;
-
-    fputs(FASTFETCH_PROJECT_VERSION, versionFile);
-
-    fclose(versionFile);
+    FFstrbuf version;
+    ffStrbufInit(&version);
+    ffStrbufAppendS(&version, FASTFETCH_PROJECT_VERSION);
+    ffWriteFileContent(path.chars, &version);
+    ffStrbufDestroy(&version);
 
     ffStrbufDestroy(&content);
-    ffStrbufDestroy(&cacheFilePath);
+    ffStrbufDestroy(&path);
 }
 
 void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache)
 {
     FFstrbuf cacheFileValue;
     ffStrbufInitA(&cacheFileValue, 64);
-    getCacheFileValue(instance, moduleName, &cacheFileValue);
+    ffGetCacheFilePath(instance, moduleName, FF_IO_CACHE_VALUE_EXTENSION, &cacheFileValue);
     cache->value = fopen(cacheFileValue.chars, "w");
     ffStrbufDestroy(&cacheFileValue);
 
     FFstrbuf cacheFileSplit;
     ffStrbufInitA(&cacheFileSplit, 64);
-    getCacheFileSplit(instance, moduleName, &cacheFileSplit);
+    ffGetCacheFilePath(instance, moduleName, FF_IO_CACHE_SPLIT_EXTENSION, &cacheFileSplit);
     cache->split = fopen(cacheFileSplit.chars, "w");
     ffStrbufDestroy(&cacheFileSplit);
 }
@@ -356,6 +360,22 @@ void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffParsePropFile(absolutePath.chars, regex, buffer);
 
     ffStrbufDestroy(&absolutePath);
+}
+
+void ffWriteFDContent(int fd, const FFstrbuf* content)
+{
+    write(fd, content->chars, content->length);
+}
+
+void ffWriteFileContent(const char* fileName, const FFstrbuf* content)
+{
+    int fd = open(fileName, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(fd == -1)
+        return;
+
+    ffWriteFDContent(fd, content);
+
+    close(fd);
 }
 
 void ffAppendFDContent(int fd, FFstrbuf* buffer)

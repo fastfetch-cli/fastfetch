@@ -5,15 +5,15 @@
 
 void ffPrintWM(FFinstance* instance)
 {
-    ffCalculateWM(instance);
+    const FFWMResult* result = ffCalculateWM(instance);
 
-    if(instance->state.wm.error.length > 0)
+    if(result->error.length > 0)
     {
-        ffPrintError(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey, &instance->config.wmFormat, FF_WM_NUM_FORMAT_ARGS, instance->state.wm.error.chars);
+        ffPrintError(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey, &instance->config.wmFormat, FF_WM_NUM_FORMAT_ARGS, result->error.chars);
         return;
     }
 
-    if(instance->state.wm.prettyName.length == 0 && instance->state.wm.processName.length == 0)
+    if(result->prettyName.length == 0 && result->processName.length == 0)
     {
         ffPrintError(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey, &instance->config.wmFormat, FF_WM_NUM_FORMAT_ARGS, "No wm name provided");
         return;
@@ -22,16 +22,16 @@ void ffPrintWM(FFinstance* instance)
     if(instance->config.wmFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, "WM", 0, &instance->config.wmKey);
-        if(instance->state.wm.prettyName.length > 0)
-            ffStrbufPutTo(&instance->state.wm.prettyName, stdout);
+        if(result->prettyName.length > 0)
+            ffStrbufPutTo(&result->prettyName, stdout);
         else
-            ffStrbufPutTo(&instance->state.wm.processName, stdout);
+            ffStrbufPutTo(&result->processName, stdout);
     }
     else
     {
         ffPrintFormatString(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey, &instance->config.wmFormat, NULL, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.wm.processName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.wm.prettyName}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName}
         });
     }
 }

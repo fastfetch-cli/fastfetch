@@ -56,12 +56,13 @@ char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
-int ffStrbufComp(FFstrbuf* strbuf, const FFstrbuf* comp);
-int ffStrbufCompS(FFstrbuf* strbuf, const char* comp);
-int ffStrbufCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp);
-int ffStrbufIgnCaseComp(FFstrbuf* strbuf, const FFstrbuf* comp);
-int ffStrbufIgnCaseCompS(FFstrbuf* strbuf, const char* comp);
-int ffStrbufIgnCaseCompNS(FFstrbuf* strbuf, uint32_t length, const char* comp);
+int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
+int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);
+int ffStrbufCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp);
+
+int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
+int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp);
+int ffStrbufIgnCaseCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
@@ -80,13 +81,13 @@ void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c);
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c);
 
-bool ffStrbufStartsWith(FFstrbuf* strbuf, FFstrbuf* start);
-bool ffStrbufStartsWithS(FFstrbuf* strbuf, const char* start);
-bool ffStrbufStartsWithNS(FFstrbuf* strbuf, uint32_t length, const char* start);
+bool ffStrbufStartsWith(const FFstrbuf* strbuf, const FFstrbuf* start);
+bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start);
+bool ffStrbufStartsWithNS(const FFstrbuf* strbuf, uint32_t length, const char* start);
 
-bool ffStrbufStartsWithIgnCase(FFstrbuf* strbuf, FFstrbuf* start);
-bool ffStrbufStartsWithIgnCaseS(FFstrbuf* strbuf, const char* start);
-bool ffStrbufStartsWithIgnCaseNS(FFstrbuf* strbuf, uint32_t length, const char* start);
+bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start);
+bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start);
+bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const char* start);
 
 void ffStrbufRecalculateLength(FFstrbuf* strbuf);
 

@@ -11,25 +11,23 @@ typedef enum PlasmaCategory
     PLASMA_CATEGORY_OTHER
 } PlasmaCategory;
 
-void ffCalculatePlasma(FFinstance* instance)
+const FFPlasmaResult* ffCalculatePlasma(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFPlasmaResult result;
     static bool init = false;
-
     pthread_mutex_lock(&mutex);
-
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return;
+        return &result;
     }
-
     init = true;
 
-    ffStrbufInit(&instance->state.plasma.widgetStyle);
-    ffStrbufInit(&instance->state.plasma.colorScheme);
-    ffStrbufInit(&instance->state.plasma.icons);
-    ffStrbufInit(&instance->state.plasma.font);
+    ffStrbufInit(&result.widgetStyle);
+    ffStrbufInit(&result.colorScheme);
+    ffStrbufInit(&result.icons);
+    ffStrbufInit(&result.font);
 
     FF_STRBUF_CREATE(kdeglobalsFile);
     ffStrbufAppendS(&kdeglobalsFile, instance->state.passwd->pw_dir);
@@ -40,7 +38,7 @@ void ffCalculatePlasma(FFinstance* instance)
     {
         ffStrbufDestroy(&kdeglobalsFile);
         pthread_mutex_unlock(&mutex);
-        return;
+        return &result;
     }
 
     char* line = NULL;
@@ -69,28 +67,28 @@ void ffCalculatePlasma(FFinstance* instance)
 
         if(category == PLASMA_CATEGORY_KDE)
         {
-            sscanf(line, "widgetStyle=%[^\n]", instance->state.plasma.widgetStyle.chars);
-            sscanf(line, "widgetStyle=\"%[^\"]+", instance->state.plasma.widgetStyle.chars);
+            sscanf(line, "widgetStyle=%[^\n]", result.widgetStyle.chars);
+            sscanf(line, "widgetStyle=\"%[^\"]+", result.widgetStyle.chars);
         }
         else if(category == PLASMA_CATEGORY_GENERAL)
         {
-            sscanf(line, "ColorScheme=%[^\n]", instance->state.plasma.colorScheme.chars);
-            sscanf(line, "ColorScheme=\"%[^\"]+", instance->state.plasma.colorScheme.chars);
+            sscanf(line, "ColorScheme=%[^\n]", result.colorScheme.chars);
+            sscanf(line, "ColorScheme=\"%[^\"]+", result.colorScheme.chars);
 
-            sscanf(line, "font=%[^\n]", instance->state.plasma.font.chars);
-            sscanf(line, "font=\"%[^\"]+", instance->state.plasma.font.chars);
+            sscanf(line, "font=%[^\n]", result.font.chars);
+            sscanf(line, "font=\"%[^\"]+", result.font.chars);
         }
         else if(category == PLASMA_CATEGORY_ICONS)
         {
-            sscanf(line, "Theme=%[^\n]", instance->state.plasma.icons.chars);
-            sscanf(line, "Theme=\"%[^\"]+", instance->state.plasma.icons.chars);
+            sscanf(line, "Theme=%[^\n]", result.icons.chars);
+            sscanf(line, "Theme=\"%[^\"]+", result.icons.chars);
         }
     }
 
-    ffStrbufRecalculateLength(&instance->state.plasma.widgetStyle);
-    ffStrbufRecalculateLength(&instance->state.plasma.colorScheme);
-    ffStrbufRecalculateLength(&instance->state.plasma.icons);
-    ffStrbufRecalculateLength(&instance->state.plasma.font);
+    ffStrbufRecalculateLength(&result.widgetStyle);
+    ffStrbufRecalculateLength(&result.colorScheme);
+    ffStrbufRecalculateLength(&result.icons);
+    ffStrbufRecalculateLength(&result.font);
 
     if(line != NULL)
         free(line);
@@ -100,17 +98,19 @@ void ffCalculatePlasma(FFinstance* instance)
 
     //In Plasma the default value is never set in the config file, but the whole key-value is discarded.
     ///We must set these values by our self if the file exists (it always does here)
-    if(instance->state.plasma.widgetStyle.length == 0)
-        ffStrbufAppendS(&instance->state.plasma.widgetStyle, "Breeze");
+    if(result.widgetStyle.length == 0)
+        ffStrbufAppendS(&result.widgetStyle, "Breeze");
 
-    if(instance->state.plasma.colorScheme.length == 0)
-        ffStrbufAppendS(&instance->state.plasma.colorScheme, "BreezeLight");
+    if(result.colorScheme.length == 0)
+        ffStrbufAppendS(&result.colorScheme, "BreezeLight");
 
-    if(instance->state.plasma.icons.length == 0)
-        ffStrbufAppendS(&instance->state.plasma.icons, "Breeze");
+    if(result.icons.length == 0)
+        ffStrbufAppendS(&result.icons, "Breeze");
 
-    if(instance->state.plasma.font.length == 0)
-        ffStrbufAppendS(&instance->state.plasma.font, "Noto Sans, 10");
+    if(result.font.length == 0)
+        ffStrbufAppendS(&result.font, "Noto Sans, 10");
 
     pthread_mutex_unlock(&mutex);
+
+    return &result;
 }

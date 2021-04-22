@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-static void getTerminalName(FFinstance* instance, const char* pid)
+static void getTerminalName(FFinstance* instance, const char* pid, FFTerminalResult* result)
 {
     char statFile[234];
     sprintf(statFile, "/proc/%s/stat", pid);
@@ -12,7 +12,7 @@ static void getTerminalName(FFinstance* instance, const char* pid)
     FILE* stat = fopen(statFile, "r");
     if(stat == NULL)
     {
-        ffStrbufSetF(&instance->state.terminal.error, "fopen(\"%s\", \"r\") == NULL", statFile);
+        ffStrbufSetF(&result->error, "fopen(\"%s\", \"r\") == NULL", statFile);
         return;
     }
 
@@ -20,7 +20,7 @@ static void getTerminalName(FFinstance* instance, const char* pid)
     char ppid[256];
     if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
     {
-        ffStrbufSetS(&instance->state.terminal.error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        ffStrbufSetS(&result->error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
         return;
     }
 
@@ -37,42 +37,43 @@ static void getTerminalName(FFinstance* instance, const char* pid)
         strcasecmp(name, "doas")   == 0 ||
         strcasecmp(name, "strace") == 0 )
     {
-        getTerminalName(instance, ppid);
+        getTerminalName(instance, ppid, result);
         return;
     }
 
     char cmdlineFile[234];
     sprintf(cmdlineFile, "/proc/%s/cmdline", pid);
 
-    ffGetFileContent(cmdlineFile, &instance->state.terminal.exeName);
-    ffStrbufSubstrBeforeFirstC(&instance->state.terminal.exeName, '\0');
-    ffStrbufSubstrAfterLastC(&instance->state.terminal.exeName, '/');
+    ffGetFileContent(cmdlineFile, &result->exeName);
+    ffStrbufSubstrBeforeFirstC(&result->exeName, '\0');
+    ffStrbufSubstrAfterLastC(&result->exeName, '/');
 
-    ffStrbufSetS(&instance->state.terminal.processName, name);
+    ffStrbufSetS(&result->processName, name);
 }
 
-void ffCalculateTerminal(FFinstance* instance)
+const FFTerminalResult* ffCalculateTerminal(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFTerminalResult result;
     static bool init = false;
-
     pthread_mutex_lock(&mutex);
-
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return;
+        return &result;
     }
     init = true;
 
-    ffStrbufInit(&instance->state.terminal.exeName);
-    ffStrbufInit(&instance->state.terminal.processName);
-    ffStrbufInit(&instance->state.terminal.error);
+    ffStrbufInit(&result.exeName);
+    ffStrbufInit(&result.processName);
+    ffStrbufInit(&result.error);
 
     char ppid[256];
     sprintf(ppid, "%i", getppid());
 
-    getTerminalName(instance, ppid);
+    getTerminalName(instance, ppid, &result);
 
     pthread_mutex_unlock(&mutex);
+
+    return &result;
 }

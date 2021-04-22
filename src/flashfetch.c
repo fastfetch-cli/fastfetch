@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     UNUSED(argv);
 
     FFinstance instance;
-    ffInitInstance(&instance);
+    ffInitInstance(&instance); //This also applys default configuration to instance.config
 
     //Configuration
     ffLoadLogoSet(&instance.config, "arch");

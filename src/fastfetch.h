@@ -43,7 +43,7 @@ typedef struct FFconfig
     bool colorLogo;
     bool showErrors;
     bool recache;
-    bool cacheSave; //This is only set to true when using arguments, because we dont want so save this values
+    bool cacheSave;
     bool printRemainingLogo;
 
     FFstrbuf osFormat;
@@ -99,12 +99,51 @@ typedef struct FFconfig
 
 } FFconfig;
 
-typedef struct FFgtkval
+typedef struct FFOSResult
+{
+    FFstrbuf systemName;
+    FFstrbuf name;
+    FFstrbuf prettyName;
+    FFstrbuf id;
+    FFstrbuf idLike;
+    FFstrbuf variant;
+    FFstrbuf variantID;
+    FFstrbuf version;
+    FFstrbuf versionID;
+    FFstrbuf codename;
+    FFstrbuf buildID;
+    FFstrbuf architecture;
+    FFstrbuf error;
+} FFOSResult;
+
+typedef struct FFPlasmaResult
+{
+    FFstrbuf widgetStyle;
+    FFstrbuf colorScheme;
+    FFstrbuf icons;
+    FFstrbuf font;
+} FFPlasmaResult;
+
+typedef struct FFGTKResult
 {
     FFstrbuf theme;
     FFstrbuf icons;
     FFstrbuf font;
-} FFgtkval;
+} FFGTKResult;
+
+typedef struct FFTerminalResult
+{
+    FFstrbuf exeName;
+    FFstrbuf processName;
+    FFstrbuf error;
+} FFTerminalResult;
+
+typedef struct FFWMResult
+{
+    FFstrbuf processName;
+    FFstrbuf prettyName;
+    FFstrbuf error;
+} FFWMResult;
 
 typedef struct FFstate
 {
@@ -112,35 +151,6 @@ typedef struct FFstate
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
-
-    //Values needed in more than one module / calculated together / calculated in extra threads
-
-    struct
-    {
-        FFstrbuf widgetStyle;
-        FFstrbuf colorScheme;
-        FFstrbuf icons;
-        FFstrbuf font;
-    } plasma;
-
-    FFgtkval gtk2;
-    FFgtkval gtk3;
-    FFgtkval gtk4;
-
-    struct
-    {
-        FFstrbuf exeName;
-        FFstrbuf processName;
-        FFstrbuf error;
-    } terminal;
-
-    struct
-    {
-        FFstrbuf processName;
-        FFstrbuf prettyName;
-        FFstrbuf error;
-    } wm;
-
 } FFstate;
 
 typedef struct FFinstance
@@ -151,13 +161,13 @@ typedef struct FFinstance
 
 typedef enum FFformatargtype
 {
+    FF_FORMAT_ARG_TYPE_NULL,
     FF_FORMAT_ARG_TYPE_UINT,
     FF_FORMAT_ARG_TYPE_UINT8,
     FF_FORMAT_ARG_TYPE_INT,
     FF_FORMAT_ARG_TYPE_STRING,
     FF_FORMAT_ARG_TYPE_STRBUF,
-    FF_FORMAT_ARG_TYPE_DOUBLE,
-    FF_FORMAT_ARG_TYPE_NULL
+    FF_FORMAT_ARG_TYPE_DOUBLE
 } FFformatargtype;
 
 typedef struct FFformatarg
@@ -179,7 +189,6 @@ typedef struct FFcache
 //common/init.c
 void ffInitInstance(FFinstance* instance);
 void ffFinish(FFinstance* instance);
-void ffCalculatePlasmaAndGtk(FFinstance* instance);
 
 //common/threading.c
 void ffStartCalculationThreads(FFinstance* instance);
@@ -188,6 +197,9 @@ void ffStartCalculationThreads(FFinstance* instance);
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
 void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
+void ffGetCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer);
+void ffReadCacheFile(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer);
+void ffWriteCacheFile(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* content);
 bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs);
 void ffPrintAndSaveToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
 void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
@@ -199,6 +211,8 @@ void ffCacheClose(FFcache* cache);
 void ffAppendFDContent(int fd, FFstrbuf* buffer);
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
+void ffWriteFDContent(int fd, const FFstrbuf* content);
+void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
 void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
@@ -208,7 +222,7 @@ void ffProcessGetStdOut(FFstrbuf* buffer, char* const argv[]);
 
 //common/logo.c
 void ffLoadLogoSet(FFconfig* config, const char* logo);
-void ffLoadLogo(FFconfig* config);
+void ffLoadLogo(FFinstance* instance);
 void ffPrintLogoLine(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 
@@ -222,23 +236,26 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
 
 //common/parsing.c
-void ffGetGtkPretty(FFstrbuf* buffer, FFstrbuf* gtk2, FFstrbuf* gtk3, FFstrbuf* gtk4);
+void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
 void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
+//common/calculateOS.c
+const FFOSResult* ffCalculateOS(FFinstance* instance);
+
 //common/calculatePlasma.c
-void ffCalculatePlasma(FFinstance* instance);
+const FFPlasmaResult* ffCalculatePlasma(FFinstance* instance);
 
 //common/calculateGTK.c
-void ffCalculateGTK2(FFinstance* instance);
-void ffCalculateGTK4(FFinstance* instance);
-void ffCalculateGTK3(FFinstance* instance);
+const FFGTKResult* ffCalculateGTK2(FFinstance* instance);
+const FFGTKResult* ffCalculateGTK4(FFinstance* instance);
+const FFGTKResult* ffCalculateGTK3(FFinstance* instance);
 
 //common/calculateWM.c
-void ffCalculateWM(FFinstance* instance);
+const FFWMResult* ffCalculateWM(FFinstance* instance);
 
 //common/calculateTerminal.c
-void ffCalculateTerminal(FFinstance* instance);
+const FFTerminalResult* ffCalculateTerminal(FFinstance* instance);
 
 /********************/
 /* Module functions */
