@@ -64,6 +64,10 @@ static int parseRefreshRate(int32_t refreshRate)
     else
         refreshRate -= remainder;
 
+    //All other typicall refresh rates are dividable by 5
+    if(refreshRate == 145)
+        refreshRate = 144;
+
     return refreshRate;
 }
 
