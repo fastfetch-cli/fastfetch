@@ -3,6 +3,16 @@
 #define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 3
 
+static inline bool hostValueSet(FFstrbuf* value)
+{
+    return
+        value != NULL &&
+        value->length > 0 &&
+        ffStrbufIgnCaseCompS(value, "None") != 0 &&
+        ffStrbufIgnCaseCompS(value, "To be filled by O.E.M.") != 0
+    ;
+}
+
 void ffPrintHost(FFinstance* instance)
 {
     if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS))
@@ -17,22 +27,18 @@ void ffPrintHost(FFinstance* instance)
     FF_STRBUF_CREATE(version);
     ffGetFileContent("/sys/devices/virtual/dmi/id/product_version", &version);
 
-    if(family.length == 0 && name.length == 0)
+    if(!hostValueSet(&family) && !hostValueSet(&name))
     {
-        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, "neither family nor name could be determined");
+        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, "neither family nor name is set by O.E.M.");
         return;
     }
 
     FF_STRBUF_CREATE(host);
 
-    if(name.length == 0)
-    {
-        ffStrbufAppend(&host, &family);
-    }
-    else if(family.length == 0)
-    {
+    if(!hostValueSet(&family))
         ffStrbufAppend(&host, &name);
-    }
+    else if(!hostValueSet(&name))
+        ffStrbufAppend(&host, &family);
     else
     {
         ffStrbufAppend(&host, &family);
@@ -40,11 +46,7 @@ void ffPrintHost(FFinstance* instance)
         ffStrbufAppend(&host, &name);
     }
 
-    if(
-        version.length > 0 &&
-        ffStrbufIgnCaseCompS(&version, "None") != 0 &&
-        ffStrbufIgnCaseCompS(&version, "To be filled by O.E.M.") != 0
-    ) {
+    if(hostValueSet(&version)) {
         ffStrbufAppendC(&host, ' ');
         ffStrbufAppend(&host, &version);
     }
