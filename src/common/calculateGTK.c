@@ -51,6 +51,10 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
     }
     init = true;
 
+    themeName = NULL;
+    iconsName = NULL;
+    fontName = NULL;
+
     void* dconf;
     if(instance->config.libDConf.length == 0)
         dconf = dlopen("libdconf.so", RTLD_LAZY);
@@ -58,11 +62,15 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
         dconf = dlopen(instance->config.libDConf.chars, RTLD_LAZY);
 
     if(dconf == NULL)
+    {
+        pthread_mutex_unlock(&mutex);
         return;
+    }
 
     DConfClient*(*ffdconf_client_new)(void) = dlsym(dconf, "dconf_client_new");
     if(ffdconf_client_new == NULL)
     {
+        pthread_mutex_unlock(&mutex);
         dlclose(dconf);
         return;
     }
@@ -70,6 +78,7 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
     const gchar*(*ffg_variant_get_string)(GVariant*, gsize*) = dlsym(dconf, "g_variant_get_string");
     if(ffg_variant_get_string == NULL)
     {
+        pthread_mutex_unlock(&mutex);
         dlclose(dconf);
         return;
     }
@@ -77,6 +86,7 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
     GVariant*(*ffdconf_client_read)(DConfClient*, const gchar*) = dlsym(dconf, "dconf_client_read");
     if(ffdconf_client_read == NULL)
     {
+        pthread_mutex_unlock(&mutex);
         dlclose(dconf);
         return;
     }
@@ -84,6 +94,7 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
     DConfClient* dconfClient = ffdconf_client_new();
     if(dconfClient == NULL)
     {
+        pthread_mutex_unlock(&mutex);
         dlclose(dconf);
         return;
     }
@@ -100,10 +111,10 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
     if(iconsNameVariant != NULL)
         iconsName = ffg_variant_get_string(iconsNameVariant, NULL);
 
-    dlclose(dconf);
-
-    applyGTKDConfSettings(result, themeName, iconsName, fontName);
     pthread_mutex_unlock(&mutex);
+
+    dlclose(dconf);
+    applyGTKDConfSettings(result, themeName, iconsName, fontName);
 }
 
 static void parseGTKConfigFile(FFstrbuf* fileName, FFGTKResult* result)

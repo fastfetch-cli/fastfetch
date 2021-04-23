@@ -16,7 +16,7 @@ At the moment the performance difference is measurable, but too small to be huma
 
 Currently, `fastfetch` supports the following logos:
 ```
-Arch, Artix, Manjaro, Debian, Ubuntu
+Arch, Artix, Manjaro, Debian, Ubuntu, Void
 ```
 Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/common/logo.c`](src/common/logo.c).
 
