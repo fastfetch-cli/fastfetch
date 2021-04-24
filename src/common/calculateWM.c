@@ -44,6 +44,18 @@ const FFWMResult* ffCalculateWM(FFinstance* instance)
 
         if(ffStrbufIgnCaseCompS(&result.processName, "kwin_wayland") == 0 || ffStrbufIgnCaseCompS(&result.processName, "kwin_x11") == 0)
             ffStrbufSetS(&result.prettyName, "KWin");
+        
+        if(ffStrbufIgnCaseCompS(&result.processName, "openbox") == 0)
+            ffStrbufSetS(&result.prettyName, "Openbox");
+
+		if(ffStrbufIgnCaseCompS(&result.processName, "cinnamon") == 0)
+            ffStrbufSetS(&result.prettyName, "Mutter");
+
+		if(ffStrbufIgnCaseCompS(&result.processName, "xfwm4") == 0)
+            ffStrbufSetS(&result.prettyName, "XFCE Window Manager");
+
+		if(ffStrbufIgnCaseCompS(&result.processName, "wayfire") == 0)
+            ffStrbufSetS(&result.prettyName, "Wayfire");
 
         if(result.prettyName.length > 0)
             break;
