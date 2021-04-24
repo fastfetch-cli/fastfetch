@@ -89,7 +89,7 @@ void ffPrintDisk(FFinstance* instance)
         if(rootRet != 0 && homeRet != 0)
         {
             FF_STRBUF_CREATE(key);
-            getKey(instance, &key, "/", false);
+            getKey(instance, &key, "", false);
             ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "statvfs failed for both / and /home");
             ffStrbufDestroy(&key);
             return;
@@ -103,6 +103,17 @@ void ffPrintDisk(FFinstance* instance)
     }
     else
     {
+        ffStrbufTrim(&instance->config.diskFolders, ':');
+
+        if(instance->config.diskFolders.length == 0)
+        {
+            FF_STRBUF_CREATE(key);
+            getKey(instance, &key, "", false);
+            ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "Custom disk folders string doesn't contain any folders");
+            ffStrbufDestroy(&key);
+            return;
+        }
+
         uint32_t lastIndex = 0;
         while (lastIndex < instance->config.diskFolders.length)
         {
