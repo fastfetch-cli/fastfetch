@@ -56,6 +56,19 @@ static void printKonsole(FFinstance* instance)
     printTerminalFont(instance, font);
 }
 
+static void printXFCE4Terminal(FFinstance* instance)
+{
+    char font[128];
+    ffParsePropFileHome(instance, ".config/xfce4/terminal/terminalrc", "FontName=%[^\n]", font);
+    if(font[0] == '\0')
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"FontName=%%[^\\n]\" in \".config/xfce4/terminal/terminalrc\"");
+        return;
+    }
+
+    printTerminalFont(instance, font);
+}
+
 static void printTTY(FFinstance* instance)
 {
     char font[128];
@@ -78,6 +91,8 @@ void ffPrintTerminalFont(FFinstance* instance)
 
     if(ffStrbufIgnCaseCompS(&result->exeName, "konsole") == 0)
         printKonsole(instance);
+    else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
+        printXFCE4Terminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "login"))
         printTTY(instance);
     else
