@@ -19,7 +19,7 @@ execute_process(
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAFS} -Wall -Wextra -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O3")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-O3")
 
 if(BUILD_TESTS)
@@ -44,15 +44,23 @@ if(NOT DEFINED GLIB2_INCLUDE_DIRS)
     )
 endif(NOT DEFINED GLIB2_INCLUDE_DIRS)
 
+if(NOT DEFINED LIBXML_INCLUDE_DIRS)
+    set(LIBXML_INCLUDE_DIRS
+        /usr/include/libxml2/
+    )
+endif(NOT DEFINED LIBXML_INCLUDE_DIRS)
+
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
     ${GLIB2_INCLUDE_DIRS}
+    ${LIBXML_INCLUDE_DIRS}
 )
 
 link_libraries(
     ${CMAKE_DL_LIBS}
     Threads::Threads
+    xml2
 )
 
 set(SRCS
