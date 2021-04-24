@@ -115,6 +115,10 @@ void ffPrintBattery(FFinstance* instance)
 
     while((entry = readdir(dirp)) != NULL)
     {
+        //Happens if an error occures
+        if(entry == NULL)
+            continue;
+
         ffStrbufAppendS(&baseDir, entry->d_name);
         ffStrbufAppendS(&baseDir, "/capacity");
 
@@ -130,7 +134,7 @@ void ffPrintBattery(FFinstance* instance)
 
     if(dirs.length == 0)
     {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "%s doesn't contain any BAT* folder", baseDir.chars);
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "%s doesn't contain any battery folder", baseDir.chars);
         ffListDestroy(&dirs);
         ffStrbufDestroy(&baseDir);
         return;
