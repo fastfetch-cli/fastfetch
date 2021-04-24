@@ -74,6 +74,8 @@ static void defaultConfig(FFconfig* config)
     ffStrbufInitA(&config->libWayland, 1);
 
     ffStrbufInitA(&config->diskFolders, 1);
+
+    ffStrbufInitA(&config->batteryDir, 1);
 }
 
 void ffInitInstance(FFinstance* instance)

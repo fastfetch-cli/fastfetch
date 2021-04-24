@@ -115,6 +115,7 @@ static inline void printHelp()
         "\n"
         "Module specific options:\n"
         "   --disk-folders <folders>: A colon seperated list of folder paths for the disk output. Default is \"/:/home\"\n"
+        "   --battery-dir <folder>:   The directory were the battery folders are in. Standard: /sys/class/power_supply/\n"
         "\n"
         "Parsing is not case sensetive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
         "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
@@ -667,6 +668,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libWayland);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
+    else if(strcasecmp(key, "--battery-dir") == 0)
+        optionParseString(key, value, &instance->config.batteryDir);
     else
     {
         fprintf(stderr, "Error: unknown option: %s\n", key);

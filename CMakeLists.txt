@@ -57,6 +57,7 @@ link_libraries(
 
 set(SRCS
     src/util/FFstrbuf.c
+    src/util/FFlist.c
     src/common/init.c
     src/common/threading.c
     src/common/io.c

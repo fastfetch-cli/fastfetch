@@ -180,6 +180,7 @@ __fastfetch_completion()
         "--lib-Xrandr"
         "--lib-DConf"
         "--lib-wayland"
+        "--battery-dir"
     )
 
     local FF_OPTIONS_LOGO=(

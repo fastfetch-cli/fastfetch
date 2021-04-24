@@ -24,7 +24,10 @@ void* ffListGet(FFlist* list, uint32_t index)
 void* ffListAdd(FFlist* list)
 {
     if(list->length == list->capacity)
-        list->data = realloc(list->data, list->capacity * 2 * list->elementSize);
+    {
+        list->capacity = list->capacity * 2 * list->elementSize;
+        list->data = realloc(list->data, list->capacity);
+    }
     void* adress = list->data + (list->length * list->elementSize);
     ++list->length;
     return adress;

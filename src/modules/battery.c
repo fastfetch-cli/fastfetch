@@ -1,40 +1,43 @@
 #include "fastfetch.h"
 
+#include <unistd.h>
 #include <dirent.h>
 
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFinstance* instance, uint8_t index)
+static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
 {
+    uint32_t dirLength = dir->length;
+
     FF_STRBUF_CREATE(manufactor);
-    char manufactorPath[42];
-    sprintf(manufactorPath, "/sys/class/power_supply/BAT%hhu/manufacturer", index);
-    ffGetFileContent(manufactorPath, &manufactor);
+    ffStrbufAppendS(dir, "/manufacturer");
+    ffGetFileContent(dir->chars, &manufactor);
+    ffStrbufSubstrBefore(dir, dirLength);
 
     FF_STRBUF_CREATE(model);
-    char modelPath[40];
-    sprintf(modelPath, "/sys/class/power_supply/BAT%hhu/model_name", index);
-    ffGetFileContent(modelPath, &model);
+    ffStrbufAppendS(dir, "/model_name");
+    ffGetFileContent(dir->chars, &model);
+    ffStrbufSubstrBefore(dir, dirLength);
 
     FF_STRBUF_CREATE(technology);
-    char technologyPath[40];
-    sprintf(technologyPath, "/sys/class/power_supply/BAT%hhu/technology", index);
-    ffGetFileContent(technologyPath, &technology);
+    ffStrbufAppendS(dir, "/technology");
+    ffGetFileContent(dir->chars, &technology);
+    ffStrbufSubstrBefore(dir, dirLength);
 
     FF_STRBUF_CREATE(capacity);
-    char capacityPath[38];
-    sprintf(capacityPath, "/sys/class/power_supply/BAT%hhu/capacity", index);
-    ffGetFileContent(capacityPath, &capacity);
+    ffStrbufAppendS(dir, "/capacity");
+    ffGetFileContent(dir->chars, &capacity);
+    ffStrbufSubstrBefore(dir, dirLength);
 
     FF_STRBUF_CREATE(status);
-    char statusPath[36];
-    sprintf(statusPath, "/sys/class/power_supply/BAT%hhu/status", index);
-    ffGetFileContent(statusPath, &status);
+    ffStrbufAppendS(dir, "/status");
+    ffGetFileContent(dir->chars, &status);
+    ffStrbufSubstrBefore(dir, dirLength);
 
     if(manufactor.length == 0 && model.length == 0 && technology.length == 0 && capacity.length == 0 && status.length == 0)
     {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "No file in /sys/class/power_supply/BAT%hhu/ could be read or all battery options are disabled", index);
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "No file in %s could be read or all battery options are disabled", dir->chars);
         return;
     }
 
@@ -87,34 +90,61 @@ static void printBattery(FFinstance* instance, uint8_t index)
     ffStrbufDestroy(&status);
 }
 
-#define FF_BATTERY_MAX_INDEX 5
-
 void ffPrintBattery(FFinstance* instance)
 {
-    uint8_t batteryCounter = 0;
-    uint8_t batteryIndicies[FF_BATTERY_MAX_INDEX];
+    FFstrbuf baseDir;
+    ffStrbufInitA(&baseDir, 64);
+    if(instance->config.batteryDir.length > 0)
+        ffStrbufAppend(&baseDir, &instance->config.batteryDir);
+    else
+        ffStrbufAppendS(&baseDir, "/sys/class/power_supply/");
+    uint32_t baseDirLength = baseDir.length;
 
-    for(uint8_t i = 0; i < FF_BATTERY_MAX_INDEX; i++)
+    DIR* dirp = opendir(baseDir.chars);
+    if(dirp == NULL)
     {
-        char path[30];
-        sprintf(path, "/sys/class/power_supply/BAT%i", i);
-
-        DIR* dir = opendir(path);
-        if(dir != NULL)
-        {
-            batteryIndicies[batteryCounter++] = i;
-            closedir(dir);
-        }
-    }
-
-    if(batteryCounter == 0)
-    {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "/sys/class/power_supply/ doesn't contain any BAT* folder");
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "opendir(\"%s\") == NULL", baseDir.chars);
+        ffStrbufDestroy(&baseDir);
         return;
     }
 
-    for(uint8_t i = 0; i < batteryCounter; i++)
+    FFlist dirs;
+    ffListInitA(&dirs, sizeof(FFstrbuf), 4);
+
+    struct dirent* entry;
+
+    while((entry = readdir(dirp)) != NULL)
     {
-        printBattery(instance, batteryIndicies[i]);
+        ffStrbufAppendS(&baseDir, entry->d_name);
+        ffStrbufAppendS(&baseDir, "/capacity");
+
+        if(access(baseDir.chars, F_OK) == 0)
+        {
+            FFstrbuf* name = ffListAdd(&dirs);
+            ffStrbufInit(name);
+            ffStrbufSetS(name, entry->d_name);
+        }
+
+        ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
+
+    if(dirs.length == 0)
+    {
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "%s doesn't contain any BAT* folder", baseDir.chars);
+        ffListDestroy(&dirs);
+        ffStrbufDestroy(&baseDir);
+        return;
+    }
+
+    for(uint32_t i = 0; i < dirs.length; i++)
+    {
+        FFstrbuf* name = ffListGet(&dirs, i);
+        ffStrbufAppend(&baseDir, name);
+        printBattery(instance, &baseDir, dirs.length == 1 ? 0 : i);
+        ffStrbufSubstrBefore(&baseDir, baseDirLength);
+        ffStrbufDestroy(name);
+    }
+
+    ffListDestroy(&dirs);
+    ffStrbufDestroy(&baseDir);
 }

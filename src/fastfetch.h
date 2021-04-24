@@ -16,6 +16,7 @@
 #include "fastfetch_config.h"
 
 #include "util/FFstrbuf.h"
+#include "util/FFlist.h"
 
 #define UNUSED(...) (void)(__VA_ARGS__)
 
@@ -96,6 +97,8 @@ typedef struct FFconfig
     FFstrbuf libDConf;
 
     FFstrbuf diskFolders;
+
+    FFstrbuf batteryDir;
 
 } FFconfig;
 
