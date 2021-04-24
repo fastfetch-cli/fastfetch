@@ -144,7 +144,7 @@ void ffPrintBattery(FFinstance* instance)
     {
         FFstrbuf* name = ffListGet(&dirs, i);
         ffStrbufAppend(&baseDir, name);
-        printBattery(instance, &baseDir, dirs.length == 1 ? 0 : i);
+        printBattery(instance, &baseDir, dirs.length == 1 ? 0 : i + 1);
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
         ffStrbufDestroy(name);
     }
