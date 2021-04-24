@@ -72,9 +72,10 @@ void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* s
 void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments);
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
 
-uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c);
-uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c);
-uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c);
+uint32_t ffStrbufFirstIndexAfterC(const FFstrbuf* strbuf, uint32_t start, const char c);
+uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, const char c);
+uint32_t ffStrbufFirstIndexAfterS(const FFstrbuf* strbuf, uint32_t start, const char* str);
+uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, const char c);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c);

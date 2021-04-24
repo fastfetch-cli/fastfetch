@@ -17,87 +17,229 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     else if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
     {
         fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);
-        ffStrbufDestroy(buffer);
         exit(806);
     }
 }
 
+static inline bool placeholderValueIsForError(const FFstrbuf* placeholderValue)
+{
+    return
+        ffStrbufIgnCaseCompS(placeholderValue, "e") == 0 ||
+        ffStrbufIgnCaseCompS(placeholderValue, "error") == 0 ||
+        ffStrbufIgnCaseCompS(placeholderValue, "0") == 0
+    ;
+}
+
+static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
+{
+    uint32_t result = UINT32_MAX;
+
+    if(placeholderValue->chars[0] != '-')
+        sscanf(placeholderValue->chars, "%u", &result);
+
+    return result;
+}
+
+static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start, const FFstrbuf* placeholderValue, uint32_t index, uint32_t formatStringLength)
+{
+    ffStrbufAppendS(buffer, start);
+    ffStrbufAppend(buffer, placeholderValue);
+
+    if(index < formatStringLength)
+        ffStrbufAppendC(buffer, '}');
+}
+
+static inline void appendEmptyPlaceholder(FFstrbuf* buffer, const char* placeholder, uint32_t* argCounter, uint32_t numArgs, const FFformatarg* arguments)
+{
+    if(*argCounter > numArgs)
+        ffStrbufAppendS(buffer, placeholder);
+    else
+        ffFormatAppendFormatArg(buffer, &arguments[(*argCounter)++]);
+}
+
+static inline bool formatArgSet(const FFformatarg* arg)
+{
+    return arg->value != NULL && (
+        (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_STRING && *(const char*)arg->value != '\0') ||
+        (arg->type == FF_FORMAT_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0)
+    );
+}
+
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments)
 {
-    uint32_t argCounter = 1; //First arg is 1 in fomat string
+    uint32_t argCounter = 0;
+
+    uint32_t numOpenIfs = 0;
+    uint32_t numOpenNotIfs = 0;
 
     for(uint32_t i = 0; i < formatstr->length; ++i)
     {
+        // if we don't have a placeholder start just copy the chars over to output buffer
         if(formatstr->chars[i] != '{')
         {
             ffStrbufAppendC(buffer, formatstr->chars[i]);
             continue;
         }
 
+        // if we have an { at the end handle it as {}
         if(i == formatstr->length - 1)
         {
-            ffStrbufAppendC(buffer, '{');
-            continue; //This will always stop the loop
+            appendEmptyPlaceholder(buffer, "{", &argCounter, numArgs, arguments);
+            continue;
         }
 
+        // jump to next char, the start of the placeholder value
         ++i;
 
+        // double {{ elvaluates to a single { and doesn't count as start
         if(formatstr->chars[i] == '{')
         {
             ffStrbufAppendC(buffer, '{');
             continue;
         }
 
-        uint32_t argIndex;
-
+        // placeholder is {}
         if(formatstr->chars[i] == '}')
         {
-            if(argCounter > numArgs)
-            {
-                ffStrbufAppendS(buffer, "{}");
-                continue;
-            }
-
-            argIndex = argCounter++;
+            appendEmptyPlaceholder(buffer, "{}", &argCounter, numArgs, arguments);
+            continue;
         }
-        else
+
+        FFstrbuf placeholderValue;
+        ffStrbufInit(&placeholderValue);
+
+        while(formatstr->chars[i] != '}' && i < formatstr->length)
+            ffStrbufAppendC(&placeholderValue, formatstr->chars[i++]);
+
+        // test for error, if so print it
+        if(placeholderValueIsForError(&placeholderValue)) {
+            ffStrbufAppend(buffer, error);
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+         // test if for stop, if so break the loop
+        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '-')
         {
-            FFstrbuf argnumstr;
-            ffStrbufInit(&argnumstr);
-
-            while(formatstr->chars[i] != '}' && i < formatstr->length)
-                ffStrbufAppendC(&argnumstr, formatstr->chars[i++]);
-
-            if(
-                ffStrbufIgnCaseCompS(&argnumstr, "e") == 0 ||
-                ffStrbufIgnCaseCompS(&argnumstr, "error") == 0 ||
-                ffStrbufIgnCaseCompS(&argnumstr, "0") == 0
-            ) {
-                ffStrbufAppend(buffer, error);
-                ffStrbufDestroy(&argnumstr);
-                continue;
-            }
-
-            //Test if argnumstr is valid
-            if(
-                argnumstr.length == 0 ||
-                ffStrbufGetC(&argnumstr, 0) == '-' ||
-                sscanf(argnumstr.chars, "%u", &argIndex) != 1 ||
-                argIndex > numArgs
-            ) {
-                //Not valid
-                ffStrbufAppendC(buffer, '{');
-                ffStrbufAppend(buffer, &argnumstr);
-                if(formatstr->chars[i] == '}') // We dont have a closing { when ending because whole format string is over
-                    ffStrbufAppendC(buffer, '}');
-                ffStrbufDestroy(&argnumstr);
-                continue;
-            }
-
-            ffStrbufDestroy(&argnumstr);
+            ffStrbufDestroy(&placeholderValue);
+            break;
         }
 
-        ffFormatAppendFormatArg(buffer, &arguments[argIndex - 1]);
+        // test for end of an if, if so do nothing
+        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '?')
+        {
+            if(numOpenIfs == 0)
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+            else
+                --numOpenIfs;
+
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+        // test for end of a not if, if so do nothing
+        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '/')
+        {
+            if(numOpenNotIfs == 0)
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+            else
+                --numOpenNotIfs;
+
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+        // test for if, if so evaluate it
+        if(placeholderValue.chars[0] == '?')
+        {
+            ffStrbufSubstrAfter(&placeholderValue, 0);
+
+            // continue if an error is set
+            if(placeholderValueIsForError(&placeholderValue) && error != NULL && error->length > 0)
+            {
+                ++numOpenIfs;
+                ffStrbufDestroy(&placeholderValue);
+                continue;
+            }
+
+            uint32_t index = getArgumentIndex(&placeholderValue);
+
+            // testing for an invalid index
+            if(index > numArgs)
+            {
+                appendInvalidPlaceholder(buffer, "{?", &placeholderValue, i, formatstr->length);
+                ffStrbufDestroy(&placeholderValue);
+                continue;
+            }
+
+            // continue normally if an format arg is set and the value is > 0
+            if(formatArgSet(&arguments[index - 1]))
+            {
+                ++numOpenIfs;
+                ffStrbufDestroy(&placeholderValue);
+                continue;
+            }
+
+            // fastforward to the end of the if without printing the in between
+            i = ffStrbufFirstIndexAfterS(formatstr, i, "{?}") + 2; // 2 is the length of "{?}" -1 because the loop will increament it again directly after continue
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+        // test for not if, if so evaluate it
+        if(placeholderValue.chars[0] == '/')
+        {
+            ffStrbufSubstrAfter(&placeholderValue, 0);
+
+            //continue if an error os not set
+            if(placeholderValueIsForError(&placeholderValue) && (error == NULL || error->length == 0))
+            {
+                ++numOpenNotIfs;
+                ffStrbufDestroy(&placeholderValue);
+                continue;
+            }
+
+            uint32_t index = getArgumentIndex(&placeholderValue);
+
+            // testing for an invalid index
+            if(index > numArgs)
+            {
+                appendInvalidPlaceholder(buffer, "{/", &placeholderValue, i, formatstr->length);
+                ffStrbufDestroy(&placeholderValue);
+                continue;
+            }
+
+            //continue normally if an format arg is not set or the value is 0
+            if(!formatArgSet(&arguments[index - 1]))
+            {
+                ++numOpenNotIfs;
+                ffStrbufDestroy(&placeholderValue);
+                continue;
+            }
+
+            // fastforward to the end of the if without printing the in between
+            i = ffStrbufFirstIndexAfterS(formatstr, i, "{/}") + 2; // 2 is the length of "{/}" -1 because the loop will increament it again directly after continue
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+        uint32_t index = getArgumentIndex(&placeholderValue);
+
+        // test for invalid index
+        if(index > numArgs)
+        {
+            appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+        ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
+
+        ffStrbufDestroy(&placeholderValue);
     }
 
     ffStrbufTrimRight(buffer, ' ');

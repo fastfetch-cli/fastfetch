@@ -55,15 +55,12 @@ void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIn
         FF_STRBUF_CREATE(error);
         ffStrbufAppendVF(&error, message, arguments);
 
-        FFformatarg nullArgs[numFormatArgs];
-        for(uint32_t i = 0; i < numFormatArgs; i++)
-        {
-            nullArgs[i].type = FF_FORMAT_ARG_TYPE_NULL;
-            nullArgs[i].value = NULL;
-        }
+        // calloc sets all to 0 and FF_FORMAT_ARG_TYPE_NULL also has value 0 so we don't need to explictly set it
+        FFformatarg* nullArgs = calloc(numFormatArgs, sizeof(FFformatarg));
 
         ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, formatString, &error, numFormatArgs, nullArgs);
 
+        free(nullArgs);
         ffStrbufDestroy(&error);
     }
 
@@ -195,7 +192,7 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
 
     uint8_t moduleCounter = 1;
 
-    FFformatarg arguments[numArgs];
+    FFformatarg* arguments = calloc(numArgs, sizeof(FFformatarg));
     uint32_t argumentCounter = 0;
 
     uint32_t lastIndex = 0;
@@ -218,6 +215,7 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
         lastIndex = nullByteIndex + 1;
     }
 
+    free(arguments);
     ffStrbufDestroy(&content);
 
     return moduleCounter > 1;

@@ -9,7 +9,7 @@
 
 typedef struct FFlist
 {
-    void* data;
+    char* data;
     uint32_t elementSize;
     uint32_t length;
     uint32_t capacity;

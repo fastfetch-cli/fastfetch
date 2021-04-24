@@ -142,6 +142,8 @@ void ffStrbufSetVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 
 void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
 {
+    if(value == NULL)
+        return;
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
@@ -338,11 +340,13 @@ void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* s
 
 void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments)
 {
-    const char* strings[numStrings];
+    const char** strings = calloc(numStrings, sizeof(const char*));
     for(uint32_t i = 0; i < numStrings; i++)
         strings[i] = va_arg(arguments, const char*);
 
     ffStrbufRemoveStringsA(strbuf, numStrings, strings);
+
+    free(strings);
 }
 
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
@@ -353,7 +357,7 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
     va_end(argp);
 }
 
-uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c)
+uint32_t ffStrbufFirstIndexAfterC(const FFstrbuf* strbuf, uint32_t start, const char c)
 {
     for(uint32_t i = start; i < strbuf->length; i++)
     {
@@ -363,12 +367,36 @@ uint32_t ffStrbufFirstIndexAfterC(FFstrbuf* strbuf, uint32_t start, const char c
     return strbuf->length;
 }
 
-uint32_t ffStrbufFirstIndexC(FFstrbuf* strbuf, const char c)
+uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, const char c)
 {
     return ffStrbufFirstIndexAfterC(strbuf, 0, c);
 }
 
-uint32_t ffStrbufLastIndexC(FFstrbuf* strbuf, const char c)
+uint32_t ffStrbufFirstIndexAfterS(const FFstrbuf* strbuf, uint32_t start, const char* str)
+{
+    for(uint32_t i = start + 1; i < strbuf->length; i++)
+    {
+        bool found = true;
+
+        for(uint32_t k = 0; str[k] != '\0'; k++)
+        {
+            if(i + k == strbuf->length)
+                return strbuf->length;
+
+            if(strbuf->chars[i + k] != str[k])
+            {
+                found = false;
+                break;
+            }
+        }
+
+        if(found)
+            return i;
+    }
+    return strbuf->length;
+}
+
+uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, const char c)
 {
     //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true
     for(uint32_t i = strbuf->length; i > 0; i--)

@@ -164,7 +164,7 @@ typedef struct FFinstance
 
 typedef enum FFformatargtype
 {
-    FF_FORMAT_ARG_TYPE_NULL,
+    FF_FORMAT_ARG_TYPE_NULL = 0,
     FF_FORMAT_ARG_TYPE_UINT,
     FF_FORMAT_ARG_TYPE_UINT8,
     FF_FORMAT_ARG_TYPE_INT,
