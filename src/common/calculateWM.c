@@ -49,7 +49,7 @@ const FFWMResult* ffCalculateWM(FFinstance* instance)
             ffStrbufSetS(&result.prettyName, "Openbox");
 
 		if(ffStrbufIgnCaseCompS(&result.processName, "cinnamon") == 0)
-            ffStrbufSetS(&result.prettyName, "Mutter");
+            ffStrbufSetS(&result.prettyName, "Muffin");
 
 		if(ffStrbufIgnCaseCompS(&result.processName, "xfwm4") == 0)
             ffStrbufSetS(&result.prettyName, "XFCE Window Manager");
