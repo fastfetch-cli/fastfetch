@@ -95,9 +95,22 @@ void ffPrintBattery(FFinstance* instance)
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 64);
     if(instance->config.batteryDir.length > 0)
+    {
         ffStrbufAppend(&baseDir, &instance->config.batteryDir);
+
+        if(baseDir.length == 0)
+        {
+            ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "custom battery dir is an empty string");
+            ffStrbufDestroy(&baseDir);
+            return;
+        }
+
+        if(baseDir.chars[baseDir.length - 1] != '/')
+            ffStrbufAppendC(&baseDir, '/');
+    }
     else
         ffStrbufAppendS(&baseDir, "/sys/class/power_supply/");
+
     uint32_t baseDirLength = baseDir.length;
 
     DIR* dirp = opendir(baseDir.chars);
