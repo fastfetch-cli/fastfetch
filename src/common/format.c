@@ -75,6 +75,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
 
     uint32_t numOpenIfs = 0;
     uint32_t numOpenNotIfs = 0;
+    uint32_t numOpenColors = 0;
 
     for(uint32_t i = 0; i < formatstr->length; ++i)
     {
@@ -148,6 +149,21 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
                 appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
             else
                 --numOpenNotIfs;
+
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
+        // test for end of a color, if so do nothing
+        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '#')
+        {
+            if(numOpenColors == 0)
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+            else
+            {
+                ffStrbufAppendS(buffer, "\033[0m");
+                --numOpenColors;
+            }
 
             ffStrbufDestroy(&placeholderValue);
             continue;
@@ -227,6 +243,18 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
             continue;
         }
 
+        //test for color, if so evaluate it
+        if(placeholderValue.chars[0] == '#')
+        {
+            ++numOpenColors;
+            ffStrbufSubstrAfter(&placeholderValue, 0);
+            ffStrbufAppendS(buffer, "\033[");
+            ffStrbufAppend(buffer, &placeholderValue);
+            ffStrbufAppendC(buffer, 'm');
+            ffStrbufDestroy(&placeholderValue);
+            continue;
+        }
+
         uint32_t index = getArgumentIndex(&placeholderValue);
 
         // test for invalid index
@@ -243,4 +271,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
     }
 
     ffStrbufTrimRight(buffer, ' ');
+
+    if(numOpenColors > 0)
+        ffStrbufAppendS(buffer, "\033[0m");
 }
