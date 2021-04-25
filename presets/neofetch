@@ -4,3 +4,4 @@
 --terminal-font-format "{/2}{-}{/}{2}{?3} {3}{?}"
 --memory-format "{/1}{-}{/}{/2}{-}{/}{}Mib / {}Mib"
 --gpu-key "GPU"
+--resolution-key "Resolution"

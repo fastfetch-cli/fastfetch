@@ -18,7 +18,7 @@ There are some presets defined for fastfech in [`presets`](presets), you can can
 
 Currently, `fastfetch` supports the following logos:
 ```
-Arch, Artix, Manjaro, Debian, Ubuntu, Void
+Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
 ```
 Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/common/logo.c`](src/common/logo.c).
 

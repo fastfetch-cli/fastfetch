@@ -524,6 +524,8 @@ static inline void listAvailablePresets(FFinstance* instance)
 
     ffStrbufSetS(&folder, "/usr/share/fastfetch/presets/");
     listAvailablePresetsFromFolder(&folder, 0, NULL);
+
+    ffStrbufDestroy(&folder);
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);

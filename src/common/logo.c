@@ -218,6 +218,37 @@ static void loadVoidLogo(FFlogo *logo, bool doColor)
     sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s               -~|{*l}*|~                    "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadGarudaLogo(FFlogo* logo, bool doColor)
+{
+    logo->width = 46;
+    logo->height = 19;
+    strcpy(logo->name, "garuda");
+
+    const char* color = doColor ? "\033[91m" : "";
+    strcpy(logo->color, "\033[91m");
+
+    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   .%%;888:8898898:            "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 x;XxXB%%89b8:b8%%b88:          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              .8Xxd                8X:.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            .8Xx;                    8x:.     "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          .tt8x          .d            x88;   "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       .@8x8;          .db:              xx@; "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     ,tSXX°          .bbbbbbbbbbbbbbbbbbbB8x@;"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s   .SXxx            bBBBBBBBBBBBBBBBBBBBbSBX8;"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s ,888S                                     pd!"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                       qp"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                         "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%sGBB.                                          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s x%%88        d888@8@X@X@X88X@@XX@@X@8@X.      "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s   dxXd    dB8b8b8B8B08bB88b998888b88x.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    dxx8o                      .@@;.          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s      dx88                   .t@x.            "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s        d:SS@8ba89aa67a853Sxxad.              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s          .d988999889889899dd.                "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
+}
+
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
     if(strcasecmp(logo, "none") == 0)
@@ -237,6 +268,8 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
         loadManjaroLogo(&config->logo, config->colorLogo);
     else if(strcasecmp(logo, "void") == 0)
         loadVoidLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "garuda") == 0)
+        loadGarudaLogo(&config->logo, config->colorLogo);
     else if(strcasecmp(logo, "unknown") == 0)
         loadUnknownLogo(&config->logo);
     else
@@ -325,7 +358,7 @@ void ffPrintRemainingLogo(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 8
+    #define FASTFETCH_LOGO_AMOUNT 9
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
@@ -336,10 +369,11 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadUnknownLogo(&logos[1]);
     loadArchLogo(&logos[2], color);
     loadArtixLogo(&logos[3], color);
-    loadUbuntuLogo(&logos[4], color);
-    loadDebianLogo(&logos[5], color);
-    loadManjaroLogo(&logos[6], color);
-    loadVoidLogo(&logos[7], color);
+    loadGarudaLogo(&logos[4], color);
+    loadUbuntuLogo(&logos[5], color);
+    loadDebianLogo(&logos[6], color);
+    loadManjaroLogo(&logos[7], color);
+    loadVoidLogo(&logos[8], color);
 
     return logos;
 }
