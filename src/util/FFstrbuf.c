@@ -293,7 +293,7 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
     if(index == 0)
         return;
 
-    memmove(strbuf->chars, strbuf->chars + index, index);
+    memmove(strbuf->chars, strbuf->chars + index, strbuf->length - index);
     strbuf->length -= index;
     strbuf->chars[strbuf->length] = '\0';
 }
