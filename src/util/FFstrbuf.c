@@ -295,6 +295,7 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 
     memmove(strbuf->chars, strbuf->chars + index, index);
     strbuf->length -= index;
+    strbuf->chars[strbuf->length] = '\0';
 }
 
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
