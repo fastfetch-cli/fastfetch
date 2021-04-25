@@ -14,14 +14,6 @@ At the moment the performance difference is measurable, but too small to be huma
   
 There are some presets defined for fastfech in [`presets`](presets), you can can load them with `--load-config`. They may also serve as a good example for format arguments.
 
-## Supported logos
-
-Currently, `fastfetch` supports the following logos:
-```
-Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
-```
-Unknown/unsupported logos will be replaced with a question mark when running fastfetch. To add a new logo, edit [`src/common/logo.c`](src/common/logo.c).
-
 ## Dependencies
 
 In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is [`glibc`](https://www.gnu.org/software/libc/) (`libc`, `libdl` and `libpthread` are actually used) which is automatically shipped with every linux system.  
@@ -31,6 +23,34 @@ Following libraries are used if present:
 * [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
 * [`libDConf`](https://developer.gnome.org/dconf/unstable/DConfClient.html): GTK theme/font/icons output on DEs which dont use config files (e.g. Gnome).
 * [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance + support for monitors with different refresh rates in wayland sessions.  
+
+## Support status
+All categories not listed here should work without needing a specific implementation.
+
+### Logos:  
+```
+Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
+```
+Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
+### Package managers:
+```
+Pacman, Flatpak
+```
+
+### Window managers:
+```
+Kwin, Openbox, Muffin, XFWM, Wayfire
+```
+
+### Window manager themes:
+```
+KWin
+```
+
+### Terminal fonts:
+```
+konsole, xfce4-terminal, TTY
+```
 
 ## Building
 
