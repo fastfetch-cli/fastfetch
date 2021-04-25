@@ -214,7 +214,7 @@ void ffCacheClose(FFcache* cache);
 void ffAppendFDContent(int fd, FFstrbuf* buffer);
 void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
 void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
-void ffWriteFDContent(int fd, const FFstrbuf* content);
+bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
 void ffParsePropFile(const char* file, const char* regex, char* buffer);

@@ -360,9 +360,9 @@ void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffStrbufDestroy(&absolutePath);
 }
 
-void ffWriteFDContent(int fd, const FFstrbuf* content)
+bool ffWriteFDContent(int fd, const FFstrbuf* content)
 {
-    write(fd, content->chars, content->length);
+    return write(fd, content->chars, content->length) != -1;
 }
 
 void ffWriteFileContent(const char* fileName, const FFstrbuf* content)
