@@ -10,7 +10,9 @@ The output on my personal machine with default configurations looks like this:
 With customization and speed being two competing goals, this project actually builds two executables.  
 The main one being `fastfetch`, which can be greatly configured via flags. These flags even can be made persistant in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
 The second executable being build is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
-At the moment the performance difference is measurable, but too small to be human recognizable. But the lap will get bigger with more and more options coming and on slow machines this may actually make a difference.
+At the moment the performance difference is measurable, but too small to be human recognizable. But the lap will get bigger with more and more options coming and on slow machines this may actually make a difference.  
+  
+There are some presets defined for fastfech in [`presets`](presets), you can can load them with `--load-config`. They may also serve as a good example for format arguments.
 
 ## Supported logos
 
