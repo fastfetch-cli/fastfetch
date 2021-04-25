@@ -145,6 +145,7 @@ typedef struct FFWMResult
 {
     FFstrbuf processName;
     FFstrbuf prettyName;
+    FFstrbuf protocolName;
     FFstrbuf error;
 } FFWMResult;
 
@@ -258,6 +259,7 @@ const FFGTKResult* ffCalculateGTK3(FFinstance* instance);
 const FFWMResult* ffCalculateWM(FFinstance* instance);
 
 //common/calculateTerminal.c
+const char* ffGetSessionDesktop();
 const FFTerminalResult* ffCalculateTerminal(FFinstance* instance);
 
 /********************/
