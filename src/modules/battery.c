@@ -128,10 +128,6 @@ void ffPrintBattery(FFinstance* instance)
 
     while((entry = readdir(dirp)) != NULL)
     {
-        //Happens if an error occures
-        if(entry == NULL)
-            continue;
-
         ffStrbufAppendS(&baseDir, entry->d_name);
         ffStrbufAppendS(&baseDir, "/capacity");
 

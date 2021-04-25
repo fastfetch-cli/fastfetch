@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 #define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
@@ -42,6 +43,7 @@ static inline void printHelp()
         "                 --print-default-config:    prints the default config and exits\n"
         "                 --print-default-structure: prints the default stucture and exits\n"
         "                 --print-available-modules: prints a list of available modules and exits\n"
+        "                 --print-available-presets:  list presets fastfetch knows about. They can be loaded with --load-config. (+)\n"
         "\n"
         "General options:\n"
         "                --structure <structure>:         sets the structure of the fetch. Must be a colon seperated list of keys. Use --print-available-modules to show the default\n"
@@ -55,6 +57,7 @@ static inline void printHelp()
         "                --nocache <?value>:              dont use cached values, but also dont overwrite existing ones\n"
         "                --print-remaining-logo <?value>: print the remaining logo, if it is higher than the number of lines shown\n"
         "                --multithreading <?value>:       use multiple threads to calculate values\n"
+        "                --load-config <file>:            load a config file (+)\n"
         "\n"
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
@@ -187,36 +190,18 @@ static inline void printCommandHelpFormat()
     );
 }
 
-static inline void printAvailableModules()
+static inline void printCommandHelpLoadConfig()
 {
     puts(
-        "Battery\n"
-        "Break\n"
-        "Colors\n"
-        "CPU\n"
-        "DE\n"
-        "Disk\n"
-        "Font\n"
-        "GPU\n"
-        "Host\n"
-        "Icons\n"
-        "Kernel\n"
-        "Locale\n"
-        "Memory\n"
-        "OS\n"
-        "Packages\n"
-        "Resolution\n"
-        "Seperator\n"
-        "Shell\n"
-        "Terminal\n"
-        "TerminalFont\n"
-        "Theme\n"
-        "Title\n"
-        "Uptime\n"
-        "WM\n"
-        "WMTheme\n"
+        "usage: fastfetch --load-config <file>\n"
         "\n"
-        "+ Additional defined by --set"
+        "Loads a config file. A config file contains one flag per line. Empty lines or lines starting with # are ignored.\n"
+        "If the file is relative it looks in the following order:\n"
+        "   - relative to the current working directory\n"
+        "   - relative to ~/.local/share/fastfetch/presets/\n"
+        "   - relative to /usr/share/fastfetch/presets/\n"
+        "Fastfetch provides some default presets. List them with --print-available-presets.\n"
+        "Note that this will only print presets fastfetch knows about and not every possible one."
     );
 }
 
@@ -244,6 +229,8 @@ static inline void printCommandHelp(const char* command)
         printCommandHelpColor();
     else if(strcasecmp(command, "format") == 0)
         printCommandHelpFormat();
+    else if(strcasecmp(command, "load-config") == 0)
+        printCommandHelpLoadConfig();
     else if(strcasecmp(command, "os-format") == 0)
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
@@ -456,6 +443,194 @@ static inline void printCommandHelp(const char* command)
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
 
+static inline void printAvailableModules()
+{
+    puts(
+        "Battery\n"
+        "Break\n"
+        "Colors\n"
+        "CPU\n"
+        "DE\n"
+        "Disk\n"
+        "Font\n"
+        "GPU\n"
+        "Host\n"
+        "Icons\n"
+        "Kernel\n"
+        "Locale\n"
+        "Memory\n"
+        "OS\n"
+        "Packages\n"
+        "Resolution\n"
+        "Seperator\n"
+        "Shell\n"
+        "Terminal\n"
+        "TerminalFont\n"
+        "Theme\n"
+        "Title\n"
+        "Uptime\n"
+        "WM\n"
+        "WMTheme\n"
+        "\n"
+        "+ Additional defined by --set"
+    );
+}
+
+static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t indentation, const char* folderName)
+{
+    DIR* dir = opendir(folder->chars);
+    if(dir == NULL)
+        return;
+
+    uint32_t folderLength = folder->length;
+
+    if(folderName != NULL)
+        printf("%s/\n", folderName);
+
+    struct dirent* entry;
+
+    while((entry = readdir(dir)) != NULL)
+    {
+        if(entry->d_type == DT_DIR)
+        {
+
+            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+
+            ffStrbufAppendS(folder, entry->d_name);
+            ffStrbufAppendC(folder, '/');
+            listAvailablePresetsFromFolder(folder, indentation + 1, entry->d_name);
+            ffStrbufSubstrBefore(folder, folderLength);
+            continue;
+        }
+
+        for(uint8_t i = 0; i < indentation; i++)
+            fputs("  | ", stdout);
+
+        puts(entry->d_name);
+    }
+
+    closedir(dir);
+}
+
+static inline void listAvailablePresets(FFinstance* instance)
+{
+    FFstrbuf folder;
+    ffStrbufInitA(&folder, 64);
+
+    ffStrbufSetS(&folder, instance->state.passwd->pw_dir);
+    ffStrbufAppendS(&folder, "/.local/share/fastfetch/presets/");
+    listAvailablePresetsFromFolder(&folder, 0, NULL);
+
+    ffStrbufSetS(&folder, "/usr/share/fastfetch/presets/");
+    listAvailablePresetsFromFolder(&folder, 0, NULL);
+}
+
+static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
+
+static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
+{
+    char* lineStart = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    FFstrbuf line;
+    ffStrbufInitA(&line, 128); //The default structure line needs this size
+
+    while ((read = getline(&lineStart, &len, file)) != -1)
+    {
+        ffStrbufSetS(&line, lineStart);
+        ffStrbufTrimRight(&line, '\n');
+        ffStrbufTrim(&line, ' ');
+
+        if(line.length == 0 || line.chars[0] == '#')
+            continue;
+
+        uint32_t firstSpace = ffStrbufFirstIndexC(&line, ' ');
+
+        if(firstSpace >= line.length)
+        {
+            parseOption(instance, data, line.chars, NULL);
+            ffStrbufDestroy(&line);
+            continue;
+        }
+
+        //Seperate key and value by simply replacing the first space with a \0
+        char* valueStart = &line.chars[firstSpace];
+        *valueStart = '\0';
+        ++valueStart;
+
+        //Trim whitespace at beginn of value
+        while(*valueStart == ' ')
+            ++valueStart;
+
+        //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
+        if(*valueStart == '"')
+        {
+            char* last = line.chars + line.length - 1;
+            if(*last == '"')
+            {
+                ++valueStart;
+                *last = '\0';
+                --line.length;
+            }
+        }
+
+        parseOption(instance, data, line.chars, valueStart);
+    }
+
+    ffStrbufDestroy(&line);
+
+    if(lineStart != NULL)
+        free(lineStart);
+}
+
+static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char* key, const char* value)
+{
+    if(value == NULL)
+    {
+        fprintf(stderr, "Error: usage: %s <file>\n", key);
+        exit(413);
+    }
+
+    FILE* file = fopen(value, "r");
+    if(file != NULL)
+    {
+        parseConfigFile(instance, data, file);
+        fclose(file);
+        return;
+   }
+
+    FFstrbuf filename;
+    ffStrbufInitA(&filename, 64);
+
+    ffStrbufAppendS(&filename, instance->state.passwd->pw_dir);
+    ffStrbufAppendS(&filename, "/.local/share/fastfetch/presets/");
+    ffStrbufAppendS(&filename, value);
+
+    file = fopen(filename.chars, "r");
+    if(file != NULL)
+    {
+        parseConfigFile(instance, data, file);
+        fclose(file);
+        return;
+    }
+
+    ffStrbufSetS(&filename, "/usr/share/fastfetch/presets/");
+    ffStrbufAppendS(&filename, value);
+
+    file = fopen(filename.chars, "r");
+    if(file != NULL)
+    {
+        parseConfigFile(instance, data, file);
+        fclose(file);
+        return;
+    }
+
+    fprintf(stderr, "Error: couldn't find config: %s\n", value);
+    exit(414);
+}
+
 static inline bool optionParseBoolean(const char* str)
 {
     if(str == NULL)
@@ -521,6 +696,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         printAvailableModules();
         exit(0);
     }
+    else if(strcasecmp(key, "--print-available-presets") == 0)
+    {
+        listAvailablePresets(instance);
+        exit(0);
+    }
     else if(strcasecmp(key, "--spacing") == 0)
     {
         if(value == NULL)
@@ -578,6 +758,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = false;
     }
+    else if(strcasecmp(key, "--load-config") == 0)
+        optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--show-errors") == 0)
         instance->config.showErrors = optionParseBoolean(value);
     else if(strcasecmp(key, "--color-logo") == 0)
@@ -699,7 +881,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
 }
 
-static void parseConfigFile(FFinstance* instance, FFdata* data)
+static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
 {
     FFstrbuf filename;
     ffStrbufInitA(&filename, 64);
@@ -724,68 +906,27 @@ static void parseConfigFile(FFinstance* instance, FFdata* data)
     if(access(filename.chars, F_OK) != 0)
     {
         FILE* file = fopen(filename.chars, "w");
+        if(file == NULL)
+        {
+            ffStrbufDestroy(&filename);
+            return;
+        }
+
         fputs(FASTFETCH_DEFAULT_CONFIG, file);
         fclose(file);
-        return;
     }
-
-    FILE* file = fopen(filename.chars, "r");
-
-    char* lineStart = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    FFstrbuf line;
-    ffStrbufInitA(&line, 128); //The default structure line needs this size
-
-    while ((read = getline(&lineStart, &len, file)) != -1)
+    else
     {
-        ffStrbufSetS(&line, lineStart);
-        ffStrbufTrimRight(&line, '\n');
-        ffStrbufTrim(&line, ' ');
-
-        if(line.length == 0 || line.chars[0] == '#')
-            continue;
-
-        uint32_t firstSpace = ffStrbufFirstIndexC(&line, ' ');
-
-        if(firstSpace >= line.length)
+        FILE* file = fopen(filename.chars, "r");
+        if(file == NULL)
         {
-            parseOption(instance, data, line.chars, NULL);
-            ffStrbufDestroy(&line);
-            continue;
+            ffStrbufDestroy(&filename);
+            return;
         }
 
-        //Seperate key and value by simply replacing the first space with a \0
-        char* valueStart = &line.chars[firstSpace];
-        *valueStart = '\0';
-        ++valueStart;
-
-        //Trim whitespace at beginn of value
-        while(*valueStart == ' ')
-            ++valueStart;
-
-        //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
-        if(*valueStart == '"')
-        {
-            char* last = line.chars + line.length - 1;
-            if(*last == '"')
-            {
-                ++valueStart;
-                *last = '\0';
-                --line.length;
-            }
-        }
-
-        parseOption(instance, data, line.chars, valueStart);
+        parseConfigFile(instance, data, file);
+        fclose(file);
     }
-
-    ffStrbufDestroy(&line);
-
-    if(lineStart != NULL)
-        free(lineStart);
-
-    fclose(file);
 
     ffStrbufDestroy(&filename);
 }
@@ -920,7 +1061,7 @@ int main(int argc, const char** argv)
     FFdata data;
     initData(&data);
 
-    parseConfigFile(&instance, &data);
+    parseDefaultConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
     applyData(&instance, &data); //Here we do things that need to be done after parsing all options
 

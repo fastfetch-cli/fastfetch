@@ -5,6 +5,7 @@ __fastfetch_complete_help()
     local __ff_helps=(
         "color"
         "format"
+        "load-config"
         "os-format"
         "host-format"
         "kernel-format"
@@ -101,6 +102,7 @@ __fastfetch_completion()
         "--print-default-config"
         "--print-default-structure"
         "--print-available-modules"
+        "--print-available-presets"
     )
 
     local FF_OPTIONS_HELP=(
@@ -181,6 +183,7 @@ __fastfetch_completion()
         "--lib-DConf"
         "--lib-wayland"
         "--battery-dir"
+        "--load-config"
     )
 
     local FF_OPTIONS_LOGO=(
