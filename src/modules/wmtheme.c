@@ -44,9 +44,9 @@ static void printOpenbox(FFinstance* instance)
 
     const char* deName = ffGetSessionDesktop();
 
-    if(strcmp(deName, (const char*)"LXQt") == 0)
+    if(strcasecmp(deName, (const char*)"LXQt") == 0)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
-    else if(strcmp(deName, (const char*)"LXDE") == 0)
+    else if(strcasecmp(deName, (const char*)"LXDE") == 0)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
     else 
         ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
@@ -55,48 +55,48 @@ static void printOpenbox(FFinstance* instance)
     size_t len = 0;
 
     FILE* file = fopen(absolutePath.chars, "r");
-    if(file == NULL)
-        return; // handle errors in higher functions
-        
-    while(getline(&line, &len, file) != -1)
+    if(file != NULL)
     {
-        if(strstr(line, "<theme>") != 0)
-            break;
-    }
-    while(getline(&line, &len, file) != -1)
-    {
-        if(strstr(line, "<name>") != 0)
+        while(getline(&line, &len, file) != -1)
         {
-            const char* delStrs[] = {"<name>", "</name>"};
-            
-            ffStrbufAppendS(&theme, line);
-            ffStrbufRemoveStringsA(&theme, 2, delStrs);
-            ffStrbufTrimRight(&theme, '\n');
-            ffStrbufTrim(&theme, ' ');
+            if(strstr(line, "<theme>") != 0)
+                break;
         }
-        else if(strstr(line, "</theme>") != 0) // sanity check
-            break;
-        break;
+        while(getline(&line, &len, file) != -1)
+        {
+            if(strstr(line, "<name>") != 0)
+            {
+                ffStrbufAppendS(&theme, line);
+                ffStrbufRemoveStrings(&theme, 2, "<name>", "</name>");
+                ffStrbufTrimRight(&theme, '\n');
+                ffStrbufTrim(&theme, ' ');
+                break;
+            }
+            else if(strstr(line, "</theme>") != 0) // sanity check
+                break;
+        }
+        if(line != NULL)
+            free(line);
+
+        fclose(file);
     }
-        
-    fclose(file);
-    if(line != NULL) {
-        free(line);
-    }
+    else
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't open \"%s\"", absolutePath.chars);
+
     if(theme.length == 0)
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", absolutePath.chars);
 
-        ffStrbufDestroy(&absolutePath);
         ffStrbufDestroy(&theme);
+        ffStrbufDestroy(&absolutePath);
        
         return;
     }
 
     printWMTheme(instance, theme.chars);
 
-    ffStrbufDestroy(&absolutePath);
     ffStrbufDestroy(&theme);
+    ffStrbufDestroy(&absolutePath);
 }
 
 void ffPrintWMTheme(FFinstance* instance)
