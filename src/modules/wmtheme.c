@@ -1,6 +1,5 @@
 #include "fastfetch.h"
-#include "string.h"
-#include "util/FFstrbuf.h"
+#include <string.h>
 
 #define FF_WMTHEME_MODULE_NAME "WM Theme"
 #define FF_WMTHEME_NUM_FORMAT_ARGS 1
@@ -35,13 +34,22 @@ static void printKWin(FFinstance* instance)
     printWMTheme(instance, theme);
 }
 
-void ffGetOBThemeName(FFinstance* instance, const char* fName, char* buffer)
+static void printOpenbox(FFinstance* instance)
 {
-    FFstrbuf absolutePath, themeStrbuf;
+	FFstrbuf absolutePath, theme;
     ffStrbufInitA(&absolutePath, 64);
+    ffStrbufInitA(&theme, 256);
     ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&absolutePath, fName);
-    ffStrbufInitA(&themeStrbuf, 256);
+    ffStrbufAppendC(&absolutePath, '/');
+
+	const char* deName = ffGetSessionDesktop();
+
+	if(strcmp(deName, (const char*)"LXQt") == 0)
+		ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
+	else if(strcmp(deName, (const char*)"LXDE") == 0)
+		ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
+	else 
+		ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
     
     char* line = NULL;
     size_t len = 0;
@@ -50,63 +58,46 @@ void ffGetOBThemeName(FFinstance* instance, const char* fName, char* buffer)
     if(file == NULL)
         return; // handle errors in higher functions
         
-    while (getline(&line, &len, file) != -1)
+    while(getline(&line, &len, file) != -1)
     {
-        if (strstr(line, "<theme>") != 0)
+        if(strstr(line, "<theme>") != 0)
             break;
     }
-    while (getline(&line, &len, file) != -1)
+    while(getline(&line, &len, file) != -1)
     {
-        if (strstr(line, "<name>") != 0)
+        if(strstr(line, "<name>") != 0)
         {
             const char* delStrs[] = {"<name>", "</name>"};
             
-            ffStrbufAppendS(&themeStrbuf, line);
-            ffStrbufRemoveStringsA(&themeStrbuf, 2, delStrs);
-            ffStrbufTrimRight(&themeStrbuf, '\n');
-            ffStrbufTrim(&themeStrbuf, ' ');
-
-            strcpy(buffer, themeStrbuf.chars);
+            ffStrbufAppendS(&theme, line);
+            ffStrbufRemoveStringsA(&theme, 2, delStrs);
+            ffStrbufTrimRight(&theme, '\n');
+            ffStrbufTrim(&theme, ' ');
         }
-        else if (strstr(line, "</theme>") != 0)
+        else if(strstr(line, "</theme>") != 0) // sanity check
             break;
         break;
     }
         
     fclose(file);
-    if(line != NULL)
+    if(line != NULL) {
         free(line);
-
-    ffStrbufDestroy(&absolutePath);
-    ffStrbufDestroy(&themeStrbuf);
-}
-
-static void printOpenbox(FFinstance* instance)
-{
-	char relPath[64];
-	char theme[256];
-	theme[0] = '\0';
-
-	const char* deName = getenv("XDG_SESSION_DESKTOP");
-
-	if (strcmp(deName, (const char*)"LXQt Desktop") == 0)
-		strcpy(relPath, "/.config/openbox/lxqt-rc.xml");
-	else if(strcmp(deName, (const char*)"LXDE") == 0)
-		strcpy(relPath, "/.config/openbox/lxde-rc.xml");
-	else 
-		strcpy(relPath, "/.config/openbox/rc.xml");
-
-	ffGetOBThemeName(instance, relPath, theme);
-
-	if(theme[0] == '\0')
+    }
+	if(theme.length == 0)
 	{
-		ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", relPath);
+		ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", absolutePath.chars);
+
+        ffStrbufDestroy(&absolutePath);
+        ffStrbufDestroy(&theme);
+        
 		return;
 	}
 
-	printWMTheme(instance, theme);
-}
+	printWMTheme(instance, theme.chars);
 
+    ffStrbufDestroy(&absolutePath);
+    ffStrbufDestroy(&theme);
+}
 
 void ffPrintWMTheme(FFinstance* instance)
 {
