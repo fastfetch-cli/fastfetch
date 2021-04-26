@@ -36,7 +36,7 @@ static void printKWin(FFinstance* instance)
 
 static void printOpenbox(FFinstance* instance)
 {
-    FFstrbuf absolutePath, theme;
+    FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
     ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
     ffStrbufAppendC(&absolutePath, '/');
@@ -47,9 +47,9 @@ static void printOpenbox(FFinstance* instance)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
     else if(strcasecmp(deName, (const char*)"LXDE") == 0)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
-    else 
+    else
         ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
-    
+
     char* line = NULL;
     size_t len = 0;
 
@@ -61,31 +61,35 @@ static void printOpenbox(FFinstance* instance)
 
         return;
     }
-    
+
+    FFstrbuf theme;
+    ffStrbufInitA(&theme, 256);
+
     while(getline(&line, &len, file) != -1)
     {
         if(strstr(line, "<theme>") != 0)
             break;
     }
+
     while(getline(&line, &len, file) != -1)
     {
         if(strstr(line, "<name>") != 0)
         {
-            ffStrbufInitA(&theme, 256);
             ffStrbufAppendS(&theme, line);
             ffStrbufRemoveStrings(&theme, 2, "<name>", "</name>");
             ffStrbufTrimRight(&theme, '\n');
             ffStrbufTrim(&theme, ' ');
             break;
         }
-        else if(strstr(line, "</theme>") != 0) // sanity check
+
+        if(strstr(line, "</theme>") != 0) // sanity check
             break;
     }
+
     if(line != NULL)
         free(line);
 
     fclose(file);
-        
 
     if(theme.length == 0)
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", absolutePath.chars);

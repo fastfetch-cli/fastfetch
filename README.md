@@ -44,7 +44,7 @@ Kwin, Openbox, Muffin, XFWM, Wayfire
 
 ### Window manager themes:
 ```
-KWin
+KWin, Openbox (LXDE, LXQT & without DE)
 ```
 
 ### Terminal fonts:
