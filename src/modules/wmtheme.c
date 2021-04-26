@@ -36,20 +36,20 @@ static void printKWin(FFinstance* instance)
 
 static void printOpenbox(FFinstance* instance)
 {
-	FFstrbuf absolutePath, theme;
+    FFstrbuf absolutePath, theme;
     ffStrbufInitA(&absolutePath, 64);
     ffStrbufInitA(&theme, 256);
     ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
     ffStrbufAppendC(&absolutePath, '/');
 
-	const char* deName = ffGetSessionDesktop();
+    const char* deName = ffGetSessionDesktop();
 
-	if(strcmp(deName, (const char*)"LXQt") == 0)
-		ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
-	else if(strcmp(deName, (const char*)"LXDE") == 0)
-		ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
-	else 
-		ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
+    if(strcmp(deName, (const char*)"LXQt") == 0)
+        ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
+    else if(strcmp(deName, (const char*)"LXDE") == 0)
+        ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
+    else 
+        ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
     
     char* line = NULL;
     size_t len = 0;
@@ -83,17 +83,17 @@ static void printOpenbox(FFinstance* instance)
     if(line != NULL) {
         free(line);
     }
-	if(theme.length == 0)
-	{
-		ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", absolutePath.chars);
+    if(theme.length == 0)
+    {
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", absolutePath.chars);
 
         ffStrbufDestroy(&absolutePath);
         ffStrbufDestroy(&theme);
-        
-		return;
-	}
+       
+        return;
+    }
 
-	printWMTheme(instance, theme.chars);
+    printWMTheme(instance, theme.chars);
 
     ffStrbufDestroy(&absolutePath);
     ffStrbufDestroy(&theme);
