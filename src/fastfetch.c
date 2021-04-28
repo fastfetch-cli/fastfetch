@@ -120,9 +120,9 @@ static inline void printHelp()
         "   --disk-folders <folders>: A colon seperated list of folder paths for the disk output. Default is \"/:/home\"\n"
         "   --battery-dir <folder>:   The directory were the battery folders are in. Standard: /sys/class/power_supply/\n"
         "\n"
-        "Parsing is not case sensetive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
-        "If an value starts with an ?, it is optional. \"true\" will be used if not set.\n"
-        "An (+) at the end indicates that more help can be printed with --help <option>\n"
+        "Parsing is not case sensitive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
+        "If a value starts with a ?, it is optional. \"true\" will be used if not set.\n"
+        "A (+) at the end indicates that more help can be printed with --help <option>\n"
         "All options can be make permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
     );
 }
@@ -275,10 +275,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (flatpak)", 3,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (flatpak), {4} (xbps)", 4,
             "Number of all packages",
             "Number of pacman packages",
-            "Number of flatpak packages"
+            "Number of flatpak packages",
+            "Number of xbps packages"
         );
     }
     else if(strcasecmp(command, "shell-format") == 0)
