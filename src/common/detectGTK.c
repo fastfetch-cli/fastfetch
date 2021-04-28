@@ -157,7 +157,7 @@ static void parseGTKConfigFile(FFstrbuf* fileName, FFGTKResult* result)
     ffStrbufRecalculateLength(&result->font);
 }
 
-static void calculateGTKFromConfigDir(const char* configDir, const char* version, FFGTKResult* result)
+static void detectGTKFromConfigDir(const char* configDir, const char* version, FFGTKResult* result)
 {
     // <configdir>/gtk-<version>.0/settings.ini
     FFstrbuf file1;
@@ -206,7 +206,7 @@ static void calculateGTKFromConfigDir(const char* configDir, const char* version
     ffStrbufDestroy(&file4);
 }
 
-static void calculateGTK(FFinstance* instance, const char* version, FFGTKResult* result)
+static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -239,18 +239,18 @@ static void calculateGTK(FFinstance* instance, const char* version, FFGTKResult*
     if(xdgIsDifferent)
     {
         // $XDG_CONFIG_HOME
-        calculateGTKFromConfigDir(xdgConfigDir.chars, version, result);
+        detectGTKFromConfigDir(xdgConfigDir.chars, version, result);
         if(allPropertiesSet(result))
             return;
     }
 
     // /home/<user>/.config
-    calculateGTKFromConfigDir(configDir.chars, version, result);
+    detectGTKFromConfigDir(configDir.chars, version, result);
     if(allPropertiesSet(result))
             return;
 
     // /home/<user>
-    calculateGTKFromConfigDir(instance->state.passwd->pw_dir, version, result);
+    detectGTKFromConfigDir(instance->state.passwd->pw_dir, version, result);
     if(allPropertiesSet(result))
             return;
 
@@ -259,7 +259,7 @@ static void calculateGTK(FFinstance* instance, const char* version, FFGTKResult*
         return;
 
     // /etc
-    calculateGTKFromConfigDir("/etc/", version, result);
+    detectGTKFromConfigDir("/etc/", version, result);
 }
 
 #define FF_CALCULATE_GTK_IMPL(version) \
@@ -275,21 +275,21 @@ static void calculateGTK(FFinstance* instance, const char* version, FFGTKResult*
     ffStrbufInit(&result.theme); \
     ffStrbufInit(&result.icons); \
     ffStrbufInit(&result.font); \
-    calculateGTK(instance, #version, &result); \
+    detectGTK(instance, #version, &result); \
     pthread_mutex_unlock(&mutex); \
     return &result;
 
-const FFGTKResult* ffCalculateGTK2(FFinstance* instance)
+const FFGTKResult* ffDetectGTK2(FFinstance* instance)
 {
     FF_CALCULATE_GTK_IMPL(2)
 }
 
-const FFGTKResult* ffCalculateGTK3(FFinstance* instance)
+const FFGTKResult* ffDetectGTK3(FFinstance* instance)
 {
     FF_CALCULATE_GTK_IMPL(3)
 }
 
-const FFGTKResult* ffCalculateGTK4(FFinstance* instance)
+const FFGTKResult* ffDetectGTK4(FFinstance* instance)
 {
     FF_CALCULATE_GTK_IMPL(4)
 }

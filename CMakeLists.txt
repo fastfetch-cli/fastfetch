@@ -65,11 +65,8 @@ set(SRCS
     src/common/logo.c
     src/common/format.c
     src/common/parsing.c
-    src/common/calculateOS.c
-    src/common/calculatePlasma.c
-    src/common/calculateGTK.c
-    src/common/calculateTerminal.c
-    src/common/calculateWM.c
+    src/common/detectPlasma.c
+    src/common/detectGTK.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c

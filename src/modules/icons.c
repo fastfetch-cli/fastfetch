@@ -5,10 +5,10 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
-    const FFstrbuf* plasma = &ffCalculatePlasma(instance)->icons;
-    const FFstrbuf* gtk2 = &ffCalculateGTK2(instance)->icons;
-    const FFstrbuf* gtk3 = &ffCalculateGTK3(instance)->icons;
-    const FFstrbuf* gtk4 = &ffCalculateGTK4(instance)->icons;
+    const FFstrbuf* plasma = &ffDetectPlasma(instance)->icons;
+    const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->icons;
+    const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->icons;
+    const FFstrbuf* gtk4 = &ffDetectGTK4(instance)->icons;
 
 
     if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)

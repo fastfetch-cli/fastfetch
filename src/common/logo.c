@@ -303,7 +303,7 @@ void ffLoadLogo(FFinstance* instance)
         ffStrbufDestroy(&content);
     }
 
-    const FFOSResult* result = ffCalculateOS(instance);
+    const FFOSResult* result = ffDetectOS(instance);
 
     if(result->id.length > 0)
     {

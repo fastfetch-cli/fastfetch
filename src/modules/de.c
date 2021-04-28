@@ -25,7 +25,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
         return;
     }
 
-    const FFWMResult* wm = ffCalculateWM(instance);
+    const FFWMResult* wm = ffDetectWM(instance);
 
     // test if we are running only a WM
     if(

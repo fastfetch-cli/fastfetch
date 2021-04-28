@@ -81,7 +81,7 @@ static void printTTY(FFinstance* instance)
 
 void ffPrintTerminalFont(FFinstance* instance)
 {
-    const FFTerminalResult* result = ffCalculateTerminal(instance);
+    const FFTerminalResult* result = ffDetectTerminal(instance);
 
     if(result->exeName.length == 0)
     {

@@ -11,7 +11,7 @@ typedef enum PlasmaCategory
     PLASMA_CATEGORY_OTHER
 } PlasmaCategory;
 
-const FFPlasmaResult* ffCalculatePlasma(FFinstance* instance)
+const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static FFPlasmaResult result;

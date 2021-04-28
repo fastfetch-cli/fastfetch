@@ -244,27 +244,27 @@ void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3
 void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
-//common/calculateOS.c
-const FFOSResult* ffCalculateOS(FFinstance* instance);
+//common/detectPlasma.c
+const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
 
-//common/calculatePlasma.c
-const FFPlasmaResult* ffCalculatePlasma(FFinstance* instance);
-
-//common/calculateGTK.c
-const FFGTKResult* ffCalculateGTK2(FFinstance* instance);
-const FFGTKResult* ffCalculateGTK4(FFinstance* instance);
-const FFGTKResult* ffCalculateGTK3(FFinstance* instance);
-
-//common/calculateWM.c
-const FFWMResult* ffCalculateWM(FFinstance* instance);
-
-//common/calculateTerminal.c
-const char* ffGetSessionDesktop();
-const FFTerminalResult* ffCalculateTerminal(FFinstance* instance);
+//common/detectGTK.c
+const FFGTKResult* ffDetectGTK2(FFinstance* instance);
+const FFGTKResult* ffDetectGTK4(FFinstance* instance);
+const FFGTKResult* ffDetectGTK3(FFinstance* instance);
 
 /********************/
 /* Module functions */
 /********************/
+
+//Common
+
+const char* ffGetSessionDesktop();
+
+const FFOSResult* ffDetectOS(FFinstance* instance);
+const FFTerminalResult* ffDetectTerminal(FFinstance* instance);
+const FFWMResult* ffDetectWM(FFinstance* instance);
+
+//Printing
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);

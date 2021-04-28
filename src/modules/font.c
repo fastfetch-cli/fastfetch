@@ -5,10 +5,10 @@
 
 void ffPrintFont(FFinstance* instance)
 {
-    const FFstrbuf* plasma = &ffCalculatePlasma(instance)->font;
-    const FFstrbuf* gtk2 = &ffCalculateGTK2(instance)->font;
-    const FFstrbuf* gtk3 = &ffCalculateGTK3(instance)->font;
-    const FFstrbuf* gtk4 = &ffCalculateGTK4(instance)->font;
+    const FFstrbuf* plasma = &ffDetectPlasma(instance)->font;
+    const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->font;
+    const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->font;
+    const FFstrbuf* gtk4 = &ffDetectGTK4(instance)->font;
 
     if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {

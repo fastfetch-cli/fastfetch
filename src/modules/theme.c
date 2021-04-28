@@ -5,10 +5,10 @@
 
 void ffPrintTheme(FFinstance* instance)
 {
-    const FFPlasmaResult* plasma = ffCalculatePlasma(instance);
-    const FFstrbuf* gtk2 = &ffCalculateGTK2(instance)->theme;
-    const FFstrbuf* gtk3 = &ffCalculateGTK3(instance)->theme;
-    const FFstrbuf* gtk4 = &ffCalculateGTK4(instance)->theme;
+    const FFPlasmaResult* plasma = ffDetectPlasma(instance);
+    const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->theme;
+    const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->theme;
+    const FFstrbuf* gtk4 = &ffDetectGTK4(instance)->theme;
 
     if(plasma->widgetStyle.length == 0 && plasma->colorScheme.length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {

@@ -56,7 +56,7 @@ static inline void printHelp()
         "   -r <?value>  --recache <?value>:              generate new cached values\n"
         "                --nocache <?value>:              dont use cached values, but also dont overwrite existing ones\n"
         "                --print-remaining-logo <?value>: print the remaining logo, if it is higher than the number of lines shown\n"
-        "                --multithreading <?value>:       use multiple threads to calculate values\n"
+        "                --multithreading <?value>:       use multiple threads to detect values\n"
         "                --load-config <file>:            load a config file (+)\n"
         "\n"
         "Logo options:\n"

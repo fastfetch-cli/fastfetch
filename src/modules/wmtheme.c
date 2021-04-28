@@ -102,7 +102,7 @@ static void printOpenbox(FFinstance* instance)
 
 void ffPrintWMTheme(FFinstance* instance)
 {
-    const FFWMResult* result = ffCalculateWM(instance);
+    const FFWMResult* result = ffDetectWM(instance);
 
     if(result->prettyName.length == 0)
     {

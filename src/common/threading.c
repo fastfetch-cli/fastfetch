@@ -2,66 +2,66 @@
 
 #include <pthread.h>
 
-static inline void* calculatePlasmaThreadMain(void* instance)
+static inline void* detectPlasmaThreadMain(void* instance)
 {
-    ffCalculatePlasma((FFinstance*)instance);
+    ffDetectPlasma((FFinstance*)instance);
     return NULL;
 }
 
-static inline void* calculateGTK2ThreadMain(void* instance)
+static inline void* detectGTK2ThreadMain(void* instance)
 {
-    ffCalculateGTK2((FFinstance*)instance);
+    ffDetectGTK2((FFinstance*)instance);
     return NULL;
 }
 
-static inline void* calculateGTK3ThreadMain(void* instance)
+static inline void* detectGTK3ThreadMain(void* instance)
 {
-    ffCalculateGTK3((FFinstance*)instance);
+    ffDetectGTK3((FFinstance*)instance);
     return NULL;
 }
 
-static inline void* calculateGTK4ThreadMain(void* instance)
+static inline void* detectGTK4ThreadMain(void* instance)
 {
-    ffCalculateGTK4((FFinstance*)instance);
+    ffDetectGTK4((FFinstance*)instance);
     return NULL;
 }
 
-static inline void* calculateWMThreadMain(void* instance)
+static inline void* detectWMThreadMain(void* instance)
 {
-    ffCalculateWM((FFinstance*)instance);
+    ffDetectWM((FFinstance*)instance);
     return NULL;
 }
 
-static inline void* calculateTerminalThreadMain(void* instance)
+static inline void* detectTerminalThreadMain(void* instance)
 {
-    ffCalculateTerminal((FFinstance*)instance);
+    ffDetectTerminal((FFinstance*)instance);
     return NULL;
 }
 
 static inline void* startThreadsThreadMain(void* instance)
 {
     pthread_t wmThread;
-    pthread_create(&wmThread, NULL, calculateWMThreadMain, instance);
+    pthread_create(&wmThread, NULL, detectWMThreadMain, instance);
     pthread_detach(wmThread);
 
     pthread_t gtk2Thread;
-    pthread_create(&gtk2Thread, NULL, calculateGTK2ThreadMain, instance);
+    pthread_create(&gtk2Thread, NULL, detectGTK2ThreadMain, instance);
     pthread_detach(gtk2Thread);
 
     pthread_t gtk3Thread;
-    pthread_create(&gtk3Thread, NULL, calculateGTK3ThreadMain, instance);
+    pthread_create(&gtk3Thread, NULL, detectGTK3ThreadMain, instance);
     pthread_detach(gtk3Thread);
 
     pthread_t gtk4Thread;
-    pthread_create(&gtk4Thread, NULL, calculateGTK4ThreadMain, instance);
+    pthread_create(&gtk4Thread, NULL, detectGTK4ThreadMain, instance);
     pthread_detach(gtk4Thread);
 
     pthread_t terminalThread;
-    pthread_create(&terminalThread, NULL, calculateTerminalThreadMain, instance);
+    pthread_create(&terminalThread, NULL, detectTerminalThreadMain, instance);
     pthread_detach(terminalThread);
 
     pthread_t plasmaThread;
-    pthread_create(&plasmaThread, NULL, calculatePlasmaThreadMain, instance);
+    pthread_create(&plasmaThread, NULL, detectPlasmaThreadMain, instance);
     pthread_detach(plasmaThread);
 
     return NULL;
