@@ -3,9 +3,9 @@
 #include <dirent.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 3
+#define FF_PACKAGES_NUM_FORMAT_ARGS 4
 
-static uint32_t get_num_elements(const char* dirname, int type) {
+static uint32_t get_num_elements(const char* dirname, unsigned char type) {
     uint32_t num_elements = 0;
     DIR * dirp;
     struct dirent *entry;
