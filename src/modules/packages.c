@@ -5,13 +5,7 @@
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 3
 
-enum elementType
-{
-    enumDir = 0,
-    enumFile
-};
-
-static uint32_t get_num_elements(const char* dirname, enum elementType type) {
+static uint32_t get_num_elements(const char* dirname, int type) {
     uint32_t num_elements = 0;
     DIR * dirp;
     struct dirent *entry;
@@ -22,13 +16,13 @@ static uint32_t get_num_elements(const char* dirname, enum elementType type) {
 
     while((entry = readdir(dirp)) != NULL)
     {
-        if(entry->d_type == DT_DIR && type == enumDir)
+        if(entry->d_type == DT_DIR && type == DT_DIR)
             ++num_elements;
-        else if(entry->d_type == DT_REG && type == enumFile)
+        else if(entry->d_type == DT_REG && type == DT_REG)
             ++num_elements;
     }
 
-    if(type == enumDir)
+    if(type == DT_DIR)
         num_elements -= 2; // accounting for . and ..
 
     closedir(dirp);
@@ -38,9 +32,9 @@ static uint32_t get_num_elements(const char* dirname, enum elementType type) {
 
 void ffPrintPackages(FFinstance* instance)
 {
-    uint32_t pacman = get_num_elements("/var/lib/pacman/local", enumDir);
-    uint32_t flatpak = get_num_elements("/var/lib/flatpak/app", enumDir);
-    uint32_t xbps = get_num_elements("/var/db/xbps", enumFile);
+    uint32_t pacman = get_num_elements("/var/lib/pacman/local", DT_DIR);
+    uint32_t flatpak = get_num_elements("/var/lib/flatpak/app", DT_DIR);
+    uint32_t xbps = get_num_elements("/var/db/xbps", DT_REG);
 
     uint32_t all = pacman + flatpak + xbps;
 
