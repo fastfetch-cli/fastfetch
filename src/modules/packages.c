@@ -20,10 +20,11 @@ static uint32_t get_num_elements(const char* dirname, enum elementType type) {
     if(dirp == NULL)
         return 0;
 
-    while((entry = readdir(dirp)) != NULL) {
+    while((entry = readdir(dirp)) != NULL)
+    {
         if(entry->d_type == DT_DIR && type == enumDir)
             ++num_elements;
-        if(entry->d_type == DT_REG && type == enumFile)
+        else if(entry->d_type == DT_REG && type == enumFile)
             ++num_elements;
     }
 
