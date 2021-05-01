@@ -34,7 +34,7 @@ Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
 Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
 ### Package managers:
 ```
-Pacman, Flatpak, xbps
+Pacman, xbps, dpkg, Flatpak, Snap
 ```
 
 ### Window managers:
@@ -44,7 +44,7 @@ KWin, Mutter, Muffin, Openbox, XFWM, Sway, Wayfire, Weston
 
 ### Window manager themes:
 ```
-KWin, Openbox (LXDE, LXQT & without DE)
+KWin, Mutter, Openbox (LXDE, LXQT & without DE)
 ```
 
 ### Terminal fonts:
