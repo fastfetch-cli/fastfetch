@@ -280,7 +280,7 @@ static inline void getWMDE(FFWMDEResult* result)
     getDE(result, &procData);
 
     if(result->wmProtocolName.length == 0 && procData.protocolHint != FF_PROTOCOL_HINT_UNKNOWN)
-        getSessionType(result, procData.protocolHint);
+        getSessionTypeFallback(result, procData.protocolHint);
 
     if(procData.proc != NULL)
         closedir(procData.proc);

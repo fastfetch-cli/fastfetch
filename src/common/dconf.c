@@ -71,16 +71,16 @@ const char* ffDConfGetValue(FFinstance* instance, const char* key)
         return NULL;
     }
 
-    GVariant*(*ffdconf_client_read)(DConfClient*, const gchar*) = dlsym(dconf.library, "dconf_client_read");
-    if(ffdconf_client_read == NULL)
+    dconf.ffdconf_client_new = dlsym(dconf.library, "dconf_client_read");
+    if(dconf.ffdconf_client_read == NULL)
     {
         pthread_mutex_unlock(&mutex);
         dlclose(dconf.library);
         return NULL;
     }
 
-    DConfClient* dconfClient = dconf.ffdconf_client_new();
-    if(dconfClient == NULL)
+    dconf.dconfClient = dconf.ffdconf_client_new();
+    if(dconf.dconfClient == NULL)
     {
         pthread_mutex_unlock(&mutex);
         dlclose(dconf.library);
