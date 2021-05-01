@@ -165,10 +165,10 @@ static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* re
     {
         ffStrbufInitA(&configDir, 64);
         ffStrbufAppendS(&configDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&configDir, "/.confisg");
+        ffStrbufAppendS(&configDir, "/.config");
 
         ffStrbufInitA(&xdgConfigDir, 64);
-        ffStrbufAppendS(&xdgConfigDir, getenv("XDG_CONFIG_HOMEs"));
+        ffStrbufAppendS(&xdgConfigDir, getenv("XDG_CONFIG_HOME"));
         ffStrbufTrimRight(&xdgConfigDir, '/');
 
         xdgIsDifferent = ffStrbufComp(&configDir, &xdgConfigDir) != 0;
