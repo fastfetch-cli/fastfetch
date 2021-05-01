@@ -2,7 +2,6 @@
 
 #include <dlfcn.h>
 #include <pthread.h>
-#include <dconf/client/dconf-client.h>
 
 static inline bool allPropertiesSet(FFGTKResult* result)
 {
@@ -19,7 +18,7 @@ static inline void initresult(FFGTKResult* result)
     ffStrbufInit(&result->font);
 }
 
-static inline void applyGTKDConfSettings(FFGTKResult* result, const gchar* themeName, const gchar* iconsName, const gchar* fontName)
+static inline void applyGTKDConfSettings(FFGTKResult* result, const char* themeName, const char* iconsName, const char* fontName)
 {
     if(result->theme.length == 0)
         ffStrbufAppendS(&result->theme, themeName);
@@ -35,9 +34,9 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    static const gchar* themeName;
-    static const gchar* iconsName;
-    static const gchar* fontName;
+    static const char* themeName;
+    static const char* iconsName;
+    static const char* fontName;
 
     static bool init = false;
 
@@ -45,75 +44,18 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
 
     if(init)
     {
-        applyGTKDConfSettings(result, themeName, iconsName, fontName);
         pthread_mutex_unlock(&mutex);
+        applyGTKDConfSettings(result, themeName, iconsName, fontName);
         return;
     }
+
     init = true;
 
-    themeName = NULL;
-    iconsName = NULL;
-    fontName = NULL;
-
-    void* dconf;
-    if(instance->config.libDConf.length == 0)
-        dconf = dlopen("libdconf.so", RTLD_LAZY);
-    else
-        dconf = dlopen(instance->config.libDConf.chars, RTLD_LAZY);
-
-    if(dconf == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        return;
-    }
-
-    DConfClient*(*ffdconf_client_new)(void) = dlsym(dconf, "dconf_client_new");
-    if(ffdconf_client_new == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        dlclose(dconf);
-        return;
-    }
-
-    const gchar*(*ffg_variant_get_string)(GVariant*, gsize*) = dlsym(dconf, "g_variant_get_string");
-    if(ffg_variant_get_string == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        dlclose(dconf);
-        return;
-    }
-
-    GVariant*(*ffdconf_client_read)(DConfClient*, const gchar*) = dlsym(dconf, "dconf_client_read");
-    if(ffdconf_client_read == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        dlclose(dconf);
-        return;
-    }
-
-    DConfClient* dconfClient = ffdconf_client_new();
-    if(dconfClient == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        dlclose(dconf);
-        return;
-    }
-
-    GVariant* themeNameVariant = ffdconf_client_read(dconfClient, "/org/gnome/desktop/interface/gtk-theme");
-    if(themeNameVariant != NULL)
-        themeName = ffg_variant_get_string(themeNameVariant, NULL);
-
-    GVariant* fontNameVariant = ffdconf_client_read(dconfClient, "/org/gnome/desktop/interface/font-name");
-    if(fontNameVariant != NULL)
-        fontName = ffg_variant_get_string(fontNameVariant, NULL);
-
-    GVariant* iconsNameVariant = ffdconf_client_read(dconfClient, "/org/gnome/desktop/interface/icon-theme");
-    if(iconsNameVariant != NULL)
-        iconsName = ffg_variant_get_string(iconsNameVariant, NULL);
+    themeName = ffDConfGetValue(instance, "/org/gnome/desktop/interface/gtk-theme");
+    iconsName = ffDConfGetValue(instance, "/org/gnome/desktop/interface/font-name");
+    fontName = ffDConfGetValue(instance, "/org/gnome/desktop/interface/icon-theme");
 
     pthread_mutex_unlock(&mutex);
-
-    dlclose(dconf);
     applyGTKDConfSettings(result, themeName, iconsName, fontName);
 }
 
@@ -223,10 +165,10 @@ static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* re
     {
         ffStrbufInitA(&configDir, 64);
         ffStrbufAppendS(&configDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&configDir, "/.config");
+        ffStrbufAppendS(&configDir, "/.confisg");
 
         ffStrbufInitA(&xdgConfigDir, 64);
-        ffStrbufAppendS(&xdgConfigDir, getenv("XDG_CONFIG_HOME"));
+        ffStrbufAppendS(&xdgConfigDir, getenv("XDG_CONFIG_HOMEs"));
         ffStrbufTrimRight(&xdgConfigDir, '/');
 
         xdgIsDifferent = ffStrbufComp(&configDir, &xdgConfigDir) != 0;

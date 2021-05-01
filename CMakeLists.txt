@@ -65,6 +65,7 @@ set(SRCS
     src/common/logo.c
     src/common/format.c
     src/common/parsing.c
+    src/common/dconf.c
     src/common/detectPlasma.c
     src/common/detectGTK.c
     src/common/detectWMDE.c
