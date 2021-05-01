@@ -3,59 +3,31 @@
 #include <string.h>
 
 #define FF_DE_MODULE_NAME "DE"
-#define FF_DE_NUM_FORMAT_ARGS 3
-
-static void getKDE(FFstrbuf* name, FFstrbuf* version)
-{
-    ffStrbufSetS(name, "KDE Plasma");
-
-    char versionBuf[256];
-    ffParsePropFile("/usr/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version=%[^\n]", versionBuf);
-
-    ffStrbufSetS(version, versionBuf);
-}
+#define FF_DE_NUM_FORMAT_ARGS 4
 
 void ffPrintDesktopEnvironment(FFinstance* instance)
 {
-    const char* sessionDesktop = ffGetSessionDesktop();
+    const FFWMDEResult* result = ffDetectWMDE(instance);
 
-    if(sessionDesktop == NULL)
+    if(result->dePrettyName.length == 0 && result->sessionDesktop == NULL)
     {
-        ffPrintError(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, FF_DE_NUM_FORMAT_ARGS, "No relevant XDG_SESSION_* environment variable set");
+        ffPrintError(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, FF_DE_NUM_FORMAT_ARGS, "No DE found");
         return;
     }
 
-    const FFWMResult* wm = ffDetectWM(instance);
-
-    // test if we are running only a WM
-    if(
-        ffStrbufIgnCaseCompS(&wm->processName, sessionDesktop) == 0 ||
-        ffStrbufIgnCaseCompS(&wm->prettyName, sessionDesktop) == 0
-    ) return;
-
-    FFstrbuf sessionName;
-    ffStrbufInit(&sessionName);
-
-    FFstrbuf sessionVersion;
-    ffStrbufInit(&sessionVersion);
-
-    if(strcasecmp(sessionDesktop, "KDE") == 0)
-        getKDE(&sessionName, &sessionVersion);
-
     if(instance->config.deFormat.length == 0)
     {
-
         ffPrintLogoAndKey(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey);
 
-        if(sessionName.length > 0)
-            ffStrbufWriteTo(&sessionName, stdout);
+        if(result->dePrettyName.length > 0)
+            ffStrbufWriteTo(&result->dePrettyName, stdout);
         else
-            fputs(sessionDesktop, stdout);
+            fputs(result->sessionDesktop, stdout);
 
-        if(sessionVersion.length > 0)
+        if(result->deVersion.length > 0)
         {
             putchar(' ');
-            ffStrbufWriteTo(&sessionVersion, stdout);
+            ffStrbufWriteTo(&result->deVersion, stdout);
         }
 
         putchar('\n');
@@ -63,12 +35,10 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     else
     {
         ffPrintFormatString(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, NULL, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, sessionDesktop},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &sessionName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &sessionVersion},
+            {FF_FORMAT_ARG_TYPE_STRING, result->sessionDesktop},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->deVersion}
         });
     }
-
-    ffStrbufDestroy(&sessionName);
-    ffStrbufDestroy(&sessionVersion);
 }

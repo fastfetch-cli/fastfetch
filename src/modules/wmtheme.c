@@ -34,18 +34,16 @@ static void printKWin(FFinstance* instance)
     printWMTheme(instance, theme);
 }
 
-static void printOpenbox(FFinstance* instance)
+static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
     ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
     ffStrbufAppendC(&absolutePath, '/');
 
-    const char* deName = ffGetSessionDesktop();
-
-    if(strcasecmp(deName, (const char*)"LXQt") == 0)
+    if(ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
-    else if(strcasecmp(deName, (const char*)"LXDE") == 0)
+    else if(ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
     else
         ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
@@ -102,18 +100,18 @@ static void printOpenbox(FFinstance* instance)
 
 void ffPrintWMTheme(FFinstance* instance)
 {
-    const FFWMResult* result = ffDetectWM(instance);
+    const FFWMDEResult* result = ffDetectWMDE(instance);
 
-    if(result->prettyName.length == 0)
+    if(result->wmPrettyName.length == 0)
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "WM Theme needs sucessfull WM detection");
         return;
     }
 
-    if(ffStrbufIgnCaseCompS(&result->prettyName, "KWin") == 0)
+    if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0)
         printKWin(instance);
-    else if(ffStrbufIgnCaseCompS(&result->prettyName, "Openbox") == 0)
-        printOpenbox(instance);
+    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Openbox") == 0)
+        printOpenbox(instance, &result->dePrettyName);
     else
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", result->prettyName.chars);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", result->dePrettyName.chars);
 }

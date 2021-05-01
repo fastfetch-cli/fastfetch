@@ -67,6 +67,7 @@ set(SRCS
     src/common/parsing.c
     src/common/detectPlasma.c
     src/common/detectGTK.c
+    src/common/detectWMDE.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c

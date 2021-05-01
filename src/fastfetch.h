@@ -141,13 +141,16 @@ typedef struct FFTerminalResult
     FFstrbuf error;
 } FFTerminalResult;
 
-typedef struct FFWMResult
+typedef struct FFWMDEResult
 {
-    FFstrbuf processName;
-    FFstrbuf prettyName;
-    FFstrbuf protocolName;
-    FFstrbuf error;
-} FFWMResult;
+    const char* sessionDesktop;
+    FFstrbuf wmProcessName;
+    FFstrbuf wmPrettyName;
+    FFstrbuf wmProtocolName;
+    FFstrbuf deProcessName;
+    FFstrbuf dePrettyName;
+    FFstrbuf deVersion;
+} FFWMDEResult;
 
 typedef struct FFstate
 {
@@ -252,17 +255,16 @@ const FFGTKResult* ffDetectGTK2(FFinstance* instance);
 const FFGTKResult* ffDetectGTK4(FFinstance* instance);
 const FFGTKResult* ffDetectGTK3(FFinstance* instance);
 
+//common/detectWMDE.c
+const FFWMDEResult* ffDetectWMDE(FFinstance* instance);
+
 /********************/
 /* Module functions */
 /********************/
 
 //Common
-
-const char* ffGetSessionDesktop();
-
 const FFOSResult* ffDetectOS(FFinstance* instance);
 const FFTerminalResult* ffDetectTerminal(FFinstance* instance);
-const FFWMResult* ffDetectWM(FFinstance* instance);
 
 //Printing
 

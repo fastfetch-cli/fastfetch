@@ -301,15 +301,17 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "de-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("de", "{} {} ({})", 3,
+        constructAndPrintCommandHelpFormat("de", "{3} {4}", 4,
             "Session desktop",
-            "Session name",
-            "Session version"
+            "DE process name",
+            "DE pretty name",
+            "DE version"
         );
     }
     else if(strcasecmp(command, "wm-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("wm", "{2} {3}", 3,
+        constructAndPrintCommandHelpFormat("wm", "{3} ({4})", 4,
+            "Session desktop",
             "WM process name",
             "WM pretty name",
             "WM protocol name"
