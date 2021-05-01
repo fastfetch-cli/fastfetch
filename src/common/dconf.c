@@ -8,17 +8,23 @@ typedef struct DConfData
 {
     void* library;
     DConfClient*(*ffdconf_client_new)(void);
-    GVariant*(*ffdconf_client_read)(DConfClient*, const gchar*);
+    GVariant*(*ffdconf_client_read_full)(DConfClient*, const gchar*, DConfReadFlags, const GQueue*);
     const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
     DConfClient* dconfClient;
 } DConfData;
 
 static inline const char* getDConfValue(DConfData* dconf,  const char* key)
 {
+    puts(key);
+
     if(dconf->dconfClient == NULL)
         return NULL;
 
-    GVariant* variant = dconf->ffdconf_client_read(dconf->dconfClient, key);
+    GVariant* variant = dconf->ffdconf_client_read_full(dconf->dconfClient, key, DCONF_READ_USER_VALUE, NULL);
+
+    if(variant == NULL)
+        variant = dconf->ffdconf_client_read_full(dconf->dconfClient, key, DCONF_READ_DEFAULT_VALUE, NULL);
+
     if(variant != NULL)
         return dconf->ffg_variant_get_string(variant, NULL);
 
@@ -56,24 +62,14 @@ const char* ffDConfGetValue(FFinstance* instance, const char* key)
     }
 
     dconf.ffdconf_client_new = dlsym(dconf.library, "dconf_client_new");
-    if(dconf.ffdconf_client_new == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        dlclose(dconf.library);
-        return NULL;
-    }
-
+    dconf.ffdconf_client_read_full = dlsym(dconf.library, "dconf_client_read_full");
     dconf.ffg_variant_get_string = dlsym(dconf.library, "g_variant_get_string");
-    if(dconf.ffg_variant_get_string == NULL)
-    {
-        pthread_mutex_unlock(&mutex);
-        dlclose(dconf.library);
-        return NULL;
-    }
 
-    dconf.ffdconf_client_read = dlsym(dconf.library, "dconf_client_read");
-    if(dconf.ffdconf_client_read == NULL)
-    {
+    if(
+        dconf.ffdconf_client_new == NULL ||
+        dconf.ffdconf_client_read_full == NULL ||
+        dconf.ffg_variant_get_string == NULL
+    ) {
         pthread_mutex_unlock(&mutex);
         dlclose(dconf.library);
         return NULL;
