@@ -34,6 +34,39 @@ static void printKWin(FFinstance* instance)
     printWMTheme(instance, theme);
 }
 
+static void printMutter(FFinstance* instance)
+{
+    FFstrbuf theme;
+    ffStrbufInit(&theme);
+
+    ffProcessAppendStdOut(&theme, (char* const[]) {
+        "gsettings",
+        "get",
+        "org.gnome.shell.extensions.user-theme",
+        "name",
+        NULL
+    });
+
+    ffStrbufTrim(&theme, '\'');
+
+    if(theme.length == 0)
+    {
+        ffProcessAppendStdOut(&theme, (char* const[]) {
+            "gsettings",
+            "get",
+            "org.gnome.desktop.wm.preferences",
+            "theme",
+            NULL
+        });
+    }
+
+    ffStrbufTrim(&theme, '\'');
+
+    printWMTheme(instance, theme.chars);
+
+    ffStrbufDestroy(&theme);
+}
+
 static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
 {
     FFstrbuf absolutePath;
@@ -108,8 +141,10 @@ void ffPrintWMTheme(FFinstance* instance)
         return;
     }
 
-    if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0)
+    if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "KDE") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Plasma") == 0)
         printKWin(instance);
+    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)
+        printMutter(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Openbox") == 0)
         printOpenbox(instance, &result->dePrettyName);
     else

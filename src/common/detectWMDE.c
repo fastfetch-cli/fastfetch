@@ -15,7 +15,8 @@ typedef enum ProtocolHint
 typedef enum DEHint
 {
     FF_DE_HINT_UNKNOWN = 0,
-    FF_DE_HINT_KDE
+    FF_DE_HINT_PLASMA,
+    FF_DE_HINT_GNOME
 } DEHint;
 
 typedef struct ProcData
@@ -115,7 +116,7 @@ static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processNam
         ffStrbufSetS(&result->wmPrettyName, "XFWM");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "mutter") == 0)
+    else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Mutter");
     else if(ffStrbufIgnCaseCompS(processName, "cinnamon") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Muffin");
@@ -132,7 +133,9 @@ static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processNam
 static bool applyDEHintIfDE(const FFstrbuf* processName, DEHint* deHint)
 {
     if(ffStrbufIgnCaseCompS(processName, "plasmashell") == 0)
-        *deHint = FF_DE_HINT_KDE;
+        *deHint = FF_DE_HINT_PLASMA;
+    else if(ffStrbufIgnCaseCompS(processName, "gnome-shell") == 0)
+        *deHint = FF_DE_HINT_GNOME;
 
     return *deHint != FF_DE_HINT_UNKNOWN;
 }
@@ -157,8 +160,10 @@ static void getFromProcDir(FFWMDEResult* result, ProcData* procData, bool search
             continue;
 
         ffStrbufAppendS(&procPath, procData->dirent->d_name);
-        ffStrbufAppendS(&procPath, "/comm");
+        ffStrbufAppendS(&procPath, "/cmdline");
         ffGetFileContent(procPath.chars, &processName);
+        ffStrbufRecalculateLength(&processName);
+        ffStrbufSubstrAfterLastC(&processName, '/');
         ffStrbufSubstrBefore(&procPath, procPathLength);
 
         //If the are searching for WM, we are also always searching for DE. Therefore !searchWM must be last in the condition
@@ -194,7 +199,16 @@ static void getKDE(FFWMDEResult* result)
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, "KDE Plasma");
 
-    ffParsePropFile("/usr/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version=%[^\n]", result->deVersion.chars);
+    ffParsePropFile("/usr/share/xsessions/plasma.desktop", " X-KDE-PluginInfo-Version=%[^\n]", result->deVersion.chars);
+    ffStrbufRecalculateLength(&result->deVersion);
+}
+
+static void getGnome(FFWMDEResult* result)
+{
+    ffStrbufSetS(&result->deProcessName, "gnome-session-binary");
+    ffStrbufSetS(&result->dePrettyName, "GNOME");
+
+    ffParsePropFile("/usr/share/gnome-shell/org.gnome.Extensions", " version: '%[^']", result->deVersion.chars);
     ffStrbufRecalculateLength(&result->deVersion);
 }
 
@@ -205,8 +219,10 @@ static inline void getDEFromHint(FFWMDEResult* result, ProcData* procData)
     if(procData->deHint == FF_DE_HINT_UNKNOWN)
         return;
 
-    if(procData->deHint == FF_DE_HINT_KDE)
+    if(procData->deHint == FF_DE_HINT_PLASMA)
         getKDE(result);
+    else if(procData->deHint == FF_DE_HINT_GNOME)
+        getGnome(result);
 }
 
 static inline void getDE(FFWMDEResult* result, ProcData* procData)
@@ -224,6 +240,8 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
 
     if(strcasecmp(result->sessionDesktop, "KDE") == 0)
         getKDE(result);
+    else if(strcasecmp(result->sessionDesktop, "Gnome") == 0 || strcasecmp(result->sessionDesktop, "ubuntu:GNOME") == 0 || strcasecmp(result->sessionDesktop, "ubuntu") == 0)
+        getGnome(result);
     else
     {
         ffStrbufSetS(&result->deProcessName, result->sessionDesktop);

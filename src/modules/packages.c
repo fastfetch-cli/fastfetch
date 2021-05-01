@@ -1,11 +1,12 @@
 #include "fastfetch.h"
 
+#include <string.h>
 #include <dirent.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 4
+#define FF_PACKAGES_NUM_FORMAT_ARGS 6
 
-static uint32_t get_num_elements(const char* dirname, unsigned char type) {
+static uint32_t getNumElements(const char* dirname, unsigned char type) {
     uint32_t num_elements = 0;
     DIR * dirp;
     struct dirent *entry;
@@ -27,13 +28,40 @@ static uint32_t get_num_elements(const char* dirname, unsigned char type) {
     return num_elements;
 }
 
+static uint32_t getNumStrings(const char* filename, const char* needle)
+{
+    FILE* file = fopen(filename, "r");
+    if(file == NULL)
+        return 0;
+
+    uint32_t count = 0;
+
+    char* line = NULL;
+    size_t len = 0;
+
+    while(getline(&line, &len, file) != EOF)
+    {
+        if(strstr(line, needle) != NULL)
+            ++count;
+    }
+
+    if(line != NULL)
+        free(line);
+
+    fclose(file);
+
+    return count;
+}
+
 void ffPrintPackages(FFinstance* instance)
 {
-    uint32_t pacman = get_num_elements("/var/lib/pacman/local", DT_DIR);
-    uint32_t flatpak = get_num_elements("/var/lib/flatpak/app", DT_DIR);
-    uint32_t xbps = get_num_elements("/var/db/xbps", DT_REG);
+    uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
+    uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
+    uint32_t dpkg = getNumStrings("/var/lib/dpkg/status", "Status: ");
+    uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
+    uint32_t snap = getNumElements("/snap", DT_DIR);
 
-    uint32_t all = pacman + flatpak + xbps;
+    uint32_t all = pacman + xbps + dpkg + flatpak + snap;
 
     if(all == 0)
     {
@@ -54,8 +82,10 @@ void ffPrintPackages(FFinstance* instance)
         };
 
         FF_PRINT_PACKAGE(pacman)
-        FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(xbps)
+        FF_PRINT_PACKAGE(dpkg)
+        FF_PRINT_PACKAGE(flatpak)
+        FF_PRINT_PACKAGE(snap)
 
         #undef FF_PRINT_PACKAGE
 
@@ -66,8 +96,10 @@ void ffPrintPackages(FFinstance* instance)
         ffPrintFormatString(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, NULL, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &all},
             {FF_FORMAT_ARG_TYPE_UINT, &pacman},
+            {FF_FORMAT_ARG_TYPE_UINT, &xbps},
+            {FF_FORMAT_ARG_TYPE_UINT, &dpkg},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpak},
-            {FF_FORMAT_ARG_TYPE_UINT, &xbps}
+            {FF_FORMAT_ARG_TYPE_UINT, &snap}
         });
     }
 }

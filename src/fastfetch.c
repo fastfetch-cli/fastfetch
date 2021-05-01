@@ -275,11 +275,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (flatpak), {4} (xbps)", 4,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (xbps), {4} (dpkg), {5}, (flatpak), {6} (snap)", 6,
             "Number of all packages",
             "Number of pacman packages",
+            "Number of xbps packages",
+            "Number of dpkg packages",
             "Number of flatpak packages",
-            "Number of xbps packages"
+            "Number of snap packages"
         );
     }
     else if(strcasecmp(command, "shell-format") == 0)
