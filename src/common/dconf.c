@@ -71,7 +71,7 @@ const char* ffDConfGetValue(FFinstance* instance, const char* key)
         return NULL;
     }
 
-    dconf.ffdconf_client_new = dlsym(dconf.library, "dconf_client_read");
+    dconf.ffdconf_client_read = dlsym(dconf.library, "dconf_client_read");
     if(dconf.ffdconf_client_read == NULL)
     {
         pthread_mutex_unlock(&mutex);
