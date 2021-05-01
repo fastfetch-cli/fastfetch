@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void ffProcessGetStdOut(FFstrbuf* buffer, char* const argv[])
+void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
 {
     int pipes[2];
 

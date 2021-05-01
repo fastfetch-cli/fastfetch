@@ -31,7 +31,7 @@ void ffPrintShell(FFinstance* instance)
     ffStrbufAppendTransformS(&command, shellName != NULL ? shellName : shellPath, toupper);
     ffStrbufAppendS(&command, "_VERSION\"");
 
-    ffProcessGetStdOut(&version, (char* const[]){
+    ffProcessAppendStdOut(&version, (char* const[]){
         shellPath,
         "-c",
         command.chars,

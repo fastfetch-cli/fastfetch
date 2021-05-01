@@ -225,7 +225,7 @@ void ffParsePropFile(const char* file, const char* regex, char* buffer);
 void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 
 //common/processing.c
-void ffProcessGetStdOut(FFstrbuf* buffer, char* const argv[]);
+void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 
 //common/logo.c
 void ffLoadLogoSet(FFconfig* config, const char* logo);

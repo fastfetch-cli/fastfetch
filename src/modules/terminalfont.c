@@ -71,12 +71,24 @@ static void printXFCE4Terminal(FFinstance* instance)
 
 static void printTTY(FFinstance* instance)
 {
-    char font[128];
-    ffParsePropFile("/etc/vconsole.conf", "Font=%[^\n]", font);
-    if(font[0] == '\0')
-        strcpy(font, "hardware-supplied VGA font");
+    FFstrbuf font;
+    ffStrbufInit(&font);
 
-    printTerminalFont(instance, font);
+    ffParsePropFile("/etc/vconsole.conf", "Font=%[^\n]", font.chars);
+    ffStrbufRecalculateLength(&font);
+
+    if(font.length == 0)
+    {
+        ffStrbufAppendS(&font, "VGA default kernel font ");
+        ffProcessAppendStdOut(&font, (char* const[]){
+            "showconsolefont",
+            "--info",
+            NULL
+        });
+    }
+
+    printTerminalFont(instance, font.chars);
+    ffStrbufDestroy(&font);
 }
 
 void ffPrintTerminalFont(FFinstance* instance)
@@ -93,8 +105,8 @@ void ffPrintTerminalFont(FFinstance* instance)
         printKonsole(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
         printXFCE4Terminal(instance);
-    else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "login"))
+    else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Terminal Font", "Unknown terminal: %s", result->exeName.chars);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Unknown terminal: %s", result->exeName.chars);
 }

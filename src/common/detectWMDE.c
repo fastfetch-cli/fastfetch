@@ -267,6 +267,25 @@ static inline void getSessionType(FFWMDEResult* result, ProtocolHint protocolHin
         getSessionTypeFallback(result, protocolHint);
 }
 
+static inline void getWMDE(FFWMDEResult* result)
+{
+    ProcData procData;
+    procData.proc = opendir("/proc");
+    procData.dirent = NULL;
+    procData.protocolHint = FF_PROTOCOL_HINT_UNKNOWN;
+    procData.deHint = FF_DE_HINT_UNKNOWN;
+
+    getSessionDesktop(result);
+    getWM(result, &procData);
+    getDE(result, &procData);
+
+    if(result->wmProtocolName.length == 0 && procData.protocolHint != FF_PROTOCOL_HINT_UNKNOWN)
+        getSessionType(result, procData.protocolHint);
+
+    if(procData.proc != NULL)
+        closedir(procData.proc);
+}
+
 const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
 {
     UNUSED(instance);
@@ -289,19 +308,11 @@ const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
     ffStrbufInit(&result.dePrettyName);
     ffStrbufInit(&result.deVersion);
 
-    ProcData procData;
-    procData.proc = opendir("/proc");
-    procData.dirent = NULL;
-    procData.protocolHint = FF_PROTOCOL_HINT_UNKNOWN;
-    procData.deHint = FF_DE_HINT_UNKNOWN;
+    getSessionType(&result, FF_PROTOCOL_HINT_UNKNOWN);
 
-    getSessionDesktop(&result);
-    getWM(&result, &procData);
-    getDE(&result, &procData);
-    getSessionType(&result, procData.protocolHint);
-
-    if(procData.proc != NULL)
-        closedir(procData.proc);
+    //Don't run anyting when on TTY. This prevents us to catch process from other users in at least that case.
+    if(ffStrbufIgnCaseCompS(&result.wmProtocolName, "TTY") != 0)
+        getWMDE(&result);
 
     pthread_mutex_unlock(&mutex);
 

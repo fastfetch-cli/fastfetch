@@ -7,6 +7,18 @@
 #define FF_TERMINAL_MODULE_NAME "Terminal"
 #define FF_TERMINAL_NUM_FORMAT_ARGS 3
 
+static inline void getTerminalFromEnv(FFTerminalResult* result)
+{
+    char* term = getenv("TERM");
+
+    //TTY
+    if(term == NULL || strcasecmp(term, "linux") == 0)
+        term = ttyname(STDIN_FILENO);
+
+    ffStrbufSetS(&result->exeName, term);
+    ffStrbufSetS(&result->processName, term);
+}
+
 static void getTerminalName(FFinstance* instance, const char* pid, FFTerminalResult* result)
 {
     char statFile[234];
@@ -75,6 +87,14 @@ const FFTerminalResult* ffDetectTerminal(FFinstance* instance)
     sprintf(ppid, "%i", getppid());
 
     getTerminalName(instance, ppid, &result);
+
+    // This is mainly used when running in TTY. It also provides an fallback to $TERM if we _somehow_ failed
+    if(
+        ffStrbufStartsWithIgnCaseS(&result.exeName, "login") ||
+        ffStrbufIgnCaseCompS(&result.exeName, "systemd") == 0 ||
+        ffStrbufIgnCaseCompS(&result.exeName, "init") == 0 ||
+        ffStrbufIgnCaseCompS(&result.exeName, "(init)") == 0
+    ) getTerminalFromEnv(&result);
 
     pthread_mutex_unlock(&mutex);
 
