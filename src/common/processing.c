@@ -20,6 +20,7 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
         dup2(pipes[1], STDOUT_FILENO);
         close(pipes[0]);
         close(pipes[1]);
+        close(STDERR_FILENO);
         execvp(argv[0], argv);
         exit(901);
     }
