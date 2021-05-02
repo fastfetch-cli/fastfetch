@@ -15,8 +15,6 @@ typedef struct DConfData
 
 static inline const char* getDConfValue(DConfData* dconf,  const char* key)
 {
-    puts(key);
-
     if(dconf->dconfClient == NULL)
         return NULL;
 
