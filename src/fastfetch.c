@@ -113,6 +113,7 @@ static inline void printHelp()
         "   --lib-PCI <path>\n"
         "   --lib-X11 <path>\n"
         "   --lib-Xrandr <path>\n"
+        "   --lib-gio <path>\n"
         "   --lib-DConf <path>\n"
         "   --lib-wayland <path>\n"
         "\n"
@@ -874,6 +875,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libX11);
     else if(strcasecmp(key, "--lib-Xrandr") == 0)
         optionParseString(key, value, &instance->config.libXrandr);
+    else if(strcasecmp(key, "--lib-gio") == 0)
+        optionParseString(key, value, &instance->config.libGIO);
     else if(strcasecmp(key, "--lib-DConf") == 0)
         optionParseString(key, value, &instance->config.libDConf);
     else if(strcasecmp(key, "--lib-wayland") == 0)

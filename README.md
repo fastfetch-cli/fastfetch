@@ -21,7 +21,8 @@ The following libraries are used if present:
 * [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
 * [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
 * [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
-* [`libDConf`](https://developer.gnome.org/dconf/unstable/DConfClient.html): GTK theme/font/icons output on DEs which dont use config files (e.g. Gnome).
+* [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored in gsettings / dconf.
+* [`libDConf`](https://developer.gnome.org/dconf/unstable/): Fallback for libGIO. Usually not needed if libGIO was loaded sucessfully.
 * [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance + support for monitors with different refresh rates in wayland sessions.  
 
 ## Support status

@@ -36,35 +36,18 @@ static void printKWin(FFinstance* instance)
 
 static void printMutter(FFinstance* instance)
 {
-    FFstrbuf theme;
-    ffStrbufInit(&theme);
+    char const* theme = ffGSettingsGetValue(instance, "org.gnome.shell.extensions.user-theme", "name");
 
-    ffProcessAppendStdOut(&theme, (char* const[]) {
-        "gsettings",
-        "get",
-        "org.gnome.shell.extensions.user-theme",
-        "name",
-        NULL
-    });
+    if(theme == NULL)
+        theme = ffGSettingsGetValue(instance, "org.gnome.desktop.wm.preferences", "theme");
 
-    ffStrbufTrim(&theme, '\'');
-
-    if(theme.length == 0)
+    if(theme == NULL)
     {
-        ffProcessAppendStdOut(&theme, (char* const[]) {
-            "gsettings",
-            "get",
-            "org.gnome.desktop.wm.preferences",
-            "theme",
-            NULL
-        });
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't found mutter theme in GSettings / DConf");
+        return;
     }
 
-    ffStrbufTrim(&theme, '\'');
-
-    printWMTheme(instance, theme.chars);
-
-    ffStrbufDestroy(&theme);
+    printWMTheme(instance, theme);
 }
 
 static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)

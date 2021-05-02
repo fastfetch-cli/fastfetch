@@ -94,6 +94,7 @@ typedef struct FFconfig
     FFstrbuf libX11;
     FFstrbuf libXrandr;
     FFstrbuf libWayland;
+    FFstrbuf libGIO;
     FFstrbuf libDConf;
 
     FFstrbuf diskFolders;
@@ -247,8 +248,8 @@ void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3
 void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
-//common/dconf.c
-const char* ffDConfGetValue(FFinstance* instance, const char* key);
+//common/gsettings.c
+const char* ffGSettingsGetValue(FFinstance* instance, const char* schema, const char* key);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);

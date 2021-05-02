@@ -34,20 +34,28 @@ find_package(Threads REQUIRED)
 find_package (PkgConfig)
 
 if(${PkgConfig_FOUND})
-    pkg_check_modules (GLIB2 glib-2.0)
+    pkg_check_modules (GIO2 gio-2.0)
+    pkg_check_modules (DCONF dconf)
 endif(${PkgConfig_FOUND})
 
-if(NOT DEFINED GLIB2_INCLUDE_DIRS)
-    set(GLIB2_INCLUDE_DIRS
+if(NOT DEFINED GIO2_INCLUDE_DIRS)
+    set(GIO2_INCLUDE_DIRS
         /usr/include/glib-2.0/
         /usr/lib/glib-2.0/include/
     )
-endif(NOT DEFINED GLIB2_INCLUDE_DIRS)
+endif(NOT DEFINED GIO2_INCLUDE_DIRS)
+
+if(NOT DEFINED DCONF_INCLUDE_DIRS)
+    set(DCONF_INCLUDE_DIRS
+        /usr/include/dconf/
+    )
+endif(NOT DEFINED DCONF_INCLUDE_DIRS)
 
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
-    ${GLIB2_INCLUDE_DIRS}
+    ${GIO2_INCLUDE_DIRS}
+    ${DCONF_INCLUDE_DIRS}
 )
 
 link_libraries(
@@ -65,7 +73,7 @@ set(SRCS
     src/common/logo.c
     src/common/format.c
     src/common/parsing.c
-    src/common/dconf.c
+    src/common/gsettings.c
     src/common/detectPlasma.c
     src/common/detectGTK.c
     src/common/detectWMDE.c

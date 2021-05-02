@@ -51,9 +51,9 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
 
     init = true;
 
-    themeName = ffDConfGetValue(instance, "/org/gnome/desktop/interface/gtk-theme");
-    iconsName = ffDConfGetValue(instance, "/org/gnome/desktop/interface/font-name");
-    fontName = ffDConfGetValue(instance, "/org/gnome/desktop/interface/icon-theme");
+    themeName = ffGSettingsGetValue(instance, "org.gnome.desktop.interface", "gtk-theme");
+    iconsName = ffGSettingsGetValue(instance, "org.gnome.desktop.interface", "icon-theme");
+    fontName = ffGSettingsGetValue(instance, "org.gnome.desktop.interface", "font-name");
 
     pthread_mutex_unlock(&mutex);
     applyGTKDConfSettings(result, themeName, iconsName, fontName);
