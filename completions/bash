@@ -180,6 +180,7 @@ __fastfetch_completion()
         "--lib-PCI"
         "--lib-X11"
         "--lib-Xrandr"
+        "--lib-gio"
         "--lib-DConf"
         "--lib-wayland"
         "--battery-dir"

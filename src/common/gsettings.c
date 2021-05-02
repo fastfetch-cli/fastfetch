@@ -31,7 +31,7 @@ static int transformGSettingsToDConf(int c)
     return c == '.' ? '/' : c;
 }
 
-static const char* getDConfValue(DConfData* data, const char* schemaName, const char* key)
+static const char* getDConfValue(DConfData* data, const char* schemaName, const char* path, const char* key)
 {
     if(data->client == NULL)
         return NULL;
@@ -41,6 +41,11 @@ static const char* getDConfValue(DConfData* data, const char* schemaName, const 
     ffStrbufAppendC(&dconfStyleKey, '/');
     ffStrbufAppendTransformS(&dconfStyleKey, schemaName, transformGSettingsToDConf);
     ffStrbufAppendC(&dconfStyleKey, '/');
+    if(path != NULL && *path != '\0')
+    {
+        ffStrbufAppendS(&dconfStyleKey, path);
+        ffStrbufAppendC(&dconfStyleKey, '/');
+    }
     ffStrbufAppendS(&dconfStyleKey, key);
 
     GVariant* variant = data->ffdconf_client_read_full(data->client, dconfStyleKey.chars, DCONF_READ_FLAGS_NONE, NULL);
@@ -59,7 +64,7 @@ static const char* getDConfValue(DConfData* data, const char* schemaName, const 
     return NULL;
 }
 
-static const char* dconfGetValue(FFinstance* instance, const char* schemaName, const char* key)
+static const char* dconfGetValue(FFinstance* instance, const char* schemaName, const char* path, const char* key)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
@@ -71,7 +76,7 @@ static const char* dconfGetValue(FFinstance* instance, const char* schemaName, c
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return getDConfValue(&data, schemaName, key);
+        return getDConfValue(&data, schemaName, path, key);
     }
 
     init = true;
@@ -101,24 +106,24 @@ static const char* dconfGetValue(FFinstance* instance, const char* schemaName, c
     }
 
     pthread_mutex_unlock(&mutex);
-    return getDConfValue(&data, schemaName, key);
+    return getDConfValue(&data, schemaName, path, key);
 }
 
-static const char* getGSettingsValue(FFinstance* instance, GSettingsData* data, const char* schemaName, const char* key)
+static const char* getGSettingsValue(FFinstance* instance, GSettingsData* data, const char* schemaName, const char* path, const char* key)
 {
     if(data->schemaSource == NULL)
-        return dconfGetValue(instance, schemaName, key);
+        return dconfGetValue(instance, schemaName, path, key);
 
     GSettingsSchema* schema = data->ffg_settings_schema_source_lookup(data->schemaSource, schemaName, true);
     if(schema == NULL)
-        return dconfGetValue(instance, schemaName, key);
+        return dconfGetValue(instance, schemaName, path, key);
 
     if(data->ffg_settings_schema_has_key(schema, key) == 0)
-        return dconfGetValue(instance, schemaName, key);
+        return dconfGetValue(instance, schemaName, path, key);
 
-    GSettings* settings = data->ffg_settings_new_full(schema, NULL, NULL);
+    GSettings* settings = data->ffg_settings_new_full(schema, NULL, path);
     if(settings == NULL)
-        return dconfGetValue(instance, schemaName, key);
+        return dconfGetValue(instance, schemaName, path, key);
 
     GVariant* variant = data->ffg_settings_get_value(settings, key);
 
@@ -129,17 +134,17 @@ static const char* getGSettingsValue(FFinstance* instance, GSettingsData* data, 
         variant = data->ffg_settings_get_default_value(settings, key);
 
     if(variant == NULL)
-        return dconfGetValue(instance, schemaName, key);
+        return dconfGetValue(instance, schemaName, path, key);
 
     const char* value = data->ffg_variant_get_string(variant, NULL);
 
     if(value == NULL || *value == '\0')
-        return dconfGetValue(instance, schemaName, key);
+        return dconfGetValue(instance, schemaName, path, key);
 
     return value;
 }
 
-const char* ffGSettingsGetValue(FFinstance* instance, const char* schemaName, const char* key)
+const char* ffGSettingsGetValuePath(FFinstance* instance, const char* schemaName, const char* path, const char* key)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
@@ -151,7 +156,7 @@ const char* ffGSettingsGetValue(FFinstance* instance, const char* schemaName, co
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return getGSettingsValue(instance, &data, schemaName, key);
+        return getGSettingsValue(instance, &data, schemaName, path, key);
     }
 
     init = true;
@@ -192,5 +197,10 @@ const char* ffGSettingsGetValue(FFinstance* instance, const char* schemaName, co
     }
 
     pthread_mutex_unlock(&mutex);
-    return getGSettingsValue(instance, &data, schemaName, key);
+    return getGSettingsValue(instance, &data, schemaName, path, key);
+}
+
+const char* ffGSettingsGetValue(FFinstance* instance, const char* schemaName, const char* key)
+{
+    return ffGSettingsGetValuePath(instance, schemaName, NULL, key);
 }

@@ -249,7 +249,8 @@ void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
 //common/gsettings.c
-const char* ffGSettingsGetValue(FFinstance* instance, const char* schema, const char* key);
+const char* ffGSettingsGetValuePath(FFinstance* instance, const char* schemaName, const char* path, const char* key);
+const char* ffGSettingsGetValue(FFinstance* instance, const char* schemaName, const char* key);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
