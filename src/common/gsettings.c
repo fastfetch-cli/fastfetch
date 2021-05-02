@@ -43,7 +43,7 @@ static const char* getDConfValue(DConfData* data, const char* schemaName, const 
     ffStrbufAppendC(&dconfStyleKey, '/');
     if(path != NULL && *path != '\0')
     {
-        ffStrbufAppendS(&dconfStyleKey, path);
+        ffStrbufAppendTransformS(&dconfStyleKey, path, transformGSettingsToDConf);
         ffStrbufAppendC(&dconfStyleKey, '/');
     }
     ffStrbufAppendS(&dconfStyleKey, key);
