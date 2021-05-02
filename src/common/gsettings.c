@@ -40,12 +40,15 @@ static const char* getDConfValue(DConfData* data, const char* schemaName, const 
     ffStrbufInitA(&dconfStyleKey, 64);
     ffStrbufAppendC(&dconfStyleKey, '/');
     ffStrbufAppendTransformS(&dconfStyleKey, schemaName, transformGSettingsToDConf);
-    ffStrbufAppendC(&dconfStyleKey, '/');
-    if(path != NULL && *path != '\0')
-    {
-        ffStrbufAppendTransformS(&dconfStyleKey, path, transformGSettingsToDConf);
+
+    if(path == NULL || *path != '/')
         ffStrbufAppendC(&dconfStyleKey, '/');
-    }
+
+    ffStrbufAppendTransformS(&dconfStyleKey, path, transformGSettingsToDConf);
+
+    if(path != NULL && dconfStyleKey.chars[dconfStyleKey.length - 1] != '/')
+        ffStrbufAppendC(&dconfStyleKey, '/');
+
     ffStrbufAppendS(&dconfStyleKey, key);
 
     GVariant* variant = data->ffdconf_client_read_full(data->client, dconfStyleKey.chars, DCONF_READ_FLAGS_NONE, NULL);
