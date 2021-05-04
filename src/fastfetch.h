@@ -248,9 +248,12 @@ void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3
 void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
-//common/gsettings.c
-const char* ffGSettingsGetValuePath(FFinstance* instance, const char* schemaName, const char* path, const char* key);
-const char* ffGSettingsGetValue(FFinstance* instance, const char* schemaName, const char* key);
+//common/settings.c
+const char* ffSettingsGetDConf(FFinstance* instance, const char* key);
+const char* ffSettingsGetGsettingsPath(FFinstance* instance, const char* schemaName, const char* path, const char* key);
+const char* ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* key);
+const char* ffSettingsGetPath(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey);
+const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsKey);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
