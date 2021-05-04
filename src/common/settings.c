@@ -50,7 +50,7 @@ const char* ffSettingsGetDConf(FFinstance* instance, const char* key)
 
     data.client = NULL; //error indicator
 
-    void* library = dlopen(instance->config.libDConf.chars == NULL ? "libdconf.so" : instance->config.libDConf.chars, RTLD_LAZY);
+    void* library = dlopen(instance->config.libDConf.length == 0 ? "libdconf.so" : instance->config.libDConf.chars, RTLD_LAZY);
     if(library == NULL)
     {
         pthread_mutex_unlock(&mutex);
