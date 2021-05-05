@@ -246,6 +246,9 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
     {
         ffStrbufSetS(&result->deProcessName, result->sessionDesktop);
         ffStrbufSet(&result->dePrettyName, &result->deProcessName);
+
+        if(ffStrbufStartsWithIgnCaseS(&result->dePrettyName, "X-"))
+            ffStrbufSubstrAfter(&result->deProcessName, 2);
     }
 }
 
