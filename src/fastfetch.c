@@ -409,7 +409,7 @@ static inline void printCommandHelp(const char* command)
     {
         constructAndPrintCommandHelpFormat("gpu", "{2} {3}", 3,
             "GPU vendor",
-            "GPU vendor pretty"
+            "GPU vendor pretty",
             "GPU name"
         );
     }
