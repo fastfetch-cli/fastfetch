@@ -35,7 +35,7 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
     ffGetFileContent(dir->chars, &status);
     ffStrbufSubstrBefore(dir, dirLength);
 
-    if(ffStrbufIgnCaseCompS(&status, "Unknown"))
+    if(ffStrbufIgnCaseCompS(&status, "Unknown") == 0)
         ffStrbufClear(&status);
 
     if(manufactor.length == 0 && model.length == 0 && technology.length == 0 && capacity.length == 0 && status.length == 0)
