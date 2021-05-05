@@ -35,6 +35,9 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
     ffGetFileContent(dir->chars, &status);
     ffStrbufSubstrBefore(dir, dirLength);
 
+    if(ffStrbufIgnCaseCompS(&status, "Unknown"))
+        ffStrbufClear(&status);
+
     if(manufactor.length == 0 && model.length == 0 && technology.length == 0 && capacity.length == 0 && status.length == 0)
     {
         ffPrintError(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "No file in %s could be read or all battery options are disabled", dir->chars);
