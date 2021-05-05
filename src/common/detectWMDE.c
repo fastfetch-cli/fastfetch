@@ -248,7 +248,7 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
         ffStrbufSet(&result->dePrettyName, &result->deProcessName);
 
         if(ffStrbufStartsWithIgnCaseS(&result->dePrettyName, "X-"))
-            ffStrbufSubstrAfter(&result->deProcessName, 2);
+            ffStrbufSubstrAfter(&result->dePrettyName, 2);
     }
 }
 
