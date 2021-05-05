@@ -86,23 +86,28 @@ typedef struct GSettingsData
     GVariant*(*ffg_settings_get_user_value)(GSettings*, const gchar*);
     GVariant*(*ffg_settings_get_default_value)(GSettings*, const gchar*);
     const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
+    gboolean(*ffg_variant_get_boolean)(GVariant*);
 } GSettingsData;
 
-static const char* getGSettingsValue(GSettingsData* data, const char* schemaName, const char* path, const char* key)
+static FFvariant getGSettingsValue(GSettingsData* data, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
+    FFvariant result;
+    result.strValue = NULL;
+    result.set = false;
+
     if(data->schemaSource == NULL)
-        return NULL;
+        return result;
 
     GSettingsSchema* schema = data->ffg_settings_schema_source_lookup(data->schemaSource, schemaName, true);
     if(schema == NULL)
-        return NULL;
+        return result;
 
     if(data->ffg_settings_schema_has_key(schema, key) == 0)
-        return NULL;
+        return result;
 
     GSettings* settings = data->ffg_settings_new_full(schema, NULL, path);
     if(settings == NULL)
-        return NULL;
+        return result;
 
     GVariant* variant = data->ffg_settings_get_value(settings, key);
 
@@ -113,12 +118,23 @@ static const char* getGSettingsValue(GSettingsData* data, const char* schemaName
         variant = data->ffg_settings_get_default_value(settings, key);
 
     if(variant == NULL)
-        return NULL;
+        return result;
 
-    return data->ffg_variant_get_string(variant, NULL);
+    if(type == FF_VARIANT_TYPE_STRING && data->ffg_variant_get_string != NULL)
+    {
+        result.strValue = data->ffg_variant_get_string(variant, NULL);
+        result.set = result.strValue != NULL;
+    }
+    else if(type == FF_VARIANT_TYPE_BOOL && data->ffg_variant_get_boolean != NULL)
+    {
+        result.boolValue = data->ffg_variant_get_boolean(variant);
+        result.set = true;
+    }
+
+    return result;
 }
 
-const char* ffSettingsGetGsettingsPath(FFinstance* instance, const char* schemaName, const char* path, const char* key)
+FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
@@ -130,18 +146,22 @@ const char* ffSettingsGetGsettingsPath(FFinstance* instance, const char* schemaN
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return getGSettingsValue(&data, schemaName, path, key);
+        return getGSettingsValue(&data, schemaName, path, key, type);
     }
 
     init = true;
 
     data.schemaSource = NULL; //error indicator
 
+    FFvariant errorResult;
+    errorResult.set = false;
+    errorResult.strValue = NULL;
+
     void* library = dlopen(instance->config.libGIO.length == 0 ? "libgio-2.0.so" : instance->config.libGIO.chars, RTLD_LAZY);
     if(library == NULL)
     {
         pthread_mutex_unlock(&mutex);
-        return NULL;
+        return errorResult;
     }
 
     data.ffg_settings_schema_source_lookup = dlsym(library, "g_settings_schema_source_lookup");
@@ -151,6 +171,7 @@ const char* ffSettingsGetGsettingsPath(FFinstance* instance, const char* schemaN
     data.ffg_settings_get_user_value       = dlsym(library, "g_settings_get_user_value");
     data.ffg_settings_get_default_value    = dlsym(library, "g_settings_get_default_value");
     data.ffg_variant_get_string            = dlsym(library, "g_variant_get_string");
+    data.ffg_variant_get_boolean           = dlsym(library, "g_variant_get_boolean");
 
     GSettingsSchemaSource*(*ffg_settings_schema_source_get_default)(void) = dlsym(library, "g_settings_schema_source_get_default");
 
@@ -161,34 +182,23 @@ const char* ffSettingsGetGsettingsPath(FFinstance* instance, const char* schemaN
         data.ffg_settings_get_value            == NULL ||
         data.ffg_settings_get_user_value       == NULL ||
         data.ffg_settings_get_default_value    == NULL ||
-        data.ffg_variant_get_string            == NULL ||
         ffg_settings_schema_source_get_default == NULL ||
         (data.schemaSource = ffg_settings_schema_source_get_default()) == NULL
     ) {
         pthread_mutex_unlock(&mutex);
         dlclose(library);
-        return NULL;
+        return errorResult;
     }
 
     pthread_mutex_unlock(&mutex);
-    return getGSettingsValue(&data, schemaName, path, key);
+    return getGSettingsValue(&data, schemaName, path, key, type);
 }
 
-const char* ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* key)
-{
-    return ffSettingsGetGsettingsPath(instance, schemaName, NULL, key);
-}
-
-const char* ffSettingsGetPath(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey)
+const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey)
 {
     const char* dconf = ffSettingsGetDConf(instance, dconfKey);
     if(dconf != NULL)
         return dconf;
 
-    return ffSettingsGetGsettingsPath(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey);
-}
-
-const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsKey)
-{
-    return ffSettingsGetPath(instance, dconfKey, gsettingsSchemaName, NULL, gsettingsKey);
+    return ffSettingsGetGsettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
 }

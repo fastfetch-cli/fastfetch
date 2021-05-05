@@ -190,6 +190,23 @@ typedef struct FFcache
     FILE* split;
 } FFcache;
 
+typedef enum FFvarianttype
+{
+    FF_VARIANT_TYPE_STRING,
+    FF_VARIANT_TYPE_BOOL
+} FFvarianttype;
+
+typedef struct FFvariant
+{
+    bool set;
+
+    union
+    {
+        const char* strValue;
+        bool boolValue;
+    };
+} FFvariant;
+
 /*************************/
 /* Common util functions */
 /*************************/
@@ -250,10 +267,8 @@ void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
 //common/settings.c
 const char* ffSettingsGetDConf(FFinstance* instance, const char* key);
-const char* ffSettingsGetGsettingsPath(FFinstance* instance, const char* schemaName, const char* path, const char* key);
-const char* ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* key);
-const char* ffSettingsGetPath(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey);
-const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsKey);
+FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type);
+const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);

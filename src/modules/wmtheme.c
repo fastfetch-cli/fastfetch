@@ -36,10 +36,10 @@ static void printKWin(FFinstance* instance)
 
 static void printMutter(FFinstance* instance)
 {
-    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", "name");
+    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name");
 
     if(theme == NULL)
-        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", "theme");
+        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme");
 
     if(theme == NULL)
     {
