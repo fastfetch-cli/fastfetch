@@ -397,6 +397,11 @@ uint32_t ffStrbufFirstIndexAfterS(const FFstrbuf* strbuf, uint32_t start, const 
     return strbuf->length;
 }
 
+uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str)
+{
+    return ffStrbufFirstIndexAfterS(strbuf, 0, str);
+}
+
 uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, const char c)
 {
     //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true

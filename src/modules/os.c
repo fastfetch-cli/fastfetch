@@ -115,51 +115,52 @@ void ffPrintOS(FFinstance* instance)
 
     FF_STRBUF_CREATE(os);
 
-    if(result->prettyName.length > 0)
-    {
+    //Name
+    if(result->name.length > 0)
+        ffStrbufAppend(&os, &result->name);
+    else if(result->id.length > 0)
+        ffStrbufAppend(&os, &result->id);
+    else if(result->prettyName.length > 0)
         ffStrbufAppend(&os, &result->prettyName);
-    }
-    else if(result->name.length == 0 && result->id.length == 0)
-    {
-        ffStrbufAppend(&os, &result->systemName);
-    }
     else
+        ffStrbufAppend(&os, &result->systemName);
+
+    //Version
+    if(result->versionID.length > 0)
     {
-        if(result->name.length > 0)
-            ffStrbufAppend(&os, &result->name);
-        else
-            ffStrbufAppend(&os, &result->id);
-
-        if(result->version.length > 0)
-        {
-            ffStrbufAppendC(&os, ' ');
-            ffStrbufAppend(&os, &result->version);
-        }
-        else
-        {
-            if(result->versionID.length > 0)
-            {
-                ffStrbufAppendC(&os, ' ');
-                ffStrbufAppend(&os, &result->versionID);
-            }
-
-            if(result->variant.length > 0)
-            {
-                ffStrbufAppendS(&os, " (");
-                ffStrbufAppend(&os, &result->variant);
-                ffStrbufAppendC(&os, ')');
-            }
-            else if(result->variantID.length > 0)
-            {
-                ffStrbufAppendS(&os, " (");
-                ffStrbufAppend(&os, &result->variantID);
-                ffStrbufAppendC(&os, ')');
-            }
-        }
+        ffStrbufAppendC(&os, ' ');
+        ffStrbufAppend(&os, &result->versionID);
+    }
+    else if(result->version.length > 0)
+    {
+        ffStrbufAppendC(&os, ' ');
+        ffStrbufAppend(&os, &result->version);
     }
 
-    ffStrbufAppendC(&os, ' ');
-    ffStrbufAppendS(&os, instance->state.utsname.machine);
+    //Codename
+    if(result->codename.length > 0)
+    {
+        ffStrbufAppendC(&os, ' ');
+        ffStrbufAppend(&os, &result->codename);
+    }
+
+    //Variant
+    if(result->variant.length > 0)
+    {
+        ffStrbufAppendS(&os, " [");
+        ffStrbufAppend(&os, &result->variant);
+        ffStrbufAppendC(&os, ']');
+    }
+    else if(result->variantID.length > 0)
+    {
+        ffStrbufAppendS(&os, " [");
+        ffStrbufAppend(&os, &result->variantID);
+        ffStrbufAppendC(&os, ']');
+    }
+
+    ffStrbufAppendS(&os, " (");
+    ffStrbufAppend(&os, &result->architecture);
+    ffStrbufAppendC(&os, ')');
 
     ffPrintAndSaveToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},
