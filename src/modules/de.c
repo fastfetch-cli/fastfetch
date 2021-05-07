@@ -9,7 +9,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
 {
     const FFWMDEResult* result = ffDetectWMDE(instance);
 
-    if(result->dePrettyName.length == 0 && result->sessionDesktop == NULL)
+    if(result->dePrettyName.length == 0)
     {
         ffPrintError(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, FF_DE_NUM_FORMAT_ARGS, "No DE found");
         return;
@@ -19,10 +19,7 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey);
 
-        if(result->dePrettyName.length > 0)
-            ffStrbufWriteTo(&result->dePrettyName, stdout);
-        else
-            fputs(result->sessionDesktop, stdout);
+        ffStrbufWriteTo(&result->dePrettyName, stdout);
 
         if(result->deVersion.length > 0)
         {
