@@ -256,7 +256,7 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
 
 int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
-    return ffStrbufCompNS(strbuf, comp->length, comp->chars);
+    return ffStrbufCompS(strbuf, comp->chars);
 }
 
 int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
@@ -264,24 +264,14 @@ int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
     return strcmp(strbuf->chars, comp);
 }
 
-int ffStrbufCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp)
-{
-    return strncasecmp(strbuf->chars, comp, length);
-}
-
 int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
-    return ffStrbufIgnCaseCompNS(strbuf, comp->length, comp->chars);
+    return ffStrbufIgnCaseCompS(strbuf, comp->chars);
 }
 
 int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
 {
     return strcasecmp(strbuf->chars, comp);
-}
-
-int ffStrbufIgnCaseCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp)
-{
-    return strncasecmp(strbuf->chars, comp, length);
 }
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)

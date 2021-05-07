@@ -58,11 +58,9 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
 int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
 int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);
-int ffStrbufCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp);
 
 int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
 int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp);
-int ffStrbufIgnCaseCompNS(const FFstrbuf* strbuf, uint32_t length, const char* comp);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);

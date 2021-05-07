@@ -33,6 +33,17 @@ void* ffListAdd(FFlist* list)
     return adress;
 }
 
+uint32_t ffListFirstIndexComp(FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
+{
+    for(uint32_t i = 0; i < list->length; i++)
+    {
+        if(compFunc(ffListGet(list, i), compElement))
+            return i;
+    }
+
+    return list->length;
+}
+
 void ffListDestroy(FFlist* list)
 {
     free(list->data);

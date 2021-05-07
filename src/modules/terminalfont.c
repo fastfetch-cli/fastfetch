@@ -35,7 +35,7 @@ static void printTerminalFont(FFinstance* instance, const char* font)
 static void printKonsole(FFinstance* instance)
 {
     char profile[128];
-    ffParsePropFileHome(instance, ".config/konsolerc", "DefaultProfile=%[^\n]", profile);
+    ffParsePropFileConfig(instance, "konsolerc", "DefaultProfile=%[^\n]", profile);
     if(profile[0] == '\0')
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"DefaultProfile=%[^\n]\" in \".config/konsolerc\"");
@@ -59,7 +59,7 @@ static void printKonsole(FFinstance* instance)
 static void printXFCE4Terminal(FFinstance* instance)
 {
     char font[128];
-    ffParsePropFileHome(instance, ".config/xfce4/terminal/terminalrc", "FontName=%[^\n]", font);
+    ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]", font);
     if(font[0] == '\0')
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"FontName=%%[^\\n]\" in \".config/xfce4/terminal/terminalrc\"");

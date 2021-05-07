@@ -2,12 +2,76 @@
 
 #include <unistd.h>
 
+static bool strbufEqualsAdapter(const void* first, const void* second)
+{
+    return ffStrbufComp(second, first) == 0;
+}
+
+static void initConfigDirs(FFstate* state)
+{
+    ffListInit(&state->configDirs, sizeof(FFstrbuf));
+
+    const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
+    if(xdgConfigHome != NULL)
+    {
+        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
+        ffStrbufInitA(buffer, 64);
+        ffStrbufAppendS(buffer, xdgConfigHome);
+        ffStrbufTrimRight(buffer, '/');
+    }
+
+    FFstrbuf xdgConfigDirs;
+    ffStrbufInitAS(&xdgConfigDirs, 64, getenv("XDG_CONFIG_DIRS"));
+    uint32_t lastIndex = 0;
+    while (lastIndex < xdgConfigDirs.length)
+    {
+        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&xdgConfigDirs, lastIndex, ':');
+        xdgConfigDirs.chars[colonIndex] = '\0';
+
+        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
+        ffStrbufInitA(buffer, 64);
+        ffStrbufAppendS(buffer, xdgConfigDirs.chars + lastIndex);
+        ffStrbufTrimRight(buffer, '/');
+
+        lastIndex = colonIndex + 1;
+    }
+
+    #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
+        if(ffListFirstIndexComp(&state->configDirs, element, strbufEqualsAdapter) < state->configDirs.length - 1) \
+            --state->configDirs.length;
+
+    FFstrbuf* userConfigHome = ffListAdd(&state->configDirs);
+    ffStrbufInitA(userConfigHome, 64);
+    ffStrbufAppendS(userConfigHome, state->passwd->pw_dir);
+    ffStrbufAppendS(userConfigHome, "/.config");
+    FF_ENSURE_ONLY_ONCE_IN_LIST(userConfigHome)
+
+    FFstrbuf* userHome = ffListAdd(&state->configDirs);
+    ffStrbufInitA(userHome, 64);
+    ffStrbufAppendS(userHome, state->passwd->pw_dir);
+    FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
+
+    FFstrbuf* systemConfigHome = ffListAdd(&state->configDirs);
+    ffStrbufInitA(systemConfigHome, 64);
+    ffStrbufAppendS(systemConfigHome, "/etc/xdg");
+    FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigHome)
+
+    FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
+    ffStrbufInitA(systemConfig, 64);
+    ffStrbufAppendS(systemConfig, "/etc");
+    FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfig)
+
+    #undef FF_ENSURE_ONLY_ONCE_IN_LIST
+}
+
 static void initState(FFstate* state)
 {
     state->current_row = 0;
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
+
+    initConfigDirs(state);
 }
 
 static void defaultConfig(FFconfig* config)

@@ -894,52 +894,36 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
 {
-    FFstrbuf filename;
-    ffStrbufInitA(&filename, 64);
+    FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
+    uint32_t filenameLength = filename->length;
 
-    const char* xdgConfig = getenv("XDG_CONFIG_HOME");
-    if(xdgConfig == NULL)
+    mkdir(filename->chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
+
+    ffStrbufAppendS(filename, "/fastfetch/");
+    mkdir(filename->chars, S_IRWXU | S_IRGRP | S_IROTH);
+
+    ffStrbufAppendS(filename, "config.conf");
+
+    if(access(filename->chars, F_OK) != 0)
     {
-        ffStrbufAppendS(&filename, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&filename, "/.config");
+        FILE* file = fopen(filename->chars, "w");
+        if(file != NULL)
+        {
+            fputs(FASTFETCH_DEFAULT_CONFIG, file);
+            fclose(file);
+        }
     }
     else
     {
-        ffStrbufAppendS(&filename, xdgConfig);
-    }
-    mkdir(filename.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
-
-    ffStrbufAppendS(&filename, "/fastfetch/");
-    mkdir(filename.chars, S_IRWXU | S_IRGRP | S_IROTH);
-
-    ffStrbufAppendS(&filename, "config.conf");
-
-    if(access(filename.chars, F_OK) != 0)
-    {
-        FILE* file = fopen(filename.chars, "w");
-        if(file == NULL)
+        FILE* file = fopen(filename->chars, "r");
+        if(file != NULL)
         {
-            ffStrbufDestroy(&filename);
-            return;
+            parseConfigFile(instance, data, file);
+            fclose(file);
         }
-
-        fputs(FASTFETCH_DEFAULT_CONFIG, file);
-        fclose(file);
-    }
-    else
-    {
-        FILE* file = fopen(filename.chars, "r");
-        if(file == NULL)
-        {
-            ffStrbufDestroy(&filename);
-            return;
-        }
-
-        parseConfigFile(instance, data, file);
-        fclose(file);
     }
 
-    ffStrbufDestroy(&filename);
+    ffStrbufSubstrBefore(filename, filenameLength);
 }
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)

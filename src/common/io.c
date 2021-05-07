@@ -364,6 +364,32 @@ bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     return result;
 }
 
+bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
+{
+    bool foundAFile = false;
+
+    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
+    {
+        FFstrbuf* baseDir = (FFstrbuf*) ffListGet(&instance->state.configDirs, i);
+        uint32_t baseDirLength = baseDir->length;
+
+        if(*relativeFile != '/')
+            ffStrbufAppendC(baseDir, '/');
+
+        ffStrbufAppendS(baseDir, relativeFile);
+
+        if(ffParsePropFile(baseDir->chars, regex, buffer))
+            foundAFile = true;
+
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+        if(*buffer != '\0')
+            return foundAFile;
+    }
+
+    return foundAFile;
+}
+
 bool ffWriteFDContent(int fd, const FFstrbuf* content)
 {
     return write(fd, content->chars, content->length) != -1;

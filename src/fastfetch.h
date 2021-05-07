@@ -159,6 +159,8 @@ typedef struct FFstate
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
+
+    FFlist configDirs;
 } FFstate;
 
 typedef struct FFinstance
@@ -242,6 +244,7 @@ void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 // They return true if the file was found, independently if regex was found
 bool ffParsePropFile(const char* file, const char* regex, char* buffer);
 bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
+bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);

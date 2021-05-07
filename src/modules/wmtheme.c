@@ -22,7 +22,7 @@ static void printWMTheme(FFinstance* instance, const char* theme)
 static void printKWin(FFinstance* instance)
 {
     char theme[256];
-    bool fileFound = ffParsePropFileHome(instance, ".config/kwinrc", "theme=%s", theme);
+    bool fileFound = ffParsePropFileConfig(instance, "kwinrc", "theme=%s", theme);
 
     if(*theme == '\0')
     {

@@ -171,84 +171,22 @@ static void detectGTK(FFinstance* instance, const char* version, const char* env
         return;
     }
 
-    //From DIR: XDG_CONFIG_HOME
+    //From config dirs
 
-    const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
-    ffStrbufSetS(&buffer, xdgConfigHome);
-    detectGTKFromConfigDir(&buffer, version, result);
-    if(allPropertiesSet(result))
+    //We need to do this because we use multiple threads on configDirs
+    FFstrbuf baseDirCopy;
+    ffStrbufInitA(&baseDirCopy, 64);
+
+    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
     {
-        ffStrbufDestroy(&buffer);
-        return;
-    }
-
-    //From DIRs: XDG_CONFIG_DIRS
-
-    ffStrbufSetS(&buffer, getenv("XDG_CONFIG_DIRS"));
-    lastIndex = 0;
-    while (lastIndex < buffer.length)
-    {
-        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&buffer, lastIndex, ':');
-        buffer.chars[colonIndex] = '\0';
-
-        FFstrbuf configDir;
-        ffStrbufInitA(&configDir, 64);
-        ffStrbufAppendS(&configDir, buffer.chars + lastIndex);
-
-        detectGTKFromConfigDir(&configDir, version, result);
-
-        ffStrbufDestroy(&configDir);
-
+        FFstrbuf* baseDir = (FFstrbuf*) ffListGet(&instance->state.configDirs, i);
+        ffStrbufSet(&baseDirCopy, baseDir);
+        detectGTKFromConfigDir(&baseDirCopy, version, result);
         if(allPropertiesSet(result))
-        {
-            ffStrbufDestroy(&buffer);
-            return;
-        }
-
-        lastIndex = colonIndex + 1;
+            break;
     }
 
-    //From DIR: ~/.config/
-
-    ffStrbufSetS(&buffer, instance->state.passwd->pw_dir);
-    lastIndex = buffer.length;
-
-    ffStrbufAppendS(&buffer, "/.config");
-    if(ffStrbufCompS(&buffer, xdgConfigHome) != 0)
-    {
-        detectGTKFromConfigDir(&buffer, version, result);
-        if(allPropertiesSet(result))
-        {
-            ffStrbufDestroy(&buffer);
-            return;
-        }
-    }
-
-    //From DIR: ~/
-
-    ffStrbufSubstrBefore(&buffer, lastIndex);
-    detectGTKFromConfigDir(&buffer, version, result);
-    if(allPropertiesSet(result))
-    {
-        ffStrbufDestroy(&buffer);
-        return;
-    }
-
-    //From DIR: /etc/xdg/
-
-    ffStrbufSetS(&buffer, "/etc/xdg");
-    detectGTKFromConfigDir(&buffer, version, result);
-    if(allPropertiesSet(result))
-    {
-        ffStrbufDestroy(&buffer);
-        return;
-    }
-
-    //From DIR: /etc/
-
-    ffStrbufSetS(&buffer, "/etc");
-    detectGTKFromConfigDir(&buffer, version, result);
-
+    ffStrbufDestroy(&baseDirCopy);
     ffStrbufDestroy(&buffer);
 }
 
