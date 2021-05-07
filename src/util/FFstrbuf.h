@@ -78,7 +78,9 @@ uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, const char c);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c);
+void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, const char c);
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
+void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, const char c);
 void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c);
 
 bool ffStrbufStartsWith(const FFstrbuf* strbuf, const FFstrbuf* start);

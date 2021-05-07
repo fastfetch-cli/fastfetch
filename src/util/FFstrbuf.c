@@ -417,6 +417,11 @@ void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c)
     ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
 }
 
+void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, const char c)
+{
+    ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
+}
+
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
 {
     if(index >= strbuf->length)
@@ -428,6 +433,13 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
     memmove(strbuf->chars, strbuf->chars + index + 1, strbuf->length - index - 1);
     strbuf->length -= (index + 1);
     strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, const char c)
+{
+    uint32_t index = ffStrbufFirstIndexC(strbuf, c);
+    if(index < strbuf->length)
+        ffStrbufSubstrAfter(strbuf, index);
 }
 
 void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c)

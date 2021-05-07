@@ -5,11 +5,12 @@
 #include <pci/pci.h>
 
 #define FF_GPU_MODULE_NAME "GPU"
-#define FF_GPU_NUM_FORMAT_ARGS 3
+#define FF_GPU_NUM_FORMAT_ARGS 4
 
 static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
 {
     char vendor[512];
+    vendor[0] = '\0';
     ffpci_lookup_name(pacc, vendor, sizeof(vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
 
     const char* vendorPretty;
@@ -23,20 +24,29 @@ static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_
         vendorPretty = vendor;
 
     char name[512];
+    name[0] = '\0';
     ffpci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
+
+    FFstrbuf namePretty;
+    ffStrbufInitA(&namePretty, 512);
+    ffStrbufAppendS(&namePretty, name);
+    ffStrbufSubstrBeforeLastC(&namePretty, ']');
+    ffStrbufSubstrAfterFirstC(&namePretty, '[');
 
     FFstrbuf gpu;
     ffStrbufInitA(&gpu, 128);
 
-    ffStrbufSetF(&gpu, "%s %s", vendorPretty, name);
+    ffStrbufSetF(&gpu, "%s %s", vendorPretty, namePretty.chars);
 
     ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, counter, &instance->config.gpuKey, cache, &gpu, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRING, vendor},
         {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
-        {FF_FORMAT_ARG_TYPE_STRING, name}
+        {FF_FORMAT_ARG_TYPE_STRING, name},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty}
     });
 
     ffStrbufDestroy(&gpu);
+    ffStrbufDestroy(&namePretty);
 }
 
 void ffPrintGPU(FFinstance* instance)
