@@ -11,13 +11,6 @@ static inline bool allPropertiesSet(FFGTKResult* result)
         result->font.length > 0;
 }
 
-static inline void initresult(FFGTKResult* result)
-{
-    ffStrbufInit(&result->theme);
-    ffStrbufInit(&result->icons);
-    ffStrbufInit(&result->font);
-}
-
 static inline void applyGTKDConfSettings(FFGTKResult* result, const char* themeName, const char* iconsName, const char* fontName)
 {
     if(result->theme.length == 0)
@@ -30,7 +23,7 @@ static inline void applyGTKDConfSettings(FFGTKResult* result, const char* themeN
         ffStrbufAppendS(&result->font, fontName);
 }
 
-static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
+static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -59,9 +52,9 @@ static void parseGTKDConfSettings(FFinstance* instance, FFGTKResult* result)
     applyGTKDConfSettings(result, themeName, iconsName, fontName);
 }
 
-static void parseGTKConfigFile(FFstrbuf* fileName, FFGTKResult* result)
+static void detectGTKFromConfigFile(const char* filename, FFGTKResult* result)
 {
-    FILE* file = fopen(fileName->chars, "r");
+    FILE* file = fopen(filename, "r");
     if(file == NULL)
         return;
 
@@ -99,109 +92,164 @@ static void parseGTKConfigFile(FFstrbuf* fileName, FFGTKResult* result)
     ffStrbufRecalculateLength(&result->font);
 }
 
-static void detectGTKFromConfigDir(const char* configDir, const char* version, FFGTKResult* result)
+static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFGTKResult* result)
 {
+    //In case of an empty env variable
+    ffStrbufTrim(configDir, ' ');
+    if(configDir->length == 0)
+        return;
+
+    uint32_t configDirLength = configDir->length;
+
     // <configdir>/gtk-<version>.0/settings.ini
-    FFstrbuf file1;
-    ffStrbufInitA(&file1, 64);
-    ffStrbufAppendS(&file1, configDir);
-    ffStrbufAppendS(&file1, "/gtk-");
-    ffStrbufAppendS(&file1, version);
-    ffStrbufAppendS(&file1, ".0/settings.ini");
-    parseGTKConfigFile(&file1, result);
-    ffStrbufDestroy(&file1);
+    ffStrbufAppendS(configDir, "/gtk-");
+    ffStrbufAppendS(configDir, version);
+    ffStrbufAppendS(configDir, ".0/settings.ini");
+    detectGTKFromConfigFile(configDir->chars, result);
+    ffStrbufSubstrBefore(configDir, configDirLength);
     if(allPropertiesSet(result))
         return;
 
     // <configdir>/gtk-<version>.0/gtkrc
-    FFstrbuf file2;
-    ffStrbufInitA(&file2, 64);
-    ffStrbufAppendS(&file2, configDir);
-    ffStrbufAppendS(&file2, "/gtk-");
-    ffStrbufAppendS(&file2, version);
-    ffStrbufAppendS(&file2, ".0/gtkrc");
-    parseGTKConfigFile(&file2, result);
-    ffStrbufDestroy(&file2);
+    ffStrbufAppendS(configDir, "/gtk-");
+    ffStrbufAppendS(configDir, version);
+    ffStrbufAppendS(configDir, ".0/gtkrc");
+    detectGTKFromConfigFile(configDir->chars, result);
+    ffStrbufSubstrBefore(configDir, configDirLength);
     if(allPropertiesSet(result))
         return;
 
     // <configdir>/gtkrc-<version>.0
-    FFstrbuf file3;
-    ffStrbufInitA(&file3, 64);
-    ffStrbufAppendS(&file3, configDir);
-    ffStrbufAppendS(&file3, "/gtkrc-");
-    ffStrbufAppendS(&file3, version);
-    ffStrbufAppendS(&file3, ".0");
-    parseGTKConfigFile(&file3, result);
-    ffStrbufDestroy(&file3);
+    ffStrbufAppendS(configDir, "/gtkrc-");
+    ffStrbufAppendS(configDir, version);
+    ffStrbufAppendS(configDir, ".0");
+    detectGTKFromConfigFile(configDir->chars, result);
+    ffStrbufSubstrBefore(configDir, configDirLength);
     if(allPropertiesSet(result))
         return;
 
     // <configdir>/.gtkrc-<version>.0
-    FFstrbuf file4;
-    ffStrbufInitA(&file4, 64);
-    ffStrbufAppendS(&file4, configDir);
-    ffStrbufAppendS(&file4, "/.gtkrc-");
-    ffStrbufAppendS(&file4, version);
-    ffStrbufAppendS(&file4, ".0");
-    parseGTKConfigFile(&file4, result);
-    ffStrbufDestroy(&file4);
+    ffStrbufAppendS(configDir, "/.gtkrc-");
+    ffStrbufAppendS(configDir, version);
+    ffStrbufAppendS(configDir, ".0");
+    detectGTKFromConfigFile(configDir->chars, result);
+    ffStrbufSubstrBefore(configDir, configDirLength);
 }
 
-static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* result)
+static void detectGTK(FFinstance* instance, const char* version, const char* envVariable, FFGTKResult* result)
 {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    FFstrbuf buffer;
+    ffStrbufInitA(&buffer, 128);
 
-    static FFstrbuf configDir;
-    static FFstrbuf xdgConfigDir;
-    static bool xdgIsDifferent;
-    static bool init = false;
+    uint32_t lastIndex;
 
-    initresult(result);
+    // From ENV: GTK*_RC_FILES
 
-    pthread_mutex_lock(&mutex);
-
-    if(!init)
+    ffStrbufSetS(&buffer, getenv(envVariable));
+    lastIndex = 0;
+    while (lastIndex < buffer.length)
     {
-        ffStrbufInitA(&configDir, 64);
-        ffStrbufAppendS(&configDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&configDir, "/.config");
+        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&buffer, lastIndex, ':');
+        buffer.chars[colonIndex] = '\0';
 
-        ffStrbufInitA(&xdgConfigDir, 64);
-        ffStrbufAppendS(&xdgConfigDir, getenv("XDG_CONFIG_HOME"));
-        ffStrbufTrimRight(&xdgConfigDir, '/');
-
-        xdgIsDifferent = ffStrbufComp(&configDir, &xdgConfigDir) != 0;
-
-        init = true;
-    }
-
-    pthread_mutex_unlock(&mutex);
-
-    if(xdgIsDifferent)
-    {
-        // $XDG_CONFIG_HOME
-        detectGTKFromConfigDir(xdgConfigDir.chars, version, result);
+        detectGTKFromConfigFile(buffer.chars + lastIndex, result);
         if(allPropertiesSet(result))
+        {
+            ffStrbufDestroy(&buffer);
             return;
+        }
+
+        lastIndex = colonIndex + 1;
     }
 
-    // /home/<user>/.config
-    detectGTKFromConfigDir(configDir.chars, version, result);
-    if(allPropertiesSet(result))
-            return;
+    //From DConf / GSettings
 
-    // /home/<user>
-    detectGTKFromConfigDir(instance->state.passwd->pw_dir, version, result);
+    detectGTKFromDConf(instance, result);
     if(allPropertiesSet(result))
-            return;
-
-    parseGTKDConfSettings(instance, result);
-    if(allPropertiesSet(result))
+    {
+        ffStrbufDestroy(&buffer);
         return;
+    }
 
-    // /etc
-    detectGTKFromConfigDir("/etc/", version, result);
+    //From DIR: XDG_CONFIG_HOME
+
+    const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
+    ffStrbufSetS(&buffer, xdgConfigHome);
+    detectGTKFromConfigDir(&buffer, version, result);
+    if(allPropertiesSet(result))
+    {
+        ffStrbufDestroy(&buffer);
+        return;
+    }
+
+    //From DIRs: XDG_CONFIG_DIRS
+
+    ffStrbufSetS(&buffer, getenv("XDG_CONFIG_DIRS"));
+    lastIndex = 0;
+    while (lastIndex < buffer.length)
+    {
+        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&buffer, lastIndex, ':');
+        buffer.chars[colonIndex] = '\0';
+
+        FFstrbuf configDir;
+        ffStrbufInitA(&configDir, 64);
+        ffStrbufAppendS(&configDir, buffer.chars + lastIndex);
+
+        detectGTKFromConfigDir(&configDir, version, result);
+
+        ffStrbufDestroy(&configDir);
+
+        if(allPropertiesSet(result))
+        {
+            ffStrbufDestroy(&buffer);
+            return;
+        }
+
+        lastIndex = colonIndex + 1;
+    }
+
+    //From DIR: ~/.config/
+
+    ffStrbufSetS(&buffer, instance->state.passwd->pw_dir);
+    lastIndex = buffer.length;
+
+    ffStrbufAppendS(&buffer, "/.config");
+    if(ffStrbufCompS(&buffer, xdgConfigHome) != 0)
+    {
+        detectGTKFromConfigDir(&buffer, version, result);
+        if(allPropertiesSet(result))
+        {
+            ffStrbufDestroy(&buffer);
+            return;
+        }
+    }
+
+    //From DIR: ~/
+
+    ffStrbufSubstrBefore(&buffer, lastIndex);
+    detectGTKFromConfigDir(&buffer, version, result);
+    if(allPropertiesSet(result))
+    {
+        ffStrbufDestroy(&buffer);
+        return;
+    }
+
+    //From DIR: /etc/xdg/
+
+    ffStrbufSetS(&buffer, "/etc/xdg");
+    detectGTKFromConfigDir(&buffer, version, result);
+    if(allPropertiesSet(result))
+    {
+        ffStrbufDestroy(&buffer);
+        return;
+    }
+
+    //From DIR: /etc/
+
+    ffStrbufSetS(&buffer, "/etc");
+    detectGTKFromConfigDir(&buffer, version, result);
+
+    ffStrbufDestroy(&buffer);
 }
 
 #define FF_CALCULATE_GTK_IMPL(version) \
@@ -217,7 +265,7 @@ static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* re
     ffStrbufInit(&result.theme); \
     ffStrbufInit(&result.icons); \
     ffStrbufInit(&result.font); \
-    detectGTK(instance, #version, &result); \
+    detectGTK(instance, #version, "GTK"#version"_RC_FILES", &result); \
     pthread_mutex_unlock(&mutex); \
     return &result;
 
