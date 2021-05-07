@@ -239,8 +239,9 @@ void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
-void ffParsePropFile(const char* file, const char* regex, char* buffer);
-void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
+// They return true if the file was found, independently if regex was found
+bool ffParsePropFile(const char* file, const char* regex, char* buffer);
+bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);

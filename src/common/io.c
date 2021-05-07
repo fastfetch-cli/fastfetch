@@ -325,7 +325,7 @@ void ffCacheClose(FFcache* cache)
         fclose(cache->split);
 }
 
-void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
+bool ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 {
     buffer[0] = '\0'; //If an error occures, this is the indicator
 
@@ -334,7 +334,7 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 
     FILE* file = fopen(fileName, "r");
     if(file == NULL)
-        return; // handle errors in higher functions
+        return false; // handle errors in higher functions
 
     while (getline(&line, &len, file) != -1)
     {
@@ -345,9 +345,11 @@ void ffParsePropFile(const char* fileName, const char* regex, char* buffer)
     fclose(file);
     if(line != NULL)
         free(line);
+
+    return true;
 }
 
-void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
+bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
@@ -355,9 +357,11 @@ void ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffStrbufAppendC(&absolutePath, '/');
     ffStrbufAppendS(&absolutePath, relativeFile);
 
-    ffParsePropFile(absolutePath.chars, regex, buffer);
+    bool result = ffParsePropFile(absolutePath.chars, regex, buffer);
 
     ffStrbufDestroy(&absolutePath);
+
+    return result;
 }
 
 bool ffWriteFDContent(int fd, const FFstrbuf* content)

@@ -22,13 +22,17 @@ static void printWMTheme(FFinstance* instance, const char* theme)
 static void printKWin(FFinstance* instance)
 {
     char theme[256];
-    theme[0] = '\0';
-    ffParsePropFileHome(instance, ".config/kwinrc", "theme=%s", theme);
+    bool fileFound = ffParsePropFileHome(instance, ".config/kwinrc", "theme=%s", theme);
 
-    if(theme[0] == '\0')
+    if(*theme == '\0')
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find \"theme=\" in \".config/kwinrc\"");
-        return;
+        if(!fileFound)
+        {
+            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find \"theme=\" in \".config/kwinrc\"");
+            return;
+        }
+
+        strcpy(theme, "Breeze");
     }
 
     printWMTheme(instance, theme);
