@@ -70,9 +70,8 @@ static void printXFCE4Terminal(FFinstance* instance)
 static void printTilixTerminal(FFinstance* instance)
 {
     const char* fontName = NULL;
-    const char* defaultProfile = NULL;
 
-    defaultProfile = ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
+    const char* defaultProfile = ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
 
     if (!defaultProfile)
     {
@@ -83,7 +82,7 @@ static void printTilixTerminal(FFinstance* instance)
     FFstrbuf key;
     ffStrbufInitAS(&key, 64, "/com/gexperts/Tilix/profiles/");
     ffStrbufAppendS(&key, defaultProfile);
-    int keyLen = key.length;
+    uint32_t keyLen = key.length;
     ffStrbufAppendS(&key, "/use-system-font");
 
     FFvariant res = ffSettingsGetDConf(instance,key.chars, FF_VARIANT_TYPE_BOOL);
