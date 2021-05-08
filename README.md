@@ -8,7 +8,7 @@ The output on my personal machine with default configurations looks like this:
 ## Customization
 
 With customization and speed being two competing goals, this project actually builds two executables.  
-The main one being `fastfetch`, which can be greatly configured via flags. These flags can even be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
+The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
 The second executable being buildt is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
 At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.  
   
@@ -21,9 +21,9 @@ The following libraries are used if present:
 * [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
 * [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
 * [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
-* [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored in gsettings / dconf.
-* [`libDConf`](https://developer.gnome.org/dconf/unstable/): Fallback for libGIO. Usually not needed if libGIO was loaded sucessfully.
 * [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance + support for monitors with different refresh rates in wayland sessions.  
+* [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
+* [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
@@ -33,6 +33,7 @@ All categories not listed here should work without needing a specific implementa
 Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
 ```
 Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
+
 ### Package managers:
 ```
 Pacman, xbps, dpkg, Flatpak, Snap
@@ -68,7 +69,8 @@ Command line completions for bash can be found in [`completions/bash`](completio
 
 ## Packaging
 
-At the moment, i only package for the [AUR](https://aur.archlinux.org/packages/fastfetch-git/). This package will install both the fastfetch and the flashfetch binary (with default configuration), as well as the bash completion.
+At the moment, i only package for the [AUR](https://aur.archlinux.org/packages/fastfetch-git/). This package will install both the fastfetch and the flashfetch binary (with default configuration), as well as the bash completion.  
+There also exists a package in the [Manjaro Repositorys](https://gitlab.manjaro.org/packages/community/fastfetch), not packaged by me, but usually very up-to-date.
 
 ## FAQ
 
