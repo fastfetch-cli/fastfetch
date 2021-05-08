@@ -79,7 +79,7 @@ static void initCacheDir(FFstate* state)
     else if(state->cacheDir.chars[state->cacheDir.length - 1] != '/')
         ffStrbufAppendC(&state->cacheDir, '/');
 
-    mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+    mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder, but who knows
 
     ffStrbufAppendS(&state->cacheDir, "fastfetch/");
     mkdir(state->cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
