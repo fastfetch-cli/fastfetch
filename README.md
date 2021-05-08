@@ -51,7 +51,7 @@ KWin, Mutter, Muffin, Openbox (LXDE, LXQT & without DE)
 
 ### Terminal fonts:
 ```
-konsole, xfce4-terminal, TTY
+konsole, xfce4-terminal, tilix, TTY
 ```
 
 ## Building
@@ -70,7 +70,7 @@ Command line completions for bash can be found in [`completions/bash`](completio
 ## Packaging
 
 At the moment, i only package for the [AUR](https://aur.archlinux.org/packages/fastfetch-git/). This package will install both the fastfetch and the flashfetch binary (with default configuration), as well as the bash completion.  
-There also exists a package in the [Manjaro Repositorys](https://gitlab.manjaro.org/packages/community/fastfetch), not packaged by me, but usually very up-to-date.
+There is also a package in the [Manjaro Repositories](https://gitlab.manjaro.org/packages/community/fastfetch), not packaged by me, but usually very up-to-date.
 
 ## FAQ
 
