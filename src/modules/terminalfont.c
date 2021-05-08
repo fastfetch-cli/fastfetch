@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-#include <string.h>
-
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 4
 
@@ -69,6 +67,51 @@ static void printXFCE4Terminal(FFinstance* instance)
     printTerminalFont(instance, font);
 }
 
+static void printTilixTerminal(FFinstance* instance)
+{
+    static const char* fontName = NULL;
+    static const char* defaultProfile = NULL;
+    static FFstrbuf key;
+    static FFvariant res;
+    res.strValue = NULL;
+    ffStrbufInitAS(&key, 64, "/com/gexperts/Tilix/profiles/");
+
+    defaultProfile = (ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING)).strValue;
+
+    if (!defaultProfile)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Default\" profile in Tilix settings");
+        ffStrbufDestroy(&key);
+        return;
+    }
+    else
+    {
+        ffStrbufAppendS(&key, defaultProfile);
+        ffStrbufAppendS(&key, "/use-system-font");
+
+        res = ffSettingsGetDConf(instance,key.chars, FF_VARIANT_TYPE_BOOL);
+
+        if(res.boolValueSet && res.boolValue == 0) // custom font
+        {
+            ffStrbufRemoveStrings(&key, 1, "/use-system-font");
+            ffStrbufAppendS(&key, "/font");
+            fontName = (ffSettingsGetDConf(instance, key.chars, FF_VARIANT_TYPE_STRING)).strValue;
+        }
+        else if(!res.boolValueSet || res.boolValue == 1) // system font
+            fontName = (ffSettingsGetDConf(instance, "/org/gnome/desktop/interface/monospace-font-name", FF_VARIANT_TYPE_STRING)).strValue;
+    }
+
+    if (!fontName)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Terminal font\" in Tilix settings");
+        ffStrbufDestroy(&key);
+        return;
+    }
+
+    printTerminalFont(instance, fontName);
+    ffStrbufDestroy(&key);
+}
+
 static void printTTY(FFinstance* instance)
 {
     FFstrbuf font;
@@ -105,6 +148,8 @@ void ffPrintTerminalFont(FFinstance* instance)
         printKonsole(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
         printXFCE4Terminal(instance);
+    else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
+        printTilixTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
