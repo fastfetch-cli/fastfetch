@@ -69,37 +69,33 @@ static void printXFCE4Terminal(FFinstance* instance)
 
 static void printTilixTerminal(FFinstance* instance)
 {
-    static const char* fontName = NULL;
-    static const char* defaultProfile = NULL;
-    static FFstrbuf key;
-    static FFvariant res;
-    res.strValue = NULL;
-    ffStrbufInitAS(&key, 64, "/com/gexperts/Tilix/profiles/");
+    const char* fontName = NULL;
+    const char* defaultProfile = NULL;
 
-    defaultProfile = (ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING)).strValue;
+    defaultProfile = ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
 
     if (!defaultProfile)
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Default\" profile in Tilix settings");
-        ffStrbufDestroy(&key);
         return;
     }
-    else
+
+    FFstrbuf key;
+    ffStrbufInitAS(&key, 64, "/com/gexperts/Tilix/profiles/");
+    ffStrbufAppendS(&key, defaultProfile);
+    int keyLen = key.length;
+    ffStrbufAppendS(&key, "/use-system-font");
+
+    FFvariant res = ffSettingsGetDConf(instance,key.chars, FF_VARIANT_TYPE_BOOL);
+
+    if(res.boolValueSet && !res.boolValue) // custom font
     {
-        ffStrbufAppendS(&key, defaultProfile);
-        ffStrbufAppendS(&key, "/use-system-font");
-
-        res = ffSettingsGetDConf(instance,key.chars, FF_VARIANT_TYPE_BOOL);
-
-        if(res.boolValueSet && res.boolValue == 0) // custom font
-        {
-            ffStrbufRemoveStrings(&key, 1, "/use-system-font");
-            ffStrbufAppendS(&key, "/font");
-            fontName = (ffSettingsGetDConf(instance, key.chars, FF_VARIANT_TYPE_STRING)).strValue;
-        }
-        else if(!res.boolValueSet || res.boolValue == 1) // system font
-            fontName = (ffSettingsGetDConf(instance, "/org/gnome/desktop/interface/monospace-font-name", FF_VARIANT_TYPE_STRING)).strValue;
+        ffStrbufSubstrBefore(&key, keyLen);
+        ffStrbufAppendS(&key, "/font");
+        fontName = ffSettingsGetDConf(instance, key.chars, FF_VARIANT_TYPE_STRING).strValue;
     }
+    else if(!res.boolValueSet || res.boolValue) // system font
+        fontName = ffSettingsGetDConf(instance, "/org/gnome/desktop/interface/monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 
     if (!fontName)
     {
