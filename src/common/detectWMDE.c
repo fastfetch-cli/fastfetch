@@ -155,17 +155,16 @@ static void getFromProcDir(FFWMDEResult* result, ProcData* procData, bool search
     uint32_t procPathLength = procPath.length;
 
     FFstrbuf processName;
-    ffStrbufInit(&processName);
+    ffStrbufInitA(&processName, 256); //Some processes have large command lines (looking at you chrome)
 
     while((procData->dirent = readdir(procData->proc)) != NULL)
     {
-        if(procData->dirent->d_type != DT_DIR)
+        if(procData->dirent->d_type != DT_DIR || procData->dirent->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&procPath, procData->dirent->d_name);
         ffStrbufAppendS(&procPath, "/cmdline");
         ffGetFileContent(procPath.chars, &processName);
-        ffStrbufRecalculateLength(&processName);
         ffStrbufSubstrAfterLastC(&processName, '/');
         ffStrbufSubstrBefore(&procPath, procPathLength);
 

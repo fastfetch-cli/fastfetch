@@ -218,7 +218,6 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     va_list localArguments;
     va_copy(localArguments, arguments);
 
-    ffStrbufEnsureFree(strbuf, 256);
     uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length, format, localArguments);
 
     va_end(localArguments);

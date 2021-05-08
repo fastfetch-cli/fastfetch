@@ -11,7 +11,7 @@ typedef struct GVariantGetters
     gboolean(*ffg_variant_get_boolean)(GVariant*);
 } GVariantGetters;
 
-static void initGVariantGetters(void* library, GVariantGetters* variantGetters)
+static inline void initGVariantGetters(void* library, GVariantGetters* variantGetters)
 {
     variantGetters->ffg_variant_get_string  = dlsym(library, "g_variant_get_string");
     variantGetters->ffg_variant_get_boolean = dlsym(library, "g_variant_get_boolean");
