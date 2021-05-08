@@ -40,10 +40,10 @@ static void printKWin(FFinstance* instance)
 
 static void printMutter(FFinstance* instance)
 {
-    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name");
+    const char* theme = ffSettingsGetStr(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name");
 
     if(theme == NULL)
-        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme");
+        theme = ffSettingsGetStr(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme");
 
     if(theme == NULL)
     {
@@ -56,8 +56,8 @@ static void printMutter(FFinstance* instance)
 
 static void printMuffin(FFinstance* instance)
 {
-    const char* name = ffSettingsGet(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name");
-    const char* theme = ffSettingsGet(instance, "/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme");
+    const char* name = ffSettingsGetStr(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name");
+    const char* theme = ffSettingsGetStr(instance, "/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme");
 
     if(name == NULL && theme == NULL)
     {

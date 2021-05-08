@@ -48,18 +48,18 @@ static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
     {
-        themeName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/gtk-theme", "org.cinnamon.desktop.interface", NULL, "gtk-theme");
-        iconsName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/icon-theme", "org.cinnamon.desktop.interface", NULL, "icon-theme");
-        fontName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/font-name", "org.cinnamon.desktop.interface", NULL, "font-name");
+        themeName = ffSettingsGetStr(instance, "/org/cinnamon/desktop/interface/gtk-theme", "org.cinnamon.desktop.interface", NULL, "gtk-theme");
+        iconsName = ffSettingsGetStr(instance, "/org/cinnamon/desktop/interface/icon-theme", "org.cinnamon.desktop.interface", NULL, "icon-theme");
+        fontName = ffSettingsGetStr(instance, "/org/cinnamon/desktop/interface/font-name", "org.cinnamon.desktop.interface", NULL, "font-name");
     }
 
     //Fallback + Gnome impl
     if(themeName == NULL)
-        themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme");
+        themeName = ffSettingsGetStr(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme");
     if(iconsName == NULL)
-        iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme");
+        iconsName = ffSettingsGetStr(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme");
     if(fontName == NULL)
-        fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name");
+        fontName = ffSettingsGetStr(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name");
 
     pthread_mutex_unlock(&mutex);
     applyGTKDConfSettings(result, themeName, iconsName, fontName);

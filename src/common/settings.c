@@ -5,17 +5,45 @@
 #include <gio/gio.h>
 #include <dconf.h>
 
+typedef struct GVariantGetters
+{
+    const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
+    gboolean(*ffg_variant_get_boolean)(GVariant*);
+} GVariantGetters;
+
+static void initGVariantGetters(void* library, GVariantGetters* variantGetters)
+{
+    variantGetters->ffg_variant_get_string  = dlsym(library, "g_variant_get_string");
+    variantGetters->ffg_variant_get_boolean = dlsym(library, "g_variant_get_boolean");
+}
+
+#define FF_VARIANT_NULL (FFvariant)(const char*)NULL
+
+static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVariantGetters* variantGetters)
+{
+    if(variant == NULL)
+        return FF_VARIANT_NULL;
+
+    if(type == FF_VARIANT_TYPE_STRING && variantGetters->ffg_variant_get_string != NULL)
+        return (FFvariant) variantGetters->ffg_variant_get_string(variant, NULL);
+
+    if(type == FF_VARIANT_TYPE_BOOL && variantGetters->ffg_variant_get_boolean != NULL)
+        return (FFvariant) (bool) variantGetters->ffg_variant_get_boolean(variant);
+
+    return FF_VARIANT_NULL;
+}
+
 typedef struct DConfData
 {
     GVariant*(*ffdconf_client_read_full)(DConfClient*, const gchar*, DConfReadFlags, const GQueue*);
-    const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
+    GVariantGetters variantGetters;
     DConfClient* client;
 } DConfData;
 
-static const char* getDConfValue(DConfData* data, const char* key)
+static FFvariant getDConfValue(DConfData* data, const char* key, FFvarianttype type)
 {
     if(data->client == NULL)
-        return NULL;
+        return FF_VARIANT_NULL;
 
     GVariant* variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_FLAGS_NONE, NULL);
 
@@ -25,13 +53,10 @@ static const char* getDConfValue(DConfData* data, const char* key)
     if(variant == NULL)
         variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_DEFAULT_VALUE, NULL);
 
-    if(variant == NULL)
-        return NULL;
-
-    return data->ffg_variant_get_string(variant, NULL);
+    return getGVariantValue(variant, type, &data->variantGetters);
 }
 
-const char* ffSettingsGetDConf(FFinstance* instance, const char* key)
+FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
@@ -43,7 +68,7 @@ const char* ffSettingsGetDConf(FFinstance* instance, const char* key)
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return getDConfValue(&data, key);
+        return getDConfValue(&data, key, type);
     }
 
     init = true;
@@ -54,26 +79,25 @@ const char* ffSettingsGetDConf(FFinstance* instance, const char* key)
     if(library == NULL)
     {
         pthread_mutex_unlock(&mutex);
-        return NULL;
+        return FF_VARIANT_NULL;
     }
 
     data.ffdconf_client_read_full = dlsym(library, "dconf_client_read_full");
-    data.ffg_variant_get_string = dlsym(library, "g_variant_get_string");
+    initGVariantGetters(library, &data.variantGetters);
 
     DConfClient*(*ffdconf_client_new)(void) = dlsym(library, "dconf_client_new");
 
     if(
         data.ffdconf_client_read_full == NULL ||
-        data.ffg_variant_get_string == NULL ||
         (data.client = ffdconf_client_new()) == NULL
     ) {
         pthread_mutex_unlock(&mutex);
         dlclose(library);
-        return NULL;
+        return FF_VARIANT_NULL;
     }
 
     pthread_mutex_unlock(&mutex);
-    return getDConfValue(&data, key);
+    return getDConfValue(&data, key, type);
 }
 
 typedef struct GSettingsData
@@ -85,29 +109,24 @@ typedef struct GSettingsData
     GVariant*(*ffg_settings_get_value)(GSettings*, const gchar*);
     GVariant*(*ffg_settings_get_user_value)(GSettings*, const gchar*);
     GVariant*(*ffg_settings_get_default_value)(GSettings*, const gchar*);
-    const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
-    gboolean(*ffg_variant_get_boolean)(GVariant*);
+    GVariantGetters variantGetters;
 } GSettingsData;
 
 static FFvariant getGSettingsValue(GSettingsData* data, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
-    FFvariant result;
-    result.strValue = NULL;
-    result.set = false;
-
     if(data->schemaSource == NULL)
-        return result;
+        return FF_VARIANT_NULL;
 
     GSettingsSchema* schema = data->ffg_settings_schema_source_lookup(data->schemaSource, schemaName, true);
     if(schema == NULL)
-        return result;
+        return FF_VARIANT_NULL;
 
     if(data->ffg_settings_schema_has_key(schema, key) == 0)
-        return result;
+        return FF_VARIANT_NULL;
 
     GSettings* settings = data->ffg_settings_new_full(schema, NULL, path);
     if(settings == NULL)
-        return result;
+        return FF_VARIANT_NULL;
 
     GVariant* variant = data->ffg_settings_get_value(settings, key);
 
@@ -117,21 +136,7 @@ static FFvariant getGSettingsValue(GSettingsData* data, const char* schemaName, 
     if(variant == NULL)
         variant = data->ffg_settings_get_default_value(settings, key);
 
-    if(variant == NULL)
-        return result;
-
-    if(type == FF_VARIANT_TYPE_STRING && data->ffg_variant_get_string != NULL)
-    {
-        result.strValue = data->ffg_variant_get_string(variant, NULL);
-        result.set = result.strValue != NULL;
-    }
-    else if(type == FF_VARIANT_TYPE_BOOL && data->ffg_variant_get_boolean != NULL)
-    {
-        result.boolValue = data->ffg_variant_get_boolean(variant);
-        result.set = true;
-    }
-
-    return result;
+    return getGVariantValue(variant, type, &data->variantGetters);
 }
 
 FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
@@ -153,15 +158,11 @@ FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, c
 
     data.schemaSource = NULL; //error indicator
 
-    FFvariant errorResult;
-    errorResult.set = false;
-    errorResult.strValue = NULL;
-
     void* library = dlopen(instance->config.libGIO.length == 0 ? "libgio-2.0.so" : instance->config.libGIO.chars, RTLD_LAZY);
     if(library == NULL)
     {
         pthread_mutex_unlock(&mutex);
-        return errorResult;
+        return FF_VARIANT_NULL;
     }
 
     data.ffg_settings_schema_source_lookup = dlsym(library, "g_settings_schema_source_lookup");
@@ -170,8 +171,7 @@ FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, c
     data.ffg_settings_get_value            = dlsym(library, "g_settings_get_value");
     data.ffg_settings_get_user_value       = dlsym(library, "g_settings_get_user_value");
     data.ffg_settings_get_default_value    = dlsym(library, "g_settings_get_default_value");
-    data.ffg_variant_get_string            = dlsym(library, "g_variant_get_string");
-    data.ffg_variant_get_boolean           = dlsym(library, "g_variant_get_boolean");
+    initGVariantGetters(library, &data.variantGetters);
 
     GSettingsSchemaSource*(*ffg_settings_schema_source_get_default)(void) = dlsym(library, "g_settings_schema_source_get_default");
 
@@ -187,18 +187,25 @@ FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, c
     ) {
         pthread_mutex_unlock(&mutex);
         dlclose(library);
-        return errorResult;
+        return FF_VARIANT_NULL;
     }
 
     pthread_mutex_unlock(&mutex);
     return getGSettingsValue(&data, schemaName, path, key, type);
 }
 
-const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey)
+FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
-    const char* dconf = ffSettingsGetDConf(instance, dconfKey);
-    if(dconf != NULL)
+    FFvariant dconf = ffSettingsGetDConf(instance, dconfKey, type);
+    if(dconf.strValue != NULL)
         return dconf;
 
-    return ffSettingsGetGsettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
+    return ffSettingsGetGsettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING);
 }
+
+const char* ffSettingsGetStr(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey)
+{
+    return ffSettingsGet(instance, dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
+}
+
+#undef FF_VARIANT_NULL

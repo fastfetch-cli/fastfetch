@@ -199,15 +199,10 @@ typedef enum FFvarianttype
     FF_VARIANT_TYPE_BOOL
 } FFvarianttype;
 
-typedef struct FFvariant
+typedef union FFvariant
 {
-    bool set;
-
-    union
-    {
-        const char* strValue;
-        bool boolValue;
-    };
+    const char* strValue;
+    bool boolValue;
 } FFvariant;
 
 /*************************/
@@ -271,9 +266,10 @@ void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 
 //common/settings.c
-const char* ffSettingsGetDConf(FFinstance* instance, const char* key);
+FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);
 FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type);
-const char* ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey);
+FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
+const char* ffSettingsGetStr(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
