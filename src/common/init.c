@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 
 #include <unistd.h>
+#include <sys/stat.h>
 
 static bool strbufEqualsAdapter(const void* first, const void* second)
 {
@@ -64,6 +65,24 @@ static void initConfigDirs(FFstate* state)
     #undef FF_ENSURE_ONLY_ONCE_IN_LIST
 }
 
+static void initCacheDir(FFstate* state)
+{
+    ffStrbufInitA(&state->cacheDir, 64);
+
+    ffStrbufAppendS(&state->cacheDir, getenv("XDG_CACHE_HOME"));
+
+    if(state->cacheDir.length == 0)
+    {
+        ffStrbufAppendS(&state->cacheDir, state->passwd->pw_dir);
+        ffStrbufAppendS(&state->cacheDir, "/.cache/");
+    }
+
+    mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
+
+    ffStrbufAppendS(&state->cacheDir, "fastfetch/");
+    mkdir(state->cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
+}
+
 static void initState(FFstate* state)
 {
     state->current_row = 0;
@@ -72,6 +91,7 @@ static void initState(FFstate* state)
     sysinfo(&state->sysinfo);
 
     initConfigDirs(state);
+    initCacheDir(state);
 }
 
 static void defaultConfig(FFconfig* config)

@@ -3,7 +3,6 @@
 #include <malloc.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <pthread.h>
 
 #define FF_IO_CACHE_VALUE_EXTENSION "ffcv"
@@ -83,46 +82,9 @@ void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t m
     ffStrbufDestroy(&buffer);
 }
 
-static void appendCacheDir(FFinstance* instance, FFstrbuf* buffer)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-    static FFstrbuf cacheDir;
-    static bool init = false;
-
-    pthread_mutex_lock(&mutex);
-
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        ffStrbufAppend(buffer, &cacheDir);
-        return;
-    }
-
-    ffStrbufInitA(&cacheDir, 64);
-    ffStrbufAppendS(&cacheDir, getenv("XDG_CACHE_HOME"));
-
-    if(cacheDir.length == 0)
-    {
-        ffStrbufSetS(&cacheDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&cacheDir, "/.cache/");
-    }
-
-    mkdir(cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder but whow knews
-
-    ffStrbufAppendS(&cacheDir, "fastfetch/");
-    mkdir(cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
-
-    init = true;
-
-    pthread_mutex_unlock(&mutex);
-
-    ffStrbufAppend(buffer, &cacheDir);
-}
-
 void ffGetCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
-    appendCacheDir(instance, buffer);
+    ffStrbufAppend(buffer, &instance->state.cacheDir);
     ffStrbufAppendS(buffer, moduleName);
 
     if(extension != NULL)

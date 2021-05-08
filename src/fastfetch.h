@@ -161,6 +161,7 @@ typedef struct FFstate
     struct sysinfo sysinfo;
 
     FFlist configDirs;
+    FFstrbuf cacheDir;
 } FFstate;
 
 typedef struct FFinstance

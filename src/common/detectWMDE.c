@@ -252,7 +252,7 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
         return;
     }
 
-    if(strcasecmp(result->sessionDesktop, "KDE") == 0)
+    if(strcasecmp(result->sessionDesktop, "KDE") == 0 || strcasecmp(result->sessionDesktop, "plasma") == 0 || strcasecmp(result->sessionDesktop, "plasmashell") == 0)
         getKDE(result);
     else if(strcasecmp(result->sessionDesktop, "Gnome") == 0 || strcasecmp(result->sessionDesktop, "ubuntu:GNOME") == 0 || strcasecmp(result->sessionDesktop, "ubuntu") == 0)
         getGnome(result);
