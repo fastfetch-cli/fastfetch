@@ -202,7 +202,12 @@ typedef enum FFvarianttype
 typedef union FFvariant
 {
     const char* strValue;
-    bool boolValue;
+
+    struct
+    {
+        bool boolValueSet;
+        bool boolValue;
+    };
 } FFvariant;
 
 /*************************/

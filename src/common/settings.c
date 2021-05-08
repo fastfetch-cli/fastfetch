@@ -28,7 +28,7 @@ static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVarian
         return (FFvariant) variantGetters->ffg_variant_get_string(variant, NULL);
 
     if(type == FF_VARIANT_TYPE_BOOL && variantGetters->ffg_variant_get_boolean != NULL)
-        return (FFvariant) (bool) variantGetters->ffg_variant_get_boolean(variant);
+        return (FFvariant) { .boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true};
 
     return FF_VARIANT_NULL;
 }
