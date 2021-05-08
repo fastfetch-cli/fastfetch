@@ -7,7 +7,7 @@
 #define FF_GPU_MODULE_NAME "GPU"
 #define FF_GPU_NUM_FORMAT_ARGS 4
 
-static void handleGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
+static void printGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
 {
     char vendor[512];
     vendor[0] = '\0';
@@ -114,17 +114,17 @@ void ffPrintGPU(FFinstance* instance)
         return;
     }
 
-    uint8_t counter = 1;
+    struct pci_access *pacc = ffpci_alloc();
+    ffpci_init(pacc);
+    ffpci_scan_bus(pacc);
+
+    FFlist devices;
+    ffListInitA(&devices, sizeof(struct pci_dev*), 4);
 
     FFcache cache;
     ffCacheOpenWrite(instance, FF_GPU_MODULE_NAME, &cache);
 
-    struct pci_access *pacc;
-    struct pci_dev *dev;
-
-    pacc = ffpci_alloc();
-    ffpci_init(pacc);
-    ffpci_scan_bus(pacc);
+    struct pci_dev* dev;
     for (dev=pacc->devices; dev; dev=dev->next)
     {
         ffpci_fill_info(dev, PCI_FILL_IDENT | PCI_FILL_CLASS);
@@ -133,17 +133,18 @@ void ffPrintGPU(FFinstance* instance)
         if(
             strcasecmp("VGA compatible controller", class) == 0 ||
             strcasecmp("3D controller", class)             == 0 ||
-            strcasecmp("Display controller", class)        == 0 )
-        {
-            handleGPU(instance, pacc, dev, &cache, counter++, ffpci_lookup_name);
-        }
+            strcasecmp("Display controller", class)        == 0
+        ) *(struct pci_dev**)ffListAdd(&devices) = dev;
     }
-    ffpci_cleanup(pacc);
+
+    for(uint32_t i = 0; i < devices.length; i++)
+        printGPU(instance, pacc, *(struct pci_dev**)ffListGet(&devices, i), &cache, devices.length == 1 ? 0 : i + 1, ffpci_lookup_name);
+
+    if(devices.length == 0)
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPU found");
 
     ffCacheClose(&cache);
-
+    ffListDestroy(&devices);
+    ffpci_cleanup(pacc);
     dlclose(pci);
-
-    if(counter == 1)
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPU found");
 }
