@@ -16,7 +16,8 @@ typedef enum DEHint
 {
     FF_DE_HINT_UNKNOWN = 0,
     FF_DE_HINT_PLASMA,
-    FF_DE_HINT_GNOME
+    FF_DE_HINT_GNOME,
+    FF_DE_HINT_CINNAMON
 } DEHint;
 
 typedef struct ProcData
@@ -118,7 +119,7 @@ static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processNam
     }
     else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Mutter");
-    else if(ffStrbufIgnCaseCompS(processName, "cinnamon") == 0)
+    else if(ffStrbufIgnCaseCompS(processName, "cinnamon-session") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Muffin");
 
     if(result->wmPrettyName.length > 0)
@@ -136,6 +137,8 @@ static bool applyDEHintIfDE(const FFstrbuf* processName, DEHint* deHint)
         *deHint = FF_DE_HINT_PLASMA;
     else if(ffStrbufIgnCaseCompS(processName, "gnome-shell") == 0)
         *deHint = FF_DE_HINT_GNOME;
+    else if(ffStrbufIgnCaseCompS(processName, "cinnamon") == 0)
+        *deHint = FF_DE_HINT_CINNAMON;
 
     return *deHint != FF_DE_HINT_UNKNOWN;
 }
@@ -205,10 +208,19 @@ static void getKDE(FFWMDEResult* result)
 
 static void getGnome(FFWMDEResult* result)
 {
-    ffStrbufSetS(&result->deProcessName, "gnome-session-binary");
+    ffStrbufSetS(&result->deProcessName, "gnome-shell");
     ffStrbufSetS(&result->dePrettyName, "GNOME");
 
     ffParsePropFile("/usr/share/gnome-shell/org.gnome.Extensions", " version: '%[^']", result->deVersion.chars);
+    ffStrbufRecalculateLength(&result->deVersion);
+}
+
+static void getCinnamon(FFWMDEResult* result)
+{
+    ffStrbufSetS(&result->deProcessName, "cinnamon");
+    ffStrbufSetS(&result->dePrettyName, "Cinnamon");
+
+    ffParsePropFile("/usr/share/applications/cinnamon.desktop", " X-GNOME-Bugzilla-Version=%[^\n]", result->deVersion.chars);
     ffStrbufRecalculateLength(&result->deVersion);
 }
 
@@ -223,6 +235,8 @@ static inline void getDEFromHint(FFWMDEResult* result, ProcData* procData)
         getKDE(result);
     else if(procData->deHint == FF_DE_HINT_GNOME)
         getGnome(result);
+    else if(procData->deHint == FF_DE_HINT_CINNAMON)
+        getCinnamon(result);
 }
 
 static inline void getDE(FFWMDEResult* result, ProcData* procData)
@@ -242,6 +256,8 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
         getKDE(result);
     else if(strcasecmp(result->sessionDesktop, "Gnome") == 0 || strcasecmp(result->sessionDesktop, "ubuntu:GNOME") == 0 || strcasecmp(result->sessionDesktop, "ubuntu") == 0)
         getGnome(result);
+    else if(strcasecmp(result->sessionDesktop, "X-Cinnamon") == 0 || strcasecmp(result->sessionDesktop, "Cinnamon") == 0)
+        getCinnamon(result);
     else
     {
         ffStrbufSetS(&result->deProcessName, result->sessionDesktop);

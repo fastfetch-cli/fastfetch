@@ -45,7 +45,7 @@ KWin, Mutter, Muffin, Openbox, XFWM, Sway, Wayfire, Weston
 
 ### Window manager themes:
 ```
-KWin, Mutter, Openbox (LXDE, LXQT & without DE)
+KWin, Mutter, Muffin, Openbox (LXDE, LXQT & without DE)
 ```
 
 ### Terminal fonts:

@@ -27,9 +27,9 @@ static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-    static const char* themeName;
-    static const char* iconsName;
-    static const char* fontName;
+    static const char* themeName = NULL;
+    static const char* iconsName = NULL;
+    static const char* fontName = NULL;
 
     static bool init = false;
 
@@ -44,9 +44,22 @@ static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
 
     init = true;
 
-    themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme");
-    iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme");
-    fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name");
+    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
+    {
+        themeName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/gtk-theme", "org.cinnamon.desktop.interface", NULL, "gtk-theme");
+        iconsName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/icon-theme", "org.cinnamon.desktop.interface", NULL, "icon-theme");
+        fontName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/font-name", "org.cinnamon.desktop.interface", NULL, "font-name");
+    }
+
+    //Fallback + Gnome impl
+    if(themeName == NULL)
+        themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme");
+    if(iconsName == NULL)
+        iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme");
+    if(fontName == NULL)
+        fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name");
 
     pthread_mutex_unlock(&mutex);
     applyGTKDConfSettings(result, themeName, iconsName, fontName);

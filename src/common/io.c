@@ -48,7 +48,7 @@ void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIn
         ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
         fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
         vprintf(message, arguments);
-        puts(FASTFETCH_TEXT_MODIFIER_ERROR);
+        puts(FASTFETCH_TEXT_MODIFIER_RESET);
     }
     else
     {

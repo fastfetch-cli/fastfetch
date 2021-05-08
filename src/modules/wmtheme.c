@@ -54,6 +54,36 @@ static void printMutter(FFinstance* instance)
     printWMTheme(instance, theme);
 }
 
+static void printMuffin(FFinstance* instance)
+{
+    const char* name = ffSettingsGet(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name");
+    const char* theme = ffSettingsGet(instance, "/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme");
+
+    if(name == NULL && theme == NULL)
+    {
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find muffin theme in GSettings / DConf");
+        return;
+    }
+
+    if(name == NULL)
+        printWMTheme(instance, theme);
+    else if(theme == NULL)
+        printWMTheme(instance, name);
+    else
+    {
+        FFstrbuf buffer;
+        ffStrbufInit(&buffer);
+        ffStrbufAppendS(&buffer, name);
+        ffStrbufAppendS(&buffer, " (");
+        ffStrbufAppendS(&buffer, theme);
+        ffStrbufAppendC(&buffer, ')');
+
+        printWMTheme(instance, buffer.chars);
+
+        ffStrbufDestroy(&buffer);
+    }
+}
+
 static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
 {
     FFstrbuf absolutePath;
@@ -132,6 +162,8 @@ void ffPrintWMTheme(FFinstance* instance)
         printKWin(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)
         printMutter(instance);
+    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Muffin") == 0)
+        printMuffin(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Openbox") == 0)
         printOpenbox(instance, &result->dePrettyName);
     else
