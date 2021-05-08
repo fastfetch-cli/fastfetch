@@ -377,8 +377,10 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer)
         ffStrbufEnsureCapacity(buffer, buffer->allocated * 2);
     }
 
-    if(readed >= 0)
+    if(readed > 0)
         buffer->length += (uint32_t) readed;
+
+    buffer->chars[buffer->length] = '\0';
 
     ffStrbufTrimRight(buffer, '\n');
     ffStrbufTrimRight(buffer, ' ');
