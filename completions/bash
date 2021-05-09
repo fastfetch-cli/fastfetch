@@ -118,6 +118,7 @@ __fastfetch_completion()
         "--color-logo"
         "--print-remaining-logo"
         "--multithreading"
+        "--allow-slow-operations"
     )
 
     local FF_OPTIONS_STRING=(

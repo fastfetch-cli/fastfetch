@@ -108,6 +108,7 @@ static void defaultConfig(FFconfig* config)
     config->recache = false;
     config->cacheSave = true;
     config->printRemainingLogo = true;
+    config->allowSlowOperations = false;
 
     //Since most of these properties are unlikely to be used at once, give them minimal heap space (the \0 character)
     ffStrbufInitA(&config->osFormat, 1);

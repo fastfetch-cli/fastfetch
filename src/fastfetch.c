@@ -46,18 +46,19 @@ static inline void printHelp()
         "                 --print-available-presets:  list presets fastfetch knows about. They can be loaded with --load-config. (+)\n"
         "\n"
         "General options:\n"
-        "                --structure <structure>:         sets the structure of the fetch. Must be a colon seperated list of keys. Use --print-available-modules to show the default\n"
-        "                --set <key=value>:               hard set the value of an key\n"
-        "   -c <color>,  --color <color>:                 sets the color of the keys. Must be a linux console color code (+)\n"
-        "                --spacing <width>:               sets the distance between logo and text\n"
-        "   -s <str>,    --seperator <str>:               sets the seperator between key and value. Default is a colon with a space\n"
-        "   -x <offset>, --offsetx <offset>:              sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
-        "                --show-errors <?value>:          print occuring errors\n"
-        "   -r <?value>  --recache <?value>:              generate new cached values\n"
-        "                --nocache <?value>:              dont use cached values, but also dont overwrite existing ones\n"
-        "                --print-remaining-logo <?value>: print the remaining logo, if it is higher than the number of lines shown\n"
-        "                --multithreading <?value>:       use multiple threads to detect values\n"
-        "                --load-config <file>:            load a config file (+)\n"
+        "                --structure <structure>:          sets the structure of the fetch. Must be a colon seperated list of keys. Use --print-available-modules to show the default\n"
+        "                --set <key=value>:                hard set the value of an key\n"
+        "   -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)\n"
+        "                --spacing <width>:                sets the distance between logo and text\n"
+        "   -s <str>,    --seperator <str>:                sets the seperator between key and value. Default is a colon with a space\n"
+        "   -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
+        "                --show-errors <?value>:           print occuring errors\n"
+        "   -r <?value>  --recache <?value>:               generate new cached values\n"
+        "                --nocache <?value>:               dont use cached values, but also dont overwrite existing ones\n"
+        "                --print-remaining-logo <?value>:  print the remaining logo, if it is higher than the number of lines shown\n"
+        "                --multithreading <?value>:        use multiple threads to detect values\n"
+        "                --load-config <file>:             load a config file (+)\n"
+        "                --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output\n"
         "\n"
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
@@ -643,10 +644,9 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
 
 static inline bool optionParseBoolean(const char* str)
 {
-    if(str == NULL)
-        return true;
-
     return (
+        str == NULL ||
+        *str == '\0' ||
         strcasecmp(str, "true") == 0 ||
         strcasecmp(str, "yes")  == 0 ||
         strcasecmp(str, "on")   == 0 ||
@@ -778,6 +778,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.printRemainingLogo = optionParseBoolean(value);
     else if(strcasecmp(key, "--multithreading") == 0)
         data->multithreading = optionParseBoolean(value);
+    else if(strcasecmp(key, "--allow-slow-operations") == 0)
+        instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)

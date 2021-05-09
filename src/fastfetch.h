@@ -46,6 +46,7 @@ typedef struct FFconfig
     bool recache;
     bool cacheSave;
     bool printRemainingLogo;
+    bool allowSlowOperations;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;
