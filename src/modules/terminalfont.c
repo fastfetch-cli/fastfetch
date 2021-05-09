@@ -50,7 +50,7 @@ static void printXCFETerminal(FFinstance* instance)
 
     ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", fontName.chars);
 
-    if((fontName.chars[0] == '\0') || ffStrbufCompS(&fontName, "TRUE"))
+    if((fontName.chars[0] == '\0') || !ffStrbufCompS(&fontName, "FALSE"))
     {
         printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
         ffStrbufDestroy(&fontName);
@@ -62,9 +62,6 @@ static void printXCFETerminal(FFinstance* instance)
     ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
     ffStrbufAppendC(&absolutePath, '/');
     ffStrbufAppendS(&absolutePath, ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml");
-
-    char* line = NULL;
-    size_t len = 0;
 
     FILE* file = fopen(absolutePath.chars, "r");
     if(file == NULL)
@@ -79,9 +76,12 @@ static void printXCFETerminal(FFinstance* instance)
     FFstrbuf matchText;
     ffStrbufInitAS(&matchText, 64, "<property name=\"MonospaceFontName\" type=\"string\" value=\"");
 
+    char* line = NULL;
+    size_t len = 0;
+
     while(getline(&line, &len, file) != -1)
     {
-        ffStrbufSetS(&fontName, line);
+        ffStrbufAppendS(&fontName, line);
         ffStrbufTrimLeft(&fontName, ' ');
 
         if(ffStrbufStartsWithS(&fontName, matchText.chars))
@@ -90,8 +90,10 @@ static void printXCFETerminal(FFinstance* instance)
             ffStrbufSubstrBefore(&fontName, fontName.length - 4); // ["/>\n]
             break;
         }
-        ffStrbufSetC(&fontName, '\0');
+        ffStrbufClear(&fontName);
     }
+    ffStrbufDestroy(&matchText);
+    ffStrbufDestroy(&absolutePath);
 
     if(line != NULL)
         free(line);
@@ -103,8 +105,6 @@ static void printXCFETerminal(FFinstance* instance)
     else
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"MonospaceFontName=%%[^\\n]\" in \"xsettings.xml\"");
 
-    ffStrbufDestroy(&matchText);
-    ffStrbufDestroy(&absolutePath);
     ffStrbufDestroy(&fontName);
 }
 
