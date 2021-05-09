@@ -43,6 +43,71 @@ static void printTerminalFontFromConfigFile(FFinstance* instance, const char* co
     printTerminalFont(instance, font);
 }
 
+static void printXCFETerminal(FFinstance* instance)
+{
+    FFstrbuf fontName;
+    ffStrbufInitA(&fontName, 256);
+
+    ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", fontName.chars);
+
+    if(fontName.chars[0] == '\0')
+    {
+        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+        ffStrbufDestroy(&fontName);
+        return;
+    }
+
+    FFstrbuf absolutePath;
+    ffStrbufInitA(&absolutePath, 64);
+    ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
+    ffStrbufAppendC(&absolutePath, '/');
+    ffStrbufAppendS(&absolutePath, ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml");
+
+    char* line = NULL;
+    size_t len = 0;
+
+    FILE* file = fopen(absolutePath.chars, "r");
+    if(file == NULL)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't open \"%s\"", absolutePath.chars);
+        ffStrbufDestroy(&absolutePath);
+        ffStrbufDestroy(&fontName);
+
+        return;
+    }
+
+    FFstrbuf matchText;
+    ffStrbufInitAS(&matchText, 64, "<property name=\"MonospaceFontName\" type=\"string\" value=\"");
+
+    while(getline(&line, &len, file) != -1)
+    {
+        ffStrbufSetS(&fontName, line);
+        ffStrbufTrimLeft(&fontName, ' ');
+
+        if(ffStrbufStartsWithS(&fontName, matchText.chars))
+        {
+            ffStrbufSubstrAfter(&fontName, matchText.length -1);
+            ffStrbufSubstrBefore(&fontName, fontName.length - 4); // ["/>\n]
+            break;
+        }
+        ffStrbufSetC(&fontName, '\0');
+    }
+
+    if(line != NULL)
+        free(line);
+
+    fclose(file);
+
+    if(fontName.chars[0] != '\0')
+        printTerminalFont(instance, fontName.chars);
+    else
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"MonospaceFontName=%%[^\\n]\" in \"xsettings.xml\"");
+
+    ffStrbufDestroy(&matchText);
+    ffStrbufDestroy(&absolutePath);
+    ffStrbufDestroy(&fontName);
+}
+
 static void printKonsole(FFinstance* instance)
 {
     char profile[128];
@@ -142,7 +207,7 @@ void ffPrintTerminalFont(FFinstance* instance)
     if(ffStrbufIgnCaseCompS(&result->exeName, "konsole") == 0)
         printKonsole(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
-        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+        printXCFETerminal(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
         printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
