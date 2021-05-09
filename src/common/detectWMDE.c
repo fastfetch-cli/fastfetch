@@ -165,6 +165,7 @@ static void getFromProcDir(FFWMDEResult* result, ProcData* procData, bool search
         ffStrbufAppendS(&procPath, procData->dirent->d_name);
         ffStrbufAppendS(&procPath, "/cmdline");
         ffGetFileContent(procPath.chars, &processName);
+        ffStrbufRecalculateLength(&processName); //Arguments are seperated by a \0 char. We make use of this to extract only the executable path. This is needed if arguments contain the / char
         ffStrbufSubstrAfterLastC(&processName, '/');
         ffStrbufSubstrBefore(&procPath, procPathLength);
 
@@ -172,7 +173,7 @@ static void getFromProcDir(FFWMDEResult* result, ProcData* procData, bool search
         if(applyDEHintIfDE(&processName, &procData->deHint) && !searchWM)
             break;
 
-        //If we have a WM, dont overwrite it. Therefoore searchWM must be first in the condition
+        //If we have a WM, dont overwrite it. Therefore searchWM must be first in the condition
         if(searchWM && applyPrettyNameIfWM(result, &processName, &procData->protocolHint))
             break;
     }
