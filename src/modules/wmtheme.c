@@ -33,7 +33,7 @@ static void printWMThemeFromConfig(FFinstance* instance, const char* configFile,
     {
         if(defaultValue == NULL)
         {
-            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme in %s", configFile);
+            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme in %s", configFile);
             return;
         }
 
