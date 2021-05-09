@@ -107,6 +107,19 @@ static void printTilixTerminal(FFinstance* instance)
     ffStrbufDestroy(&key);
 }
 
+static void printLxTerminal(FFinstance* instance)
+{
+    char font[128];
+    ffParsePropFileConfig(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]", font);
+    if(font[0] == '\0')
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"fontname=%%[^\\n]\" in \".config/lxterminal/lxterminal.conf\"");
+        return;
+    }
+
+    printTerminalFont(instance, font);
+}
+
 static void printTTY(FFinstance* instance)
 {
     FFstrbuf font;
@@ -145,6 +158,8 @@ void ffPrintTerminalFont(FFinstance* instance)
         printXFCE4Terminal(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
         printTilixTerminal(instance);
+    else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
+        printLxTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
