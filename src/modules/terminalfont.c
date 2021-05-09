@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "util/FFstrbuf.h"
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 4
@@ -50,7 +51,7 @@ static void printXCFETerminal(FFinstance* instance)
 
     ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", fontName.chars);
 
-    if(fontName.chars[0] == '\0')
+    if((fontName.chars[0] == '\0') || ffStrbufCompS(&fontName, "TRUE"))
     {
         printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
         ffStrbufDestroy(&fontName);
