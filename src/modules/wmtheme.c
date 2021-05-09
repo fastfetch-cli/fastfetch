@@ -19,7 +19,7 @@ static void printWMTheme(FFinstance* instance, const char* theme)
     }
 }
 
-static void printWMThemeFromConfig(FFinstance* instance, const char* configFile, const char* themeRegex, const char* defaultValue)
+static void printWMThemeFromConfigFile(FFinstance* instance, const char* configFile, const char* themeRegex, const char* defaultValue)
 {
     char theme[256];
 
@@ -165,9 +165,9 @@ void ffPrintWMTheme(FFinstance* instance)
     }
 
     if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "KDE") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Plasma") == 0)
-        printWMThemeFromConfig(instance, "kwinrc", " theme=%s", "Breeze");
+        printWMThemeFromConfigFile(instance, "kwinrc", " theme=%s", "Breeze");
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm4") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm") == 0)
-        printWMThemeFromConfig(instance, "xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml", " <property name=\"theme\" type=\"string\" value=\"%[^\"]", "Default");
+        printWMThemeFromConfigFile(instance, "xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml", " <property name=\"theme\" type=\"string\" value=\"%[^\"]", "Default");
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)
         printMutter(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Muffin") == 0)
