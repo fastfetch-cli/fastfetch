@@ -39,10 +39,13 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
 
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...)
 {
+    if(!instance->config.showErrors)
+        return;
+
     va_list arguments;
     va_start(arguments, message);
 
-    if((formatString == NULL || formatString->length == 0) && instance->config.showErrors)
+    if(formatString == NULL || formatString->length == 0)
     {
         ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
         fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
