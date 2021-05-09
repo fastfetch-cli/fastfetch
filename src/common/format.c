@@ -9,7 +9,7 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
         ffStrbufAppendF(buffer, "%hhu", *(uint8_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRING)
-        ffStrbufAppendF(buffer, "%s", (const char*)formatarg->value);
+        ffStrbufAppendS(buffer, (const char*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRBUF)
         ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)

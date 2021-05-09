@@ -30,6 +30,19 @@ static void printTerminalFont(FFinstance* instance, const char* font)
     ffStrbufDestroy(&pretty);
 }
 
+static void printTerminalFontFromConfigFile(FFinstance* instance, const char* configFile, const char* regex)
+{
+    char font[128];
+    ffParsePropFileConfig(instance, configFile, regex, font);
+    if(font[0] == '\0')
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"%s\" in \"$XDG_CONFIG_HOME/%s\"", regex, configFile);
+        return;
+    }
+
+    printTerminalFont(instance, font);
+}
+
 static void printKonsole(FFinstance* instance)
 {
     char profile[128];
@@ -48,19 +61,6 @@ static void printKonsole(FFinstance* instance)
     if(font[0] == '\0')
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
-        return;
-    }
-
-    printTerminalFont(instance, font);
-}
-
-static void printXFCE4Terminal(FFinstance* instance)
-{
-    char font[128];
-    ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]", font);
-    if(font[0] == '\0')
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"FontName=%%[^\\n]\" in \".config/xfce4/terminal/terminalrc\"");
         return;
     }
 
@@ -107,19 +107,6 @@ static void printTilixTerminal(FFinstance* instance)
     ffStrbufDestroy(&key);
 }
 
-static void printLxTerminal(FFinstance* instance)
-{
-    char font[128];
-    ffParsePropFileConfig(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]", font);
-    if(font[0] == '\0')
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"fontname=%%[^\\n]\" in \".config/lxterminal/lxterminal.conf\"");
-        return;
-    }
-
-    printTerminalFont(instance, font);
-}
-
 static void printTTY(FFinstance* instance)
 {
     FFstrbuf font;
@@ -155,11 +142,11 @@ void ffPrintTerminalFont(FFinstance* instance)
     if(ffStrbufIgnCaseCompS(&result->exeName, "konsole") == 0)
         printKonsole(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
-        printXFCE4Terminal(instance);
+        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+    else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
+        printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
         printTilixTerminal(instance);
-    else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
-        printLxTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
