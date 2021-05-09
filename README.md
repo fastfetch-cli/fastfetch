@@ -51,7 +51,7 @@ KWin, Mutter, Muffin, Openbox (LXDE, LXQT & without DE)
 
 ### Terminal fonts:
 ```
-konsole, xfce4-terminal, tilix, TTY
+konsole, xfce4-terminal, tilix, lxterminal, TTY
 ```
 
 ## Building

@@ -68,12 +68,12 @@ static void printXFCE4Terminal(FFinstance* instance)
 }
 
 static void printTilixTerminal(FFinstance* instance)
-{
+{    // Note - Subject to change when DConf/GSettings fix their implementations of defaults/relocatable schemas respectively
     const char* fontName = NULL;
 
     const char* defaultProfile = ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
 
-    if (!defaultProfile)
+    if(!defaultProfile)
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Default\" profile in Tilix settings");
         return;
@@ -96,7 +96,7 @@ static void printTilixTerminal(FFinstance* instance)
     else if(!res.boolValueSet || res.boolValue) // system font
         fontName = ffSettingsGetDConf(instance, "/org/gnome/desktop/interface/monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 
-    if (!fontName)
+    if(!fontName)
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Terminal font\" in Tilix settings");
         ffStrbufDestroy(&key);
@@ -105,6 +105,19 @@ static void printTilixTerminal(FFinstance* instance)
 
     printTerminalFont(instance, fontName);
     ffStrbufDestroy(&key);
+}
+
+static void printLxTerminal(FFinstance* instance)
+{
+    char font[128];
+    ffParsePropFileConfig(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]", font);
+    if(font[0] == '\0')
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"fontname=%%[^\\n]\" in \".config/lxterminal/lxterminal.conf\"");
+        return;
+    }
+
+    printTerminalFont(instance, font);
 }
 
 static void printTTY(FFinstance* instance)
@@ -145,6 +158,8 @@ void ffPrintTerminalFont(FFinstance* instance)
         printXFCE4Terminal(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
         printTilixTerminal(instance);
+    else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
+        printLxTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
