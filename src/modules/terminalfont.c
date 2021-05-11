@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include <string.h>
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 4
@@ -41,71 +42,6 @@ static void printTerminalFontFromConfigFile(FFinstance* instance, const char* co
     }
 
     printTerminalFont(instance, font);
-}
-
-static void printXCFETerminal(FFinstance* instance)
-{
-    FFstrbuf fontName;
-    ffStrbufInitA(&fontName, 256);
-
-    ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", fontName.chars);
-
-    if((fontName.chars[0] == '\0') || !ffStrbufCompS(&fontName, "FALSE"))
-    {
-        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
-        ffStrbufDestroy(&fontName);
-        return;
-    }
-
-    FFstrbuf absolutePath;
-    ffStrbufInitA(&absolutePath, 64);
-    ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
-    ffStrbufAppendC(&absolutePath, '/');
-    ffStrbufAppendS(&absolutePath, ".config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml");
-
-    FILE* file = fopen(absolutePath.chars, "r");
-    if(file == NULL)
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't open \"%s\"", absolutePath.chars);
-        ffStrbufDestroy(&absolutePath);
-        ffStrbufDestroy(&fontName);
-
-        return;
-    }
-
-    FFstrbuf matchText;
-    ffStrbufInitAS(&matchText, 64, "<property name=\"MonospaceFontName\" type=\"string\" value=\"");
-
-    char* line = NULL;
-    size_t len = 0;
-
-    while(getline(&line, &len, file) != -1)
-    {
-        ffStrbufAppendS(&fontName, line);
-        ffStrbufTrimLeft(&fontName, ' ');
-
-        if(ffStrbufStartsWithS(&fontName, matchText.chars))
-        {
-            ffStrbufSubstrAfter(&fontName, matchText.length -1);
-            ffStrbufSubstrBefore(&fontName, fontName.length - 4); // ["/>\n]
-            break;
-        }
-        ffStrbufClear(&fontName);
-    }
-    ffStrbufDestroy(&matchText);
-    ffStrbufDestroy(&absolutePath);
-
-    if(line != NULL)
-        free(line);
-
-    fclose(file);
-
-    if(fontName.chars[0] != '\0')
-        printTerminalFont(instance, fontName.chars);
-    else
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"MonospaceFontName=%%[^\\n]\" in \"xsettings.xml\"");
-
-    ffStrbufDestroy(&fontName);
 }
 
 static void printKonsole(FFinstance* instance)
@@ -170,6 +106,31 @@ static void printTilixTerminal(FFinstance* instance)
 
     printTerminalFont(instance, fontName);
     ffStrbufDestroy(&key);
+}
+
+static void printXCFETerminal(FFinstance* instance)
+{
+    char useSysFont[6];
+    const char* fontName;
+
+    if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", useSysFont))
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't open \"$XDG_CONFIG_HOME/xfce4/terminal/terminalrc\"");
+        return;
+    }
+
+    if((useSysFont[0] == '\0') || strcasecmp(useSysFont, "FALSE") == 0)
+    {
+        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+        return;
+    }
+    else
+        fontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
+
+    if(fontName == NULL)
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"xsettings::/Gtk/MonospaceFontName\" in XFConf");
+    else
+        printTerminalFont(instance, fontName);
 }
 
 static void printTTY(FFinstance* instance)
