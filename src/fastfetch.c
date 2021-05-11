@@ -117,6 +117,7 @@ static inline void printHelp()
         "   --lib-gio <path>\n"
         "   --lib-DConf <path>\n"
         "   --lib-wayland <path>\n"
+        "   --lib-XFConf <path>\n"
         "\n"
         "Module specific options:\n"
         "   --disk-folders <folders>: A colon seperated list of folder paths for the disk output. Default is \"/:/home\"\n"
@@ -884,6 +885,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libDConf);
     else if(strcasecmp(key, "--lib-wayland") == 0)
         optionParseString(key, value, &instance->config.libWayland);
+    else if(strcasecmp(key, "--lib-XFConf") == 0)
+        optionParseString(key, value, &instance->config.libXFConf);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)

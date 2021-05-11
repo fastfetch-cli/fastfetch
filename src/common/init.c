@@ -160,6 +160,7 @@ static void defaultConfig(FFconfig* config)
     ffStrbufInitA(&config->libGIO, 1);
     ffStrbufInitA(&config->libDConf, 1);
     ffStrbufInitA(&config->libWayland, 1);
+    ffStrbufInitA(&config->libXFConf, 1);
 
     ffStrbufInitA(&config->diskFolders, 1);
 

@@ -184,6 +184,7 @@ __fastfetch_completion()
         "--lib-gio"
         "--lib-DConf"
         "--lib-wayland"
+        "--lib-XFConf"
         "--battery-dir"
         "--load-config"
     )
