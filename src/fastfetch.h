@@ -46,6 +46,7 @@ typedef struct FFconfig
     bool recache;
     bool cacheSave;
     bool printRemainingLogo;
+    bool allowSlowOperations;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;
@@ -96,6 +97,7 @@ typedef struct FFconfig
     FFstrbuf libWayland;
     FFstrbuf libGIO;
     FFstrbuf libDConf;
+    FFstrbuf libXFConf;
 
     FFstrbuf diskFolders;
 
@@ -274,7 +276,7 @@ void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);
 FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type);
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
-const char* ffSettingsGetStr(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey);
+FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);

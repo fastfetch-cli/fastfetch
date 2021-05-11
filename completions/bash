@@ -118,6 +118,7 @@ __fastfetch_completion()
         "--color-logo"
         "--print-remaining-logo"
         "--multithreading"
+        "--allow-slow-operations"
     )
 
     local FF_OPTIONS_STRING=(
@@ -183,6 +184,7 @@ __fastfetch_completion()
         "--lib-gio"
         "--lib-DConf"
         "--lib-wayland"
+        "--lib-XFConf"
         "--battery-dir"
         "--load-config"
     )

@@ -17,7 +17,8 @@ typedef enum DEHint
     FF_DE_HINT_UNKNOWN = 0,
     FF_DE_HINT_PLASMA,
     FF_DE_HINT_GNOME,
-    FF_DE_HINT_CINNAMON
+    FF_DE_HINT_CINNAMON,
+    FF_DE_HINT_XFCE4
 } DEHint;
 
 typedef struct ProcData
@@ -114,7 +115,7 @@ static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processNam
     }
     else if(ffStrbufIgnCaseCompS(processName, "xfwm4") == 0)
     {
-        ffStrbufSetS(&result->wmPrettyName, "XFWM");
+        ffStrbufSetS(&result->wmPrettyName, "Xfwm4");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
     else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0)
@@ -139,6 +140,8 @@ static bool applyDEHintIfDE(const FFstrbuf* processName, DEHint* deHint)
         *deHint = FF_DE_HINT_GNOME;
     else if(ffStrbufIgnCaseCompS(processName, "cinnamon") == 0)
         *deHint = FF_DE_HINT_CINNAMON;
+    else if(ffStrbufIgnCaseCompS(processName, "xfce4-session") == 0)
+        *deHint = FF_DE_HINT_XFCE4;
 
     return *deHint != FF_DE_HINT_UNKNOWN;
 }
@@ -224,7 +227,30 @@ static void getCinnamon(FFWMDEResult* result)
     ffStrbufRecalculateLength(&result->deVersion);
 }
 
-static inline void getDEFromHint(FFWMDEResult* result, ProcData* procData)
+static void getXFCE4(FFinstance* instance, FFWMDEResult* result)
+{
+    ffStrbufSetS(&result->deProcessName, "xfce4-session");
+    ffStrbufSetS(&result->dePrettyName, "Xfce4");
+
+    ffParsePropFile("/usr/share/gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version %[^\n]", result->deVersion.chars);
+    ffStrbufRecalculateLength(&result->deVersion);
+
+    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    {
+        //This is really, really slow. Thank you, XFCE developers
+        ffProcessAppendStdOut(&result->deVersion, (char* const[]){
+            "xfce4-session",
+            "--version",
+            NULL
+        });
+
+        ffStrbufSubstrBeforeFirstC(&result->deVersion, '(');
+        ffStrbufSubstrAfterFirstC(&result->deVersion, ' ');
+        ffStrbufTrim(&result->deVersion, ' ');
+    }
+}
+
+static inline void getDEFromHint(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
 {
     getFromProcDir(result, procData, false);
 
@@ -237,9 +263,11 @@ static inline void getDEFromHint(FFWMDEResult* result, ProcData* procData)
         getGnome(result);
     else if(procData->deHint == FF_DE_HINT_CINNAMON)
         getCinnamon(result);
+    else if(procData->deHint == FF_DE_HINT_XFCE4)
+        getXFCE4(instance, result);
 }
 
-static inline void getDE(FFWMDEResult* result, ProcData* procData)
+static inline void getDE(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
 {
     // if sessionDesktop is not set or sessionDesktiop == WM, try finding DE via /proc
     if(
@@ -248,7 +276,7 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
         ffStrbufIgnCaseCompS(&result->wmProcessName, result->sessionDesktop) == 0 ||
         ffStrbufIgnCaseCompS(&result->wmPrettyName, result->sessionDesktop) == 0
     ) {
-        getDEFromHint(result, procData);
+        getDEFromHint(instance, result, procData);
         return;
     }
 
@@ -258,6 +286,8 @@ static inline void getDE(FFWMDEResult* result, ProcData* procData)
         getGnome(result);
     else if(strcasecmp(result->sessionDesktop, "X-Cinnamon") == 0 || strcasecmp(result->sessionDesktop, "Cinnamon") == 0)
         getCinnamon(result);
+    else if(strcasecmp(result->sessionDesktop, "XFCE") == 0 || strcasecmp(result->sessionDesktop, "X-XFCE") == 0 || strcasecmp(result->sessionDesktop, "XFCE4") == 0 || strcasecmp(result->sessionDesktop, "X-XFCE4") == 0)
+        getXFCE4(instance, result);
     else
     {
         ffStrbufSetS(&result->deProcessName, result->sessionDesktop);
@@ -304,7 +334,7 @@ static inline void getSessionType(FFWMDEResult* result, ProtocolHint protocolHin
         getSessionTypeFallback(result, protocolHint);
 }
 
-static inline void getWMDE(FFWMDEResult* result)
+static inline void getWMDE(FFinstance* instance, FFWMDEResult* result)
 {
     ProcData procData;
     procData.proc = opendir("/proc");
@@ -314,7 +344,7 @@ static inline void getWMDE(FFWMDEResult* result)
 
     getSessionDesktop(result);
     getWM(result, &procData);
-    getDE(result, &procData);
+    getDE(instance, result, &procData);
 
     if(result->wmProtocolName.length == 0 && procData.protocolHint != FF_PROTOCOL_HINT_UNKNOWN)
         getSessionTypeFallback(result, procData.protocolHint);
@@ -325,8 +355,6 @@ static inline void getWMDE(FFWMDEResult* result)
 
 const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
 {
-    UNUSED(instance);
-
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static FFWMDEResult result;
     static bool init = false;
@@ -349,7 +377,7 @@ const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
 
     //Don't run anyting when on TTY. This prevents us to catch process from other users in at least that case.
     if(ffStrbufIgnCaseCompS(&result.wmProtocolName, "TTY") != 0)
-        getWMDE(&result);
+        getWMDE(instance, &result);
 
     pthread_mutex_unlock(&mutex);
 

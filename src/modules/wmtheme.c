@@ -19,20 +19,26 @@ static void printWMTheme(FFinstance* instance, const char* theme)
     }
 }
 
-static void printKWin(FFinstance* instance)
+static void printWMThemeFromConfigFile(FFinstance* instance, const char* configFile, const char* themeRegex, const char* defaultValue)
 {
     char theme[256];
-    bool fileFound = ffParsePropFileConfig(instance, "kwinrc", "theme=%s", theme);
+
+    if(!ffParsePropFileConfig(instance, configFile, themeRegex, theme))
+    {
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Config file %s doesn't exist", configFile);
+        return;
+    }
 
     if(*theme == '\0')
     {
-        if(!fileFound)
+        if(defaultValue == NULL)
         {
-            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find \"theme=\" in \".config/kwinrc\"");
+            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme in %s", configFile);
             return;
         }
 
-        strcpy(theme, "Breeze");
+        printWMTheme(instance, defaultValue);
+        return;
     }
 
     printWMTheme(instance, theme);
@@ -40,10 +46,10 @@ static void printKWin(FFinstance* instance)
 
 static void printMutter(FFinstance* instance)
 {
-    const char* theme = ffSettingsGetStr(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name");
+    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
 
     if(theme == NULL)
-        theme = ffSettingsGetStr(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme");
+        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
 
     if(theme == NULL)
     {
@@ -56,8 +62,8 @@ static void printMutter(FFinstance* instance)
 
 static void printMuffin(FFinstance* instance)
 {
-    const char* name = ffSettingsGetStr(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name");
-    const char* theme = ffSettingsGetStr(instance, "/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme");
+    const char* name = ffSettingsGet(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGet(instance, "/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
 
     if(name == NULL && theme == NULL)
     {
@@ -82,6 +88,19 @@ static void printMuffin(FFinstance* instance)
 
         ffStrbufDestroy(&buffer);
     }
+}
+
+static void printXFWM4(FFinstance* instance)
+{
+    const char* theme = ffSettingsGetXFConf(instance, "xfwm4", "/general/theme", FF_VARIANT_TYPE_STRING).strValue;
+
+    if(theme == NULL)
+    {
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find xfwm4::/general/theme in XFConf");
+        return;
+    }
+
+    printWMTheme(instance, theme);
 }
 
 static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
@@ -159,7 +178,9 @@ void ffPrintWMTheme(FFinstance* instance)
     }
 
     if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "KDE") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Plasma") == 0)
-        printKWin(instance);
+        printWMThemeFromConfigFile(instance, "kwinrc", " theme=%s", "Breeze");
+    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm4") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm") == 0)
+        printXFWM4(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)
         printMutter(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Muffin") == 0)
