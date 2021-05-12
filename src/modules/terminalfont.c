@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include <string.h>
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 4
@@ -107,6 +108,31 @@ static void printTilixTerminal(FFinstance* instance)
     ffStrbufDestroy(&key);
 }
 
+static void printXCFETerminal(FFinstance* instance)
+{
+    char useSysFont[6];
+    const char* fontName;
+
+    if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", useSysFont))
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't open \"$XDG_CONFIG_HOME/xfce4/terminal/terminalrc\"");
+        return;
+    }
+
+    if((useSysFont[0] == '\0') || strcasecmp(useSysFont, "FALSE") == 0)
+    {
+        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+        return;
+    }
+    else
+        fontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
+
+    if(fontName == NULL)
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"xsettings::/Gtk/MonospaceFontName\" in XFConf");
+    else
+        printTerminalFont(instance, fontName);
+}
+
 static void printTTY(FFinstance* instance)
 {
     FFstrbuf font;
@@ -142,7 +168,7 @@ void ffPrintTerminalFont(FFinstance* instance)
     if(ffStrbufIgnCaseCompS(&result->exeName, "konsole") == 0)
         printKonsole(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
-        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+        printXCFETerminal(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
         printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
