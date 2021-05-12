@@ -35,12 +35,7 @@ static void xCloseDisplay(void* library, Display* display)
 
 void ffPrintResolutionX11Backend(FFinstance* instance)
 {
-    void* x11;
-    if(instance->config.libX11.length == 0)
-        x11 = dlopen("libX11.so", RTLD_LAZY);
-    else
-        x11 = dlopen(instance->config.libX11.chars, RTLD_LAZY);
-
+    void* x11 = dlopen(instance->config.libX11.length == 0 ? "libX11.so" : instance->config.libX11.chars, RTLD_LAZY);
     if(x11 == NULL)
     {
         ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.resolutionKey, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS, "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
@@ -102,12 +97,7 @@ static int xrandrGetCurrentRate(void* xrandr, Display* display)
 
 bool ffPrintResolutionXrandrBackend(FFinstance* instance)
 {
-    void* xrandr;
-    if(instance->config.libXrandr.length == 0)
-        xrandr = dlopen("libXrandr.so", RTLD_LAZY);
-    else
-        xrandr = dlopen(instance->config.libXrandr.chars, RTLD_LAZY);
-
+    void* xrandr = dlopen(instance->config.libXrandr.length == 0 ? "libXrandr.so" : instance->config.libXrandr.chars, RTLD_LAZY);
     if(xrandr == NULL)
         return false;
 

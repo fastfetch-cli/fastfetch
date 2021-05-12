@@ -14,18 +14,15 @@ typedef void* DynamicLibrary;
         return FF_VARIANT_NULL; \
     }
 
-#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, mutex) dlsym(library, symbolName); \
-    if(dlerror() != NULL) { \
-        pthread_mutex_unlock(&mutex); \
-        dlclose(library); \
-        return FF_VARIANT_NULL; \
-    }
-
 #define FF_LIBRARY_ERROR_RETURN(library, mutex) { \
     pthread_mutex_unlock(&mutex); \
     dlclose(library); \
     return FF_VARIANT_NULL; \
 }
+
+#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, mutex) dlsym(library, symbolName); \
+    if(dlerror() != NULL) \
+        FF_LIBRARY_ERROR_RETURN(library, mutex)
 
 typedef struct GVariantGetters
 {

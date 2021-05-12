@@ -54,12 +54,7 @@ void ffPrintGPU(FFinstance* instance)
     if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
         return;
 
-    void* pci;
-    if(instance->config.libPCI.length == 0)
-        pci = dlopen("libpci.so", RTLD_LAZY);
-    else
-        pci = dlopen(instance->config.libPCI.chars, RTLD_LAZY);
-
+    void* pci = dlopen(instance->config.libPCI.length == 0 ? "libpci.so" : instance->config.libPCI.chars, RTLD_LAZY);
     if(pci == NULL)
     {
         ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlopen(\"libpci.so\", RTLD_LAZY) == NULL");

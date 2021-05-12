@@ -114,12 +114,7 @@ bool ffPrintResolutionWaylandBackend(FFinstance* instance)
     if(sessionType != NULL && strcasecmp(sessionType, "wayland") != 0)
         return false;
 
-    void* wayland;
-    if(instance->config.libWayland.length == 0)
-        wayland = dlopen("libwayland-client.so", RTLD_LAZY);
-    else
-        wayland = dlopen(instance->config.libWayland.chars, RTLD_LAZY);
-
+    void* wayland = dlopen(instance->config.libWayland.length == 0 ? "libwayland-client.so" : instance->config.libWayland.chars, RTLD_LAZY);
     if(wayland == NULL)
         return false;
 

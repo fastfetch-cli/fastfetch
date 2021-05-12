@@ -111,7 +111,6 @@ static void printTilixTerminal(FFinstance* instance)
 static void printXCFETerminal(FFinstance* instance)
 {
     char useSysFont[6];
-    const char* fontName;
 
     if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", useSysFont))
     {
@@ -124,13 +123,16 @@ static void printXCFETerminal(FFinstance* instance)
         printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
         return;
     }
-    else
-        fontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
+
+    const char* fontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
 
     if(fontName == NULL)
+    {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"xsettings::/Gtk/MonospaceFontName\" in XFConf");
-    else
-        printTerminalFont(instance, fontName);
+        return;
+    }
+
+    printTerminalFont(instance, fontName);
 }
 
 static void printTTY(FFinstance* instance)
