@@ -37,7 +37,7 @@ static void printTerminalFontFromConfigFile(FFinstance* instance, const char* co
     ffParsePropFileConfig(instance, configFile, regex, font);
     if(font[0] == '\0')
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"%s\" in \"$XDG_CONFIG_HOME/%s\"", regex, configFile);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find terminal font in \"$XDG_CONFIG_HOME/%s\"", regex, configFile);
         return;
     }
 
