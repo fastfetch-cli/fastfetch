@@ -18,6 +18,13 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+execute_process (
+    COMMAND bash -c "awk -F= '/^ID=/{print $2}' /etc/os-release |tr -d '\n' | tr -d '\"'"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE BUILD_DISTRIBUTION_ID
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O3")
