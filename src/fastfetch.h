@@ -245,9 +245,9 @@ bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
 // They return true if the file was found, independently if regex was found
-bool ffParsePropFile(const char* file, const char* regex, char* buffer);
-bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
-bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer);
+bool ffParsePropFile(const char* file, const char* start, FFstrbuf* buffer);
+bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
+bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
@@ -271,6 +271,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
 void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
 void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
+bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer);
 
 //common/settings.c
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);

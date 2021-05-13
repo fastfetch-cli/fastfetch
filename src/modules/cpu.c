@@ -44,8 +44,8 @@ void ffPrintCPU(FFinstance* instance)
 
     while(getline(&line, &len, cpuinfo) != -1)
     {
-        sscanf(line, "model name%*s %[^\n]", name);
-        sscanf(line, "vendor_id%*s %[^\n]", vendor);
+        sscanf(line, "model name%*s %256[^\n]", name);
+        sscanf(line, "vendor_id%*s %256[^\n]", vendor);
         sscanf(line, "cpu cores%*s %i", &physicalCores);
 
         //Stop after the first CPU

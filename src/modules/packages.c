@@ -87,6 +87,9 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
 
+        //Fix linter warning of unused value of all
+        (void) all;
+
         #undef FF_PRINT_PACKAGE
 
         putchar('\n');

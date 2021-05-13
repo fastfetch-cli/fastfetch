@@ -84,7 +84,7 @@ void ffGetFont(const char* font, FFstrbuf* name, double* size)
 {
     ffStrbufEnsureCapacity(name, 32);
 
-    int scanned = sscanf(font, "%[^,], %lf", name->chars, size);
+    int scanned = sscanf(font, "%31[^,], %lf", name->chars, size);
 
     ffStrbufRecalculateLength(name);
 
@@ -105,4 +105,44 @@ void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size)
         ffStrbufAppendF(buffer, "%g", size);
         ffStrbufAppendS(buffer, "pt)");
     }
+}
+
+bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
+{
+    uint32_t lineIndex = 0;
+    uint32_t startIndex = 0;
+
+    //Skip any amount of whitespace at the begin of line
+    while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
+        ++lineIndex;
+
+    while(start[startIndex] != '\0')
+    {
+        // Any amount of whitespace in the format string matches any amount of whitespace in the line
+        if(start[startIndex] == ' ' || start[startIndex] == '\t')
+        {
+            while(start[startIndex] == ' ' || start[startIndex] == '\t')
+                ++startIndex;
+
+            while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
+                ++lineIndex;
+        }
+
+        if(line[lineIndex] == '\0' || line[lineIndex] != start[startIndex])
+            return false;
+
+        ++lineIndex;
+        ++startIndex;
+    }
+
+    //Allow quotet values
+    const char* quotes = NULL;
+    if(line[lineIndex] == '"' || line[lineIndex] == '\'')
+        quotes = &line[lineIndex++];
+
+    //Copy the value to the buffer
+    while(line[lineIndex] != '\n' && line[lineIndex] != '\0' && (quotes == NULL || *quotes != line[lineIndex]))
+        ffStrbufAppendC(buffer, line[lineIndex++]);
+
+    return true;
 }

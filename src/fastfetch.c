@@ -719,7 +719,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             fprintf(stderr, "Error: usage: %s <width>\n", key);
             exit(404);
         }
-        if(sscanf(value, "%hd", &instance->config.logo_spacing) != 1)
+        if(sscanf(value, "%hu", &instance->config.logo_spacing) != 1)
         {
             fprintf(stderr, "Error: couldn't parse %s to uint16_t\n", value);
             exit(405);

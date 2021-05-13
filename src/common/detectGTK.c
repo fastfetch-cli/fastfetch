@@ -77,32 +77,17 @@ static void detectGTKFromConfigFile(const char* filename, FFGTKResult* result)
     while(getline(&line, &len, file) != -1)
     {
         if(result->theme.length == 0)
-        {
-            sscanf(line, "gtk-theme-name=%[^\n]", result->theme.chars);
-            sscanf(line, "gtk-theme-name=\"%[^\"]+", result->theme.chars);
-        }
-
+            ffGetPropValue(line, "gtk-theme-name=", &result->theme);
         if(result->icons.length == 0)
-        {
-            sscanf(line, "gtk-icon-theme-name=%[^\n]", result->icons.chars);
-            sscanf(line, "gtk-icon-theme-name=\"%[^\"]+", result->icons.chars);
-        }
-
+            ffGetPropValue(line, "gtk-icon-theme-name=", &result->icons);
         if(result->font.length == 0)
-        {
-            sscanf(line, "gtk-font-name=%[^\n]", result->font.chars);
-            sscanf(line, "gtk-font-name=\"%[^\"]+", result->font.chars);
-        }
+            ffGetPropValue(line, "gtk-font-name=", &result->font);
     }
 
     if(line != NULL)
         free(line);
 
     fclose(file);
-
-    ffStrbufRecalculateLength(&result->theme);
-    ffStrbufRecalculateLength(&result->icons);
-    ffStrbufRecalculateLength(&result->font);
 }
 
 static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFGTKResult* result)

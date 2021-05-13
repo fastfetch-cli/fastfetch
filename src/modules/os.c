@@ -30,19 +30,19 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
         return &result;
     }
 
-    ffStrbufInitA(&result.systemName, 256);
-    ffStrbufInitA(&result.name, 256);
-    ffStrbufInitA(&result.prettyName, 256);
-    ffStrbufInitA(&result.id, 256);
-    ffStrbufInitA(&result.idLike, 256);
-    ffStrbufInitA(&result.variant, 256);
-    ffStrbufInitA(&result.variantID, 256);
-    ffStrbufInitA(&result.version, 256);
-    ffStrbufInitA(&result.versionID, 256);
-    ffStrbufInitA(&result.codename, 256);
-    ffStrbufInitA(&result.buildID, 256);
-    ffStrbufInitA(&result.architecture, 256);
-    ffStrbufInitA(&result.error, 256);
+    ffStrbufInit(&result.systemName);
+    ffStrbufInit(&result.name);
+    ffStrbufInit(&result.prettyName);
+    ffStrbufInit(&result.id);
+    ffStrbufInit(&result.idLike);
+    ffStrbufInit(&result.variant);
+    ffStrbufInit(&result.variantID);
+    ffStrbufInit(&result.version);
+    ffStrbufInit(&result.versionID);
+    ffStrbufInit(&result.codename);
+    ffStrbufInit(&result.buildID);
+    ffStrbufInit(&result.architecture);
+    ffStrbufInit(&result.error);
 
     ffStrbufSetS(&result.systemName, instance->state.utsname.sysname);
     ffStrbufSetS(&result.architecture, instance->state.utsname.machine);
@@ -54,41 +54,17 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
     // https://www.freedesktop.org/software/systemd/man/os-release.html
     while (getline(&line, &len, osRelease) != -1)
     {
-        sscanf(line, "NAME=%[^\n]", result.name.chars);
-        sscanf(line, "NAME=\"%[^\"]+", result.name.chars);
-        sscanf(line, "PRETTY_NAME=%[^\n]", result.prettyName.chars);
-        sscanf(line, "PRETTY_NAME=\"%[^\"]+", result.prettyName.chars);
-        sscanf(line, "ID=%[^\n]", result.id.chars);
-        sscanf(line, "ID=\"%[^\"]+", result.id.chars);
-        sscanf(line, "ID_LIKE=%[^\n]", result.idLike.chars);
-        sscanf(line, "ID_LIKE=\"%[^\"]+", result.idLike.chars);
-        sscanf(line, "VARIANT=%[^\n]", result.variant.chars);
-        sscanf(line, "VARIANT=\"%[^\"]+", result.variant.chars);
-        sscanf(line, "VARIANT_ID=%[^\n]", result.variantID.chars);
-        sscanf(line, "VARIANT_ID=\"%[^\"]+", result.variantID.chars);
-        sscanf(line, "VERSION=%[^\n]", result.version.chars);
-        sscanf(line, "VERSION=\"%[^\"]+", result.version.chars);
-        sscanf(line, "VERSION_ID=%[^\n]", result.versionID.chars);
-        sscanf(line, "VERSION_ID=\"%[^\"]+", result.versionID.chars);
-        sscanf(line, "VERSION_CODENAME=%[^\n]", result.codename.chars);
-        sscanf(line, "VERSION_CODENAME=\"%[^\"]+", result.codename.chars);
-        sscanf(line, "BUILD_ID=%[^\n]", result.buildID.chars);
-        sscanf(line, "BUILD_ID=\"%[^\"]+", result.buildID.chars);
+        ffGetPropValue(line, "NAME=", &result.name);
+        ffGetPropValue(line, "PRETTY_NAME=", &result.prettyName);
+        ffGetPropValue(line, "ID=", &result.id);
+        ffGetPropValue(line, "ID_LIKE=", &result.idLike);
+        ffGetPropValue(line, "VARIANT=", &result.variant);
+        ffGetPropValue(line, "VARIANT_ID=", &result.variantID);
+        ffGetPropValue(line, "VERSION=", &result.version);
+        ffGetPropValue(line, "VERSION_ID=", &result.versionID);
+        ffGetPropValue(line, "VERSION_CODENAME=", &result.codename);
+        ffGetPropValue(line, "BUILD_ID=", &result.buildID);
     }
-
-    ffStrbufRecalculateLength(&result.systemName);
-    ffStrbufRecalculateLength(&result.name);
-    ffStrbufRecalculateLength(&result.prettyName);
-    ffStrbufRecalculateLength(&result.id);
-    ffStrbufRecalculateLength(&result.idLike);
-    ffStrbufRecalculateLength(&result.variant);
-    ffStrbufRecalculateLength(&result.variantID);
-    ffStrbufRecalculateLength(&result.version);
-    ffStrbufRecalculateLength(&result.versionID);
-    ffStrbufRecalculateLength(&result.codename);
-    ffStrbufRecalculateLength(&result.buildID);
-    ffStrbufRecalculateLength(&result.architecture);
-    ffStrbufRecalculateLength(&result.error);
 
     if(line != NULL)
         free(line);

@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include <string.h>
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 4
@@ -31,41 +30,50 @@ static void printTerminalFont(FFinstance* instance, const char* font)
     ffStrbufDestroy(&pretty);
 }
 
-static void printTerminalFontFromConfigFile(FFinstance* instance, const char* configFile, const char* regex)
+static void printTerminalFontFromConfigFile(FFinstance* instance, const char* configFile, const char* start)
 {
-    char font[128];
-    ffParsePropFileConfig(instance, configFile, regex, font);
-    if(font[0] == '\0')
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find terminal font in \"$XDG_CONFIG_HOME/%s\"", regex, configFile);
-        return;
-    }
+    FFstrbuf font;
+    ffStrbufInit(&font);
+    ffParsePropFileConfig(instance, configFile, start, &font);
 
-    printTerminalFont(instance, font);
+    if(font.length == 0)
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find terminal font in \"$XDG_CONFIG_HOME/%s\"", configFile);
+    else
+        printTerminalFont(instance, font.chars);
+
+    ffStrbufDestroy(&font);
 }
 
 static void printKonsole(FFinstance* instance)
 {
-    char profile[128];
-    ffParsePropFileConfig(instance, "konsolerc", "DefaultProfile=%[^\n]", profile);
-    if(profile[0] == '\0')
+    FFstrbuf profile;
+    ffStrbufInit(&profile);
+    ffParsePropFileConfig(instance, "konsolerc", "DefaultProfile=", &profile);
+
+    if(profile.length == 0)
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"DefaultProfile=%[^\n]\" in \".config/konsolerc\"");
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"DefaultProfile=%[^\\n]\" in \".config/konsolerc\"");
+        ffStrbufDestroy(&profile);
         return;
     }
 
-    char profilePath[256];
-    sprintf(profilePath, ".local/share/konsole/%s", profile);
+    FFstrbuf profilePath;
+    ffStrbufInitA(&profilePath, 64);
+    ffStrbufAppendS(&profilePath, ".local/share/konsole/");
+    ffStrbufAppend(&profilePath, &profile);
 
-    char font[128];
-    ffParsePropFileHome(instance, profilePath, "Font=%[^\n]", font);
-    if(font[0] == '\0')
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath);
-        return;
-    }
+    FFstrbuf font;
+    ffStrbufInit(&font);
+    ffParsePropFileHome(instance, profilePath.chars, "Font=", &font);
 
-    printTerminalFont(instance, font);
+    if(font.length == 0)
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath.chars);
+    else
+        printTerminalFont(instance, font.chars);
+
+    ffStrbufDestroy(&font);
+    ffStrbufDestroy(&profilePath);
+    ffStrbufDestroy(&profile);
 }
 
 static void printTilixTerminal(FFinstance* instance)
@@ -97,42 +105,41 @@ static void printTilixTerminal(FFinstance* instance)
     else if(!res.boolValueSet || res.boolValue) // system font
         fontName = ffSettingsGetDConf(instance, "/org/gnome/desktop/interface/monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 
-    if(!fontName)
-    {
+    if(fontName == NULL)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Terminal font\" in Tilix settings");
-        ffStrbufDestroy(&key);
-        return;
-    }
+    else
+        printTerminalFont(instance, fontName);
 
-    printTerminalFont(instance, fontName);
     ffStrbufDestroy(&key);
 }
 
 static void printXCFETerminal(FFinstance* instance)
 {
-    char useSysFont[6];
+    FFstrbuf useSysFont;
+    ffStrbufInit(&useSysFont);
 
-    if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=%[^\n]", useSysFont))
+    if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=", &useSysFont))
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't open \"$XDG_CONFIG_HOME/xfce4/terminal/terminalrc\"");
+        ffStrbufDestroy(&useSysFont);
         return;
     }
 
-    if((useSysFont[0] == '\0') || strcasecmp(useSysFont, "FALSE") == 0)
+    if(useSysFont.length == 0 || ffStrbufIgnCaseCompS(&useSysFont, "FALSE") == 0)
     {
-        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=%[^\n]");
+        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=");
+        ffStrbufDestroy(&useSysFont);
         return;
     }
+
+    ffStrbufDestroy(&useSysFont);
 
     const char* fontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
 
     if(fontName == NULL)
-    {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"xsettings::/Gtk/MonospaceFontName\" in XFConf");
-        return;
-    }
-
-    printTerminalFont(instance, fontName);
+    else
+        printTerminalFont(instance, fontName);
 }
 
 static void printTTY(FFinstance* instance)
@@ -140,8 +147,7 @@ static void printTTY(FFinstance* instance)
     FFstrbuf font;
     ffStrbufInit(&font);
 
-    ffParsePropFile("/etc/vconsole.conf", "Font=%[^\n]", font.chars);
-    ffStrbufRecalculateLength(&font);
+    ffParsePropFile("/etc/vconsole.conf", "Font=", &font);
 
     if(font.length == 0)
     {
@@ -172,7 +178,7 @@ void ffPrintTerminalFont(FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
         printXCFETerminal(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
-        printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname=%[^\n]");
+        printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname=");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
         printTilixTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))

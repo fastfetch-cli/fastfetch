@@ -290,10 +290,8 @@ void ffCacheClose(FFcache* cache)
         fclose(cache->split);
 }
 
-bool ffParsePropFile(const char* fileName, const char* regex, char* buffer)
+bool ffParsePropFile(const char* fileName, const char* start, FFstrbuf* buffer)
 {
-    buffer[0] = '\0'; //If an error occures, this is the indicator
-
     char* line = NULL;
     size_t len = 0;
 
@@ -303,7 +301,7 @@ bool ffParsePropFile(const char* fileName, const char* regex, char* buffer)
 
     while (getline(&line, &len, file) != -1)
     {
-        if (sscanf(line, regex, buffer) > 0)
+        if(ffGetPropValue(line, start, buffer))
             break;
     }
 
@@ -314,7 +312,7 @@ bool ffParsePropFile(const char* fileName, const char* regex, char* buffer)
     return true;
 }
 
-bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
+bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
@@ -322,15 +320,17 @@ bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffStrbufAppendC(&absolutePath, '/');
     ffStrbufAppendS(&absolutePath, relativeFile);
 
-    bool result = ffParsePropFile(absolutePath.chars, regex, buffer);
+    bool result = ffParsePropFile(absolutePath.chars, start, buffer);
 
     ffStrbufDestroy(&absolutePath);
 
     return result;
 }
 
-bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* regex, char* buffer)
+bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
 {
+
+    uint32_t bufferLengthStart = buffer->length;
     bool foundAFile = false;
 
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
@@ -343,12 +343,12 @@ bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const
 
         ffStrbufAppendS(baseDir, relativeFile);
 
-        if(ffParsePropFile(baseDir->chars, regex, buffer))
+        if(ffParsePropFile(baseDir->chars, start, buffer))
             foundAFile = true;
 
         ffStrbufSubstrBefore(baseDir, baseDirLength);
 
-        if(*buffer != '\0')
+        if(bufferLengthStart < buffer->length)
             return foundAFile;
     }
 

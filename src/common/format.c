@@ -113,7 +113,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
         FFstrbuf placeholderValue;
         ffStrbufInit(&placeholderValue);
 
-        while(formatstr->chars[i] != '}' && i < formatstr->length)
+        while(i < formatstr->length && formatstr->chars[i] != '}')
             ffStrbufAppendC(&placeholderValue, formatstr->chars[i++]);
 
         // test for error, if so print it

@@ -21,16 +21,20 @@ static void printWMTheme(FFinstance* instance, const char* theme)
 
 static void printWMThemeFromConfigFile(FFinstance* instance, const char* configFile, const char* themeRegex, const char* defaultValue)
 {
-    char theme[256];
+    FFstrbuf theme;
+    ffStrbufInit(&theme);
 
-    if(!ffParsePropFileConfig(instance, configFile, themeRegex, theme))
+    if(!ffParsePropFileConfig(instance, configFile, themeRegex, &theme))
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Config file %s doesn't exist", configFile);
+        ffStrbufDestroy(&theme);
         return;
     }
 
-    if(*theme == '\0')
+    if(theme.length == 0)
     {
+        ffStrbufDestroy(&theme);
+
         if(defaultValue == NULL)
         {
             ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme in %s", configFile);
@@ -41,7 +45,8 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
         return;
     }
 
-    printWMTheme(instance, theme);
+    printWMTheme(instance, theme.chars);
+    ffStrbufDestroy(&theme);
 }
 
 static void printMutter(FFinstance* instance)
@@ -178,7 +183,7 @@ void ffPrintWMTheme(FFinstance* instance)
     }
 
     if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "KDE") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Plasma") == 0)
-        printWMThemeFromConfigFile(instance, "kwinrc", " theme=%s", "Breeze");
+        printWMThemeFromConfigFile(instance, "kwinrc", "theme=", "Breeze");
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm4") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm") == 0)
         printXFWM4(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)

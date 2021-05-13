@@ -27,7 +27,7 @@ static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* resul
         if(line[0] == '[')
         {
             char categoryName[32];
-            sscanf(line, "[%[^]]", categoryName);
+            sscanf(line, "[%32[^]]", categoryName);
 
             if(strcasecmp(categoryName, "General") == 0)
                 category = PLASMA_CATEGORY_GENERAL;
@@ -42,29 +42,15 @@ static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* resul
         }
 
         if(category == PLASMA_CATEGORY_KDE)
-        {
-            sscanf(line, "widgetStyle=%[^\n]", result->widgetStyle.chars);
-            sscanf(line, "widgetStyle=\"%[^\"]+", result->widgetStyle.chars);
-        }
+            ffGetPropValue(line, "widgetStyle=", &result->widgetStyle);
+        else if(category == PLASMA_CATEGORY_ICONS)
+            ffGetPropValue(line, "Theme=", &result->icons);
         else if(category == PLASMA_CATEGORY_GENERAL)
         {
-            sscanf(line, "ColorScheme=%[^\n]", result->colorScheme.chars);
-            sscanf(line, "ColorScheme=\"%[^\"]+", result->colorScheme.chars);
-
-            sscanf(line, "font=%[^\n]", result->font.chars);
-            sscanf(line, "font=\"%[^\"]+", result->font.chars);
-        }
-        else if(category == PLASMA_CATEGORY_ICONS)
-        {
-            sscanf(line, "Theme=%[^\n]", result->icons.chars);
-            sscanf(line, "Theme=\"%[^\"]+", result->icons.chars);
+            ffGetPropValue(line, "ColorScheme=", &result->colorScheme);
+            ffGetPropValue(line, "font=", &result->font);
         }
     }
-
-    ffStrbufRecalculateLength(&result->widgetStyle);
-    ffStrbufRecalculateLength(&result->colorScheme);
-    ffStrbufRecalculateLength(&result->icons);
-    ffStrbufRecalculateLength(&result->font);
 
     if(line != NULL)
         free(line);

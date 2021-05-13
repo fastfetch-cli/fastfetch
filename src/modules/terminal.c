@@ -33,9 +33,10 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFTerminalRes
 
     char name[256];
     char ppid[256];
-    if(fscanf(stat, "%*s (%[^)])%*s%s", name, ppid) != 2)
+    if(fscanf(stat, "%*s (%255[^)])%*s%255s", name, ppid) != 2)
     {
         ffStrbufSetS(&result->error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
+        fclose(stat);
         return;
     }
 
