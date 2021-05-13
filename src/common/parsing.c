@@ -126,6 +126,8 @@ bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
 
             while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
                 ++lineIndex;
+
+            continue;
         }
 
         if(line[lineIndex] == '\0' || line[lineIndex] != start[startIndex])
