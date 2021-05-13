@@ -90,7 +90,7 @@ FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttyp
 
     data.client = NULL; //error indicator
 
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libDConf, "libdocnf.so", mutex);
+    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libDConf, "libdconf.so", mutex);
 
     data.ffdconf_client_read_full = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_read_full", mutex);
     FF_LIBRARY_GVARIANT_GETTERS_INIT(library, data.variantGetters, mutex);
