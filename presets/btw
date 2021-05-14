@@ -1,0 +1,3 @@
+--logo arch
+--os-format "Arch Linux ({12})"
+--packages-format "{} (pacman)"
