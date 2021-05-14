@@ -37,7 +37,7 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
 
         if(defaultValue == NULL)
         {
-            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme in %s", configFile);
+            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find WM theme in %s", configFile);
             return;
         }
 
@@ -49,14 +49,27 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
     ffStrbufDestroy(&theme);
 }
 
+static void printWMThemeFromSettings(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey)
+{
+    const char* theme = ffSettingsGet(instance, dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
+
+    if(theme == NULL || *theme == '\0')
+    {
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find WM theme in DConf or GSettings");
+        return;
+    }
+
+    printWMTheme(instance, theme);
+}
+
 static void printMutter(FFinstance* instance)
 {
     const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
 
-    if(theme == NULL)
+    if(theme == NULL || *theme == '\0')
         theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
 
-    if(theme == NULL)
+    if(theme == NULL || *theme == '\0')
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't found mutter theme in GSettings / DConf");
         return;
@@ -190,8 +203,10 @@ void ffPrintWMTheme(FFinstance* instance)
         printMutter(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Muffin") == 0)
         printMuffin(instance);
+    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Marco") == 0)
+        printWMThemeFromSettings(instance, "/org/mate/Marco/general/theme", "org.mate.Marco.general", NULL, "theme");
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Openbox") == 0)
         printOpenbox(instance, &result->dePrettyName);
     else
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", result->dePrettyName.chars);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", result->wmPrettyName.chars);
 }

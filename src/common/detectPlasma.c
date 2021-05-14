@@ -78,6 +78,13 @@ const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
     ffStrbufInit(&result.icons);
     ffStrbufInit(&result.font);
 
+    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+    if(ffStrbufIgnCaseCompS(&wmde->deProcessName, "plasmashell") != 0)
+    {
+        pthread_mutex_unlock(&mutex);
+        return &result;
+    }
+
     bool foundAFile = false;
 
     //We need to do this because we use multiple threads on configDirs

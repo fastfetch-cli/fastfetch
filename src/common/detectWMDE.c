@@ -18,7 +18,8 @@ typedef enum DEHint
     FF_DE_HINT_PLASMA,
     FF_DE_HINT_GNOME,
     FF_DE_HINT_CINNAMON,
-    FF_DE_HINT_XFCE4
+    FF_DE_HINT_XFCE4,
+    FF_DE_HINT_MATE
 } DEHint;
 
 typedef struct ProcData
@@ -118,6 +119,11 @@ static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processNam
         ffStrbufSetS(&result->wmPrettyName, "Xfwm4");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
+    else if(ffStrbufIgnCaseCompS(processName, "Marco") == 0)
+    {
+        ffStrbufSetS(&result->wmPrettyName, "Marco");
+        *protocolHint = FF_PROTOCOL_HINT_X11;
+    }
     else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Mutter");
     else if(ffStrbufIgnCaseCompS(processName, "cinnamon-session") == 0)
@@ -142,6 +148,8 @@ static bool applyDEHintIfDE(const FFstrbuf* processName, DEHint* deHint)
         *deHint = FF_DE_HINT_CINNAMON;
     else if(ffStrbufIgnCaseCompS(processName, "xfce4-session") == 0)
         *deHint = FF_DE_HINT_XFCE4;
+    else if(ffStrbufIgnCaseCompS(processName, "mate-session") == 0)
+        *deHint = FF_DE_HINT_MATE;
 
     return *deHint != FF_DE_HINT_UNKNOWN;
 }
@@ -221,6 +229,34 @@ static void getCinnamon(FFWMDEResult* result)
     ffParsePropFile("/usr/share/applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version=", &result->deVersion);
 }
 
+static void getMate(FFinstance* instance, FFWMDEResult* result)
+{
+    ffStrbufSetS(&result->deProcessName, "mate-session");
+    ffStrbufSetS(&result->dePrettyName, "MATE");
+
+    //I parse the file 3 times by purpose, because the properties are not guaranteed to be in order
+    ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<platform>", &result->deVersion);
+    ffStrbufSubstrBeforeFirstC(&result->deVersion, '<');
+    ffStrbufAppendC(&result->deVersion, '.');
+    ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<minor>", &result->deVersion);
+    ffStrbufSubstrBeforeFirstC(&result->deVersion, '<');
+    ffStrbufAppendC(&result->deVersion, '.');
+    ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<micro>", &result->deVersion);
+    ffStrbufSubstrBeforeFirstC(&result->deVersion, '<');
+
+    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    {
+        ffProcessAppendStdOut(&result->deVersion, (char* const[]){
+            "mate-session",
+            "--version",
+            NULL
+        });
+
+        ffStrbufSubstrAfterFirstC(&result->deVersion, ' ');
+        ffStrbufTrim(&result->deVersion, ' ');
+    }
+}
+
 static void getXFCE4(FFinstance* instance, FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "xfce4-session");
@@ -257,6 +293,8 @@ static inline void getDEFromHint(FFinstance* instance, FFWMDEResult* result, Pro
         getCinnamon(result);
     else if(procData->deHint == FF_DE_HINT_XFCE4)
         getXFCE4(instance, result);
+    else if(procData->deHint == FF_DE_HINT_MATE)
+        getMate(instance, result);
 }
 
 static inline void getDE(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
@@ -280,6 +318,8 @@ static inline void getDE(FFinstance* instance, FFWMDEResult* result, ProcData* p
         getCinnamon(result);
     else if(strcasecmp(result->sessionDesktop, "XFCE") == 0 || strcasecmp(result->sessionDesktop, "X-XFCE") == 0 || strcasecmp(result->sessionDesktop, "XFCE4") == 0 || strcasecmp(result->sessionDesktop, "X-XFCE4") == 0)
         getXFCE4(instance, result);
+    else if(strcasecmp(result->sessionDesktop, "MATE") == 0 || strcasecmp(result->sessionDesktop, "X-MATE") == 0)
+        getMate(instance, result);
     else
     {
         ffStrbufSetS(&result->deProcessName, result->sessionDesktop);
