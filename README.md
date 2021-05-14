@@ -33,7 +33,7 @@ All categories not listed here should work without needing a specific implementa
 ```
 Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
 ```
-Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
+> **_NOTE:_** Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
 
 ##### Package managers:
 ```
@@ -45,12 +45,12 @@ Pacman, xbps, dpkg, Flatpak, Snap
 KWin, Mutter, Muffin, Marco, Openbox, XFWM, Sway, Wayfire, Weston
 ```
 
-##### Window manager themes:
+##### WM themes:
 ```
 KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
 ```
 
-##### DE Versions
+##### DE versions
 ```
 KDE Plasma, Gnome, Cinnamon, Mate, XFCE4
 ```
