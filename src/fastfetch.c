@@ -253,7 +253,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "host-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("host", "{} {} {}", 3,
+        constructAndPrintCommandHelpFormat("host", "{2} {3}", 3,
             "Host family",
             "Host name",
             "Host version"
