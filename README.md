@@ -29,28 +29,33 @@ The following libraries are used if present:
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
-### Logos:  
+#### Logos:  
 ```
 Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
 ```
 Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
 
-### Package managers:
+#### Package managers:
 ```
 Pacman, xbps, dpkg, Flatpak, Snap
 ```
 
-### Window managers:
+#### Window managers:
 ```
-KWin, Mutter, Muffin, Openbox, XFWM, Sway, Wayfire, Weston
-```
-
-### Window manager themes:
-```
-KWin, Mutter, Muffin, XFWM, Openbox (LXDE, LXQT & without DE)
+KWin, Mutter, Muffin, Marco, Openbox, XFWM, Sway, Wayfire, Weston
 ```
 
-### Terminal fonts:
+#### Window manager themes:
+```
+KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
+```
+
+##### DE Versions
+```
+KDE Plasma, Gnome, Cinnamon, Mate, XFCE4
+```
+
+#### Terminal fonts:
 ```
 konsole, xfce4-terminal, tilix, lxterminal, TTY
 ```
