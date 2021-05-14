@@ -412,6 +412,5 @@ const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
         getWMDE(instance, &result);
 
     pthread_mutex_unlock(&mutex);
-
     return &result;
 }
