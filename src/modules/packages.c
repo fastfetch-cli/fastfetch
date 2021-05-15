@@ -53,12 +53,6 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
     return count;
 }
 
-static void getActiveBranchManjaro(FFstrbuf buffer)
-{
-    if(ffParsePropFile("/etc/pacman-mirrors.conf", "Branch = ", &buffer) && buffer.length == 0)
-        ffStrbufSetS(&buffer, "stable");
-}
-
 void ffPrintPackages(FFinstance* instance)
 {
     uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
@@ -76,8 +70,9 @@ void ffPrintPackages(FFinstance* instance)
     }
     FFstrbuf manjaroBranch;
     ffStrbufInit(&manjaroBranch);
-    getActiveBranchManjaro(manjaroBranch);
-    ffStrbufRecalculateLength(&manjaroBranch); // needed for later length comparison...
+
+    if(ffParsePropFile("/etc/pacman-mirrors.conf", "Branch =", &manjaroBranch) && manjaroBranch.length == 0)
+        ffStrbufSetS(&manjaroBranch, "stable");
 
     if(instance->config.packagesFormat.length == 0)
     {
@@ -99,6 +94,9 @@ void ffPrintPackages(FFinstance* instance)
             if((all = all - pacman) > 0)
                 printf(", ");
         };
+
+        ffStrbufDestroy(&manjaroBranch);
+
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(flatpak)
@@ -122,5 +120,4 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &snap}
         });
     }
-    ffStrbufDestroy(&manjaroBranch);
 }
