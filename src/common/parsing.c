@@ -146,5 +146,7 @@ bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
     while(line[lineIndex] != '\n' && line[lineIndex] != '\0' && (quotes == NULL || *quotes != line[lineIndex]))
         ffStrbufAppendC(buffer, line[lineIndex++]);
 
+    ffStrbufTrim(buffer, ' ');
+
     return true;
 }
