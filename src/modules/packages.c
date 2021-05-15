@@ -53,6 +53,37 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
     return count;
 }
 
+static void getActiveBranch()
+{
+    FILE* file = fopen("/etc/pacman-mirrors.conf", "r");
+    if(file == NULL)
+        return; // No file or not Manjaro/based
+
+    char* line = NULL;
+    size_t len = 0, strip;
+    uint_fast8_t match = 0;
+
+    while (getline(&line, &len, file) != EOF)
+    {
+        if((strip = strspn(line, "\t ") > 0)) {
+            if(strip != len)
+                memmove(line, line + strip, len + 1 - strip);
+        }
+        if((match = sscanf(line, "Branch = %s", line)) > 0)
+            break;
+    }
+
+    fclose(file);
+
+    if(match > 0)
+        printf("[%s]", line);
+    else
+        printf("[stable]"); // defaults to stable
+
+    if(line != NULL)
+        free(line);
+}
+
 void ffPrintPackages(FFinstance* instance)
 {
     uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
@@ -77,6 +108,8 @@ void ffPrintPackages(FFinstance* instance)
         if(name > 0) \
         { \
             printf("%u ("#name")", name); \
+            if(name == pacman)  \
+                getActiveBranch(); \
             if((all = all - name) > 0) \
                 printf(", "); \
         };
