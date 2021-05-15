@@ -46,15 +46,15 @@ static inline void printHelp()
         "                 --print-available-presets:  list presets fastfetch knows about. They can be loaded with --load-config. (+)\n"
         "\n"
         "General options:\n"
-        "                --structure <structure>:          sets the structure of the fetch. Must be a colon seperated list of keys. Use --print-available-modules to show the default\n"
-        "                --set <key=value>:                hard set the value of an key\n"
+        "                --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use --print-available-modules to show the default\n"
+        "                --set <key=value>:                hard set the value of a key\n"
         "   -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)\n"
         "                --spacing <width>:                sets the distance between logo and text\n"
-        "   -s <str>,    --seperator <str>:                sets the seperator between key and value. Default is a colon with a space\n"
+        "   -s <str>,    --seperator <str>:                sets the separator between key and value. Default is a colon with a space\n"
         "   -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
         "                --show-errors <?value>:           print occuring errors\n"
         "   -r <?value>  --recache <?value>:               generate new cached values\n"
-        "                --nocache <?value>:               dont use cached values, but also dont overwrite existing ones\n"
+        "                --nocache <?value>:               don't use cached values, but also don't overwrite existing ones\n"
         "                --print-remaining-logo <?value>:  print the remaining logo, if it is higher than the number of lines shown\n"
         "                --multithreading <?value>:        use multiple threads to detect values\n"
         "                --load-config <file>:             load a config file (+)\n"
@@ -120,13 +120,13 @@ static inline void printHelp()
         "   --lib-XFConf <path>\n"
         "\n"
         "Module specific options:\n"
-        "   --disk-folders <folders>: A colon seperated list of folder paths for the disk output. Default is \"/:/home\"\n"
-        "   --battery-dir <folder>:   The directory were the battery folders are in. Standard: /sys/class/power_supply/\n"
+        "   --disk-folders <folders>: A colon separated list of folder paths for the disk output. Default is \"/:/home\"\n"
+        "   --battery-dir <folder>:   The directory where the battery folders are. Standard: /sys/class/power_supply/\n"
         "\n"
         "Parsing is not case sensitive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
         "If a value starts with a ?, it is optional. \"true\" will be used if not set.\n"
         "A (+) at the end indicates that more help can be printed with --help <option>\n"
-        "All options can be make permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
+        "All options can be made permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
     );
 }
 
@@ -148,48 +148,48 @@ static inline void printCommandHelpColor()
 static inline void printCommandHelpFormat()
 {
     puts(
-        "A format string is string that contains placeholder for values.\n"
-        "These placeholders beginn with a '{', contain the index of the value and end with a '}'.\n"
+        "A format string is a string that contains placeholders for values.\n"
+        "These placeholders begin with a '{', containing the index of the value, and end with a '}'.\n"
         "For example the format string \"Values: {1} ({2})\", with the values \"First\" and \"My second val\", will produce \"Values: First (My second val)\".\n"
-        "The format string can contain placeholdes in any oder and multiple occurences.\n"
-        "To include spaces when setting from command line, surround the whole string with double quotes (\").\n"
+        "The format string can contain placeholders in any order and have multiple occurences.\n"
+        "To include spaces when setting from the command line, surround the whole string with double quotes (\").\n"
         "\n"
         "If the value index is missing, meaning the placeholder is \"{}\", an internal counter sets the value index.\n"
-        "This means, that the format string \"Values: {1} ({2})\" is equivalent to \"Values: {} ({})\".\n"
-        "Note that this counter only counts empty placeholders, so the format string \"{2} {} {}\" will contain the second value, then the first, and then again the second.\n"
+        "This means that the format string \"Values: {1} ({2})\" is equivalent to \"Values: {} ({})\".\n"
+        "Note that this counter only counts empty placeholders, so the format string \"{2} {} {}\" will contain the second value, then the first, and then the second again.\n"
         "\n"
-        "To make formatting easier, a double open curly brace (\"{{\") will be printed as a single open curly brace and not counted as the beginn of a placeholder.\n"
-        "If a value index is missformatted or wants a non existing value, it will be printed as is, with the curly braces around it.\n"
+        "To make formatting easier, a double open curly brace (\"{{\") will be printed as a single open curly brace and not counted as the beginning of a placeholder.\n"
+        "If a value index is misformatted or wants a non-existing value, it will be printed as is, with the curly braces around it.\n"
         "If the last placeholder isn't closed, it will be treated like it was at the end of the format string.\n"
         "\n"
-        "To only print something if a variable is set use \"{?<index>} ... {?}\".\n"
-        "For example to only print a second value if it is set use \"{?2} Second value: {2}{?}\".\n"
+        "To only print something if a variable is set, use \"{?<index>} ... {?}\".\n"
+        "For example, to only print a second value if it is set, use \"{?2} Second value: {2}{?}\".\n"
         "If a \"{?}\" is found without an opener, it is printed as is.\n"
         "\n"
         "To only print something if a variable is not set, do the same as with if, just replace every '?' with a '!'.\n"
-        "For example to print a fallback for a second value if it is not set use \"{?2}{2}{?}{/2}Second value fallback{/}\".\n"
+        "For example to print a fallback for a second value if it is not set, use \"{?2}{2}{?}{/2}Second value fallback{/}\".\n"
         "\n"
-        "There is a special variable set if an error occured during detection, you can access it with \"{e}\", \"{error}\" or \"{0}\".\n"
-        "You can use ifs and not ifs with it like with an index, for example use \"{?e}some text{?}\" to print an text if an error occurred.\n"
+        "There is a special variable set if an error occured during detection. You can access it with \"{e}\", \"{error}\" or \"{0}\".\n"
+        "You can use ifs and not ifs with it like with an index. For example use \"{?e}some text{?}\", to print a text if an error occurred.\n"
         "\n"
-        "To stop formating at any point in the format string, use \"{-}\".\n"
+        "To stop formatting at any point in the format string, use \"{-}\".\n"
         "For example to print an error instead of the normal output if it occured, prefix the format string with \"{?e}{e}{-}{?}...\".\n"
         "\n"
         "To print something with color, start a placeholder with a '#' and then the linux terminal color encoding.\n"
-        "\"\\033[\" at the start and a 'm' at the end is automatically added, so don't do that.\n"
+        "\"\\033[\" at the start, and an 'm' at the end is automatically added, so don't do that.\n"
         "A \"{#}\" is equivalent to a \"{#0}\" and resets everything to normal.\n"
-        "For example to print something pink and underline use \"{#4;35}...{#}\".\n"
+        "For example to print something pink and underline, use \"{#4;35}...{#}\".\n"
         "If not in a format string, fastfetch wraps errors with \"{#1;31}error{#}\", so you might want to do that to if you show errors.\n"
         "Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.\n"
-        "Which escape codes are supported and how they look like is defined by your terminal.\n"
+        "Which escape codes are supported and how they look is defined by your terminal.\n"
         "\n"
-        "If an format string evaluates to an empty value, the whole line in the output will be discarded.\n"
+        "If a format string evaluates to an empty value, the whole line in the output will be discarded.\n"
         "You can therefore use --host-format \" \" to disable host output.\n"
-        "Note that --host-format \"\" would evaluate as not set, and therefore use the built in host format\n"
+        "Note that --host-format \"\" would evaluate as not set, and therefore use the built-in host format\n"
         "This can be used to print nothing if an error occured: prefix the format string with \"{?e}{-}{?}...\".\n"
         "\n"
-        "Format string is also the way to go to set a fixed value, just use one without placeholders.\n"
-        "For example when running in headless mode you could use \"--resolution-format \"Preferred\"."
+        "Format string is also the way to go to set a fixed value - just use one without placeholders.\n"
+        "For example when running in headless mode, you could use \"--resolution-format \"Preferred\"."
     );
 }
 
@@ -216,7 +216,7 @@ static void constructAndPrintCommandHelpFormat(const char* name, const char* def
     printf("--%s-format:\n", name);
     printf("Sets the format string for %s output.\n", name);
     puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
-    puts("Following values are passed:");
+    puts("The following values are passed:");
 
     for(uint32_t i = 1; i <= numArgs; i++)
         printf("        {%u}: %s\n", i, va_arg(argp, const char*));
@@ -237,7 +237,7 @@ static inline void printCommandHelp(const char* command)
     else if(strcasecmp(command, "os-format") == 0)
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
-            "System name, typically just Linux",
+            "System name (typically just Linux)",
             "Name of the OS",
             "Pretty name of the OS",
             "ID of the OS",
@@ -567,12 +567,12 @@ static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
             continue;
         }
 
-        //Seperate key and value by simply replacing the first space with a \0
+        //Separate key and value by simply replacing the first space with a \0
         char* valueStart = &line.chars[firstSpace];
         *valueStart = '\0';
         ++valueStart;
 
-        //Trim whitespace at beginn of value
+        //Trim whitespace at beginning of value
         while(*valueStart == ' ')
             ++valueStart;
 
@@ -662,7 +662,7 @@ static inline void optionParseString(const char* key, const char* value, FFstrbu
         fprintf(stderr, "Error: usage: %s <str>\n", key);
         exit(477);
     }
-    ffStrbufEnsureCapacity(buffer, 64); //This is not needed as ffStrbufSetS will resize capacity if needed, but giving an higher start should improve performance
+    ffStrbufEnsureCapacity(buffer, 64); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
     ffStrbufSetS(buffer, value);
 }
 
@@ -760,7 +760,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
-        //Set cacheSave as well, beacuse the user expects the values to  be cached when expliciting using --recache
+        //Set cacheSave as well, beacuse the user expects the values to be cached when expliciting using --recache
         instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = instance->config.recache;
     }
@@ -903,7 +903,7 @@ static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
     FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
     uint32_t filenameLength = filename->length;
 
-    mkdir(filename->chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder but whow knews
+    mkdir(filename->chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder, but who knows
 
     ffStrbufAppendS(filename, "/fastfetch/");
     mkdir(filename->chars, S_IRWXU | S_IRGRP | S_IROTH);
