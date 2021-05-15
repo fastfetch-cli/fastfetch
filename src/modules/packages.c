@@ -68,6 +68,11 @@ void ffPrintPackages(FFinstance* instance)
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, FF_PACKAGES_NUM_FORMAT_ARGS, "No packages from known package managers found");
         return;
     }
+    FFstrbuf manjaroBranch;
+    ffStrbufInit(&manjaroBranch);
+
+    if(ffParsePropFile("/etc/pacman-mirrors.conf", "Branch =", &manjaroBranch) && manjaroBranch.length == 0)
+        ffStrbufSetS(&manjaroBranch, "stable");
 
     if(instance->config.packagesFormat.length == 0)
     {
@@ -81,7 +86,17 @@ void ffPrintPackages(FFinstance* instance)
                 printf(", "); \
         };
 
-        FF_PRINT_PACKAGE(pacman)
+        if(pacman > 0)
+        {
+            printf("%u (pacman)", pacman);
+            if(manjaroBranch.length > 0)
+                printf("[%s]", manjaroBranch.chars);
+            if((all = all - pacman) > 0)
+                printf(", ");
+        };
+
+        ffStrbufDestroy(&manjaroBranch);
+
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(flatpak)
