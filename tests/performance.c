@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     )
 
     FASTFETCH_TEST_PERFORMANCE(ffPrintTitle(&instance))
-    FASTFETCH_TEST_PERFORMANCE(ffPrintSeperator(&instance))
+    FASTFETCH_TEST_PERFORMANCE(ffPrintSeparator(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintOS(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintHost(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintKernel(&instance))

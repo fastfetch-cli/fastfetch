@@ -92,7 +92,7 @@ set(SRCS
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
-    src/modules/seperator.c
+    src/modules/separator.c
     src/modules/os.c
     src/modules/host.c
     src/modules/kernel.c

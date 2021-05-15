@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-void ffPrintSeperator(FFinstance* instance)
+void ffPrintSeparator(FFinstance* instance)
 {
     ffPrintLogoLine(instance);
 

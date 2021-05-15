@@ -33,7 +33,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
 
     ffStrbufWriteTo(&key, stdout);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
-    ffStrbufWriteTo(&instance->config.seperator, stdout);
+    ffStrbufWriteTo(&instance->config.separator, stdout);
     ffStrbufDestroy(&key);
 }
 

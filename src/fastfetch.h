@@ -37,7 +37,7 @@ typedef struct FFconfig
 {
     FFlogo logo;
     uint16_t logo_spacing;
-    FFstrbuf seperator;
+    FFstrbuf separator;
     int16_t offsetx;
     FFstrbuf color;
     uint32_t titleLength;
@@ -303,7 +303,7 @@ const FFTerminalResult* ffDetectTerminal(FFinstance* instance);
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
 void ffPrintTitle(FFinstance* instance);
-void ffPrintSeperator(FFinstance* instance);
+void ffPrintSeparator(FFinstance* instance);
 void ffPrintOS(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
 void ffPrintKernel(FFinstance* instance);

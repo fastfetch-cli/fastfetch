@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-#define FASTFETCH_DEFAULT_STRUCTURE "Title:Seperator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
+#define FASTFETCH_DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
     "# Fastfetch configuration\n" \
@@ -50,7 +50,7 @@ static inline void printHelp()
         "                --set <key=value>:                hard set the value of a key\n"
         "   -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)\n"
         "                --spacing <width>:                sets the distance between logo and text\n"
-        "   -s <str>,    --seperator <str>:                sets the separator between key and value. Default is a colon with a space\n"
+        "   -s <str>,    --separator <str>:                sets the separator between key and value. Default is a colon with a space\n"
         "   -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
         "                --show-errors <?value>:           print occuring errors\n"
         "   -r <?value>  --recache <?value>:               generate new cached values\n"
@@ -472,7 +472,7 @@ static inline void printAvailableModules()
         "OS\n"
         "Packages\n"
         "Resolution\n"
-        "Seperator\n"
+        "Separator\n"
         "Shell\n"
         "Terminal\n"
         "TerminalFont\n"
@@ -746,17 +746,17 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             exit(411);
         }
 
-        char* seperator = strchr(value, '=');
+        char* separator = strchr(value, '=');
 
-        if(seperator == NULL)
+        if(separator == NULL)
         {
             fprintf(stderr, "Error: usage: %s <key=value>, '=' missing\n", key);
             exit(412);
         }
 
-        *seperator = '\0';
+        *separator = '\0';
 
-        ffValuestoreSet(&data->valuestore, value, seperator + 1);
+        ffValuestoreSet(&data->valuestore, value, separator + 1);
     }
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
@@ -785,8 +785,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
         optionParseString(key, value, &data->logoName);
-    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--seperator") == 0)
-        optionParseString(key, value, &instance->config.seperator);
+    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
+        optionParseString(key, value, &instance->config.separator);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
         optionParseString(key, value, &instance->config.color);
     else if(strcasecmp(key, "--os-format") == 0)
@@ -974,8 +974,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintBreak(instance);
     else if(strcasecmp(line, "title") == 0)
         ffPrintTitle(instance);
-    else if(strcasecmp(line, "seperator") == 0)
-        ffPrintSeperator(instance);
+    else if(strcasecmp(line, "separator") == 0)
+        ffPrintSeparator(instance);
     else if(strcasecmp(line, "os") == 0)
         ffPrintOS(instance);
     else if(strcasecmp(line, "host") == 0)

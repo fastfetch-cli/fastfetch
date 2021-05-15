@@ -100,7 +100,7 @@ static void defaultConfig(FFconfig* config)
 {
     ffStrbufInit(&config->color);
     config->logo_spacing = 4;
-    ffStrbufInitS(&config->seperator, ": ");
+    ffStrbufInitS(&config->separator, ": ");
     config->offsetx = 0;
     config->titleLength = 20; // This is overwritten by ffPrintTitle
     config->colorLogo = true;
