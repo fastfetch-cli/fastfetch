@@ -105,7 +105,7 @@ void ffPrintCPU(FFinstance* instance)
         " 2-Core", " 4-Core", " 6-Core", " 8-Core", " 10-Core", " 12-Core", " 14-Core", " 16-Core"
     };
 
-    ffStrbufRemoveStringsA(&namePretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
+    ffStrbufRemoveStringsA(&namePretty, sizeof(removeStrings) / (sizeof(removeStrings) / sizeof(removeStrings[0])), removeStrings);
     ffStrbufSubstrBeforeFirstC(&namePretty, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&namePretty, ' '); //If we removed the @ in previous step there was most likely a space before it
 
