@@ -196,7 +196,7 @@ void ffPrintWMTheme(FFinstance* instance)
     }
 
     if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "KWin") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "KDE") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Plasma") == 0)
-        printWMThemeFromConfigFile(instance, "kwinrc", "theme=", "Breeze");
+        printWMThemeFromConfigFile(instance, "kwinrc", "theme =", "Breeze");
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm4") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm") == 0)
         printXFWM4(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)

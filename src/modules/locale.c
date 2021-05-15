@@ -28,7 +28,7 @@ void ffPrintLocale(FFinstance* instance)
 	FFstrbuf locale;
     ffStrbufInit(&locale);
 
-    ffParsePropFile("/etc/locale.conf", "LANG=", &locale);
+    ffParsePropFile("/etc/locale.conf", "LANG =", &locale);
 
 	if (locale.length == 0)
         getLocaleFromEnv(&locale);

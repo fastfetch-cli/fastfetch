@@ -118,7 +118,7 @@ bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
 
     while(start[startIndex] != '\0')
     {
-        // Any amount of whitespace in the format string matches any amount of whitespace in the line
+        // Any amount of whitespace in the format string matches any amount of whitespace in the line, even none
         if(start[startIndex] == ' ' || start[startIndex] == '\t')
         {
             while(start[startIndex] == ' ' || start[startIndex] == '\t')
@@ -137,6 +137,10 @@ bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
         ++startIndex;
     }
 
+    //Skip any amount of whitespace at the begin of the value
+    while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
+        ++lineIndex;
+
     //Allow quotet values
     const char* quotes = NULL;
     if(line[lineIndex] == '"' || line[lineIndex] == '\'')
@@ -146,7 +150,7 @@ bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
     while(line[lineIndex] != '\n' && line[lineIndex] != '\0' && (quotes == NULL || *quotes != line[lineIndex]))
         ffStrbufAppendC(buffer, line[lineIndex++]);
 
-    ffStrbufTrim(buffer, ' ');
+    ffStrbufTrimRight(buffer, ' ');
 
     return true;
 }

@@ -54,16 +54,16 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
     // https://www.freedesktop.org/software/systemd/man/os-release.html
     while (getline(&line, &len, osRelease) != -1)
     {
-        ffGetPropValue(line, "NAME=", &result.name);
-        ffGetPropValue(line, "PRETTY_NAME=", &result.prettyName);
-        ffGetPropValue(line, "ID=", &result.id);
-        ffGetPropValue(line, "ID_LIKE=", &result.idLike);
-        ffGetPropValue(line, "VARIANT=", &result.variant);
-        ffGetPropValue(line, "VARIANT_ID=", &result.variantID);
-        ffGetPropValue(line, "VERSION=", &result.version);
-        ffGetPropValue(line, "VERSION_ID=", &result.versionID);
-        ffGetPropValue(line, "VERSION_CODENAME=", &result.codename);
-        ffGetPropValue(line, "BUILD_ID=", &result.buildID);
+        ffGetPropValue(line, "NAME =", &result.name);
+        ffGetPropValue(line, "PRETTY_NAME =", &result.prettyName);
+        ffGetPropValue(line, "ID =", &result.id);
+        ffGetPropValue(line, "ID_LIKE =", &result.idLike);
+        ffGetPropValue(line, "VARIANT =", &result.variant);
+        ffGetPropValue(line, "VARIANT_ID =", &result.variantID);
+        ffGetPropValue(line, "VERSION =", &result.version);
+        ffGetPropValue(line, "VERSION_ID =", &result.versionID);
+        ffGetPropValue(line, "VERSION_CODENAME =", &result.codename);
+        ffGetPropValue(line, "BUILD_ID =", &result.buildID);
     }
 
     if(line != NULL)

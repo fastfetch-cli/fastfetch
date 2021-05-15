@@ -212,21 +212,21 @@ static void getKDE(FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, "KDE Plasma");
-    ffParsePropFile("/usr/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version=", &result->deVersion);
+    ffParsePropFile("/usr/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
 }
 
 static void getGnome(FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
     ffStrbufSetS(&result->dePrettyName, "GNOME");
-    ffParsePropFile("/usr/share/gnome-shell/org.gnome.Extensions", "version: ", &result->deVersion);
+    ffParsePropFile("/usr/share/gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
 }
 
 static void getCinnamon(FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "cinnamon");
     ffStrbufSetS(&result->dePrettyName, "Cinnamon");
-    ffParsePropFile("/usr/share/applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version=", &result->deVersion);
+    ffParsePropFile("/usr/share/applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
 }
 
 static void getMate(FFinstance* instance, FFWMDEResult* result)
@@ -261,7 +261,7 @@ static void getXFCE4(FFinstance* instance, FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "xfce4-session");
     ffStrbufSetS(&result->dePrettyName, "Xfce4");
-    ffParsePropFile("/usr/share/gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version ", &result->deVersion);
+    ffParsePropFile("/usr/share/gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {

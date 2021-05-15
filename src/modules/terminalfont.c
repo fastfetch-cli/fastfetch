@@ -48,7 +48,7 @@ static void printKonsole(FFinstance* instance)
 {
     FFstrbuf profile;
     ffStrbufInit(&profile);
-    ffParsePropFileConfig(instance, "konsolerc", "DefaultProfile=", &profile);
+    ffParsePropFileConfig(instance, "konsolerc", "DefaultProfile =", &profile);
 
     if(profile.length == 0)
     {
@@ -64,7 +64,7 @@ static void printKonsole(FFinstance* instance)
 
     FFstrbuf font;
     ffStrbufInit(&font);
-    ffParsePropFileHome(instance, profilePath.chars, "Font=", &font);
+    ffParsePropFileHome(instance, profilePath.chars, "Font =", &font);
 
     if(font.length == 0)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath.chars);
@@ -118,7 +118,7 @@ static void printXCFETerminal(FFinstance* instance)
     FFstrbuf useSysFont;
     ffStrbufInit(&useSysFont);
 
-    if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem=", &useSysFont))
+    if(!ffParsePropFileConfig(instance, "xfce4/terminal/terminalrc", "FontUseSystem =", &useSysFont))
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't open \"$XDG_CONFIG_HOME/xfce4/terminal/terminalrc\"");
         ffStrbufDestroy(&useSysFont);
@@ -127,7 +127,7 @@ static void printXCFETerminal(FFinstance* instance)
 
     if(useSysFont.length == 0 || ffStrbufIgnCaseCompS(&useSysFont, "FALSE") == 0)
     {
-        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName=");
+        printTerminalFontFromConfigFile(instance, "xfce4/terminal/terminalrc", "FontName =");
         ffStrbufDestroy(&useSysFont);
         return;
     }
@@ -147,7 +147,7 @@ static void printTTY(FFinstance* instance)
     FFstrbuf font;
     ffStrbufInit(&font);
 
-    ffParsePropFile("/etc/vconsole.conf", "Font=", &font);
+    ffParsePropFile("/etc/vconsole.conf", "Font =", &font);
 
     if(font.length == 0)
     {
@@ -178,7 +178,7 @@ void ffPrintTerminalFont(FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
         printXCFETerminal(instance);
     else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
-        printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname=");
+        printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
         printTilixTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
