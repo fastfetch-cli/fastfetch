@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
     //Printing
     ffPrintTitle(&instance);
-    ffPrintSeperator(&instance);
+    ffPrintSeparator(&instance);
     ffPrintOS(&instance);
     ffPrintHost(&instance);
     ffPrintKernel(&instance);

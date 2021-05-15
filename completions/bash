@@ -126,7 +126,7 @@ __fastfetch_completion()
         "--color"
         "--spacing"
         "-s"
-        "--seperator"
+        "--separator"
         "-x"
         "--offsetx"
         "--structure"
