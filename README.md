@@ -42,7 +42,7 @@ Pacman, xbps, dpkg, Flatpak, Snap
 
 ##### Window managers:
 ```
-KWin, Mutter, Muffin, Marco, Openbox, XFWM, Sway, Wayfire, Weston
+KWin, Mutter, Muffin, Marco, XFWM, Openbox, Sway, Wayfire, Weston
 ```
 
 ##### WM themes:
