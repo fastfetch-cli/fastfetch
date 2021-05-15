@@ -53,32 +53,10 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
     return count;
 }
 
-static void getActiveBranch()
+static void getActiveBranchManjaro(FFstrbuf buffer)
 {
-    FILE* file = fopen("/etc/pacman-mirrors.conf", "r");
-    if(file == NULL)
-        return; // No file or not Manjaro[based]
-
-    char* line = NULL;
-    size_t len = 0, strip;
-    uint_fast8_t match = 0;
-
-    while (getline(&line, &len, file) != EOF)
-    {
-        if((strip = strspn(line, "\t ") > 0)) {
-            if(strip != len)
-                memmove(line, line + strip, len + 1 - strip);
-        }
-        if((match = sscanf(line, "Branch = %s", line)) > 0)
-            break;
-    }
-
-    fclose(file);
-
-    match > 0 ? printf("[%s]", line) : printf("[stable]");
-
-    if(line != NULL)
-        free(line);
+    if(ffParsePropFile("/etc/pacman-mirrors.conf", "Branch = ", &buffer) && buffer.length == 0)
+        ffStrbufSetS(&buffer, "stable");
 }
 
 void ffPrintPackages(FFinstance* instance)
@@ -96,6 +74,10 @@ void ffPrintPackages(FFinstance* instance)
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, FF_PACKAGES_NUM_FORMAT_ARGS, "No packages from known package managers found");
         return;
     }
+    FFstrbuf manjaroBranch;
+    ffStrbufInit(&manjaroBranch);
+    getActiveBranchManjaro(manjaroBranch);
+    ffStrbufRecalculateLength(&manjaroBranch); // needed for later length comparison...
 
     if(instance->config.packagesFormat.length == 0)
     {
@@ -105,13 +87,18 @@ void ffPrintPackages(FFinstance* instance)
         if(name > 0) \
         { \
             printf("%u ("#name")", name); \
-            if(name == pacman)  \
-                getActiveBranch(); \
             if((all = all - name) > 0) \
                 printf(", "); \
         };
 
-        FF_PRINT_PACKAGE(pacman)
+        if(pacman > 0)
+        {
+            printf("%u (pacman)", pacman);
+            if(manjaroBranch.length > 0)
+                printf("[%s]", manjaroBranch.chars);
+            if((all = all - pacman) > 0)
+                printf(", ");
+        };
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(flatpak)
@@ -135,4 +122,5 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &snap}
         });
     }
+    ffStrbufDestroy(&manjaroBranch);
 }
