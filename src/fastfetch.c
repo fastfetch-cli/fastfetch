@@ -278,9 +278,10 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman), {3} (xbps), {4} (dpkg), {5}, (flatpak), {6} (snap)", 6,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (xbps), {5} (dpkg), {6}, (flatpak), {7} (snap)", 7,
             "Number of all packages",
             "Number of pacman packages",
+            "Pacman branch on manjaro",
             "Number of xbps packages",
             "Number of dpkg packages",
             "Number of flatpak packages",

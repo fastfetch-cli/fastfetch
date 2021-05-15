@@ -4,7 +4,7 @@
 #include <dirent.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 6
+#define FF_PACKAGES_NUM_FORMAT_ARGS 7
 
 static uint32_t getNumElements(const char* dirname, unsigned char type) {
     uint32_t num_elements = 0;
@@ -68,9 +68,9 @@ void ffPrintPackages(FFinstance* instance)
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, FF_PACKAGES_NUM_FORMAT_ARGS, "No packages from known package managers found");
         return;
     }
+
     FFstrbuf manjaroBranch;
     ffStrbufInit(&manjaroBranch);
-
     if(ffParsePropFile("/etc/pacman-mirrors.conf", "Branch =", &manjaroBranch) && manjaroBranch.length == 0)
         ffStrbufSetS(&manjaroBranch, "stable");
 
@@ -95,8 +95,6 @@ void ffPrintPackages(FFinstance* instance)
                 printf(", ");
         };
 
-        ffStrbufDestroy(&manjaroBranch);
-
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(flatpak)
@@ -114,10 +112,13 @@ void ffPrintPackages(FFinstance* instance)
         ffPrintFormatString(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, NULL, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &all},
             {FF_FORMAT_ARG_TYPE_UINT, &pacman},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &manjaroBranch},
             {FF_FORMAT_ARG_TYPE_UINT, &xbps},
             {FF_FORMAT_ARG_TYPE_UINT, &dpkg},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpak},
             {FF_FORMAT_ARG_TYPE_UINT, &snap}
         });
     }
+
+    ffStrbufDestroy(&manjaroBranch);
 }

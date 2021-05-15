@@ -289,7 +289,6 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
 {
-
     while(strbuf->length > 0 && strbuf->chars[strbuf->length - 1] == c)
         --strbuf->length;
     strbuf->chars[strbuf->length] = '\0';
