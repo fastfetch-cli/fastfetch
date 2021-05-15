@@ -57,7 +57,7 @@ static void getActiveBranch()
 {
     FILE* file = fopen("/etc/pacman-mirrors.conf", "r");
     if(file == NULL)
-        return; // No file or not Manjaro/based
+        return; // No file or not Manjaro[based]
 
     char* line = NULL;
     size_t len = 0, strip;
@@ -75,10 +75,7 @@ static void getActiveBranch()
 
     fclose(file);
 
-    if(match > 0)
-        printf("[%s]", line);
-    else
-        printf("[stable]"); // defaults to stable
+    match > 0 ? printf("[%s]", line) : printf("[stable]");
 
     if(line != NULL)
         free(line);
