@@ -320,9 +320,9 @@ static bool strbufRemoveTest(FFstrbuf* strbuf, uint32_t i, const char* substr)
 
 void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
 {
-    for(uint32_t i = 0; i < strbuf->length; i++)
+    for(uint32_t k = 0; k < numStrings; k++)
     {
-        for(uint32_t k = 0; k < numStrings; k++)
+        for(uint32_t i = 0; i < strbuf->length; i++)
             while(strbufRemoveTest(strbuf, i, strings[k]));
     }
 }
