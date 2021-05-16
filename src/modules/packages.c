@@ -6,15 +6,15 @@
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 7
 
-static uint32_t getNumElements(const char* dirname, unsigned char type) {
-    uint32_t num_elements = 0;
-    DIR * dirp;
-    struct dirent *entry;
-
-    dirp = opendir(dirname);
+static uint32_t getNumElements(const char* dirname, unsigned char type)
+{
+    DIR* dirp = opendir(dirname);
     if(dirp == NULL)
         return 0;
 
+    uint32_t num_elements = 0;
+
+    struct dirent *entry;
     while((entry = readdir(dirp)) != NULL) {
         if(entry->d_type == type)
             ++num_elements;

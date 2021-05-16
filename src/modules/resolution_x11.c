@@ -35,10 +35,11 @@ static void xCloseDisplay(void* library, Display* display)
 
 void ffPrintResolutionX11Backend(FFinstance* instance)
 {
-    void* x11 = dlopen(instance->config.libX11.length == 0 ? "libX11.so" : instance->config.libX11.chars, RTLD_LAZY);
+    const char* libX11Name = instance->config.libX11.length == 0 ? "libX11.so" : instance->config.libX11.chars;
+    void* x11 = dlopen(libX11Name, RTLD_LAZY);
     if(x11 == NULL)
     {
-        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.resolutionKey, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS, "dlopen(\"libX11.so\", RTLD_LAZY) == NULL");
+        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.resolutionKey, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS, "dlopen(\"%s\", RTLD_LAZY) == NULL", libX11Name);
         return;
     }
 
