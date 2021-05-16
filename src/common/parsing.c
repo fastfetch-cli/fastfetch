@@ -107,48 +107,74 @@ void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size)
     }
 }
 
-bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
+bool ffGetPropValue(const char* lines, const char* start, FFstrbuf* buffer)
 {
-    uint32_t lineIndex = 0;
-    uint32_t startIndex = 0;
+    if(*lines == '\0')
+        return false;
+
+    const char* startStart = start;
 
     //Skip any amount of whitespace at the begin of line
-    while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
-        ++lineIndex;
+    while(*lines == ' ' || *lines == '\t')
+        ++lines;
 
-    while(start[startIndex] != '\0')
+    while(*start != '\0')
     {
         // Any amount of whitespace in the format string matches any amount of whitespace in the line, even none
-        if(start[startIndex] == ' ' || start[startIndex] == '\t')
+        if(*start == ' ' || *start == '\t')
         {
-            while(start[startIndex] == ' ' || start[startIndex] == '\t')
-                ++startIndex;
+            while(*start == ' ' || *start == '\t')
+                ++start;
 
-            while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
-                ++lineIndex;
+            while(*lines == ' ' || *lines == '\t')
+                ++lines;
 
             continue;
         }
 
-        if(line[lineIndex] == '\0' || line[lineIndex] != start[startIndex])
+        //Line doesn't match start, skip it
+        if(*lines != *start)
+        {
+            while(*lines != '\0' && *lines != '\n')
+                ++lines;
+            //Handle both cases in the following ifs
+        }
+
+        //We reached the end of all lines without finding something
+        if(*lines == '\0')
             return false;
 
-        ++lineIndex;
-        ++startIndex;
+        ++lines;
+
+        if(*lines == '\n')
+            start = startStart; //We reached we end of line, begin again from the next line.
+        else
+            ++start; //Line and start match, continue testing
     }
 
-    //Skip any amount of whitespace at the begin of the value
-    while(line[lineIndex] == ' ' || line[lineIndex] == '\t')
-        ++lineIndex;
+    char valueEnd = '\n';
 
-    //Allow quotet values
-    const char* quotes = NULL;
-    if(line[lineIndex] == '"' || line[lineIndex] == '\'')
-        quotes = &line[lineIndex++];
+    //Allow faster parsing of XML
+    if(*(lines - 1) == '>')
+        valueEnd = '<';
+
+    //Skip any amount of whitespace at the begin of the value
+    while(*lines == ' ' || *lines == '\t')
+        ++lines;
+
+    //Allow faster parsing of quotet values
+    if(*lines == '"' || *lines == '\'')
+    {
+        valueEnd = *lines;
+        ++lines;
+    }
 
     //Copy the value to the buffer
-    while(line[lineIndex] != '\n' && line[lineIndex] != '\0' && (quotes == NULL || *quotes != line[lineIndex]))
-        ffStrbufAppendC(buffer, line[lineIndex++]);
+    while(*lines != '\0' && *lines != valueEnd)
+    {
+        ffStrbufAppendC(buffer, *lines);
+        ++lines;
+    }
 
     ffStrbufTrimRight(buffer, ' ');
 
