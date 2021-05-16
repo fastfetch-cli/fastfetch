@@ -107,16 +107,16 @@ void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size)
     }
 }
 
-bool ffGetPropValue(const char* lines, const char* start, FFstrbuf* buffer)
+static bool getPropValueLine(const char** linePtr, const char* start, FFstrbuf* buffer)
 {
-    if(*lines == '\0')
+    const char* line = *linePtr;
+
+    if(*line == '\0')
         return false;
 
-    const char* startStart = start;
-
     //Skip any amount of whitespace at the begin of line
-    while(*lines == ' ' || *lines == '\t')
-        ++lines;
+    while(*line == ' ' || *line == '\t')
+        ++line;
 
     while(*start != '\0')
     {
@@ -126,57 +126,68 @@ bool ffGetPropValue(const char* lines, const char* start, FFstrbuf* buffer)
             while(*start == ' ' || *start == '\t')
                 ++start;
 
-            while(*lines == ' ' || *lines == '\t')
-                ++lines;
+            while(*line == ' ' || *line == '\t')
+                ++line;
 
             continue;
         }
 
         //Line doesn't match start, skip it
-        if(*lines != *start)
-        {
-            while(*lines != '\0' && *lines != '\n')
-                ++lines;
-            //Handle both cases in the following ifs
-        }
-
-        //We reached the end of all lines without finding something
-        if(*lines == '\0')
+        if(*line != *start || *line == '\0')
             return false;
 
-        ++lines;
-
-        if(*lines == '\n')
-            start = startStart; //We reached we end of line, begin again from the next line.
-        else
-            ++start; //Line and start match, continue testing
+        //Line and start match, continue testing
+        ++line;
+        ++start;
     }
 
     char valueEnd = '\n';
 
     //Allow faster parsing of XML
-    if(*(lines - 1) == '>')
+    if(*(line - 1) == '>')
         valueEnd = '<';
 
     //Skip any amount of whitespace at the begin of the value
-    while(*lines == ' ' || *lines == '\t')
-        ++lines;
+    while(*line == ' ' || *line == '\t')
+        ++line;
 
     //Allow faster parsing of quotet values
-    if(*lines == '"' || *lines == '\'')
+    if(*line == '"' || *line == '\'')
     {
-        valueEnd = *lines;
-        ++lines;
+        valueEnd = *line;
+        ++line;
     }
 
     //Copy the value to the buffer
-    while(*lines != '\0' && *lines != valueEnd)
+    while(*line != valueEnd && *line != '\n' && *line != '\0')
     {
-        ffStrbufAppendC(buffer, *lines);
-        ++lines;
+        ffStrbufAppendC(buffer, *line);
+        ++line;
     }
 
     ffStrbufTrimRight(buffer, ' ');
+
+    return true;
+}
+
+bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer)
+{
+    return getPropValueLine(&line, start, buffer);
+}
+
+bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buffer)
+{
+    while(!getPropValueLine(&lines, start, buffer))
+    {
+        while(*lines != '\0' && *lines != '\n')
+            ++lines;
+
+        if(*lines == '\0')
+            return false;
+
+        //Skip '\n'
+        ++lines;
+    }
 
     return true;
 }
