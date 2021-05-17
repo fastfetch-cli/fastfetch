@@ -113,6 +113,40 @@ static void printTilixTerminal(FFinstance* instance)
     ffStrbufDestroy(&key);
 }
 
+static void printGnomeTerminal(FFinstance* instance)
+{
+    const char* defaultProfile = ffSettingsGetGsettings(instance, "org.gnome.Terminal.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
+
+    if(!defaultProfile)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get \"Default\" profile from gsettings");
+        return;
+    }
+
+    const char* fontName = NULL;
+    FFstrbuf path;
+    ffStrbufInitAS(&path, 128, "/org/gnome/terminal/legacy/profiles:/:");
+    ffStrbufAppendS(&path, defaultProfile);
+    ffStrbufAppendC(&path, '/');
+
+    FFvariant res = ffSettingsGetGsettings(instance, "org.gnome.Terminal.Legacy.Profile", path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL);
+
+    if(!res.boolValue) // custom font
+        fontName = ffSettingsGetGsettings(instance, "org.gnome.Terminal.Legacy.Profile", path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
+    else // system font
+        fontName = ffSettingsGetGsettings(instance, "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+
+    ffStrbufDestroy(&path);
+
+    if(fontName == NULL)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get Gnome terminal font from gsettings");
+        return;
+    }
+
+    printTerminalFont(instance, fontName);
+}
+
 static void printXCFETerminal(FFinstance* instance)
 {
     FFstrbuf useSysFont;
@@ -181,6 +215,8 @@ void ffPrintTerminalFont(FFinstance* instance)
         printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
         printTilixTerminal(instance);
+    else if(ffStrbufIgnCaseCompS(&result->exeName, "gnome-terminal-server") == 0)
+        printGnomeTerminal(instance);
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
