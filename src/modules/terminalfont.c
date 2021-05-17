@@ -136,12 +136,15 @@ static void printGnomeTerminal(FFinstance* instance)
     else // system font
         fontName = ffSettingsGetGsettings(instance, "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 
-    if(fontName == NULL)
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get Gnome terminal font from gsettings");
-    else
-        printTerminalFont(instance, fontName);
-
     ffStrbufDestroy(&path);
+
+    if(fontName == NULL)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get Gnome terminal font from gsettings");
+        return;
+    }
+
+    printTerminalFont(instance, fontName);
 }
 
 static void printXCFETerminal(FFinstance* instance)
