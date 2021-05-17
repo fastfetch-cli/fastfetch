@@ -239,13 +239,10 @@ static void getMate(FFinstance* instance, FFWMDEResult* result)
 
     //I parse the file 3 times by purpose, because the properties are not guaranteed to be in order
     ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<platform>", &result->deVersion);
-    ffStrbufSubstrBeforeFirstC(&result->deVersion, '<');
     ffStrbufAppendC(&result->deVersion, '.');
     ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<minor>", &result->deVersion);
-    ffStrbufSubstrBeforeFirstC(&result->deVersion, '<');
     ffStrbufAppendC(&result->deVersion, '.');
     ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<micro>", &result->deVersion);
-    ffStrbufSubstrBeforeFirstC(&result->deVersion, '<');
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {

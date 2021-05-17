@@ -292,12 +292,12 @@ void ffCacheClose(FFcache* cache)
 
 bool ffParsePropFile(const char* fileName, const char* start, FFstrbuf* buffer)
 {
-    char* line = NULL;
-    size_t len = 0;
-
     FILE* file = fopen(fileName, "r");
     if(file == NULL)
         return false; // handle errors in higher functions
+
+    char* line = NULL;
+    size_t len = 0;
 
     while (getline(&line, &len, file) != -1)
     {
@@ -305,9 +305,10 @@ bool ffParsePropFile(const char* fileName, const char* start, FFstrbuf* buffer)
             break;
     }
 
-    fclose(file);
     if(line != NULL)
         free(line);
+
+    fclose(file);
 
     return true;
 }
@@ -329,7 +330,6 @@ bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
 
 bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
 {
-
     uint32_t bufferLengthStart = buffer->length;
     bool foundAFile = false;
 

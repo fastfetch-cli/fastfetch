@@ -64,7 +64,7 @@ static inline void printHelp()
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
         "\n"
-        "Format options: Provide the format string for custom output (+)\n"
+        "Format options: Provide the format string for custom output. Use fastfetch --help *-format for specific help.\n"
         "   --os-format <format>\n"
         "   --host-format <format>\n"
         "   --kernel-format <format>\n"

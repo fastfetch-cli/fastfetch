@@ -272,6 +272,7 @@ void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3
 void ffGetFont(const char* font, FFstrbuf* name, double* size);
 void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
 bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer);
+bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buffer);
 
 //common/settings.c
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);
