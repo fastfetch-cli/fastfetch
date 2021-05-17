@@ -282,7 +282,12 @@ static void getLXQt(FFinstance* instance, FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
     ffStrbufSetS(&result->dePrettyName, "LXQt");
-    ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config.cmake", "set(LXQT_VERSION", &result->deVersion);
+    ffParsePropFile("/usr/lib/pkgconfig/lxqt.pc", "Version:", &result->deVersion);
+
+    if(result->deVersion.length == 0)
+        ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
+    if(result->deVersion.length == 0)
+        ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -293,10 +298,8 @@ static void getLXQt(FFinstance* instance, FFWMDEResult* result)
             NULL
         });
 
-        FF_STRBUF_CREATE(tmp);
-        ffGetPropValueFromLines(result->deVersion.chars , "liblxqt", &tmp);
-        ffStrbufSet(&result->deVersion, &tmp);
-        ffStrbufDestroy(&tmp);
+        result->deVersion.length = 0; //don't set '\0' byte
+        ffGetPropValueFromLines(result->deVersion.chars , "liblxqt", &result->deVersion);
     }
 }
 
