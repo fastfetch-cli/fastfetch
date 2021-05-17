@@ -282,18 +282,21 @@ static void getLXQt(FFinstance* instance, FFWMDEResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
     ffStrbufSetS(&result->dePrettyName, "LXQt");
+    ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config.cmake", "set(LXQT_VERSION", &result->deVersion);
 
-    if(instance->config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
-        //This is really, really, reaaaally slow. Thank you, LXQt developers
+        //This is really, really, really slow. Thank you, LXQt developers
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "lxqt-session",
             "-v",
             NULL
         });
 
-        ffStrbufSubstrAfter(&result->deVersion, result->deProcessName.length);
-        ffStrbufSubstrBefore(&result->deVersion, 6); //X.XX.X
+        FF_STRBUF_CREATE(tmp);
+        ffGetPropValueFromLines(result->deVersion.chars , "liblxqt", &tmp);
+        ffStrbufSet(&result->deVersion, &tmp);
+        ffStrbufDestroy(&tmp);
     }
 }
 
