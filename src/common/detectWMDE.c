@@ -19,7 +19,8 @@ typedef enum DEHint
     FF_DE_HINT_GNOME,
     FF_DE_HINT_CINNAMON,
     FF_DE_HINT_XFCE4,
-    FF_DE_HINT_MATE
+    FF_DE_HINT_MATE,
+    FF_DE_HINT_LXQT
 } DEHint;
 
 typedef struct ProcData
@@ -150,6 +151,8 @@ static bool applyDEHintIfDE(const FFstrbuf* processName, DEHint* deHint)
         *deHint = FF_DE_HINT_XFCE4;
     else if(ffStrbufIgnCaseCompS(processName, "mate-session") == 0)
         *deHint = FF_DE_HINT_MATE;
+    else if(ffStrbufIgnCaseCompS(processName, "lxqt-session") == 0)
+        *deHint = FF_DE_HINT_LXQT;
 
     return *deHint != FF_DE_HINT_UNKNOWN;
 }
@@ -275,6 +278,31 @@ static void getXFCE4(FFinstance* instance, FFWMDEResult* result)
     }
 }
 
+static void getLXQt(FFinstance* instance, FFWMDEResult* result)
+{
+    ffStrbufSetS(&result->deProcessName, "lxqt-session");
+    ffStrbufSetS(&result->dePrettyName, "LXQt");
+    ffParsePropFile("/usr/lib/pkgconfig/lxqt.pc", "Version:", &result->deVersion);
+
+    if(result->deVersion.length == 0)
+        ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
+    if(result->deVersion.length == 0)
+        ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
+
+    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    {
+        //This is really, really, really slow. Thank you, LXQt developers
+        ffProcessAppendStdOut(&result->deVersion, (char* const[]){
+            "lxqt-session",
+            "-v",
+            NULL
+        });
+
+        result->deVersion.length = 0; //don't set '\0' byte
+        ffGetPropValueFromLines(result->deVersion.chars , "liblxqt", &result->deVersion);
+    }
+}
+
 static inline void getDEFromHint(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
 {
     getFromProcDir(result, procData, false);
@@ -292,6 +320,8 @@ static inline void getDEFromHint(FFinstance* instance, FFWMDEResult* result, Pro
         getXFCE4(instance, result);
     else if(procData->deHint == FF_DE_HINT_MATE)
         getMate(instance, result);
+    else if(procData->deHint == FF_DE_HINT_LXQT)
+        getLXQt(instance, result);
 }
 
 static inline void getDE(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
@@ -317,6 +347,8 @@ static inline void getDE(FFinstance* instance, FFWMDEResult* result, ProcData* p
         getXFCE4(instance, result);
     else if(strcasecmp(result->sessionDesktop, "MATE") == 0 || strcasecmp(result->sessionDesktop, "X-MATE") == 0)
         getMate(instance, result);
+    else if(strcasecmp(result->sessionDesktop, "LXQt") == 0 || strcasecmp(result->sessionDesktop, "X-LXQT") == 0)
+        getLXQt(instance, result);
     else
     {
         ffStrbufSetS(&result->deProcessName, result->sessionDesktop);

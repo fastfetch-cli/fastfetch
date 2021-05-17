@@ -52,7 +52,7 @@ KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
 
 ##### DE versions
 ```
-KDE Plasma, Gnome, Cinnamon, Mate, XFCE4
+KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 ```
 
 ##### Terminal fonts:
