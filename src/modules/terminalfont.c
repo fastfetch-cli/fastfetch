@@ -76,75 +76,35 @@ static void printKonsole(FFinstance* instance)
     ffStrbufDestroy(&profile);
 }
 
-static void printTilixTerminal(FFinstance* instance)
-{    // Note - Subject to change when DConf/GSettings fix their implementations of defaults/relocatable schemas respectively
-    const char* fontName = NULL;
-
-    const char* defaultProfile = ffSettingsGetGsettings(instance, "com.gexperts.Tilix.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(!defaultProfile)
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Default\" profile in Tilix settings");
-        return;
-    }
-
-    FFstrbuf key;
-    ffStrbufInitAS(&key, 64, "/com/gexperts/Tilix/profiles/");
-    ffStrbufAppendS(&key, defaultProfile);
-    uint32_t keyLen = key.length;
-    ffStrbufAppendS(&key, "/use-system-font");
-
-    FFvariant res = ffSettingsGetDConf(instance,key.chars, FF_VARIANT_TYPE_BOOL);
-
-    if(res.boolValueSet && !res.boolValue) // custom font
-    {
-        ffStrbufSubstrBefore(&key, keyLen);
-        ffStrbufAppendS(&key, "/font");
-        fontName = ffSettingsGetDConf(instance, key.chars, FF_VARIANT_TYPE_STRING).strValue;
-    }
-    else if(!res.boolValueSet || res.boolValue) // system font
-        fontName = ffSettingsGetDConf(instance, "/org/gnome/desktop/interface/monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(fontName == NULL)
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Terminal font\" in Tilix settings");
-    else
-        printTerminalFont(instance, fontName);
-
-    ffStrbufDestroy(&key);
-}
-
-static void printGnomeTerminal(FFinstance* instance)
+static void printGSTerminal(FFinstance* instance, char* profilepath, char* profilelist, char* profile)
 {
-    const char* defaultProfile = ffSettingsGetGsettings(instance, "org.gnome.Terminal.ProfilesList", NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
+    const char* defaultProfile = ffSettingsGetGsettings(instance, profilelist, NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
 
     if(!defaultProfile)
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get \"Default\" profile from gsettings");
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get \"default\" profile from gsettings");
         return;
     }
 
-    const char* fontName = NULL;
     FFstrbuf path;
-    ffStrbufInitAS(&path, 128, "/org/gnome/terminal/legacy/profiles:/:");
+    ffStrbufInitAS(&path, 128, profilepath);
     ffStrbufAppendS(&path, defaultProfile);
     ffStrbufAppendC(&path, '/');
+    const char* fontName = NULL;
 
-    FFvariant res = ffSettingsGetGsettings(instance, "org.gnome.Terminal.Legacy.Profile", path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL);
+    FFvariant res = ffSettingsGetGsettings(instance, profile, path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL);
 
     if(!res.boolValue) // custom font
-        fontName = ffSettingsGetGsettings(instance, "org.gnome.Terminal.Legacy.Profile", path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
+        fontName = ffSettingsGetGsettings(instance, profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
     else // system font
         fontName = ffSettingsGetGsettings(instance, "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 
     ffStrbufDestroy(&path);
 
     if(fontName == NULL)
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get Gnome terminal font from gsettings");
-        return;
-    }
-
-    printTerminalFont(instance, fontName);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get terminal font from gsettings");
+    else
+        printTerminalFont(instance, fontName);
 }
 
 static void printXCFETerminal(FFinstance* instance)
@@ -214,9 +174,9 @@ void ffPrintTerminalFont(FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
         printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
-        printTilixTerminal(instance);
+        printGSTerminal(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "gnome-terminal-server") == 0)
-        printGnomeTerminal(instance);
+        printGSTerminal(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile");
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
