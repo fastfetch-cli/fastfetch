@@ -269,7 +269,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "uptime-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("uptime", "{} days {} hours {} mins", 4,
+        constructAndPrintCommandHelpFormat("uptime", "{1} days {2} hours {3} mins", 4,
             "Days",
             "Hours",
             "Minutes",
@@ -299,7 +299,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "resolution-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("resolution", "{}x{} @ {}Hz", 3,
+        constructAndPrintCommandHelpFormat("resolution", "{1}x{2} @ {3}Hz", 3,
             "Screen width",
             "Screen height",
             "Screen refresh rate"
@@ -419,7 +419,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "memory-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("memory", "{}MiB / {}MiB ({}%)", 3,
+        constructAndPrintCommandHelpFormat("memory", "{1}MiB / {2}MiB ({3}%)", 3,
             "Used memory",
             "Total memory",
             "Used memory percentage"
@@ -427,7 +427,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "disk-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("disk", "{}GB / {}GB ({4}%)", 4,
+        constructAndPrintCommandHelpFormat("disk", "{1}GB / {2}GB ({4}%)", 4,
             "Used disk space",
             "Total disk space",
             "Number of files",
@@ -436,7 +436,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "battery-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("battery", "{} {} ({}) [{}%; {}]", 5,
+        constructAndPrintCommandHelpFormat("battery", "{1} {2} ({3}) [{4}%; {5}]", 5,
             "Battery manufactor",
             "Battery model",
             "Battery technology",
@@ -446,7 +446,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "locale-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("locale", "{}", 1,
+        constructAndPrintCommandHelpFormat("locale", "{1}", 1,
             "Locale code"
         );
     }
