@@ -143,7 +143,7 @@ static FFvariant getGSettingsValue(GSettingsData* data, const char* schemaName, 
     return getGVariantValue(variant, type, &data->variantGetters);
 }
 
-FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
@@ -181,11 +181,11 @@ FFvariant ffSettingsGetGsettings(FFinstance* instance, const char* schemaName, c
 
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
-    FFvariant dconf = ffSettingsGetDConf(instance, dconfKey, type);
-    if(dconf.strValue != NULL)
-        return dconf;
+    FFvariant gsettings = ffSettingsGetGSettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING);
+    if(gsettings.strValue != NULL)
+        return gsettings;
 
-    return ffSettingsGetGsettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING);
+    return ffSettingsGetDConf(instance, dconfKey, type);
 }
 
 typedef struct _XfconfChannel XfconfChannel; // /usr/include/xfce4/xfconf-0/xfconf/xfconf-channel.h#L39

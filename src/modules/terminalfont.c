@@ -30,6 +30,26 @@ static void printTerminalFont(FFinstance* instance, const char* font)
     ffStrbufDestroy(&pretty);
 }
 
+static const char* getSystemMonospaceFont(FFinstance* instance)
+{
+    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
+    {
+        const char* systemMonospaceFont = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/monospace-font-name", "org.cinnamon.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+        if(systemMonospaceFont != NULL)
+            return systemMonospaceFont;
+    }
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Mate") == 0)
+    {
+        const char* systemMonospaceFont = ffSettingsGet(instance, "/org/mate/interface/monospace-font-name", "org.mate.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+        if(systemMonospaceFont != NULL)
+            return systemMonospaceFont;
+    }
+
+    return ffSettingsGet(instance, "/org/gnome/desktop/interface/monospace-font-name", "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+}
+
 static void printTerminalFontFromConfigFile(FFinstance* instance, const char* configFile, const char* start)
 {
     FFstrbuf font;
@@ -42,6 +62,44 @@ static void printTerminalFontFromConfigFile(FFinstance* instance, const char* co
         printTerminalFont(instance, font.chars);
 
     ffStrbufDestroy(&font);
+}
+
+static void printTerminalFontFromGSettings(FFinstance* instance, char* profilePath, char* profileList, char* profile)
+{
+    const char* defaultProfile = ffSettingsGetGSettings(instance, profileList, NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
+    if(defaultProfile == NULL)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get \"default\" profile from gsettings");
+        return;
+    }
+
+    FFstrbuf path;
+    ffStrbufInitA(&path, 128);
+    ffStrbufAppendS(&path, profilePath);
+    ffStrbufAppendS(&path, defaultProfile);
+    ffStrbufAppendC(&path, '/');
+
+    const char* fontName;
+
+    if(!ffSettingsGetGSettings(instance, profile, path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue) // custom font
+    {
+        fontName = ffSettingsGetGSettings(instance, profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
+        if(fontName == NULL)
+            ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get terminal font from GSettings (%s::%s::font)", profile, path.chars);
+    }
+    else // system font
+    {
+        fontName = getSystemMonospaceFont(instance);
+        if(fontName == NULL)
+            ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Could't get system monospace font name from GSettings / DConf");
+    }
+
+    ffStrbufDestroy(&path);
+
+    if(fontName == NULL)
+        return;
+
+    printTerminalFont(instance, fontName);
 }
 
 static void printKonsole(FFinstance* instance)
@@ -74,37 +132,6 @@ static void printKonsole(FFinstance* instance)
     ffStrbufDestroy(&font);
     ffStrbufDestroy(&profilePath);
     ffStrbufDestroy(&profile);
-}
-
-static void printGSTerminal(FFinstance* instance, char* profilepath, char* profilelist, char* profile)
-{
-    const char* defaultProfile = ffSettingsGetGsettings(instance, profilelist, NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(!defaultProfile)
-    {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get \"default\" profile from gsettings");
-        return;
-    }
-
-    FFstrbuf path;
-    ffStrbufInitAS(&path, 128, profilepath);
-    ffStrbufAppendS(&path, defaultProfile);
-    ffStrbufAppendC(&path, '/');
-    const char* fontName = NULL;
-
-    FFvariant res = ffSettingsGetGsettings(instance, profile, path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL);
-
-    if(!res.boolValue) // custom font
-        fontName = ffSettingsGetGsettings(instance, profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
-    else // system font
-        fontName = ffSettingsGetGsettings(instance, "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
-
-    ffStrbufDestroy(&path);
-
-    if(fontName == NULL)
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't get terminal font from gsettings");
-    else
-        printTerminalFont(instance, fontName);
 }
 
 static void printXCFETerminal(FFinstance* instance)
@@ -174,9 +201,9 @@ void ffPrintTerminalFont(FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
         printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
-        printGSTerminal(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile");
+        printTerminalFontFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile");
     else if(ffStrbufIgnCaseCompS(&result->exeName, "gnome-terminal-server") == 0)
-        printGSTerminal(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile");
+        printTerminalFontFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile");
     else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
         printTTY(instance);
     else
