@@ -57,7 +57,7 @@ KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 
 ##### Terminal fonts:
 ```
-konsole, xfce4-terminal, tilix, lxterminal, TTY
+konsole, gnome-terminal-server, tilix, xfce4-terminal, lxterminal, TTY
 ```
 
 ## Building
