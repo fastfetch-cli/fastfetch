@@ -62,22 +62,6 @@ static void printWMThemeFromSettings(FFinstance* instance, const char* dconfKey,
     printWMTheme(instance, theme);
 }
 
-static void printMutter(FFinstance* instance)
-{
-    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(theme == NULL || *theme == '\0')
-        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(theme == NULL || *theme == '\0')
-    {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't found mutter theme in GSettings / DConf");
-        return;
-    }
-
-    printWMTheme(instance, theme);
-}
-
 static void printGTKThemeAsWMTheme(FFinstance* instance)
 {
     const FFGTKResult* gtk = ffDetectGTK4(instance);
@@ -105,6 +89,22 @@ static void printGTKThemeAsWMTheme(FFinstance* instance)
     }
 
     ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't detect GTK4/3/2 theme");
+}
+
+static void printMutter(FFinstance* instance)
+{
+    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+
+    if(theme == NULL || *theme == '\0')
+        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
+
+    if(theme != NULL && *theme != '\0')
+    {
+        printWMTheme(instance, theme);
+        return;
+    }
+
+    printGTKThemeAsWMTheme(instance);
 }
 
 static void printMuffin(FFinstance* instance)
