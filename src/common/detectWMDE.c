@@ -125,9 +125,9 @@ static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processNam
         ffStrbufSetS(&result->wmPrettyName, "Marco");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0)
+    else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0 || ffStrbufIgnCaseCompS(processName, "Mutter") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Mutter");
-    else if(ffStrbufIgnCaseCompS(processName, "cinnamon-session") == 0)
+    else if(ffStrbufIgnCaseCompS(processName, "cinnamon-session") == 0 || ffStrbufIgnCaseCompS(processName, "Muffin") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Muffin");
 
     if(result->wmPrettyName.length > 0)
