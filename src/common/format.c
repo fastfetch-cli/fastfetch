@@ -14,6 +14,16 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
         ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
         ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_LIST)
+    {
+        const FFlist* list = formatarg->value;
+        for(uint32_t i = 0; i < list->length; i++)
+        {
+            ffStrbufAppend(buffer, ffListGet(list, i));
+            if(i < list->length - 1)
+                ffStrbufAppendS(buffer, ", ");
+        }
+    }
     else if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
     {
         fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);

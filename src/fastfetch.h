@@ -180,7 +180,8 @@ typedef enum FFformatargtype
     FF_FORMAT_ARG_TYPE_INT,
     FF_FORMAT_ARG_TYPE_STRING,
     FF_FORMAT_ARG_TYPE_STRBUF,
-    FF_FORMAT_ARG_TYPE_DOUBLE
+    FF_FORMAT_ARG_TYPE_DOUBLE,
+    FF_FORMAT_ARG_TYPE_LIST
 } FFformatargtype;
 
 typedef struct FFformatarg
@@ -211,6 +212,14 @@ typedef union FFvariant
         bool boolValue;
     };
 } FFvariant;
+
+typedef struct FFfont
+{
+    FFstrbuf pretty;
+    FFstrbuf name;
+    FFstrbuf size;
+    FFlist styles;
+} FFfont;
 
 /*************************/
 /* Common util functions */
@@ -269,8 +278,12 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
 
 //common/parsing.c
 void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
-void ffGetFont(const char* font, FFstrbuf* name, double* size);
-void ffGetFontPretty(FFstrbuf* buffer, const FFstrbuf* name, double size);
+
+void ffFontInitQt(FFfont* font, const char* data);
+void ffFontInitPango(FFfont* font, const char* data);
+void ffFontInitCopy(FFfont* font, const char* name);
+void ffFontDestroy(FFfont* font);
+
 bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer);
 bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buffer);
 

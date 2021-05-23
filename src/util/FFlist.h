@@ -19,11 +19,11 @@ typedef struct FFlist
 void ffListInit(FFlist* list, uint32_t elementSize);
 void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity);
 
-void* ffListGet(FFlist* list, uint32_t index);
+void* ffListGet(const FFlist* list, uint32_t index);
 
 void* ffListAdd(FFlist* list);
 
-uint32_t ffListFirstIndexComp(FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
+uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
 
 void ffListDestroy(FFlist* list);
 

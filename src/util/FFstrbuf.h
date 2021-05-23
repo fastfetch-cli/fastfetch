@@ -45,6 +45,8 @@ void ffStrbufSetVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
+void ffStrbufAppendSExcludingC(FFstrbuf* strbuf, const char* value, char exclude);
+void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
 void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendC(FFstrbuf* strbuf, const char c);
@@ -90,6 +92,8 @@ bool ffStrbufStartsWithNS(const FFstrbuf* strbuf, uint32_t length, const char* s
 bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start);
 bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start);
 bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const char* start);
+
+bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end);
 
 void ffStrbufRecalculateLength(FFstrbuf* strbuf);
 

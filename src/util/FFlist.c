@@ -16,7 +16,7 @@ void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
     list->data = malloc(list->capacity * list->elementSize);
 }
 
-void* ffListGet(FFlist* list, uint32_t index)
+void* ffListGet(const FFlist* list, uint32_t index)
 {
     return list->data + (index * list->elementSize);
 }
@@ -33,7 +33,7 @@ void* ffListAdd(FFlist* list)
     return adress;
 }
 
-uint32_t ffListFirstIndexComp(FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
+uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
 {
     for(uint32_t i = 0; i < list->length; i++)
     {

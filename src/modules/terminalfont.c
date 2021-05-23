@@ -1,33 +1,31 @@
 #include "fastfetch.h"
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
-#define FF_TERMFONT_NUM_FORMAT_ARGS 4
+#define FF_TERMFONT_NUM_FORMAT_ARGS 5
 
-static void printTerminalFont(FFinstance* instance, const char* font)
+static void printTerminalFont(FFinstance* instance, const char* raw, FFfont* font)
 {
-    FF_STRBUF_CREATE(name);
-    double size;
-    ffGetFont(font, &name, &size);
-    FF_STRBUF_CREATE(pretty);
-    ffGetFontPretty(&pretty, &name, size);
+    if(font->pretty.length == 0)
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Terminal font is an empty value");
+        return;
+    }
 
     if(instance->config.termFontFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey);
-        ffStrbufPutTo(&pretty, stdout);
+        ffStrbufPutTo(&font->pretty, stdout);
     }
     else
     {
         ffPrintFormatString(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, NULL, FF_TERMFONT_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, font},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &name},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &size},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &pretty}
+            {FF_FORMAT_ARG_TYPE_STRING, raw},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->name},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->size},
+            {FF_FORMAT_ARG_TYPE_LIST,   &font->styles},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->pretty}
         });
     }
-
-    ffStrbufDestroy(&name);
-    ffStrbufDestroy(&pretty);
 }
 
 static const char* getSystemMonospaceFont(FFinstance* instance)
@@ -52,16 +50,21 @@ static const char* getSystemMonospaceFont(FFinstance* instance)
 
 static void printTerminalFontFromConfigFile(FFinstance* instance, const char* configFile, const char* start)
 {
-    FFstrbuf font;
-    ffStrbufInit(&font);
-    ffParsePropFileConfig(instance, configFile, start, &font);
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+    ffParsePropFileConfig(instance, configFile, start, &fontName);
 
-    if(font.length == 0)
+    if(fontName.length == 0)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find terminal font in \"$XDG_CONFIG_HOME/%s\"", configFile);
     else
-        printTerminalFont(instance, font.chars);
+    {
+        FFfont font;
+        ffFontInitPango(&font, fontName.chars);
+        printTerminalFont(instance, fontName.chars, &font);
+        ffFontDestroy(&font);
+    }
 
-    ffStrbufDestroy(&font);
+    ffStrbufDestroy(&fontName);
 }
 
 static void printTerminalFontFromGSettings(FFinstance* instance, char* profilePath, char* profileList, char* profile)
@@ -99,7 +102,10 @@ static void printTerminalFontFromGSettings(FFinstance* instance, char* profilePa
     if(fontName == NULL)
         return;
 
-    printTerminalFont(instance, fontName);
+    FFfont font;
+    ffFontInitPango(&font, fontName);
+    printTerminalFont(instance, fontName, &font);
+    ffFontDestroy(&font);
 }
 
 static void printKonsole(FFinstance* instance)
@@ -120,16 +126,21 @@ static void printKonsole(FFinstance* instance)
     ffStrbufAppendS(&profilePath, ".local/share/konsole/");
     ffStrbufAppend(&profilePath, &profile);
 
-    FFstrbuf font;
-    ffStrbufInit(&font);
-    ffParsePropFileHome(instance, profilePath.chars, "Font =", &font);
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+    ffParsePropFileHome(instance, profilePath.chars, "Font =", &fontName);
 
-    if(font.length == 0)
+    if(fontName.length == 0)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath.chars);
     else
-        printTerminalFont(instance, font.chars);
+    {
+        FFfont font;
+        ffFontInitQt(&font, fontName.chars);
+        printTerminalFont(instance, fontName.chars, &font);
+        ffFontDestroy(&font);
+    }
 
-    ffStrbufDestroy(&font);
+    ffStrbufDestroy(&fontName);
     ffStrbufDestroy(&profilePath);
     ffStrbufDestroy(&profile);
 }
@@ -160,28 +171,38 @@ static void printXCFETerminal(FFinstance* instance)
     if(fontName == NULL)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Couldn't find \"xsettings::/Gtk/MonospaceFontName\" in XFConf");
     else
-        printTerminalFont(instance, fontName);
+    {
+        FFfont font;
+        ffFontInitPango(&font, fontName);
+        printTerminalFont(instance, fontName, &font);
+        ffFontDestroy(&font);
+    }
 }
 
 static void printTTY(FFinstance* instance)
 {
-    FFstrbuf font;
-    ffStrbufInit(&font);
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
 
-    ffParsePropFile("/etc/vconsole.conf", "Font =", &font);
+    ffParsePropFile("/etc/vconsole.conf", "Font =", &fontName);
 
-    if(font.length == 0)
+    if(fontName.length == 0)
     {
-        ffStrbufAppendS(&font, "VGA default kernel font ");
-        ffProcessAppendStdOut(&font, (char* const[]){
+        ffStrbufAppendS(&fontName, "VGA default kernel font ");
+        ffProcessAppendStdOut(&fontName, (char* const[]){
             "showconsolefont",
             "--info",
             NULL
         });
     }
 
-    printTerminalFont(instance, font.chars);
-    ffStrbufDestroy(&font);
+    ffStrbufTrimRight(&fontName, ' ');
+
+    FFfont font;
+    ffFontInitCopy(&font, fontName.chars);
+    printTerminalFont(instance, fontName.chars, &font);
+    ffFontDestroy(&font);
+    ffStrbufDestroy(&fontName);
 }
 
 void ffPrintTerminalFont(FFinstance* instance)

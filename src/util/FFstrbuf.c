@@ -172,6 +172,7 @@ void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
             ffStrbufEnsureFree(strbuf, 16);
         strbuf->chars[strbuf->length++] = value[i];
     }
+
     strbuf->chars[strbuf->length] = '\0';
 }
 
@@ -189,6 +190,40 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 
         strbuf->chars[strbuf->length++] = value[i];
     }
+
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufAppendSExcludingC(FFstrbuf* strbuf, const char* value, char exclude)
+{
+    if(value == NULL)
+        return;
+
+    for(uint32_t i = 0; value[i] != '\0'; i++)
+    {
+        if(i % 16 == 0)
+            ffStrbufEnsureFree(strbuf, 16);
+
+        if(value[i] != exclude)
+            strbuf->chars[strbuf->length++] = value[i];
+    }
+
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude)
+{
+    if(value == NULL)
+        return;
+
+    ffStrbufEnsureFree(strbuf, length);
+
+    for(uint32_t i = 0; i < length; i++)
+    {
+        if(value[i] != exclude)
+        strbuf->chars[strbuf->length++] = value[i];
+    }
+
     strbuf->chars[strbuf->length] = '\0';
 }
 
@@ -506,6 +541,22 @@ bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const 
         if(tolower(strbuf->chars[i]) != tolower(start[i]))
             return false;
     }
+    return true;
+}
+
+bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
+{
+    uint32_t endLength = strlen(end);
+
+    if(endLength > strbuf->length)
+        return false;
+
+    for(uint32_t i = 0; i < endLength; ++i)
+    {
+        if(strbuf->chars[strbuf->length - endLength + i] != end[i])
+            return false;
+    }
+
     return true;
 }
 

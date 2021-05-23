@@ -51,8 +51,9 @@ static void getTerminalName(FFinstance* instance, const char* pid, FFTerminalRes
         strcasecmp(name, "sudo")   == 0 ||
         strcasecmp(name, "su")     == 0 ||
         strcasecmp(name, "doas")   == 0 ||
-        strcasecmp(name, "strace") == 0 )
-    {
+        strcasecmp(name, "strace") == 0 ||
+        strcasecmp(name, "gdb")    == 0
+    ) {
         getTerminalName(instance, ppid, result);
         return;
     }

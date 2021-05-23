@@ -353,24 +353,28 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "font-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("font", "{4}, {17}", 17,
-            "Plasma as in resource file",
+        constructAndPrintCommandHelpFormat("font", "{5} [Plasma], {21}", 21,
+            "Plasma raw",
             "Plasma name",
             "Plasma size",
-            "Plasma name and size pretty together",
-            "GTK2 as in resource file",
+            "Plasma styles",
+            "Plasma pretty",
+            "GTK2 raw",
             "GTK2 name",
             "GTK2 size",
-            "GTK2 name and size pretty together",
-            "GTK3 as in resource file",
+            "GTK2 styles",
+            "GTK2 pretty",
+            "GTK3 raw",
             "GTK3 name",
             "GTK3 size",
-            "GTK3 name and size pretty together",
-            "GTK4 as in resource file",
+            "GTK3 styles",
+            "GTK3 pretty",
+            "GTK4 raw",
             "GTK4 name",
             "GTK4 size",
-            "GTK4 name and size pretty together",
-            "GTK 2/3/4 name and size pretty together"
+            "GTK4 styles",
+            "GTK4 pretty",
+            "GTK2/3/4 pretty"
         );
     }
     else if(strcasecmp(command, "terminal-format") == 0)
@@ -383,11 +387,12 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "terminal-font-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("terminal-font", "{4}", 4,
-            "Terminal font as in resource file",
+        constructAndPrintCommandHelpFormat("terminal-font", "{5}", 5,
+            "Terminal font raw",
             "Terminal font name",
             "Termianl font size",
-            "Terminal font name and size pretty together"
+            "Terminal font styles"
+            "Terminal font pretty"
         );
     }
     else if(strcasecmp(command, "cpu-format") == 0)
