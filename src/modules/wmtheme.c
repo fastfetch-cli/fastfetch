@@ -78,6 +78,35 @@ static void printMutter(FFinstance* instance)
     printWMTheme(instance, theme);
 }
 
+static void printGTKThemeAsWMTheme(FFinstance* instance)
+{
+    FFGTKResult* gtk = ffDetectGTK4(instance);
+
+    if(gtk->theme.length > 0)
+    {
+        printWMTheme(instance, gtk->theme.chars);
+        return;
+    }
+
+    gtk = ffDetectGTK3(instance);
+
+    if(gtk->theme.length > 0)
+    {
+        printWMTheme(instance, gtk->theme.chars);
+        return;
+    }
+
+    gtk = ffDetectGTK2(instance);
+
+    if(gtk->theme.length > 0)
+    {
+        printWMTheme(instance, gtk->theme.chars);
+        return;
+    }
+
+    ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't detect GTK4/3/2 theme");
+}
+
 static void printMuffin(FFinstance* instance)
 {
     const char* name = ffSettingsGet(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
@@ -199,8 +228,13 @@ void ffPrintWMTheme(FFinstance* instance)
         printWMThemeFromConfigFile(instance, "kwinrc", "theme =", "Breeze");
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm4") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Xfwm") == 0)
         printXFWM4(instance);
-    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&result->wmPrettyName, "Ubuntu") == 0)
-        printMutter(instance);
+    else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Mutter") == 0)
+    {
+        if(ffStrbufIgnCaseCompS(&result->dePrettyName, "Gnome") == 0)
+            printMutter(instance);
+        else
+            printGTKThemeAsWMTheme(instance);
+    }
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Muffin") == 0)
         printMuffin(instance);
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Marco") == 0)
