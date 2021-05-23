@@ -80,7 +80,7 @@ static void printMutter(FFinstance* instance)
 
 static void printGTKThemeAsWMTheme(FFinstance* instance)
 {
-    FFGTKResult* gtk = ffDetectGTK4(instance);
+    const FFGTKResult* gtk = ffDetectGTK4(instance);
 
     if(gtk->theme.length > 0)
     {
