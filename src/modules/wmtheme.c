@@ -94,10 +94,6 @@ static void printGTKThemeAsWMTheme(FFinstance* instance)
 static void printMutter(FFinstance* instance)
 {
     const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(theme == NULL || *theme == '\0')
-        theme = ffSettingsGet(instance, "/org/gnome/desktop/wm/preferences/theme", "org.gnome.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
-
     if(theme != NULL && *theme != '\0')
     {
         printWMTheme(instance, theme);
