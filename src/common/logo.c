@@ -269,7 +269,7 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
-static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, char* pathToFile)
+static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, const char* pathToFile)
 {
     const char* color = doColor ? configColor->chars : "";
     strcpy(logo->color, color);
@@ -277,18 +277,20 @@ static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, 
     FILE* fp = fopen(pathToFile, "r");
     char* buff = NULL;
     size_t buffLen = 0;
-    char* normalizedBuff;
-    int len;
+    int lineBytes;
+    int lineLength;
 
     int logoWidth = 0, logoHeight = 0;
-    while(getline(&buff, &buffLen, fp) != -1) {
-        normalizedBuff = strtok(buff, "\n");
+    while( (lineBytes=getline(&buff, &buffLen, fp)) != -1 ) {
+        // Remove trailing newline
+        if(buff[lineBytes-1] == '\n')
+            buff[lineBytes-1] = '\0';
         
-        sprintf(logo->chars[logoHeight++],   FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, normalizedBuff);
+        sprintf(logo->chars[logoHeight++],   FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, buff);
 
-        len = utf8_strlen(normalizedBuff);
-        logoWidth = len > logoWidth
-            ? len
+        lineLength = utf8_strlen(buff);
+        logoWidth = lineLength > logoWidth
+            ? lineLength
             : logoWidth;
     }
 
