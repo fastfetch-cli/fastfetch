@@ -269,21 +269,19 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
-static void loadLogoFromFile(FFlogo* logo, bool doColor, char* pathToFile)
+static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, char* pathToFile)
 {
-    strcpy(logo->name, "amogus");
-
-    const char* color = doColor ? "\033[91m" : "";
-    strcpy(logo->color, "\033[91m");
+    const char* color = doColor ? configColor->chars : "";
+    strcpy(logo->color, color);
 
     FILE* fp = fopen(pathToFile, "r");
-    char buff[255];
+    char* buff = NULL;
+    size_t buffLen = 0;
     char* normalizedBuff;
     int len;
 
     int logoWidth = 0, logoHeight = 0;
-    while(!feof(fp)) {
-        fgets(buff, sizeof(buff), fp);
+    while(getline(&buff, &buffLen, fp) != -1) {
         normalizedBuff = strtok(buff, "\n");
         
         sprintf(logo->chars[logoHeight++],   FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, normalizedBuff);
@@ -324,7 +322,7 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
     else if(strcasecmp(logo, "unknown") == 0)
         loadUnknownLogo(&config->logo);
     else if(access(logo, R_OK) == 0)
-        loadLogoFromFile(&config->logo, config->colorLogo, logo);
+        loadLogoFromFile(&config->logo, config->colorLogo, &config->color, logo);
     else
     {
         if(config->showErrors)
