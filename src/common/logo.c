@@ -302,28 +302,37 @@ static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, 
 
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
-    if(strcasecmp(logo, "none") == 0)
-    {
-        loadNoneLogo(&config->logo);
-        config->logo_spacing = 0; //This is wanted in most cases, so just set it
+    if(config->readLogoFromFile) {
+        ffLoadLogoFromFile(config, logo);
+    } else {
+        if(strcasecmp(logo, "none") == 0)
+        {
+            loadNoneLogo(&config->logo);
+            config->logo_spacing = 0; //This is wanted in most cases, so just set it
+        }
+        else if(strcasecmp(logo, "arch") == 0)
+            loadArchLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "artix") == 0)
+            loadArtixLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "ubuntu") == 0)
+            loadUbuntuLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "debian") == 0)
+            loadDebianLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "manjaro") == 0)
+            loadManjaroLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "void") == 0)
+            loadVoidLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "garuda") == 0)
+            loadGarudaLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "unknown") == 0)
+            loadUnknownLogo(&config->logo);
+        else
+            ffLoadLogoFromFile(config, logo);
     }
-    else if(strcasecmp(logo, "arch") == 0)
-        loadArchLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "artix") == 0)
-        loadArtixLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "ubuntu") == 0)
-        loadUbuntuLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "debian") == 0)
-        loadDebianLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "manjaro") == 0)
-        loadManjaroLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "void") == 0)
-        loadVoidLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "garuda") == 0)
-        loadGarudaLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "unknown") == 0)
-        loadUnknownLogo(&config->logo);
-    else if(access(logo, R_OK) == 0)
+}
+
+void ffLoadLogoFromFile(FFconfig* config, const char* logo) {
+    if(access(logo, R_OK) == 0)
         loadLogoFromFile(&config->logo, config->colorLogo, &config->color, logo);
     else
     {

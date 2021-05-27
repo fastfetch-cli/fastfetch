@@ -192,6 +192,7 @@ __fastfetch_completion()
     local FF_OPTIONS_LOGO=(
         "-l"
         "--logo"
+        "--logo-file"
     )
 
     if __fastfetch_previous_matches "${FF_OPTIONS_SINGLE[@]}"; then
