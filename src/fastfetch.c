@@ -794,7 +794,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
-        optionParseString(key, value, &instance->config.color);
+    {
+        if(value == NULL)
+        {
+            fprintf(stderr, "Error: usage: %s <str>\n", key);
+            exit(477);
+        }
+        ffStrbufSetS(&instance->config.color, "\033[");
+        ffStrbufAppendS(&instance->config.color, value);
+        ffStrbufAppendC(&instance->config.color, 'm');
+    }
     else if(strcasecmp(key, "--os-format") == 0)
         optionParseString(key, value, &instance->config.osFormat);
     else if(strcasecmp(key, "--os-key") == 0)
