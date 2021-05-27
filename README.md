@@ -2,8 +2,8 @@
 
 fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch) like tool for fetching system information and displaying them in a pretty way. It is written in c to achieve much better performance, in return only linux is supported. It also uses mechanisms like multithreading and caching to finish as fast as possible.  
   
-This fork adds custom logos read from files:
-<img src="screenshots/amogus.png" alt="example output" width="100%"/>  
+The output on my personal machine with default configurations looks like this:
+<img src="screenshots/example.png" alt="example output" width="100%"/>  
 
 ## Customization
 
