@@ -41,7 +41,6 @@ typedef struct FFconfig
     int16_t offsetx;
     FFstrbuf color;
     uint32_t titleLength;
-    bool readLogoFromFile;
     bool colorLogo;
     bool showErrors;
     bool recache;
@@ -265,6 +264,7 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 //common/logo.c
 void ffLoadLogoSet(FFconfig* config, const char* logo);
 void ffLoadLogo(FFinstance* instance);
+void ffLoadLogoFromFile(FFconfig* config, const char* path);
 void ffPrintLogoLine(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 

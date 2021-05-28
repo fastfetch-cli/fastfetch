@@ -256,9 +256,9 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     ,tSXX°          .bbbbbbbbbbbbbbbbbbbB8x@;"FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s   .SXxx            bBBBBBBBBBBBBBBBBBBBbSBX8;"FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s ,888S                                     pd!"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                       qp"FASTFETCH_TEXT_MODIFIER_RESET, color);                                                                                                                                                                                                                                                                                                                                                                                                         
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                       qp"FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%sGBB.                                          "FASTFETCH_TEXT_MODIFIER_RESET, color);                                                                                                                                                       
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%sGBB.                                          "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s x%%88        d888@8@X@X@X88X@@XX@@X@8@X.      "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s   dxXd    dB8b8b8B8B08bB88b998888b88x.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    dxx8o                      .@@;.          "FASTFETCH_TEXT_MODIFIER_RESET, color);
@@ -269,80 +269,68 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
-static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, const char* pathToFile)
+void ffLoadLogoFromFile(FFconfig* config, const char* path)
 {
-    const char* color = doColor ? configColor->chars : "";
-    strcpy(logo->color, color);
-
-    FILE* fp = fopen(pathToFile, "r");
-    char* buff = NULL;
-    size_t buffLen = 0;
-    int lineBytes;
-    int lineLength;
-
-    int logoWidth = 0, logoHeight = 0;
-    while( (lineBytes=getline(&buff, &buffLen, fp)) != -1 ) {
-        // Remove trailing newline
-        if(buff[lineBytes-1] == '\n')
-            buff[lineBytes-1] = '\0';
-        
-        sprintf(logo->chars[logoHeight++],   FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, buff);
-
-        lineLength = utf8_strlen(buff);
-        logoWidth = lineLength > logoWidth
-            ? lineLength
-            : logoWidth;
+    puts(path);
+    FILE* file = fopen(path, "r");
+    if(file == NULL)
+    {
+        if(config->showErrors)
+            printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo / logo file not found: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", path);
+        loadUnknownLogo(&config->logo);
+        return;
     }
 
-    // Clean up
-    fclose(fp);
-    if(buff != NULL)
-        free(buff);
+    const char* color = config->colorLogo ? config->color.chars : "";
+    strcpy(config->logo.color, color);
 
-    logo->width = logoWidth;
-    logo->height = logoHeight;
+    char* line = NULL;
+    size_t lineBufLen = 0;
+    ssize_t lineBytesLen;
+
+    while((lineBytesLen = getline(&line, &lineBufLen, file)) != EOF) {
+        // Remove trailing newline
+        if(line[lineBytesLen - 1] == '\n')
+            line[lineBytesLen - 1] = '\0';
+
+        snprintf(config->logo.chars[config->logo.height++], 255, FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, line);
+
+        uint8_t lineLength = (uint8_t) utf8_strlen(line);
+        if(lineLength > config->logo.width)
+            config->logo.width = lineLength;
+    }
+
+    if(line != NULL)
+        free(line);
+
+    fclose(file);
 }
 
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
-    if(config->readLogoFromFile) {
-        ffLoadLogoFromFile(config, logo);
-    } else {
-        if(strcasecmp(logo, "none") == 0)
-        {
-            loadNoneLogo(&config->logo);
-            config->logo_spacing = 0; //This is wanted in most cases, so just set it
-        }
-        else if(strcasecmp(logo, "arch") == 0)
-            loadArchLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "artix") == 0)
-            loadArtixLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "ubuntu") == 0)
-            loadUbuntuLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "debian") == 0)
-            loadDebianLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "manjaro") == 0)
-            loadManjaroLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "void") == 0)
-            loadVoidLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "garuda") == 0)
-            loadGarudaLogo(&config->logo, config->colorLogo);
-        else if(strcasecmp(logo, "unknown") == 0)
-            loadUnknownLogo(&config->logo);
-        else
-            ffLoadLogoFromFile(config, logo);
-    }
-}
-
-void ffLoadLogoFromFile(FFconfig* config, const char* logo) {
-    if(access(logo, R_OK) == 0)
-        loadLogoFromFile(&config->logo, config->colorLogo, &config->color, logo);
-    else
+    if(strcasecmp(logo, "none") == 0)
     {
-        if(config->showErrors)
-            printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", logo);
-        loadUnknownLogo(&config->logo);
+        loadNoneLogo(&config->logo);
+        config->logo_spacing = 0; //This is wanted in most cases, so just set it
     }
+    else if(strcasecmp(logo, "arch") == 0)
+        loadArchLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "artix") == 0)
+        loadArtixLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "ubuntu") == 0)
+        loadUbuntuLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "debian") == 0)
+        loadDebianLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "manjaro") == 0)
+        loadManjaroLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "void") == 0)
+        loadVoidLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "garuda") == 0)
+        loadGarudaLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "unknown") == 0)
+        loadUnknownLogo(&config->logo);
+    else
+        ffLoadLogoFromFile(config, logo);
 }
 
 void ffLoadLogo(FFinstance* instance)

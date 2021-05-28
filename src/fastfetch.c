@@ -26,6 +26,7 @@ typedef struct FFdata
     FFvaluestore valuestore;
     FFstrbuf structure;
     FFstrbuf logoName;
+    bool loadLogoFromFile;
     bool multithreading;
 } FFdata;
 
@@ -793,11 +794,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--logo-file") == 0)
     {
         optionParseString(key, value, &data->logoName);
-        instance->config.readLogoFromFile = true;
+        data->loadLogoFromFile = true;
     }
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0) {
         optionParseString(key, value, &data->logoName);
-        instance->config.readLogoFromFile = false;
+        data->loadLogoFromFile = false;
     }
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
@@ -976,6 +977,8 @@ static void applyData(FFinstance* instance, FFdata* data)
     //We must do this after parsing all options because of color options
     if(data->logoName.length == 0)
         ffLoadLogo(instance);
+    else if(data->loadLogoFromFile)
+        ffLoadLogoFromFile(&instance->config, data->logoName.chars);
     else
         ffLoadLogoSet(&instance->config, data->logoName.chars);
 
@@ -1074,6 +1077,7 @@ static void initData(FFdata* data)
     ffValuestoreInit(&data->valuestore);
     ffStrbufInitA(&data->structure, 256);
     ffStrbufInit(&data->logoName);
+    data->loadLogoFromFile = false;
     data->multithreading = true;
 }
 
