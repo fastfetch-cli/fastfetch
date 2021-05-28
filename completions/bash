@@ -187,6 +187,7 @@ __fastfetch_completion()
         "--lib-XFConf"
         "--battery-dir"
         "--load-config"
+        "--logo-file"
     )
 
     local FF_OPTIONS_LOGO=(

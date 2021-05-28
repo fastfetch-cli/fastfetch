@@ -41,6 +41,7 @@ typedef struct FFconfig
     int16_t offsetx;
     FFstrbuf color;
     uint32_t titleLength;
+    bool readLogoFromFile;
     bool colorLogo;
     bool showErrors;
     bool recache;

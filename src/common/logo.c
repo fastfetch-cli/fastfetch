@@ -1,6 +1,26 @@
 #include "fastfetch.h"
 
 #include <string.h>
+#include <unistd.h>
+
+// http://www.zedwood.com/article/cpp-utf8-strlen-function
+// Code snippet licensed under Creative Commons CC-By-SA 3.0
+static int utf8_strlen(const char* str)
+{
+    int c,i,ix,q;
+    for (q=0, i=0, ix=strlen(str); i < ix; i++, q++)
+    {
+        c = (unsigned char) str[i];
+        if      (c>=0   && c<=127) i+=0;
+        else if ((c & 0xE0) == 0xC0) i+=1;
+        else if ((c & 0xF0) == 0xE0) i+=2;
+        else if ((c & 0xF8) == 0xF0) i+=3;
+        //else if (($c & 0xFC) == 0xF8) i+=4; // 111110bb //byte 5, unnecessary in 4 byte UTF-8
+        //else if (($c & 0xFE) == 0xFC) i+=5; // 1111110b //byte 6, unnecessary in 4 byte UTF-8
+        else return 0;//invalid utf8
+    }
+    return q;
+}
 
 static void loadUnknownLogo(FFlogo* logo)
 {
@@ -236,9 +256,9 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     ,tSXX°          .bbbbbbbbbbbbbbbbbbbB8x@;"FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s   .SXxx            bBBBBBBBBBBBBBBBBBBBbSBX8;"FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s ,888S                                     pd!"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                       qp"FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                       qp"FASTFETCH_TEXT_MODIFIER_RESET, color);                                                                                                                                                                                                                                                                                                                                                                                                         
     sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%sGBB.                                          "FASTFETCH_TEXT_MODIFIER_RESET, color);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%sGBB.                                          "FASTFETCH_TEXT_MODIFIER_RESET, color);                                                                                                                                                       
     sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s x%%88        d888@8@X@X@X88X@@XX@@X@8@X.      "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s   dxXd    dB8b8b8B8B08bB88b998888b88x.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
     sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    dxx8o                      .@@;.          "FASTFETCH_TEXT_MODIFIER_RESET, color);
@@ -249,29 +269,74 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
     sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, const char* pathToFile)
+{
+    const char* color = doColor ? configColor->chars : "";
+    strcpy(logo->color, color);
+
+    FILE* fp = fopen(pathToFile, "r");
+    char* buff = NULL;
+    size_t buffLen = 0;
+    int lineBytes;
+    int lineLength;
+
+    int logoWidth = 0, logoHeight = 0;
+    while( (lineBytes=getline(&buff, &buffLen, fp)) != -1 ) {
+        // Remove trailing newline
+        if(buff[lineBytes-1] == '\n')
+            buff[lineBytes-1] = '\0';
+        
+        sprintf(logo->chars[logoHeight++],   FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, buff);
+
+        lineLength = utf8_strlen(buff);
+        logoWidth = lineLength > logoWidth
+            ? lineLength
+            : logoWidth;
+    }
+
+    // Clean up
+    fclose(fp);
+    if(buff != NULL)
+        free(buff);
+
+    logo->width = logoWidth;
+    logo->height = logoHeight;
+}
+
 void ffLoadLogoSet(FFconfig* config, const char* logo)
 {
-    if(strcasecmp(logo, "none") == 0)
-    {
-        loadNoneLogo(&config->logo);
-        config->logo_spacing = 0; //This is wanted in most cases, so just set it
+    if(config->readLogoFromFile) {
+        ffLoadLogoFromFile(config, logo);
+    } else {
+        if(strcasecmp(logo, "none") == 0)
+        {
+            loadNoneLogo(&config->logo);
+            config->logo_spacing = 0; //This is wanted in most cases, so just set it
+        }
+        else if(strcasecmp(logo, "arch") == 0)
+            loadArchLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "artix") == 0)
+            loadArtixLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "ubuntu") == 0)
+            loadUbuntuLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "debian") == 0)
+            loadDebianLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "manjaro") == 0)
+            loadManjaroLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "void") == 0)
+            loadVoidLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "garuda") == 0)
+            loadGarudaLogo(&config->logo, config->colorLogo);
+        else if(strcasecmp(logo, "unknown") == 0)
+            loadUnknownLogo(&config->logo);
+        else
+            ffLoadLogoFromFile(config, logo);
     }
-    else if(strcasecmp(logo, "arch") == 0)
-        loadArchLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "artix") == 0)
-        loadArtixLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "ubuntu") == 0)
-        loadUbuntuLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "debian") == 0)
-        loadDebianLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "manjaro") == 0)
-        loadManjaroLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "void") == 0)
-        loadVoidLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "garuda") == 0)
-        loadGarudaLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "unknown") == 0)
-        loadUnknownLogo(&config->logo);
+}
+
+void ffLoadLogoFromFile(FFconfig* config, const char* logo) {
+    if(access(logo, R_OK) == 0)
+        loadLogoFromFile(&config->logo, config->colorLogo, &config->color, logo);
     else
     {
         if(config->showErrors)

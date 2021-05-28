@@ -62,6 +62,7 @@ static inline void printHelp()
         "\n"
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
+        "              --logo-file <path>:    sets the path of the file to use as the logo\n"
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
         "\n"
         "Format options: Provide the format string for custom output. Use fastfetch --help *-format for specific help.\n"
@@ -789,8 +790,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
+    else if(strcasecmp(key, "--logo-file") == 0)
+    {
         optionParseString(key, value, &data->logoName);
+        instance->config.readLogoFromFile = true;
+    }
+    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0) {
+        optionParseString(key, value, &data->logoName);
+        instance->config.readLogoFromFile = false;
+    }
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
