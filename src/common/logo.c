@@ -294,7 +294,10 @@ static void loadLogoFromFile(FFlogo* logo, bool doColor, FFstrbuf* configColor, 
             : logoWidth;
     }
 
+    // Clean up
     fclose(fp);
+    if(buff != NULL)
+        free(buff);
 
     logo->width = logoWidth;
     logo->height = logoHeight;
