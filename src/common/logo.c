@@ -271,7 +271,6 @@ static void loadGarudaLogo(FFlogo* logo, bool doColor)
 
 void ffLoadLogoFromFile(FFconfig* config, const char* path)
 {
-    puts(path);
     FILE* file = fopen(path, "r");
     if(file == NULL)
     {
