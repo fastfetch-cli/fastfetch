@@ -184,7 +184,7 @@ void ffFontInitQt(FFfont* font, const char* data)
     fontInitPretty(font);
 }
 
-void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* alternativeBuffer)
+static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* alternativeBuffer)
 {
     while(**data == ' ' || **data == '\t' || **data == ',')
         ++(*data);

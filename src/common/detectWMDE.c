@@ -12,210 +12,126 @@ typedef enum ProtocolHint
     FF_PROTOCOL_HINT_WAYLAND
 } ProtocolHint;
 
-typedef enum DEHint
+static void getSessionDesktop(FFWMDEResult* result)
 {
-    FF_DE_HINT_UNKNOWN = 0,
-    FF_DE_HINT_PLASMA,
-    FF_DE_HINT_GNOME,
-    FF_DE_HINT_CINNAMON,
-    FF_DE_HINT_XFCE4,
-    FF_DE_HINT_MATE,
-    FF_DE_HINT_LXQT
-} DEHint;
-
-typedef struct ProcData
-{
-    DIR* proc;
-    struct dirent* dirent;
-    ProtocolHint protocolHint;
-    DEHint deHint;
-} ProcData;
-
-static inline void getSessionDesktop(FFWMDEResult* result)
-{
-
     result->sessionDesktop = getenv("XDG_CURRENT_DESKTOP");
-    if(result->sessionDesktop != NULL && result->sessionDesktop[0] != '\0')
+    if(result->sessionDesktop != NULL && *result->sessionDesktop != '\0')
         return;
 
     result->sessionDesktop = getenv("XDG_SESSION_DESKTOP");
-    if(result->sessionDesktop != NULL && result->sessionDesktop[0] != '\0')
+    if(result->sessionDesktop != NULL && *result->sessionDesktop != '\0')
         return;
 
     result->sessionDesktop = getenv("CURRENT_DESKTOP");
-    if(result->sessionDesktop != NULL && result->sessionDesktop[0] != '\0')
+    if(result->sessionDesktop != NULL && *result->sessionDesktop != '\0')
         return;
 
     result->sessionDesktop = getenv("SESSION_DESKTOP");
-    if(result->sessionDesktop != NULL && result->sessionDesktop[0] != '\0')
+    if(result->sessionDesktop != NULL && *result->sessionDesktop != '\0')
         return;
 
-    const char* desktopSession = getenv("DESKTOP_SESSION");
-    if(desktopSession != NULL && desktopSession[0] != '\0')
+    char* env;
+
+    env = getenv("DESKTOP_SESSION");
+    if(env != NULL && *env != '\0')
     {
-        if(strcasecmp(desktopSession, "plasma") == 0)
+        if(strcasecmp(env, "plasma") == 0)
             result->sessionDesktop = "KDE";
         else
-            result->sessionDesktop = desktopSession;
-
+            result->sessionDesktop = env;
         return;
     }
 
-    char* gnomeID = getenv("GNOME_DESKTOP_SESSION_ID");
-    if(gnomeID != NULL)
+    env = getenv("GNOME_DESKTOP_SESSION_ID");
+    if(env != NULL)
     {
         result->sessionDesktop = "Gnome";
         return;
     }
 
-    char* mateID = getenv("MATE_DESKTOP_SESSION_ID");
-    if(mateID != NULL)
+    env = getenv("MATE_DESKTOP_SESSION_ID");
+    if(env != NULL)
     {
         result->sessionDesktop = "Mate";
         return;
     }
 
-    char* tdeID = getenv("TDE_FULL_SESSION");
-    if(tdeID != NULL)
+    env = getenv("TDE_FULL_SESSION");
+    if(env != NULL)
     {
         result->sessionDesktop = "Trinity";
         return;
     }
 }
 
-static bool applyPrettyNameIfWM(FFWMDEResult* result, const FFstrbuf* processName, ProtocolHint* protocolHint)
+static void applyPrettyNameIfWM(FFWMDEResult* result, const char* processName, ProtocolHint* protocolHint)
 {
-    if(ffStrbufIgnCaseCompS(processName, "kwin_wayland") == 0)
+    if(strcasecmp(processName, "kwin_wayland") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "KWin");
         *protocolHint = FF_PROTOCOL_HINT_WAYLAND;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "kwin_x11") == 0)
+    else if(strcasecmp(processName, "kwin_x11") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "KWin");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "sway") == 0)
+    else if(strcasecmp(processName, "sway") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "Sway");
         *protocolHint = FF_PROTOCOL_HINT_WAYLAND;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "weston") == 0)
+    else if(strcasecmp(processName, "weston") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "Weston");
         *protocolHint = FF_PROTOCOL_HINT_WAYLAND;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "wayfire") == 0)
+    else if(strcasecmp(processName, "wayfire") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "Wayfire");
         *protocolHint = FF_PROTOCOL_HINT_WAYLAND;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "openbox") == 0)
+    else if(strcasecmp(processName, "openbox") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "Openbox");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "xfwm4") == 0)
+    else if(strcasecmp(processName, "xfwm4") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "Xfwm4");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "Marco") == 0)
+    else if(strcasecmp(processName, "Marco") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "Marco");
         *protocolHint = FF_PROTOCOL_HINT_X11;
     }
-    else if(ffStrbufIgnCaseCompS(processName, "gnome-session-binary") == 0 || ffStrbufIgnCaseCompS(processName, "Mutter") == 0)
+    else if(strcasecmp(processName, "gnome-session-binary") == 0 || strcasecmp(processName, "Mutter") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Mutter");
-    else if(ffStrbufIgnCaseCompS(processName, "cinnamon-session") == 0 || ffStrbufIgnCaseCompS(processName, "Muffin") == 0)
+    else if(strcasecmp(processName, "cinnamon-session") == 0 || strcasecmp(processName, "Muffin") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Muffin");
 
-    if(result->wmPrettyName.length > 0)
-    {
-        ffStrbufSet(&result->wmProcessName, processName);
-        return true;
-    }
-
-    return false;
+    if(result->wmPrettyName.length > 0 && result->wmProcessName.length == 0)
+        ffStrbufSetS(&result->wmProcessName, processName);
 }
 
-static bool applyDEHintIfDE(const FFstrbuf* processName, DEHint* deHint)
+static void applyBetterWM(FFWMDEResult* result, const char* processName, ProtocolHint* protocolHint)
 {
-    if(ffStrbufIgnCaseCompS(processName, "plasmashell") == 0)
-        *deHint = FF_DE_HINT_PLASMA;
-    else if(ffStrbufIgnCaseCompS(processName, "gnome-shell") == 0)
-        *deHint = FF_DE_HINT_GNOME;
-    else if(ffStrbufIgnCaseCompS(processName, "cinnamon") == 0)
-        *deHint = FF_DE_HINT_CINNAMON;
-    else if(ffStrbufIgnCaseCompS(processName, "xfce4-session") == 0)
-        *deHint = FF_DE_HINT_XFCE4;
-    else if(ffStrbufIgnCaseCompS(processName, "mate-session") == 0)
-        *deHint = FF_DE_HINT_MATE;
-    else if(ffStrbufIgnCaseCompS(processName, "lxqt-session") == 0)
-        *deHint = FF_DE_HINT_LXQT;
-
-    return *deHint != FF_DE_HINT_UNKNOWN;
-}
-
-static void getFromProcDir(FFWMDEResult* result, ProcData* procData, bool searchWM)
-{
-    if(procData->proc == NULL)
+    if(processName == NULL || *processName == '\0')
         return;
 
-    FFstrbuf procPath;
-    ffStrbufInitA(&procPath, 64);
-    ffStrbufAppendS(&procPath, "/proc/");
-
-    uint32_t procPathLength = procPath.length;
-
-    FFstrbuf processName;
-    ffStrbufInitA(&processName, 256); //Some processes have large command lines (looking at you chrome)
-
-    while((procData->dirent = readdir(procData->proc)) != NULL)
-    {
-        if(procData->dirent->d_type != DT_DIR || procData->dirent->d_name[0] == '.')
-            continue;
-
-        ffStrbufAppendS(&procPath, procData->dirent->d_name);
-        ffStrbufAppendS(&procPath, "/cmdline");
-        ffGetFileContent(procPath.chars, &processName);
-        ffStrbufRecalculateLength(&processName); //Arguments are seperated by a \0 char. We make use of this to extract only the executable path. This is needed if arguments contain the / char
-        ffStrbufSubstrAfterLastC(&processName, '/');
-        ffStrbufSubstrBefore(&procPath, procPathLength);
-
-        //If the are searching for WM, we are also always searching for DE. Therefore !searchWM must be last in the condition
-        if(applyDEHintIfDE(&processName, &procData->deHint) && !searchWM)
-            break;
-
-        //If we have a WM, dont overwrite it. Therefore searchWM must be first in the condition
-        if(searchWM && applyPrettyNameIfWM(result, &processName, &procData->protocolHint))
-            break;
-    }
-
-    ffStrbufDestroy(&processName);
-    ffStrbufDestroy(&procPath);
-}
-
-static inline void getWM(FFWMDEResult* result, ProcData* procData)
-{
-    //If sessionDesktop env is a known WM, set it. Otherwise we might be running a DE, search /proc for known WMs
-    ffStrbufSetS(&result->wmProcessName, result->sessionDesktop);
-    if(!applyPrettyNameIfWM(result, &result->wmProcessName, &procData->protocolHint))
-        getFromProcDir(result, procData, true);
-
-    //Fallback for unknown window managers. This will falsely detect DEs as WMs if their WM is unknown
+    ffStrbufSetS(&result->wmProcessName, processName);
+    applyPrettyNameIfWM(result, processName, protocolHint);
     if(result->wmPrettyName.length == 0)
-    {
-        ffStrbufSetS(&result->wmProcessName, result->sessionDesktop);
-        ffStrbufSetS(&result->wmPrettyName, result->sessionDesktop);
-    }
+        ffStrbufAppend(&result->wmPrettyName, &result->wmProcessName);
 }
 
-static void getKDE(FFWMDEResult* result)
+static void getKDE(FFWMDEResult* result, ProtocolHint* protocolHint)
 {
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, "KDE Plasma");
     ffParsePropFile("/usr/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    applyBetterWM(result, getenv("KDEWM"), protocolHint);
 }
 
 static void getGnome(FFWMDEResult* result)
@@ -239,10 +155,13 @@ static void getMate(FFinstance* instance, FFWMDEResult* result)
 
     //I parse the file 3 times by purpose, because the properties are not guaranteed to be in order
     ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<platform>", &result->deVersion);
-    ffStrbufAppendC(&result->deVersion, '.');
-    ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<minor>", &result->deVersion);
-    ffStrbufAppendC(&result->deVersion, '.');
-    ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<micro>", &result->deVersion);
+    if(result->deVersion.length > 0)
+    {
+        ffStrbufAppendC(&result->deVersion, '.');
+        ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<minor>", &result->deVersion);
+        ffStrbufAppendC(&result->deVersion, '.');
+        ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<micro>", &result->deVersion);
+    }
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -265,7 +184,7 @@ static void getXFCE4(FFinstance* instance, FFWMDEResult* result)
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
-        //This is really, really slow. Thank you, XFCE developers
+        //This is somewhat slow
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "xfce4-session",
             "--version",
@@ -278,7 +197,7 @@ static void getXFCE4(FFinstance* instance, FFWMDEResult* result)
     }
 }
 
-static void getLXQt(FFinstance* instance, FFWMDEResult* result)
+static void getLXQt(FFinstance* instance, FFWMDEResult* result, ProtocolHint* protocolHint)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
     ffStrbufSetS(&result->dePrettyName, "LXQt");
@@ -301,117 +220,155 @@ static void getLXQt(FFinstance* instance, FFWMDEResult* result)
         result->deVersion.length = 0; //don't set '\0' byte
         ffGetPropValueFromLines(result->deVersion.chars , "liblxqt", &result->deVersion);
     }
+
+    FFstrbuf wmProcessNameBuffer;
+    ffStrbufInit(&wmProcessNameBuffer);
+
+    ffParsePropFileConfig(instance, "lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
+    applyBetterWM(result, wmProcessNameBuffer.chars, protocolHint);
+
+    ffStrbufDestroy(&wmProcessNameBuffer);
 }
 
-static inline void getDEFromHint(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
+static void applyPrettyNameIfDE(FFinstance* instance, FFWMDEResult* result, const char* name, ProtocolHint* protocolHint)
 {
-    getFromProcDir(result, procData, false);
-
-    if(procData->deHint == FF_DE_HINT_UNKNOWN)
+    if(name == NULL || *name == '\0')
         return;
 
-    if(procData->deHint == FF_DE_HINT_PLASMA)
-        getKDE(result);
-    else if(procData->deHint == FF_DE_HINT_GNOME)
+    if(strcasecmp(name, "KDE") == 0 || strcasecmp(name, "plasma") == 0 || strcasecmp(name, "plasmashell") == 0)
+        getKDE(result, protocolHint);
+    else if(strcasecmp(name, "Gnome") == 0 || strcasecmp(name, "ubuntu:GNOME") == 0 || strcasecmp(name, "ubuntu") == 0 || strcasecmp(name, "gnome-shell") == 0)
         getGnome(result);
-    else if(procData->deHint == FF_DE_HINT_CINNAMON)
+    else if(strcasecmp(name, "X-Cinnamon") == 0 || strcasecmp(name, "Cinnamon") == 0)
         getCinnamon(result);
-    else if(procData->deHint == FF_DE_HINT_XFCE4)
+    else if(strcasecmp(name, "XFCE") == 0 || strcasecmp(name, "X-XFCE") == 0 || strcasecmp(name, "XFCE4") == 0 || strcasecmp(name, "X-XFCE4") == 0 || strcasecmp(name, "xfce4-session") == 0)
         getXFCE4(instance, result);
-    else if(procData->deHint == FF_DE_HINT_MATE)
+    else if(strcasecmp(name, "MATE") == 0 || strcasecmp(name, "X-MATE") == 0 || strcasecmp(name, "mate-session") == 0)
         getMate(instance, result);
-    else if(procData->deHint == FF_DE_HINT_LXQT)
-        getLXQt(instance, result);
+    else if(strcasecmp(name, "LXQt") == 0 || strcasecmp(name, "X-LXQT") == 0 || strcasecmp(name, "lxqt-session") == 0)
+        getLXQt(instance, result, protocolHint);
 }
 
-static inline void getDE(FFinstance* instance, FFWMDEResult* result, ProcData* procData)
+static void getSessionTypeFromHint(FFWMDEResult* result, ProtocolHint protocolHint)
 {
-    // if sessionDesktop is not set or sessionDesktiop == WM, try finding DE via /proc
     if(
-        result->sessionDesktop == NULL ||
-        *result->sessionDesktop == '\0' ||
-        ffStrbufIgnCaseCompS(&result->wmProcessName, result->sessionDesktop) == 0 ||
-        ffStrbufIgnCaseCompS(&result->wmPrettyName, result->sessionDesktop) == 0
-    ) {
-        getDEFromHint(instance, result, procData);
-        return;
-    }
+        result->wmProtocolName.length > 0 ||
+        protocolHint == FF_PROTOCOL_HINT_UNKNOWN
+    ) return;
 
-    if(strcasecmp(result->sessionDesktop, "KDE") == 0 || strcasecmp(result->sessionDesktop, "plasma") == 0 || strcasecmp(result->sessionDesktop, "plasmashell") == 0)
-        getKDE(result);
-    else if(strcasecmp(result->sessionDesktop, "Gnome") == 0 || strcasecmp(result->sessionDesktop, "ubuntu:GNOME") == 0 || strcasecmp(result->sessionDesktop, "ubuntu") == 0)
-        getGnome(result);
-    else if(strcasecmp(result->sessionDesktop, "X-Cinnamon") == 0 || strcasecmp(result->sessionDesktop, "Cinnamon") == 0)
-        getCinnamon(result);
-    else if(strcasecmp(result->sessionDesktop, "XFCE") == 0 || strcasecmp(result->sessionDesktop, "X-XFCE") == 0 || strcasecmp(result->sessionDesktop, "XFCE4") == 0 || strcasecmp(result->sessionDesktop, "X-XFCE4") == 0)
-        getXFCE4(instance, result);
-    else if(strcasecmp(result->sessionDesktop, "MATE") == 0 || strcasecmp(result->sessionDesktop, "X-MATE") == 0)
-        getMate(instance, result);
-    else if(strcasecmp(result->sessionDesktop, "LXQt") == 0 || strcasecmp(result->sessionDesktop, "X-LXQT") == 0)
-        getLXQt(instance, result);
-    else
-    {
-        ffStrbufSetS(&result->deProcessName, result->sessionDesktop);
-        ffStrbufSet(&result->dePrettyName, &result->deProcessName);
-
-        if(ffStrbufStartsWithIgnCaseS(&result->dePrettyName, "X-"))
-            ffStrbufSubstrAfter(&result->dePrettyName, 1);
-    }
-}
-
-static void getSessionTypeFallback(FFWMDEResult* result, ProtocolHint protocolHint)
-{
     if(protocolHint == FF_PROTOCOL_HINT_WAYLAND)
         ffStrbufSetS(&result->wmProtocolName, "Wayland");
     else if(protocolHint == FF_PROTOCOL_HINT_X11)
         ffStrbufSetS(&result->wmProtocolName, "X11");
-    else if(getenv("WAYLAND_DISPLAY") != NULL)
-        ffStrbufSetS(&result->wmProtocolName, "Wayland");
 }
 
-static inline void getSessionType(FFWMDEResult* result, ProtocolHint protocolHint)
+static void getSessionTypeFromEnv(FFWMDEResult* result)
 {
-    const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
-
-    if (xdgSessionType == NULL)
+    const char* env = getenv("XDG_SESSION_TYPE");
+    if(env != NULL && *env != '\0')
     {
-        getSessionTypeFallback(result, protocolHint);
+        if(strcasecmp(env, "wayland") == 0)
+            ffStrbufSetS(&result->wmProtocolName, "Wayland");
+        else if(strcasecmp(env, "x11") == 0)
+            ffStrbufSetS(&result->wmProtocolName, "X11");
+        else if(strcasecmp(env, "tty") == 0)
+            ffStrbufSetS(&result->wmProtocolName, "TTY");
+        else if(strcasecmp(env, "mir") == 0)
+            ffStrbufSetS(&result->wmProtocolName, "Mir");
+        else
+            ffStrbufSetS(&result->wmProtocolName, env);
+
         return;
     }
 
-    if(strcasecmp(xdgSessionType, "wayland") == 0)
+    env = getenv("WAYLAND_DISPLAY");
+    if(env != NULL && *env != '\0')
+    {
         ffStrbufSetS(&result->wmProtocolName, "Wayland");
-    else if(strcasecmp(xdgSessionType, "x11") == 0)
-        ffStrbufSetS(&result->wmProtocolName, "X11");
-    else if(strcasecmp(xdgSessionType, "tty") == 0)
-        ffStrbufSetS(&result->wmProtocolName, "TTY");
-    else if(strcasecmp(xdgSessionType, "mir") == 0)
-        ffStrbufSetS(&result->wmProtocolName, "Mir");
-    else
-        ffStrbufSetS(&result->wmProtocolName, xdgSessionType);
+        return;
+    }
 
-    // $XDG_SESSION_TYPE is empty
-    if(result->wmProtocolName.length == 0)
-        getSessionTypeFallback(result, protocolHint);
+    env = getenv("TERM");
+    if(env != NULL && *env != '\0')
+    {
+        if(strcasecmp(env, "linux") == 0)
+        {
+            ffStrbufSetS(&result->wmProtocolName, "TTY");
+            return;
+        }
+    }
 }
 
-static inline void getWMDE(FFinstance* instance, FFWMDEResult* result)
+static void getFromProcDir(FFinstance* instance, FFWMDEResult* result, ProtocolHint* protocolHint)
 {
-    ProcData procData;
-    procData.proc = opendir("/proc");
-    procData.dirent = NULL;
-    procData.protocolHint = FF_PROTOCOL_HINT_UNKNOWN;
-    procData.deHint = FF_DE_HINT_UNKNOWN;
+    DIR* proc = opendir("/proc");
+    if(proc == NULL)
+        return;
 
-    getSessionDesktop(result);
-    getWM(result, &procData);
-    getDE(instance, result, &procData);
+    FFstrbuf procPath;
+    ffStrbufInitA(&procPath, 64);
+    ffStrbufAppendS(&procPath, "/proc/");
 
-    if(result->wmProtocolName.length == 0 && procData.protocolHint != FF_PROTOCOL_HINT_UNKNOWN)
-        getSessionTypeFallback(result, procData.protocolHint);
+    uint32_t procPathLength = procPath.length;
 
-    if(procData.proc != NULL)
-        closedir(procData.proc);
+    FFstrbuf processName;
+    ffStrbufInitA(&processName, 256); //Some processes have large command lines (looking at you chrome)
+
+    struct dirent* dirent;
+    while((dirent = readdir(proc)) != NULL)
+    {
+        if(dirent->d_type != DT_DIR || dirent->d_name[0] == '.')
+            continue;
+
+        ffStrbufAppendS(&procPath, dirent->d_name);
+        ffStrbufAppendS(&procPath, "/cmdline");
+        ffGetFileContent(procPath.chars, &processName);
+        ffStrbufRecalculateLength(&processName); //Arguments are seperated by a \0 char. We make use of this to extract only the executable path. This is needed if arguments contain the / char
+        ffStrbufSubstrAfterLastC(&processName, '/');
+        ffStrbufSubstrBefore(&procPath, procPathLength);
+
+        if(result->dePrettyName.length == 0)
+            applyPrettyNameIfDE(instance, result, processName.chars, protocolHint);
+
+        if(result->wmPrettyName.length == 0)
+            applyPrettyNameIfWM(result, processName.chars, protocolHint);
+
+        if(result->deProcessName.length > 0 && result->wmPrettyName.length > 0)
+            break;
+    }
+
+    closedir(proc);
+
+    ffStrbufDestroy(&processName);
+    ffStrbufDestroy(&procPath);
+}
+
+void getWMDE(FFinstance* instance, FFWMDEResult* result)
+{
+    ProtocolHint protocolHint;
+
+    //If sessionDesktop is a known DE, set it. Some DEs even have config files which tell us the WM, so we can return very fast in this case
+    applyPrettyNameIfDE(instance, result, result->sessionDesktop, &protocolHint);
+    if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
+    {
+        getSessionTypeFromHint(result, protocolHint);
+        return;
+    }
+
+    //If sessionDesktop is a known WM, set it.
+    applyPrettyNameIfWM(result, result->sessionDesktop, &protocolHint);
+
+    //Search for missing DE / WM in processes
+    getFromProcDir(instance, result, &protocolHint);
+
+    //Fallback for unknown WMs and DEs. This will falsely detect DEs as WMs if they (and their used WM) are unknown
+    if(result->wmPrettyName.length == 0 && result->dePrettyName.length == 0)
+    {
+        ffStrbufSetS(&result->wmProcessName, result->sessionDesktop);
+        ffStrbufSetS(&result->wmPrettyName, result->sessionDesktop);
+    }
+
+    getSessionTypeFromHint(result, protocolHint);
 }
 
 const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
@@ -434,7 +391,8 @@ const FFWMDEResult* ffDetectWMDE(FFinstance* instance)
     ffStrbufInit(&result.dePrettyName);
     ffStrbufInit(&result.deVersion);
 
-    getSessionType(&result, FF_PROTOCOL_HINT_UNKNOWN);
+    getSessionDesktop(&result);
+    getSessionTypeFromEnv(&result);
 
     //Don't run anyting when on TTY. This prevents us to catch process from other users in at least that case.
     if(ffStrbufIgnCaseCompS(&result.wmProtocolName, "TTY") != 0)
