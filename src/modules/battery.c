@@ -49,16 +49,18 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
 
         ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey);
 
+        bool showStatus = status.length > 0 && ffStrbufIgnCaseCompS(&status, "Full") != 0;
+
         if(capacity.length > 0)
         {
             ffStrbufWriteTo(&capacity, stdout);
             putchar('%');
 
-            if(status.length > 0)
+            if(showStatus)
                 fputs(", ", stdout);
         }
 
-        if(status.length > 0)
+        if(showStatus)
             ffStrbufWriteTo(&status, stdout);
 
         putchar('\n');
