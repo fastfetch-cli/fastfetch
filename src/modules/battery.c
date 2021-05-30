@@ -38,7 +38,7 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
     if(ffStrbufIgnCaseCompS(&status, "Unknown") == 0)
         ffStrbufClear(&status);
 
-    if(manufactor.length == 0 && model.length == 0 && technology.length == 0 && capacity.length == 0 && status.length == 0)
+    if(capacity.length == 0 && status.length == 0)
     {
         ffPrintError(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "No file in %s could be read or all battery options are disabled", dir->chars);
         return;
@@ -49,31 +49,19 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
 
         ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey);
 
-        if(manufactor.length > 0)
-            printf("%s ", manufactor.chars);
-
-        if(model.length > 0)
-            printf("%s ", model.chars);
-
-        if(technology.length > 0)
-            printf("(%s) ", technology.chars);
-
         if(capacity.length > 0)
         {
-            printf("[%s%%", capacity.chars);
+            ffStrbufWriteTo(&capacity, stdout);
+            putchar('%');
 
-            if(status.length == 0)
-                puts("]");
-            else
-                printf("; %s]\n", status.chars);
-        }
-        else
-        {
             if(status.length > 0)
-                printf("[%s]", status.chars);
-            else
-                putchar('\n');
+                fputs(", ", stdout);
         }
+
+        if(status.length > 0)
+            ffStrbufWriteTo(&status, stdout);
+
+        putchar('\n');
     }
     else
     {

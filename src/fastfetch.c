@@ -443,7 +443,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "battery-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("battery", "{} {} ({}) [{}%; {}]", 5,
+        constructAndPrintCommandHelpFormat("battery", "{}%, {}", 5,
             "Battery manufactor",
             "Battery model",
             "Battery technology",
