@@ -25,6 +25,7 @@ The following libraries are used if present:
 * [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 * [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
 * [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.  
+* [`libSQLite3`](https://www.sqlite.org/index.html): Needed for rpm package count.  
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
@@ -37,7 +38,7 @@ Arch, Artix, Manjaro, Garuda, Debian, Ubuntu, Void
 
 ##### Package managers:
 ```
-Pacman, xbps, dpkg, Flatpak, Snap
+Pacman, dpkg, rpm, xbps, Flatpak, Snap
 ```
 
 ##### Window managers:
@@ -72,6 +73,8 @@ cmake --build .
   
 This will produce `build/fastfetch` and `build/flashfetch`, both standalone executables.  
 Command line completions for bash can be found in [`completions/bash`](completions/bash).  
+
+Note that the headers of the libraries listed in [Dependencies](#Dependencies) are needed to build the project.
 
 ## Packaging
 

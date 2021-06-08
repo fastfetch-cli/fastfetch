@@ -179,6 +179,36 @@ static void loadDebianLogo(FFlogo *logo, bool doColor)
     sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s             `\"\"\"          "FASTFETCH_TEXT_MODIFIER_RESET, color);
 }
 
+static void loadFedoraLogo(FFlogo* logo, bool doColor)
+{
+
+    logo->width = 35;
+    logo->height = 17;
+    strcpy(logo->name, "fedora");
+
+    const char* blue = doColor ? "\033[34m" : "";
+    const char* white = doColor ? "\033[37m" : "";
+    strcpy(logo->color, "\033[34m");
+
+    sprintf(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"%s           /:-------------:\\       "FASTFETCH_TEXT_MODIFIER_RESET, blue);
+    sprintf(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"%s        :-------------------::     "FASTFETCH_TEXT_MODIFIER_RESET, blue);
+    sprintf(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT"%s      :-----------%s/shhOHbmp$%s---:\\  "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"%s    /-----------%somMMMNNNMMD  %s---:  "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"%s   :-----------%ssMMMMNMNMP%s.    ---: "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"%s  :-----------%s:MMMdP%s-------    ---\\"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"%s ,------------%s:MMMd%s--------    ---:"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"%s :------------%s:MMMd%s-------    .---:"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"%s :----    %soNMMMMMMMMMNho%s     .----:"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"%s :--     .%s+shhhMMMmhhy++%s   .------/"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s :-    -------%s:MMMd%s--------------: "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s :-   --------%s/MMMd%s-------------;  "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s :-    ------%s/hMMMy%s------------:   "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s :--%s :dMNdhhdNMMNo%s------------;    "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s :---%s:sdNMMMMNds:%s------------:     "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s :------%s:://:%s-------------::       "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
+    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s :---------------------://         "FASTFETCH_TEXT_MODIFIER_RESET, blue);
+}
+
 static void loadManjaroLogo(FFlogo *logo, bool doColor)
 {
     logo->width = 28;
@@ -320,6 +350,8 @@ void ffLoadLogoSet(FFconfig* config, const char* logo)
         loadDebianLogo(&config->logo, config->colorLogo);
     else if(strcasecmp(logo, "manjaro") == 0)
         loadManjaroLogo(&config->logo, config->colorLogo);
+    else if(strcasecmp(logo, "fedora") == 0)
+        loadFedoraLogo(&config->logo, config->colorLogo);
     else if(strcasecmp(logo, "void") == 0)
         loadVoidLogo(&config->logo, config->colorLogo);
     else if(strcasecmp(logo, "garuda") == 0)
@@ -408,7 +440,7 @@ void ffPrintRemainingLogo(FFinstance* instance)
 
 static FFlogo* getLogos(uint8_t* size, bool color)
 {
-    #define FASTFETCH_LOGO_AMOUNT 9
+    #define FASTFETCH_LOGO_AMOUNT 10
 
     *size = FASTFETCH_LOGO_AMOUNT;
     static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
@@ -424,6 +456,7 @@ static FFlogo* getLogos(uint8_t* size, bool color)
     loadDebianLogo(&logos[6], color);
     loadManjaroLogo(&logos[7], color);
     loadVoidLogo(&logos[8], color);
+    loadFedoraLogo(&logos[9], color);
 
     return logos;
 }

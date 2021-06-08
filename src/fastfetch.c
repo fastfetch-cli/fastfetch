@@ -120,6 +120,7 @@ static inline void printHelp()
         "   --lib-DConf <path>\n"
         "   --lib-wayland <path>\n"
         "   --lib-XFConf <path>\n"
+        "   --lib-SQLite <path>\n"
         "\n"
         "Module specific options:\n"
         "   --disk-folders <folders>: A colon separated list of folder paths for the disk output. Default is \"/:/home\"\n"
@@ -280,12 +281,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (xbps), {5} (dpkg), {6}, (flatpak), {7} (snap)", 7,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (xps), {7}, (flatpak), {8} (snap)", 8,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
-            "Number of xbps packages",
             "Number of dpkg packages",
+            "Number of rpm packages",
+            "Number of xbps packages",
             "Number of flatpak packages",
             "Number of snap packages"
         );
@@ -911,6 +913,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libWayland);
     else if(strcasecmp(key, "--lib-XFConf") == 0)
         optionParseString(key, value, &instance->config.libXFConf);
+    else if(strcasecmp(key, "--lib-SQLite") == 0)
+        optionParseString(key, value, &instance->config.libSQLite);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)

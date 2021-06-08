@@ -98,6 +98,7 @@ typedef struct FFconfig
     FFstrbuf libGIO;
     FFstrbuf libDConf;
     FFstrbuf libXFConf;
+    FFstrbuf libSQLite;
 
     FFstrbuf diskFolders;
 
@@ -293,6 +294,8 @@ FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttyp
 FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type);
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
 FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type);
+
+uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName);
 
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
