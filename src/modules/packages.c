@@ -62,6 +62,10 @@ void ffPrintPackages(FFinstance* instance)
     uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
     uint32_t snap = getNumElements("/snap", DT_DIR);
 
+    //Accounting for the /snap/bin folder
+    if(snap > 0)
+        --snap;
+
     uint32_t all = pacman + dpkg + rpm + xbps + flatpak + snap;
 
     if(all == 0)
