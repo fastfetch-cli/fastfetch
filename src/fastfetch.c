@@ -12,15 +12,15 @@
 
 #define FASTFETCH_DEFAULT_CONFIG \
     "# Fastfetch configuration\n" \
-    "# Put arguments here to make them permanently (one per line). \n" \
-    "# Direct arguments will overwrite the corresponding ones in this files\n" \
-    "# Each line is whitespace trimmed on beginn and end.\n" \
+    "# Write every argument in different lines.\n" \
+    "# Direct arguments will overwrite the corresponding ones in this file.\n" \
+    "# Whitespaces are trimmed at the beginning and the end.\n" \
     "# Empty lines or lines starting with # are ignored.\n" \
-    "# There are more arguments possible than listed here, take a look at fastfetch --help!\n" \
-    "# This version of the file was shipped with "FASTFETCH_PROJECT_VERSION".\n" \
+    "# There are more arguments possible than the ones listed here, take a look at fastfetch --help\n" \
+    "# This file was shipped with "FASTFETCH_PROJECT_VERSION".\n" \
     "# Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current defaults.\n"
 
-//Things only needed by fastfetch
+// Things only needed by fastfetch
 typedef struct FFdata
 {
     FFvaluestore valuestore;
