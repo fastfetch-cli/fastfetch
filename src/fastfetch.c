@@ -26,7 +26,6 @@ typedef struct FFdata
     FFvaluestore valuestore;
     FFstrbuf structure;
     FFstrbuf logoName;
-    bool loadLogoFromFile;
     bool multithreading;
 } FFdata;
 
@@ -62,8 +61,7 @@ static inline void printHelp()
         "                --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output\n"
         "\n"
         "Logo options:\n"
-        "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly\n"
-        "              --logo-file <path>:    sets the path of the file to use as the logo\n"
+        "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a path\n"
         "              --color-logo <?value>: if set to false, the logo will be black / white\n"
         "\n"
         "Format options: Provide the format string for custom output. Use fastfetch --help *-format for specific help.\n"
@@ -699,7 +697,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--print-logos") == 0)
     {
-        ffPrintLogos(instance->config.colorLogo);
+        ffPrintLogos(instance);
         exit(0);
     }
     else if(strcasecmp(key, "--print-default-config") == 0)
@@ -729,7 +727,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             fprintf(stderr, "Error: usage: %s <width>\n", key);
             exit(404);
         }
-        if(sscanf(value, "%hu", &instance->config.logo_spacing) != 1)
+        if(sscanf(value, "%hu", &instance->config.logoKeySpacing) != 1)
         {
             fprintf(stderr, "Error: couldn't parse %s to uint16_t\n", value);
             exit(405);
@@ -793,15 +791,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
-    else if(strcasecmp(key, "--logo-file") == 0)
-    {
+    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
         optionParseString(key, value, &data->logoName);
-        data->loadLogoFromFile = true;
-    }
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0) {
-        optionParseString(key, value, &data->logoName);
-        data->loadLogoFromFile = false;
-    }
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
@@ -964,7 +955,7 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 {
     for(int i = 1; i < argc; i++)
     {
-        if(i == argc - 1 || argv[i + 1][0] == '-')
+        if(i == argc - 1 || (*argv[i + 1] == '-' && strcasecmp(argv[i], "--offsetx") != 0)) // --offsetx allows negative values
         {
             parseOption(instance, data, argv[i], NULL);
         }
@@ -981,14 +972,12 @@ static void applyData(FFinstance* instance, FFdata* data)
     //We must do this after parsing all options because of color options
     if(data->logoName.length == 0)
         ffLoadLogo(instance);
-    else if(data->loadLogoFromFile)
-        ffLoadLogoFromFile(&instance->config, data->logoName.chars);
     else
-        ffLoadLogoSet(&instance->config, data->logoName.chars);
+        ffLoadLogoSet(instance, data->logoName.chars);
 
     //This must be done after loading the logo
     if(instance->config.color.length == 0)
-        ffStrbufSetS(&instance->config.color, instance->config.logo.color);
+        ffStrbufSetS(&instance->config.color, instance->config.logo.colors[0]);
 }
 
 static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
@@ -1081,7 +1070,6 @@ static void initData(FFdata* data)
     ffValuestoreInit(&data->valuestore);
     ffStrbufInitA(&data->structure, 256);
     ffStrbufInit(&data->logoName);
-    data->loadLogoFromFile = false;
     data->multithreading = true;
 }
 

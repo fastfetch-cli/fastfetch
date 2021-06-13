@@ -389,19 +389,20 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer)
     ffStrbufTrimRight(buffer, ' ');
 }
 
-void ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
+bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
 {
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
-        return;
+        return false;
 
     ffAppendFDContent(fd, buffer);
 
     close(fd);
+    return true;
 }
 
-void ffGetFileContent(const char* fileName, FFstrbuf* buffer)
+bool ffGetFileContent(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
-    ffAppendFileContent(fileName, buffer);
+    return ffAppendFileContent(fileName, buffer);
 }

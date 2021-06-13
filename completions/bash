@@ -188,7 +188,6 @@ __fastfetch_completion()
         "--lib-SQLite"
         "--battery-dir"
         "--load-config"
-        "--logo-file"
     )
 
     local FF_OPTIONS_LOGO=(

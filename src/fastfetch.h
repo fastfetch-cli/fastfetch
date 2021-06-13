@@ -24,19 +24,17 @@
 #define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
 #define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
 
-typedef struct FFlogo
-{
-    uint8_t width;
-    uint8_t height;
-    char    chars[256][256];
-    char    name[128];
-    char    color[32];
-} FFlogo;
-
 typedef struct FFconfig
 {
-    FFlogo logo;
-    uint16_t logo_spacing;
+    struct
+    {
+        char* lines;
+        const char* colors[9]; // colors[0] is used as key color
+        bool freeable;
+        bool allLinesSameLength; // a performance optimization
+    } logo;
+
+    uint16_t logoKeySpacing;
     FFstrbuf separator;
     int16_t offsetx;
     FFstrbuf color;
@@ -158,7 +156,8 @@ typedef struct FFWMDEResult
 
 typedef struct FFstate
 {
-    uint8_t current_row;
+    uint32_t logoWidth;
+
     struct passwd* passwd;
     struct utsname utsname;
     struct sysinfo sysinfo;
@@ -249,8 +248,8 @@ void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cac
 void ffCacheClose(FFcache* cache);
 
 void ffAppendFDContent(int fd, FFstrbuf* buffer);
-void ffAppendFileContent(const char* fileName, FFstrbuf* buffer);
-void ffGetFileContent(const char* fileName, FFstrbuf* buffer);
+bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer); //returns true if open() succeeds. This is used to differentiate between <file not found> and <empty file>
+bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
@@ -263,15 +262,14 @@ bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 
 //common/logo.c
-void ffLoadLogoSet(FFconfig* config, const char* logo);
+void ffLoadLogoSet(FFinstance* instance, const char* logo);
 void ffLoadLogo(FFinstance* instance);
-void ffLoadLogoFromFile(FFconfig* config, const char* path);
 void ffPrintLogoLine(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 
 #ifndef FLASHFETCH_BUILD_FLASHFATCH
     void ffListLogos();
-    void ffPrintLogos(bool color);
+    void ffPrintLogos(FFinstance* instance);
 #endif
 
 //common/format.c

@@ -3,363 +3,363 @@
 #include <string.h>
 #include <unistd.h>
 
-// http://www.zedwood.com/article/cpp-utf8-strlen-function
-// Code snippet licensed under Creative Commons CC-By-SA 3.0
-static int utf8_strlen(const char* str)
+static void initLogoUnknown(FFinstance* instance)
 {
-    int i, ix, q;
-    for (q=0, i=0, ix=strlen(str); i < ix; i++, q++)
+    instance->config.logo.lines =
+        "       ________        \n"
+        "   _jgN########Ngg_    \n"
+        " _N##N@@\"\"  \"\"9NN##Np_ \n"
+        "d###P            N####p\n"
+        "\"^^\"              T####\n"
+        "                  d###P\n"
+        "               _g###@F \n"
+        "            _gN##@P    \n"
+        "          gN###F\"      \n"
+        "         d###F         \n"
+        "        0###F          \n"
+        "        0###F          \n"
+        "        0###F          \n"
+        "        \"NN@'          \n"
+        "                       \n"
+        "         ___           \n"
+        "        q###r          \n"
+        "         \"\"            ";
+}
+
+static void initLogoArch(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1                  -`                 \n"
+        "$1                  -`                 \n"
+        "$1                 .o+`                \n"
+        "$1                `ooo/                \n"
+        "$1               `+oooo:               \n"
+        "$1              `+oooooo:              \n"
+        "$1              -+oooooo+:             \n"
+        "$1            `/:-:++oooo+:            \n"
+        "$1           `/++++/+++++++:           \n"
+        "$1          `/++++++++++++++:          \n"
+        "$1         `/+++ooooooooooooo/`        \n"
+        "$1        ./ooosssso++osssssso+`       \n"
+        "$1       .oossssso-````/ossssss+`      \n"
+        "$1      -osssssso.      :ssssssso.     \n"
+        "$1     :osssssss/        osssso+++.    \n"
+        "$1    /ossssssss/        +ssssooo/-    \n"
+        "$1  `/ossssso+/:-        -:/+osssso+-  \n"
+        "$1 `+sso+:-`                 `.-/+oso: \n"
+        "$1`++:.                           `-/+/\n"
+        "$1.`                                 `/";
+    instance->config.logo.colors[0] = "\033[36m"; //cyan
+}
+
+static void initLogoArtix(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1                   '                  \n"
+        "$1                  'o'                 \n"
+        "$1                 'ooo'                \n"
+        "$1                'ooxoo'               \n"
+        "$1               'ooxxxoo'              \n"
+        "$1              'oookkxxoo'             \n"
+        "$1             'oiioxkkxxoo'            \n"
+        "$1            ':;:iiiioxxxoo'           \n"
+        "$1              `'.;::ioxxoo''          \n"
+        "$1          '-.      `':;jiooo'         \n"
+        "$1        'oooio-..     `'i:io'         \n"
+        "$1       'ooooxxxxoio:,.   `'-;'        \n"
+        "$1      'ooooxxxxxkkxoooIi:-.  `'       \n"
+        "$1     'ooooxxxxxkkkkxoiiiiiji'         \n"
+        "$1    'ooooxxxxxkxxoiiii:'`     .i'     \n"
+        "$1   'ooooxxxxxoi:::'`       .;ioxo'    \n"
+        "$1  'ooooxooi::'`         .:iiixkxxo'   \n"
+        "$1 'ooooi:'`                `'';ioxxo'  \n"
+        "$1'i:'`                          '':io' \n"
+        "$1'`                                  `'";
+    instance->config.logo.colors[0] = "\033[36m"; //cyan
+}
+
+static void initLogoDebian(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$2       _,met$$$$$$$$$$gg.       \n"
+        "$2    ,g$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$P.    \n"
+        "$2  ,g$$$$P\"         \"\"\"Y$$$$.\". \n"
+        "$2 ,$$$$P'               `$$$$$$. \n"
+        "$2',$$$$P       ,ggs.     `$$$$b:\n"
+        "$2`d$$$$'     ,$P\"'   $1.$2    $$$$$$ \n"
+        "$2 $$$$P      d$'     $1,$2    $$$$$$P\n"
+        "$2 $$$$:      $$.   $1-$2    ,d$$$$'  \n"
+        "$2 $$$$;      Y$b._   _,d$P'   \n"
+        "$2 Y$$$$.    $1`.$2`\"Y$$$$$$$$P\"'      \n "
+        "$2 `$$$$b      $1\"-.__          \n"
+        "$2  `Y$$$$                     \n"
+        "$2   `Y$$$$.                   \n"
+        "$2     `$$$$b.                 \n"
+        "$2       `Y$$$$b.              \n"
+        "$2          `\"Y$$b._          \n"
+        "$2             `\"\"\"          ";
+    instance->config.logo.colors[0] = "\033[31m"; //red
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoFedora(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1          /:-------------:\\       \n"
+        "$1       :-------------------::     \n"
+        "$1     :-----------$2/shhOHbmp$1---:\\   \n"
+        "$1   /-----------$2omMMMNNNMMD$1  ---:  \n"
+        "$1  :-----------$2sMMMMNMNMP$1.    ---: \n"
+        "$1 :-----------$2:MMMdP$1-------    ---\\\n"
+        "$1,------------$2:MMMd$1--------    ---:\n"
+        "$1:------------$2:MMMd$1-------    .---:\n"
+        "$1:----    $2oNMMMMMMMMMNho$1     .----:\n"
+        "$1:--     .$2+shhhMMMmhhy++$1   .------/\n"
+        "$1:-    -------$2:MMMd$1--------------: \n"
+        "$1:-   --------$2/MMMd$1-------------;  \n"
+        "$1:-    ------$2/hMMMy$1------------:   \n"
+        "$1:--$2 :dMNdhhdNMMNo$1------------;    \n"
+        "$1:---$2:sdNMMMMNds:$1------------:     \n"
+        "$1:------$2:://:$1-------------::       \n"
+        "$1:---------------------://         ";
+    instance->config.logo.colors[0] = "\033[34m"; //blue
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoGaruda(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1                   .%;888:8898898:            \n"
+        "$1                 x;XxXB%89b8:b8%b88:          \n"
+        "$1              .8Xxd                8X:.       \n"
+        "$1            .8Xx;                    8x:.     \n"
+        "$1          .tt8x          .d            x88;   \n"
+        "$1       .@8x8;          .db:              xx@; \n"
+        "$1     ,tSXX°          .bbbbbbbbbbbbbbbbbbbB8x@;\n"
+        "$1   .SXxx            bBBBBBBBBBBBBBBBBBBBbSBX8;\n"
+        "$1 ,888S                                     pd!\n"
+        "$18X88/                                       qp\n"
+        "$18X88/                                         \n"
+        "$1GBB.                                          \n"
+        "$1 x%88        d888@8@X@X@X88X@@XX@@X@8@X.      \n"
+        "$1   dxXd    dB8b8b8B8B08bB88b998888b88x.       \n"
+        "$1    dxx8o                      .@@;.          \n"
+        "$1      dx88                   .t@x.            \n"
+        "$1        d:SS@8ba89aa67a853Sxxad.              \n"
+        "$1          .d988999889889899dd.                ";
+    instance->config.logo.colors[0] = "\033[31m"; //red
+}
+
+static void initLogoGentoo(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1         -/oyddmdhs+:.             \n"
+        "$1     -o$2dNMMMMMMMMNNmhy+$1-`          \n"
+        "$1   -y$2NMMMMMMMMMMMNNNmmdhy$1+-        \n"
+        "$1 `o$2mMMMMMMMMMMMMNmdmmmmddhhy$1/`     \n"
+        "$1 om$2MMMMMMMMMMMN$1hhyyyo$2hmdddhhhd$1o`   \n"
+        "$1.y$2dMMMMMMMMMMd$1hs++so/s$2mdddhhhhdm$1+` \n"
+        "$1 oy$2hdmNMMMMMMMN$1dyooy$2dmddddhhhhyhN$1d.\n"
+        "$1  :o$2yhhdNNMMMMMMMNNNmmdddhhhhhyym$1Mh\n"
+        "$1    .:$2+sydNMMMMMNNNmmmdddhhhhhhmM$1my\n"
+        "$1       /m$2MMMMMMNNNmmmdddhhhhhmMNh$1s:\n"
+        "$1    `o$2NMMMMMMMNNNmmmddddhhdmMNhs$1+` \n"
+        "$1  `s$2NMMMMMMMMNNNmmmdddddmNMmhs$1/.   \n"
+        "$1 /N$2MMMMMMMMNNNNmmmdddmNMNdso$1:`     \n"
+        "$1+M$2MMMMMMNNNNNmmmmdmNMNdso$1/-        \n"
+        "$1yM$2MNNNNNNNmmmmmNNMmhs+/$1-`          \n"
+        "$1/h$2MMNNNNNNNNMNdhs++/$1-`             \n"
+        "$1`/$2ohdmmddhys+++/:$1.`                \n"
+        "$1  `-//////:--.                     ";
+    instance->config.logo.colors[0] = "\033[35m"; //magenta
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoManjaro(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1██████████████████  ████████\n"
+        "$1██████████████████  ████████\n"
+        "$1██████████████████  ████████\n"
+        "$1██████████████████  ████████\n"
+        "$1████████            ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████\n"
+        "$1████████  ████████  ████████";
+    instance->config.logo.colors[0] = "\033[32m"; //green
+}
+
+static void initLogoMint(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$2             ...-:::::-...              \n"
+        "$2          .-MMMMMMMMMMMMMMM-.           \n"
+        "$2      .-MMMM$1`..-:::::::-..`$2MMMM-.       \n"
+        "$2    .:MMMM$1.:MMMMMMMMMMMMMMM:.$2MMMM:.     \n"
+        "$2   -MMM$1-M---MMMMMMMMMMMMMMMMMMM.$2MMM-    \n"
+        "$2 `:MMM$1:MM`  :MMMM:....::-...-MMMM:$2MMM:` \n"
+        "$2 :MMM$1:MMM`  :MM:`  ``    ``  `:MMM:$2MMM: \n"
+        "$2.MMM$1.MMMM`  :MM.  -MM.  .MM-  `MMMM.$2MMM.\n"
+        "$2:MMM$1:MMMM`  :MM.  -MM-  .MM:  `MMMM-$2MMM:\n"
+        "$2:MMM$1:MMMM`  :MM.  -MM-  .MM:  `MMMM:$2MMM:\n"
+        "$2:MMM$1:MMMM`  :MM.  -MM-  .MM:  `MMMM-$2MMM:\n"
+        "$2.MMM$1.MMMM`  :MM:--:MM:--:MM:  `MMMM.$2MMM.\n"
+        "$2 :MMM$1:MMM-  `-MMMMMMMMMMMM-`  -MMM-$2MMM: \n"
+        "$2  :MMM$1:MMM:`                `:MMM:$2MMM:  \n"
+        "$2   .MMM$1.MMMM:--------------:MMMM.$2MMM.   \n"
+        "$2     '-MMMM$1.-MMMMMMMMMMMMMMM-.$2MMMM-'    \n"
+        "$2       '.-MMMM$1``--:::::--``$2MMMM-.'      \n"
+        "$2            '-MMMMMMMMMMMMM-'           \n"
+        "$2               ``-:::::-``              ";
+    instance->config.logo.colors[0] = "\033[32m"; //green
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoPop(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1             /////////////             \n"
+        "$1         /////////////////////         \n"
+        "$1      ///////$2*767$1////////////////      \n"
+        "$1    //////$27676767676*$1//////////////    \n"
+        "$1   /////$276767$1//$27676767$1//////////////   \n"
+        "$1  /////$2767676$1///$2*76767$1///////////////  \n"
+        "$1 ///////$2767676$1///$276767$1.///$27676*$1/////// \n"
+        "$1/////////$2767676$1//$276767$1///$2767676$1////////\n"
+        "$1//////////$276767676767$1////$276767$1/////////\n"
+        "$1///////////$276767676$1//////$27676$1//////////\n"
+        "$1////////////,$27676$1,///////$2767$1///////////\n"
+        "$1/////////////*$27676$1///////$276$1////////////\n"
+        "$1///////////////$27676$1////////////////////\n"
+        "$1 ///////////////$27676$1///$2767$1//////////// \n"
+        "$1  //////////////////////$2'$1////////////  \n"
+        "$1   //////$2.7676767676767676767,$1//////   \n"
+        "$1    /////$2767676767676767676767$1/////    \n"
+        "$1      ///////////////////////////      \n"
+        "$1         /////////////////////         \n"
+        "$1             /////////////             ";
+    instance->config.logo.colors[0] = "\033[36m"; //cyan
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoUbuntu(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1             .-/+oossssoo+/-.           \n"
+        "$1         `:+ssssssssssssssssss+:`       \n"
+        "$1       -+ssssssssssssssssssyyssss+-     \n"
+        "$1     .ossssssssssssssssssd$2MMMNy$1sssso.   \n"
+        "$1   /sssssssssss$2hdmmNNmmyNMMMMh$1ssssss/   \n"
+        "$1  +sssssssss$2hmydMMMMMMMNddddy$1ssssssss+  \n"
+        "$1 /ssssssss$2hNMMMyhhyyyyhmNMMMNh$1ssssssss/ \n"
+        "$1.ssssssss$2dMMMNh$1ssssssssss$2hNMMMd$1ssssssss.\n"
+        "$1+ssss$2hhhyNMMNy$1ssssssssssss$2yNMMMy$1sssssss+\n"
+        "$1oss$2yNMMMNyMMh$1ssssssssssssss$2hmmmh$1ssssssso\n"
+        "$1oss$2yNMMMNyMMh$1ssssssssssssss$2hmmmh$1ssssssso\n"
+        "$1+ssss$2hhhyNMMNy$1ssssssssssss$2yNMMMy$1sssssss+\n"
+        "$1.ssssssss$2dMMMNh$1ssssssssss$2hNMMMd$1ssssssss.\n"
+        "$1 /ssssssss$2hNMMMyhhyyyyhdNMMMNh$1ssssssss/ \n"
+        "$1  +sssssssss$2dmydMMMMMMMMddddy$1ssssssss+  \n"
+        "$1   /sssssssssss$2hdmNNNNmyNMMMMh$1ssssss/   \n"
+        "$1    .ossssssssssssssssss$2dMMMNy$1sssso.    \n"
+        "$1     -+sssssssssssssssss$2yyy$1ssss+-       \n"
+        "$1       `:+ssssssssssssssssss+:`         \n"
+        "$1           .-/+oossssoo+/-.             ";
+    instance->config.logo.colors[0] = "\033[31m"; //red
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoVoid(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1                __.;=====;.__                \n"
+        "$1            _.=+==++=++=+=+===;.             \n"
+        "$1             -=+++=+===+=+=+++++=_           \n"
+        "$1        .     -=:``     `--==+=++==.         \n"
+        "$1       _vi,    `            --+=++++:        \n"
+        "$1      .uvnvi.       _._       -==+==+.       \n"
+        "$1     .vvnvnI`    .;==|==;.     :|=||=|.      \n"
+        "$2+QmQQm$1pvvnv;$2 _yYsyQQWUUQQQm #QmQ#$1:$2QQQWUV$QQm.\n"
+        "$2 -QQWQW$1pvvo$2wZ?.wQQQE$1==<$2QWWQ/QWQW.QQWW$1(:$2 jQWQE\n"
+        "$2  -$QQQQmmU'  jQQQ$1@+=<$2QWQQ)mQQQ.mQQQC$1+;$2jWQQ@'\n"
+        "$2   -$WQ8Y$1nI:$2   QWQQwgQQWV$1`$2mWQQ.jQWQQgyyWW@!  \n"
+        "$1     -1vvnvv.     `~+++`        ++|+++       \n"
+        "$1      +vnvnnv,                 `-|===        \n"
+        "$1       +vnvnvns.           .      :=-        \n"
+        "$1        -Invnvvnsi..___..=sv=.     `         \n"
+        "$1          +Invnvnvnnnnnnnnvvnn;.             \n"
+        "$1            ~|Invnvnvvnvvvnnv}+`             \n"
+        "$1               -~|{*l}*|~                    ";
+    instance->config.logo.colors[0] = "\033[32m"; //green
+    instance->config.logo.colors[1] = "\033[30m"; //black
+}
+
+static void initLogoFromFile(FFinstance* instance, const char* path)
+{
+    FFstrbuf logo;
+    ffStrbufInitA(&logo, 1024);
+
+    if(!ffGetFileContent(path, &logo))
     {
-        int c = (unsigned char) str[i];
-        if      (c>=0   && c<=127) i+=0;
-        else if ((c & 0xE0) == 0xC0) i+=1;
-        else if ((c & 0xF0) == 0xE0) i+=2;
-        else if ((c & 0xF8) == 0xF0) i+=3;
-        else return 0;//invalid utf8
-    }
-    return q;
-}
-
-static void loadUnknownLogo(FFlogo* logo)
-{
-    logo->width = 23;
-    logo->height = 18;
-    strcpy(logo->name, "unknown");
-    strcpy(logo->color, "");
-    strcpy(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"       ________        "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"   _jgN########Ngg_    "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT" _N##N@@\"\"  \"\"9NN##Np_ "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"d###P            N####p"FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"\"^^\"              T####"FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"                  d###P"FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"               _g###@F "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"            _gN##@P    "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"          gN###F\"      "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"         d###F         "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"        0###F          "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"        0###F          "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"        0###F          "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"        \"NN@'          "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"                       "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"         ___           "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"        q###r          "FASTFETCH_TEXT_MODIFIER_RESET);
-    strcpy(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"         \"\"            "FASTFETCH_TEXT_MODIFIER_RESET);
-}
-
-static void loadNoneLogo(FFlogo* logo)
-{
-    logo->width = 0;
-    logo->height = 0;
-    strcpy(logo->name, "none");
-    strcpy(logo->color, "");
-}
-
-static void loadArchLogo(FFlogo* logo, bool doColor)
-{
-    logo->width = 37;
-    logo->height = 20;
-    strcpy(logo->name, "arch");
-
-    const char* color = doColor ? "\033[36m" : "";
-    strcpy(logo->color, "\033[36m");
-
-    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  -`                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  -`                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 .o+`                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                `ooo/                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               `+oooo:               "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `+oooooo:              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              -+oooooo+:             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            `/:-:++oooo+:            "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s           `/++++/+++++++:           "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          `/++++++++++++++:          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s         `/+++ooooooooooooo/`        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s        ./ooosssso++osssssso+`       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s       .oossssso-````/ossssss+`      "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s      -osssssso.      :ssssssso.     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s     :osssssss/        osssso+++.    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s    /ossssssss/        +ssssooo/-    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s  `/ossssso+/:-        -:/+osssso+-  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s `+sso+:-`                 `.-/+oso: "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s`++:.                           `-/+/"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s.`                                 `/"FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-static void loadArtixLogo(FFlogo* logo, bool doColor)
-{
-    logo->width = 38;
-    logo->height = 20;
-    strcpy(logo->name, "artix");
-
-    const char* color = doColor ? "\033[36m" : "";
-    strcpy(logo->color, "\033[36m");
-
-    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   '                  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                  'o'                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 'ooo'                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                'ooxoo'               "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s               'ooxxxoo'              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              'oookkxxoo'             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             'oiioxkkxxoo'            "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            ':;:iiiioxxxoo'           "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              `'.;::ioxxoo''          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          '-.      `':;jiooo'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s        'oooio-..     `'i:io'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s       'ooooxxxxoio:,.   `'-;'        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s      'ooooxxxxxkkxoooIi:-.  `'       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s     'ooooxxxxxkkkkxoiiiiiji'         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    'ooooxxxxxkxxoiiii:'`     .i'     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s   'ooooxxxxxoi:::'`       .;ioxo'    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s  'ooooxooi::'`         .:iiixkxxo'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s 'ooooi:'`                `'';ioxxo'  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s'i:'`                          '':io' "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s'`                                  `'"FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-static void loadUbuntuLogo(FFlogo *logo, bool doColor)
-{
-    logo->width = 40;
-    logo->height = 20;
-    strcpy(logo->name, "ubuntu");
-
-    /* color = red; color2 = white */
-    const char* color = doColor ? "\033[91m" : "";
-    const char* color2 = doColor ? "\033[97m" : "";
-    strcpy(logo->color, "\033[91m");
-
-    sprintf(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"%s             .-/+oossssoo+/-.           "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"%s         `:+ssssssssssssssssss+:`       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT"%s       -+ssssssssssssssssssyyssss+-     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"%s     .ossssssssssssssssssd%sMMMNy%ssssso.   "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"%s   /sssssssssss%shdmmNNmmyNMMMMh%sssssss/   "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"%s  +sssssssss%shmydMMMMMMMNddddy%sssssssss+  "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"%s /ssssssss%shNMMMyhhyyyyhmNMMMNh%sssssssss/ "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"%s.ssssssss%sdMMMNh%sssssssssss%shNMMMd%sssssssss."FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
-    sprintf(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"%s+ssss%shhhyNMMNy%sssssssssssss%syNMMMy%ssssssss+"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
-    sprintf(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"%soss%syNMMMNyMMh%sssssssssssssss%shmmmh%sssssssso"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%soss%syNMMMNyMMh%sssssssssssssss%shmmmh%sssssssso"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s+ssss%shhhyNMMNy%sssssssssssss%syNMMMy%ssssssss+"FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s.ssssssss%sdMMMNh%sssssssssss%shNMMMd%sssssssss."FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color, color2, color);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s /ssssssss%shNMMMyhhyyyyhdNMMMNh%sssssssss/ "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s  +sssssssss%sdmydMMMMMMMMddddy%sssssssss+  "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s   /sssssssssss%shdmNNNNmyNMMMMh%sssssss/   "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s    .ossssssssssssssssss%sdMMMNy%ssssso.    "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s     -+sssssssssssssssss%syyy%sssss+-       "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s       `:+ssssssssssssssssss+:`         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s           .-/+oossssoo+/-.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-static void loadDebianLogo(FFlogo *logo, bool doColor)
-{
-    logo->width = 27;
-    logo->height = 17;
-    strcpy(logo->name, "debian");
-
-    /* color = red; color2 = white */
-    const char* color = doColor ? "\033[91m" : "";
-    const char* color2 = doColor ? "\033[97m" : "";
-    strcpy(logo->color, "\033[91m");
-
-    sprintf(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"%s       _,met$$$$$gg.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"%s    ,g$$$$$$$$$$$$$$$P.    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT"%s  ,g$$P\"     \"\"\"Y$$.\".     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"%s ,$$P'              `$$$.  "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"%s',$$P       ,ggs.     `$$b:"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"%s`d$$'     ,$P\"'   %s.%s    $$$ "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"%s $$P      d$'     %s,%s    $$P "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"%s $$:      $$.   %s-%s    ,d$$' "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"%s $$;      Y$b._   _,d$P'   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"%s Y$$.    %s`.%s`\"Y$$$$P\"'      "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s `$$b      %s\"-.__%s           "FASTFETCH_TEXT_MODIFIER_RESET, color, color2, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s  `Y$$                     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s   `Y$$.                   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s     `$$b.                 "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s       `Y$$b.              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s          `\"Y$b._          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s             `\"\"\"          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-static void loadFedoraLogo(FFlogo* logo, bool doColor)
-{
-
-    logo->width = 35;
-    logo->height = 17;
-    strcpy(logo->name, "fedora");
-
-    const char* blue = doColor ? "\033[34m" : "";
-    const char* white = doColor ? "\033[37m" : "";
-    strcpy(logo->color, "\033[34m");
-
-    sprintf(logo->chars[0], FASTFETCH_TEXT_MODIFIER_BOLT"%s           /:-------------:\\       "FASTFETCH_TEXT_MODIFIER_RESET, blue);
-    sprintf(logo->chars[1], FASTFETCH_TEXT_MODIFIER_BOLT"%s        :-------------------::     "FASTFETCH_TEXT_MODIFIER_RESET, blue);
-    sprintf(logo->chars[2], FASTFETCH_TEXT_MODIFIER_BOLT"%s      :-----------%s/shhOHbmp$%s---:\\  "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[3], FASTFETCH_TEXT_MODIFIER_BOLT"%s    /-----------%somMMMNNNMMD  %s---:  "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[4], FASTFETCH_TEXT_MODIFIER_BOLT"%s   :-----------%ssMMMMNMNMP%s.    ---: "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[5], FASTFETCH_TEXT_MODIFIER_BOLT"%s  :-----------%s:MMMdP%s-------    ---\\"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[6], FASTFETCH_TEXT_MODIFIER_BOLT"%s ,------------%s:MMMd%s--------    ---:"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[7], FASTFETCH_TEXT_MODIFIER_BOLT"%s :------------%s:MMMd%s-------    .---:"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[8], FASTFETCH_TEXT_MODIFIER_BOLT"%s :----    %soNMMMMMMMMMNho%s     .----:"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[9], FASTFETCH_TEXT_MODIFIER_BOLT"%s :--     .%s+shhhMMMmhhy++%s   .------/"FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s :-    -------%s:MMMd%s--------------: "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s :-   --------%s/MMMd%s-------------;  "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s :-    ------%s/hMMMy%s------------:   "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s :--%s :dMNdhhdNMMNo%s------------;    "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s :---%s:sdNMMMMNds:%s------------:     "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s :------%s:://:%s-------------::       "FASTFETCH_TEXT_MODIFIER_RESET, blue, white, blue);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s :---------------------://         "FASTFETCH_TEXT_MODIFIER_RESET, blue);
-}
-
-static void loadManjaroLogo(FFlogo *logo, bool doColor)
-{
-    logo->width = 28;
-    logo->height = 14;
-    strcpy(logo->name, "manjaro");
-
-    /* color = light green */
-    const char* color = doColor ? "\033[92m" : "";
-    strcpy(logo->color, "\033[92m");
-
-	sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s██████████████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████            ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-	sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s████████  ████████  ████████"FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-static void loadVoidLogo(FFlogo *logo, bool doColor)
-{
-    logo->width = 45;
-    logo->height = 18;
-    strcpy(logo->name, "void");
-
-    /* color = light green; color2 = gray */
-    const char* color = doColor ? "\033[92m" : "";
-    const char* color2 = doColor ? "\033[30m" : "";
-    strcpy(logo->color, "\033[92m");
-
-    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                __.;=====;.__                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            _.=+==++=++=+=+===;.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s             -=+++=+===+=+=+++++=_           "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s        .     -=:``     `--==+=++==.         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       _vi,    `            --+=++++:        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s      .uvnvi.       _._       -==+==+.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     .vvnvnI`    .;==|==;.     :|=||=|.      "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s+QmQQm%spvvnv;%s _yYsyQQWUUQQQm #QmQ#%s:%sQQQWUV$QQm."FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2);
-    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s -QQWQW%spvvo%swZ?.wQQQE%s==<%sQWWQ/QWQW.QQWW%s(:%s jQWQE"FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2, color, color2);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s  -$QQQQmmU'  jQQQ%s@+=<%sQWQQ)mQQQ.mQQQC%s+;%sjWQQ@'"FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s   -$WQ8Y%snI:%s   QWQQwgQQWV%s`%smWQQ.jQWQQgyyWW@!  "FASTFETCH_TEXT_MODIFIER_RESET, color2, color, color2, color, color2);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%s     -1vvnvv.     `~+++`        ++|+++       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s      +vnvnnv,                 `-|===        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s       +vnvnvns.           .      :=-        "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s        -Invnvvnsi..___..=sv=.     `         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s          +Invnvnvnnnnnnnnvvnn;.             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s            ~|Invnvnvvnvvvnnv}+`             "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s               -~|{*l}*|~                    "FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-static void loadGarudaLogo(FFlogo* logo, bool doColor)
-{
-    logo->width = 46;
-    logo->height = 19;
-    strcpy(logo->name, "garuda");
-
-    const char* color = doColor ? "\033[91m" : "";
-    strcpy(logo->color, "\033[91m");
-
-    sprintf(logo->chars[0],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                   .%%;888:8898898:            "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[1],  FASTFETCH_TEXT_MODIFIER_BOLT"%s                 x;XxXB%%89b8:b8%%b88:          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[2],  FASTFETCH_TEXT_MODIFIER_BOLT"%s              .8Xxd                8X:.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[3],  FASTFETCH_TEXT_MODIFIER_BOLT"%s            .8Xx;                    8x:.     "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[4],  FASTFETCH_TEXT_MODIFIER_BOLT"%s          .tt8x          .d            x88;   "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[5],  FASTFETCH_TEXT_MODIFIER_BOLT"%s       .@8x8;          .db:              xx@; "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[6],  FASTFETCH_TEXT_MODIFIER_BOLT"%s     ,tSXX°          .bbbbbbbbbbbbbbbbbbbB8x@;"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[7],  FASTFETCH_TEXT_MODIFIER_BOLT"%s   .SXxx            bBBBBBBBBBBBBBBBBBBBbSBX8;"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[8],  FASTFETCH_TEXT_MODIFIER_BOLT"%s ,888S                                     pd!"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[9],  FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                       qp"FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[10], FASTFETCH_TEXT_MODIFIER_BOLT"%s8X88/                                         "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[11], FASTFETCH_TEXT_MODIFIER_BOLT"%sGBB.                                          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[12], FASTFETCH_TEXT_MODIFIER_BOLT"%s x%%88        d888@8@X@X@X88X@@XX@@X@8@X.      "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[13], FASTFETCH_TEXT_MODIFIER_BOLT"%s   dxXd    dB8b8b8B8B08bB88b998888b88x.       "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[14], FASTFETCH_TEXT_MODIFIER_BOLT"%s    dxx8o                      .@@;.          "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[15], FASTFETCH_TEXT_MODIFIER_BOLT"%s      dx88                   .t@x.            "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[16], FASTFETCH_TEXT_MODIFIER_BOLT"%s        d:SS@8ba89aa67a853Sxxad.              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[17], FASTFETCH_TEXT_MODIFIER_BOLT"%s          .d988999889889899dd.                "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[18], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-    sprintf(logo->chars[19], FASTFETCH_TEXT_MODIFIER_BOLT"%s                                              "FASTFETCH_TEXT_MODIFIER_RESET, color);
-}
-
-void ffLoadLogoFromFile(FFconfig* config, const char* path)
-{
-    FILE* file = fopen(path, "r");
-    if(file == NULL)
-    {
-        if(config->showErrors)
+        ffStrbufDestroy(&logo);
+        if(instance->config.showErrors)
             printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo / logo file not found: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", path);
-        loadUnknownLogo(&config->logo);
+        initLogoUnknown(instance);
         return;
     }
 
-    const char* color = config->colorLogo ? config->color.chars : "";
-    strcpy(config->logo.color, color);
-
-    char* line = NULL;
-    size_t lineBufLen = 0;
-    ssize_t lineBytesLen;
-
-    while((lineBytesLen = getline(&line, &lineBufLen, file)) != EOF) {
-        // Remove trailing newline
-        if(line[lineBytesLen - 1] == '\n')
-            line[lineBytesLen - 1] = '\0';
-
-        snprintf(config->logo.chars[config->logo.height++], 255, FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET, color, line);
-
-        uint8_t lineLength = (uint8_t) utf8_strlen(line);
-        if(lineLength > config->logo.width)
-            config->logo.width = lineLength;
-    }
-
-    if(line != NULL)
-        free(line);
-
-    fclose(file);
+    instance->config.logo.allLinesSameLength = false;
+    instance->config.logo.freeable = true;
+    instance->config.logo.lines = logo.chars;
 }
 
-void ffLoadLogoSet(FFconfig* config, const char* logo)
+void ffLoadLogoSet(FFinstance* instance, const char* logo)
 {
+    instance->config.logo.allLinesSameLength = true;
+
+    if(instance->config.logo.freeable)
+    {
+        free(instance->config.logo.lines);
+        instance->config.logo.freeable = false;
+    }
+
     if(strcasecmp(logo, "none") == 0)
     {
-        loadNoneLogo(&config->logo);
-        config->logo_spacing = 0; //This is wanted in most cases, so just set it
+        instance->config.logo.lines = "";
+        instance->config.logoKeySpacing = 0; //This is wanted in most cases, so just set it. None logo is set in src/common/init.c
     }
-    else if(strcasecmp(logo, "arch") == 0)
-        loadArchLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "artix") == 0)
-        loadArtixLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "ubuntu") == 0)
-        loadUbuntuLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "debian") == 0)
-        loadDebianLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "manjaro") == 0)
-        loadManjaroLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "fedora") == 0)
-        loadFedoraLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "void") == 0)
-        loadVoidLogo(&config->logo, config->colorLogo);
-    else if(strcasecmp(logo, "garuda") == 0)
-        loadGarudaLogo(&config->logo, config->colorLogo);
     else if(strcasecmp(logo, "unknown") == 0)
-        loadUnknownLogo(&config->logo);
+        initLogoUnknown(instance);
+    else if(strcasecmp(logo, "arch") == 0)
+        initLogoArch(instance);
+    else if(strcasecmp(logo, "artix") == 0)
+        initLogoArtix(instance);
+    else if(strcasecmp(logo, "debian") == 0)
+        initLogoDebian(instance);
+    else if(strcasecmp(logo, "fedora") == 0)
+        initLogoFedora(instance);
+    else if(strcasecmp(logo, "garuda") == 0)
+        initLogoGaruda(instance);
+    else if(strcasecmp(logo, "gentoo") == 0)
+        initLogoGentoo(instance);
+    else if(strcasecmp(logo, "manjaro") == 0)
+        initLogoManjaro(instance);
+    else if(strcasecmp(logo, "mint") == 0)
+        initLogoMint(instance);
+    else if(strcasecmp(logo, "pop") == 0 || strcasecmp(logo, "pop_os") == 0)
+        initLogoPop(instance);
+    else if(strcasecmp(logo, "ubuntu") == 0)
+        initLogoUbuntu(instance);
+    else if(strcasecmp(logo, "void") == 0)
+        initLogoVoid(instance);
     else
-        ffLoadLogoFromFile(config, logo);
+        initLogoFromFile(instance, logo);
 }
 
 void ffLoadLogo(FFinstance* instance)
@@ -376,7 +376,7 @@ void ffLoadLogo(FFinstance* instance)
 
         if(content.length > 0)
         {
-            ffLoadLogoSet(&instance->config, content.chars);
+            ffLoadLogoSet(instance, content.chars);
             ffStrbufDestroy(&content);
             ffStrbufDestroy(&cacheFilePath);
             return;
@@ -389,18 +389,38 @@ void ffLoadLogo(FFinstance* instance)
 
     if(result->id.length > 0)
     {
-        ffLoadLogoSet(&instance->config, result->id.chars);
+        ffLoadLogoSet(instance, result->id.chars);
         ffWriteFileContent(cacheFilePath.chars, &result->id);
     }
     else if(result->name.length > 0)
     {
-        ffLoadLogoSet(&instance->config, result->name.chars);
+        ffLoadLogoSet(instance, result->name.chars);
         ffWriteFileContent(cacheFilePath.chars, &result->name);
     }
     else
-        loadUnknownLogo(&instance->config.logo);
+        initLogoUnknown(instance);
 
     ffStrbufDestroy(&cacheFilePath);
+}
+
+static uint32_t strLengthUTF8(const char* str, uint32_t bytesLength)
+{
+    uint32_t length = 0;
+
+    for (uint32_t i = 0; i < bytesLength; ++i)
+    {
+        int c = (unsigned char) str[i];
+
+        if((c>=0 && c<=127))        i += 0;
+        else if((c & 0xE0) == 0xC0) i += 1;
+        else if((c & 0xF0) == 0xE0) i += 2;
+        else if((c & 0xF8) == 0xF0) i += 3;
+        else return 0; //invalid utf8
+
+        ++length;
+    }
+
+    return length;
 }
 
 void ffPrintLogoLine(FFinstance* instance)
@@ -408,28 +428,104 @@ void ffPrintLogoLine(FFinstance* instance)
     for(int16_t i = 0; i < instance->config.offsetx; i++)
         putchar(' ');
 
-    int16_t cut = instance->config.offsetx >= 0 ? 0 :
-        (instance->config.logo.width > instance->config.offsetx * -1 ? instance->config.offsetx * -1 : instance->config.logo.width);
-
-    if(instance->state.current_row < instance->config.logo.height)
+    if(*instance->config.logo.lines == '\0')
     {
-        printf("%s", instance->config.logo.chars[instance->state.current_row] + cut);
-    }
-    else
-    {
-        for(uint8_t i = 0; i < instance->config.logo.width - cut; i++)
+        for(uint32_t i = 0; i < instance->state.logoWidth; ++i)
             putchar(' ');
+        return;
     }
 
-    for(uint16_t i = 0; i < instance->config.logo_spacing; i++)
+    if(*instance->config.logo.lines == '\n')
+    {
+        ++instance->config.logo.lines;
+        return;
+    }
+
+    const char* start = instance->config.logo.lines;
+    uint32_t colorPlaceholdersLength = 0;
+
+    uint32_t cutValue = instance->config.offsetx < 0 ? (uint32_t) (instance->config.offsetx * -1) : 0;
+    uint32_t cut = cutValue;
+
+    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+
+    while(*instance->config.logo.lines != '\n' && *instance->config.logo.lines != '\0')
+    {
+        char current = *instance->config.logo.lines;
+        ++instance->config.logo.lines;
+
+        if(current != '$')
+        {
+            if(cut > 0) --cut;
+            else putchar(current);
+            continue;
+        }
+
+        current = *instance->config.logo.lines;
+        ++instance->config.logo.lines;
+
+        if(current == '\n' || current == '\0')
+        {
+            if(cut == 0)
+                putchar('$');
+            break;
+        }
+
+        if(current == '$')
+        {
+            ++colorPlaceholdersLength;
+            if(cut > 0) --cut;
+            else putchar('$');
+            continue;
+        }
+
+        int index = ((int) current) - 49;
+
+        if(index < 0 || index > 9)
+        {
+            if(cut > 0) --cut;
+            else putchar('$');
+
+            if(cut > 0) --cut;
+            else putchar(current);
+
+            continue;
+        }
+
+        colorPlaceholdersLength += 2;
+
+        if(!instance->config.colorLogo)
+            continue;
+
+        fputs(instance->config.logo.colors[index], stdout);
+    }
+
+    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
+    const uint32_t logoKeySpacing = cut > instance->config.logoKeySpacing ? 0 : instance->config.logoKeySpacing - cut;
+    for(uint32_t i = 0; i < logoKeySpacing; ++i)
         putchar(' ');
 
-    ++instance->state.current_row;
+    if(instance->state.logoWidth == 0 || !instance->config.logo.allLinesSameLength)
+    {
+        uint32_t lineLength = strLengthUTF8(start, (uint32_t) (instance->config.logo.lines - start)) - colorPlaceholdersLength + instance->config.logoKeySpacing;
+
+        if(cutValue > lineLength)
+            lineLength = 0;
+        else
+            lineLength -= cutValue;
+
+        if(instance->state.logoWidth < lineLength)
+            instance->state.logoWidth = lineLength;
+    }
+
+    if(*instance->config.logo.lines == '\n')
+        ++instance->config.logo.lines;
 }
 
 void ffPrintRemainingLogo(FFinstance* instance)
 {
-    while(instance->state.current_row < instance->config.logo.height)
+    while(*instance->config.logo.lines != '\0')
     {
         ffPrintLogoLine(instance);
         putchar('\n');
@@ -438,50 +534,47 @@ void ffPrintRemainingLogo(FFinstance* instance)
 
 #ifndef FASTFETCH_BUILD_FLASHFETCH
 
-static FFlogo* getLogos(uint8_t* size, bool color)
-{
-    #define FASTFETCH_LOGO_AMOUNT 10
-
-    *size = FASTFETCH_LOGO_AMOUNT;
-    static FFlogo logos[FASTFETCH_LOGO_AMOUNT];
-
-    #undef FASTFETCH_LOGO_AMOUNT
-
-    loadNoneLogo(&logos[0]);
-    loadUnknownLogo(&logos[1]);
-    loadArchLogo(&logos[2], color);
-    loadArtixLogo(&logos[3], color);
-    loadGarudaLogo(&logos[4], color);
-    loadUbuntuLogo(&logos[5], color);
-    loadDebianLogo(&logos[6], color);
-    loadManjaroLogo(&logos[7], color);
-    loadVoidLogo(&logos[8], color);
-    loadFedoraLogo(&logos[9], color);
-
-    return logos;
-}
-
 void ffListLogos()
 {
-    uint8_t size;
-    FFlogo* logos = getLogos(&size, false);
-
-    for(uint8_t i = 0; i < size; i++)
-        puts(logos[i].name);
+    puts(
+        "none\n"
+        "unknown\n"
+        "arch\n"
+        "artix\n"
+        "debian\n"
+        "fedora\n"
+        "garuda\n"
+        "gentoo\n"
+        "manjaro\n"
+        "mint\n"
+        "pop\n"
+        "ubuntu\n"
+        "void"
+    );
 }
 
-void ffPrintLogos(bool doColor)
+void ffPrintLogos(FFinstance* instance)
 {
-    uint8_t size;
-    FFlogo* logos = getLogos(&size, doColor);
-
-    for(uint8_t i = 0; i < size; i++)
-    {
-        printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET":\n", doColor ? logos[i].color : "", logos[i].name);
-        for(uint8_t k = 0; k < logos[i].height; k++)
-            puts(logos[i].chars[k]);
+    #define FF_LOGO_PRINT(name, loadFunction) \
+        loadFunction(instance); \
+        printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s" #name FASTFETCH_TEXT_MODIFIER_RESET":\n", instance->config.colorLogo ? instance->config.logo.colors[0] : ""); \
+        ffPrintRemainingLogo(instance); \
         putchar('\n');
-    }
+
+    FF_LOGO_PRINT(unknown, initLogoUnknown)
+    FF_LOGO_PRINT(arch, initLogoArch)
+    FF_LOGO_PRINT(artix, initLogoArtix)
+    FF_LOGO_PRINT(debian, initLogoDebian)
+    FF_LOGO_PRINT(fedora, initLogoFedora)
+    FF_LOGO_PRINT(garuda, initLogoGaruda)
+    FF_LOGO_PRINT(garuda, initLogoGentoo)
+    FF_LOGO_PRINT(manjaro, initLogoManjaro)
+    FF_LOGO_PRINT(mint, initLogoMint)
+    FF_LOGO_PRINT(pop, initLogoPop)
+    FF_LOGO_PRINT(ubuntu, initLogoUbuntu)
+    FF_LOGO_PRINT(void, initLogoVoid)
+
+    #undef FF_LOGO_PRINT
 }
 
 #endif

@@ -87,7 +87,7 @@ static void initCacheDir(FFstate* state)
 
 static void initState(FFstate* state)
 {
-    state->current_row = 0;
+    state->logoWidth = 0;
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
@@ -96,82 +96,89 @@ static void initState(FFstate* state)
     initCacheDir(state);
 }
 
-static void defaultConfig(FFconfig* config)
+static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInit(&config->color);
-    config->logo_spacing = 4;
-    ffStrbufInitS(&config->separator, ": ");
-    config->offsetx = 0;
-    config->titleLength = 20; // This is overwritten by ffPrintTitle
-    config->colorLogo = true;
-    config->showErrors = false;
-    config->recache = false;
-    config->cacheSave = true;
-    config->printRemainingLogo = true;
-    config->allowSlowOperations = false;
+    ffStrbufInit(&instance->config.color);
+    instance->config.logoKeySpacing = 4;
+    ffStrbufInitS(&instance->config.separator, ": ");
+    instance->config.offsetx = 0;
+    instance->config.titleLength = 20; // This is overwritten by ffPrintTitle
+    instance->config.colorLogo = true;
+    instance->config.showErrors = false;
+    instance->config.recache = false;
+    instance->config.cacheSave = true;
+    instance->config.printRemainingLogo = true;
+    instance->config.allowSlowOperations = false;
+
+    //This is basically the none logo
+    for(uint8_t i = 0; i < sizeof(instance->config.logo.colors) / sizeof(instance->config.logo.colors[0]); ++i)
+        instance->config.logo.colors[i] = "";
+    instance->config.logo.allLinesSameLength = true;
+    instance->config.logo.freeable = false;
+    instance->config.logo.lines = "";
 
     //Since most of these properties are unlikely to be used at once, give them minimal heap space (the \0 character)
-    ffStrbufInitA(&config->osFormat, 1);
-    ffStrbufInitA(&config->osKey, 1);
-    ffStrbufInitA(&config->hostFormat, 1);
-    ffStrbufInitA(&config->hostKey, 1);
-    ffStrbufInitA(&config->kernelFormat, 1);
-    ffStrbufInitA(&config->kernelKey, 1);
-    ffStrbufInitA(&config->uptimeFormat, 1);
-    ffStrbufInitA(&config->uptimeKey, 1);
-    ffStrbufInitA(&config->packagesFormat, 1);
-    ffStrbufInitA(&config->packagesKey, 1);
-    ffStrbufInitA(&config->shellFormat, 1);
-    ffStrbufInitA(&config->shellKey, 1);
-    ffStrbufInitA(&config->resolutionFormat, 1);
-    ffStrbufInitA(&config->resolutionKey, 1);
-    ffStrbufInitA(&config->deFormat, 1);
-    ffStrbufInitA(&config->deKey, 1);
-    ffStrbufInitA(&config->wmFormat, 1);
-    ffStrbufInitA(&config->wmKey, 1);
-    ffStrbufInitA(&config->wmThemeFormat, 1);
-    ffStrbufInitA(&config->wmThemeKey, 1);
-    ffStrbufInitA(&config->themeFormat, 1);
-    ffStrbufInitA(&config->themeKey, 1);
-    ffStrbufInitA(&config->iconsFormat, 1);
-    ffStrbufInitA(&config->iconsKey, 1);
-    ffStrbufInitA(&config->fontFormat, 1);
-    ffStrbufInitA(&config->fontKey, 1);
-    ffStrbufInitA(&config->terminalFormat, 1);
-    ffStrbufInitA(&config->terminalKey, 1);
-    ffStrbufInitA(&config->termFontFormat, 1);
-    ffStrbufInitA(&config->termFontKey, 1);
-    ffStrbufInitA(&config->cpuFormat, 1);
-    ffStrbufInitA(&config->cpuKey, 1);
-    ffStrbufInitA(&config->gpuFormat, 1);
-    ffStrbufInitA(&config->gpuKey, 1);
-    ffStrbufInitA(&config->memoryFormat, 1);
-    ffStrbufInitA(&config->memoryKey, 1);
-    ffStrbufInitA(&config->diskFormat, 1);
-    ffStrbufInitA(&config->diskKey, 1);
-    ffStrbufInitA(&config->batteryFormat, 1);
-    ffStrbufInitA(&config->batteryKey, 1);
-    ffStrbufInitA(&config->localeFormat, 1);
-    ffStrbufInitA(&config->localeKey, 1);
+    ffStrbufInitA(&instance->config.osFormat, 1);
+    ffStrbufInitA(&instance->config.osKey, 1);
+    ffStrbufInitA(&instance->config.hostFormat, 1);
+    ffStrbufInitA(&instance->config.hostKey, 1);
+    ffStrbufInitA(&instance->config.kernelFormat, 1);
+    ffStrbufInitA(&instance->config.kernelKey, 1);
+    ffStrbufInitA(&instance->config.uptimeFormat, 1);
+    ffStrbufInitA(&instance->config.uptimeKey, 1);
+    ffStrbufInitA(&instance->config.packagesFormat, 1);
+    ffStrbufInitA(&instance->config.packagesKey, 1);
+    ffStrbufInitA(&instance->config.shellFormat, 1);
+    ffStrbufInitA(&instance->config.shellKey, 1);
+    ffStrbufInitA(&instance->config.resolutionFormat, 1);
+    ffStrbufInitA(&instance->config.resolutionKey, 1);
+    ffStrbufInitA(&instance->config.deFormat, 1);
+    ffStrbufInitA(&instance->config.deKey, 1);
+    ffStrbufInitA(&instance->config.wmFormat, 1);
+    ffStrbufInitA(&instance->config.wmKey, 1);
+    ffStrbufInitA(&instance->config.wmThemeFormat, 1);
+    ffStrbufInitA(&instance->config.wmThemeKey, 1);
+    ffStrbufInitA(&instance->config.themeFormat, 1);
+    ffStrbufInitA(&instance->config.themeKey, 1);
+    ffStrbufInitA(&instance->config.iconsFormat, 1);
+    ffStrbufInitA(&instance->config.iconsKey, 1);
+    ffStrbufInitA(&instance->config.fontFormat, 1);
+    ffStrbufInitA(&instance->config.fontKey, 1);
+    ffStrbufInitA(&instance->config.terminalFormat, 1);
+    ffStrbufInitA(&instance->config.terminalKey, 1);
+    ffStrbufInitA(&instance->config.termFontFormat, 1);
+    ffStrbufInitA(&instance->config.termFontKey, 1);
+    ffStrbufInitA(&instance->config.cpuFormat, 1);
+    ffStrbufInitA(&instance->config.cpuKey, 1);
+    ffStrbufInitA(&instance->config.gpuFormat, 1);
+    ffStrbufInitA(&instance->config.gpuKey, 1);
+    ffStrbufInitA(&instance->config.memoryFormat, 1);
+    ffStrbufInitA(&instance->config.memoryKey, 1);
+    ffStrbufInitA(&instance->config.diskFormat, 1);
+    ffStrbufInitA(&instance->config.diskKey, 1);
+    ffStrbufInitA(&instance->config.batteryFormat, 1);
+    ffStrbufInitA(&instance->config.batteryKey, 1);
+    ffStrbufInitA(&instance->config.localeFormat, 1);
+    ffStrbufInitA(&instance->config.localeKey, 1);
 
-    ffStrbufInitA(&config->libPCI, 1);
-    ffStrbufInitA(&config->libX11, 1);
-    ffStrbufInitA(&config->libXrandr, 1);
-    ffStrbufInitA(&config->libGIO, 1);
-    ffStrbufInitA(&config->libDConf, 1);
-    ffStrbufInitA(&config->libWayland, 1);
-    ffStrbufInitA(&config->libXFConf, 1);
-    ffStrbufInitA(&config->libSQLite, 1);
+    ffStrbufInitA(&instance->config.libPCI, 1);
+    ffStrbufInitA(&instance->config.libX11, 1);
+    ffStrbufInitA(&instance->config.libXrandr, 1);
+    ffStrbufInitA(&instance->config.libGIO, 1);
+    ffStrbufInitA(&instance->config.libDConf, 1);
+    ffStrbufInitA(&instance->config.libWayland, 1);
+    ffStrbufInitA(&instance->config.libXFConf, 1);
+    ffStrbufInitA(&instance->config.libSQLite, 1);
 
-    ffStrbufInitA(&config->diskFolders, 1);
+    ffStrbufInitA(&instance->config.diskFolders, 1);
 
-    ffStrbufInitA(&config->batteryDir, 1);
+    ffStrbufInitA(&instance->config.batteryDir, 1);
 }
 
 void ffInitInstance(FFinstance* instance)
 {
     initState(&instance->state);
-    defaultConfig(&instance->config);
+    defaultConfig(instance);
     ffCacheValidate(instance);
 }
 
