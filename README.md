@@ -18,35 +18,35 @@ There are some presets defined for fastfech in [`presets`](presets), you can can
 
 In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is [`glibc`](https://www.gnu.org/software/libc/) (`libc`, `libdl` and `libpthread` are actually used) which is automatically shipped with every linux system.  
 The following libraries are used if present:
-* [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
-* [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
-* [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
-* [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance + support for monitors with different refresh rates in wayland sessions.  
-* [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
-* [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
-* [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.  
-* [`libSQLite3`](https://www.sqlite.org/index.html): Needed for rpm package count.  
+*  [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
+*  [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
+*  [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
+*  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance + support for monitors with different refresh rates in wayland sessions.  
+*  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
+*  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
+*  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.  
+*  [`libSQLite3`](https://www.sqlite.org/index.html): Needed for rpm package count.  
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
-##### Logos:  
+##### Logos
 ```
 Arch, Artix, Debian, Fedora, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, Ubuntu, Void
 ```
 > **_NOTE:_** Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
 
-##### Package managers:
+##### Package managers
 ```
 Pacman, dpkg, rpm, xbps, Flatpak, Snap
 ```
 
-##### Window managers:
+##### Window managers
 ```
 KWin, Mutter, Muffin, Marco, XFWM, Openbox, Sway, Wayfire, Weston
 ```
 
-##### WM themes:
+##### WM themes
 ```
 KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
 ```
@@ -56,7 +56,7 @@ KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
 KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 ```
 
-##### Terminal fonts:
+##### Terminal fonts
 ```
 konsole, gnome-terminal-server, tilix, xfce4-terminal, lxterminal, TTY
 ```
