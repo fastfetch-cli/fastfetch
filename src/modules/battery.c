@@ -57,7 +57,7 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
             putchar('%');
 
             if(showStatus)
-                fputs(", ", stdout);
+                fputs("; ", stdout);
         }
 
         if(showStatus)

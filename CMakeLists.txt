@@ -89,6 +89,7 @@ set(SRCS
     src/common/detectPlasma.c
     src/common/detectGTK.c
     src/common/detectWMDE.c
+    src/common/detectTerminalShell.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c

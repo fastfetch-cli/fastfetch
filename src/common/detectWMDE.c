@@ -323,7 +323,7 @@ static void getFromProcDir(FFinstance* instance, FFWMDEResult* result, ProtocolH
         ffStrbufAppendS(&procPath, dirent->d_name);
         ffStrbufAppendS(&procPath, "/cmdline");
         ffGetFileContent(procPath.chars, &processName);
-        ffStrbufRecalculateLength(&processName); //Arguments are seperated by a \0 char. We make use of this to extract only the executable path. This is needed if arguments contain the / char
+        ffStrbufSubstrBeforeFirstC(&processName, '\0'); //Trim the arguments
         ffStrbufSubstrAfterLastC(&processName, '/');
         ffStrbufSubstrBefore(&procPath, procPathLength);
 

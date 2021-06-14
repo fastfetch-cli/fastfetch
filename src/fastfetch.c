@@ -292,11 +292,14 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "shell-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("shell", "{2} {4}", 4,
-            "Shell path (without name)",
-            "Shell name",
-            "Shell version raw",
-            "Shell version pretty"
+        constructAndPrintCommandHelpFormat("shell", "{3} {4}", 7,
+            "Shell process name",
+            "Shell path with exe name",
+            "Shell exe name",
+            "Shell version",
+            "User shell path with exe name",
+            "User shell exe name",
+            "User shell version"
         );
     }
     else if(strcasecmp(command, "resolution-format") == 0)
@@ -382,9 +385,9 @@ static inline void printCommandHelp(const char* command)
     else if(strcasecmp(command, "terminal-format") == 0)
     {
         constructAndPrintCommandHelpFormat("terminal", "{3}", 3,
-            "Terminal executable name",
             "Terminal process name",
-            "Terminal name"
+            "Terminal path with exe name",
+            "Terminal exe name"
         );
     }
     else if(strcasecmp(command, "terminal-font-format") == 0)

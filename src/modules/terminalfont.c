@@ -207,26 +207,26 @@ static void printTTY(FFinstance* instance)
 
 void ffPrintTerminalFont(FFinstance* instance)
 {
-    const FFTerminalResult* result = ffDetectTerminal(instance);
+    const FFTerminalShellResult* result = ffDetectTerminalShell(instance);
 
-    if(result->exeName.length == 0)
+    if(result->terminalProcessName.length == 0)
     {
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Terminal font needs successfull terminal detection");
         return;
     }
 
-    if(ffStrbufIgnCaseCompS(&result->exeName, "konsole") == 0)
+    if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "konsole") == 0)
         printKonsole(instance);
-    else if(ffStrbufIgnCaseCompS(&result->exeName, "xfce4-terminal") == 0)
+    else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "xfce4-terminal") == 0)
         printXCFETerminal(instance);
-    else if(ffStrbufIgnCaseCompS(&result->exeName, "lxterminal") == 0)
+    else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "lxterminal") == 0)
         printTerminalFontFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =");
-    else if(ffStrbufIgnCaseCompS(&result->exeName, "tilix") == 0)
+    else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "tilix") == 0)
         printTerminalFontFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile");
-    else if(ffStrbufIgnCaseCompS(&result->exeName, "gnome-terminal-server") == 0)
+    else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "gnome-terminal-") == 0)
         printTerminalFontFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile");
-    else if(ffStrbufStartsWithIgnCaseS(&result->exeName, "/dev/tty"))
+    else if(ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "/dev/tty"))
         printTTY(instance);
     else
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Unknown terminal: %s", result->exeName.chars);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Unknown terminal: %s", result->terminalProcessName.chars);
 }

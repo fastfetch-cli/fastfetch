@@ -136,12 +136,21 @@ typedef struct FFGTKResult
     FFstrbuf font;
 } FFGTKResult;
 
-typedef struct FFTerminalResult
+typedef struct FFTerminalShellResult
 {
-    FFstrbuf exeName;
-    FFstrbuf processName;
-    FFstrbuf error;
-} FFTerminalResult;
+    FFstrbuf shellProcessName;
+    FFstrbuf shellExe;
+    const char* shellExeName; //pointer to a char in shellExe
+    FFstrbuf shellVersion;
+
+    FFstrbuf terminalProcessName;
+    FFstrbuf terminalExe;
+    const char* terminalExeName; //pointer to a char in terminalExe
+
+    FFstrbuf userShellExe;
+    const char* userShellExeName; //pointer to a char in userShellExe
+    FFstrbuf userShellVersion;
+} FFTerminalShellResult;
 
 typedef struct FFWMDEResult
 {
@@ -306,13 +315,15 @@ const FFGTKResult* ffDetectGTK3(FFinstance* instance);
 //common/detectWMDE.c
 const FFWMDEResult* ffDetectWMDE(FFinstance* instance);
 
+//common/detectTerminalShell.c
+const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
+
 /********************/
 /* Module functions */
 /********************/
 
 //Common
 const FFOSResult* ffDetectOS(FFinstance* instance);
-const FFTerminalResult* ffDetectTerminal(FFinstance* instance);
 
 //Printing
 

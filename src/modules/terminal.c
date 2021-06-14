@@ -7,136 +7,27 @@
 #define FF_TERMINAL_MODULE_NAME "Terminal"
 #define FF_TERMINAL_NUM_FORMAT_ARGS 3
 
-static inline void getTerminalFromEnv(FFTerminalResult* result)
-{
-    char* term = getenv("TERM");
-
-    //TTY
-    if(term == NULL || strcasecmp(term, "linux") == 0)
-        term = ttyname(STDIN_FILENO);
-
-    ffStrbufSetS(&result->exeName, term);
-    ffStrbufSetS(&result->processName, term);
-}
-
-static void getTerminalName(FFinstance* instance, const char* pid, FFTerminalResult* result)
-{
-    char statFile[234];
-    sprintf(statFile, "/proc/%s/stat", pid);
-
-    FILE* stat = fopen(statFile, "r");
-    if(stat == NULL)
-    {
-        ffStrbufSetF(&result->error, "fopen(\"%s\", \"r\") == NULL", statFile);
-        return;
-    }
-
-    char name[256];
-    char ppid[256];
-    if(fscanf(stat, "%*s (%255[^)])%*s%255s", name, ppid) != 2)
-    {
-        ffStrbufSetS(&result->error, "fscanf(stat, \"%*s (%[^)])%*s%s\", name, ppid) != 2");
-        fclose(stat);
-        return;
-    }
-
-    fclose(stat);
-
-    if (
-        strcasecmp(name, "bash")   == 0 ||
-        strcasecmp(name, "sh")     == 0 ||
-        strcasecmp(name, "zsh")    == 0 ||
-        strcasecmp(name, "ksh")    == 0 ||
-        strcasecmp(name, "fish")   == 0 ||
-        strcasecmp(name, "sudo")   == 0 ||
-        strcasecmp(name, "su")     == 0 ||
-        strcasecmp(name, "doas")   == 0 ||
-        strcasecmp(name, "strace") == 0 ||
-        strcasecmp(name, "gdb")    == 0
-    ) {
-        getTerminalName(instance, ppid, result);
-        return;
-    }
-
-    char cmdlineFile[234];
-    sprintf(cmdlineFile, "/proc/%s/cmdline", pid);
-
-    ffGetFileContent(cmdlineFile, &result->exeName);
-    ffStrbufSubstrBeforeFirstC(&result->exeName, '\0');
-    ffStrbufSubstrAfterLastC(&result->exeName, '/');
-
-    ffStrbufSetS(&result->processName, name);
-}
-
-const FFTerminalResult* ffDetectTerminal(FFinstance* instance)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static FFTerminalResult result;
-    static bool init = false;
-    pthread_mutex_lock(&mutex);
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
-    init = true;
-
-    ffStrbufInit(&result.exeName);
-    ffStrbufInit(&result.processName);
-    ffStrbufInit(&result.error);
-
-    char ppid[256];
-    sprintf(ppid, "%i", getppid());
-
-    getTerminalName(instance, ppid, &result);
-
-    // This is mainly used when running in TTY. It also provides an fallback to $TERM if we _somehow_ failed
-    if(
-        ffStrbufStartsWithIgnCaseS(&result.exeName, "login") ||
-        ffStrbufIgnCaseCompS(&result.exeName, "systemd") == 0 ||
-        ffStrbufIgnCaseCompS(&result.exeName, "init") == 0 ||
-        ffStrbufIgnCaseCompS(&result.exeName, "(init)") == 0
-    ) getTerminalFromEnv(&result);
-
-    pthread_mutex_unlock(&mutex);
-
-    return &result;
-}
-
 void ffPrintTerminal(FFinstance* instance)
 {
-    const FFTerminalResult* result = ffDetectTerminal(instance);
+    const FFTerminalShellResult* result = ffDetectTerminalShell(instance);
 
-    if(result->error.length > 0)
+    if(result->terminalProcessName.length == 0)
     {
-        ffPrintError(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, FF_TERMINAL_NUM_FORMAT_ARGS, result->error.chars);
+        ffPrintError(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, FF_TERMINAL_NUM_FORMAT_ARGS, "Couldn't detect terminal");
         return;
     }
-
-    if(result->exeName.length == 0 && result->processName.length == 0)
-    {
-        ffPrintError(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, FF_TERMINAL_NUM_FORMAT_ARGS, "Terminal names not set");
-        return;
-    }
-
-    const FFstrbuf* name;
-
-    if(ffStrbufStartsWith(&result->exeName, &result->processName))
-        name = &result->exeName;
-    else
-        name = &result->processName;
 
     if(instance->config.terminalFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey);
-        ffStrbufPutTo(name, stdout);
+        puts(result->terminalExeName);
     }
     else
     {
         ffPrintFormatString(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, NULL, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, name}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalProcessName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalExe},
+            {FF_FORMAT_ARG_TYPE_STRING, &result->terminalExeName}
         });
     }
 }

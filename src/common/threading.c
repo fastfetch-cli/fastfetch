@@ -32,9 +32,9 @@ static inline void* detectWMDEThreadMain(void* instance)
     return NULL;
 }
 
-static inline void* detectTerminalThreadMain(void* instance)
+static inline void* detectTerminalShellThreadMain(void* instance)
 {
-    ffDetectTerminal((FFinstance*)instance);
+    ffDetectTerminalShell((FFinstance*)instance);
     return NULL;
 }
 
@@ -56,9 +56,9 @@ static inline void* startThreadsThreadMain(void* instance)
     pthread_create(&gtk4Thread, NULL, detectGTK4ThreadMain, instance);
     pthread_detach(gtk4Thread);
 
-    pthread_t terminalThread;
-    pthread_create(&terminalThread, NULL, detectTerminalThreadMain, instance);
-    pthread_detach(terminalThread);
+    pthread_t terminalShellThread;
+    pthread_create(&terminalShellThread, NULL, detectTerminalShellThreadMain, instance);
+    pthread_detach(terminalShellThread);
 
     pthread_t plasmaThread;
     pthread_create(&plasmaThread, NULL, detectPlasmaThreadMain, instance);
