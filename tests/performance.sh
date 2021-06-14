@@ -1,3 +1,4 @@
+#!/bin/env bash
 rm -rf tests/build/
 mkdir -p tests/build/
 cd tests/build/
