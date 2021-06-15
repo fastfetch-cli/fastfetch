@@ -244,7 +244,7 @@ void ffInitInstance(FFinstance* instance);
 void ffFinish(FFinstance* instance);
 
 //common/threading.c
-void ffStartCalculationThreads(FFinstance* instance);
+void ffStartDetectionThreads(FFinstance* instance);
 
 //common/io.c
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);

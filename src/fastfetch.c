@@ -1049,7 +1049,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
 static void run(FFinstance* instance, FFdata* data)
 {
     if(data->multithreading)
-        ffStartCalculationThreads(instance);
+        ffStartDetectionThreads(instance);
 
     if(data->structure.length == 0)
         ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);

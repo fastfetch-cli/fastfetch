@@ -67,7 +67,7 @@ static inline void* startThreadsThreadMain(void* instance)
     return NULL;
 }
 
-void ffStartCalculationThreads(FFinstance* instance)
+void ffStartDetectionThreads(FFinstance* instance)
 {
     pthread_t startThreadsThread;
     pthread_create(&startThreadsThread, NULL, startThreadsThreadMain, instance);

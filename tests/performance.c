@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 
     FASTFETCH_TEST_PERFORMANCE(
         puts("Thread starting");
-        ffStartCalculationThreads(&instance);
+        ffStartDetectionThreads(&instance);
     )
 
     FASTFETCH_TEST_PERFORMANCE(ffPrintTitle(&instance))

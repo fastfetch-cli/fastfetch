@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     ffStrbufSetS(&instance.config.color, instance.config.logo.colors[0]); //Use the primary color of the logo as key color
 
     //Multithreading --> better performance
-    ffStartCalculationThreads(&instance);
+    ffStartDetectionThreads(&instance);
 
     //Printing
     ffPrintTitle(&instance);
