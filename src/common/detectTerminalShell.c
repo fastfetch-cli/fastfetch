@@ -156,26 +156,24 @@ static void getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
 static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
 {
     ffProcessAppendStdOut(version, (char* const[]) {
-        "env",
-        "-i",
         exe->chars,
-        "--no-rcs",
-        "-c",
-        "printf \"%s\" \"$ZSH_VERSION\"",
+        "--version",
         NULL
     });
+    ffStrbufTrimRight(version, '\n');
+    ffStrbufSubstrBeforeLastC(version, ' ');
+    ffStrbufSubstrAfterFirstC(version, ' ');
 }
 
 static void getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
 {
     ffProcessAppendStdOut(version, (char* const[]) {
-        "env",
-        "-i",
         exe->chars,
-        "-c",
-        "printf \"%s\" \"$FISH_VERSION\"",
+        "--version",
         NULL
     });
+    ffStrbufTrimRight(version, '\n');
+    ffStrbufSubstrAfterLastC(version, ' ');
 }
 
 static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
