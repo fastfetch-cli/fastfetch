@@ -102,7 +102,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logoKeySpacing = 4;
     ffStrbufInitS(&instance->config.separator, ": ");
     instance->config.offsetx = 0;
-    instance->config.titleLength = 20; // This is overwritten by ffPrintTitle
     instance->config.colorLogo = true;
     instance->config.showErrors = false;
     instance->config.recache = false;

@@ -38,7 +38,6 @@ typedef struct FFconfig
     FFstrbuf separator;
     int16_t offsetx;
     FFstrbuf color;
-    uint32_t titleLength;
     bool colorLogo;
     bool showErrors;
     bool recache;
@@ -103,6 +102,12 @@ typedef struct FFconfig
     FFstrbuf batteryDir;
 
 } FFconfig;
+
+typedef struct FFTitleResult
+{
+    FFstrbuf userName;
+    FFstrbuf hostname;
+} FFTitleResult;
 
 typedef struct FFOSResult
 {
@@ -324,6 +329,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
 
 //Common
 const FFOSResult* ffDetectOS(FFinstance* instance);
+const FFTitleResult* ffDetectTitle(FFinstance* instance);
 
 //Printing
 
