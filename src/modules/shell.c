@@ -16,16 +16,6 @@ void ffPrintShell(FFinstance* instance)
         return;
     }
 
-    FFstrbuf shell;
-    ffStrbufInit(&shell);
-    ffStrbufAppendS(&shell, result->shellExeName);
-
-    if(result->shellVersion.length > 0)
-    {
-        ffStrbufAppendC(&shell, ' ');
-        ffStrbufAppend(&shell, &result->shellVersion);
-    }
-
     if(instance->config.shellFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shellKey);
@@ -51,6 +41,4 @@ void ffPrintShell(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellVersion}
         });
     }
-
-    ffStrbufDestroy(&shell);
 }
