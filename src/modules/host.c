@@ -13,7 +13,8 @@ static bool hostValueSet(FFstrbuf* value)
         ffStrbufIgnCaseCompS(value, "To be filled by O.E.M.") != 0 &&
         ffStrbufIgnCaseCompS(value, "System Product Name") != 0 &&
         ffStrbufIgnCaseCompS(value, "System Version") != 0 &&
-        ffStrbufIgnCaseCompS(value, "Type1ProductConfigId") != 0
+        ffStrbufIgnCaseCompS(value, "Type1ProductConfigId") != 0 &&
+        ffStrbufIgnCaseCompS(value, "Default string") != 0
     ;
 }
 
