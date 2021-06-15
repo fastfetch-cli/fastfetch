@@ -22,6 +22,7 @@ static void getProcessInformation(const char* pid, FFstrbuf* processName, FFstrb
 
     ffGetFileContent(cmdlineFilePath.chars, exe);
     ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
+    ffStrbufTrimLeft(exe, '-'); //Happens in TTY
 
     if(exe->length == 0)
         ffStrbufSet(exe, processName);
@@ -33,9 +34,6 @@ static void getProcessInformation(const char* pid, FFstrbuf* processName, FFstrb
 
 static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
 {
-    if(pid == NULL || *pid == '\0')
-        return;
-
     FFstrbuf statFilePath;
     ffStrbufInit(&statFilePath);
     ffStrbufAppendS(&statFilePath, "/proc/");
@@ -55,15 +53,18 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
     char ppid[256];
     ppid[0] = '\0';
 
-    fscanf(stat, "%*s (%255[^)]) %*c %255s", name, ppid); //stat (comm) state ppid
-    fclose(stat);
-
     if(
+        fscanf(stat, "%*s (%255[^)]) %*c %255s", name, ppid) != 2 || //stat (comm) state ppid
         *name == '\0' ||
         *ppid == '\0' ||
         *ppid == '-' ||
         strcasecmp(ppid, "0") == 0
-    ) return;
+    ) {
+        fclose(stat);
+        return;
+    }
+
+    fclose(stat);
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
@@ -101,11 +102,13 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
 static void getTerminalFromEnv(FFTerminalShellResult* result)
 {
     if(
-        result->terminalProcessName.length != 0 &&
-        ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "login") != 0 &&
+        result->terminalProcessName.length > 0 &&
+        !ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "login") &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(login)") != 0 &&
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "systemd") != 0 &&
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "init") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(init)") != 0
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(init)") != 0 &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
     ) return;
 
     char* term = getenv("TERM");
@@ -114,7 +117,9 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(term == NULL || *term == '\0' || strcasecmp(term, "linux") == 0)
         term = ttyname(STDIN_FILENO);
 
-    ffStrbufAppendS(&result->terminalProcessName, term);
+    if(result->terminalProcessName.length == 0)
+        ffStrbufAppendS(&result->terminalProcessName, term);
+
     ffStrbufSetS(&result->terminalExe, term);
     setExeName(&result->terminalExe, &result->terminalExeName);
 }
