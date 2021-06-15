@@ -225,7 +225,7 @@ void ffPrintTerminalFont(FFinstance* instance)
         printTerminalFontFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile");
     else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "gnome-terminal-") == 0)
         printTerminalFontFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile");
-    else if(ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "/dev/tty"))
+    else if(ffStrbufStartsWithIgnCaseS(&result->terminalExe, "/dev/tty"))
         printTTY(instance);
     else
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.termFontKey, &instance->config.termFontFormat, FF_TERMFONT_NUM_FORMAT_ARGS, "Unknown terminal: %s", result->terminalProcessName.chars);
