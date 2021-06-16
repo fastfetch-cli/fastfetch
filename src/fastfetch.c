@@ -402,7 +402,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "cpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {13}GHz", 13,
+        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {14}GHz", 14,
             "CPU name",
             "Prettified CPU name",
             "CPU Vendor name (Vendor ID)",
@@ -415,7 +415,8 @@ static inline void printCommandHelp(const char* command)
             "frequency scaling min",
             "frequency info max",
             "frequency info min",
-            "Always set frequeny"
+            "frequeny from /proc/cpuinfo",
+            "most accurate frequeny"
         );
     }
     else if(strcasecmp(command, "gpu-format") == 0)

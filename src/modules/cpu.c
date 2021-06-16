@@ -3,24 +3,32 @@
 #include <string.h>
 
 #define FF_CPU_MODULE_NAME "CPU"
-#define FF_CPU_NUM_FORMAT_ARGS 13
+#define FF_CPU_NUM_FORMAT_ARGS 14
 
-static double getGhz(const char* file)
+static double parseGhz(FFstrbuf* content)
 {
-    FF_STRBUF_CREATE(content);
-    ffGetFileContent(file, &content);
-
-    if(content.length == 0)
+    if(content->length == 0)
         return 0;
 
     uint32_t herz;
-    if(sscanf(content.chars, "%u", &herz) != 1)
+    if(sscanf(content->chars, "%u", &herz) != 1)
         return 0;
-
-    ffStrbufDestroy(&content);
 
     herz /= 1000; //to MHz
     return (double) herz / 1000.0; //to GHz
+}
+
+static double getGhz(const char* file)
+{
+    FFstrbuf content;
+    ffStrbufInit(&content);
+    ffGetFileContent(file, &content);
+
+    double ghz = parseGhz(&content);
+
+    ffStrbufDestroy(&content);
+
+    return ghz;
 }
 
 void ffPrintCPU(FFinstance* instance)
@@ -35,18 +43,27 @@ void ffPrintCPU(FFinstance* instance)
         return;
     }
 
-    char name[256];   name[0] = '\0';
-    char vendor[256]; vendor[0] = '\0';
-    int physicalCores = 0;
+    FFstrbuf name;
+    ffStrbufInit(&name);
+
+    FFstrbuf vendor;
+    ffStrbufInit(&vendor);
+
+    FFstrbuf physicalCoresString;
+    ffStrbufInit(&physicalCoresString);
+
+    FFstrbuf procGhzString;
+    ffStrbufInit(&procGhzString);
 
     char* line = NULL;
     size_t len = 0;
 
     while(getline(&line, &len, cpuinfo) != -1)
     {
-        sscanf(line, "model name%*s %256[^\n]", name);
-        sscanf(line, "vendor_id%*s %256[^\n]", vendor);
-        sscanf(line, "cpu cores%*s %i", &physicalCores);
+        ffGetPropValue(line, "model name :", &name);
+        ffGetPropValue(line, "vendor_id :", &vendor);
+        ffGetPropValue(line, "cpu cores :", &physicalCoresString);
+        ffGetPropValue(line, "cpu MHz :", &procGhzString);
 
         //Stop after the first CPU
         if(strstr(line, "flags") != NULL)
@@ -58,6 +75,9 @@ void ffPrintCPU(FFinstance* instance)
 
     fclose(cpuinfo);
 
+    double procGhz = parseGhz(&procGhzString);
+    ffStrbufDestroy(&procGhzString);
+
     double biosLimit      = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/bios_limit");
     double scalingMaxFreq = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
     double scalingMinFreq = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq");
@@ -66,6 +86,10 @@ void ffPrintCPU(FFinstance* instance)
 
     int numProcsOnline = get_nprocs();
     int numProcsAvailable = get_nprocs_conf();
+
+    int physicalCores = 1;
+    sscanf(physicalCoresString.chars, "%i", &physicalCores);
+    ffStrbufDestroy(&physicalCoresString);
 
     //The current get_nprocs* returns 1 on failure. It also makes no sense to have a (1) as count
     int numProcs = numProcsOnline;
@@ -80,23 +104,27 @@ void ffPrintCPU(FFinstance* instance)
     if(ghz == 0)
         ghz = infoMaxFreq;
     if(ghz == 0)
+        ghz = procGhz;
+    if(ghz == 0)
         ghz = scalingMinFreq;
     if(ghz == 0)
         ghz = infoMinFreq;
 
     if(
-        name[0] == '\0' && //This also implies namePretty is not set
-        vendor[0] == '\0' &&
+        name.length == 0 &&
+        vendor.length == 0 &&
         numProcs <= 1 &&
         ghz <= 0
     ) {
+        ffStrbufDestroy(&name);
+        ffStrbufDestroy(&vendor);
         ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "No CPU info found in /proc/cpuinfo");
         return;
     }
 
     FFstrbuf namePretty;
     ffStrbufInitA(&namePretty, 64);
-    ffStrbufAppendS(&namePretty, name);
+    ffStrbufAppend(&namePretty, &name);
 
     const char* removeStrings[] = {
         "(R)", "(r)", "(TM)", "(tm)",
@@ -114,15 +142,15 @@ void ffPrintCPU(FFinstance* instance)
 
     if(namePretty.length > 0)
         ffStrbufAppend(&cpu, &namePretty);
-    else if(name[0] != '\0')
-        ffStrbufAppendS(&cpu, name);
-    else if(vendor[0] != '\0')
+    else if(name.length > 0)
+        ffStrbufAppend(&cpu, &name);
+    else if(vendor.length > 0)
     {
-        ffStrbufAppendS(&cpu, vendor);
+        ffStrbufAppend(&cpu, &vendor);
         ffStrbufAppendS(&cpu, " unknown processor");
     }
     else
-        ffStrbufAppendS(&cpu, " unknown processor");
+        ffStrbufAppendS(&cpu, "unknown processor");
 
     if(numProcs > 1)
         ffStrbufAppendF(&cpu, " (%i)", numProcs);
@@ -131,21 +159,24 @@ void ffPrintCPU(FFinstance* instance)
         ffStrbufAppendF(&cpu, " @ %.9gGHz", ghz);
 
     ffPrintAndSaveToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &cpu, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
-        {FF_FORMAT_ARG_TYPE_STRING, name},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
-        {FF_FORMAT_ARG_TYPE_STRING, vendor},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &vendor},
         {FF_FORMAT_ARG_TYPE_INT, &numProcsOnline},
         {FF_FORMAT_ARG_TYPE_INT, &numProcsAvailable},
         {FF_FORMAT_ARG_TYPE_INT, &physicalCores},
-        {FF_FORMAT_ARG_TYPE_DOUBLE, &biosLimit},
         {FF_FORMAT_ARG_TYPE_INT, &numProcs},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &biosLimit},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMaxFreq},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMinFreq},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &infoMaxFreq},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &infoMinFreq},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &procGhz},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &ghz}
     });
 
-    ffStrbufDestroy(&namePretty);
     ffStrbufDestroy(&cpu);
+    ffStrbufDestroy(&namePretty);
+    ffStrbufDestroy(&name);
+    ffStrbufDestroy(&vendor);
 }
