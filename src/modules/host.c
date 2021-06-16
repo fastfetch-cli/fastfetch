@@ -30,36 +30,12 @@ static bool hostValueSet(FFstrbuf* value)
     ;
 }
 
-static bool getHostValueSpecific(FFstrbuf* basePath, const char* key, FFstrbuf* buffer)
+static inline void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
-    uint32_t basePathLength = basePath->length;
+    ffGetFileContent(devicesPath, buffer);
 
-    ffStrbufAppendS(basePath, "product_");
-    ffStrbufAppendS(basePath, key);
-    ffGetFileContent(basePath->chars, buffer);
-    ffStrbufSubstrBefore(basePath, basePathLength);
-
-    return hostValueSet(buffer);
-}
-
-static bool getHostValue(FFstrbuf* devicesPath, FFstrbuf* classPath, const char* key, FFstrbuf* buffer)
-{
-    if(getHostValueSpecific(devicesPath, key, buffer))
-        return true;
-
-    if(getHostValueSpecific(classPath, key, buffer))
-        return true;
-
-    return false;
-}
-
-static void destroyStrbufs(FFstrbuf* devicesPath, FFstrbuf* classPath, FFstrbuf* family, FFstrbuf* name, FFstrbuf* version)
-{
-    ffStrbufDestroy(devicesPath);
-    ffStrbufDestroy(classPath);
-    ffStrbufDestroy(family);
-    ffStrbufDestroy(name);
-    ffStrbufDestroy(version);
+    if(buffer->length == 0)
+        ffGetFileContent(classPath, buffer);
 }
 
 void ffPrintHost(FFinstance* instance)
@@ -67,33 +43,22 @@ void ffPrintHost(FFinstance* instance)
     if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS))
         return;
 
-    FFstrbuf devicesPath;
-    ffStrbufInitA(&devicesPath, 128);
-    ffStrbufAppendS(&devicesPath, "/sys/devices/virtual/dmi/id/");
-
-    FFstrbuf classPath;
-    ffStrbufInitA(&classPath, 128);
-    ffStrbufAppendS(&classPath, "/sys/class/dmi/id/");
-
     FFstrbuf family;
     ffStrbufInit(&family);
-    bool familySet = getHostValue(&devicesPath, &classPath, "family", &family);
+    getHostValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &family);
+    bool familySet = hostValueSet(&family);
 
     FFstrbuf name;
     ffStrbufInit(&name);
-    bool nameSet = getHostValue(&devicesPath, &classPath, "name", &name);
+    getHostValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &name);
 
     if(name.length == 0)
-    {
         ffGetFileContent("/sys/firmware/devicetree/base/model", &name);
-        nameSet = hostValueSet(&name);
-    }
 
     if(name.length == 0)
-    {
         ffGetFileContent("/tmp/sysinfo/model", &name);
-        nameSet = hostValueSet(&name);
-    }
+
+    bool nameSet = hostValueSet(&name);
 
     if(ffStrbufStartsWithS(&name, "Standard PC"))
     {
@@ -106,11 +71,14 @@ void ffPrintHost(FFinstance* instance)
 
     FFstrbuf version;
     ffStrbufInit(&version);
-    bool versionSet = getHostValue(&devicesPath, &classPath, "version", &version);
+    getHostValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &version);
+    bool versionSet = hostValueSet(&version);
 
     if(!familySet && !nameSet)
     {
-        destroyStrbufs(&devicesPath, &classPath, &family, &name, &version);
+        ffStrbufDestroy(&family);
+        ffStrbufDestroy(&name);
+        ffStrbufDestroy(&version);
         ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, "neither family nor name is set by O.E.M.");
         return;
     }
@@ -135,5 +103,7 @@ void ffPrintHost(FFinstance* instance)
         {FF_FORMAT_ARG_TYPE_STRBUF, &version}
     });
 
-    destroyStrbufs(&devicesPath, &classPath, &family, &name, &version);
+    ffStrbufDestroy(&family);
+    ffStrbufDestroy(&name);
+    ffStrbufDestroy(&version);
 }
