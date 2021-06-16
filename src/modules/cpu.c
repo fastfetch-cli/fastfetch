@@ -5,30 +5,33 @@
 #define FF_CPU_MODULE_NAME "CPU"
 #define FF_CPU_NUM_FORMAT_ARGS 14
 
-static double parseGhz(FFstrbuf* content)
+static double parseHz(FFstrbuf* content)
 {
     if(content->length == 0)
         return 0;
 
-    uint32_t herz;
-    if(sscanf(content->chars, "%u", &herz) != 1)
+    double herz;
+    if(sscanf(content->chars, "%lf", &herz) != 1)
         return 0;
 
-    herz /= 1000; //to MHz
-    return (double) herz / 1000.0; //to GHz
+    return herz;
 }
 
-static double getGhz(const char* file)
+static double getGhz(const char* policyFile, const char* cpuFile)
 {
     FFstrbuf content;
     ffStrbufInit(&content);
-    ffGetFileContent(file, &content);
 
-    double ghz = parseGhz(&content);
+    ffGetFileContent(policyFile, &content);
+    if(content.length == 0)
+        ffGetFileContent(cpuFile, &content);
+
+    double herz = parseHz(&content);
 
     ffStrbufDestroy(&content);
 
-    return ghz;
+    herz /= 1000.0; //to MHz
+    return herz / 1000.0; //to GHz
 }
 
 void ffPrintCPU(FFinstance* instance)
@@ -75,14 +78,14 @@ void ffPrintCPU(FFinstance* instance)
 
     fclose(cpuinfo);
 
-    double procGhz = parseGhz(&procGhzString);
+    double procGhz = parseHz(&procGhzString) / 1000.0; //to GHz
     ffStrbufDestroy(&procGhzString);
 
-    double biosLimit      = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/bios_limit");
-    double scalingMaxFreq = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
-    double scalingMinFreq = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq");
-    double infoMaxFreq    = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
-    double infoMinFreq    = getGhz("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq");
+    double biosLimit      = getGhz("/sys/devices/system/cpu/cpufreq/policy0/bios_limit",       "/sys/devices/system/cpu/cpu0/cpufreq/bios_limit");
+    double scalingMaxFreq = getGhz("/sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq");
+    double scalingMinFreq = getGhz("/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq");
+    double infoMaxFreq    = getGhz("/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq", "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
+    double infoMinFreq    = getGhz("/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_min_freq", "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq");
 
     int numProcsOnline = get_nprocs();
     int numProcsAvailable = get_nprocs_conf();
