@@ -59,6 +59,8 @@ static inline void printHelp()
         "                --multithreading <?value>:        use multiple threads to detect values\n"
         "                --load-config <file>:             load a config file (+)\n"
         "                --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output\n"
+        "                --disable-linewrap <?value>:      Disable linewrap during the run\n"
+        "                --hide-cursor <?value>:           Hide the cursor during the run\n"
         "\n"
         "Logo options:\n"
         "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a path\n"
@@ -793,6 +795,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         data->multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disable-linewrap") == 0)
+        instance->config.disableLinewrap = optionParseBoolean(value);
+    else if(strcasecmp(key, "--hide-cursor") == 0)
+        instance->config.hideCursor = optionParseBoolean(value);
     else if(strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
@@ -1054,6 +1060,8 @@ static void run(FFinstance* instance, FFdata* data)
 
     if(data->structure.length == 0)
         ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
+
+    ffStart(instance);
 
     uint32_t lastIndex = 0;
     while (lastIndex < data->structure.length)

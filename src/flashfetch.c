@@ -16,6 +16,9 @@ int main(int argc, char** argv)
     //Multithreading --> better performance
     ffStartDetectionThreads(&instance);
 
+    //Does things like disabling line wrap
+    ffStart(&instance);
+
     //Printing
     ffPrintTitle(&instance);
     ffPrintSeparator(&instance);

@@ -27,7 +27,6 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     else if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
     {
         fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);
-        exit(806);
     }
 }
 

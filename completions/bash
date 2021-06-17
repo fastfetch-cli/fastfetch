@@ -119,6 +119,8 @@ __fastfetch_completion()
         "--print-remaining-logo"
         "--multithreading"
         "--allow-slow-operations"
+        "--disable-linewrap"
+        "--hide-cursor"
     )
 
     local FF_OPTIONS_STRING=(

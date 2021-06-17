@@ -108,6 +108,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.cacheSave = true;
     instance->config.printRemainingLogo = true;
     instance->config.allowSlowOperations = false;
+    instance->config.disableLinewrap = true;
+    instance->config.hideCursor = true;
 
     //This is basically the none logo
     for(uint8_t i = 0; i < sizeof(instance->config.logo.colors) / sizeof(instance->config.logo.colors[0]); ++i)
@@ -181,6 +183,15 @@ void ffInitInstance(FFinstance* instance)
     ffCacheValidate(instance);
 }
 
+void ffStart(FFinstance* instance)
+{
+    if(instance->config.hideCursor)
+        fputs("\033[?25l", stdout);
+
+    if(instance->config.disableLinewrap)
+        fputs("\033[?7l", stdout);
+}
+
 static void ffCleanup(FFinstance* instance)
 {
     UNUSED(instance);
@@ -193,6 +204,12 @@ void ffFinish(FFinstance* instance)
 {
     if(instance->config.printRemainingLogo)
         ffPrintRemainingLogo(instance);
+
+    if(instance->config.disableLinewrap)
+        fputs("\033[?7h", stdout);
+
+    if(instance->config.hideCursor)
+        fputs("\033[?25h", stdout);
 
     ffCleanup(instance);
 }

@@ -44,6 +44,8 @@ typedef struct FFconfig
     bool cacheSave;
     bool printRemainingLogo;
     bool allowSlowOperations;
+    bool disableLinewrap;
+    bool hideCursor;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;
@@ -241,6 +243,7 @@ typedef struct FFfont
 
 //common/init.c
 void ffInitInstance(FFinstance* instance);
+void ffStart(FFinstance* instance);
 void ffFinish(FFinstance* instance);
 
 //common/threading.c
