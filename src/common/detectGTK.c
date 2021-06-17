@@ -80,13 +80,17 @@ static void detectGTKFromConfigFile(const char* filename, FFGTKResult* result)
     char* line = NULL;
     size_t len = 0;
 
+    bool needsTheme = result->theme.length == 0;
+    bool needsIcons = result->icons.length == 0;
+    bool needsFont  = result->font.length  == 0;
+
     while(getline(&line, &len, file) != -1)
     {
-        if(result->theme.length == 0)
+        if(needsTheme)
             ffGetPropValue(line, "gtk-theme-name =", &result->theme);
-        if(result->icons.length == 0)
+        if(needsIcons)
             ffGetPropValue(line, "gtk-icon-theme-name =", &result->icons);
-        if(result->font.length == 0)
+        if(needsFont)
             ffGetPropValue(line, "gtk-font-name =", &result->font);
     }
 
