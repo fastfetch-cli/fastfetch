@@ -159,6 +159,8 @@ __fastfetch_completion()
         "--icons-key"
         "--font-format"
         "--font-key"
+        "--cursor-format"
+        "--cursor-key"
         "--terminal-format"
         "--terminal-key"
         "--terminal-font-format"

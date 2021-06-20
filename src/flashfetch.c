@@ -35,6 +35,7 @@ int main(int argc, char** argv)
     ffPrintTheme(&instance);
     ffPrintIcons(&instance);
     ffPrintFont(&instance);
+    ffPrintCursor(&instance);
     ffPrintTerminal(&instance);
     ffPrintTerminalFont(&instance);
     ffPrintCPU(&instance);

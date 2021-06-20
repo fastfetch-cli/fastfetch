@@ -29,24 +29,26 @@ typedef struct GVariantGetters
 {
     const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
     gboolean(*ffg_variant_get_boolean)(GVariant*);
+    gint32(*ffg_variant_get_int32)(GVariant*);
 } GVariantGetters;
 
 #define FF_LIBRARY_GVARIANT_GETTERS_INIT(library, object, mutex) \
     object.ffg_variant_get_string = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_string", mutex, FF_VARIANT_NULL); \
-    object.ffg_variant_get_boolean = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_boolean", mutex, FF_VARIANT_NULL);
+    object.ffg_variant_get_boolean = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_boolean", mutex, FF_VARIANT_NULL); \
+    object.ffg_variant_get_int32 = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_int32", mutex, FF_VARIANT_NULL)
 
 static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVariantGetters* variantGetters)
 {
     if(variant == NULL)
         return FF_VARIANT_NULL;
-
-    if(type == FF_VARIANT_TYPE_STRING)
-        return (FFvariant) variantGetters->ffg_variant_get_string(variant, NULL);
-
-    if(type == FF_VARIANT_TYPE_BOOL)
-        return (FFvariant) { .boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true};
-
-    return FF_VARIANT_NULL;
+    else if(type == FF_VARIANT_TYPE_STRING)
+        return (FFvariant) {.strValue = variantGetters->ffg_variant_get_string(variant, NULL)};
+    else if(type == FF_VARIANT_TYPE_BOOL)
+        return (FFvariant) {.boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true};
+    else if(type == FF_VARIANT_TYPE_INT)
+        return (FFvariant) {.intValue = variantGetters->ffg_variant_get_int32(variant)};
+    else
+        return FF_VARIANT_NULL;
 }
 
 typedef struct DConfData
@@ -182,9 +184,12 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
 
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
-    FFvariant gsettings = ffSettingsGetGSettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING);
-    if(gsettings.strValue != NULL)
-        return gsettings;
+    FFvariant gsettings = ffSettingsGetGSettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, type);
+
+    if(
+        (type == FF_VARIANT_TYPE_BOOL && gsettings.boolValueSet) ||
+        (type != FF_VARIANT_TYPE_BOOL && gsettings.strValue != NULL)
+    ) return gsettings;
 
     return ffSettingsGetDConf(instance, dconfKey, type);
 }
@@ -198,6 +203,7 @@ typedef struct XFConfData
     gboolean(*ffxfconf_channel_has_property)(XfconfChannel*, const gchar*);
     gchar*(*ffxfconf_channel_get_string)(XfconfChannel*, const gchar*, const gchar*);
     gboolean(*ffxfconf_channel_get_bool)(XfconfChannel*, const gchar*, gboolean);
+    gint32(*ffxfconf_channel_get_int)(XfconfChannel*, const gchar*, gint32);
 } XFConfData;
 
 static FFvariant getXFConfValue(XFConfData* data, const char* channelName, const char* propertyName, FFvarianttype type)
@@ -209,6 +215,9 @@ static FFvariant getXFConfValue(XFConfData* data, const char* channelName, const
 
     if(!data->ffxfconf_channel_has_property(channel, propertyName))
         return FF_VARIANT_NULL;
+
+    if(type == FF_VARIANT_TYPE_INT)
+        return (FFvariant) {.intValue = data->ffxfconf_channel_get_int(channel, propertyName, 0)};
 
     if(type == FF_VARIANT_TYPE_STRING)
         return (FFvariant) {.strValue = data->ffxfconf_channel_get_string(channel, propertyName, NULL)};
@@ -243,6 +252,7 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
     data.ffxfconf_channel_has_property = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_has_property", mutex, FF_VARIANT_NULL);
     data.ffxfconf_channel_get_string = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get_string", mutex, FF_VARIANT_NULL);
     data.ffxfconf_channel_get_bool = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get_bool", mutex, FF_VARIANT_NULL);
+    data.ffxfconf_channel_get_int = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get_int", mutex, FF_VARIANT_NULL);
 
     gboolean(*ffxfconf_init)(GError **) = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_init", mutex, FF_VARIANT_NULL);
     if((data.init = ffxfconf_init(NULL)) == FALSE)

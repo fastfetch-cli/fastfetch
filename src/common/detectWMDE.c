@@ -153,15 +153,21 @@ static void getMate(FFinstance* instance, FFWMDEResult* result)
     ffStrbufSetS(&result->deProcessName, "mate-session");
     ffStrbufSetS(&result->dePrettyName, "MATE");
 
-    //I parse the file 3 times by purpose, because the properties are not guaranteed to be in order
-    ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<platform>", &result->deVersion);
-    if(result->deVersion.length > 0)
-    {
-        ffStrbufAppendC(&result->deVersion, '.');
-        ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<minor>", &result->deVersion);
-        ffStrbufAppendC(&result->deVersion, '.');
-        ffParsePropFile("/usr/share/mate-about/mate-version.xml", "<micro>", &result->deVersion);
-    }
+    FFstrbuf major; ffStrbufInit(&major);
+    FFstrbuf minor; ffStrbufInit(&minor);
+    FFstrbuf micro; ffStrbufInit(&micro);
+
+    ffParsePropFileValues("/usr/share/mate-about/mate-version.xml", 3, (FFpropquery[]) {
+        {"<platform>", &major},
+        {"<minor>", &minor},
+        {"<micro>", &micro}
+    });
+
+    ffParseSemver(&result->deVersion, &major, &minor, &micro);
+
+    ffStrbufDestroy(&major);
+    ffStrbufDestroy(&minor);
+    ffStrbufDestroy(&micro);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {

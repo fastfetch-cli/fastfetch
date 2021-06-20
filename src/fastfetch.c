@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-#define FASTFETCH_DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
+#define FASTFETCH_DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
 #define FASTFETCH_DEFAULT_CONFIG \
     "# Fastfetch configuration\n" \
@@ -80,6 +80,7 @@ static inline void printHelp()
         "   --theme-format <format>\n"
         "   --icons-format <format>\n"
         "   --font-format <format>\n"
+        "   --cursor-format <format>\n"
         "   --terminal-format <format>\n"
         "   --terminal-font-format <format>\n"
         "   --cpu-format <format>\n"
@@ -103,6 +104,7 @@ static inline void printHelp()
         "   --theme-key <key>\n"
         "   --icons-key <key>\n"
         "   --font-key <key>\n"
+        "   --cursor-key <key>\n"
         "   --terminal-key <key>\n"
         "   --terminal-font-key <key>\n"
         "   --cpu-key <key>\n"
@@ -384,6 +386,13 @@ static inline void printCommandHelp(const char* command)
             "GTK2/3/4 pretty"
         );
     }
+    else if(strcasecmp(command, "cursor-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("cursor", "{} ({}pt)", 2,
+            "Cursor theme",
+            "Cursor size"
+        );
+    }
     else if(strcasecmp(command, "terminal-format") == 0)
     {
         constructAndPrintCommandHelpFormat("terminal", "{3}", 3,
@@ -474,6 +483,7 @@ static inline void printAvailableModules()
         "Break\n"
         "Colors\n"
         "CPU\n"
+        "Cursor\n"
         "DE\n"
         "Disk\n"
         "Font\n"
@@ -868,6 +878,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.fontFormat);
     else if(strcasecmp(key, "--font-key") == 0)
         optionParseString(key, value, &instance->config.fontKey);
+    else if(strcasecmp(key, "--cursor-key") == 0)
+        optionParseString(key, value, &instance->config.cursorKey);
+    else if(strcasecmp(key, "--cursor-format") == 0)
+        optionParseString(key, value, &instance->config.cursorFormat);
     else if(strcasecmp(key, "--terminal-format") == 0)
         optionParseString(key, value, &instance->config.terminalFormat);
     else if(strcasecmp(key, "--terminal-key") == 0)
@@ -1031,6 +1045,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintIcons(instance);
     else if(strcasecmp(line, "font") == 0)
         ffPrintFont(instance);
+    else if(strcasecmp(line, "cursor") == 0)
+        ffPrintCursor(instance);
     else if(strcasecmp(line, "terminal") == 0)
         ffPrintTerminal(instance);
     else if(strcasecmp(line, "terminalfont") == 0)

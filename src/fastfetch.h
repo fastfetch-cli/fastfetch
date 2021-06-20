@@ -73,6 +73,8 @@ typedef struct FFconfig
     FFstrbuf iconsKey;
     FFstrbuf fontFormat;
     FFstrbuf fontKey;
+    FFstrbuf cursorFormat;
+    FFstrbuf cursorKey;
     FFstrbuf terminalFormat;
     FFstrbuf terminalKey;
     FFstrbuf termFontFormat;
@@ -104,6 +106,24 @@ typedef struct FFconfig
     FFstrbuf batteryDir;
 
 } FFconfig;
+
+typedef struct FFstate
+{
+    uint32_t logoWidth;
+
+    struct passwd* passwd;
+    struct utsname utsname;
+    struct sysinfo sysinfo;
+
+    FFlist configDirs;
+    FFstrbuf cacheDir;
+} FFstate;
+
+typedef struct FFinstance
+{
+    FFconfig config;
+    FFstate state;
+} FFinstance;
 
 typedef struct FFTitleResult
 {
@@ -141,6 +161,8 @@ typedef struct FFGTKResult
     FFstrbuf theme;
     FFstrbuf icons;
     FFstrbuf font;
+    FFstrbuf cursor;
+    FFstrbuf cursorSize;
 } FFGTKResult;
 
 typedef struct FFTerminalShellResult
@@ -170,24 +192,6 @@ typedef struct FFWMDEResult
     FFstrbuf deVersion;
 } FFWMDEResult;
 
-typedef struct FFstate
-{
-    uint32_t logoWidth;
-
-    struct passwd* passwd;
-    struct utsname utsname;
-    struct sysinfo sysinfo;
-
-    FFlist configDirs;
-    FFstrbuf cacheDir;
-} FFstate;
-
-typedef struct FFinstance
-{
-    FFconfig config;
-    FFstate state;
-} FFinstance;
-
 typedef enum FFformatargtype
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
@@ -215,13 +219,14 @@ typedef struct FFcache
 typedef enum FFvarianttype
 {
     FF_VARIANT_TYPE_STRING,
-    FF_VARIANT_TYPE_BOOL
+    FF_VARIANT_TYPE_BOOL,
+    FF_VARIANT_TYPE_INT
 } FFvarianttype;
 
 typedef union FFvariant
 {
     const char* strValue;
-
+    int32_t intValue;
     struct
     {
         bool boolValueSet;
@@ -236,6 +241,12 @@ typedef struct FFfont
     FFstrbuf size;
     FFlist styles;
 } FFfont;
+
+typedef struct FFpropquery
+{
+    const char* start;
+    FFstrbuf* buffer;
+} FFpropquery;
 
 /*************************/
 /* Common util functions */
@@ -270,9 +281,14 @@ bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
-// They return true if the file was found, independently if regex was found
-bool ffParsePropFile(const char* file, const char* start, FFstrbuf* buffer);
+// They return true if the file was found, independently if start was found
+// Buffers which already contain content are not overwritten
+// The last occurence of start in the first file will be the one used
+bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries);
+bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer);
+bool ffParsePropFileHomeValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
+bool ffParsePropFileConfigValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
 
 //common/processing.c
@@ -303,6 +319,8 @@ void ffFontDestroy(FFfont* font);
 
 bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer);
 bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buffer);
+
+void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
 
 //common/settings.c
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);
@@ -353,6 +371,7 @@ void ffPrintWMTheme(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);
+void ffPrintCursor(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintCPU(FFinstance* instance);

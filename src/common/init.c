@@ -145,6 +145,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.iconsKey, 1);
     ffStrbufInitA(&instance->config.fontFormat, 1);
     ffStrbufInitA(&instance->config.fontKey, 1);
+    ffStrbufInitA(&instance->config.cursorKey, 1);
+    ffStrbufInitA(&instance->config.cursorFormat, 1);
     ffStrbufInitA(&instance->config.terminalFormat, 1);
     ffStrbufInitA(&instance->config.terminalKey, 1);
     ffStrbufInitA(&instance->config.termFontFormat, 1);

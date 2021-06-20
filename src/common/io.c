@@ -290,20 +290,44 @@ void ffCacheClose(FFcache* cache)
         fclose(cache->split);
 }
 
-bool ffParsePropFile(const char* fileName, const char* start, FFstrbuf* buffer)
+bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries)
 {
-    FILE* file = fopen(fileName, "r");
+    bool* searchedValues = malloc(sizeof(bool) * numQueries);
+    bool allSet = true;
+    for(uint32_t i = 0; i < numQueries; i++)
+    {
+        if((searchedValues[i] = queries[i].buffer->length == 0))
+            allSet = false;
+    }
+
+    if(allSet)
+    {
+        free(searchedValues);
+        return access(filename, R_OK) == 0;
+    }
+
+    FILE* file = fopen(filename, "r");
     if(file == NULL)
-        return false; // handle errors in higher functions
+        return false;
 
     char* line = NULL;
     size_t len = 0;
 
     while (getline(&line, &len, file) != -1)
     {
-        if(ffGetPropValue(line, start, buffer))
-            break;
+        for(uint32_t i = 0; i < numQueries; i++)
+        {
+            if(!searchedValues[i])
+                continue;
+
+            uint32_t currentLength = queries[i].buffer->length;
+            queries[i].buffer->length = 0;
+            if(!ffGetPropValue(line, queries[i].start, queries[i].buffer))
+                queries[i].buffer->length = currentLength;
+        }
     }
+
+    free(searchedValues);
 
     if(line != NULL)
         free(line);
@@ -313,7 +337,12 @@ bool ffParsePropFile(const char* fileName, const char* start, FFstrbuf* buffer)
     return true;
 }
 
-bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
+bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
+{
+    return ffParsePropFileValues(filename, 1, (FFpropquery[]){{start, buffer}});
+}
+
+bool ffParsePropFileHomeValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
@@ -321,16 +350,20 @@ bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const c
     ffStrbufAppendC(&absolutePath, '/');
     ffStrbufAppendS(&absolutePath, relativeFile);
 
-    bool result = ffParsePropFile(absolutePath.chars, start, buffer);
+    bool result = ffParsePropFileValues(absolutePath.chars, numQueries, queries);
 
     ffStrbufDestroy(&absolutePath);
 
     return result;
 }
 
-bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
+bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
 {
-    uint32_t bufferLengthStart = buffer->length;
+    return ffParsePropFileHomeValues(instance, relativeFile, 1, (FFpropquery[]){{start, buffer}});
+}
+
+bool ffParsePropFileConfigValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
+{
     bool foundAFile = false;
 
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
@@ -343,16 +376,31 @@ bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const
 
         ffStrbufAppendS(baseDir, relativeFile);
 
-        if(ffParsePropFile(baseDir->chars, start, buffer))
+        if(ffParsePropFileValues(baseDir->chars, numQueries, queries))
             foundAFile = true;
 
         ffStrbufSubstrBefore(baseDir, baseDirLength);
 
-        if(bufferLengthStart < buffer->length)
-            return foundAFile;
+        bool allSet = true;
+        for(uint32_t i = 0; i < numQueries; i++)
+        {
+            if(queries[i].buffer->length == 0)
+            {
+                allSet = false;
+                break;
+            }
+        }
+
+        if(allSet)
+            break;
     }
 
     return foundAFile;
+}
+
+bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
+{
+    return ffParsePropFileConfigValues(instance, relativeFile, 1, (FFpropquery[]){{start, buffer}});
 }
 
 bool ffWriteFDContent(int fd, const FFstrbuf* content)

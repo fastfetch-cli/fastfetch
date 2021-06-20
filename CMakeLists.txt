@@ -109,6 +109,7 @@ set(SRCS
     src/modules/theme.c
     src/modules/icons.c
     src/modules/font.c
+    src/modules/cursor.c
     src/modules/terminal.c
     src/modules/terminalfont.c
     src/modules/cpu.c

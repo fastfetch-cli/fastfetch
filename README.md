@@ -41,11 +41,6 @@ Arch, Artix, Debian, Fedora, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, Ubuntu, Voi
 Pacman, dpkg, rpm, xbps, Flatpak, Snap
 ```
 
-##### Window managers
-```
-KWin, Mutter, Muffin, Marco, XFWM, Openbox, Sway, Wayfire, Weston
-```
-
 ##### WM themes
 ```
 KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
