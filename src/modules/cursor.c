@@ -97,7 +97,7 @@ void ffPrintCursor(FFinstance* instance)
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
         printCursorPlasma(instance);
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "XFCE") == 0)
+    else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "XFCE"))
         printCursorXFCE(instance);
     else
         printCursorGTK(instance);
