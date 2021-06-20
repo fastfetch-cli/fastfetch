@@ -382,9 +382,9 @@ bool ffParsePropFileConfigValues(FFinstance* instance, const char* relativeFile,
         ffStrbufSubstrBefore(baseDir, baseDirLength);
 
         bool allSet = true;
-        for(uint32_t i = 0; i < numQueries; i++)
+        for(uint32_t k = 0; k < numQueries; k++)
         {
-            if(queries[i].buffer->length == 0)
+            if(queries[k].buffer->length == 0)
             {
                 allSet = false;
                 break;
