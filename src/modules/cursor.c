@@ -51,36 +51,6 @@ static void printCursorGTK(FFinstance* instance)
     ffStrbufDestroy(&theme);
 }
 
-static void printCursorPlasma(FFinstance* instance)
-{
-    FFstrbuf cursorTheme;
-    ffStrbufInit(&cursorTheme);
-
-    FFstrbuf cursorSize;
-    ffStrbufInit(&cursorSize);
-
-    if(ffParsePropFileConfigValues(instance, "kcminputrc", 2, (FFpropquery[]) {
-        {"cursorTheme =", &cursorTheme},
-        {"cursorSize =", &cursorSize}
-    })) {
-        if(cursorTheme.length == 0)
-            ffStrbufAppendS(&cursorTheme, "Breeze");
-
-        if(cursorSize.length == 0)
-            ffStrbufAppendS(&cursorSize, "24");
-    }
-
-    if(cursorTheme.length == 0)
-    {
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't find plasma cursor in kcminputrc");
-        return;
-    }
-
-    printCursor(instance, &cursorTheme, &cursorSize);
-    ffStrbufDestroy(&cursorTheme);
-    ffStrbufDestroy(&cursorSize);
-}
-
 static void printCursorXFCE(FFinstance* instance)
 {
     FFstrbuf cursorTheme;
@@ -99,6 +69,39 @@ static void printCursorXFCE(FFinstance* instance)
     int cursorSizeVal = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
     if(cursorSizeVal > 0)
         ffStrbufAppendF(&cursorSize, "%i", cursorSizeVal);
+
+    printCursor(instance, &cursorTheme, &cursorSize);
+    ffStrbufDestroy(&cursorTheme);
+    ffStrbufDestroy(&cursorSize);
+}
+
+static void printCursorFromConfigFile(FFinstance* instance, const char* relativeFilePath, const char* themeStart, const char* themeDefault, const char* sizeStart, const char* sizeDefault)
+{
+    FFstrbuf cursorTheme;
+    ffStrbufInit(&cursorTheme);
+
+    FFstrbuf cursorSize;
+    ffStrbufInit(&cursorSize);
+
+    if(ffParsePropFileConfigValues(instance, relativeFilePath, 2, (FFpropquery[]) {
+        {themeStart, &cursorTheme},
+        {sizeStart, &cursorSize}
+    })) {
+
+        if(cursorTheme.length == 0)
+            ffStrbufAppendS(&cursorTheme, themeDefault);
+
+        if(cursorSize.length == 0)
+            ffStrbufAppendS(&cursorSize, sizeDefault);
+    }
+
+    if(cursorTheme.length == 0)
+    {
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't find cursor in %s", relativeFilePath);
+        ffStrbufDestroy(&cursorTheme);
+        ffStrbufDestroy(&cursorSize);
+        return;
+    }
 
     printCursor(instance, &cursorTheme, &cursorSize);
     ffStrbufDestroy(&cursorTheme);
@@ -180,13 +183,19 @@ void ffPrintCursor(FFinstance* instance)
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
     {
-        printCursorPlasma(instance);
+        printCursorFromConfigFile(instance, "kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24");
         return;
     }
 
     if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "XFCE"))
     {
         printCursorXFCE(instance);
+        return;
+    }
+
+    if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "LXQt"))
+    {
+        printCursorFromConfigFile(instance, "lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24");
         return;
     }
 
