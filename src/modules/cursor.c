@@ -105,6 +105,31 @@ static void printCursorXFCE(FFinstance* instance)
     ffStrbufDestroy(&cursorSize);
 }
 
+static void printCursorLXQt(FFinstance* instance)
+{
+    FFstrbuf cursorTheme;
+    ffStrbufInit(&cursorTheme);
+
+    FFstrbuf cursorSize;
+    ffStrbufInit(&cursorSize);
+
+    if(ffParsePropFileConfigValues(instance, "/lxqt/session.conf", 2, (FFpropquery[]) {
+        {"cursor_theme =", &cursorTheme},
+        {"cursor_size =", &cursorSize}
+    })) {
+    }
+
+    if(cursorTheme.length == 0)
+    {
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't find LXQt cursor in session.conf");
+        return;
+    }
+
+    printCursor(instance, &cursorTheme, &cursorSize);
+    ffStrbufDestroy(&cursorTheme);
+    ffStrbufDestroy(&cursorSize);
+}
+
 static bool printCursorFromXResources(FFinstance* instance)
 {
     FFstrbuf theme;
@@ -187,6 +212,12 @@ void ffPrintCursor(FFinstance* instance)
     if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "XFCE"))
     {
         printCursorXFCE(instance);
+        return;
+    }
+
+    if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "LXQt"))
+    {
+        printCursorLXQt(instance);
         return;
     }
 
