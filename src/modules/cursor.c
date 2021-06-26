@@ -3,9 +3,16 @@
 #define FF_CURSOR_MODULE_NAME "Cursor"
 #define FF_CURSOR_NUM_FORMAT_ARGS 2
 
-static void printCursor(FFinstance* instance, const FFstrbuf* cursorTheme, const FFstrbuf* cursorSize)
+static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstrbuf* cursorSize)
 {
     ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey);
+
+    ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursors");
+    ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursor");
+    ffStrbufTrimRight(cursorTheme, '_');
+    if(cursorTheme->length == 0)
+        ffStrbufAppendS(cursorTheme, "default");
+
     ffStrbufWriteTo(cursorTheme, stdout);
 
     if(cursorSize != NULL && cursorSize->length > 0)
@@ -34,7 +41,13 @@ static void printCursorGTK(FFinstance* instance)
         return;
     }
 
-    printCursor(instance, &gtk->cursor, &gtk->cursorSize);
+    //gtk->cursor is const, so we don't want to modify it
+    FFstrbuf theme;
+    ffStrbufInitCopy(&theme, &gtk->cursor);
+
+    printCursor(instance, &theme, &gtk->cursorSize);
+
+    ffStrbufDestroy(&theme);
 }
 
 static void printCursorPlasma(FFinstance* instance)
@@ -162,9 +175,6 @@ static bool printCursorFromEnv(FFinstance* instance)
 
 void ffPrintCursor(FFinstance* instance)
 {
-    if(printCursorFromEnv(instance))
-        return;
-
     const FFWMDEResult* wmde = ffDetectWMDE(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
@@ -184,6 +194,9 @@ void ffPrintCursor(FFinstance* instance)
         printCursorGTK(instance);
         return;
     }
+
+    if(printCursorFromEnv(instance))
+        return;
 
     //User config
     if(printCursorFromXDG(instance, true))

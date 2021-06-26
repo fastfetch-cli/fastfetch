@@ -96,6 +96,10 @@ bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const 
 
 bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end);
 
+bool ffStrbufEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end);
+
+bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
+
 void ffStrbufRecalculateLength(FFstrbuf* strbuf);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);

@@ -569,6 +569,40 @@ bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
     return true;
 }
 
+static bool testEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end, uint32_t* endLength)
+{
+    *endLength = strlen(end);
+
+    if(*endLength > strbuf->length)
+        return false;
+
+    for(uint32_t i = 0; i < *endLength; ++i)
+    {
+        if(tolower(strbuf->chars[strbuf->length - *endLength + i]) != tolower(end[i]))
+            return false;
+    }
+
+    return true;
+}
+
+bool ffStrbufEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end)
+{
+    uint32_t dummy;
+    return testEndsWithIgnCaseS(strbuf, end, &dummy);
+}
+
+bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
+{
+    uint32_t endLength;
+    if(testEndsWithIgnCaseS(strbuf, end, &endLength))
+    {
+        ffStrbufSubstrBefore(strbuf, strbuf->length - endLength);
+        return true;
+    }
+
+    return false;
+}
+
 void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 {
     for(strbuf->length = 0; strbuf->chars[strbuf->length] != '\0'; ++strbuf->length);
