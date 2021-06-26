@@ -10,6 +10,7 @@ static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstr
     ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursors");
     ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursor");
     ffStrbufTrimRight(cursorTheme, '_');
+    ffStrbufTrimRight(cursorTheme, '-');
     if(cursorTheme->length == 0)
         ffStrbufAppendS(cursorTheme, "default");
 
