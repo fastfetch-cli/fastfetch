@@ -49,11 +49,11 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
     uint32_t idx = 0;
 
     idx = ffStrbufFirstIndexS(&theme, "qml_");
-    if((idx != theme.length))
+    if(idx != theme.length)
         ffStrbufSubstrAfter(&theme, idx + 3);
 
     idx = ffStrbufFirstIndexS(&theme, "svg__");
-    if((idx != theme.length))
+    if(idx != theme.length)
         ffStrbufSubstrAfter(&theme, idx + 4);
 
     printWMTheme(instance, theme.chars);
