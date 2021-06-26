@@ -96,14 +96,10 @@ static void printCursorFromConfigFile(FFinstance* instance, const char* relative
     }
 
     if(cursorTheme.length == 0)
-    {
         ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't find cursor in %s", relativeFilePath);
-        ffStrbufDestroy(&cursorTheme);
-        ffStrbufDestroy(&cursorSize);
-        return;
-    }
+    else
+        printCursor(instance, &cursorTheme, &cursorSize);
 
-    printCursor(instance, &cursorTheme, &cursorSize);
     ffStrbufDestroy(&cursorTheme);
     ffStrbufDestroy(&cursorSize);
 }
