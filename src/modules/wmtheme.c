@@ -45,7 +45,7 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
         return;
     }
 
-    // Remove Plasma generated garbage
+    // Remove Plasma-generated prefix
     ffStrbufRemoveStrings(&theme, 1, "__aurorae__svg__");
 
     printWMTheme(instance, theme.chars);
