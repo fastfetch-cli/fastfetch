@@ -152,25 +152,23 @@ static void detectGTK(FFinstance* instance, const char* version, const char* env
     FFstrbuf buffer;
     ffStrbufInitA(&buffer, 128);
 
-    uint32_t lastIndex;
-
     // From ENV: GTK*_RC_FILES
 
     ffStrbufSetS(&buffer, getenv(envVariable));
-    lastIndex = 0;
-    while (lastIndex < buffer.length)
+    uint32_t startIndex = 0;
+    while (startIndex < buffer.length)
     {
-        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&buffer, lastIndex, ':');
+        uint32_t colonIndex = ffStrbufNextIndexC(&buffer, startIndex, ':');
         buffer.chars[colonIndex] = '\0';
 
-        detectGTKFromConfigFile(buffer.chars + lastIndex, result);
+        detectGTKFromConfigFile(buffer.chars + startIndex, result);
         if(allPropertiesSet(result))
         {
             ffStrbufDestroy(&buffer);
             return;
         }
 
-        lastIndex = colonIndex + 1;
+        startIndex = colonIndex + 1;
     }
 
     //From DConf / GSettings

@@ -1079,15 +1079,15 @@ static void run(FFinstance* instance, FFdata* data)
 
     ffStart(instance);
 
-    uint32_t lastIndex = 0;
-    while (lastIndex < data->structure.length)
+    uint32_t startIndex = 0;
+    while (startIndex < data->structure.length)
     {
-        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&data->structure, lastIndex, ':');
+        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
         data->structure.chars[colonIndex] = '\0';
 
-        parseStructureCommand(instance, data, data->structure.chars + lastIndex);
+        parseStructureCommand(instance, data, data->structure.chars + startIndex);
 
-        lastIndex = colonIndex + 1;
+        startIndex = colonIndex + 1;
     }
 
     ffFinish(instance);
