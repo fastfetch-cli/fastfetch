@@ -12,7 +12,7 @@ static void printCursor(FFinstance* instance, const FFstrbuf* cursorTheme, const
     {
         fputs(" (", stdout);
         ffStrbufWriteTo(cursorSize, stdout);
-        fputs("pt)", stdout);
+        fputs("px)", stdout);
     }
 
     putchar('\n');
