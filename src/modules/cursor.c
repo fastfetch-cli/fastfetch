@@ -8,7 +8,7 @@ static void printCursor(FFinstance* instance, const FFstrbuf* cursorTheme, const
     ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey);
     ffStrbufWriteTo(cursorTheme, stdout);
 
-    if(cursorSize->length > 0)
+    if(cursorSize != NULL && cursorSize->length > 0)
     {
         fputs(" (", stdout);
         ffStrbufWriteTo(cursorSize, stdout);
@@ -91,14 +91,110 @@ static void printCursorXFCE(FFinstance* instance)
     ffStrbufDestroy(&cursorSize);
 }
 
+static bool printCursorFromXResources(FFinstance* instance)
+{
+    FFstrbuf theme;
+    ffStrbufInit(&theme);
+
+    FFstrbuf size;
+    ffStrbufInit(&size);
+
+    ffParsePropFileHomeValues(instance, ".Xresources", 2, (FFpropquery[]) {
+        {"Xcursor.theme :", &theme},
+        {"Xcursor.size :", &size}
+    });
+
+    if(theme.length == 0)
+    {
+        ffStrbufDestroy(&size);
+        ffStrbufDestroy(&theme);
+        return false;
+    }
+
+    printCursor(instance, &theme, &size);
+    ffStrbufDestroy(&size);
+    ffStrbufDestroy(&theme);
+    return true;
+}
+
+static bool printCursorFromXDG(FFinstance* instance, bool user)
+{
+    FFstrbuf theme;
+    ffStrbufInit(&theme);
+
+    if(user)
+        ffParsePropFileHome(instance, ".icons/default/index.theme", "Inherits =", &theme);
+    else
+        ffParsePropFile("/usr/share/icons/default/index.theme", "Inherits =", &theme);
+
+    if(theme.length == 0)
+    {
+        ffStrbufDestroy(&theme);
+        return false;
+    }
+
+    printCursor(instance, &theme, NULL);
+    ffStrbufDestroy(&theme);
+    return true;
+}
+
+static bool printCursorFromEnv(FFinstance* instance)
+{
+    const char* xcursor_theme = getenv("XCURSOR_THEME");
+
+    if(xcursor_theme == NULL || *xcursor_theme == '\0')
+        return false;
+
+    FFstrbuf theme;
+    ffStrbufInit(&theme);
+    ffStrbufAppendS(&theme, xcursor_theme);
+
+    FFstrbuf size;
+    ffStrbufInit(&size);
+    ffStrbufAppendS(&size, getenv("XCURSOR_SIZE"));
+
+    printCursor(instance, &theme, &size);
+
+    ffStrbufDestroy(&size);
+    ffStrbufDestroy(&theme);
+    return true;
+}
+
 void ffPrintCursor(FFinstance* instance)
 {
+    if(printCursorFromEnv(instance))
+        return;
+
     const FFWMDEResult* wmde = ffDetectWMDE(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
+    {
         printCursorPlasma(instance);
-    else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "XFCE"))
+        return;
+    }
+
+    if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "XFCE"))
+    {
         printCursorXFCE(instance);
-    else
+        return;
+    }
+
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Mate") == 0)
+    {
         printCursorGTK(instance);
+        return;
+    }
+
+    //User config
+    if(printCursorFromXDG(instance, true))
+        return;
+
+    if(printCursorFromXResources(instance))
+        return;
+
+    //System config
+    if(printCursorFromXDG(instance, false))
+        return;
+
+    printCursorGTK(instance);
 }
