@@ -57,11 +57,16 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
             putchar('%');
 
             if(showStatus)
-                fputs("; ", stdout);
+                fputs(" [", stdout);
         }
 
         if(showStatus)
+        {
             ffStrbufWriteTo(&status, stdout);
+
+            if(capacity.length > 0)
+                putchar(']');
+        }
 
         putchar('\n');
     }

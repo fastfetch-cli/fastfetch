@@ -114,15 +114,15 @@ void ffPrintDisk(FFinstance* instance)
             return;
         }
 
-        uint32_t lastIndex = 0;
-        while (lastIndex < instance->config.diskFolders.length)
+        uint32_t startIndex = 0;
+        while (startIndex < instance->config.diskFolders.length)
         {
-            uint32_t colonIndex = ffStrbufFirstIndexAfterC(&instance->config.diskFolders, lastIndex, ':');
+            uint32_t colonIndex = ffStrbufNextIndexC(&instance->config.diskFolders, startIndex, ':');
             instance->config.diskFolders.chars[colonIndex] = '\0';
 
-            printFolder(instance, instance->config.diskFolders.chars + lastIndex);
+            printFolder(instance, instance->config.diskFolders.chars + startIndex);
 
-            lastIndex = colonIndex + 1;
+            startIndex = colonIndex + 1;
         }
     }
 }

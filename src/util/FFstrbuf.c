@@ -381,7 +381,7 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
     va_end(argp);
 }
 
-uint32_t ffStrbufFirstIndexAfterC(const FFstrbuf* strbuf, uint32_t start, const char c)
+uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 {
     for(uint32_t i = start; i < strbuf->length; i++)
     {
@@ -391,14 +391,14 @@ uint32_t ffStrbufFirstIndexAfterC(const FFstrbuf* strbuf, uint32_t start, const 
     return strbuf->length;
 }
 
-uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, const char c)
+uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
 {
-    return ffStrbufFirstIndexAfterC(strbuf, 0, c);
+    return ffStrbufNextIndexC(strbuf, 0, c);
 }
 
-uint32_t ffStrbufFirstIndexAfterS(const FFstrbuf* strbuf, uint32_t start, const char* str)
+uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str)
 {
-    for(uint32_t i = start + 1; i < strbuf->length; i++)
+    for(uint32_t i = start; i < strbuf->length; i++)
     {
         bool found = true;
 
@@ -417,23 +417,32 @@ uint32_t ffStrbufFirstIndexAfterS(const FFstrbuf* strbuf, uint32_t start, const 
         if(found)
             return i;
     }
+
     return strbuf->length;
 }
 
 uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str)
 {
-    return ffStrbufFirstIndexAfterS(strbuf, 0, str);
+    return ffStrbufNextIndexS(strbuf, 0, str);
 }
 
-uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, const char c)
+uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 {
+    if(start >= strbuf->length)
+        return strbuf->length;
+
     //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true
-    for(uint32_t i = strbuf->length; i > 0; i--)
+    for(uint32_t i = start + 1; i > 0; i--)
     {
         if(strbuf->chars[i - 1] == c)
             return i - 1;
     }
     return strbuf->length;
+}
+
+uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c)
+{
+    return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
 }
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)

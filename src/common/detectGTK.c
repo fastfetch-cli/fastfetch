@@ -67,15 +67,18 @@ static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
         themeName = ffSettingsGet(instance, "/org/mate/interface/gtk-theme", "org.mate.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGet(instance, "/org/mate/interface/icon-theme", "org.mate.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
         fontName = ffSettingsGet(instance, "/org/mate/interface/font-name", "org.mate.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
-        cursorTheme = ffSettingsGet(instance, "/org/mate/interface/cursor-theme", "org.mate.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
-        cursorSize = ffSettingsGet(instance, "/org/mate/interface/cursor-size", "org.mate.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+        cursorTheme = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-theme", "org.mate.peripherals-mouse", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
+        cursorSize = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-size", "org.mate.peripherals-mouse", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
     }
 
     //Fallback + Gnome impl
+
     if(themeName == NULL)
         themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
+
     if(iconsName == NULL)
         iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
+
     if(fontName == NULL)
         fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
 
@@ -149,25 +152,23 @@ static void detectGTK(FFinstance* instance, const char* version, const char* env
     FFstrbuf buffer;
     ffStrbufInitA(&buffer, 128);
 
-    uint32_t lastIndex;
-
     // From ENV: GTK*_RC_FILES
 
     ffStrbufSetS(&buffer, getenv(envVariable));
-    lastIndex = 0;
-    while (lastIndex < buffer.length)
+    uint32_t startIndex = 0;
+    while (startIndex < buffer.length)
     {
-        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&buffer, lastIndex, ':');
+        uint32_t colonIndex = ffStrbufNextIndexC(&buffer, startIndex, ':');
         buffer.chars[colonIndex] = '\0';
 
-        detectGTKFromConfigFile(buffer.chars + lastIndex, result);
+        detectGTKFromConfigFile(buffer.chars + startIndex, result);
         if(allPropertiesSet(result))
         {
             ffStrbufDestroy(&buffer);
             return;
         }
 
-        lastIndex = colonIndex + 1;
+        startIndex = colonIndex + 1;
     }
 
     //From DConf / GSettings

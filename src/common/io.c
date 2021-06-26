@@ -128,14 +128,14 @@ static bool printCachedValue(FFinstance* instance, const char* moduleName, const
 
     uint8_t moduleCounter = 1;
 
-    uint32_t lastIndex = 0;
-    while(lastIndex < content.length)
+    uint32_t startIndex = 0;
+    while(startIndex < content.length)
     {
-        uint32_t nullByteIndex = ffStrbufFirstIndexAfterC(&content, lastIndex, '\0');
+        uint32_t nullByteIndex = ffStrbufNextIndexC(&content, startIndex, '\0');
         uint8_t moduleIndex = (moduleCounter == 1 && nullByteIndex == content.length) ? 0 : moduleCounter;
         ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
-        puts(content.chars + lastIndex);
-        lastIndex = nullByteIndex + 1;
+        puts(content.chars + startIndex);
+        startIndex = nullByteIndex + 1;
         ++moduleCounter;
     }
 
@@ -160,14 +160,14 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
     FFformatarg* arguments = calloc(numArgs, sizeof(FFformatarg));
     uint32_t argumentCounter = 0;
 
-    uint32_t lastIndex = 0;
-    while(lastIndex < content.length)
+    uint32_t startIndex = 0;
+    while(startIndex < content.length)
     {
         arguments[argumentCounter].type = FF_FORMAT_ARG_TYPE_STRING;
-        arguments[argumentCounter].value = &content.chars[lastIndex];
+        arguments[argumentCounter].value = &content.chars[startIndex];
         ++argumentCounter;
 
-        uint32_t nullByteIndex = ffStrbufFirstIndexAfterC(&content, lastIndex, '\0');
+        uint32_t nullByteIndex = ffStrbufNextIndexC(&content, startIndex, '\0');
 
         if(argumentCounter == numArgs)
         {
@@ -177,7 +177,7 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
             argumentCounter = 0;
         }
 
-        lastIndex = nullByteIndex + 1;
+        startIndex = nullByteIndex + 1;
     }
 
     free(arguments);

@@ -22,19 +22,21 @@ static void initConfigDirs(FFstate* state)
     }
 
     FFstrbuf xdgConfigDirs;
-    ffStrbufInitAS(&xdgConfigDirs, 64, getenv("XDG_CONFIG_DIRS"));
-    uint32_t lastIndex = 0;
-    while (lastIndex < xdgConfigDirs.length)
+    ffStrbufInitA(&xdgConfigDirs, 64);
+    ffStrbufAppendS(&xdgConfigDirs, getenv("XDG_CONFIG_DIRS"));
+
+    uint32_t startIndex = 0;
+    while (startIndex < xdgConfigDirs.length)
     {
-        uint32_t colonIndex = ffStrbufFirstIndexAfterC(&xdgConfigDirs, lastIndex, ':');
+        uint32_t colonIndex = ffStrbufNextIndexC(&xdgConfigDirs, startIndex, ':');
         xdgConfigDirs.chars[colonIndex] = '\0';
 
         FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
         ffStrbufInitA(buffer, 64);
-        ffStrbufAppendS(buffer, xdgConfigDirs.chars + lastIndex);
+        ffStrbufAppendS(buffer, xdgConfigDirs.chars + startIndex);
         ffStrbufTrimRight(buffer, '/');
 
-        lastIndex = colonIndex + 1;
+        startIndex = colonIndex + 1;
     }
 
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
