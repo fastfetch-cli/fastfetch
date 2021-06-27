@@ -135,7 +135,7 @@ static bool printResolutionX11Backend(FFinstance* instance)
 {
     void* x11 = FF_LIBRARY_LOAD(instance->config.libX11, "libX11.so");
 
-    Display* display = xOpenDisplay(instance);
+    Display* display = xOpenDisplay(x11);
     if(display == NULL)
     {
         dlclose(x11);
@@ -198,7 +198,7 @@ static bool printResolutionXrandrBackend(FFinstance* instance)
 
     XRRMonitorInfo*(*ffXRRGetMonitors)(Display*, Window, Bool, int*) = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetMonitors");
 
-    Display* display = xOpenDisplay(instance);
+    Display* display = xOpenDisplay(xrandr);
     if(display == NULL)
     {
         dlclose(xrandr);
