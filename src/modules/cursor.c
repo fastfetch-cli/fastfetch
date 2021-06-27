@@ -177,6 +177,12 @@ void ffPrintCursor(FFinstance* instance)
 {
     const FFWMDEResult* wmde = ffDetectWMDE(instance);
 
+    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
+    {
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Cursor isn't supported in TTY");
+        return;
+    }
+
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
     {
         printCursorFromConfigFile(instance, "kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24");

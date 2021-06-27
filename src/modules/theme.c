@@ -5,6 +5,14 @@
 
 void ffPrintTheme(FFinstance* instance)
 {
+    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+
+    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
+    {
+        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_THEME_NUM_FORMAT_ARGS, "Theme isn't supported in TTY");
+        return;
+    }
+
     const FFPlasmaResult* plasma = ffDetectPlasma(instance);
     const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->theme;
     const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->theme;

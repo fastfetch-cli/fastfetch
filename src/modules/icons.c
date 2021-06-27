@@ -5,11 +5,18 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
+    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+
+    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
+    {
+        ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_ICONS_NUM_FORMAT_ARGS, "Icons aren't supported in TTY");
+        return;
+    }
+
     const FFstrbuf* plasma = &ffDetectPlasma(instance)->icons;
     const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->icons;
     const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->icons;
     const FFstrbuf* gtk4 = &ffDetectGTK4(instance)->icons;
-
 
     if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {

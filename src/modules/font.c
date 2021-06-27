@@ -5,6 +5,14 @@
 
 void ffPrintFont(FFinstance* instance)
 {
+    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+
+    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
+    {
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_FONT_NUM_FORMAT_ARGS, "Font isn't supported in TTY");
+        return;
+    }
+
     const FFstrbuf* plasmaRaw = &ffDetectPlasma(instance)->font;
     const FFstrbuf* gtk2Raw = &ffDetectGTK2(instance)->font;
     const FFstrbuf* gtk3Raw = &ffDetectGTK3(instance)->font;
