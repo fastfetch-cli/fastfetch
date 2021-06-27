@@ -201,19 +201,12 @@ void ffPrintCursor(FFinstance* instance)
         return;
     }
 
-    if(printCursorFromEnv(instance))
-        return;
-
-    //User config
-    if(printCursorFromXDG(instance, true))
-        return;
-
-    if(printCursorFromXResources(instance))
-        return;
-
-    //System config
-    if(printCursorFromXDG(instance, false))
-        return;
+    if(
+        printCursorFromEnv(instance) ||
+        printCursorFromXDG(instance, true) ||
+        printCursorFromXResources(instance) ||
+        printCursorFromXDG(instance, false)
+    ) return;
 
     printCursorGTK(instance);
 }
