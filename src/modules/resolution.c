@@ -19,6 +19,8 @@
         return false; \
     }
 
+typedef void* DynamicLibrary;
+
 static void printResolution(FFinstance* instance, uint8_t moduleIndex, FFcache* cache, int width, int height, int refreshRate)
 {
     FFstrbuf value;
@@ -35,11 +37,44 @@ static void printResolution(FFinstance* instance, uint8_t moduleIndex, FFcache* 
     });
 }
 
-typedef struct DRMData
+typedef struct ResolutionResult
 {
     int width;
     int height;
-} DRMData;
+    int refreshRate;
+} ResolutionResult;
+
+static inline void printResolutionResultList(FFinstance* instance, FFlist* results)
+{
+    FFcache cache;
+    ffCacheOpenWrite(instance, FF_RESOLUTION_MODULE_NAME, &cache);
+
+    for(uint32_t i = 0; i < results->length; i++)
+    {
+        ResolutionResult* result = ffListGet(results, i);
+        printResolution(instance, results->length == 1 ? 0 : i + 1, &cache, result->width, result->height, result->refreshRate);
+    }
+
+    ffCacheClose(&cache);
+}
+
+static int parseRefreshRate(int32_t refreshRate)
+{
+    if(refreshRate <= 0)
+        return 0;
+
+    int remainder = refreshRate % 5;
+    if(remainder >= 3)
+        refreshRate += (5 - remainder);
+    else
+        refreshRate -= remainder;
+
+    //All other typicall refresh rates are dividable by 5
+    if(refreshRate == 145)
+        refreshRate = 144;
+
+    return refreshRate;
+}
 
 static void printResolutionDRMBackend(FFinstance* instance)
 {
@@ -59,7 +94,7 @@ static void printResolutionDRMBackend(FFinstance* instance)
     uint32_t drmDirLength = drmDir.length;
 
     FFlist modes;
-    ffListInitA(&modes, sizeof(DRMData), 4);
+    ffListInitA(&modes, sizeof(ResolutionResult), 4);
 
     struct dirent* entry;
 
@@ -75,12 +110,13 @@ static void printResolutionDRMBackend(FFinstance* instance)
             continue;
         }
 
-        DRMData* data = ffListAdd(&modes);
-        data->width = 0;
-        data->height = 0;
-        fscanf(modeFile, "%ix%i", &data->width, &data->height);
+        ResolutionResult* result = ffListAdd(&modes);
+        result->width = 0;
+        result->height = 0;
+        result->refreshRate = 0;
+        fscanf(modeFile, "%ix%i", &result->width, &result->height);
 
-        if(data->width == 0 || data->height == 0)
+        if(result->width == 0 || result->height == 0)
             --modes.length;
 
         fclose(modeFile);
@@ -97,150 +133,237 @@ static void printResolutionDRMBackend(FFinstance* instance)
         return;
     }
 
-    FFcache cache;
-    ffCacheOpenWrite(instance, FF_RESOLUTION_MODULE_NAME, &cache);
-
-    for(uint32_t i = 0; i < modes.length; i++)
-    {
-        DRMData* data = ffListGet(&modes, i);
-        printResolution(instance, modes.length == 1 ? 0 : i + 1, &cache, data->width, data->height, 0);
-    }
-
-    ffCacheClose(&cache);
+    printResolutionResultList(instance, &modes);
 
     ffListDestroy(&modes);
 }
 
-static Display* xOpenDisplay(void* library)
+static void x11AddScreenAsResult(FFlist* results, Screen* screen, int refreshRate)
 {
-    Display*(*ffXOpenDisplay)(const char*) = dlsym(library, "XOpenDisplay");
-    if(dlerror() != NULL)
-        return NULL;
+    if(WidthOfScreen(screen) == 0 || HeightOfScreen(screen) == 0)
+        return;
 
-    Display* display = ffXOpenDisplay(NULL);
-    if(display == NULL)
-        return NULL;
-
-    return display;
-}
-
-static void xCloseDisplay(void* library, Display* display)
-{
-    int(*ffXCloseDisplay)(Display*) = dlsym(library, "XCloseDisplay");
-    if(dlerror() != NULL)
-        ffXCloseDisplay(display);
+    ResolutionResult* result = ffListAdd(results);
+    result->width = WidthOfScreen(screen);
+    result->height = HeightOfScreen(screen);
+    result->refreshRate = refreshRate;
 }
 
 static bool printResolutionX11Backend(FFinstance* instance)
 {
-    void* x11 = FF_LIBRARY_LOAD(instance->config.libX11, "libX11.so");
+    DynamicLibrary x11 = FF_LIBRARY_LOAD(instance->config.libX11, "libX11.so");
 
-    Display* display = xOpenDisplay(x11);
+    Display*(*ffXOpenDisplay)(const char*) = FF_LIBRARY_LOAD_SYMBOL(x11, "XOpenDisplay");
+    int(*ffXCloseDisplay)(Display*) = FF_LIBRARY_LOAD_SYMBOL(x11, "XCloseDisplay");
+
+    Display* display = ffXOpenDisplay(x11);
     if(display == NULL)
     {
         dlclose(x11);
         return false;
     }
 
-    int screenCount = ScreenCount(display);
-    if(screenCount < 1)
+    FFlist results;
+    ffListInitA(&results, sizeof(ResolutionResult), 4);
+
+    for(int i = 0; i < ScreenCount(display); i++)
+        x11AddScreenAsResult(&results, ScreenOfDisplay(display, i), 0);
+
+    if(results.length == 0)
     {
-        xCloseDisplay(x11, display);
+        ffListDestroy(&results);
+        ffXCloseDisplay(display);
         dlclose(x11);
         return false;
     }
 
-    FFcache cache;
-    ffCacheOpenWrite(instance, FF_RESOLUTION_MODULE_NAME, &cache);
+    printResolutionResultList(instance, &results);
 
-    for(int i = 0; i < screenCount; i++)
-    {
-        Screen* screen = ScreenOfDisplay(display, i);
-        uint8_t moduleIndex = screenCount == 1 ? 0 : i + 1;
-        printResolution(instance, moduleIndex, &cache, WidthOfScreen(screen), HeightOfScreen(screen), 0);
-    }
-
-    ffCacheClose(&cache);
-
-    xCloseDisplay(x11, display);
+    ffListDestroy(&results);
+    ffXCloseDisplay(display);
     dlclose(x11);
 
     return true;
 }
 
-static int xrandrGetCurrentRate(void* xrandr, Display* display)
+typedef struct XrandrData
 {
-    XRRScreenConfiguration*(*ffXRRGetScreenInfo)(Display*, Window) = dlsym(xrandr, "XRRGetScreenInfo");
-    if(dlerror() != NULL)
-        return 0;
+    XRRScreenConfiguration*(*ffXRRGetScreenInfo)(Display* display, Window window);
+    short(*ffXRRConfigCurrentRate)(XRRScreenConfiguration* config);
+    XRRMonitorInfo*(*ffXRRGetMonitors)(Display* display, Window window, Bool getActive, int* nmonitors);
+    XRRScreenResources*(*ffXRRGetScreenResources)(Display* display, Window window);
+    XRROutputInfo*(*ffXRRGetOutputInfo)(Display* display, XRRScreenResources* resources, RROutput output);
+    XRRCrtcInfo*(*ffXRRGetCrtcInfo)(Display* display, XRRScreenResources* resources, RRCrtc crtc);
+    void(*ffXRRFreeCrtcInfo)(XRRCrtcInfo* crtcInfo);
+    void(*ffXRRFreeOutputInfo)(XRROutputInfo* outputInfo);
+    void(*ffXRRFreeScreenResources)(XRRScreenResources* resources);
+    void(*ffXRRFreeMonitors)(XRRMonitorInfo* monitors);
+    void(*ffXRRFreeScreenConfigInfo)(XRRScreenConfiguration* config);
 
-    short(*ffXRRConfigCurrentRate)(XRRScreenConfiguration*) = dlsym(xrandr, "XRRConfigCurrentRate");
-    if(dlerror() != NULL)
-        return 0;
+    //Init once
+    Display* display;
+    FFlist results;
 
+    //Init per screen
+    int defaultRefreshRate;
+    XRRScreenResources* screenResources;
+} XrandrData;
 
-    XRRScreenConfiguration* xrrscreenconf = ffXRRGetScreenInfo(display, DefaultRootWindow(display));
-    if(dlerror() != NULL)
-        return 0;
+static XRRModeInfo* xrandrGetModeInfo(XRRScreenResources* screenResources, RRMode mode)
+{
+    for(int i = 0; i < screenResources->nmode; i++)
+    {
+        if(screenResources->modes[i].id == mode)
+            return &screenResources->modes[i];
+    }
+    return NULL;
+}
 
-    short currentRate = ffXRRConfigCurrentRate(xrrscreenconf);
+static bool xrandrHandleOutputInfo(XrandrData* data, XRROutputInfo* outputInfo)
+{
+    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, data->screenResources, outputInfo->crtc);
+    if(crtcInfo == NULL)
+        return false;
 
-    void(*ffXRRFreeScreenConfigInfo)(XRRScreenConfiguration*) = dlsym(xrandr, "XRRFreeScreenConfigInfo");
-    if(dlerror() != NULL)
-        ffXRRFreeScreenConfigInfo(xrrscreenconf);
+    XRRModeInfo* modeInfo = xrandrGetModeInfo(data->screenResources, crtcInfo->mode);
+    if(modeInfo == NULL || modeInfo->width == 0 || modeInfo->height == 0)
+    {
+        data->ffXRRFreeCrtcInfo(crtcInfo);
+        return false;
+    }
 
-    return (int) currentRate;
+    ResolutionResult* result = ffListAdd(&data->results);
+    result->width = modeInfo->width;
+    result->height = modeInfo->height;
+    result->refreshRate = parseRefreshRate(modeInfo->dotClock / (modeInfo->hTotal * modeInfo->vTotal));
+
+    if(result->refreshRate == 0)
+        result->refreshRate = data->defaultRefreshRate;
+
+    data->ffXRRFreeCrtcInfo(crtcInfo);
+
+    return true;
+}
+
+static void xrandrHandleMonitorFallback(XrandrData* data, XRRMonitorInfo* monitorInfo)
+{
+    if(monitorInfo->width == 0 || monitorInfo->height == 0)
+        return;
+
+    ResolutionResult* result = ffListAdd(&data->results);
+    result->width = monitorInfo->width;
+    result->height = monitorInfo->height;
+    result->refreshRate = data->defaultRefreshRate;
+}
+
+static void xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
+{
+    bool res = false;
+
+    for(int i = 0; i < monitorInfo->noutput; i++)
+    {
+        XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, monitorInfo->outputs[i]);
+        if(outputInfo == NULL)
+            continue;
+
+        res = xrandrHandleOutputInfo(data, outputInfo);
+
+        data->ffXRRFreeOutputInfo(outputInfo);
+
+        if(res)
+            break;
+    }
+
+    if(!res)
+        xrandrHandleMonitorFallback(data, monitorInfo);
+}
+
+static void xrandrHandleScreen(XrandrData* data, Screen* screen)
+{
+    Window window = RootWindowOfScreen(screen);
+
+    XRRScreenConfiguration* screenConfiguration = data->ffXRRGetScreenInfo(data->display, window);
+    if(screenConfiguration != NULL)
+    {
+        data->defaultRefreshRate = (int) data->ffXRRConfigCurrentRate(screenConfiguration);
+        data->ffXRRFreeScreenConfigInfo(screenConfiguration);
+    }
+    else
+        data->defaultRefreshRate = 0;
+
+    int numberOfMonitors;
+    XRRMonitorInfo* monitorInfos = data->ffXRRGetMonitors(data->display, window, True, &numberOfMonitors);
+    if(monitorInfos == NULL)
+    {
+        x11AddScreenAsResult(&data->results, screen, data->defaultRefreshRate);
+        return;
+    }
+
+    data->screenResources = data->ffXRRGetScreenResources(data->display, window);
+
+    uint32_t initialResultsLength = data->results.length;
+
+    for(int i = 0; i < numberOfMonitors; i++)
+    {
+        if(data->screenResources != NULL)
+            xrandrHandleMonitor(data, &monitorInfos[i]);
+        else
+            xrandrHandleMonitorFallback(data, &monitorInfos[i]);
+    }
+
+    if(data->results.length == initialResultsLength)
+        x11AddScreenAsResult(&data->results, screen, data->defaultRefreshRate);
+
+    data->ffXRRFreeScreenResources(data->screenResources);
+    data->ffXRRFreeMonitors(monitorInfos);
 }
 
 static bool printResolutionXrandrBackend(FFinstance* instance)
 {
-    void* xrandr = FF_LIBRARY_LOAD(instance->config.libXrandr, "libXrandr.so");
+    DynamicLibrary xrandr = FF_LIBRARY_LOAD(instance->config.libXrandr, "libXrandr.so");
 
-    XRRMonitorInfo*(*ffXRRGetMonitors)(Display*, Window, Bool, int*) = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetMonitors");
+    Display*(*ffXOpenDisplay)(const char*) = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XOpenDisplay");
+    int(*ffXCloseDisplay)(Display*) = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XCloseDisplay");
 
-    Display* display = xOpenDisplay(xrandr);
-    if(display == NULL)
+    XrandrData data;
+
+    data.ffXRRGetScreenInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetScreenInfo");
+    data.ffXRRConfigCurrentRate = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRConfigCurrentRate");
+    data.ffXRRGetMonitors = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetMonitors");
+    data.ffXRRGetScreenResources = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetScreenResources");
+    data.ffXRRGetOutputInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetOutputInfo");
+    data.ffXRRGetCrtcInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetCrtcInfo");
+    data.ffXRRFreeCrtcInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeCrtcInfo");
+    data.ffXRRFreeOutputInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeOutputInfo");
+    data.ffXRRFreeScreenResources = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeScreenResources");
+    data.ffXRRFreeMonitors = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeMonitors");
+    data.ffXRRFreeScreenConfigInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeScreenConfigInfo");
+
+    data.display = ffXOpenDisplay(NULL);
+    if(data.display == NULL)
     {
         dlclose(xrandr);
         return false;
     }
 
-    int numberOfMonitors;
-    XRRMonitorInfo* monitors = ffXRRGetMonitors(display, DefaultRootWindow(display), False, &numberOfMonitors);
-    if(monitors == NULL)
+    ffListInitA(&data.results, sizeof(ResolutionResult), 4);
+
+    for(int i = 0; i < ScreenCount(data.display); i++)
+        xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i)); 
+
+    if(data.results.length == 0)
     {
-        xCloseDisplay(xrandr, display);
+        ffListDestroy(&data.results);
+        ffXCloseDisplay(data.display);
         dlclose(xrandr);
         return false;
     }
 
-    if(numberOfMonitors < 1)
-    {
-        xCloseDisplay(xrandr, display);
-        dlclose(xrandr);
-        return false;
-    }
+    printResolutionResultList(instance, &data.results);
 
-    int refreshRate = xrandrGetCurrentRate(xrandr, display);
-
-    FFcache cache;
-    ffCacheOpenWrite(instance, FF_RESOLUTION_MODULE_NAME, &cache);
-
-    for(int i = 0; i < numberOfMonitors; i++)
-    {
-        uint8_t moduleIndex = numberOfMonitors == 1 ? 0 : i + 1;
-        printResolution(instance, moduleIndex, &cache, monitors[i].width, monitors[i].height, refreshRate);
-    }
-
-    ffCacheClose(&cache);
-
-    void(*ffXRRFreeMonitors)(XRRMonitorInfo*) = dlsym(xrandr, "XRRFreeMonitors");
-    if(dlerror() != NULL)
-        ffXRRFreeMonitors(monitors);
-
-    xCloseDisplay(xrandr, display);
+    ffListDestroy(&data.results);
+    ffXCloseDisplay(data.display);
     dlclose(xrandr);
-
     return true;
 }
 
@@ -291,26 +414,6 @@ static void waylandOutputScaleListener(void* data, struct wl_output* wl_output, 
     UNUSED(factor);
 }
 
-static int parseRefreshRate(int32_t refreshRate)
-{
-    if(refreshRate <= 0)
-        return 0;
-
-    refreshRate /= 1000; //to Hz
-
-    int remainder = refreshRate % 5;
-    if(remainder >= 3)
-        refreshRate += (5 - remainder);
-    else
-        refreshRate -= remainder;
-
-    //All other typicall refresh rates are dividable by 5
-    if(refreshRate == 145)
-        refreshRate = 144;
-
-    return refreshRate;
-}
-
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
     if(!(flags & WL_OUTPUT_MODE_CURRENT))
@@ -319,7 +422,7 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
     WaylandData* wldata = (WaylandData*) data;
 
     ++wldata->moduleCounter;
-    printResolution(wldata->instance, wldata->numModules == 1 ? 0 : wldata->moduleCounter, &wldata->cache, width, height, parseRefreshRate(refreshRate));
+    printResolution(wldata->instance, wldata->numModules == 1 ? 0 : wldata->moduleCounter, &wldata->cache, width, height, parseRefreshRate(refreshRate / 1000));
 
     if(wldata->ffwl_proxy_destroy != NULL)
         wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
@@ -354,7 +457,7 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
     if(sessionType != NULL && strcasecmp(sessionType, "wayland") != 0)
         return false;
 
-    void* wayland = FF_LIBRARY_LOAD(instance->config.libWayland, "libwayland-client.so");
+    DynamicLibrary wayland = FF_LIBRARY_LOAD(instance->config.libWayland, "libwayland-client.so");
 
     WaylandData data;
     data.instance = instance;
