@@ -114,9 +114,9 @@ static void printResolutionDRMBackend(FFinstance* instance)
         result->width = 0;
         result->height = 0;
         result->refreshRate = 0;
-        fscanf(modeFile, "%ix%i", &result->width, &result->height);
 
-        if(result->width == 0 || result->height == 0)
+        int scanned = fscanf(modeFile, "%ix%i", &result->width, &result->height);
+        if(scanned < 2 || result->width == 0 || result->height == 0)
             --modes.length;
 
         fclose(modeFile);
@@ -349,7 +349,7 @@ static bool printResolutionXrandrBackend(FFinstance* instance)
     ffListInitA(&data.results, sizeof(ResolutionResult), 4);
 
     for(int i = 0; i < ScreenCount(data.display); i++)
-        xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i)); 
+        xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i));
 
     if(data.results.length == 0)
     {
