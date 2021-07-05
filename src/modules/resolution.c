@@ -258,7 +258,7 @@ static void xrandrHandleMonitorFallback(XrandrData* data, XRRMonitorInfo* monito
 
 static void xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
-    bool res = false;
+    bool foundMode = false;
 
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
@@ -266,15 +266,13 @@ static void xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         if(outputInfo == NULL)
             continue;
 
-        res = xrandrHandleOutputInfo(data, outputInfo);
+        if(xrandrHandleOutputInfo(data, outputInfo))
+            foundMode = true;
 
         data->ffXRRFreeOutputInfo(outputInfo);
-
-        if(res)
-            break;
     }
 
-    if(!res)
+    if(!foundMode)
         xrandrHandleMonitorFallback(data, monitorInfo);
 }
 
@@ -523,7 +521,6 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
 void ffPrintResolution(FFinstance* instance)
 {
     if(
-        ffPrintFromCache(instance, FF_RESOLUTION_MODULE_NAME, &instance->config.resolutionKey, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS) ||
         printResolutionWaylandBackend(instance) ||
         printResolutionXrandrBackend(instance) ||
         printResolutionX11Backend(instance)
