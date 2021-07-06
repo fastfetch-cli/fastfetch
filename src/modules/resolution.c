@@ -3,6 +3,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <dirent.h>
+#include <pthread.h>
 #include <X11/extensions/Xrandr.h>
 #include <wayland-client.h>
 
@@ -21,22 +22,6 @@
 
 typedef void* DynamicLibrary;
 
-static void printResolution(FFinstance* instance, uint8_t moduleIndex, FFcache* cache, int width, int height, int refreshRate)
-{
-    FFstrbuf value;
-    ffStrbufInitA(&value, 32);
-    ffStrbufAppendF(&value, "%ix%i", width, height);
-
-    if(refreshRate > 0)
-        ffStrbufAppendF(&value, " @ %iHz", refreshRate);
-
-    ffPrintAndAppendToCache(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.resolutionKey, cache, &value, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS, (FFformatarg[]){
-        {FF_FORMAT_ARG_TYPE_INT, &width},
-        {FF_FORMAT_ARG_TYPE_INT, &height},
-        {FF_FORMAT_ARG_TYPE_INT, &refreshRate}
-    });
-}
-
 typedef struct ResolutionResult
 {
     int width;
@@ -44,18 +29,36 @@ typedef struct ResolutionResult
     int refreshRate;
 } ResolutionResult;
 
-static inline void printResolutionResultList(FFinstance* instance, FFlist* results)
+static bool printResolutionResultList(FFinstance* instance, FFlist* results)
 {
-    FFcache cache;
-    ffCacheOpenWrite(instance, FF_RESOLUTION_MODULE_NAME, &cache);
-
     for(uint32_t i = 0; i < results->length; i++)
     {
         ResolutionResult* result = ffListGet(results, i);
-        printResolution(instance, results->length == 1 ? 0 : i + 1, &cache, result->width, result->height, result->refreshRate);
+        uint8_t moduleIndex = results->length == 1 ? 0 : i + 1;
+
+        if(instance->config.resolutionFormat.length == 0)
+        {
+            ffPrintLogoAndKey(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.resolutionKey);
+            printf("%ix%i", result->width, result->height);
+
+            if(result->refreshRate > 0)
+                printf(" @ %iHz", result->refreshRate);
+
+            putchar('\n');
+        }
+        else
+        {
+            ffPrintFormatString(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.resolutionKey, &instance->config.resolutionFormat, NULL, FF_RESOLUTION_NUM_FORMAT_ARGS, (FFformatarg[]) {
+                {FF_FORMAT_ARG_TYPE_INT, &result->width},
+                {FF_FORMAT_ARG_TYPE_INT, &result->height},
+                {FF_FORMAT_ARG_TYPE_INT, &result->refreshRate}
+            });
+        }
     }
 
-    ffCacheClose(&cache);
+    bool res = results->length > 0;
+    ffListDestroy(results);
+    return res;
 }
 
 static int parseRefreshRate(int32_t refreshRate)
@@ -134,8 +137,6 @@ static void printResolutionDRMBackend(FFinstance* instance)
     }
 
     printResolutionResultList(instance, &modes);
-
-    ffListDestroy(&modes);
 }
 
 static void x11AddScreenAsResult(FFlist* results, Screen* screen, int refreshRate)
@@ -169,21 +170,10 @@ static bool printResolutionX11Backend(FFinstance* instance)
     for(int i = 0; i < ScreenCount(display); i++)
         x11AddScreenAsResult(&results, ScreenOfDisplay(display, i), 0);
 
-    if(results.length == 0)
-    {
-        ffListDestroy(&results);
-        ffXCloseDisplay(display);
-        dlclose(x11);
-        return false;
-    }
-
-    printResolutionResultList(instance, &results);
-
-    ffListDestroy(&results);
     ffXCloseDisplay(display);
     dlclose(x11);
 
-    return true;
+    return printResolutionResultList(instance, &results);
 }
 
 typedef struct XrandrData
@@ -245,18 +235,19 @@ static bool xrandrHandleOutputInfo(XrandrData* data, XRROutputInfo* outputInfo)
     return true;
 }
 
-static void xrandrHandleMonitorFallback(XrandrData* data, XRRMonitorInfo* monitorInfo)
+static bool xrandrHandleMonitorFallback(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
     if(monitorInfo->width == 0 || monitorInfo->height == 0)
-        return;
+        return false;
 
     ResolutionResult* result = ffListAdd(&data->results);
     result->width = monitorInfo->width;
     result->height = monitorInfo->height;
     result->refreshRate = data->defaultRefreshRate;
+    return true;
 }
 
-static void xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
+static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
     bool foundMode = false;
 
@@ -273,7 +264,22 @@ static void xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
     }
 
     if(!foundMode)
-        xrandrHandleMonitorFallback(data, monitorInfo);
+        return xrandrHandleMonitorFallback(data, monitorInfo);
+
+    return true;
+}
+
+static inline bool xrandrLoopMonitors(XrandrData* data, XRRMonitorInfo* monitorInfos, int numberOfMonitors, bool(*monitorFunc)(XrandrData* data, XRRMonitorInfo* monitorInfo))
+{
+    bool foundAMonitor = false;
+
+    for(int i = 0; i < numberOfMonitors; i++)
+    {
+        if(monitorFunc(data, &monitorInfos[i]))
+            foundAMonitor = true;
+    }
+
+    return foundAMonitor;
 }
 
 static void xrandrHandleScreen(XrandrData* data, Screen* screen)
@@ -299,17 +305,14 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 
     data->screenResources = data->ffXRRGetScreenResources(data->display, window);
 
-    uint32_t initialResultsLength = data->results.length;
+    bool foundAMonitor;
 
-    for(int i = 0; i < numberOfMonitors; i++)
-    {
-        if(data->screenResources != NULL)
-            xrandrHandleMonitor(data, &monitorInfos[i]);
-        else
-            xrandrHandleMonitorFallback(data, &monitorInfos[i]);
-    }
+    if(data->screenResources != NULL)
+        foundAMonitor = xrandrLoopMonitors(data, monitorInfos, numberOfMonitors, xrandrHandleMonitor);
+    else
+        foundAMonitor = xrandrLoopMonitors(data, monitorInfos, numberOfMonitors, xrandrHandleMonitorFallback);
 
-    if(data->results.length == initialResultsLength)
+    if(!foundAMonitor)
         x11AddScreenAsResult(&data->results, screen, data->defaultRefreshRate);
 
     data->ffXRRFreeScreenResources(data->screenResources);
@@ -349,34 +352,21 @@ static bool printResolutionXrandrBackend(FFinstance* instance)
     for(int i = 0; i < ScreenCount(data.display); i++)
         xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i));
 
-    if(data.results.length == 0)
-    {
-        ffListDestroy(&data.results);
-        ffXCloseDisplay(data.display);
-        dlclose(xrandr);
-        return false;
-    }
-
-    printResolutionResultList(instance, &data.results);
-
-    ffListDestroy(&data.results);
     ffXCloseDisplay(data.display);
     dlclose(xrandr);
-    return true;
+
+    return printResolutionResultList(instance, &data.results);
 }
 
 typedef struct WaylandData
 {
     FFinstance* instance;
-    void* wayland;
-    FFcache cache;
+    FFlist results;
     struct wl_proxy*(*ffwl_proxy_marshal_constructor_versioned)(struct wl_proxy*, uint32_t, const struct wl_interface*, uint32_t, ...);
     int(*ffwl_proxy_add_listener)(struct wl_proxy*, void (**)(void), void *data);
     void(*ffwl_proxy_destroy)(struct wl_proxy*);
     const struct wl_interface* ffwl_output_interface;
     struct wl_output_listener output_listener;
-    int8_t moduleCounter;
-    int8_t numModules;
 } WaylandData;
 
 static void waylandGlobalRemoveListener(void* data, struct wl_registry* wl_registry, uint32_t name){
@@ -419,34 +409,35 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
 
     WaylandData* wldata = (WaylandData*) data;
 
-    ++wldata->moduleCounter;
-    printResolution(wldata->instance, wldata->numModules == 1 ? 0 : wldata->moduleCounter, &wldata->cache, width, height, parseRefreshRate(refreshRate / 1000));
+    wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
 
-    if(wldata->ffwl_proxy_destroy != NULL)
-        wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
+    if(width == 0 || height == 0)
+        return;
+
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+
+    ResolutionResult* result = ffListAdd(&wldata->results);
+
+    pthread_mutex_unlock(&mutex);
+
+    result->width = (int) width;
+    result->height = (int) height;
+    result->refreshRate = parseRefreshRate(refreshRate / 1000);
 }
 
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)
 {
     if(strcmp(interface, "wl_output") == 0)
     {
-
         WaylandData* wldata = (WaylandData*) data;
 
         struct wl_output* output = (struct wl_output*) wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy *) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
         if(output == NULL)
             return;
 
-        ++wldata->numModules;
         wldata->ffwl_proxy_add_listener((struct wl_proxy*) output, (void(**)(void)) &wldata->output_listener, data);
     }
-}
-
-static inline void waylandDisplayDisconnect(void* wayland, struct wl_display* display)
-{
-    void(*ffwl_display_disconnect)(struct wl_display*) = dlsym(wayland, "wl_display_disconnect");
-    if(dlerror() != NULL)
-        ffwl_display_disconnect(display);
 }
 
 static bool printResolutionWaylandBackend(FFinstance* instance)
@@ -457,25 +448,19 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
 
     DynamicLibrary wayland = FF_LIBRARY_LOAD(instance->config.libWayland, "libwayland-client.so");
 
-    WaylandData data;
-    data.instance = instance;
-    data.wayland = wayland;
-    data.moduleCounter = 0;
-    data.numModules = 0;
-
     struct wl_display*(*ffwl_display_connect)(const char*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_connect");
     int(*ffwl_display_dispatch)(struct wl_display*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_dispatch");
     void(*ffwl_display_roundtrip)(struct wl_display*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_roundtrip");
     struct wl_proxy*(*ffwl_proxy_marshal_constructor)(struct wl_proxy*, uint32_t, const struct wl_interface*, ...) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_marshal_constructor");
+    const struct wl_interface* ffwl_registry_interface = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_registry_interface");
+    void(*ffwl_display_disconnect)(struct wl_display*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_disconnect");
+
+    WaylandData data;
+
     data.ffwl_proxy_marshal_constructor_versioned = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_marshal_constructor_versioned");
     data.ffwl_proxy_add_listener = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_add_listener");
-    const struct wl_interface* ffwl_registry_interface = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_registry_interface");
     data.ffwl_output_interface = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_output_interface");
-
-    data.ffwl_proxy_destroy = dlsym(wayland, "wl_proxy_destroy");
-    //We check for NULL before each call because this is just used for cleanup and not actually needed
-    if(dlerror() != NULL)
-        data.ffwl_proxy_destroy = NULL;
+    data.ffwl_proxy_destroy = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_destroy");
 
     struct wl_display* display = ffwl_display_connect(NULL);
     if(display == NULL)
@@ -487,10 +472,13 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
     struct wl_registry* registry = (struct wl_registry*) ffwl_proxy_marshal_constructor((struct wl_proxy*) display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
     if(registry == NULL)
     {
-        waylandDisplayDisconnect(wayland, display);
+        ffwl_display_disconnect(display);
         dlclose(wayland);
         return false;
     }
+
+    data.instance = instance;
+    ffListInitA(&data.results, sizeof(ResolutionResult), 4);
 
     struct wl_registry_listener regestry_listener;
     regestry_listener.global = waylandGlobalAddListener;
@@ -501,21 +489,15 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
     data.output_listener.done = waylandOutputDoneListener;
     data.output_listener.scale = waylandOutputScaleListener;
 
-    ffCacheOpenWrite(instance, FF_RESOLUTION_MODULE_NAME, &data.cache);
-
     data.ffwl_proxy_add_listener((struct wl_proxy*) registry, (void(**)(void)) &regestry_listener, &data);
     ffwl_display_dispatch(display);
     ffwl_display_roundtrip(display);
 
-    ffCacheClose(&data.cache);
-
-    if(data.ffwl_proxy_destroy != NULL)
-        data.ffwl_proxy_destroy((struct wl_proxy*) registry);
-
-    waylandDisplayDisconnect(wayland, display);
+    data.ffwl_proxy_destroy((struct wl_proxy*) registry);
+    ffwl_display_disconnect(display);
     dlclose(wayland);
 
-    return data.numModules > 0;
+    return printResolutionResultList(instance, &data.results);
 }
 
 void ffPrintResolution(FFinstance* instance)
