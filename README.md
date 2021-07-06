@@ -60,9 +60,9 @@ konsole, gnome-terminal-server, tilix, xfce4-terminal, lxterminal, TTY
 
 fastfetch uses [`cmake`](https://cmake.org/) for building. The simplest steps to build the entire project are:  
 ```bash
-mkdir -p build && \
-cd build && \
-cmake .. && \
+mkdir -p build
+cd build
+cmake ..
 cmake --build .
 ```
   
