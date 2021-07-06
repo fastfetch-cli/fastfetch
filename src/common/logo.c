@@ -78,6 +78,28 @@ static void initLogoArtix(FFinstance* instance)
     instance->config.logo.colors[0] = "\033[36m"; //cyan
 }
 
+static void initLogoCelOS(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1             `-:/++++/:-`            \n"
+        "$1          -/syyyyyyyyyyyyy+-         \n"
+        "$1        :ssssyyyyyyyyyyyyyyyy/       \n"
+        "$1      .osy$2mmmmmmmmmmmmmmmNNNNNmmhy+  \n"
+        "$1     .sssshhhhhhhddddddddddddddds-   \n"
+        "$1    `osssssssyyyyyyyyyyyyyyyyyyhy`   \n"
+        "$1    :ssssssyyyyyyyyyyyyyyyyyyyyhh/   \n"
+        "$2sMMMMMMMMMMMMMMMMMMMMMMMh$1yyyyyyhho   \n"
+        "$1    :sssssssyyyyyyyyyyyyyyyyyyyhh/   \n"
+        "$1    `ssssssssyyyyyyyyyyyyyyyyyyhy.   \n"
+        "$1     -sssssyddddddddddddddddddddy    \n"
+        "$1      -ssss$2hmmmmmmmmmmmmmmmmmmmyssss-\n"
+        "$1       `/ssssyyyyyyyyyyyyyyyy+`      \n"
+        "$1         `:osyyyyyyyyyyyyys/`        \n"
+        "$1            `.:/+ooooo+:-`           ";
+    instance->config.logo.colors[0] = "\033[35m"; //magenta
+    instance->config.logo.colors[1] = "\033[30m"; //black
+}
+
 static void initLogoDebian(FFinstance* instance)
 {
     instance->config.logo.lines =
@@ -300,36 +322,17 @@ static void initLogoVoid(FFinstance* instance)
     instance->config.logo.colors[1] = "\033[30m"; //black
 }
 
-static void initLogoFromFile(FFinstance* instance, const char* path)
+static bool loadLogoSet(FFinstance* instance, const char* logo)
 {
-    FFstrbuf logo;
-    ffStrbufInitA(&logo, 1024);
+    if(instance->config.logo.freeable)
+        free(instance->config.logo.lines);
 
-    if(!ffGetFileContent(path, &logo))
-    {
-        ffStrbufDestroy(&logo);
-        if(instance->config.showErrors)
-            printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo / logo file not found: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", path);
-        initLogoUnknown(instance);
-        return;
-    }
-
-    instance->config.logo.allLinesSameLength = false;
-    instance->config.logo.freeable = true;
-    instance->config.logo.lines = logo.chars;
-}
-
-void ffLoadLogoSet(FFinstance* instance, const char* logo)
-{
+    instance->config.logo.freeable = false;
     instance->config.logo.allLinesSameLength = true;
 
-    if(instance->config.logo.freeable)
-    {
-        free(instance->config.logo.lines);
-        instance->config.logo.freeable = false;
-    }
-
-    if(strcasecmp(logo, "none") == 0)
+    if(logo == NULL || *logo == '\0')
+        return false;
+    else if(strcasecmp(logo, "none") == 0)
     {
         instance->config.logo.lines = "";
         instance->config.logoKeySpacing = 0; //This is wanted in most cases, so just set it. None logo is set in src/common/init.c
@@ -340,6 +343,8 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
         initLogoArch(instance);
     else if(strcasecmp(logo, "artix") == 0)
         initLogoArtix(instance);
+    else if(strcasecmp(logo, "celos") == 0)
+        initLogoCelOS(instance);
     else if(strcasecmp(logo, "debian") == 0)
         initLogoDebian(instance);
     else if(strcasecmp(logo, "fedora") == 0)
@@ -359,48 +364,43 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
     else if(strcasecmp(logo, "void") == 0)
         initLogoVoid(instance);
     else
-        initLogoFromFile(instance, logo);
+        return false;
+
+    return true;
+}
+
+void ffLoadLogoSet(FFinstance* instance, const char* logo)
+{
+    if(loadLogoSet(instance, logo))
+        return;
+
+    FFstrbuf logoChars;
+    ffStrbufInitA(&logoChars, 1024);
+
+    if(!ffGetFileContent(logo, &logoChars))
+    {
+        ffStrbufDestroy(&logoChars);
+        if(instance->config.showErrors)
+            printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo / logo file not found: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", logo);
+        initLogoUnknown(instance);
+        return;
+    }
+
+    instance->config.logo.allLinesSameLength = false;
+    instance->config.logo.freeable = true;
+    instance->config.logo.lines = logoChars.chars;
 }
 
 void ffLoadLogo(FFinstance* instance)
 {
-    FFstrbuf cacheFilePath;
-    ffStrbufInitA(&cacheFilePath, 64);
-    ffGetCacheFilePath(instance, "logo.ffcl", NULL, &cacheFilePath);
-
-    if(!instance->config.recache)
-    {
-        FFstrbuf content;
-        ffStrbufInit(&content);
-        ffAppendFileContent(cacheFilePath.chars, &content);
-
-        if(content.length > 0)
-        {
-            ffLoadLogoSet(instance, content.chars);
-            ffStrbufDestroy(&content);
-            ffStrbufDestroy(&cacheFilePath);
-            return;
-        }
-
-        ffStrbufDestroy(&content);
-    }
-
     const FFOSResult* result = ffDetectOS(instance);
 
-    if(result->id.length > 0)
-    {
-        ffLoadLogoSet(instance, result->id.chars);
-        ffWriteFileContent(cacheFilePath.chars, &result->id);
-    }
-    else if(result->name.length > 0)
-    {
-        ffLoadLogoSet(instance, result->name.chars);
-        ffWriteFileContent(cacheFilePath.chars, &result->name);
-    }
-    else
-        initLogoUnknown(instance);
-
-    ffStrbufDestroy(&cacheFilePath);
+    if(
+        !loadLogoSet(instance, result->name.chars) &&
+        !loadLogoSet(instance, result->id.chars) &&
+        !loadLogoSet(instance, result->systemName.chars) &&
+        !loadLogoSet(instance, result->idLike.chars)
+    ) initLogoUnknown(instance);
 }
 
 static uint32_t strLengthUTF8(const char* str, uint32_t bytesLength)
@@ -541,6 +541,7 @@ void ffListLogos()
         "unknown\n"
         "arch\n"
         "artix\n"
+        "celos\n"
         "debian\n"
         "fedora\n"
         "garuda\n"
@@ -564,6 +565,7 @@ void ffPrintLogos(FFinstance* instance)
     FF_LOGO_PRINT(unknown, initLogoUnknown)
     FF_LOGO_PRINT(arch, initLogoArch)
     FF_LOGO_PRINT(artix, initLogoArtix)
+    FF_LOGO_PRINT(celos, initLogoCelOS)
     FF_LOGO_PRINT(debian, initLogoDebian)
     FF_LOGO_PRINT(fedora, initLogoFedora)
     FF_LOGO_PRINT(garuda, initLogoGaruda)
