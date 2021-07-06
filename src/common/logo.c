@@ -30,7 +30,6 @@ static void initLogoArch(FFinstance* instance)
 {
     instance->config.logo.lines =
         "$1                  -`                 \n"
-        "$1                  -`                 \n"
         "$1                 .o+`                \n"
         "$1                `ooo/                \n"
         "$1               `+oooo:               \n"
