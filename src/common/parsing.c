@@ -371,13 +371,13 @@ bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buf
 
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch)
 {
-    if(major->length == 0 && minor->length == 0 && patch->length == 0)
-        return;
-
     if(major->length > 0)
         ffStrbufAppend(buffer, major);
-    else
+    else if(minor->length > 0 || patch->length > 0)
         ffStrbufAppendC(buffer, '1');
+
+    if(minor->length == 0 && patch->length == 0)
+        return;
 
     ffStrbufAppendC(buffer, '.');
 
@@ -385,7 +385,8 @@ void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* mino
         ffStrbufAppend(buffer, minor);
     else if(patch->length > 0)
         ffStrbufAppendC(buffer, '0');
-    else
+
+    if(patch->length == 0)
         return;
 
     ffStrbufAppendC(buffer, '.');
