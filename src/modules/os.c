@@ -89,54 +89,58 @@ void ffPrintOS(FFinstance* instance)
         return;
     }
 
-    FF_STRBUF_CREATE(os);
+    FFstrbuf os;
+    ffStrbufInit(&os);
 
-    //Name
+    //Create the basic output
+
     if(result->name.length > 0)
+        ffStrbufAppend(&os, &result->name);
+    else if(result->prettyName.length > 0)
         ffStrbufAppend(&os, &result->name);
     else if(result->id.length > 0)
         ffStrbufAppend(&os, &result->id);
-    else if(result->prettyName.length > 0)
-        ffStrbufAppend(&os, &result->prettyName);
-    else
+    else if(result->systemName.length > 0)
         ffStrbufAppend(&os, &result->systemName);
+    else
+        ffStrbufAppendS(&os, "Linux");
 
-    //Version
-    if(result->versionID.length > 0)
+    //Append version if it is missing
+
+    if(result->versionID.length > 0 && ffStrbufFirstIndex(&os, &result->versionID) == os.length)
     {
         ffStrbufAppendC(&os, ' ');
         ffStrbufAppend(&os, &result->versionID);
     }
-    else if(result->version.length > 0)
+    else if(result->versionID.length == 0 && result->version.length > 0 && ffStrbufFirstIndex(&os, &result->version) == os.length)
     {
         ffStrbufAppendC(&os, ' ');
         ffStrbufAppend(&os, &result->version);
     }
 
-    //Codename
-    if(result->codename.length > 0)
-    {
-        ffStrbufAppendC(&os, ' ');
-        ffStrbufAppend(&os, &result->codename);
-    }
+    //Append variant if it is missing
 
-    //Variant
-    if(result->variant.length > 0)
+    if(result->variant.length > 0 && ffStrbufFirstIndex(&os, &result->variant) == os.length)
     {
-        ffStrbufAppendS(&os, " [");
+        ffStrbufAppendS(&os, " (");
         ffStrbufAppend(&os, &result->variant);
-        ffStrbufAppendC(&os, ']');
+        ffStrbufAppendC(&os, ')');
     }
-    else if(result->variantID.length > 0)
+    else if(result->variant.length == 0 && result->variantID.length > 0 && ffStrbufFirstIndex(&os, &result->variantID) == os.length)
     {
-        ffStrbufAppendS(&os, " [");
+        ffStrbufAppendS(&os, " (");
         ffStrbufAppend(&os, &result->variantID);
-        ffStrbufAppendC(&os, ']');
+        ffStrbufAppendC(&os, ')');
     }
 
-    ffStrbufAppendS(&os, " (");
-    ffStrbufAppend(&os, &result->architecture);
-    ffStrbufAppendC(&os, ')');
+    //Append architecture if it is missing
+
+    if(ffStrbufFirstIndex(&os, &result->architecture) == os.length)
+    {
+        ffStrbufAppendS(&os, " [");
+        ffStrbufAppend(&os, &result->architecture);
+        ffStrbufAppendC(&os, ']');
+    }
 
     ffPrintAndSaveToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},

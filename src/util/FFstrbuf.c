@@ -4,6 +4,16 @@
 #include <ctype.h>
 #include <string.h>
 
+static bool strbufCharsLeft(uint32_t i, const void* strbuf)
+{
+    return i < ((const FFstrbuf*) strbuf)->length;
+}
+
+static bool strbufCharsLeftS(uint32_t i, const void* str)
+{
+    return ((const char*) str)[i] != '\0';
+}
+
 void ffStrbufInit(FFstrbuf* strbuf)
 {
     ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
@@ -391,23 +401,18 @@ uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
     return strbuf->length;
 }
 
-uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
-{
-    return ffStrbufNextIndexC(strbuf, 0, c);
-}
-
-uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str)
+static uint32_t strbufNextIndex(const FFstrbuf* strbuf, uint32_t start, const char* chars, const void* container, bool(*charsLeft)(uint32_t, const void*))
 {
     for(uint32_t i = start; i < strbuf->length; i++)
     {
         bool found = true;
 
-        for(uint32_t k = 0; str[k] != '\0'; k++)
+        for(uint32_t k = 0; charsLeft(k, container); k++)
         {
             if(i + k == strbuf->length)
                 return strbuf->length;
 
-            if(strbuf->chars[i + k] != str[k])
+            if(strbuf->chars[i + k] != chars[k])
             {
                 found = false;
                 break;
@@ -419,6 +424,26 @@ uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* 
     }
 
     return strbuf->length;
+}
+
+uint32_t ffStrbufNextIndex(const FFstrbuf* strbuf, uint32_t start, const FFstrbuf* searched)
+{
+    return strbufNextIndex(strbuf, start, searched->chars, searched, strbufCharsLeft);
+}
+
+uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str)
+{
+    return strbufNextIndex(strbuf, start, str, str, strbufCharsLeftS);
+}
+
+uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
+{
+    return ffStrbufNextIndexC(strbuf, 0, c);
+}
+
+uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched)
+{
+    return ffStrbufNextIndex(strbuf, 0, searched);
 }
 
 uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str)
