@@ -66,6 +66,9 @@ static void getSessionDesktop(FFWMDEResult* result)
 
 static void applyPrettyNameIfWM(FFWMDEResult* result, const char* processName, ProtocolHint* protocolHint)
 {
+    if(processName == NULL || *processName == '\0')
+        return;
+
     if(strcasecmp(processName, "kwin_wayland") == 0)
     {
         ffStrbufSetS(&result->wmPrettyName, "KWin");
