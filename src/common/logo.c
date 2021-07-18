@@ -159,7 +159,7 @@ static void initLogoGaruda(FFinstance* instance)
         "$1     ,tSXX°          .bbbbbbbbbbbbbbbbbbbB8x@;\n"
         "$1   .SXxx            bBBBBBBBBBBBBBBBBBBBbSBX8;\n"
         "$1 ,888S                                     pd!\n"
-        "$18X88/                                       qp\n"
+        "$18X88/                                       q \n"
         "$18X88/                                         \n"
         "$1GBB.                                          \n"
         "$1 x%88        d888@8@X@X@X88X@@XX@@X@8@X.      \n"
