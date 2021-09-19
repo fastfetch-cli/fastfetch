@@ -20,7 +20,12 @@ void ffPrintTerminal(FFinstance* instance)
     if(instance->config.terminalFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey);
-        puts(result->terminalExeName);
+
+        uint32_t terminalExeNameLength = result->terminalExe.chars + result->terminalExe.length - result->terminalExeName;
+        if(strncmp(result->terminalExeName, result->terminalProcessName.chars, terminalExeNameLength) == 0) // if exeName starts with processName, print it. Otherwise print processName
+            puts(result->terminalExeName);
+        else
+            ffStrbufPutTo(&result->terminalProcessName, stdout);
     }
     else
     {
