@@ -126,23 +126,25 @@ static void initLogoDebian(FFinstance* instance)
 static void initLogoFedora(FFinstance* instance)
 {
     instance->config.logo.lines =
-        "$1          /:-------------:\\       \n"
-        "$1       :-------------------::     \n"
-        "$1     :-----------$2/shhOHbmp$1---:\\   \n"
-        "$1   /-----------$2omMMMNNNMMD$1  ---:  \n"
-        "$1  :-----------$2sMMMMNMNMP$1.    ---: \n"
-        "$1 :-----------$2:MMMdP$1-------    ---\\\n"
-        "$1,------------$2:MMMd$1--------    ---:\n"
-        "$1:------------$2:MMMd$1-------    .---:\n"
-        "$1:----    $2oNMMMMMMMMMNho$1     .----:\n"
-        "$1:--     .$2+shhhMMMmhhy++$1   .------/\n"
-        "$1:-    -------$2:MMMd$1--------------: \n"
-        "$1:-   --------$2/MMMd$1-------------;  \n"
-        "$1:-    ------$2/hMMMy$1------------:   \n"
-        "$1:--$2 :dMNdhhdNMMNo$1------------;    \n"
-        "$1:---$2:sdNMMMMNds:$1------------:     \n"
-        "$1:------$2:://:$1-------------::       \n"
-        "$1:---------------------://         ";
+        "$1             .',;::::;,'.                     \n"
+        "$1         .';:cccccccccccc:;,.                 \n"
+        "$1      .;cccccccccccccccccccccc;.              \n"
+        "$1    .:cccccccccccccccccccccccccc:.            \n"
+        "$1  .;ccccccccccccc;$2        $1;ccccccc;.      \n"
+        "$1 .:ccccccccccccc;$2          $1;ccccccc:.     \n"
+        "$1.:ccccccccccccc;$2    $1;cc;$2    $1;ccccccc:.\n"
+        "$1,cccccccccccccc;$2    $1;cc;$2    $1;cccccccc,\n"
+        "$1:cccccccccccccc;$2    $1;cccccccccccccccc:    \n"
+        "$1:ccccccc;$2      $1;$2        $1;cccccccccccc:\n"
+        "$1cccccc;$2        $1;$2        $1;cccccccccccc;\n"
+        "$1ccccc;$2    $1;cccc;$2    $1;cccccccccccccccc'\n"
+        "$1ccccc;$2   $1;ccccc;$2    $1;ccccccccccccccc; \n"
+        "$1ccccc;$2     $1ccc$2     $1;ccccccccccccccc;  \n"
+        "$1cccccc;$2           $1;cccccccccccccc:,       \n"
+        "$1cccccccc;$2       $1;cccccccccccccc:,.        \n"
+        "$1ccccccccccccccccccccccccccccc:'.              \n"
+        "$1:ccccccccccccccccccccccc:;,..                 \n"
+        "$1 ':cccccccccccccccc::;,.                      ";
     instance->config.logo.colors[0] = "\033[34m"; //blue
     instance->config.logo.colors[1] = "\033[37m"; //white
 }
