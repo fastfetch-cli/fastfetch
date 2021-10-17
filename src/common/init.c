@@ -165,6 +165,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.batteryKey, 1);
     ffStrbufInitA(&instance->config.localeFormat, 1);
     ffStrbufInitA(&instance->config.localeKey, 1);
+    ffStrbufInitA(&instance->config.localIpKey, 1);
+    ffStrbufInitA(&instance->config.localIpFormat, 1);
 
     ffStrbufInitA(&instance->config.libPCI, 1);
     ffStrbufInitA(&instance->config.libX11, 1);
@@ -178,6 +180,10 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.diskFolders, 1);
 
     ffStrbufInitA(&instance->config.batteryDir, 1);
+
+    instance->config.localIpShowIpV4 = true;
+    instance->config.localIpShowIpV6 = false;
+    instance->config.localIpShowLoop = false;
 }
 
 void ffInitInstance(FFinstance* instance)

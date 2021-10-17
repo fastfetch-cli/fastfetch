@@ -116,6 +116,7 @@ set(SRCS
     src/modules/disk.c
     src/modules/battery.c
     src/modules/locale.c
+    src/modules/localip.c
     src/modules/colors.c
 )
 

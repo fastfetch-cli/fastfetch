@@ -25,6 +25,7 @@ __fastfetch_complete_help()
         "disk-format"
         "battery-format"
         "locale-format"
+        "local-ip-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -121,6 +122,9 @@ __fastfetch_completion()
         "--allow-slow-operations"
         "--disable-linewrap"
         "--hide-cursor"
+        "--localip-show-ipv4"
+        "--localip-show-ipv6"
+        "--localip-show-loop"
     )
 
     local FF_OPTIONS_STRING=(
@@ -179,6 +183,8 @@ __fastfetch_completion()
         "--locale-key"
         "--disk-folders"
         "--disk-key"
+        "--local-ip-format"
+        "--local-ip-key"
     )
 
     local FF_OPTIONS_PATH=(
