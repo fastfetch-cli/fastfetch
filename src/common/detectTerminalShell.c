@@ -72,6 +72,7 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
         strcasecmp(name, "su")     == 0 ||
         strcasecmp(name, "doas")   == 0 ||
         strcasecmp(name, "strace") == 0 ||
+        strcasecmp(name, "sshd")   == 0 ||
         strcasecmp(name, "gdb")    == 0
     ) {
         getTerminalShell(result, ppid);
@@ -111,15 +112,25 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
     ) return;
 
-    char* term = getenv("TERM");
+    char* term = NULL;
+
+    //SSH
+    if(getenv("SSH_CONNECTION") != NULL)
+        term = getenv("SSH_TTY");
+
+    //Windows Terminal
+    if((term == NULL || *term == '\0') && getenv("WT_SESSION") != NULL)
+        term = "Windows Terminal";
+
+    //Normal Terminal
+    if(term == NULL || *term == '\0')
+        term = getenv("TERM");
 
     //TTY
     if(term == NULL || *term == '\0' || strcasecmp(term, "linux") == 0)
         term = ttyname(STDIN_FILENO);
 
-    if(result->terminalProcessName.length == 0)
-        ffStrbufAppendS(&result->terminalProcessName, term);
-
+    ffStrbufSetS(&result->terminalProcessName, term);
     ffStrbufSetS(&result->terminalExe, term);
     setExeName(&result->terminalExe, &result->terminalExeName);
 }
