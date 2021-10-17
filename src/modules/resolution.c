@@ -442,6 +442,9 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
 static bool printResolutionWaylandBackend(FFinstance* instance)
 {
+    if(getenv("XDG_RUNTIME_DIR") == NULL)
+        return false;
+
     const char* sessionType = getenv("XDG_SESSION_TYPE");
     if(sessionType != NULL && strcasecmp(sessionType, "wayland") != 0)
         return false;
