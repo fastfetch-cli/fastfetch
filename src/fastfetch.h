@@ -91,6 +91,8 @@ typedef struct FFconfig
     FFstrbuf batteryKey;
     FFstrbuf localeFormat;
     FFstrbuf localeKey;
+    FFstrbuf localIpKey;
+    FFstrbuf localIpFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libX11;
@@ -104,6 +106,10 @@ typedef struct FFconfig
     FFstrbuf diskFolders;
 
     FFstrbuf batteryDir;
+
+    bool localIpShowLoop;
+    bool localIpShowIpV4;
+    bool localIpShowIpV6;
 
 } FFconfig;
 
@@ -380,6 +386,7 @@ void ffPrintMemory(FFinstance* instance);
 void ffPrintDisk(FFinstance* instance);
 void ffPrintBattery(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
+void ffPrintLocalIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 
 #endif

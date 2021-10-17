@@ -89,6 +89,7 @@ static inline void printHelp()
         "   --disk-format <format>\n"
         "   --battery-format <format>\n"
         "   --locale-format <format>\n"
+        "   --local-ip-format <format>\n"
         "\n"
         "Key options: Provide a custom key for an output\n"
         "   --os-key <key>\n"
@@ -113,6 +114,7 @@ static inline void printHelp()
         "   --disk-key <key>: takes the mount path as format argument\n"
         "   --battery-key <key>: takes the battery index as format argument\n"
         "   --locale-key <key>\n"
+        "   --local-ip-key <key>: takes the name of this network interface as format argument\n"
         "\n"
         "Library optins: Set the path of a library to load\n"
         "   --lib-PCI <path>\n"
@@ -125,8 +127,11 @@ static inline void printHelp()
         "   --lib-SQLite <path>\n"
         "\n"
         "Module specific options:\n"
-        "   --disk-folders <folders>: A colon separated list of folder paths for the disk output. Default is \"/:/home\"\n"
-        "   --battery-dir <folder>:   The directory where the battery folders are. Standard: /sys/class/power_supply/\n"
+        "   --disk-folders <folders>:     A colon separated list of folder paths for the disk output. Default is \"/:/home\"\n"
+        "   --battery-dir <folder>:       The directory where the battery folders are. Standard: /sys/class/power_supply/\n"
+        "   --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true\n"
+        "   --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false\n"
+        "   --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false\n"
         "\n"
         "Parsing is not case sensitive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
         "If a value starts with a ?, it is optional. \"true\" will be used if not set.\n"
@@ -492,6 +497,7 @@ static inline void printAvailableModules()
         "Icons\n"
         "Kernel\n"
         "Locale\n"
+        "LocalIp\n"
         "Memory\n"
         "OS\n"
         "Packages\n"
@@ -914,6 +920,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.localeFormat);
     else if(strcasecmp(key, "--locale-key") == 0)
         optionParseString(key, value, &instance->config.localeKey);
+    else if(strcasecmp(key, "--local-ip-key") == 0)
+        optionParseString(key, value, &instance->config.localIpKey);
+    else if(strcasecmp(key, "--local-ip-format") == 0)
+        optionParseString(key, value, &instance->config.localIpFormat);
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-X11") == 0)
@@ -934,6 +944,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
+    else if(strcasecmp(key, "--localip-show-ipv4") == 0)
+        instance->config.localIpShowIpV4 = optionParseBoolean(value);
+    else if(strcasecmp(key, "--localip-show-ipv6") == 0)
+        instance->config.localIpShowIpV6 = optionParseBoolean(value);
+    else if(strcasecmp(key, "--localip-show-loop") == 0)
+        instance->config.localIpShowLoop = optionParseBoolean(value);
     else
     {
         fprintf(stderr, "Error: unknown option: %s\n", key);
@@ -1063,6 +1079,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintBattery(instance);
     else if(strcasecmp(line, "locale") == 0)
         ffPrintLocale(instance);
+    else if(strcasecmp(line, "localip") == 0)
+        ffPrintLocalIp(instance);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else
