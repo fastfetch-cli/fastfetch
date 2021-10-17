@@ -297,11 +297,8 @@ static void getSessionTypeFromEnv(FFWMDEResult* result)
     env = getenv("TERM");
     if(env != NULL && *env != '\0')
     {
-        if(strcasecmp(env, "linux") == 0)
-        {
-            ffStrbufSetS(&result->wmProtocolName, "TTY");
-            return;
-        }
+        ffStrbufSetS(&result->wmProtocolName, "TTY");
+        return;
     }
 }
 
