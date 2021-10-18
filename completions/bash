@@ -145,6 +145,8 @@ __fastfetch_completion()
         "--kernel-key"
         "--uptime-format"
         "--uptime-key"
+        "--processes-format"
+        "--processes-key"
         "--packages-format"
         "--packages-key"
         "--shell-format"

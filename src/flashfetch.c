@@ -26,6 +26,7 @@ int main(int argc, char** argv)
     ffPrintHost(&instance);
     ffPrintKernel(&instance);
     ffPrintUptime(&instance);
+    ffPrintProcesses(&instance);
     ffPrintPackages(&instance);
     ffPrintShell(&instance);
     ffPrintResolution(&instance);

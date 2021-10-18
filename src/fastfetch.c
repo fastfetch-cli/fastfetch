@@ -71,6 +71,7 @@ static inline void printHelp()
         "   --host-format <format>\n"
         "   --kernel-format <format>\n"
         "   --uptime-format <format>\n"
+        "   --processes-format <format>\n"
         "   --packages-format <format>\n"
         "   --shell-format <format>\n"
         "   --resolution-format <format>\n"
@@ -96,6 +97,7 @@ static inline void printHelp()
         "   --host-key <key>\n"
         "   --kernel-key <key>\n"
         "   --uptime-key <key>\n"
+        "   --processes-key <key>\n"
         "   --packages-key <key>\n"
         "   --shell-key <key>\n"
         "   --resolution-key <key>: takes the resolution index as argument\n"
@@ -284,6 +286,12 @@ static inline void printCommandHelp(const char* command)
             "Hours",
             "Minutes",
             "Seconds"
+        );
+    }
+    else if(strcasecmp(command, "processes-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("processes", "{}", 1,
+            "Count"
         );
     }
     else if(strcasecmp(command, "packages-format") == 0)
@@ -501,6 +509,7 @@ static inline void printAvailableModules()
         "Memory\n"
         "OS\n"
         "Packages\n"
+        "Processes\n"
         "Resolution\n"
         "Separator\n"
         "Shell\n"
@@ -848,6 +857,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.uptimeFormat);
     else if(strcasecmp(key, "--uptime-key") == 0)
         optionParseString(key, value, &instance->config.uptimeKey);
+    else if(strcasecmp(key, "--processes-format") == 0)
+        optionParseString(key, value, &instance->config.processesFormat);
+    else if(strcasecmp(key, "--processes-key") == 0)
+        optionParseString(key, value, &instance->config.processesKey);
     else if(strcasecmp(key, "--packages-format") == 0)
         optionParseString(key, value, &instance->config.packagesFormat);
     else if(strcasecmp(key, "--packages-key") == 0)
@@ -1043,6 +1056,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintKernel(instance);
     else if(strcasecmp(line, "uptime") == 0)
         ffPrintUptime(instance);
+    else if(strcasecmp(line, "processes") == 0)
+        ffPrintProcesses(instance);
     else if(strcasecmp(line, "packages") == 0)
         ffPrintPackages(instance);
     else if(strcasecmp(line, "shell") == 0)

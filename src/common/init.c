@@ -129,6 +129,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.kernelKey, 1);
     ffStrbufInitA(&instance->config.uptimeFormat, 1);
     ffStrbufInitA(&instance->config.uptimeKey, 1);
+    ffStrbufInitA(&instance->config.processesFormat, 1);
+    ffStrbufInitA(&instance->config.processesKey, 1);
     ffStrbufInitA(&instance->config.packagesFormat, 1);
     ffStrbufInitA(&instance->config.packagesKey, 1);
     ffStrbufInitA(&instance->config.shellFormat, 1);
