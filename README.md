@@ -63,7 +63,7 @@ fastfetch uses [`cmake`](https://cmake.org/) for building. The simplest steps to
 mkdir -p build
 cd build
 cmake ..
-cmake --build .
+cmake --build . -j$(nproc)
 ```
   
 This will produce `build/fastfetch` and `build/flashfetch`, both standalone executables.  
