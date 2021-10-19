@@ -98,6 +98,7 @@ set(SRCS
     src/modules/host.c
     src/modules/kernel.c
     src/modules/uptime.c
+    src/modules/processes.c
     src/modules/packages.c
     src/modules/shell.c
     src/modules/resolution.c

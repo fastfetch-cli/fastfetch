@@ -55,6 +55,8 @@ typedef struct FFconfig
     FFstrbuf kernelKey;
     FFstrbuf uptimeFormat;
     FFstrbuf uptimeKey;
+    FFstrbuf processesFormat;
+    FFstrbuf processesKey;
     FFstrbuf packagesFormat;
     FFstrbuf packagesKey;
     FFstrbuf shellFormat;
@@ -202,6 +204,7 @@ typedef enum FFformatargtype
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
     FF_FORMAT_ARG_TYPE_UINT,
+    FF_FORMAT_ARG_TYPE_UINT16,
     FF_FORMAT_ARG_TYPE_UINT8,
     FF_FORMAT_ARG_TYPE_INT,
     FF_FORMAT_ARG_TYPE_STRING,
@@ -368,6 +371,7 @@ void ffPrintOS(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
 void ffPrintKernel(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
+void ffPrintProcesses(FFinstance* instance);
 void ffPrintPackages(FFinstance* instance);
 void ffPrintShell(FFinstance* instance);
 void ffPrintResolution(FFinstance* instance);

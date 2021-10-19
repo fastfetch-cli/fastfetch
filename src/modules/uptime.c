@@ -6,7 +6,7 @@
 void ffPrintUptime(FFinstance* instance)
 {
     uint32_t days    =  instance->state.sysinfo.uptime / 86400;
-	uint32_t hours   = (instance->state.sysinfo.uptime - (days * 86400)) / 3600;
+    uint32_t hours   = (instance->state.sysinfo.uptime - (days * 86400)) / 3600;
     uint32_t minutes = (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
     uint32_t seconds =  instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
 
