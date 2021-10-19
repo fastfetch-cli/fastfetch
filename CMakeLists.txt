@@ -43,31 +43,55 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-find_package (PkgConfig)
+find_package(PkgConfig REQUIRED)
 
-if(${PkgConfig_FOUND})
-    pkg_check_modules (GIO2 gio-2.0)
-    pkg_check_modules (DCONF dconf)
-endif(${PkgConfig_FOUND})
+pkg_check_modules (GIO2 gio-2.0)
+if(GIO2_FOUND)
+    add_compile_definitions(FF_HAS_GIO2=1)
+endif()
 
-if(NOT DEFINED GIO2_INCLUDE_DIRS)
-    set(GIO2_INCLUDE_DIRS
-        /usr/include/glib-2.0/
-        /usr/lib/glib-2.0/include/
-    )
-endif(NOT DEFINED GIO2_INCLUDE_DIRS)
+pkg_check_modules (DCONF dconf)
+if(DCONF_FOUND)
+    add_compile_definitions(FF_HAS_DCONF=1)
+endif()
 
-if(NOT DEFINED DCONF_INCLUDE_DIRS)
-    set(DCONF_INCLUDE_DIRS
-        /usr/include/dconf/
-    )
-endif(NOT DEFINED DCONF_INCLUDE_DIRS)
+pkg_check_modules (XFCONF xfconf)
+if(XFCONF_FOUND)
+    add_compile_definitions(FF_HAS_XFCONF=1)
+endif()
+
+pkg_check_modules (XRANDR xrandr)
+if(XRANDR_FOUND)
+    add_compile_definitions(FF_HAS_XRANDR=1)
+endif()
+
+pkg_check_modules (X11 x11)
+if(X11_FOUND)
+    add_compile_definitions(FF_HAS_X11=1)
+endif()
+
+pkg_check_modules (WAYLAND wayland-client)
+if(WAYLAND_FOUND)
+    add_compile_definitions(FF_HAS_WAYLAND=1)
+endif()
+
+pkg_check_modules (SQLITE3 sqlite3)
+if(SQLITE3_FOUND)
+    add_compile_definitions(FF_HAS_SQLITE3=1)
+endif()
+
+pkg_check_modules (LIBPCI REQUIRED libpci)
 
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
     ${GIO2_INCLUDE_DIRS}
     ${DCONF_INCLUDE_DIRS}
+    ${XRANDR_INCLUDE_DIRS}
+    ${X11_INCLUDE_DIRS}
+    ${WAYLAND_INCLUDE_DIRS}
+    ${SQLITE3_INCLUDE_DIRS}
+    ${LIBPCI_INCLUDE_DIRS}
 )
 
 link_libraries(

@@ -2,8 +2,12 @@
 
 #include <dlfcn.h>
 #include <pthread.h>
-#include <dconf.h> // Also included gio/gio.h
-#include <sqlite3.h>
+#if FF_HAS_DCONF
+#   include <dconf.h> // Also included gio/gio.h
+#endif
+#if FF_HAS_SQLITE3
+#   include <sqlite3.h>
+#endif
 
 typedef void* DynamicLibrary;
 
@@ -25,6 +29,7 @@ typedef void* DynamicLibrary;
     if(dlerror() != NULL) \
         FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue)
 
+#if FF_HAS_DCONF
 typedef struct GVariantGetters
 {
     const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
@@ -261,9 +266,23 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
     pthread_mutex_unlock(&mutex);
     return getXFConfValue(&data, channelName, propertyName, type);
 }
-
+#else
+FFvariant ffSettingsGet(FFinstance*, const char*, const char*, const char*, const char*, FFvarianttype) {
+    return FF_VARIANT_NULL;
+}
+FFvariant ffSettingsGetDConf(FFinstance*, const char*, FFvarianttype) {
+    return FF_VARIANT_NULL;
+}
+FFvariant ffSettingsGetXFConf(FFinstance*, const char*, const char*, FFvarianttype) {
+    return FF_VARIANT_NULL;
+}
+FFvariant ffSettingsGetGSettings(FFinstance*, const char*, const char*, const char*, FFvarianttype) {
+    return FF_VARIANT_NULL;
+}
+#endif // FF_HAS_DCONF
 #undef FF_VARIANT_NULL
 
+#if FF_HAS_SQLITE3
 typedef struct SQLiteData
 {
     int(*ffsqlite3_open_v2)(const char* filename, sqlite3** ppDb, int flags, const char* zVfs);
@@ -355,3 +374,8 @@ uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileNa
     pthread_mutex_unlock(&mutex);
     return getSQLiteColumnCount(&data, fileName, tableName);
 }
+#else
+uint32_t ffSettingsGetSQLiteColumnCount(FFinstance*, const char*, const char*) {
+    return 0;
+}
+#endif // FF_HAS_SQLITE3

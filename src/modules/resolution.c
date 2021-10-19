@@ -4,8 +4,16 @@
 #include <dlfcn.h>
 #include <dirent.h>
 #include <pthread.h>
-#include <X11/extensions/Xrandr.h>
-#include <wayland-client.h>
+
+#if FF_HAS_X11
+#   include <X11/Xlib.h>
+#endif
+#if FF_HAS_XRANDR
+#   include <X11/extensions/Xrandr.h>
+#endif
+#if FF_HAS_WAYLAND
+#   include <wayland-client.h>
+#endif
 
 #define FF_RESOLUTION_MODULE_NAME "Resolution"
 #define FF_RESOLUTION_NUM_FORMAT_ARGS 3
@@ -61,6 +69,7 @@ static bool printResolutionResultList(FFinstance* instance, FFlist* results)
     return res;
 }
 
+#if FF_HAS_XRANDR || FF_HAS_WAYLAND
 static int parseRefreshRate(int32_t refreshRate)
 {
     if(refreshRate <= 0)
@@ -78,6 +87,7 @@ static int parseRefreshRate(int32_t refreshRate)
 
     return refreshRate;
 }
+#endif // FF_HAS_XRANDR || FF_HAS_WAYLAND
 
 static void printResolutionDRMBackend(FFinstance* instance)
 {
@@ -139,6 +149,7 @@ static void printResolutionDRMBackend(FFinstance* instance)
     printResolutionResultList(instance, &modes);
 }
 
+#if FF_HAS_X11
 static void x11AddScreenAsResult(FFlist* results, Screen* screen, int refreshRate)
 {
     if(WidthOfScreen(screen) == 0 || HeightOfScreen(screen) == 0)
@@ -175,7 +186,9 @@ static bool printResolutionX11Backend(FFinstance* instance)
 
     return printResolutionResultList(instance, &results);
 }
+#endif // FF_HAS_XLIB
 
+#if FF_HAS_XRANDR
 typedef struct XrandrData
 {
     XRRScreenConfiguration*(*ffXRRGetScreenInfo)(Display* display, Window window);
@@ -357,7 +370,9 @@ static bool printResolutionXrandrBackend(FFinstance* instance)
 
     return printResolutionResultList(instance, &data.results);
 }
+#endif // FF_HAS_XRANDR
 
+#if FF_HAS_WAYLAND
 typedef struct WaylandData
 {
     FFinstance* instance;
@@ -502,13 +517,21 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
 
     return printResolutionResultList(instance, &data.results);
 }
+#endif // FF_HAS_WAYLAND
 
 void ffPrintResolution(FFinstance* instance)
 {
     if(
+#if FF_HAS_WAYLAND
         printResolutionWaylandBackend(instance) ||
+#endif
+#if FF_HAS_XRANDR
         printResolutionXrandrBackend(instance) ||
-        printResolutionX11Backend(instance)
+#endif
+#if FF_HAS_X11
+        printResolutionX11Backend(instance) ||
+#endif
+        false
     ) return;
 
     printResolutionDRMBackend(instance);
