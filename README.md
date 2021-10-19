@@ -69,7 +69,9 @@ cmake --build . -j$(nproc)
 This will produce `build/fastfetch` and `build/flashfetch`, both standalone executables.  
 Command line completions for bash can be found in [`completions/bash`](completions/bash).  
 
-Note that the headers of the libraries listed in [Dependencies](#Dependencies) are needed to build the project.
+[pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) is also required for building. It is used to find the header files for the libraries listed in [Dependencies](#Dependencies). If pkg-config fails to find a package, a warning will be printed and fastfetch will be build without support for the features depending on it.  
+
+Note that building with a feature enabled, doesn't mean the library must be present to run fastfetch, as they are still loaded dynamically during runtime.
 
 ## Packaging
 

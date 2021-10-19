@@ -1,11 +1,21 @@
 #include "fastfetch.h"
 
 #include <string.h>
-#include <dlfcn.h>
-#include <pci/pci.h>
 
 #define FF_GPU_MODULE_NAME "GPU"
 #define FF_GPU_NUM_FORMAT_ARGS 4
+
+#ifndef FF_HAVE_LIBPCI
+
+void ffPrintGPU(FFinstance* instance)
+{
+    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "Fastfetch was compiled without libpci support");
+}
+
+#else
+
+#include <dlfcn.h>
+#include <pci/pci.h>
 
 static void printGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
 {
@@ -144,3 +154,5 @@ void ffPrintGPU(FFinstance* instance)
     ffpci_cleanup(pacc);
     dlclose(pci);
 }
+
+#endif

@@ -2,12 +2,6 @@
 
 #include <dlfcn.h>
 #include <pthread.h>
-#if FF_HAS_DCONF
-#   include <dconf.h> // Also included gio/gio.h
-#endif
-#if FF_HAS_SQLITE3
-#   include <sqlite3.h>
-#endif
 
 typedef void* DynamicLibrary;
 
@@ -29,7 +23,9 @@ typedef void* DynamicLibrary;
     if(dlerror() != NULL) \
         FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue)
 
-#if FF_HAS_DCONF
+#ifdef FF_HAVE_GIO
+#include <gio/gio.h>
+
 typedef struct GVariantGetters
 {
     const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
@@ -54,61 +50,6 @@ static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVarian
         return (FFvariant) {.intValue = variantGetters->ffg_variant_get_int32(variant)};
     else
         return FF_VARIANT_NULL;
-}
-
-typedef struct DConfData
-{
-    GVariant*(*ffdconf_client_read_full)(DConfClient*, const gchar*, DConfReadFlags, const GQueue*);
-    GVariantGetters variantGetters;
-    DConfClient* client;
-} DConfData;
-
-static FFvariant getDConfValue(DConfData* data, const char* key, FFvarianttype type)
-{
-    if(data->client == NULL)
-        return FF_VARIANT_NULL;
-
-    GVariant* variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_FLAGS_NONE, NULL);
-    if(variant != NULL)
-        return getGVariantValue(variant, type, &data->variantGetters);
-
-    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_USER_VALUE, NULL);
-    if(variant != NULL)
-        return getGVariantValue(variant, type, &data->variantGetters);
-
-    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_DEFAULT_VALUE, NULL);
-    return getGVariantValue(variant, type, &data->variantGetters);
-}
-
-FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-
-    static DConfData data;
-
-    pthread_mutex_lock(&mutex);
-
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return getDConfValue(&data, key, type);
-    }
-    init = true;
-
-    data.client = NULL; //error indicator
-
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libDConf, "libdconf.so", mutex, FF_VARIANT_NULL);
-
-    data.ffdconf_client_read_full = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_read_full", mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_GVARIANT_GETTERS_INIT(library, data.variantGetters, mutex);
-
-    DConfClient*(*ffdconf_client_new)(void) = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_new", mutex, FF_VARIANT_NULL);
-    if((data.client = ffdconf_client_new()) == NULL)
-        FF_LIBRARY_ERROR_RETURN(library, mutex, FF_VARIANT_NULL);
-
-    pthread_mutex_unlock(&mutex);
-    return getDConfValue(&data, key, type);
 }
 
 typedef struct GSettingsData
@@ -187,6 +128,78 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
     return getGSettingsValue(&data, schemaName, path, key, type);
 }
 
+#else //FF_HAVE_GIO
+FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+{
+    return FF_VARIANT_NULL;
+}
+#endif //FF_HAVE_GIO
+
+#ifdef FF_HAVE_DCONF
+#include <dconf.h>
+
+typedef struct DConfData
+{
+    GVariant*(*ffdconf_client_read_full)(DConfClient*, const gchar*, DConfReadFlags, const GQueue*);
+    GVariantGetters variantGetters;
+    DConfClient* client;
+} DConfData;
+
+static FFvariant getDConfValue(DConfData* data, const char* key, FFvarianttype type)
+{
+    if(data->client == NULL)
+        return FF_VARIANT_NULL;
+
+    GVariant* variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_FLAGS_NONE, NULL);
+    if(variant != NULL)
+        return getGVariantValue(variant, type, &data->variantGetters);
+
+    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_USER_VALUE, NULL);
+    if(variant != NULL)
+        return getGVariantValue(variant, type, &data->variantGetters);
+
+    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_DEFAULT_VALUE, NULL);
+    return getGVariantValue(variant, type, &data->variantGetters);
+}
+
+FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
+{
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static bool init = false;
+
+    static DConfData data;
+
+    pthread_mutex_lock(&mutex);
+
+    if(init)
+    {
+        pthread_mutex_unlock(&mutex);
+        return getDConfValue(&data, key, type);
+    }
+    init = true;
+
+    data.client = NULL; //error indicator
+
+    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libDConf, "libdconf.so", mutex, FF_VARIANT_NULL);
+
+    data.ffdconf_client_read_full = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_read_full", mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_GVARIANT_GETTERS_INIT(library, data.variantGetters, mutex);
+
+    DConfClient*(*ffdconf_client_new)(void) = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_new", mutex, FF_VARIANT_NULL);
+    if((data.client = ffdconf_client_new()) == NULL)
+        FF_LIBRARY_ERROR_RETURN(library, mutex, FF_VARIANT_NULL);
+
+    pthread_mutex_unlock(&mutex);
+    return getDConfValue(&data, key, type);
+}
+
+#else //FF_HAVE_DCONF
+FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
+{
+    return FF_VARIANT_NULL;
+}
+#endif //FF_HAVE_DCONF
+
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
     FFvariant gsettings = ffSettingsGetGSettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, type);
@@ -199,7 +212,8 @@ FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* 
     return ffSettingsGetDConf(instance, dconfKey, type);
 }
 
-typedef struct _XfconfChannel XfconfChannel; // /usr/include/xfce4/xfconf-0/xfconf/xfconf-channel.h#L39
+#ifdef FF_HAVE_XFCONF
+#include <xfconf/xfconf.h>
 
 typedef struct XFConfData
 {
@@ -266,23 +280,16 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
     pthread_mutex_unlock(&mutex);
     return getXFConfValue(&data, channelName, propertyName, type);
 }
-#else
-FFvariant ffSettingsGet(FFinstance*, const char*, const char*, const char*, const char*, FFvarianttype) {
+#else //FF_HAVE_XFCONF
+FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
+{
     return FF_VARIANT_NULL;
 }
-FFvariant ffSettingsGetDConf(FFinstance*, const char*, FFvarianttype) {
-    return FF_VARIANT_NULL;
-}
-FFvariant ffSettingsGetXFConf(FFinstance*, const char*, const char*, FFvarianttype) {
-    return FF_VARIANT_NULL;
-}
-FFvariant ffSettingsGetGSettings(FFinstance*, const char*, const char*, const char*, FFvarianttype) {
-    return FF_VARIANT_NULL;
-}
-#endif // FF_HAS_DCONF
-#undef FF_VARIANT_NULL
+#endif //FF_HAVE_XFCONF
 
-#if FF_HAS_SQLITE3
+#ifdef FF_HAVE_SQLITE3
+#include <sqlite3.h>
+
 typedef struct SQLiteData
 {
     int(*ffsqlite3_open_v2)(const char* filename, sqlite3** ppDb, int flags, const char* zVfs);
@@ -374,8 +381,9 @@ uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileNa
     pthread_mutex_unlock(&mutex);
     return getSQLiteColumnCount(&data, fileName, tableName);
 }
-#else
-uint32_t ffSettingsGetSQLiteColumnCount(FFinstance*, const char*, const char*) {
+#else //FF_HAVE_SQLITE3
+uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName)
+{
     return 0;
 }
-#endif // FF_HAS_SQLITE3
+#endif //FF_HAVE_SQLITE3

@@ -43,7 +43,8 @@ static inline void printHelp()
         "                 --print-default-config:    prints the default config and exits\n"
         "                 --print-default-structure: prints the default stucture and exits\n"
         "                 --print-available-modules: prints a list of available modules and exits\n"
-        "                 --print-available-presets:  list presets fastfetch knows about. They can be loaded with --load-config. (+)\n"
+        "                 --print-available-presets: list presets fastfetch knows about. They can be loaded with --load-config. (+)\n"
+        "                 --list-supported-features: list the supported features fastfetch was compiled with. Mainly for development.\n"
         "\n"
         "General options:\n"
         "                --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use --print-available-modules to show the default\n"
@@ -577,6 +578,37 @@ static inline void listAvailablePresets(FFinstance* instance)
     ffStrbufDestroy(&folder);
 }
 
+static inline void listSupportedFeatures()
+{
+    fputs(
+        #ifdef FF_HAVE_LIBPCI
+            "libpci\n"
+        #endif
+        #ifdef FF_HAVE_X11
+            "x11\n"
+        #endif
+        #ifdef FF_HAVE_XRANDR
+            "xrandr\n"
+        #endif
+        #ifdef FF_HAVE_WAYLAND
+            "wayland\n"
+        #endif
+        #ifdef FF_HAVE_GIO
+            "gio\n"
+        #endif
+        #ifdef FF_HAVE_DCONF
+            "dconf\n"
+        #endif
+        #ifdef FF_HAVE_XFCONF
+            "xfconf\n"
+        #endif
+        #ifdef FF_HAVE_SQLITE3
+            "sqlite3\n"
+        #endif
+        ""
+    , stdout);
+}
+
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
 
 static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
@@ -749,6 +781,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--print-available-presets") == 0)
     {
         listAvailablePresets(instance);
+        exit(0);
+    }
+    else if(strcasecmp(key, "--list-supported-features") == 0)
+    {
+        listSupportedFeatures();
         exit(0);
     }
     else if(strcasecmp(key, "--spacing") == 0)

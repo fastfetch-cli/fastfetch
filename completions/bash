@@ -104,6 +104,7 @@ __fastfetch_completion()
         "--print-default-structure"
         "--print-available-modules"
         "--print-available-presets"
+        "--list-supported-features"
     )
 
     local FF_OPTIONS_HELP=(

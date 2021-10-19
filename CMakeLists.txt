@@ -45,53 +45,73 @@ find_package(Threads REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules (GIO2 gio-2.0)
-if(GIO2_FOUND)
-    add_compile_definitions(FF_HAS_GIO2=1)
-endif()
-
-pkg_check_modules (DCONF dconf)
-if(DCONF_FOUND)
-    add_compile_definitions(FF_HAS_DCONF=1)
-endif()
-
-pkg_check_modules (XFCONF xfconf)
-if(XFCONF_FOUND)
-    add_compile_definitions(FF_HAS_XFCONF=1)
-endif()
-
-pkg_check_modules (XRANDR xrandr)
-if(XRANDR_FOUND)
-    add_compile_definitions(FF_HAS_XRANDR=1)
-endif()
+pkg_check_modules (LIBPCI libpci)
+if(LIBPCI_FOUND)
+    add_compile_definitions(FF_HAVE_LIBPCI=1)
+else(LIBPCI_FOUND)
+    message(WARNING "Package libpci not found. Building without support.")
+endif(LIBPCI_FOUND)
 
 pkg_check_modules (X11 x11)
 if(X11_FOUND)
-    add_compile_definitions(FF_HAS_X11=1)
-endif()
+    add_compile_definitions(FF_HAVE_X11=1)
+else(X11_FOUND)
+    message(WARNING "Package x11 not found. Building without support.")
+endif(X11_FOUND)
+
+pkg_check_modules (XRANDR xrandr)
+if(XRANDR_FOUND)
+    add_compile_definitions(FF_HAVE_XRANDR=1)
+else(XRANDR_FOUND)
+    message(WARNING "Package xrandr not found. Building without support.")
+endif(XRANDR_FOUND)
 
 pkg_check_modules (WAYLAND wayland-client)
 if(WAYLAND_FOUND)
-    add_compile_definitions(FF_HAS_WAYLAND=1)
-endif()
+    add_compile_definitions(FF_HAVE_WAYLAND=1)
+else(WAYLAND_FOUND)
+    message(WARNING "Package wayland-client not found. Building without support.")
+endif(WAYLAND_FOUND)
+
+pkg_check_modules (GIO gio-2.0)
+if(GIO_FOUND)
+    add_compile_definitions(FF_HAVE_GIO=1)
+else(GIO_FOUND)
+    message(WARNING "Package gio-2.0 not found. Building without support.")
+endif(GIO_FOUND)
+
+pkg_check_modules (DCONF dconf)
+if(DCONF_FOUND)
+    add_compile_definitions(FF_HAVE_DCONF=1)
+else(DCONF_FOUND)
+    message(WARNING "Package dconf not found. Building without support.")
+endif(DCONF_FOUND)
+
+pkg_check_modules (XFCONF libxfconf-0)
+if(XFCONF_FOUND)
+    add_compile_definitions(FF_HAVE_XFCONF=1)
+else(XFCONF_FOUND)
+    message(WARNING "Package libxfconf-0 not found. Building without support.")
+endif(XFCONF_FOUND)
 
 pkg_check_modules (SQLITE3 sqlite3)
 if(SQLITE3_FOUND)
-    add_compile_definitions(FF_HAS_SQLITE3=1)
-endif()
-
-pkg_check_modules (LIBPCI REQUIRED libpci)
+    add_compile_definitions(FF_HAVE_SQLITE3=1)
+else(SQLITE3_FOUND)
+    message(WARNING "Package sqlite3 not found. Building without support.")
+endif(SQLITE3_FOUND)
 
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
-    ${GIO2_INCLUDE_DIRS}
-    ${DCONF_INCLUDE_DIRS}
-    ${XRANDR_INCLUDE_DIRS}
-    ${X11_INCLUDE_DIRS}
-    ${WAYLAND_INCLUDE_DIRS}
-    ${SQLITE3_INCLUDE_DIRS}
     ${LIBPCI_INCLUDE_DIRS}
+    ${X11_INCLUDE_DIRS}
+    ${XRANDR_INCLUDE_DIRS}
+    ${WAYLAND_INCLUDE_DIRS}
+    ${GIO_INCLUDE_DIRS}
+    ${DCONF_INCLUDE_DIRS}
+    ${XFCONF_INCLUDE_DIRS}
+    ${SQLITE3_INCLUDE_DIRS}
 )
 
 link_libraries(
