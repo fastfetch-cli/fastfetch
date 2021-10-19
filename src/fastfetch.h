@@ -18,7 +18,8 @@
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 
-#define UNUSED(...) (void)(__VA_ARGS__)
+static inline void ffUnused(int dummy, ...) { (void) dummy; }
+#define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
 
 #define FASTFETCH_TEXT_MODIFIER_BOLT  "\033[1m"
 #define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"

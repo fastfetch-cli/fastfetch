@@ -206,7 +206,7 @@ void ffStart(FFinstance* instance)
 
 static void ffCleanup(FFinstance* instance)
 {
-    UNUSED(instance);
+    FF_UNUSED(instance);
     // Place for cleaning up
     // I dont destroy the global strbufs, because the OS is typically faster doing it after the program terminates
     // This eliminates one function call per strbuf + setting things like length to 0

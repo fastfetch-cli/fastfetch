@@ -59,24 +59,6 @@ static bool printResolutionResultList(FFinstance* instance, FFlist* results)
     return res;
 }
 
-static int parseRefreshRate(int32_t refreshRate)
-{
-    if(refreshRate <= 0)
-        return 0;
-
-    int remainder = refreshRate % 5;
-    if(remainder >= 3)
-        refreshRate += (5 - remainder);
-    else
-        refreshRate -= remainder;
-
-    //All other typicall refresh rates are dividable by 5
-    if(refreshRate == 145)
-        refreshRate = 144;
-
-    return refreshRate;
-}
-
 static void printResolutionDRMBackend(FFinstance* instance)
 {
     const char* drmDirPath = "/sys/class/drm/";
@@ -136,6 +118,28 @@ static void printResolutionDRMBackend(FFinstance* instance)
 
     printResolutionResultList(instance, &modes);
 }
+
+#if defined(FF_HAVE_XRANDR) || defined(FF_HAVE_WAYLAND)
+
+static int parseRefreshRate(int32_t refreshRate)
+{
+    if(refreshRate <= 0)
+        return 0;
+
+    int remainder = refreshRate % 5;
+    if(remainder >= 3)
+        refreshRate += (5 - remainder);
+    else
+        refreshRate -= remainder;
+
+    //All other typicall refresh rates are dividable by 5
+    if(refreshRate == 145)
+        refreshRate = 144;
+
+    return refreshRate;
+}
+
+#endif //FF_HAVE_XRANDR || FF_HAVE_WAYLAND
 
 #ifdef FF_HAVE_X11
 #include <X11/Xlib.h>
@@ -380,36 +384,26 @@ typedef struct WaylandData
 } WaylandData;
 
 static void waylandGlobalRemoveListener(void* data, struct wl_registry* wl_registry, uint32_t name){
-    UNUSED(data);
-    UNUSED(wl_registry);
-    UNUSED(name);
+    FF_UNUSED(data, wl_registry, name);
+    return;
 }
 
 static void waylandOutputGeometryListener(void* data, struct wl_output* wl_output, int32_t x, int32_t y, int32_t physical_width, int32_t physical_height, int32_t subpixel, const char* make, const char* model, int32_t transform)
 {
-    UNUSED(data);
-    UNUSED(wl_output);
-    UNUSED(x);
-    UNUSED(y);
-    UNUSED(physical_width);
-    UNUSED(physical_height);
-    UNUSED(subpixel);
-    UNUSED(make);
-    UNUSED(model);
-    UNUSED(transform);
+    FF_UNUSED(data, wl_output, x, y, physical_width, physical_height, subpixel, make, model, transform);
+    return;
 }
 
 static void waylandOutputDoneListener(void* data, struct wl_output* wl_output)
 {
-    UNUSED(data);
-    UNUSED(wl_output);
+    FF_UNUSED(data, wl_output);
+    return;
 }
 
 static void waylandOutputScaleListener(void* data, struct wl_output* wl_output, int32_t factor)
 {
-    UNUSED(data);
-    UNUSED(wl_output);
-    UNUSED(factor);
+    FF_UNUSED(data, wl_output, factor);
+    return;
 }
 
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)

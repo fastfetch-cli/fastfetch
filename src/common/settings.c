@@ -131,6 +131,7 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
 #else //FF_HAVE_GIO
 FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
+    FF_UNUSED(instance, schemaName, path, key, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_GIO
@@ -196,6 +197,7 @@ FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttyp
 #else //FF_HAVE_DCONF
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
 {
+    FF_UNUSED(instance, key, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_DCONF
@@ -283,6 +285,7 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 #else //FF_HAVE_XFCONF
 FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
 {
+    FF_UNUSED(instance, channelName, propertyName, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_XFCONF
@@ -384,6 +387,7 @@ uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileNa
 #else //FF_HAVE_SQLITE3
 uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName)
 {
+    FF_UNUSED(instance, fileName, tableName);
     return 0;
 }
 #endif //FF_HAVE_SQLITE3

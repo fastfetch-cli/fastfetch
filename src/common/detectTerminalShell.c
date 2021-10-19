@@ -223,7 +223,7 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
 
 const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance)
 {
-    UNUSED(instance);
+    FF_UNUSED(instance);
 
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;

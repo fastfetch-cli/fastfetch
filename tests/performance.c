@@ -16,8 +16,7 @@
 
 int main(int argc, char** argv)
 {
-    UNUSED(argc);
-    UNUSED(argv);
+    FF_UNUSED(argc, argv);
 
     FFinstance instance;
 

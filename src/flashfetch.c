@@ -3,8 +3,7 @@
 int main(int argc, char** argv)
 {
     //Disable compiler warnings
-    UNUSED(argc);
-    UNUSED(argv);
+    FF_UNUSED(argc, argv);
 
     FFinstance instance;
     ffInitInstance(&instance); //This also applys default configuration to instance.config
