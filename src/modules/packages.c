@@ -57,6 +57,11 @@ void ffPrintPackages(FFinstance* instance)
 {
     uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
     uint32_t dpkg = getNumStrings("/var/lib/dpkg/status", "Status: ");
+
+#if __ANDROID__
+    dpkg += getNumStrings("/data/data/com.termux/files/usr/var/lib/dpkg/status", "Status: ");
+#endif
+
     uint32_t rpm = ffSettingsGetSQLiteColumnCount(instance, "/var/lib/rpm/rpmdb.sqlite", "Packages");
     uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
     uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);

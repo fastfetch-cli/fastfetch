@@ -18,18 +18,6 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
     }
     init = true;
 
-    FILE* osRelease = fopen("/etc/os-release", "r");
-
-    if(osRelease == NULL)
-        osRelease = fopen("/usr/lib/os-release", "r");
-
-    ffStrbufInitA(&result.error, 64);
-    if(osRelease == NULL)
-    {
-        ffStrbufAppendS(&result.error, "couldn't read /etc/os-release nor /usr/lib/os-release");
-        return &result;
-    }
-
     ffStrbufInit(&result.systemName);
     ffStrbufInit(&result.name);
     ffStrbufInit(&result.prettyName);
@@ -46,6 +34,19 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
 
     ffStrbufSetS(&result.systemName, instance->state.utsname.sysname);
     ffStrbufSetS(&result.architecture, instance->state.utsname.machine);
+
+#if !__ANDROID__
+    FILE* osRelease = fopen("/etc/os-release", "r");
+
+    if(osRelease == NULL)
+        osRelease = fopen("/usr/lib/os-release", "r");
+
+    ffStrbufInitA(&result.error, 64);
+    if(osRelease == NULL)
+    {
+        ffStrbufAppendS(&result.error, "couldn't read /etc/os-release nor /usr/lib/os-release");
+        return &result;
+    }
 
     char* line = NULL;
     size_t len = 0;
@@ -70,6 +71,14 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
         free(line);
 
     fclose(osRelease);
+#else
+    ffStrbufSetS(&result.name, "Android");
+    ffStrbufSetS(&result.id, "android");
+    ffSettingsGetAndroidProperty("ro.build.version.release", &result.versionID);
+    ffSettingsGetAndroidProperty("ro.build.version.sdk", &result.version);
+    ffSettingsGetAndroidProperty("ro.build.version.codename", &result.codename);
+    ffSettingsGetAndroidProperty("ro.build.display.id", &result.buildID);
+#endif
 
     pthread_mutex_unlock(&mutex);
 

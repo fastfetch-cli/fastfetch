@@ -391,3 +391,11 @@ uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileNa
     return 0;
 }
 #endif //FF_HAVE_SQLITE3
+
+#ifdef __ANDROID__
+#include <sys/system_properties.h>
+void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
+    ffStrbufEnsureCapacity(result, PROP_VALUE_MAX);
+    result->length = __system_property_get(propName, result->chars);
+}
+#endif
