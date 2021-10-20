@@ -634,7 +634,6 @@ static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
         if(firstSpace >= line.length)
         {
             parseOption(instance, data, line.chars, NULL);
-            ffStrbufDestroy(&line);
             continue;
         }
 
