@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 3.1.0) # Threads::Threads is needed
 project(fastfetch)
 
 option(BUILD_TESTS "Build test programs" OFF)
-option(BUILD_DEBUG "Build with debug symbols" OFF)
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
 execute_process(
     COMMAND git rev-list --count HEAD
@@ -27,16 +30,12 @@ execute_process (
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O3")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
 
 if(BUILD_TESTS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -mtune=native -pipe -fno-plt -Wconversion -Wpedantic")
 endif(BUILD_TESTS)
-
-if(BUILD_DEBUG)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
-endif(BUILD_DEBUG)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
