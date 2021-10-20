@@ -340,6 +340,10 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 
 uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName);
 
+#ifdef __ANDROID__
+void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
+#endif
+
 //common/detectPlasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
 

@@ -63,14 +63,17 @@ void ffPrintCPU(FFinstance* instance)
 
     while(getline(&line, &len, cpuinfo) != -1)
     {
-        ffGetPropValue(line, "model name :", &name);
-        ffGetPropValue(line, "vendor_id :", &vendor);
-        ffGetPropValue(line, "cpu cores :", &physicalCoresString);
-        ffGetPropValue(line, "cpu MHz :", &procGhzString);
-
         //Stop after the first CPU
-        if(strstr(line, "flags") != NULL)
+        if(name.length > 0 && (*line == '\0' || *line == '\n'))
             break;
+
+        (void)(
+            ffGetPropValue(line, "model name :", &name) ||
+            ffGetPropValue(line, "vendor_id :", &vendor) ||
+            ffGetPropValue(line, "cpu cores :", &physicalCoresString) ||
+            ffGetPropValue(line, "cpu MHz :", &procGhzString) ||
+            (name.length == 0 && ffGetPropValue(line, "Hardware :", &name)) //For Android devices
+        );
     }
 
     if(line != NULL)
