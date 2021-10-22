@@ -1,0 +1,9 @@
+usage: fastfetch --color <color>
+
+<color> must be a color encoding for linux terminals. It is inserted between "ESC[" and "m".
+Infos about them can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
+Examples:
+   --color 35:    sets the color to pink
+   --color 4;92:  sets the color to bright Green with underline
+   --color 5;104: blinking text on a blue background
+If no color is set, the main color of the logo will be used.

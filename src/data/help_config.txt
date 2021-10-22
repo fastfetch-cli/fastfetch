@@ -1,0 +1,9 @@
+usage: fastfetch --load-config <file>
+
+Loads a config file. A config file contains one flag per line. Empty lines or lines starting with # are ignored.
+If the file is relative it looks in the following order:
+   - relative to the current working directory
+   - relative to ~/.local/share/fastfetch/presets/
+   - relative to /usr/share/fastfetch/presets/
+Fastfetch provides some default presets. List them with --print-available-presets.
+Note that this will only print presets fastfetch knows about and not every possible one.

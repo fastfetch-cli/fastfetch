@@ -37,6 +37,21 @@ if(BUILD_TESTS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -mtune=native -pipe -fno-plt -Wconversion -Wpedantic")
 endif(BUILD_TESTS)
 
+function(fastfetch_load_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    string(REPLACE "\n" "\\n" TEMP "${TEMP}")
+    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")
+    string(REPLACE "$\\" "" TEMP "${TEMP}")
+    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
+endfunction(fastfetch_load_text)
+
+fastfetch_load_text(src/data/config.txt DATATEXT_CONFIG)
+fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
+fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
+fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
+fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
+fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
+
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)

@@ -10,16 +10,6 @@
 
 #define FASTFETCH_DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
 
-#define FASTFETCH_DEFAULT_CONFIG \
-    "# Fastfetch configuration\n" \
-    "# Write every argument in different lines.\n" \
-    "# Direct arguments will overwrite the corresponding ones in this file.\n" \
-    "# Whitespaces are trimmed at the beginning and the end.\n" \
-    "# Empty lines or lines starting with # are ignored.\n" \
-    "# There are more arguments possible than the ones listed here, take a look at fastfetch --help\n" \
-    "# This file was shipped with "FASTFETCH_PROJECT_VERSION".\n" \
-    "# Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current defaults.\n"
-
 // Things only needed by fastfetch
 typedef struct FFdata
 {
@@ -28,198 +18,6 @@ typedef struct FFdata
     FFstrbuf logoName;
     bool multithreading;
 } FFdata;
-
-static inline void printHelp()
-{
-    puts(
-        "Usage: fastfetch <options>\n"
-        "\n"
-        "Informative options:\n"
-        "   -h,           --help:                    shows this message and exits\n"
-        "   -h <command>, --help <command>:          shows help for a specific command and exits\n"
-        "   -v            --version:                 prints the version of fastfetch and exits\n"
-        "                 --list-logos:              list available logos and exits\n"
-        "                 --print-logos:             shows available logos and exits\n"
-        "                 --print-default-config:    prints the default config and exits\n"
-        "                 --print-default-structure: prints the default stucture and exits\n"
-        "                 --print-available-modules: prints a list of available modules and exits\n"
-        "                 --print-available-presets: list presets fastfetch knows about. They can be loaded with --load-config. (+)\n"
-        "                 --list-supported-features: list the supported features fastfetch was compiled with. Mainly for development.\n"
-        "\n"
-        "General options:\n"
-        "                --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use --print-available-modules to show the default\n"
-        "                --set <key=value>:                hard set the value of a key\n"
-        "   -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)\n"
-        "                --spacing <width>:                sets the distance between logo and text\n"
-        "   -s <str>,    --separator <str>:                sets the separator between key and value. Default is a colon with a space\n"
-        "   -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.\n"
-        "                --show-errors <?value>:           print occuring errors\n"
-        "   -r <?value>  --recache <?value>:               generate new cached values\n"
-        "                --nocache <?value>:               don't use cached values, but also don't overwrite existing ones\n"
-        "                --print-remaining-logo <?value>:  print the remaining logo, if it is higher than the number of lines shown\n"
-        "                --multithreading <?value>:        use multiple threads to detect values\n"
-        "                --load-config <file>:             load a config file (+)\n"
-        "                --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output\n"
-        "                --disable-linewrap <?value>:      Disable linewrap during the run\n"
-        "                --hide-cursor <?value>:           Hide the cursor during the run\n"
-        "\n"
-        "Logo options:\n"
-        "   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a path\n"
-        "              --color-logo <?value>: if set to false, the logo will be black / white\n"
-        "\n"
-        "Format options: Provide the format string for custom output. Use fastfetch --help *-format for specific help.\n"
-        "   --os-format <format>\n"
-        "   --host-format <format>\n"
-        "   --kernel-format <format>\n"
-        "   --uptime-format <format>\n"
-        "   --processes-format <format>\n"
-        "   --packages-format <format>\n"
-        "   --shell-format <format>\n"
-        "   --resolution-format <format>\n"
-        "   --de-format <format>\n"
-        "   --wm-format <format>\n"
-        "   --wm-theme-format <format>\n"
-        "   --theme-format <format>\n"
-        "   --icons-format <format>\n"
-        "   --font-format <format>\n"
-        "   --cursor-format <format>\n"
-        "   --terminal-format <format>\n"
-        "   --terminal-font-format <format>\n"
-        "   --cpu-format <format>\n"
-        "   --gpu-format <format>\n"
-        "   --memory-format <format>\n"
-        "   --disk-format <format>\n"
-        "   --battery-format <format>\n"
-        "   --locale-format <format>\n"
-        "   --local-ip-format <format>\n"
-        "\n"
-        "Key options: Provide a custom key for an output\n"
-        "   --os-key <key>\n"
-        "   --host-key <key>\n"
-        "   --kernel-key <key>\n"
-        "   --uptime-key <key>\n"
-        "   --processes-key <key>\n"
-        "   --packages-key <key>\n"
-        "   --shell-key <key>\n"
-        "   --resolution-key <key>: takes the resolution index as argument\n"
-        "   --de-key <key>\n"
-        "   --wm-key <key>\n"
-        "   --wm-theme-key <key>\n"
-        "   --theme-key <key>\n"
-        "   --icons-key <key>\n"
-        "   --font-key <key>\n"
-        "   --cursor-key <key>\n"
-        "   --terminal-key <key>\n"
-        "   --terminal-font-key <key>\n"
-        "   --cpu-key <key>\n"
-        "   --gpu-key <key>: takes the gpu index as format argument\n"
-        "   --memory-key <key>\n"
-        "   --disk-key <key>: takes the mount path as format argument\n"
-        "   --battery-key <key>: takes the battery index as format argument\n"
-        "   --locale-key <key>\n"
-        "   --local-ip-key <key>: takes the name of this network interface as format argument\n"
-        "\n"
-        "Library optins: Set the path of a library to load\n"
-        "   --lib-PCI <path>\n"
-        "   --lib-X11 <path>\n"
-        "   --lib-Xrandr <path>\n"
-        "   --lib-gio <path>\n"
-        "   --lib-DConf <path>\n"
-        "   --lib-wayland <path>\n"
-        "   --lib-XFConf <path>\n"
-        "   --lib-SQLite <path>\n"
-        "\n"
-        "Module specific options:\n"
-        "   --disk-folders <folders>:     A colon separated list of folder paths for the disk output. Default is \"/:/home\"\n"
-        "   --battery-dir <folder>:       The directory where the battery folders are. Standard: /sys/class/power_supply/\n"
-        "   --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true\n"
-        "   --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false\n"
-        "   --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false\n"
-        "\n"
-        "Parsing is not case sensitive. E.g. \"--lib-PCI\" is equal to \"--Lib-Pci\"\n"
-        "If a value starts with a ?, it is optional. \"true\" will be used if not set.\n"
-        "A (+) at the end indicates that more help can be printed with --help <option>\n"
-        "All options can be made permanent in $XDG_CONFIG_HOME/fastfetch/config.conf"
-    );
-}
-
-static inline void printCommandHelpColor()
-{
-    puts(
-        "usage: fastfetch --color <color>\n"
-        "\n"
-        "<color> must be a color encoding for linux terminals. It is inserted between \"ESC[\" and \"m\".\n"
-        "Infos about them can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.\n"
-        "Examples:\n"
-        "   \"--color 35\":    sets the color to pink\n"
-        "   \"--color 4;92\":  sets the color to bright Green with underline\n"
-        "   \"--color 5;104\": blinking text on a blue background\n"
-        "If no color is set, the main color of the logo will be used.\n"
-    );
-}
-
-static inline void printCommandHelpFormat()
-{
-    puts(
-        "A format string is a string that contains placeholders for values.\n"
-        "These placeholders begin with a '{', containing the index of the value, and end with a '}'.\n"
-        "For example the format string \"Values: {1} ({2})\", with the values \"First\" and \"My second val\", will produce \"Values: First (My second val)\".\n"
-        "The format string can contain placeholders in any order and have multiple occurences.\n"
-        "To include spaces when setting from the command line, surround the whole string with double quotes (\").\n"
-        "\n"
-        "If the value index is missing, meaning the placeholder is \"{}\", an internal counter sets the value index.\n"
-        "This means that the format string \"Values: {1} ({2})\" is equivalent to \"Values: {} ({})\".\n"
-        "Note that this counter only counts empty placeholders, so the format string \"{2} {} {}\" will contain the second value, then the first, and then the second again.\n"
-        "\n"
-        "To make formatting easier, a double open curly brace (\"{{\") will be printed as a single open curly brace and not counted as the beginning of a placeholder.\n"
-        "If a value index is misformatted or wants a non-existing value, it will be printed as is, with the curly braces around it.\n"
-        "If the last placeholder isn't closed, it will be treated like it was at the end of the format string.\n"
-        "\n"
-        "To only print something if a variable is set, use \"{?<index>} ... {?}\".\n"
-        "For example, to only print a second value if it is set, use \"{?2} Second value: {2}{?}\".\n"
-        "If a \"{?}\" is found without an opener, it is printed as is.\n"
-        "\n"
-        "To only print something if a variable is not set, do the same as with if, just replace every '?' with a '!'.\n"
-        "For example to print a fallback for a second value if it is not set, use \"{?2}{2}{?}{/2}Second value fallback{/}\".\n"
-        "\n"
-        "There is a special variable set if an error occured during detection. You can access it with \"{e}\", \"{error}\" or \"{0}\".\n"
-        "You can use ifs and not ifs with it like with an index. For example use \"{?e}some text{?}\", to print a text if an error occurred.\n"
-        "\n"
-        "To stop formatting at any point in the format string, use \"{-}\".\n"
-        "For example to print an error instead of the normal output if it occured, prefix the format string with \"{?e}{e}{-}{?}...\".\n"
-        "\n"
-        "To print something with color, start a placeholder with a '#' and then the linux terminal color encoding.\n"
-        "\"\\033[\" at the start, and an 'm' at the end is automatically added, so don't do that.\n"
-        "A \"{#}\" is equivalent to a \"{#0}\" and resets everything to normal.\n"
-        "For example to print something pink and underline, use \"{#4;35}...{#}\".\n"
-        "If not in a format string, fastfetch wraps errors with \"{#1;31}error{#}\", so you might want to do that to if you show errors.\n"
-        "Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.\n"
-        "Which escape codes are supported and how they look is defined by your terminal.\n"
-        "\n"
-        "If a format string evaluates to an empty value, the whole line in the output will be discarded.\n"
-        "You can therefore use --host-format \" \" to disable host output.\n"
-        "Note that --host-format \"\" would evaluate as not set, and therefore use the built-in host format\n"
-        "This can be used to print nothing if an error occured: prefix the format string with \"{?e}{-}{?}...\".\n"
-        "\n"
-        "Format string is also the way to go to set a fixed value - just use one without placeholders.\n"
-        "For example when running in headless mode, you could use \"--resolution-format \"Preferred\"."
-    );
-}
-
-static inline void printCommandHelpLoadConfig()
-{
-    puts(
-        "usage: fastfetch --load-config <file>\n"
-        "\n"
-        "Loads a config file. A config file contains one flag per line. Empty lines or lines starting with # are ignored.\n"
-        "If the file is relative it looks in the following order:\n"
-        "   - relative to the current working directory\n"
-        "   - relative to ~/.local/share/fastfetch/presets/\n"
-        "   - relative to /usr/share/fastfetch/presets/\n"
-        "Fastfetch provides some default presets. List them with --print-available-presets.\n"
-        "Note that this will only print presets fastfetch knows about and not every possible one."
-    );
-}
 
 static void constructAndPrintCommandHelpFormat(const char* name, const char* def, uint32_t numArgs, ...)
 {
@@ -241,12 +39,14 @@ static void constructAndPrintCommandHelpFormat(const char* name, const char* def
 
 static inline void printCommandHelp(const char* command)
 {
-    if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
-        printCommandHelpColor();
+    if(command == NULL)
+        fputs(FASTFETCH_DATATEXT_HELP, stdout);
+    else if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
+        fputs(FASTFETCH_DATATEXT_HELP_COLOR, stdout);
     else if(strcasecmp(command, "format") == 0)
-        printCommandHelpFormat();
-    else if(strcasecmp(command, "load-config") == 0)
-        printCommandHelpLoadConfig();
+        fputs(FASTFETCH_DATATEXT_HELP_FORMAT, stdout);
+    else if(strcasecmp(command, "load-config") == 0 || strcasecmp(command, "loadconfig") == 0 || strcasecmp(command, "config") == 0)
+        fputs(FASTFETCH_DATATEXT_HELP_CONFIG, stdout);
     else if(strcasecmp(command, "os-format") == 0)
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
@@ -490,42 +290,6 @@ static inline void printCommandHelp(const char* command)
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
 
-static inline void printAvailableModules()
-{
-    puts(
-        "Battery\n"
-        "Break\n"
-        "Colors\n"
-        "CPU\n"
-        "Cursor\n"
-        "DE\n"
-        "Disk\n"
-        "Font\n"
-        "GPU\n"
-        "Host\n"
-        "Icons\n"
-        "Kernel\n"
-        "Locale\n"
-        "LocalIp\n"
-        "Memory\n"
-        "OS\n"
-        "Packages\n"
-        "Processes\n"
-        "Resolution\n"
-        "Separator\n"
-        "Shell\n"
-        "Terminal\n"
-        "TerminalFont\n"
-        "Theme\n"
-        "Title\n"
-        "Uptime\n"
-        "WM\n"
-        "WMTheme\n"
-        "\n"
-        "+ Additional defined by --set"
-    );
-}
-
 static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t indentation, const char* folderName)
 {
     DIR* dir = opendir(folder->chars);
@@ -740,11 +504,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 {
     if(strcasecmp(key, "-h") == 0 || strcasecmp(key, "--help") == 0)
     {
-        if(value == NULL)
-            printHelp();
-        else
-            printCommandHelp(value);
-
+        printCommandHelp(value);
         exit(0);
     }
     else if(strcasecmp(key, "-v") == 0 || strcasecmp(key, "--version") == 0)
@@ -764,17 +524,17 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--print-default-config") == 0)
     {
-        puts(FASTFETCH_DEFAULT_CONFIG);
+        fputs(FASTFETCH_DATATEXT_CONFIG, stdout);
         exit(0);
     }
     else if(strcasecmp(key, "--print-default-structure") == 0)
     {
-        puts(FASTFETCH_DEFAULT_STRUCTURE);
+        fputs(FASTFETCH_DEFAULT_STRUCTURE, stdout);
         exit(0);
     }
     else if(strcasecmp(key, "--print-available-modules") == 0)
     {
-        printAvailableModules();
+        fputs(FASTFETCH_DATATEXT_MODULES, stdout);
         exit(0);
     }
     else if(strcasecmp(key, "--print-available-presets") == 0)
@@ -1023,7 +783,7 @@ static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
         FILE* file = fopen(filename->chars, "w");
         if(file != NULL)
         {
-            fputs(FASTFETCH_DEFAULT_CONFIG, file);
+            fputs(FASTFETCH_DATATEXT_CONFIG, file);
             fclose(file);
         }
     }

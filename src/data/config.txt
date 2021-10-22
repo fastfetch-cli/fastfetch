@@ -1,0 +1,8 @@
+# Fastfetch configuration
+# Write every argument in different lines.
+# Direct arguments will overwrite the corresponding ones in this file.
+# Whitespaces are trimmed at the beginning and the end.
+# Empty lines or lines starting with # are ignored.
+# There are more arguments possible than the ones listed here, take a look at fastfetch --help
+# This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
+# Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current default
