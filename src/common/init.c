@@ -25,20 +25,6 @@ static void initConfigDirs(FFstate* state)
     ffStrbufInitA(&xdgConfigDirs, 64);
     ffStrbufAppendS(&xdgConfigDirs, getenv("XDG_CONFIG_DIRS"));
 
-    uint32_t startIndex = 0;
-    while (startIndex < xdgConfigDirs.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&xdgConfigDirs, startIndex, ':');
-        xdgConfigDirs.chars[colonIndex] = '\0';
-
-        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
-        ffStrbufInitA(buffer, 64);
-        ffStrbufAppendS(buffer, xdgConfigDirs.chars + startIndex);
-        ffStrbufTrimRight(buffer, '/');
-
-        startIndex = colonIndex + 1;
-    }
-
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
         if(ffListFirstIndexComp(&state->configDirs, element, strbufEqualsAdapter) < state->configDirs.length - 1) \
             --state->configDirs.length;
@@ -53,6 +39,21 @@ static void initConfigDirs(FFstate* state)
     ffStrbufInitA(userHome, 64);
     ffStrbufAppendS(userHome, state->passwd->pw_dir);
     FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
+
+    uint32_t startIndex = 0;
+    while (startIndex < xdgConfigDirs.length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(&xdgConfigDirs, startIndex, ':');
+        xdgConfigDirs.chars[colonIndex] = '\0';
+
+        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
+        ffStrbufInitA(buffer, 64);
+        ffStrbufAppendS(buffer, xdgConfigDirs.chars + startIndex);
+        ffStrbufTrimRight(buffer, '/');
+        FF_ENSURE_ONLY_ONCE_IN_LIST(buffer);
+
+        startIndex = colonIndex + 1;
+    }
 
     FFstrbuf* systemConfigHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfigHome, 64);

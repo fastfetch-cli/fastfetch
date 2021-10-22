@@ -41,14 +41,17 @@ static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* resul
             continue;
         }
 
-        if(category == PLASMA_CATEGORY_KDE)
+        if(category == PLASMA_CATEGORY_KDE && result->widgetStyle.length == 0)
             ffGetPropValue(line, "widgetStyle =", &result->widgetStyle);
-        else if(category == PLASMA_CATEGORY_ICONS)
+        else if(category == PLASMA_CATEGORY_ICONS && result->icons.length == 0)
             ffGetPropValue(line, "Theme =", &result->icons);
         else if(category == PLASMA_CATEGORY_GENERAL)
         {
-            ffGetPropValue(line, "ColorScheme =", &result->colorScheme);
-            ffGetPropValue(line, "font =", &result->font);
+            if(result->colorScheme.length == 0)
+                ffGetPropValue(line, "ColorScheme =", &result->colorScheme);
+
+            if(result->font.length == 0)
+                ffGetPropValue(line, "Font =", &result->font);
         }
     }
 

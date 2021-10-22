@@ -310,7 +310,7 @@ void ffLoadLogo(FFinstance* instance);
 void ffPrintLogoLine(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 
-#ifndef FLASHFETCH_BUILD_FLASHFATCH
+#ifndef FASTFETCH_BUILD_FLASHFATCH
     void ffListLogos();
     void ffPrintLogos(FFinstance* instance);
 #endif
