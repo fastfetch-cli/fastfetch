@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <signal.h>
 
 static bool strbufEqualsAdapter(const void* first, const void* second)
 {
@@ -196,8 +197,37 @@ void ffInitInstance(FFinstance* instance)
     ffCacheValidate(instance);
 }
 
+static void resetConsole(bool disableLinewrap, bool hideCursor)
+{
+    if(disableLinewrap)
+        fputs("\033[?7h", stdout);
+
+    if(hideCursor)
+        fputs("\033[?25h", stdout);
+}
+
+static volatile bool ffDisableLinewrap = true;
+static volatile bool ffHideCursor = true;
+
+static void exitSignalHandler(int signal)
+{
+    FF_UNUSED(signal);
+    resetConsole(ffDisableLinewrap, ffHideCursor);
+    exit(0);
+}
+
 void ffStart(FFinstance* instance)
 {
+    ffDisableLinewrap = instance->config.disableLinewrap;
+    ffHideCursor = instance->config.hideCursor;
+
+    struct sigaction action = {};
+    action.sa_handler = exitSignalHandler;
+
+    sigaction(SIGINT, &action, NULL);
+    sigaction(SIGTERM, &action, NULL);
+    sigaction(SIGQUIT, &action, NULL);
+
     if(instance->config.hideCursor)
         fputs("\033[?25l", stdout);
 
@@ -205,24 +235,10 @@ void ffStart(FFinstance* instance)
         fputs("\033[?7l", stdout);
 }
 
-static void ffCleanup(FFinstance* instance)
-{
-    FF_UNUSED(instance);
-    // Place for cleaning up
-    // I dont destroy the global strbufs, because the OS is typically faster doing it after the program terminates
-    // This eliminates one function call per strbuf + setting things like length to 0
-}
-
 void ffFinish(FFinstance* instance)
 {
     if(instance->config.printRemainingLogo)
         ffPrintRemainingLogo(instance);
 
-    if(instance->config.disableLinewrap)
-        fputs("\033[?7h", stdout);
-
-    if(instance->config.hideCursor)
-        fputs("\033[?25h", stdout);
-
-    ffCleanup(instance);
+    resetConsole(instance->config.disableLinewrap, instance->config.hideCursor);
 }
