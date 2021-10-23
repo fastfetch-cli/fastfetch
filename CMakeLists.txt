@@ -45,6 +45,7 @@ function(fastfetch_load_text FILENAME OUTVAR)
     set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
 endfunction(fastfetch_load_text)
 
+fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config.txt DATATEXT_CONFIG)
 fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)

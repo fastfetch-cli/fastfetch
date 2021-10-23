@@ -8,8 +8,6 @@
 #include <fcntl.h>
 #include <dirent.h>
 
-#define FASTFETCH_DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Resolution:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Disk:Battery:Locale:Break:Colors"
-
 // Things only needed by fastfetch
 typedef struct FFdata
 {
@@ -522,27 +520,27 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         ffPrintLogos(instance);
         exit(0);
     }
-    else if(strcasecmp(key, "--print-default-config") == 0)
+    else if(strcasecmp(key, "--print-config") == 0)
     {
         fputs(FASTFETCH_DATATEXT_CONFIG, stdout);
         exit(0);
     }
-    else if(strcasecmp(key, "--print-default-structure") == 0)
+    else if(strcasecmp(key, "--print-structure") == 0)
     {
-        fputs(FASTFETCH_DEFAULT_STRUCTURE, stdout);
+        puts(FASTFETCH_DATATEXT_STRUCTURE);
         exit(0);
     }
-    else if(strcasecmp(key, "--print-available-modules") == 0)
+    else if(strcasecmp(key, "--list-modules") == 0)
     {
         fputs(FASTFETCH_DATATEXT_MODULES, stdout);
         exit(0);
     }
-    else if(strcasecmp(key, "--print-available-presets") == 0)
+    else if(strcasecmp(key, "--list-presets") == 0)
     {
         listAvailablePresets(instance);
         exit(0);
     }
-    else if(strcasecmp(key, "--list-supported-features") == 0)
+    else if(strcasecmp(key, "--list-features") == 0)
     {
         listSupportedFeatures();
         exit(0);
@@ -904,7 +902,7 @@ static void run(FFinstance* instance, FFdata* data)
         ffStartDetectionThreads(instance);
 
     if(data->structure.length == 0)
-        ffStrbufSetS(&data->structure, FASTFETCH_DEFAULT_STRUCTURE);
+        ffStrbufSetS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
 
     ffStart(instance);
 

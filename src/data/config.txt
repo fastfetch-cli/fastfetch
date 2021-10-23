@@ -3,6 +3,96 @@
 # Direct arguments will overwrite the corresponding ones in this file.
 # Whitespaces are trimmed at the beginning and the end.
 # Empty lines or lines starting with # are ignored.
-# There are more arguments possible than the ones listed here, take a look at fastfetch --help
+
 # This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
-# Use fastfetch --print-default-config > ~/.config/fastfetch/config.conf to generate a new one with current default
+# Use fastfetch --print-config > ~/.config/fastfetch/config.conf to generate the current default one
+
+# Below some options are listed. Uncomment and modify them so they take affect.
+# Note that there are a lot more options than listed here, take a look at "fastfetch --help".
+# Notably all the --*-format and --*-key options are missing.
+# Of course all of the can be made persistent here too.
+
+# Config option:
+# Load additional config files.
+# Some are shipped with fastfetch, list them with "fastfetch --list-presets".
+# Must be a path to a config file or the name of a shipped preset.
+# The config file is completly loaded before continuing in the current file, so the placement of this option matters, as later options overwrite already set ones.
+# Can be used multiple times to load multiple config files / presets.
+#--load-config /path/to/config.txt
+
+# Structure option:
+# Sets the modules to use and their order.
+# List available modules with "fastfetch --list-modules".
+# Get the default structure with "fastfetch --print-structure".
+# Must be a list of module names, separated by colons.
+# Default is $"FASTFETCH_DATATEXT_STRUCTURE$".
+#--structure $"FASTFETCH_DATATEXT_STRUCTURE$"
+
+# Logo option:
+# Sets the logo to use.
+# List available logos with "fastfetch --list-logos".
+# Print available logos with "fastfetch --print-logos".
+# Must be the name of an available logo or a path to a text file containing a custom logo.
+# Default is the current distribution.
+#--logo arch
+
+# Color option:
+# Sets the color of the keys.
+# Must be linux console color codes.
+# Default is the primary color of the logo.
+# Use "fastfetch --help color" to learn more and see examples.
+#--color 35
+
+# Spacing option:
+# Sets the amount of whitespace between the logo and keys.
+# Must be an positive integer.
+# Default is 4.
+#--spacing 4
+
+# Separator option:
+# Sets the string placed between a key and its value.
+# Can be any string.
+# Default is ": ".
+#--separator ": "
+
+# Offset option:
+# Sets the amount of whitespace before the logo. Can be negative to cut the logo.
+# Must be an integer.
+# Default is 0.
+#--offsetx 0
+
+# Linewrap option:
+# Sets if fastfetch should disable linewrap during the run.
+# Must be true or false.
+# Default is true.
+#--disable-linewrap true
+
+# Cursor option:
+# Sets if fastfetch should hide the console cursor during the run.
+# Must be true or false.
+# Default is true.
+#--hide-cursor true
+
+# Remaing logo option:
+# Sets if the remaining logo should be printed, if it is higher than the information printed.
+# Must be true or false.
+# Default is true.
+#--print-remaining-logo true
+
+# Multithreading option:
+# Sets if fastfetch should use multiple threads to detect the values.
+# Must be true or false.
+# Default is true.
+#--multithreading true
+
+# Slow operations option:
+# Sets if fastfetch is allowed to use known slow operations to detect more / better values.
+# Must be true or false.
+# Default is false.
+#--allow-slow-operations false
+
+# Color logo option:
+# Sets if the logo should be colored.
+# Must be true or false.
+# Default is true.
+#--color-logo true

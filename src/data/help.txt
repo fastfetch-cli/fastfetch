@@ -1,19 +1,19 @@
 Usage: fastfetch <options>
 
 Informative options:
-   -h,           --help:                    shows this message and exits
-   -h <command>, --help <command>:          shows help for a specific command and exits
-   -v            --version:                 prints the version of fastfetch and exits
-                 --list-logos:              list available logos and exits
-                 --print-logos:             shows available logos and exits
-                 --print-default-config:    prints the default config and exits
-                 --print-default-structure: prints the default stucture and exits
-                 --print-available-modules: prints a list of available modules and exits
-                 --print-available-presets: list presets fastfetch knows about. They can be loaded with --load-config. (+)
-                 --list-supported-features: list the supported features fastfetch was compiled with. Mainly for development.
+   -h,           --help:            shows this message and exits
+   -h <command>, --help <command>:  shows help for a specific command and exits
+   -v            --version:         prints the version of fastfetch and exits
+                 --list-logos:      list available logos and exits
+                 --list-modules:    lists available modules and exits
+                 --list-presets:    list presets fastfetch knows about and exits. They can be loaded with --load-config. (+)
+                 --list-features:   list the supported features fastfetch was compiled with and exits. Mainly for development.
+                 --print-logos:     show available logos and exits
+                 --print-config:    prints the default config and exits
+                 --print-structure: prints the default stucture and exits
 
 General options:
-                --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use --print-available-modules to show th
+                --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
                 --set <key=value>:                hard set the value of a key
    -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)
                 --spacing <width>:                sets the distance between logo and text
@@ -30,7 +30,7 @@ General options:
                 --hide-cursor <?value>:           Hide the cursor during the run
 
 Logo options:
-   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument
+   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a valid path.
               --color-logo <?value>: if set to false, the logo will be black / white
 
 Format options: Provide the format string for custom output. Use fastfetch --help *-format for specific help.

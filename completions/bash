@@ -99,12 +99,12 @@ __fastfetch_completion()
         "-v"
         "--version"
         "--list-logos"
+        "--list-modules"
+        "--list-presets"
+        "--list-features"
         "--print-logos"
-        "--print-default-config"
-        "--print-default-structure"
-        "--print-available-modules"
-        "--print-available-presets"
-        "--list-supported-features"
+        "--print-config"
+        "--print-structure"
     )
 
     local FF_OPTIONS_HELP=(
