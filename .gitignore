@@ -1,5 +1,7 @@
 **/build/
 **/.vscode/
 **/.cache/
+**/.kdev4/
 cscope.*
 tags
+fastfetch.kdev4

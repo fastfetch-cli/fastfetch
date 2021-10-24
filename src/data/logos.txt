@@ -1,0 +1,15 @@
+none
+unknown
+arch
+artix
+celos
+debian
+fedora
+fedora_old
+garuda
+gentoo
+manjaro
+mint
+pop
+ubuntu
+void

@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 
+#include <limits.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -124,6 +125,32 @@ static void initLogoDebian(FFinstance* instance)
 }
 
 static void initLogoFedora(FFinstance* instance)
+{
+    instance->config.logo.lines =
+        "$1             .',;::::;,'.             \n"
+        "$1         .';:cccccccccccc:;,.         \n"
+        "$1      .;cccccccccccccccccccccc;.      \n"
+        "$1    .:cccccccccccccccccccccccccc:.    \n"
+        "$1  .;ccccccccccccc;$2.:dddl:.$1;ccccccc;.  \n"
+        "$1 .:ccccccccccccc;$2OWMKOOXMWd$1;ccccccc:. \n"
+        "$1.:ccccccccccccc;$2KMMc$1;cc;$2xMMc$1;ccccccc:.\n"
+        "$1,cccccccccccccc;$2MMM.$1;cc;$2;WW:$1;cccccccc,\n"
+        "$1:cccccccccccccc;$2MMM.$1;cccccccccccccccc:\n"
+        "$1:ccccccc;$2oxOOOo$1;$2MMM000k.$1;cccccccccccc:\n"
+        "$1cccccc;$20MMKxdd:$1;$2MMMkddc.$1;cccccccccccc;\n"
+        "$1ccccc;$2XMO'$1;cccc;$2MMM.$1;cccccccccccccccc'\n"
+        "$1ccccc;$2MMo$1;ccccc;$2MMW.$1;ccccccccccccccc; \n"
+        "$1ccccc;$20MNc.$1ccc$2.xMMd$1;ccccccccccccccc;  \n"
+        "$1cccccc;$2dNMWXXXWM0:$1;cccccccccccccc:,   \n"
+        "$1cccccccc;$2.:odl:.$1;cccccccccccccc:,.    \n"
+        "$1ccccccccccccccccccccccccccccc:'.      \n"
+        "$1:ccccccccccccccccccccccc:;,..         \n"
+        "$1 ':cccccccccccccccc::;,.              ";
+    instance->config.logo.colors[0] = "\033[34m"; //blue
+    instance->config.logo.colors[1] = "\033[37m"; //white
+}
+
+static void initLogoFedoraOld(FFinstance* instance)
 {
     instance->config.logo.lines =
         "$1          /:-------------:\\       \n"
@@ -348,6 +375,8 @@ static bool loadLogoSet(FFinstance* instance, const char* logo)
         initLogoDebian(instance);
     else if(strcasecmp(logo, "fedora") == 0)
         initLogoFedora(instance);
+    else if(strcasecmp(logo, "fedora_old") == 0)
+        initLogoFedoraOld(instance);
     else if(strcasecmp(logo, "garuda") == 0)
         initLogoGaruda(instance);
     else if(strcasecmp(logo, "gentoo") == 0)
@@ -390,15 +419,39 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
     instance->config.logo.lines = logoChars.chars;
 }
 
+static bool loadLogoSetWithVersion(FFinstance* instance, const FFstrbuf* versionID, const FFstrbuf* name)
+{
+    bool isFedora = ffStrbufIgnCaseCompS(name, "fedora") == 0;
+
+    if(versionID->length == 0 || (
+        !isFedora
+    )) return loadLogoSet(instance, name->chars);
+
+    long version = strtol(versionID->chars, NULL, 10);
+    if(version == 0 || version == LONG_MAX || version == LONG_MIN)
+        return loadLogoSet(instance, name->chars);
+
+    if(isFedora)
+    {
+        if(version > 34)
+            return loadLogoSet(instance, "fedora");
+        else
+            return loadLogoSet(instance, "fedora_old");
+    }
+
+    //This should never happen, but just in case...
+    return loadLogoSet(instance, name->chars);
+}
+
 void ffLoadLogo(FFinstance* instance)
 {
     const FFOSResult* result = ffDetectOS(instance);
 
     if(
-        !loadLogoSet(instance, result->name.chars) &&
-        !loadLogoSet(instance, result->id.chars) &&
-        !loadLogoSet(instance, result->systemName.chars) &&
-        !loadLogoSet(instance, result->idLike.chars)
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->name) &&
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->id) &&
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->systemName) &&
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->idLike)
     ) initLogoUnknown(instance);
 }
 
@@ -532,26 +585,6 @@ void ffPrintRemainingLogo(FFinstance* instance)
 }
 
 #ifndef FASTFETCH_BUILD_FLASHFETCH
-
-void ffListLogos()
-{
-    puts(
-        "none\n"
-        "unknown\n"
-        "arch\n"
-        "artix\n"
-        "celos\n"
-        "debian\n"
-        "fedora\n"
-        "garuda\n"
-        "gentoo\n"
-        "manjaro\n"
-        "mint\n"
-        "pop\n"
-        "ubuntu\n"
-        "void"
-    );
-}
 
 void ffPrintLogos(FFinstance* instance)
 {
