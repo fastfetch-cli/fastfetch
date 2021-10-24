@@ -15,7 +15,12 @@ void ffPrintMemory(FFinstance* instance)
     char* line = NULL;
     size_t len = 0;
 
-    uint32_t total, shared, memfree, buffers, cached, reclaimable;
+    uint32_t total = 0,
+             shared = 0,
+             memfree = 0,
+             buffers = 0,
+             cached = 0,
+             reclaimable = 0;
 
     while (getline(&line, &len, meminfo) != -1) {
         sscanf(line, "MemTotal: %u", &total);
