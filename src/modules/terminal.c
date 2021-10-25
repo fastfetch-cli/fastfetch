@@ -32,7 +32,7 @@ void ffPrintTerminal(FFinstance* instance)
         ffPrintFormatString(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminalKey, &instance->config.terminalFormat, NULL, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalExe},
-            {FF_FORMAT_ARG_TYPE_STRING, &result->terminalExeName}
+            {FF_FORMAT_ARG_TYPE_STRING, result->terminalExeName}
         });
     }
 }
