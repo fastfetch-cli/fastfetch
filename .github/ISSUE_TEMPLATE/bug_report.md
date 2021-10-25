@@ -8,17 +8,17 @@ assignees: ''
 ---
 
 Output of `fastfetch --version`:
-```bash
+```
 //paste here
 ```
 
 Output of `fastfetch --load-config devinfo`:
-```bash
+```
 //paste here
 ```
 
 Output of `fastfetch --load-config devinfo-verbose`:
-```bash
+```
 //paste here
 ```
 
