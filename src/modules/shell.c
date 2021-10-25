@@ -37,7 +37,7 @@ void ffPrintShell(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellExe},
-            {FF_FORMAT_ARG_TYPE_STRING, &result->userShellExeName},
+            {FF_FORMAT_ARG_TYPE_STRING, result->userShellExeName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellVersion}
         });
     }

@@ -8,6 +8,13 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
+
+if(BUILD_TESTS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -mtune=native -pipe -fno-plt -Wconversion")
+endif(BUILD_TESTS)
+
 execute_process(
     COMMAND git rev-list --count HEAD
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
@@ -29,13 +36,6 @@ execute_process (
 )
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
-
-if(BUILD_TESTS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -mtune=native -pipe -fno-plt -Wconversion -Wpedantic")
-endif(BUILD_TESTS)
 
 function(fastfetch_load_text FILENAME OUTVAR)
     file(READ "${FILENAME}" TEMP)

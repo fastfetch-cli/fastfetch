@@ -1,0 +1,2 @@
+--load-config verbose
+--load-config devinfo

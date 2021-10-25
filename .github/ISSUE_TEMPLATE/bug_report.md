@@ -12,7 +12,12 @@ Output of `fastfetch --version`:
 //paste here
 ```
 
-Output of `fastfetch --show-errors --multithreading false`:
+Output of `fastfetch --load-config devinfo`:
+```bash
+//paste here
+```
+
+Output of `fastfetch --load-config devinfo-verbose`:
 ```bash
 //paste here
 ```
