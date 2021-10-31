@@ -1,15 +1,15 @@
 # Fastfetch configuration
 # Write every argument in different lines.
 # Direct arguments will overwrite the corresponding ones in this file.
+# Argument keys are not case sensitive.
 # Whitespaces are trimmed at the beginning and the end.
 # Empty lines or lines starting with # are ignored.
 
 # This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
-# Use fastfetch --print-config > ~/.config/fastfetch/config.conf to generate the current default one
+# Use fastfetch --print-config > ~/.config/fastfetch/config.conf to overwrite this with the current defaults
 
 # Below some options are listed. Uncomment and modify them so they take affect.
 # Note that there are a lot more options than listed here, take a look at "fastfetch --help".
-# Notably all the --*-format and --*-key options are missing.
 # Of course all of the can be made persistent here too.
 
 # Config option:
@@ -96,3 +96,73 @@
 # Must be true or false.
 # Default is true.
 #--color-logo true
+
+# Key options:
+# Sets the displayed key of a module
+# Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
+#--os-key OS
+#--host-key Host
+#--kernel-key Kernel
+#--uptime-key Uptime
+#--processes-key Processes
+#--packages-key Packages
+#--shell-key Shell
+#--resolution-key Resolution {1}
+#--de-key DE
+#--wm-key WM
+#--wm-theme-key WM Theme
+#--theme-key Theme
+#--icons-key Icons
+#--font-key Font
+#--cursor-key Cursor
+#--terminal-key Terminal
+#--terminal-font-key Terminal Font
+#--cpu-key CPU
+#--gpu-key GPU {1}
+#--memory-key Memory
+#--disk-key Disk ({1})
+#--battery-key Battery {1}
+#--locale-key Locale
+#--local-ip-key Local IP ({1})
+
+# Format options:
+# Sets the format string for module values.
+# For information on format strings, see "fastfetch --help format".
+# To see the parameter they take and their default value, see "fastfetch --help *-format", e.g. "fastfetch --help os-format".
+# An empty format string (As they are currently below) will behave as if it was not set.
+#--os-format
+#--host-format
+#--kernel-format
+#--uptime-format
+#--processes-format
+#--packages-format
+#--shell-format
+#--resolution-format
+#--de-format
+#--wm-format
+#--wm-theme-format
+#--theme-format
+#--icons-format
+#--font-format
+#--cursor-format
+#--terminal-format
+#--terminal-font-format
+#--cpu-format
+#--gpu-format
+#--memory-format
+#--disk-format
+#--battery-format
+#--locale-format
+#--local-ip-format
+
+# Library options:
+# Sets an user specific path to a library to load.
+# Must be a valid path to a library.
+#--lib-PCI /usr/lib/libpci.so
+#--lib-X11 /usr/lib/libX11.so
+#--lib-Xrandr /usr/lib/libXrandr.so
+#--lib-gio /usr/lib/libgio-2.0.so
+#--lib-DConf /usr/lib/libdconf.so
+#--lib-wayland /usr/lib/libwayland-client.so
+#--lib-XFConf /usr/lib/libxfconf-0.so
+#--lib-SQLite /usr/lib/libsqlite3.so

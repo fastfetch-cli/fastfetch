@@ -85,7 +85,7 @@ Key options: Provide a custom key for an output
    --locale-key <key>
    --local-ip-key <key>: takes the name of this network interface as format argument
 
-Library optins: Set the path of a library to load
+Library options: Set the path of a library to load
    --lib-PCI <path>
    --lib-X11 <path>
    --lib-Xrandr <path>
