@@ -600,6 +600,7 @@ void ffPrintLogos(FFinstance* instance)
     FF_LOGO_PRINT(celos, initLogoCelOS)
     FF_LOGO_PRINT(debian, initLogoDebian)
     FF_LOGO_PRINT(fedora, initLogoFedora)
+    FF_LOGO_PRINT(fedora_old, initLogoFedoraOld)
     FF_LOGO_PRINT(garuda, initLogoGaruda)
     FF_LOGO_PRINT(gentoo, initLogoGentoo)
     FF_LOGO_PRINT(manjaro, initLogoManjaro)
@@ -607,8 +608,6 @@ void ffPrintLogos(FFinstance* instance)
     FF_LOGO_PRINT(pop, initLogoPop)
     FF_LOGO_PRINT(ubuntu, initLogoUbuntu)
     FF_LOGO_PRINT(void, initLogoVoid)
-
-    #undef FF_LOGO_PRINT
 }
 
 #endif
