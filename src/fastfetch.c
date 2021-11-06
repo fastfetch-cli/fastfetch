@@ -364,8 +364,8 @@ static inline void listSupportedFeatures()
         #ifdef FF_HAVE_XFCONF
             "xfconf\n"
         #endif
-        #ifdef FF_HAVE_SQLITE3
-            "sqlite3\n"
+        #ifdef FF_HAVE_RPM
+            "librpm\n"
         #endif
         ""
     , stdout);
@@ -745,8 +745,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libWayland);
     else if(strcasecmp(key, "--lib-XFConf") == 0)
         optionParseString(key, value, &instance->config.libXFConf);
-    else if(strcasecmp(key, "--lib-SQLite") == 0)
-        optionParseString(key, value, &instance->config.libSQLite);
+    else if(strcasecmp(key, "--lib-rpm") == 0)
+        optionParseString(key, value, &instance->config.librpm);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)

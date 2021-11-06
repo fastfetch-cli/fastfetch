@@ -110,12 +110,12 @@ else(XFCONF_FOUND)
     message(WARNING "Package libxfconf-0 not found. Building without support.")
 endif(XFCONF_FOUND)
 
-pkg_check_modules (SQLITE3 sqlite3)
-if(SQLITE3_FOUND)
-    add_compile_definitions(FF_HAVE_SQLITE3=1)
-else(SQLITE3_FOUND)
-    message(WARNING "Package sqlite3 not found. Building without support.")
-endif(SQLITE3_FOUND)
+pkg_check_modules (RPM rpm)
+if(RPM_FOUND)
+    add_compile_definitions(FF_HAVE_RPM=1)
+else(RPM_FOUND)
+    message(WARNING "Package librpm not found. Building without support.")
+endif(RPM_FOUND)
 
 include_directories(
     ${PROJECT_BINARY_DIR}
@@ -127,7 +127,7 @@ include_directories(
     ${GIO_INCLUDE_DIRS}
     ${DCONF_INCLUDE_DIRS}
     ${XFCONF_INCLUDE_DIRS}
-    ${SQLITE3_INCLUDE_DIRS}
+    ${RPM_INCLUDE_DIRS}
 )
 
 link_libraries(

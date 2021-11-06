@@ -198,7 +198,7 @@ __fastfetch_completion()
         "--lib-DConf"
         "--lib-wayland"
         "--lib-XFConf"
-        "--lib-SQLite"
+        "--lib-RPM"
         "--battery-dir"
         "--load-config"
     )

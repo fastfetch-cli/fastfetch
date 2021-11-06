@@ -104,7 +104,7 @@ typedef struct FFconfig
     FFstrbuf libGIO;
     FFstrbuf libDConf;
     FFstrbuf libXFConf;
-    FFstrbuf libSQLite;
+    FFstrbuf librpm;
 
     FFstrbuf diskFolders;
 
@@ -337,7 +337,7 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
 FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type);
 
-uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName);
+uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance);
 
 #ifdef __ANDROID__
 void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);

@@ -290,107 +290,77 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 }
 #endif //FF_HAVE_XFCONF
 
-#ifdef FF_HAVE_SQLITE3
-#include <sqlite3.h>
+#ifdef FF_HAVE_RPM
+#include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
+#include <rpm/rpmdb.h>
 
-typedef struct SQLiteData
+typedef struct LibrpmData
 {
-    int(*ffsqlite3_open_v2)(const char* filename, sqlite3** ppDb, int flags, const char* zVfs);
-    int(*ffsqlite3_prepare_v2)(sqlite3* db, const char* zSql, int nByte, sqlite3_stmt** ppStmt, const char** pzTail);
-    int(*ffsqlite3_step)(sqlite3_stmt* pStmt);
-    int(*ffsqlite3_data_count)(sqlite3_stmt* pStmt);
-    int(*ffsqlite3_column_int)(sqlite3_stmt* pStmt, int iCol);
-    int(*ffsqlite3_finalize)(sqlite3_stmt* pStmt);
-    int(*ffsqlite3_close)(sqlite3* db);
-} SQLiteData;
+    __typeof__(&rpmReadConfigFiles) ffrpmReadConfigFiles;
+    __typeof__(&rpmtsCreate) ffrpmtsCreate;
+    __typeof__(&rpmtsInitIterator) ffrpmtsInitIterator;
+    __typeof__(&rpmdbGetIteratorCount) ffrpmdbGetIteratorCount;
+    __typeof__(&rpmdbFreeIterator) ffrpmdbFreeIterator;
+    __typeof__(&rpmtsFree) ffrpmtsFree;
+} LibrpmData;
 
-static inline void closeSQLiteHandles(const SQLiteData* data, sqlite3* db, sqlite3_stmt* stmt)
-{
-    if(data->ffsqlite3_finalize != NULL && stmt != NULL)
-        data->ffsqlite3_finalize(stmt);
+uint32_t getRpmPackageCount(LibrpmData* data) {
+    uint32_t count = 0;
+    rpmts ts = NULL;
+    rpmdbMatchIterator mi = NULL;
 
-    if(data->ffsqlite3_close != NULL && db != NULL)
-        data->ffsqlite3_close(db);
-}
+    if (data->ffrpmReadConfigFiles(NULL, NULL)) goto exit;
+    if (!(ts = data->ffrpmtsCreate())) goto exit;
+    if (!(mi = data->ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0))) goto exit;
+    count = data->ffrpmdbGetIteratorCount(mi);
 
-uint32_t getSQLiteColumnCount(const SQLiteData* data, const char* fileName, const char* tableName)
-{
-    if(data->ffsqlite3_open_v2 == NULL)
-        return 0;
-
-    sqlite3* db;
-    if(data->ffsqlite3_open_v2(fileName, &db, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
-        return 0;
-
-    FFstrbuf sql;
-    ffStrbufInit(&sql);
-    ffStrbufAppendS(&sql, "SELECT COUNT(*) FROM ");
-    ffStrbufAppendS(&sql, tableName);
-
-    sqlite3_stmt* stmt = NULL;
-    int ret = data->ffsqlite3_prepare_v2(db, sql.chars, sql.length + 1, &stmt, NULL);
-    ffStrbufDestroy(&sql);
-    if(ret != SQLITE_OK)
-    {
-        closeSQLiteHandles(data, db, stmt);
-        return 0;
-    }
-
-    if(data->ffsqlite3_step(stmt) != SQLITE_ROW)
-    {
-        closeSQLiteHandles(data, db, stmt);
-        return 0;
-    }
-
-    if(data->ffsqlite3_data_count(stmt) < 1)
-    {
-        closeSQLiteHandles(data, db, stmt);
-        return 0;
-    }
-
-    int count = data->ffsqlite3_column_int(stmt, 0);
-    closeSQLiteHandles(data, db, stmt);
+exit:
+    if (mi) data->ffrpmdbFreeIterator(mi);
+    if (ts) data->ffrpmtsFree(ts);
     return count;
 }
 
-uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName)
+uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    static SQLiteData data;
+    static LibrpmData data;
 
     pthread_mutex_lock(&mutex);
 
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return getSQLiteColumnCount(&data, fileName, tableName);
+        return getRpmPackageCount(&data);
     }
     init = true;
 
-    data.ffsqlite3_open_v2 = NULL; //error indicator
+    // As `data` is a static variable, it's already zero inited.
+    // data.ffrpmtsCreate = NULL;
 
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libSQLite, "libsqlite3.so", mutex, 0);
+    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.librpm, "librpm.so", mutex, 0);
 
-    data.ffsqlite3_open_v2 = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_open_v2", mutex, 0);
-    data.ffsqlite3_prepare_v2 = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_prepare_v2", mutex, 0);
-    data.ffsqlite3_step = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_step", mutex, 0);
-    data.ffsqlite3_data_count = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_data_count", mutex, 0);
-    data.ffsqlite3_column_int = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_column_int", mutex, 0);
-    data.ffsqlite3_finalize = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_finalize", mutex, 0);
-    data.ffsqlite3_close = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_close", mutex, 0);
+#define FF_LOAD_LIB_SYMBOL(fnName) data.ff ## fnName = FF_LIBRARY_LOAD_SYMBOL(library, #fnName, mutex, 0);
+    FF_LOAD_LIB_SYMBOL(rpmReadConfigFiles);
+    FF_LOAD_LIB_SYMBOL(rpmtsCreate);
+    FF_LOAD_LIB_SYMBOL(rpmtsInitIterator);
+    FF_LOAD_LIB_SYMBOL(rpmdbGetIteratorCount);
+    FF_LOAD_LIB_SYMBOL(rpmdbFreeIterator);
+    FF_LOAD_LIB_SYMBOL(rpmtsFree);
+#undef FF_LOAD_LIB_SYMBOL
 
     pthread_mutex_unlock(&mutex);
-    return getSQLiteColumnCount(&data, fileName, tableName);
+    return getRpmPackageCount(&data);
 }
-#else //FF_HAVE_SQLITE3
-uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName)
+#else //FF_HAVE_RPM
+uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
 {
-    FF_UNUSED(instance, fileName, tableName);
+    FF_UNUSED(instance);
     return 0;
 }
-#endif //FF_HAVE_SQLITE3
+#endif //FF_HAVE_RPM
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
