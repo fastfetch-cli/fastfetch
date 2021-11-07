@@ -62,7 +62,7 @@ void ffPrintPackages(FFinstance* instance)
     dpkg += getNumStrings("/data/data/com.termux/files/usr/var/lib/dpkg/status", "Status: ");
 #endif
 
-    uint32_t rpm = ffSettingsGetSQLiteColumnCount(instance, "/var/lib/rpm/rpmdb.sqlite", "Packages");
+    uint32_t rpm = ffSettingsGetRpmPackageCount(instance);
     uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
     uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
     uint32_t snap = getNumElements("/snap", DT_DIR);

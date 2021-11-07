@@ -21,11 +21,11 @@ The following libraries are used if present:
 *  [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
 *  [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
 *  [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
-*  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance in wayland sessions.  
+*  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance in wayland sessions.
 *  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 *  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
-*  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.  
-*  [`libSQLite3`](https://www.sqlite.org/index.html): Needed for rpm package count.  
+*  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
+*  [`librpm`](http://rpm.org/): Needed for rpm package count.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.

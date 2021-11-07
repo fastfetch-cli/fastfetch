@@ -179,7 +179,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libDConf, 1);
     ffStrbufInitA(&instance->config.libWayland, 1);
     ffStrbufInitA(&instance->config.libXFConf, 1);
-    ffStrbufInitA(&instance->config.libSQLite, 1);
+    ffStrbufInitA(&instance->config.librpm, 1);
 
     ffStrbufInitA(&instance->config.diskFolders, 1);
 

@@ -7,11 +7,14 @@ typedef void* DynamicLibrary;
 
 #define FF_VARIANT_NULL ((FFvariant){.strValue = NULL})
 
-#define FF_LIBRARY_LOAD(libraryNameUser, libraryNameDefault, mutex, returnValue) dlopen(libraryNameUser.length == 0 ? libraryNameDefault : libraryNameUser.chars, RTLD_LAZY); \
-    if(dlerror() != NULL) { \
+#define FF_LIBRARY_LOAD(libraryNameUser, libraryNameDefault, mutex, returnValue) ({ \
+    void* addr = dlopen(libraryNameUser.length == 0 ? libraryNameDefault : libraryNameUser.chars, RTLD_LAZY); \
+    if(addr == NULL) { \
         pthread_mutex_unlock(&mutex); \
         return returnValue; \
-    }
+    } \
+    addr; \
+})
 
 #define FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue) { \
     pthread_mutex_unlock(&mutex); \
@@ -19,24 +22,27 @@ typedef void* DynamicLibrary;
     return returnValue; \
 }
 
-#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, mutex, returnValue) dlsym(library, symbolName); \
-    if(dlerror() != NULL) \
-        FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue)
+#define FF_LIBRARY_DEFINE_SYMBOL_FIELD(symbolName) __typeof__(&symbolName) ff ## symbolName
+
+#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, mutex, returnValue) ({ \
+    void* fn = dlsym(library, symbolName); \
+    if(fn == NULL) \
+        FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue); \
+    fn; \
+})
+
+#define FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(object, library, symbolName, mutex, returnValue) \
+    object.ff ## symbolName = FF_LIBRARY_LOAD_SYMBOL(library, #symbolName, mutex, returnValue)
 
 #ifdef FF_HAVE_GIO
 #include <gio/gio.h>
 
 typedef struct GVariantGetters
 {
-    const gchar*(*ffg_variant_get_string)(GVariant*, gsize*);
-    gboolean(*ffg_variant_get_boolean)(GVariant*);
-    gint32(*ffg_variant_get_int32)(GVariant*);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_variant_get_string);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_variant_get_boolean);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_variant_get_int32);
 } GVariantGetters;
-
-#define FF_LIBRARY_GVARIANT_GETTERS_INIT(library, object, mutex) \
-    object.ffg_variant_get_string = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_string", mutex, FF_VARIANT_NULL); \
-    object.ffg_variant_get_boolean = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_boolean", mutex, FF_VARIANT_NULL); \
-    object.ffg_variant_get_int32 = FF_LIBRARY_LOAD_SYMBOL(library, "g_variant_get_int32", mutex, FF_VARIANT_NULL)
 
 static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVariantGetters* variantGetters)
 {
@@ -55,12 +61,12 @@ static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVarian
 typedef struct GSettingsData
 {
     GSettingsSchemaSource* schemaSource;
-    GSettingsSchema*(*ffg_settings_schema_source_lookup)(GSettingsSchemaSource*, const gchar*, gboolean);
-    gboolean(*ffg_settings_schema_has_key)(GSettingsSchema*, const gchar*);
-    GSettings*(*ffg_settings_new_full)(GSettingsSchema*, GSettingsBackend*, const gchar*);
-    GVariant*(*ffg_settings_get_value)(GSettings*, const gchar*);
-    GVariant*(*ffg_settings_get_user_value)(GSettings*, const gchar*);
-    GVariant*(*ffg_settings_get_default_value)(GSettings*, const gchar*);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_schema_source_lookup);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_schema_has_key);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_new_full);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_get_value);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_get_user_value);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_get_default_value);
     GVariantGetters variantGetters;
 } GSettingsData;
 
@@ -112,13 +118,15 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
 
     DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libGIO, "libgio-2.0.so", mutex, FF_VARIANT_NULL);
 
-    data.ffg_settings_schema_source_lookup = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_schema_source_lookup", mutex, FF_VARIANT_NULL);
-    data.ffg_settings_schema_has_key = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_schema_has_key", mutex, FF_VARIANT_NULL);
-    data.ffg_settings_new_full = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_new_full", mutex, FF_VARIANT_NULL);
-    data.ffg_settings_get_value = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_get_value", mutex, FF_VARIANT_NULL);
-    data.ffg_settings_get_user_value = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_get_user_value", mutex, FF_VARIANT_NULL);
-    data.ffg_settings_get_default_value = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_get_default_value", mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_GVARIANT_GETTERS_INIT(library, data.variantGetters, mutex);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_schema_source_lookup, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_schema_has_key, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_new_full, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_get_value, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_get_user_value, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_get_default_value, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_string, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_boolean, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_int32, mutex, FF_VARIANT_NULL);
 
     GSettingsSchemaSource*(*ffg_settings_schema_source_get_default)(void) = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_schema_source_get_default", mutex, FF_VARIANT_NULL);
     if((data.schemaSource = ffg_settings_schema_source_get_default()) == NULL)
@@ -141,7 +149,7 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
 
 typedef struct DConfData
 {
-    GVariant*(*ffdconf_client_read_full)(DConfClient*, const gchar*, DConfReadFlags, const GQueue*);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(dconf_client_read_full);
     GVariantGetters variantGetters;
     DConfClient* client;
 } DConfData;
@@ -183,8 +191,10 @@ FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttyp
 
     DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libDConf, "libdconf.so", mutex, FF_VARIANT_NULL);
 
-    data.ffdconf_client_read_full = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_read_full", mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_GVARIANT_GETTERS_INIT(library, data.variantGetters, mutex);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, dconf_client_read_full, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_string, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_boolean, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_int32, mutex, FF_VARIANT_NULL);
 
     DConfClient*(*ffdconf_client_new)(void) = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_new", mutex, FF_VARIANT_NULL);
     if((data.client = ffdconf_client_new()) == NULL)
@@ -220,11 +230,11 @@ FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* 
 typedef struct XFConfData
 {
     bool init;
-    XfconfChannel*(*ffxfconf_channel_get)(const gchar*);
-    gboolean(*ffxfconf_channel_has_property)(XfconfChannel*, const gchar*);
-    gchar*(*ffxfconf_channel_get_string)(XfconfChannel*, const gchar*, const gchar*);
-    gboolean(*ffxfconf_channel_get_bool)(XfconfChannel*, const gchar*, gboolean);
-    gint32(*ffxfconf_channel_get_int)(XfconfChannel*, const gchar*, gint32);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_has_property);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get_string);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get_bool);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get_int);
 } XFConfData;
 
 static FFvariant getXFConfValue(XFConfData* data, const char* channelName, const char* propertyName, FFvarianttype type)
@@ -269,11 +279,12 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 
     DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libXFConf, "libxfconf-0.so", mutex, FF_VARIANT_NULL);
 
-    data.ffxfconf_channel_get = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get", mutex, FF_VARIANT_NULL);
-    data.ffxfconf_channel_has_property = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_has_property", mutex, FF_VARIANT_NULL);
-    data.ffxfconf_channel_get_string = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get_string", mutex, FF_VARIANT_NULL);
-    data.ffxfconf_channel_get_bool = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get_bool", mutex, FF_VARIANT_NULL);
-    data.ffxfconf_channel_get_int = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_channel_get_int", mutex, FF_VARIANT_NULL);
+
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_has_property, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get_string, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get_bool, mutex, FF_VARIANT_NULL);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get_int, mutex, FF_VARIANT_NULL);
 
     gboolean(*ffxfconf_init)(GError **) = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_init", mutex, FF_VARIANT_NULL);
     if((data.init = ffxfconf_init(NULL)) == FALSE)
@@ -290,107 +301,75 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 }
 #endif //FF_HAVE_XFCONF
 
-#ifdef FF_HAVE_SQLITE3
-#include <sqlite3.h>
+#ifdef FF_HAVE_RPM
+#include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
+#include <rpm/rpmdb.h>
 
-typedef struct SQLiteData
+typedef struct LibrpmData
 {
-    int(*ffsqlite3_open_v2)(const char* filename, sqlite3** ppDb, int flags, const char* zVfs);
-    int(*ffsqlite3_prepare_v2)(sqlite3* db, const char* zSql, int nByte, sqlite3_stmt** ppStmt, const char** pzTail);
-    int(*ffsqlite3_step)(sqlite3_stmt* pStmt);
-    int(*ffsqlite3_data_count)(sqlite3_stmt* pStmt);
-    int(*ffsqlite3_column_int)(sqlite3_stmt* pStmt, int iCol);
-    int(*ffsqlite3_finalize)(sqlite3_stmt* pStmt);
-    int(*ffsqlite3_close)(sqlite3* db);
-} SQLiteData;
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmReadConfigFiles);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsCreate);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsInitIterator);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmdbGetIteratorCount);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmdbFreeIterator);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsFree);
+} LibrpmData;
 
-static inline void closeSQLiteHandles(const SQLiteData* data, sqlite3* db, sqlite3_stmt* stmt)
-{
-    if(data->ffsqlite3_finalize != NULL && stmt != NULL)
-        data->ffsqlite3_finalize(stmt);
+uint32_t getRpmPackageCount(LibrpmData* data) {
+    uint32_t count = 0;
+    rpmts ts = NULL;
+    rpmdbMatchIterator mi = NULL;
 
-    if(data->ffsqlite3_close != NULL && db != NULL)
-        data->ffsqlite3_close(db);
-}
+    if (data->ffrpmReadConfigFiles(NULL, NULL)) goto exit;
+    if (!(ts = data->ffrpmtsCreate())) goto exit;
+    if (!(mi = data->ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0))) goto exit;
+    count = data->ffrpmdbGetIteratorCount(mi);
 
-uint32_t getSQLiteColumnCount(const SQLiteData* data, const char* fileName, const char* tableName)
-{
-    if(data->ffsqlite3_open_v2 == NULL)
-        return 0;
-
-    sqlite3* db;
-    if(data->ffsqlite3_open_v2(fileName, &db, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
-        return 0;
-
-    FFstrbuf sql;
-    ffStrbufInit(&sql);
-    ffStrbufAppendS(&sql, "SELECT COUNT(*) FROM ");
-    ffStrbufAppendS(&sql, tableName);
-
-    sqlite3_stmt* stmt = NULL;
-    int ret = data->ffsqlite3_prepare_v2(db, sql.chars, sql.length + 1, &stmt, NULL);
-    ffStrbufDestroy(&sql);
-    if(ret != SQLITE_OK)
-    {
-        closeSQLiteHandles(data, db, stmt);
-        return 0;
-    }
-
-    if(data->ffsqlite3_step(stmt) != SQLITE_ROW)
-    {
-        closeSQLiteHandles(data, db, stmt);
-        return 0;
-    }
-
-    if(data->ffsqlite3_data_count(stmt) < 1)
-    {
-        closeSQLiteHandles(data, db, stmt);
-        return 0;
-    }
-
-    int count = data->ffsqlite3_column_int(stmt, 0);
-    closeSQLiteHandles(data, db, stmt);
+exit:
+    if (mi) data->ffrpmdbFreeIterator(mi);
+    if (ts) data->ffrpmtsFree(ts);
     return count;
 }
 
-uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName)
+uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    static SQLiteData data;
+    static LibrpmData data;
 
     pthread_mutex_lock(&mutex);
 
     if(init)
     {
         pthread_mutex_unlock(&mutex);
-        return getSQLiteColumnCount(&data, fileName, tableName);
+        return getRpmPackageCount(&data);
     }
     init = true;
 
-    data.ffsqlite3_open_v2 = NULL; //error indicator
+    // As `data` is a static variable, it's already zero inited.
+    // data.ffrpmtsCreate = NULL;
 
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libSQLite, "libsqlite3.so", mutex, 0);
+    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.librpm, "librpm.so", mutex, 0);
 
-    data.ffsqlite3_open_v2 = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_open_v2", mutex, 0);
-    data.ffsqlite3_prepare_v2 = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_prepare_v2", mutex, 0);
-    data.ffsqlite3_step = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_step", mutex, 0);
-    data.ffsqlite3_data_count = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_data_count", mutex, 0);
-    data.ffsqlite3_column_int = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_column_int", mutex, 0);
-    data.ffsqlite3_finalize = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_finalize", mutex, 0);
-    data.ffsqlite3_close = FF_LIBRARY_LOAD_SYMBOL(library, "sqlite3_close", mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmReadConfigFiles, mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsCreate, mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsInitIterator, mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmdbGetIteratorCount, mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmdbFreeIterator, mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsFree, mutex, 0);
 
     pthread_mutex_unlock(&mutex);
-    return getSQLiteColumnCount(&data, fileName, tableName);
+    return getRpmPackageCount(&data);
 }
-#else //FF_HAVE_SQLITE3
-uint32_t ffSettingsGetSQLiteColumnCount(FFinstance* instance, const char* fileName, const char* tableName)
+#else //FF_HAVE_RPM
+uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
 {
-    FF_UNUSED(instance, fileName, tableName);
+    FF_UNUSED(instance);
     return 0;
 }
-#endif //FF_HAVE_SQLITE3
+#endif //FF_HAVE_RPM
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
