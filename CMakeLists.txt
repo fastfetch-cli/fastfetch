@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0) # Threads::Threads is needed
+cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch)
 
@@ -53,6 +53,16 @@ fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
 fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
+
+file(GLOB LOGOS "src/data/logos/*.fflogo")
+foreach(LOGO_FILE ${LOGOS})
+    file(READ "${LOGO_FILE}" LOGO_RAW)
+
+    string(REGEX MATCH "names {[^}]*" LOGO_NAMES "${LOGO_RAW}")
+    message("${LOGO_NAMES}")
+
+endforeach()
+
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
