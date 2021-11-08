@@ -32,7 +32,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Logos
 ```
-Arch, Artix, Debian, Fedora, Fedora old, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, Ubuntu, Void
+Arch, Artix, CentOS, Debian, Fedora, Fedora old, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, Ubuntu, Void
 ```
 > **_NOTE:_** Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
 
