@@ -305,6 +305,7 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 #include <rpm/rpmlib.h>
 #include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>
+#include <rpm/rpmlog.h>
 
 typedef struct LibrpmData
 {
@@ -314,9 +315,13 @@ typedef struct LibrpmData
     FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmdbGetIteratorCount);
     FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmdbFreeIterator);
     FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsFree);
+    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmlogSetMask);
 } LibrpmData;
 
 uint32_t getRpmPackageCount(LibrpmData* data) {
+    // Don't print any error messages
+    data->ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
+
     uint32_t count = 0;
     rpmts ts = NULL;
     rpmdbMatchIterator mi = NULL;
@@ -359,6 +364,7 @@ uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmdbGetIteratorCount, mutex, 0);
     FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmdbFreeIterator, mutex, 0);
     FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsFree, mutex, 0);
+    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmlogSetMask, mutex, 0);
 
     pthread_mutex_unlock(&mutex);
     return getRpmPackageCount(&data);
