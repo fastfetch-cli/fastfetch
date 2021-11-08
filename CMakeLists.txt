@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads is needed
 
-project(fastfetch)
+project(fastfetch LANGUAGES C)
 
 option(BUILD_TESTS "Build test programs" OFF)
 
