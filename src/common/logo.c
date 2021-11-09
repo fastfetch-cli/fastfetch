@@ -138,6 +138,41 @@ static FFlogo* getLogoCelOS()
     FF_LOGO_RETURN
 }
 
+static FFlogo* getLogoCentOS()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("centos", "centos-linux")
+    FF_LOGO_LINES(
+        "$1                 ..                 \n"
+        "$1               .PLTJ.               \n"
+        "$1              <><><><>              \n"
+        "$2     KKSSV' 4KKK $1LJ$4 KKKL.'VSSKK     \n"
+        "$2     KKV' 4KKKKK $1LJ$4 KKKKAL 'VKK     \n"
+        "$2     V' ' 'VKKKK $1LJ$4 KKKKV' ' 'V     \n"
+        "$2     .4MA.' 'VKK $1LJ$4 KKV' '.4Mb.     \n"
+        "$4   . $2KKKKKA.' 'V $1LJ$4 V' '.4KKKKK $3.   \n"
+        "$4 .4D $2KKKKKKKA.'' $1LJ$4 ''.4KKKKKKK $3FA. \n"
+        "$4<QDD ++++++++++++  $3++++++++++++ GFD>\n"
+        "$4 'VD $3KKKKKKKK'.. $2LJ $1..'KKKKKKKK $3FV  \n"
+        "$4   ' $3VKKKKK'. .4 $2LJ $1K. .'KKKKKV $3'   \n"
+        "$3      'VK'. .4KK $2LJ $1KKA. .'KV'      \n"
+        "$3     A. . .4KKKK $2LJ $1KKKKA. . .4     \n"
+        "$3     KKA. 'KKKKK $2LJ $1KKKKK' .4KK     \n"
+        "$3     KKSSA. VKKK $2LJ $1KKKV .4SSKK     \n"
+        "$2              <><><><>              \n"
+        "$1               'MKKM'               \n"
+        "$1                 ''                 "
+    )
+    FF_LOGO_COLORS(
+        "\033[33m", //yellow
+        "\033[32m", //green
+        "\033[34m", //blue
+        "\033[35m", //magenta
+        "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
 static FFlogo* getLogoDebian()
 {
     FF_LOGO_INIT
@@ -456,6 +491,7 @@ static getLogoMethod* getLogoMethods()
         getLogoArch,
         getLogoArtix,
         getLogoCelOS,
+        getLogoCentOS,
         getLogoDebian,
         getLogoFedora,
         getLogoFedoraOld,
@@ -742,4 +778,3 @@ void ffListLogos()
 }
 
 #endif
-
