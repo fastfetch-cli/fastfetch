@@ -315,6 +315,7 @@ void ffPrintRemainingLogo(FFinstance* instance);
 #ifndef FASTFETCH_BUILD_FLASHFATCH
     void ffPrintLogos(FFinstance* instance);
     void ffListLogos();
+    void ffListLogosForAutocompletion();
 #endif
 
 //common/format.c

@@ -481,11 +481,11 @@ static FFlogo* getLogoVoid()
     FF_LOGO_RETURN
 }
 
-typedef FFlogo*(*getLogoMethod)();
+typedef FFlogo*(*GetLogoMethod)();
 
-static getLogoMethod* getLogoMethods()
+static GetLogoMethod* getLogoMethods()
 {
-    static getLogoMethod logoMethods[] = {
+    static GetLogoMethod logoMethods[] = {
         getLogoNone,
         getLogoUnknown,
         getLogoArch,
@@ -525,7 +525,7 @@ static bool logoHasName(FFlogo* logo, const char* name)
 
 static bool loadLogoSet(FFinstance* instance, const char* name)
 {
-    getLogoMethod* logoMethod = getLogoMethods();
+    GetLogoMethod* logoMethod = getLogoMethods();
 
     while(*logoMethod != NULL)
     {
@@ -743,7 +743,7 @@ void ffPrintRemainingLogo(FFinstance* instance)
 
 void ffPrintLogos(FFinstance* instance)
 {
-    getLogoMethod* methods = getLogoMethods();
+    GetLogoMethod* methods = getLogoMethods();
 
     while(*methods != NULL)
     {
@@ -757,7 +757,7 @@ void ffPrintLogos(FFinstance* instance)
 
 void ffListLogos()
 {
-    getLogoMethod* methods = getLogoMethods();
+    GetLogoMethod* methods = getLogoMethods();
 
     while(*methods != NULL)
     {
@@ -773,6 +773,17 @@ void ffListLogos()
 
         putchar('\n');
 
+        ++methods;
+    }
+}
+
+void ffListLogosForAutocompletion()
+{
+    GetLogoMethod* methods = getLogoMethods();
+
+    while(*methods != NULL)
+    {
+        printf("%s\n", (*methods)()->names[0]);
         ++methods;
     }
 }

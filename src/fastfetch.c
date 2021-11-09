@@ -515,6 +515,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         ffListLogos();
         exit(0);
     }
+    else if(strcasecmp(key, "--list-logos-autocompletion") == 0)
+    {
+        ffListLogosForAutocompletion();
+        exit(0);
+    }
     else if(strcasecmp(key, "--print-logos") == 0)
     {
         ffPrintLogos(instance);

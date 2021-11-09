@@ -49,7 +49,7 @@ __fastfetch_complete_path()
 
 __fastfetch_complete_logo()
 {
-    COMPREPLY=($(compgen -W "$(fastfetch --list-logos)" -- "$CURRENT_WORD"))
+    COMPREPLY=($(compgen -W "$(fastfetch --list-logos-autocompletion)" -- "$CURRENT_WORD"))
 }
 
 __fastfetch_complete_option()
