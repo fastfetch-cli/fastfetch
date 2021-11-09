@@ -512,7 +512,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--list-logos") == 0)
     {
-        fputs(FASTFETCH_DATATEXT_LOGOS, stdout);
+        ffListLogos();
         exit(0);
     }
     else if(strcasecmp(key, "--print-logos") == 0)
@@ -816,15 +816,11 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 
 static void applyData(FFinstance* instance, FFdata* data)
 {
-    //We must do this after parsing all options because of color options
-    if(data->logoName.length == 0)
-        ffLoadLogo(instance);
-    else
+    if(data->logoName.length > 0)
         ffLoadLogoSet(instance, data->logoName.chars);
 
-    //This must be done after loading the logo
     if(instance->config.color.length == 0)
-        ffStrbufSetS(&instance->config.color, instance->config.logo.colors[0]);
+        ffStrbufSetS(&instance->config.color, instance->config.logo->colors[0]);
 }
 
 static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)

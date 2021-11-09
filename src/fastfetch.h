@@ -25,15 +25,17 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
 #define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
 
+typedef struct FFlogo
+{
+    const char** names; //Null terminated
+    char* lines;
+    const char** colors; // colors[0] is used as key color
+} FFlogo;
+
 typedef struct FFconfig
 {
-    struct
-    {
-        char* lines;
-        const char* colors[9]; // colors[0] is used as key color
-        bool freeable;
-        bool allLinesSameLength; // a performance optimization
-    } logo;
+    FFlogo* logo;
+    bool logoIsFromUserFile;
 
     uint16_t logoKeySpacing;
     FFstrbuf separator;
@@ -312,6 +314,7 @@ void ffPrintRemainingLogo(FFinstance* instance);
 
 #ifndef FASTFETCH_BUILD_FLASHFATCH
     void ffPrintLogos(FFinstance* instance);
+    void ffListLogos();
 #endif
 
 //common/format.c

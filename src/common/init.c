@@ -115,12 +115,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
 
-    //This is basically the none logo
-    for(uint8_t i = 0; i < sizeof(instance->config.logo.colors) / sizeof(instance->config.logo.colors[0]); ++i)
-        instance->config.logo.colors[i] = "";
-    instance->config.logo.allLinesSameLength = true;
-    instance->config.logo.freeable = false;
-    instance->config.logo.lines = "";
+    ffLoadLogo(instance);
+    instance->config.logoIsFromUserFile = false;
 
     //Since most of these properties are unlikely to be used at once, give them minimal heap space (the \0 character)
     ffStrbufInitA(&instance->config.osFormat, 1);

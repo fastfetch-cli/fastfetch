@@ -8,9 +8,8 @@ int main(int argc, char** argv)
     FFinstance instance;
     ffInitInstance(&instance); //This also applys default configuration to instance.config
 
-    //Configuration
-    ffLoadLogoSet(&instance, FASTFETCH_BUILD_DISTRIBUTION_ID);
-    ffStrbufSetS(&instance.config.color, instance.config.logo.colors[0]); //Use the primary color of the logo as key color
+    //ffLoadLogoSet(&instance, "my custom logo");
+    ffStrbufSetS(&instance.config.color, instance.config.logo->colors[0]); //Use the primary color of the logo as key color
 
     //Multithreading --> better performance
     ffStartDetectionThreads(&instance);

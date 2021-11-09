@@ -28,13 +28,6 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-execute_process (
-    COMMAND bash -c "awk -F= '/^ID=/{print $2}' /etc/os-release |tr -d '\n' | tr -d '\"'"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_VARIABLE BUILD_DISTRIBUTION_ID
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
 
 function(fastfetch_load_text FILENAME OUTVAR)
@@ -48,21 +41,10 @@ endfunction(fastfetch_load_text)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config.txt DATATEXT_CONFIG)
 fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
-fastfetch_load_text(src/data/logos.txt DATATEXT_LOGOS)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
 fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
-
-file(GLOB LOGOS "src/data/logos/*.fflogo")
-foreach(LOGO_FILE ${LOGOS})
-    file(READ "${LOGO_FILE}" LOGO_RAW)
-
-    string(REGEX MATCH "names {[^}]*" LOGO_NAMES "${LOGO_RAW}")
-    message("${LOGO_NAMES}")
-
-endforeach()
-
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
