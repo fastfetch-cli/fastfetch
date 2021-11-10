@@ -355,7 +355,7 @@ static FFlogo* getLogoManjaro()
 static FFlogo* getLogoMint()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("mint", "mint-linux")
+    FF_LOGO_NAMES("mint", "mint-linux", "linux-mint")
     FF_LOGO_LINES(
         "$2             ...-:::::-...              \n"
         "$2          .-MMMMMMMMMMMMMMM-.           \n"
@@ -376,6 +376,35 @@ static FFlogo* getLogoMint()
         "$2       '.-MMMM$1``--:::::--``$2MMMM-.'      \n"
         "$2            '-MMMMMMMMMMMMM-'           \n"
         "$2               ``-:::::-``              "
+    )
+    FF_LOGO_COLORS(
+        "\033[32m", //green
+        "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static FFlogo* getLogoMintOld()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("mint_old", "mint-old", "mint-linux_old", "mint-linux-old", "linux-mint_old", "linux-mint-old")
+    FF_LOGO_LINES(
+        "$1MMMMMMMMMMMMMMMMMMMMMMMMMmds+.     \n"
+        "$1MMm----::-://////////////oymNMd+`  \n"
+        "$1MMd      $2/++                $1-sNMd: \n"
+        "$1MMNso/`  $2dMM    `.::-. .-::.` $1.hMN:\n"
+        "$1ddddMMh  $2dMM   :hNMNMNhNMNMNh: $1`NMm\n"
+        "$1    NMm  $2dMM  .NMN/-+MMM+-/NMN` $1dMM\n"
+        "$1    NMm  $2dMM  -MMm  `MMM   dMM. $1dMM\n"
+        "$1    NMm  $2dMM  -MMm  `MMM   dMM. $1dMM\n"
+        "$1    NMm  $2dMM  .mmd  `mmm   yMM. $1dMM\n"
+        "$1    NMm  $2dMM`  ..`   ...   ydm. $1dMM\n"
+        "$1    hMM- $2+MMd/-------...-:sdds  $1dMM\n"
+        "$1    -NMm- $2:hNMNNNmdddddddddy/`  $1dMM\n"
+        "$1    -dMNs-$2``-::::-------.``    $1dMM \n"
+        "$1    `/dMNmy+/:-------------:/yMMM  \n"
+        "$1      ./ydNMMMMMMMMMMMMMMMMMMMMM   \n"
+        "$1          .MMMMMMMMMMMMMMMMMMM     "
     )
     FF_LOGO_COLORS(
         "\033[32m", //green
@@ -499,6 +528,7 @@ static GetLogoMethod* getLogoMethods()
         getLogoGentoo,
         getLogoManjaro,
         getLogoMint,
+        getLogoMintOld,
         getLogoPop,
         getLogoUbuntu,
         getLogoVoid,
@@ -523,6 +553,12 @@ static bool logoHasName(FFlogo* logo, const char* name)
     return false;
 }
 
+static inline void setLogo(FFinstance* instance, FFlogo* logo)
+{
+    instance->config.logo = logo;
+    instance->config.logoIsFromUserFile = false;
+}
+
 static bool loadLogoSet(FFinstance* instance, const char* name)
 {
     GetLogoMethod* logoMethod = getLogoMethods();
@@ -532,8 +568,7 @@ static bool loadLogoSet(FFinstance* instance, const char* name)
         FFlogo* logo = (*logoMethod)();
         if(logoHasName(logo, name))
         {
-            instance->config.logo = logo;
-            instance->config.logoIsFromUserFile = false;
+            setLogo(instance, logo);
             return true;
         }
 
@@ -568,25 +603,25 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
 static bool loadLogoSetWithVersion(FFinstance* instance, const FFstrbuf* versionID, const FFstrbuf* name)
 {
     bool isFedora = logoHasName(getLogoFedora(), name->chars);
+    bool isMint   = logoHasName(getLogoMint(),   name->chars);
 
     if(versionID->length == 0 || (
-        !isFedora
+        !isFedora &&
+        !isMint
     )) return loadLogoSet(instance, name->chars);
 
     long version = strtol(versionID->chars, NULL, 10);
-    if(version == 0 || version == LONG_MAX || version == LONG_MIN)
-        return loadLogoSet(instance, name->chars);
+
+    #define FF_LOAD_LOGO_WITH_VERSION(ver, newLogo, oldLogo) setLogo(instance, (version == 0 || version == LONG_MAX || version == LONG_MIN || version > ver) ? newLogo : oldLogo);
 
     if(isFedora)
-    {
-        if(version > 34)
-            return loadLogoSet(instance, "fedora");
-        else
-            return loadLogoSet(instance, "fedora_old");
-    }
+        FF_LOAD_LOGO_WITH_VERSION(34, getLogoFedora(), getLogoFedoraOld())
+    else if(isMint)
+        FF_LOAD_LOGO_WITH_VERSION(19, getLogoMint(), getLogoMintOld())
 
-    //This should never happen, but just in case...
-    return loadLogoSet(instance, name->chars);
+    #undef FF_LOAD_LOGO_WITH_VERSION
+
+    return true;
 }
 
 void ffLoadLogo(FFinstance* instance)
@@ -609,7 +644,7 @@ static uint32_t strLengthUTF8(const char* str, uint32_t bytesLength)
     {
         int c = (unsigned char) str[i];
 
-        if((c>=0 && c<=127))        i += 0;
+        if(c<=127) {}            // i += 0;
         else if((c & 0xE0) == 0xC0) i += 1;
         else if((c & 0xF0) == 0xE0) i += 2;
         else if((c & 0xF8) == 0xF0) i += 3;
