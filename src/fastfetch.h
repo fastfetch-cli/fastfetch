@@ -30,12 +30,12 @@ typedef struct FFlogo
     const char** names; //Null terminated
     char* lines;
     const char** colors; // colors[0] is used as key color
+    bool isFromUser;
 } FFlogo;
 
 typedef struct FFconfig
 {
-    FFlogo* logo;
-    bool logoIsFromUserFile;
+    const FFlogo* logo;
 
     uint16_t logoKeySpacing;
     FFstrbuf separator;
@@ -121,6 +121,7 @@ typedef struct FFconfig
 typedef struct FFstate
 {
     uint32_t logoWidth;
+    char* logoLinesIndex;
 
     struct passwd* passwd;
     struct utsname utsname;

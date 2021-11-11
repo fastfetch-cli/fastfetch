@@ -116,7 +116,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.hideCursor = true;
 
     ffLoadLogo(instance);
-    instance->config.logoIsFromUserFile = false;
 
     //Since most of these properties are unlikely to be used at once, give them minimal heap space (the \0 character)
     ffStrbufInitA(&instance->config.osFormat, 1);

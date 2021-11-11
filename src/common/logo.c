@@ -4,13 +4,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true;
+#define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true; logo.isFromUser = false;
 #define FF_LOGO_NAMES(...) static const char* names[] = (const char*[]) { __VA_ARGS__, NULL }; logo.names = names;
 #define FF_LOGO_LINES(x) logo.lines = x;
 #define FF_LOGO_COLORS(...) static const char* colors[] = (const char*[]) { __VA_ARGS__, NULL }; logo.colors = colors;
 #define FF_LOGO_RETURN return &logo;
 
-static FFlogo* getLogoUnknown()
+static const FFlogo* getLogoUnknown()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("unkown", "question mark")
@@ -38,7 +38,7 @@ static FFlogo* getLogoUnknown()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoNone()
+static const FFlogo* getLogoNone()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("none", "empty", "")
@@ -47,7 +47,7 @@ static FFlogo* getLogoNone()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoArch()
+static const FFlogo* getLogoArch()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("arch", "archlinux", "arch-linux")
@@ -78,7 +78,7 @@ static FFlogo* getLogoArch()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoArtix()
+static const FFlogo* getLogoArtix()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("artix", "artixlinux", "artix-linux")
@@ -110,7 +110,7 @@ static FFlogo* getLogoArtix()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoCelOS()
+static const FFlogo* getLogoCelOS()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("celos", "celos-linux")
@@ -138,7 +138,7 @@ static FFlogo* getLogoCelOS()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoCentOS()
+static const FFlogo* getLogoCentOS()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("centos", "centos-linux")
@@ -173,7 +173,7 @@ static FFlogo* getLogoCentOS()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoDebian()
+static const FFlogo* getLogoDebian()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("debian", "debian-linux")
@@ -203,7 +203,7 @@ static FFlogo* getLogoDebian()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoFedora()
+static const FFlogo* getLogoFedora()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("fedora", "fedora-linux")
@@ -235,7 +235,7 @@ static FFlogo* getLogoFedora()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoFedoraOld()
+static const FFlogo* getLogoFedoraOld()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("fedora_old", "fedora-old", "fedora-linux-old", "fedora-linux_old")
@@ -265,7 +265,7 @@ static FFlogo* getLogoFedoraOld()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoGaruda()
+static const FFlogo* getLogoGaruda()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("garuda", "garuda-linux")
@@ -295,7 +295,7 @@ static FFlogo* getLogoGaruda()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoGentoo()
+static const FFlogo* getLogoGentoo()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("gentoo", "gentoo-linux")
@@ -326,7 +326,7 @@ static FFlogo* getLogoGentoo()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoManjaro()
+static const FFlogo* getLogoManjaro()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("manjaro", "manjaro-linux")
@@ -352,7 +352,7 @@ static FFlogo* getLogoManjaro()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoMint()
+static const FFlogo* getLogoMint()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("mint", "mint-linux", "linux-mint")
@@ -384,7 +384,7 @@ static FFlogo* getLogoMint()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoMintOld()
+static const FFlogo* getLogoMintOld()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("mint_old", "mint-old", "mint-linux_old", "mint-linux-old", "linux-mint_old", "linux-mint-old")
@@ -413,7 +413,7 @@ static FFlogo* getLogoMintOld()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoPop()
+static const FFlogo* getLogoPop()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("pop", "pop-linux")
@@ -446,7 +446,7 @@ static FFlogo* getLogoPop()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoUbuntu()
+static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("ubuntu", "ubuntu-linux")
@@ -479,7 +479,7 @@ static FFlogo* getLogoUbuntu()
     FF_LOGO_RETURN
 }
 
-static FFlogo* getLogoVoid()
+static const FFlogo* getLogoVoid()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("void", "void-linux")
@@ -510,7 +510,7 @@ static FFlogo* getLogoVoid()
     FF_LOGO_RETURN
 }
 
-typedef FFlogo*(*GetLogoMethod)();
+typedef const FFlogo*(*GetLogoMethod)();
 
 static GetLogoMethod* getLogoMethods()
 {
@@ -538,7 +538,7 @@ static GetLogoMethod* getLogoMethods()
     return logoMethods;
 }
 
-static bool logoHasName(FFlogo* logo, const char* name)
+static bool logoHasName(const FFlogo* logo, const char* name)
 {
     const char** logoName = logo->names;
 
@@ -553,10 +553,11 @@ static bool logoHasName(FFlogo* logo, const char* name)
     return false;
 }
 
-static inline void setLogo(FFinstance* instance, FFlogo* logo)
+static inline void setLogo(FFinstance* instance, const FFlogo* logo)
 {
     instance->config.logo = logo;
-    instance->config.logoIsFromUserFile = false;
+    instance->state.logoWidth = 0;
+    instance->state.logoLinesIndex = logo->lines;
 }
 
 static bool loadLogoSet(FFinstance* instance, const char* name)
@@ -565,7 +566,7 @@ static bool loadLogoSet(FFinstance* instance, const char* name)
 
     while(*logoMethod != NULL)
     {
-        FFlogo* logo = (*logoMethod)();
+        const FFlogo* logo = (*logoMethod)();
         if(logoHasName(logo, name))
         {
             setLogo(instance, logo);
@@ -595,9 +596,14 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
         return;
     }
 
-    instance->config.logoIsFromUserFile = true;
-    instance->config.logo->colors = getLogoNone()->colors;
-    instance->config.logo->lines = logoChars.chars;
+    static FFlogo dummyLogo;
+    dummyLogo.isFromUser = true;
+    dummyLogo.colors = getLogoNone()->colors;
+    dummyLogo.lines = logoChars.chars;
+    static const char* NULLSTR = NULL;
+    dummyLogo.names = &NULLSTR;
+
+    setLogo(instance, &dummyLogo);
 }
 
 static bool loadLogoSetWithVersion(FFinstance* instance, const FFstrbuf* versionID, const FFstrbuf* name)
@@ -633,7 +639,7 @@ void ffLoadLogo(FFinstance* instance)
         !loadLogoSetWithVersion(instance, &result->versionID, &result->id) &&
         !loadLogoSetWithVersion(instance, &result->versionID, &result->systemName) &&
         !loadLogoSetWithVersion(instance, &result->versionID, &result->idLike)
-    ) instance->config.logo = getLogoUnknown();
+    ) setLogo(instance, getLogoUnknown());
 }
 
 static uint32_t strLengthUTF8(const char* str, uint32_t bytesLength)
@@ -670,7 +676,7 @@ void ffPrintLogoLine(FFinstance* instance)
 
     //If we have more informations than lines in the logo, print whitespaces.
     //We can return after this, since logoWidth includes logoKeySpacing.
-    if(*instance->config.logo->lines == '\0')
+    if(*instance->state.logoLinesIndex == '\0')
     {
         for(uint32_t i = 0; i < instance->state.logoWidth; ++i)
             putchar(' ');
@@ -678,7 +684,7 @@ void ffPrintLogoLine(FFinstance* instance)
     }
 
     //Save the start of the line and the length of color placeholders, so we can calculate the length of the line at the end
-    const char* start = instance->config.logo->lines;
+    const char* start = instance->state.logoLinesIndex;
     uint32_t colorPlaceholdersLength = 0;
 
 
@@ -689,22 +695,22 @@ void ffPrintLogoLine(FFinstance* instance)
     //Logo is always bold
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
 
-    while(*instance->config.logo->lines != '\n' && *instance->config.logo->lines != '\0')
+    while(*instance->state.logoLinesIndex != '\n' && *instance->state.logoLinesIndex != '\0')
     {
         //Get the current char
-        char current = *instance->config.logo->lines;
-        ++instance->config.logo->lines;
+        char current = *instance->state.logoLinesIndex;
+        ++instance->state.logoLinesIndex;
 
         //Not a color placeholder, just print it. User files don't support colors this way.
-        if(current != '$' || instance->config.logoIsFromUserFile)
+        if(current != '$' || instance->config.logo->isFromUser)
         {
             LOGO_LINE_PRINT_CHAR(current, cut);
             continue;
         }
 
         //Skip the dollar sign
-        current = *instance->config.logo->lines;
-        ++instance->config.logo->lines;
+        current = *instance->state.logoLinesIndex;
+        ++instance->state.logoLinesIndex;
 
         //We have a dollar sign at the end of the line. Just print it.
         if(current == '\n' || current == '\0')
@@ -752,22 +758,18 @@ void ffPrintLogoLine(FFinstance* instance)
     //If we haven't yet calculated the length of the line, do it now
     if(instance->state.logoWidth == 0)
     {
-        instance->state.logoWidth = strLengthUTF8(start, (uint32_t) (instance->config.logo->lines - start)) - colorPlaceholdersLength + instance->config.logoKeySpacing;
-
-        if(cutValue > instance->state.logoWidth)
-            instance->state.logoWidth = 0;
-        else
-            instance->state.logoWidth -= cutValue;
+        instance->state.logoWidth = strLengthUTF8(start, (uint32_t) (instance->state.logoLinesIndex - start)) - colorPlaceholdersLength + instance->config.logoKeySpacing;
+        instance->state.logoWidth = cutValue > instance->state.logoWidth ? 0 : instance->state.logoWidth - cutValue;
     }
 
     //If we just finished a line and not the entire logo, skip the newline char
-    if(*instance->config.logo->lines == '\n')
-        ++instance->config.logo->lines;
+    if(*instance->state.logoLinesIndex == '\n')
+        ++instance->state.logoLinesIndex;
 }
 
 void ffPrintRemainingLogo(FFinstance* instance)
 {
-    while(*instance->config.logo->lines != '\0')
+    while(*instance->state.logoLinesIndex != '\0')
     {
         ffPrintLogoLine(instance);
         putchar('\n');
@@ -796,7 +798,7 @@ void ffListLogos()
 
     while(*methods != NULL)
     {
-        FFlogo* logo = (*methods)();
+        const FFlogo* logo = (*methods)();
 
         const char** names = logo->names;
 
