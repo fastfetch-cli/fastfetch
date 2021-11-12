@@ -78,6 +78,25 @@ static const FFlogo* getLogoArch()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoArchSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("arch_small", "archlinux_small", "arch-linux-small")
+    FF_LOGO_LINES(
+        "$1      /\\      \n"
+        "$1     /  \\     \n"
+        "$1    /    \\    \n"
+        "$1   /      \\   \n"
+        "$1  /   ,,   \\  \n"
+        "$1 /   |  |   \\ \n"
+        "$1/_-''    ''-_\\"
+    )
+    FF_LOGO_COLORS(
+        "\033[36m" //cyan
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoArtix()
 {
     FF_LOGO_INIT
@@ -103,6 +122,25 @@ static const FFlogo* getLogoArtix()
         "$1 'ooooi:'`                `'';ioxxo'  \n"
         "$1'i:'`                          '':io' \n"
         "$1'`                                  `'";
+    )
+    FF_LOGO_COLORS(
+        "\033[36m" //cyan
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArtixSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("artix_small", "artixlinux_small", "artix-linux-small")
+    FF_LOGO_LINES(
+        "$1      /\\      \n"
+        "$1     /  \\     \n"
+        "$1    /`'.,\\    \n"
+        "$1   /     ',    \n"
+        "$1  /      ,`\\  \n"
+        "$1 /   ,.'`.  \\ \n"
+        "$1/.,'`     `'.\\"
     )
     FF_LOGO_COLORS(
         "\033[36m" //cyan
@@ -173,6 +211,28 @@ static const FFlogo* getLogoCentOS()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoCentOSSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("centos_small", "centos-linux-small")
+    FF_LOGO_LINES(
+        "$2 ____$1^$4____ \n"
+        "$2 |\\  $1|$4  /| \n"
+        "$2 | \\ $1|$4 / | \n"
+        "$4<---- $3---->\n"
+        "$3 | / $2|$1 \\ | \n"
+        "$3 |/__$2|$1__\\| \n"
+        "$2     v     "
+    )
+    FF_LOGO_COLORS(
+        "\033[33m", //yellow
+        "\033[32m", //green
+        "\033[34m", //blue
+        "\033[35m" //magenta
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoDebian()
 {
     FF_LOGO_INIT
@@ -199,6 +259,24 @@ static const FFlogo* getLogoDebian()
     FF_LOGO_COLORS(
         "\033[31m", //red
         "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoDebianSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("debian_small", "debian-linux-small")
+    FF_LOGO_LINES(
+        "$1  _____  \n"
+        "$1 /  __ \\ \n"
+        "$1|  /    |\n"
+        "$1|  \\___- \n"
+        "$1-_       \n"
+        "$1  --_    "
+    )
+    FF_LOGO_COLORS(
+        "\033[31m" //red
     )
     FF_LOGO_RETURN
 }
@@ -231,6 +309,27 @@ static const FFlogo* getLogoFedora()
     FF_LOGO_COLORS(
         "\033[34m", //blue
         "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoFedoraSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("fedora_small", "fedora-linux-small")
+    FF_LOGO_LINES(
+        "$1        ,'''''. \n"
+        "$1       |   ,.  |\n"
+        "$1       |  |  '_'\n"
+        "$1  ,....|  |..   \n"
+        "$1.'  ,_;|   ..'  \n"
+        "$1|  |   |  |     \n"
+        "$1|  ',_,'  |     \n"
+        "$1 '.     ,'      \n"
+        "$1   '''''        "
+    )
+    FF_LOGO_COLORS(
+        "\033[34m" //blue
     )
     FF_LOGO_RETURN
 }
@@ -326,6 +425,26 @@ static const FFlogo* getLogoGentoo()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoGentooSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("gentoo_small", "gentoo-linux-small")
+    FF_LOGO_LINES(
+        "$1 _-----_    \n"
+        "$1(       \\  \n"
+        "$1\\    0   \\  \n"
+        "$2 \\        ) \n"
+        "$2 /      _/  \n"
+        "$2(     _-    \n"
+        "$2\\____-      "
+    )
+    FF_LOGO_COLORS(
+        "\033[35m", //magenta
+        "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoManjaro()
 {
     FF_LOGO_INIT
@@ -352,10 +471,29 @@ static const FFlogo* getLogoManjaro()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoManjaroSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("manjaro_small", "manjaro-linux-small")
+    FF_LOGO_LINES(
+        "$1||||||||| ||||\n"
+        "$1||||||||| ||||\n"
+        "$1||||      ||||\n"
+        "$1|||| |||| ||||\n"
+        "$1|||| |||| ||||\n"
+        "$1|||| |||| ||||\n"
+        "$1|||| |||| ||||"
+    )
+    FF_LOGO_COLORS(
+        "\033[32m" //green
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoMint()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("mint", "mint-linux", "linux-mint")
+    FF_LOGO_NAMES("mint", "linuxmint", "mint-linux", "linux-mint")
     FF_LOGO_LINES(
         "$2             ...-:::::-...              \n"
         "$2          .-MMMMMMMMMMMMMMM-.           \n"
@@ -376,6 +514,26 @@ static const FFlogo* getLogoMint()
         "$2       '.-MMMM$1``--:::::--``$2MMMM-.'      \n"
         "$2            '-MMMMMMMMMMMMM-'           \n"
         "$2               ``-:::::-``              "
+    )
+    FF_LOGO_COLORS(
+        "\033[32m", //green
+        "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoMintSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("mint_small", "linuxmint_small", "mint-linux-small")
+    FF_LOGO_LINES(
+        "$1 __________  \n"
+        "$1|_          \\\n"
+        "$1  | $2| _____ $1|\n"
+        "$1  | $2| | | | $1|\n"
+        "$1  | $2| | | | $1|\n"
+        "$1  | $2\\__$2___/ $1|\n"
+        "$1  \\_________/"
     )
     FF_LOGO_COLORS(
         "\033[32m", //green
@@ -416,7 +574,7 @@ static const FFlogo* getLogoMintOld()
 static const FFlogo* getLogoPop()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("pop", "pop-linux")
+    FF_LOGO_NAMES("pop", "popos", "pop_os", "pop-linux")
     FF_LOGO_LINES(
         "$1             /////////////             \n"
         "$1         /////////////////////         \n"
@@ -442,6 +600,26 @@ static const FFlogo* getLogoPop()
     FF_LOGO_COLORS(
         "\033[36m", //cyan
         "\033[37m" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoPopSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("pop_small", "popos_small", "pop_os_small", "pop-linux-small")
+    FF_LOGO_LINES(
+    "$1______           \n"
+    "$1\\   _ \\        __\n"
+    "$1 \\ \\ \\ \\      / /\n"
+    "$1  \\ \\_\\ \\    / / \n"
+    "$1   \\  ___\\  /_/  \n"
+    "$1    \\ \\    _     \n"
+    "$1   __\\_\\__(_)_   \n"
+    "$1  (___________)` "
+    )
+    FF_LOGO_COLORS(
+        "\033[36m" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -479,6 +657,24 @@ static const FFlogo* getLogoUbuntu()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoUbuntuSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu_small", "ubuntu-linux-small")
+    FF_LOGO_LINES(
+        "$1         _ \n"
+        "$1     ---(_)\n"
+        "$1 _/  ---  \\\n"
+        "$1(_) |   |  \n"
+        "$1  \\  --- _/\n"
+        "$1     ---(_)"
+    )
+    FF_LOGO_COLORS(
+        "\033[31m" //red
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoVoid()
 {
     FF_LOGO_INIT
@@ -510,6 +706,25 @@ static const FFlogo* getLogoVoid()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoVoidSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("void_small", "void-linux-small")
+    FF_LOGO_LINES(
+        "$1    _______  \n"
+        "$1 _ \\______ - \n"
+        "$1| \\  ___  \\ |\n"
+        "$1| | /   \\ | |\n"
+        "$1| | \\___/ | |\n"
+        "$1| \\______ \\_|\n"
+        "$1 -_______\\   "
+    )
+    FF_LOGO_COLORS(
+        "\033[32m" //green
+    )
+    FF_LOGO_RETURN
+}
+
 typedef const FFlogo*(*GetLogoMethod)();
 
 static GetLogoMethod* getLogoMethods()
@@ -518,20 +733,31 @@ static GetLogoMethod* getLogoMethods()
         getLogoNone,
         getLogoUnknown,
         getLogoArch,
+        getLogoArchSmall,
         getLogoArtix,
+        getLogoArtixSmall,
         getLogoCelOS,
         getLogoCentOS,
+        getLogoCentOSSmall,
         getLogoDebian,
+        getLogoDebianSmall,
         getLogoFedora,
+        getLogoFedoraSmall,
         getLogoFedoraOld,
         getLogoGaruda,
         getLogoGentoo,
+        getLogoGentooSmall,
         getLogoManjaro,
+        getLogoManjaroSmall,
         getLogoMint,
+        getLogoMintSmall,
         getLogoMintOld,
         getLogoPop,
+        getLogoPopSmall,
         getLogoUbuntu,
+        getLogoUbuntuSmall,
         getLogoVoid,
+        getLogoVoidSmall,
         NULL
     };
 
@@ -784,10 +1010,10 @@ void ffPrintLogos(FFinstance* instance)
 
     while(*methods != NULL)
     {
-        instance->config.logo = (*methods)();
+        setLogo(instance, (*methods)());
         printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET":\n", instance->config.colorLogo ? instance->config.logo->colors[0] : "", instance->config.logo->names[0]);
         ffPrintRemainingLogo(instance);
-        putchar('\n');
+        puts("\n");
         ++methods;
     }
 }
@@ -796,11 +1022,16 @@ void ffListLogos()
 {
     GetLogoMethod* methods = getLogoMethods();
 
+    uint32_t counter = 0;
+
     while(*methods != NULL)
     {
         const FFlogo* logo = (*methods)();
 
         const char** names = logo->names;
+
+        printf("%u)%s ", counter, counter < 10 ? " " : "");
+        ++counter;
 
         while(*names != NULL)
         {
