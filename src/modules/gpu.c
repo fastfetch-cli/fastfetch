@@ -26,9 +26,9 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .pNext = NULL,
         .pApplicationName = FASTFETCH_PROJECT_NAME,
-        .applicationVersion = VK_MAKE_VERSION(FASTFETCH_PROJECT_NAME, 0, 0),
+        .applicationVersion = VK_MAKE_VERSION(FASTFETCH_PROJECT_VERSION_MAJOR, 0, 0),
         .pEngineName = "vulkanPrintGPUs",
-        .engineVersion = VK_MAKE_VERSION(FASTFETCH_PROJECT_NAME, 0, 0),
+        .engineVersion = VK_MAKE_VERSION(FASTFETCH_PROJECT_VERSION_MAJOR, 0, 0),
         .apiVersion = VK_API_VERSION_1_0,
     };
 

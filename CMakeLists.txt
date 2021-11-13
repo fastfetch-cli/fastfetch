@@ -29,6 +29,7 @@ execute_process(
 )
 
 set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
+set(PROJECT_VERSION_MAJOR "${GIT_REV_LIST}")
 
 function(fastfetch_load_text FILENAME OUTVAR)
     file(READ "${FILENAME}" TEMP)
