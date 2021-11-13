@@ -1,24 +1,11 @@
 #include "fastfetch.h"
 
 #include <string.h>
-#include <dlfcn.h>
 #include <dirent.h>
 #include <pthread.h>
 
 #define FF_RESOLUTION_MODULE_NAME "Resolution"
 #define FF_RESOLUTION_NUM_FORMAT_ARGS 3
-
-typedef void* DynamicLibrary;
-
-#define FF_LIBRARY_LOAD(libraryNameUser, libraryNameDefault) dlopen(libraryNameUser.length == 0 ? libraryNameDefault : libraryNameUser.chars, RTLD_LAZY); \
-    if(dlerror() != NULL) \
-        return false;
-
-#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName) dlsym(library, symbolName); \
-    if(dlerror() != NULL) { \
-        dlclose(library); \
-        return false; \
-    }
 
 typedef struct ResolutionResult
 {
@@ -157,10 +144,9 @@ static void x11AddScreenAsResult(FFlist* results, Screen* screen, int refreshRat
 
 static bool printResolutionX11Backend(FFinstance* instance)
 {
-    DynamicLibrary x11 = FF_LIBRARY_LOAD(instance->config.libX11, "libX11.so");
-
-    Display*(*ffXOpenDisplay)(const char*) = FF_LIBRARY_LOAD_SYMBOL(x11, "XOpenDisplay");
-    int(*ffXCloseDisplay)(Display*) = FF_LIBRARY_LOAD_SYMBOL(x11, "XCloseDisplay");
+    FF_LIBRARY_LOAD(x11, "libX11.so", instance->config.libX11, false)
+    FF_LIBRARY_LOAD_SYMBOL(x11, XOpenDisplay, false)
+    FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay, false)
 
     Display* display = ffXOpenDisplay(x11);
     if(display == NULL)
@@ -188,17 +174,18 @@ static bool printResolutionX11Backend(FFinstance* instance)
 
 typedef struct XrandrData
 {
-    XRRScreenConfiguration*(*ffXRRGetScreenInfo)(Display* display, Window window);
-    short(*ffXRRConfigCurrentRate)(XRRScreenConfiguration* config);
-    XRRMonitorInfo*(*ffXRRGetMonitors)(Display* display, Window window, Bool getActive, int* nmonitors);
-    XRRScreenResources*(*ffXRRGetScreenResources)(Display* display, Window window);
-    XRROutputInfo*(*ffXRRGetOutputInfo)(Display* display, XRRScreenResources* resources, RROutput output);
-    XRRCrtcInfo*(*ffXRRGetCrtcInfo)(Display* display, XRRScreenResources* resources, RRCrtc crtc);
-    void(*ffXRRFreeCrtcInfo)(XRRCrtcInfo* crtcInfo);
-    void(*ffXRRFreeOutputInfo)(XRROutputInfo* outputInfo);
-    void(*ffXRRFreeScreenResources)(XRRScreenResources* resources);
-    void(*ffXRRFreeMonitors)(XRRMonitorInfo* monitors);
-    void(*ffXRRFreeScreenConfigInfo)(XRRScreenConfiguration* config);
+    FF_LIBRARY_SYMBOL(XRRGetScreenInfo)
+    FF_LIBRARY_SYMBOL(XRRConfigCurrentConfiguration)
+    FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
+    FF_LIBRARY_SYMBOL(XRRGetMonitors)
+    FF_LIBRARY_SYMBOL(XRRGetScreenResources)
+    FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
+    FF_LIBRARY_SYMBOL(XRRGetCrtcInfo)
+    FF_LIBRARY_SYMBOL(XRRFreeCrtcInfo)
+    FF_LIBRARY_SYMBOL(XRRFreeOutputInfo)
+    FF_LIBRARY_SYMBOL(XRRFreeScreenResources)
+    FF_LIBRARY_SYMBOL(XRRFreeMonitors)
+    FF_LIBRARY_SYMBOL(XRRFreeScreenConfigInfo)
 
     //Init once
     Display* display;
@@ -331,24 +318,24 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 
 static bool printResolutionXrandrBackend(FFinstance* instance)
 {
-    DynamicLibrary xrandr = FF_LIBRARY_LOAD(instance->config.libXrandr, "libXrandr.so");
+    FF_LIBRARY_LOAD(xrandr, "libXrandr.so", instance->config.libXrandr, false);
 
-    Display*(*ffXOpenDisplay)(const char*) = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XOpenDisplay");
-    int(*ffXCloseDisplay)(Display*) = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XCloseDisplay");
+    FF_LIBRARY_LOAD_SYMBOL(xrandr, XOpenDisplay, false)
+    FF_LIBRARY_LOAD_SYMBOL(xrandr, XCloseDisplay, false)
 
     XrandrData data;
 
-    data.ffXRRGetScreenInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetScreenInfo");
-    data.ffXRRConfigCurrentRate = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRConfigCurrentRate");
-    data.ffXRRGetMonitors = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetMonitors");
-    data.ffXRRGetScreenResources = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetScreenResources");
-    data.ffXRRGetOutputInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetOutputInfo");
-    data.ffXRRGetCrtcInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRGetCrtcInfo");
-    data.ffXRRFreeCrtcInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeCrtcInfo");
-    data.ffXRRFreeOutputInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeOutputInfo");
-    data.ffXRRFreeScreenResources = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeScreenResources");
-    data.ffXRRFreeMonitors = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeMonitors");
-    data.ffXRRFreeScreenConfigInfo = FF_LIBRARY_LOAD_SYMBOL(xrandr, "XRRFreeScreenConfigInfo");
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetScreenInfo, XRRGetScreenInfo, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRConfigCurrentRate, XRRConfigCurrentRate, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetMonitors, XRRGetMonitors, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetScreenResources, XRRGetScreenResources, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetOutputInfo, XRRGetOutputInfo, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetCrtcInfo, XRRGetCrtcInfo, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeCrtcInfo, XRRFreeCrtcInfo, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeOutputInfo, XRRFreeOutputInfo, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeScreenResources, XRRFreeScreenResources, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeMonitors, XRRFreeMonitors, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeScreenConfigInfo, XRRFreeScreenConfigInfo, false);
 
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)
@@ -376,9 +363,9 @@ typedef struct WaylandData
 {
     FFinstance* instance;
     FFlist results;
-    struct wl_proxy*(*ffwl_proxy_marshal_constructor_versioned)(struct wl_proxy*, uint32_t, const struct wl_interface*, uint32_t, ...);
-    int(*ffwl_proxy_add_listener)(struct wl_proxy*, void (**)(void), void *data);
-    void(*ffwl_proxy_destroy)(struct wl_proxy*);
+    FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned)
+    FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
+    FF_LIBRARY_SYMBOL(wl_proxy_destroy)
     const struct wl_interface* ffwl_output_interface;
     struct wl_output_listener output_listener;
 } WaylandData;
@@ -453,21 +440,21 @@ static bool printResolutionWaylandBackend(FFinstance* instance)
     if(sessionType != NULL && strcasecmp(sessionType, "wayland") != 0)
         return false;
 
-    DynamicLibrary wayland = FF_LIBRARY_LOAD(instance->config.libWayland, "libwayland-client.so");
+    FF_LIBRARY_LOAD(wayland, "libwayland-client.so", instance->config.libWayland, false);
 
-    struct wl_display*(*ffwl_display_connect)(const char*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_connect");
-    int(*ffwl_display_dispatch)(struct wl_display*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_dispatch");
-    void(*ffwl_display_roundtrip)(struct wl_display*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_roundtrip");
-    struct wl_proxy*(*ffwl_proxy_marshal_constructor)(struct wl_proxy*, uint32_t, const struct wl_interface*, ...) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_marshal_constructor");
-    const struct wl_interface* ffwl_registry_interface = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_registry_interface");
-    void(*ffwl_display_disconnect)(struct wl_display*) = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_display_disconnect");
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_dispatch, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_roundtrip, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_proxy_marshal_constructor, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_disconnect, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_registry_interface, false)
 
     WaylandData data;
 
-    data.ffwl_proxy_marshal_constructor_versioned = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_marshal_constructor_versioned");
-    data.ffwl_proxy_add_listener = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_add_listener");
-    data.ffwl_output_interface = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_output_interface");
-    data.ffwl_proxy_destroy = FF_LIBRARY_LOAD_SYMBOL(wayland, "wl_proxy_destroy");
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, wl_proxy_marshal_constructor_versioned, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_destroy, wl_proxy_destroy, false)
 
     struct wl_display* display = ffwl_display_connect(NULL);
     if(display == NULL)

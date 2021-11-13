@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 
-#include <dlfcn.h>
 #include <pthread.h>
 
 static inline bool allPropertiesSet(FFGTKResult* result)

@@ -1,50 +1,57 @@
 #include "fastfetch.h"
 
-#include <dlfcn.h>
 #include <pthread.h>
-
-typedef void* DynamicLibrary;
-
-#define FF_VARIANT_NULL ((FFvariant){.strValue = NULL})
-
-#define FF_LIBRARY_LOAD(libraryNameUser, libraryNameDefault, mutex, returnValue) ({ \
-    void* addr = dlopen(libraryNameUser.length == 0 ? libraryNameDefault : libraryNameUser.chars, RTLD_LAZY); \
-    if(addr == NULL) { \
-        pthread_mutex_unlock(&mutex); \
-        return returnValue; \
-    } \
-    addr; \
-})
-
-#define FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue) { \
-    pthread_mutex_unlock(&mutex); \
-    dlclose(library); \
-    return returnValue; \
-}
-
-#define FF_LIBRARY_DEFINE_SYMBOL_FIELD(symbolName) __typeof__(&symbolName) ff ## symbolName
-
-#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, mutex, returnValue) ({ \
-    void* fn = dlsym(library, symbolName); \
-    if(fn == NULL) \
-        FF_LIBRARY_ERROR_RETURN(library, mutex, returnValue); \
-    fn; \
-})
-
-#define FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(object, library, symbolName, mutex, returnValue) \
-    object.ff ## symbolName = FF_LIBRARY_LOAD_SYMBOL(library, #symbolName, mutex, returnValue)
 
 #ifdef FF_HAVE_GIO
 #include <gio/gio.h>
 
+#define FF_LIBRARY_DATA_LOAD_INIT(dataObject, libraryName, userLibraryName) \
+    static dataObject data; \
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
+    static FFInitState initState = FF_INITSTATE_UNINITIALIZED; \
+    pthread_mutex_lock(&mutex); \
+    if(initState != FF_INITSTATE_UNINITIALIZED) {\
+        pthread_mutex_unlock(&mutex); \
+        return initState == FF_INITSTATE_SUCCESSFUL ? &data : NULL; \
+    } \
+    initState = FF_INITSTATE_SUCCESSFUL; \
+    void* libraryHandle = dlopen(userLibraryName.length == 0 ? libraryName : userLibraryName.chars, RTLD_LAZY); \
+    if(dlerror() != NULL || libraryHandle == NULL) { \
+        initState = FF_INITSTATE_FAILED; \
+        pthread_mutex_unlock(&mutex); \
+        return NULL; \
+    } \
+
+#define FF_LIBRARY_DATA_LOAD_SYMBOL(symbolName) \
+    data.ff ## symbolName = dlsym(libraryHandle, #symbolName); \
+    if(dlerror() != NULL || data.ff ## symbolName == NULL) { \
+        dlclose(libraryHandle); \
+        initState = FF_INITSTATE_FAILED; \
+        pthread_mutex_unlock(&mutex); \
+        return NULL; \
+    }
+
+#define FF_LIBRARY_DATA_LOAD_RETURN \
+    initState = FF_INITSTATE_SUCCESSFUL; \
+    pthread_mutex_unlock(&mutex); \
+    return &data;
+
+#define FF_LIBRARY_DATA_LOAD_ERROR \
+    { \
+        dlclose(libraryHandle); \
+        initState = FF_INITSTATE_FAILED; \
+        pthread_mutex_unlock(&mutex); \
+        return NULL; \
+    }
+
 typedef struct GVariantGetters
 {
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_variant_get_string);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_variant_get_boolean);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_variant_get_int32);
+    FF_LIBRARY_SYMBOL(g_variant_get_string)
+    FF_LIBRARY_SYMBOL(g_variant_get_boolean)
+    FF_LIBRARY_SYMBOL(g_variant_get_int32)
 } GVariantGetters;
 
-static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVariantGetters* variantGetters)
+static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, const GVariantGetters* variantGetters)
 {
     if(variant == NULL)
         return FF_VARIANT_NULL;
@@ -60,26 +67,53 @@ static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, GVarian
 
 typedef struct GSettingsData
 {
+    FF_LIBRARY_SYMBOL(g_settings_schema_source_lookup)
+    FF_LIBRARY_SYMBOL(g_settings_schema_has_key)
+    FF_LIBRARY_SYMBOL(g_settings_new_full)
+    FF_LIBRARY_SYMBOL(g_settings_get_value)
+    FF_LIBRARY_SYMBOL(g_settings_get_user_value)
+    FF_LIBRARY_SYMBOL(g_settings_get_default_value)
+    FF_LIBRARY_SYMBOL(g_settings_schema_source_get_default)
     GSettingsSchemaSource* schemaSource;
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_schema_source_lookup);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_schema_has_key);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_new_full);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_get_value);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_get_user_value);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(g_settings_get_default_value);
     GVariantGetters variantGetters;
 } GSettingsData;
 
-static FFvariant getGSettingsValue(GSettingsData* data, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+static const GSettingsData* getGSettingsData(FFinstance* instance)
 {
-    if(data->schemaSource == NULL)
+    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, "libgio-2.0.so", instance->config.libGIO)
+
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_new_full)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_get_value)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_get_user_value)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_get_default_value)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_get_default)
+
+    #define data data.variantGetters
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_string)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
+    #undef data
+
+    data.schemaSource = data.ffg_settings_schema_source_get_default();
+    if(data.schemaSource == NULL)
+        FF_LIBRARY_DATA_LOAD_ERROR
+
+    FF_LIBRARY_DATA_LOAD_RETURN
+}
+
+FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+{
+    const GSettingsData* data = getGSettingsData(instance);
+    if(data == NULL)
         return FF_VARIANT_NULL;
 
     GSettingsSchema* schema = data->ffg_settings_schema_source_lookup(data->schemaSource, schemaName, true);
     if(schema == NULL)
         return FF_VARIANT_NULL;
 
-    if(data->ffg_settings_schema_has_key(schema, key) == 0)
+    if(data->ffg_settings_schema_has_key(schema, key) == false)
         return FF_VARIANT_NULL;
 
     GSettings* settings = data->ffg_settings_new_full(schema, NULL, path);
@@ -97,45 +131,6 @@ static FFvariant getGSettingsValue(GSettingsData* data, const char* schemaName, 
     variant = data->ffg_settings_get_default_value(settings, key);
     return getGVariantValue(variant, type, &data->variantGetters);
 }
-
-FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-
-    static GSettingsData data;
-
-    pthread_mutex_lock(&mutex);
-
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return getGSettingsValue(&data, schemaName, path, key, type);
-    }
-    init = true;
-
-    data.schemaSource = NULL; //error indicator
-
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libGIO, "libgio-2.0.so", mutex, FF_VARIANT_NULL);
-
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_schema_source_lookup, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_schema_has_key, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_new_full, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_get_value, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_get_user_value, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, g_settings_get_default_value, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_string, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_boolean, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_int32, mutex, FF_VARIANT_NULL);
-
-    GSettingsSchemaSource*(*ffg_settings_schema_source_get_default)(void) = FF_LIBRARY_LOAD_SYMBOL(library, "g_settings_schema_source_get_default", mutex, FF_VARIANT_NULL);
-    if((data.schemaSource = ffg_settings_schema_source_get_default()) == NULL)
-        FF_LIBRARY_ERROR_RETURN(library, mutex, FF_VARIANT_NULL);
-
-    pthread_mutex_unlock(&mutex);
-    return getGSettingsValue(&data, schemaName, path, key, type);
-}
-
 #else //FF_HAVE_GIO
 FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
@@ -149,14 +144,36 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
 
 typedef struct DConfData
 {
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(dconf_client_read_full);
+    FF_LIBRARY_SYMBOL(dconf_client_read_full)
+    FF_LIBRARY_SYMBOL(dconf_client_new)
     GVariantGetters variantGetters;
     DConfClient* client;
 } DConfData;
 
-static FFvariant getDConfValue(DConfData* data, const char* key, FFvarianttype type)
+static const DConfData* getDConfData(FFinstance* instance)
 {
-    if(data->client == NULL)
+    FF_LIBRARY_DATA_LOAD_INIT(DConfData, "libdconf.so", instance->config.libDConf)
+
+    FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
+
+    #define data data.variantGetters
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_string)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
+    #undef data
+
+    data.client = data.ffdconf_client_new();
+    if(data.client == NULL)
+        FF_LIBRARY_DATA_LOAD_ERROR
+
+    FF_LIBRARY_DATA_LOAD_RETURN
+}
+
+FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
+{
+    const DConfData* data = getDConfData(instance);
+    if(data == NULL)
         return FF_VARIANT_NULL;
 
     GVariant* variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_FLAGS_NONE, NULL);
@@ -170,40 +187,6 @@ static FFvariant getDConfValue(DConfData* data, const char* key, FFvarianttype t
     variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_DEFAULT_VALUE, NULL);
     return getGVariantValue(variant, type, &data->variantGetters);
 }
-
-FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-
-    static DConfData data;
-
-    pthread_mutex_lock(&mutex);
-
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return getDConfValue(&data, key, type);
-    }
-    init = true;
-
-    data.client = NULL; //error indicator
-
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libDConf, "libdconf.so", mutex, FF_VARIANT_NULL);
-
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, dconf_client_read_full, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_string, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_boolean, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data.variantGetters, library, g_variant_get_int32, mutex, FF_VARIANT_NULL);
-
-    DConfClient*(*ffdconf_client_new)(void) = FF_LIBRARY_LOAD_SYMBOL(library, "dconf_client_new", mutex, FF_VARIANT_NULL);
-    if((data.client = ffdconf_client_new()) == NULL)
-        FF_LIBRARY_ERROR_RETURN(library, mutex, FF_VARIANT_NULL);
-
-    pthread_mutex_unlock(&mutex);
-    return getDConfValue(&data, key, type);
-}
-
 #else //FF_HAVE_DCONF
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
 {
@@ -229,17 +212,35 @@ FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* 
 
 typedef struct XFConfData
 {
-    bool init;
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_has_property);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get_string);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get_bool);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(xfconf_channel_get_int);
+    FF_LIBRARY_SYMBOL(xfconf_channel_get)
+    FF_LIBRARY_SYMBOL(xfconf_channel_has_property)
+    FF_LIBRARY_SYMBOL(xfconf_channel_get_string)
+    FF_LIBRARY_SYMBOL(xfconf_channel_get_bool)
+    FF_LIBRARY_SYMBOL(xfconf_channel_get_int)
+    FF_LIBRARY_SYMBOL(xfconf_init)
 } XFConfData;
 
-static FFvariant getXFConfValue(XFConfData* data, const char* channelName, const char* propertyName, FFvarianttype type)
+static const XFConfData* getXFConfData(FFinstance* instance)
 {
-    if(!data->init)
+    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, "libxfconf-0.so", instance->config.libXFConf)
+
+    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_string)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_bool)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_int)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_init)
+
+    if(data.ffxfconf_init(NULL) == FALSE)
+        FF_LIBRARY_DATA_LOAD_ERROR
+
+    FF_LIBRARY_DATA_LOAD_RETURN
+}
+
+FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
+{
+    const XFConfData* data = getXFConfData(instance);
+    if(data == NULL)
         return FF_VARIANT_NULL;
 
     XfconfChannel* channel = data->ffxfconf_channel_get(channelName); // Never fails according to documentation but rather returns an empty channel
@@ -258,41 +259,6 @@ static FFvariant getXFConfValue(XFConfData* data, const char* channelName, const
 
     return FF_VARIANT_NULL;
 }
-
-FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-
-    static XFConfData data;
-
-    pthread_mutex_lock(&mutex);
-
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return getXFConfValue(&data, channelName, propertyName, type);
-    }
-    init = true;
-
-    data.init = false; //error indicator
-
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.libXFConf, "libxfconf-0.so", mutex, FF_VARIANT_NULL);
-
-
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_has_property, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get_string, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get_bool, mutex, FF_VARIANT_NULL);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, xfconf_channel_get_int, mutex, FF_VARIANT_NULL);
-
-    gboolean(*ffxfconf_init)(GError **) = FF_LIBRARY_LOAD_SYMBOL(library, "xfconf_init", mutex, FF_VARIANT_NULL);
-    if((data.init = ffxfconf_init(NULL)) == FALSE)
-        FF_LIBRARY_ERROR_RETURN(library, mutex, FF_VARIANT_NULL);
-
-    pthread_mutex_unlock(&mutex);
-    return getXFConfValue(&data, channelName, propertyName, type);
-}
 #else //FF_HAVE_XFCONF
 FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
 {
@@ -300,82 +266,6 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_XFCONF
-
-#ifdef FF_HAVE_RPM
-#include <rpm/rpmlib.h>
-#include <rpm/rpmts.h>
-#include <rpm/rpmdb.h>
-#include <rpm/rpmlog.h>
-
-typedef struct LibrpmData
-{
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmReadConfigFiles);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsCreate);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsInitIterator);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmdbGetIteratorCount);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmdbFreeIterator);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmtsFree);
-    FF_LIBRARY_DEFINE_SYMBOL_FIELD(rpmlogSetMask);
-} LibrpmData;
-
-uint32_t getRpmPackageCount(LibrpmData* data) {
-    // Don't print any error messages
-    data->ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
-
-    uint32_t count = 0;
-    rpmts ts = NULL;
-    rpmdbMatchIterator mi = NULL;
-
-    if (data->ffrpmReadConfigFiles(NULL, NULL)) goto exit;
-    if (!(ts = data->ffrpmtsCreate())) goto exit;
-    if (!(mi = data->ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0))) goto exit;
-    count = data->ffrpmdbGetIteratorCount(mi);
-
-exit:
-    if (mi) data->ffrpmdbFreeIterator(mi);
-    if (ts) data->ffrpmtsFree(ts);
-    return count;
-}
-
-uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-
-    static LibrpmData data;
-
-    pthread_mutex_lock(&mutex);
-
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return getRpmPackageCount(&data);
-    }
-    init = true;
-
-    // As `data` is a static variable, it's already zero inited.
-    // data.ffrpmtsCreate = NULL;
-
-    DynamicLibrary library = FF_LIBRARY_LOAD(instance->config.librpm, "librpm.so", mutex, 0);
-
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmReadConfigFiles, mutex, 0);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsCreate, mutex, 0);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsInitIterator, mutex, 0);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmdbGetIteratorCount, mutex, 0);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmdbFreeIterator, mutex, 0);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmtsFree, mutex, 0);
-    FF_LIBRARY_LOAD_SYMBOL_TO_OBJECT(data, library, rpmlogSetMask, mutex, 0);
-
-    pthread_mutex_unlock(&mutex);
-    return getRpmPackageCount(&data);
-}
-#else //FF_HAVE_RPM
-uint32_t ffSettingsGetRpmPackageCount(FFinstance* instance)
-{
-    FF_UNUSED(instance);
-    return 0;
-}
-#endif //FF_HAVE_RPM
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>

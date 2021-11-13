@@ -12,6 +12,7 @@
 #include <pwd.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
+#include <dlfcn.h>
 
 #include "fastfetch_config.h"
 
@@ -247,6 +248,8 @@ typedef union FFvariant
     };
 } FFvariant;
 
+#define FF_VARIANT_NULL ((FFvariant){.strValue = NULL})
+
 typedef struct FFfont
 {
     FFstrbuf pretty;
@@ -260,6 +263,33 @@ typedef struct FFpropquery
     const char* start;
     FFstrbuf* buffer;
 } FFpropquery;
+
+typedef enum FFInitState
+{
+    FF_INITSTATE_UNINITIALIZED = 0,
+    FF_INITSTATE_SUCCESSFUL = 1,
+    FF_INITSTATE_FAILED = 2
+} FFInitState;
+
+#define FF_LIBRARY_SYMBOL(symbolName) \
+    __typeof__(&symbolName) ff ## symbolName;
+
+
+#define FF_LIBRARY_LOAD(libraryObjectName, libraryName, userLibraryName, returnValue) \
+    void* libraryObjectName =  dlopen(userLibraryName.length == 0 ? libraryName : userLibraryName.chars, RTLD_LAZY); \
+    if(dlerror() != NULL || libraryObjectName == NULL) \
+        return returnValue;
+
+#define FF_LIBRARY_LOAD_SYMBOL_ADRESS(library, symbolMapping, symbolName, returnValue) \
+    symbolMapping = dlsym(library, #symbolName); \
+    if(dlerror() != NULL || symbolMapping == NULL) \
+    { \
+        dlclose(library); \
+        return returnValue; \
+    }
+
+#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
+    __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADRESS(library, ff ## symbolName, symbolName, returnValue);
 
 /*************************/
 /* Common util functions */

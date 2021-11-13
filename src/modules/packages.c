@@ -6,6 +6,44 @@
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 8
 
+#ifdef FF_HAVE_RPM
+#include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
+#include <rpm/rpmdb.h>
+#include <rpm/rpmlog.h>
+
+static uint32_t getRpmPackageCount(FFinstance* instance)
+{
+    FF_LIBRARY_LOAD(rpm, "librpm.so", instance->config.librpm, 0);
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbGetIteratorCount, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbFreeIterator, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsFree, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmlogSetMask, 0)
+
+    // Don't print any error messages
+    ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
+
+    uint32_t count = 0;
+    rpmts ts = NULL;
+    rpmdbMatchIterator mi = NULL;
+
+    if (ffrpmReadConfigFiles(NULL, NULL)) goto exit;
+    if (!(ts = ffrpmtsCreate())) goto exit;
+    if (!(mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0))) goto exit;
+    count = ffrpmdbGetIteratorCount(mi);
+
+exit:
+    if (mi) ffrpmdbFreeIterator(mi);
+    if (ts) ffrpmtsFree(ts);
+    dlclose(rpm);
+    return count;
+}
+
+#endif
+
 static uint32_t getNumElements(const char* dirname, unsigned char type)
 {
     DIR* dirp = opendir(dirname);
@@ -58,11 +96,16 @@ void ffPrintPackages(FFinstance* instance)
     uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
     uint32_t dpkg = getNumStrings("/var/lib/dpkg/status", "Status: ");
 
-#if __ANDROID__
-    dpkg += getNumStrings("/data/data/com.termux/files/usr/var/lib/dpkg/status", "Status: ");
-#endif
+    #if __ANDROID__
+        dpkg += getNumStrings("/data/data/com.termux/files/usr/var/lib/dpkg/status", "Status: ");
+    #endif
 
-    uint32_t rpm = ffSettingsGetRpmPackageCount(instance);
+    #ifdef FF_HAVE_RPM
+        uint32_t rpm = getRpmPackageCount(instance);
+    #else
+        uint32_t rpm = 0;
+    #endif
+
     uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
     uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
     uint32_t snap = getNumElements("/snap", DT_DIR);

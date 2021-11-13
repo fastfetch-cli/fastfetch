@@ -14,7 +14,6 @@ void ffPrintGPU(FFinstance* instance)
 
 #else
 
-#include <dlfcn.h>
 #include <pci/pci.h>
 
 static void printGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
@@ -59,66 +58,19 @@ static void printGPU(FFinstance* instance, struct pci_access* pacc, struct pci_d
     ffStrbufDestroy(&namePretty);
 }
 
-void ffPrintGPU(FFinstance* instance)
+static const char* printGPUs(FFinstance* instance)
 {
     if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
-        return;
+        return NULL;
 
-    const char* pciLibName = instance->config.libPCI.length == 0 ? "libpci.so" : instance->config.libPCI.chars;
-    void* pci = dlopen(pciLibName, RTLD_LAZY);
-    if(pci == NULL)
-    {
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlopen(\"%s\", RTLD_LAZY) == NULL", pciLibName);
-        return;
-    }
+    FF_LIBRARY_LOAD(pci, "libpci.so", instance->config.libPCI, "gpu: dlopen of libpci failed")
 
-    struct pci_access*(*ffpci_alloc)() = dlsym(pci, "pci_alloc");
-    if(ffpci_alloc == NULL)
-    {
-        dlclose(pci);
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_alloc\") == NULL");
-        return;
-    }
-
-    void(*ffpci_init)(struct pci_access*) = dlsym(pci, "pci_init");
-    if(ffpci_init == NULL)
-    {
-        dlclose(pci);
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_init\") == NULL");
-        return;
-    }
-
-    void(*ffpci_scan_bus)(struct pci_access*) = dlsym(pci, "pci_scan_bus");
-    if(ffpci_scan_bus == NULL)
-    {
-        dlclose(pci);
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_init\") == NULL");
-        return;
-    }
-
-    int(*ffpci_fill_info)(struct pci_dev*, int) = dlsym(pci, "pci_fill_info");
-    if(ffpci_fill_info == NULL)
-    {
-        dlclose(pci);
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_fill_info\") == NULL");
-        return;
-    }
-
-    char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...) = dlsym(pci, "pci_lookup_name");
-    if(ffpci_lookup_name == NULL)
-    {
-        dlclose(pci);
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_lookup_name\") == NULL");
-        return;
-    }
-
-    void(*ffpci_cleanup)(struct pci_access*) = dlsym(pci, "pci_cleanup");
-    if(ffpci_cleanup == NULL)
-    {
-        dlclose(pci);
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "dlsym(pci, \"pci_cleanup\") == NULL");
-        return;
-    }
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_alloc, "gpu: dlsym of pci_alloc failed")
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_init, "gpu: dlsym of pci_init failed")
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_scan_bus, "gpu: dlsym of pci_scan_bus failed")
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_fill_info, "gpu: dlsym of pci_fill_info failed")
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_lookup_name, "gpu: dlsym of pci_lookup_name failed")
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_cleanup, "gpu: dlsym of pci_cleanup failed")
 
     struct pci_access *pacc = ffpci_alloc();
     ffpci_init(pacc);
@@ -146,13 +98,18 @@ void ffPrintGPU(FFinstance* instance)
     for(uint32_t i = 0; i < devices.length; i++)
         printGPU(instance, pacc, *(struct pci_dev**)ffListGet(&devices, i), &cache, devices.length == 1 ? 0 : i + 1, ffpci_lookup_name);
 
-    if(devices.length == 0)
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPU found");
-
     ffCacheClose(&cache);
     ffListDestroy(&devices);
     ffpci_cleanup(pacc);
     dlclose(pci);
+    return devices.length > 0 ? NULL : "No GPU found";
+}
+
+void ffPrintGPU(FFinstance* instance)
+{
+    const char* error = printGPUs(instance);
+    if(error != NULL)
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, error);
 }
 
 #endif
