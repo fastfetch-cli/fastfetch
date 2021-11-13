@@ -192,6 +192,7 @@ __fastfetch_completion()
 
     local FF_OPTIONS_PATH=(
         "--lib-PCI"
+        "--lib-vulkan"
         "--lib-X11"
         "--lib-Xrandr"
         "--lib-gio"

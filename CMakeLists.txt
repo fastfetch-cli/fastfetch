@@ -60,6 +60,13 @@ else(LIBPCI_FOUND)
     message(WARNING "Package libpci not found. Building without support.")
 endif(LIBPCI_FOUND)
 
+pkg_check_modules (VULKAN vulkan)
+if(VULKAN_FOUND)
+    add_compile_definitions(FF_HAVE_VULKAN=1)
+else(VULKAN_FOUND)
+    message(WARNING "Package vulkan not found. Building without support.")
+endif(VULKAN_FOUND)
+
 pkg_check_modules (X11 x11)
 if(X11_FOUND)
     add_compile_definitions(FF_HAVE_X11=1)

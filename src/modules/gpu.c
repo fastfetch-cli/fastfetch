@@ -5,82 +5,109 @@
 #define FF_GPU_MODULE_NAME "GPU"
 #define FF_GPU_NUM_FORMAT_ARGS 4
 
-#ifndef FF_HAVE_LIBPCI
-
-void ffPrintGPU(FFinstance* instance)
+typedef struct GPUResult
 {
-    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "Fastfetch was compiled without libpci support");
+    FFstrbuf vendor;
+    FFstrbuf name;
+} GPUResult;
+
+#ifdef FF_HAVE_VULKAN
+#include <vulkan/vulkan.h>
+
+static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
+{
+    FF_LIBRARY_LOAD(vulkan, "libvulkan.so", instance->config.libVulkan,)
+    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkCreateInstance,)
+    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkDestroyInstance,)
+    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkEnumeratePhysicalDevices,)
+    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkGetPhysicalDeviceProperties,)
+
+    const VkApplicationInfo applicationInfo = {
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pNext = NULL,
+        .pApplicationName = FASTFETCH_PROJECT_NAME,
+        .applicationVersion = VK_MAKE_VERSION(FASTFETCH_PROJECT_NAME, 0, 0),
+        .pEngineName = "vulkanPrintGPUs",
+        .engineVersion = VK_MAKE_VERSION(FASTFETCH_PROJECT_NAME, 0, 0),
+        .apiVersion = VK_API_VERSION_1_0,
+    };
+
+    const VkInstanceCreateInfo instanceCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pNext = NULL,
+        .pApplicationInfo = &applicationInfo,
+        .enabledLayerCount = 0,
+        .ppEnabledLayerNames = NULL,
+        .enabledExtensionCount = 0,
+        .ppEnabledExtensionNames = NULL,
+        .flags = 0
+    };
+
+    VkInstance vkInstance;
+    if(ffvkCreateInstance(&instanceCreateInfo, NULL, &vkInstance) != VK_SUCCESS)
+    {
+        dlclose(vulkan);
+        return;
+    }
+
+    uint32_t physicalDeviceCount;
+    if(ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, NULL) != VK_SUCCESS)
+    {
+        ffvkDestroyInstance(vkInstance, NULL);
+        dlclose(vulkan);
+        return;
+    }
+
+    VkPhysicalDevice* physicalDevices = malloc(sizeof(VkPhysicalDevice) * physicalDeviceCount);
+    if(ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices) != VK_SUCCESS)
+    {
+        free(physicalDevices);
+        ffvkDestroyInstance(vkInstance, NULL);
+        dlclose(vulkan);
+        return;
+    }
+
+    for(uint32_t i = 0; i < physicalDeviceCount; i++)
+    {
+        VkPhysicalDeviceProperties physicalDeviceProperties;
+        ffvkGetPhysicalDeviceProperties(physicalDevices[i], &physicalDeviceProperties);
+
+        //We don't want softare rasterizers
+        if(physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+            continue;
+
+        GPUResult* result = ffListAdd(results);
+        ffStrbufInit(&result->vendor);
+        ffStrbufInit(&result->name);
+
+        ffStrbufAppendS(&result->name, physicalDeviceProperties.deviceName);
+    }
+
+    free(physicalDevices);
+    ffvkDestroyInstance(vkInstance, NULL);
+    dlclose(vulkan);
+    return;
 }
 
-#else
+#endif
 
+#ifdef FF_HAVE_LIBPCI
 #include <pci/pci.h>
 
-static void printGPU(FFinstance* instance, struct pci_access* pacc, struct pci_dev* dev, FFcache* cache, uint8_t counter, char*(*ffpci_lookup_name)(struct pci_access*, char*, int, int, ...))
+static void pciFillGPUs(FFinstance* instance, FFlist* results)
 {
-    char vendor[512];
-    vendor[0] = '\0';
-    ffpci_lookup_name(pacc, vendor, sizeof(vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
+    FF_LIBRARY_LOAD(pci, "libpci.so", instance->config.libPCI,)
 
-    const char* vendorPretty;
-    if(strcasecmp(vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
-        vendorPretty = "AMD ATI";
-    else if(strcasecmp(vendor, "NVIDIA Corporation") == 0)
-        vendorPretty = "Nvidia";
-    else if(strcasecmp(vendor, "Intel Corporation") == 0)
-        vendorPretty = "Intel";
-    else
-        vendorPretty = vendor;
-
-    char name[512];
-    name[0] = '\0';
-    ffpci_lookup_name(pacc, name, sizeof(name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
-
-    FFstrbuf namePretty;
-    ffStrbufInitA(&namePretty, 512);
-    ffStrbufAppendS(&namePretty, name);
-    ffStrbufSubstrBeforeLastC(&namePretty, ']');
-    ffStrbufSubstrAfterFirstC(&namePretty, '[');
-
-    FFstrbuf gpu;
-    ffStrbufInitA(&gpu, 128);
-
-    ffStrbufSetF(&gpu, "%s %s", vendorPretty, namePretty.chars);
-
-    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, counter, &instance->config.gpuKey, cache, &gpu, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
-        {FF_FORMAT_ARG_TYPE_STRING, vendor},
-        {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
-        {FF_FORMAT_ARG_TYPE_STRING, name},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty}
-    });
-
-    ffStrbufDestroy(&gpu);
-    ffStrbufDestroy(&namePretty);
-}
-
-static const char* printGPUs(FFinstance* instance)
-{
-    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
-        return NULL;
-
-    FF_LIBRARY_LOAD(pci, "libpci.so", instance->config.libPCI, "gpu: dlopen of libpci failed")
-
-    FF_LIBRARY_LOAD_SYMBOL(pci, pci_alloc, "gpu: dlsym of pci_alloc failed")
-    FF_LIBRARY_LOAD_SYMBOL(pci, pci_init, "gpu: dlsym of pci_init failed")
-    FF_LIBRARY_LOAD_SYMBOL(pci, pci_scan_bus, "gpu: dlsym of pci_scan_bus failed")
-    FF_LIBRARY_LOAD_SYMBOL(pci, pci_fill_info, "gpu: dlsym of pci_fill_info failed")
-    FF_LIBRARY_LOAD_SYMBOL(pci, pci_lookup_name, "gpu: dlsym of pci_lookup_name failed")
-    FF_LIBRARY_LOAD_SYMBOL(pci, pci_cleanup, "gpu: dlsym of pci_cleanup failed")
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_alloc,)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_init,)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_scan_bus,)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_fill_info,)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_lookup_name,)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_cleanup,)
 
     struct pci_access *pacc = ffpci_alloc();
     ffpci_init(pacc);
     ffpci_scan_bus(pacc);
-
-    FFlist devices;
-    ffListInitA(&devices, sizeof(struct pci_dev*), 4);
-
-    FFcache cache;
-    ffCacheOpenWrite(instance, FF_GPU_MODULE_NAME, &cache);
 
     struct pci_dev* dev;
     for (dev=pacc->devices; dev; dev=dev->next)
@@ -92,24 +119,90 @@ static const char* printGPUs(FFinstance* instance)
             strcasecmp("VGA compatible controller", class) == 0 ||
             strcasecmp("3D controller", class)             == 0 ||
             strcasecmp("Display controller", class)        == 0
-        ) *(struct pci_dev**)ffListAdd(&devices) = dev;
+        ) {
+            GPUResult* result = ffListAdd(results);
+
+            ffStrbufInitA(&result->vendor, 256);
+            ffpci_lookup_name(pacc, result->vendor.chars, result->vendor.allocated -1, PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
+            ffStrbufRecalculateLength(&result->vendor);
+
+            ffStrbufInitA(&result->name, 256);
+            ffpci_lookup_name(pacc, result->name.chars, result->name.allocated - 1, PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
+            ffStrbufRecalculateLength(&result->name);
+        };
     }
 
-    for(uint32_t i = 0; i < devices.length; i++)
-        printGPU(instance, pacc, *(struct pci_dev**)ffListGet(&devices, i), &cache, devices.length == 1 ? 0 : i + 1, ffpci_lookup_name);
-
-    ffCacheClose(&cache);
-    ffListDestroy(&devices);
     ffpci_cleanup(pacc);
     dlclose(pci);
-    return devices.length > 0 ? NULL : "No GPU found";
+}
+
+#endif
+
+static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, GPUResult* result)
+{
+    const char* vendorPretty;
+    if(ffStrbufIgnCaseCompS(&result->vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
+        vendorPretty = "AMD ATI";
+    else if(ffStrbufIgnCaseCompS(&result->vendor, "NVIDIA Corporation") == 0)
+        vendorPretty = "Nvidia";
+    else if(ffStrbufIgnCaseCompS(&result->vendor, "Intel Corporation") == 0)
+        vendorPretty = "Intel";
+    else
+        vendorPretty = result->vendor.chars;
+
+    FFstrbuf namePretty;
+    ffStrbufInitCopy(&namePretty, &result->name);
+    ffStrbufSubstrBeforeLastC(&namePretty, ']');
+    ffStrbufSubstrAfterFirstC(&namePretty, '[');
+
+    FFstrbuf gpu;
+    ffStrbufInitA(&gpu, result->vendor.length + namePretty.length);
+
+    if(*vendorPretty != '\0')
+    {
+        ffStrbufAppendS(&gpu, vendorPretty);
+        ffStrbufAppendC(&gpu, ' ');
+    }
+
+    ffStrbufAppend(&gpu, &namePretty);
+
+    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpuKey, cache, &gpu, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->vendor},
+        {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty}
+    });
+
+    ffStrbufDestroy(&gpu);
+    ffStrbufDestroy(&namePretty);
 }
 
 void ffPrintGPU(FFinstance* instance)
 {
-    const char* error = printGPUs(instance);
-    if(error != NULL)
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, error);
-}
+    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
+        return;
 
-#endif
+    FFlist gpus;
+    ffListInitA(&gpus, sizeof(GPUResult), 4);
+
+    FFcache cache;
+    ffCacheOpenWrite(instance, FF_GPU_MODULE_NAME, &cache);
+
+    #ifdef FF_HAVE_LIBPCI
+        pciFillGPUs(instance, &gpus);
+    #endif
+
+    #ifdef FF_HAVE_VULKAN
+        if(gpus.length == 0)
+            vulkanFillGPUs(instance, &gpus);
+    #endif
+
+    for(uint32_t i = 0; i < gpus.length; i++)
+        printGPUResult(instance, gpus.length == 1 ? 0 : i + 1, &cache, ffListGet(&gpus, i));
+
+    if(gpus.length == 0)
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPUs found.");
+
+    ffCacheClose(&cache);
+    ffListDestroy(&gpus);
+}

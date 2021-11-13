@@ -346,6 +346,9 @@ static inline void listSupportedFeatures()
         #ifdef FF_HAVE_LIBPCI
             "libpci\n"
         #endif
+        #ifdef FF_HAVE_VULKAN
+            "vulkan\n"
+        #endif
         #ifdef FF_HAVE_X11
             "x11\n"
         #endif
@@ -738,6 +741,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.localIpFormat);
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
+    else if(strcasecmp(key, "--lib-vulkan") == 0)
+        optionParseString(key, value, &instance->config.libVulkan);
     else if(strcasecmp(key, "--lib-X11") == 0)
         optionParseString(key, value, &instance->config.libX11);
     else if(strcasecmp(key, "--lib-Xrandr") == 0)

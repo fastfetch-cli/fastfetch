@@ -87,6 +87,7 @@ Key options: Provide a custom key for an output
 
 Library options: Set the path of a library to load
    --lib-PCI <path>
+   --lib-vulkan <path>
    --lib-X11 <path>
    --lib-Xrandr <path>
    --lib-gio <path>

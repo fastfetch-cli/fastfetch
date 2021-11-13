@@ -159,6 +159,7 @@
 # Sets an user specific path to a library to load.
 # Must be a valid path to a library.
 #--lib-PCI /usr/lib/libpci.so
+#--lib-vulkan /usr/lib/libvulkan.so
 #--lib-X11 /usr/lib/libX11.so
 #--lib-Xrandr /usr/lib/libXrandr.so
 #--lib-gio /usr/lib/libgio-2.0.so

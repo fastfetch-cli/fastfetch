@@ -101,6 +101,7 @@ typedef struct FFconfig
     FFstrbuf localIpFormat;
 
     FFstrbuf libPCI;
+    FFstrbuf libVulkan;
     FFstrbuf libX11;
     FFstrbuf libXrandr;
     FFstrbuf libWayland;
@@ -273,7 +274,6 @@ typedef enum FFInitState
 
 #define FF_LIBRARY_SYMBOL(symbolName) \
     __typeof__(&symbolName) ff ## symbolName;
-
 
 #define FF_LIBRARY_LOAD(libraryObjectName, libraryName, userLibraryName, returnValue) \
     void* libraryObjectName =  dlopen(userLibraryName.length == 0 ? libraryName : userLibraryName.chars, RTLD_LAZY); \

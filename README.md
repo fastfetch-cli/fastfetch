@@ -18,7 +18,8 @@ There are some presets defined for fastfech in [`presets`](presets), you can can
 
 In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is [`glibc`](https://www.gnu.org/software/libc/) (`libc`, `libdl` and `libpthread` are actually used) which is automatically shipped with every linux system.  
 The following libraries are used if present:
-*  [`libpci`](https://github.com/pciutils/pciutils): Needed for GPU output. _Should_ be available on every linux system.
+*  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
+*  [`libvulkan`](https://www.vulkan.org/): Fallback for GPU output.
 *  [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
 *  [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
 *  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance in wayland sessions.

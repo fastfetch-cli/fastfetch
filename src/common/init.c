@@ -168,6 +168,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.localIpFormat, 1);
 
     ffStrbufInitA(&instance->config.libPCI, 1);
+    ffStrbufInitA(&instance->config.libVulkan, 1);
     ffStrbufInitA(&instance->config.libX11, 1);
     ffStrbufInitA(&instance->config.libXrandr, 1);
     ffStrbufInitA(&instance->config.libGIO, 1);
