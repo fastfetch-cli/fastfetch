@@ -51,6 +51,10 @@ static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* resul
                 ffGetPropValue(line, "ColorScheme =", &result->colorScheme);
 
             if(result->font.length == 0)
+                ffGetPropValue(line, "font =", &result->font);
+
+            //Before plasma 5.23, "Font" was the key instead of "font". Since a lot of distros ship older versions, we test for both.
+            if(result->font.length == 0)
                 ffGetPropValue(line, "Font =", &result->font);
         }
     }
