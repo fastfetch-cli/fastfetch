@@ -33,7 +33,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Logos
 ```
-Arch, Artix, CentOS, Debian, Fedora, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, Ubuntu, Void
+Arch, Arco, Artix, CentOS, Debian, Fedora, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, Ubuntu, Void
 ```
 * Most of the logos have a small variant. Access it by appending _small to the logo name.
 * Some logos have an old variant. Access it by appending _old to the logo name.
