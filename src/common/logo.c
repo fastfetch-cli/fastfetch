@@ -725,6 +725,40 @@ static const FFlogo* getLogoVoidSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoArcoLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Arco", "Arcolinux", "Arco-linux")
+    FF_LOGO_LINES(
+        "$1                    /-                       \n"
+        "$1                   ooo:                      \n"
+        "$1                  yoooo/                     \n"
+        "$1                 yooooooo                    \n"
+        "$1                yooooooooo                   \n"
+        "$1               yooooooooooo                  \n"
+        "$1             .yooooooooooooo                 \n"
+        "$1            .oooooooooooooooo                \n"
+        "$1           .oooooooarcoooooooo               \n"
+        "$1          .ooooooooo-oooooooooo              \n"
+        "$1         .ooooooooo-  oooooooooo             \n"
+        "$1        :ooooooooo.    :ooooooooo            \n"
+        "$1       :ooooooooo.      :ooooooooo           \n"
+        "$1      :oooarcooo         .oooarcooo          \n"
+        "$1     :ooooooooy           .ooooooooo         \n"
+        "$1    :ooooooooo     $2 /ooooooooooooooooooo     \n"
+        "$1   :ooooooooo        $2 .-ooooooooooooooooo.   \n"
+        "$1   ooooooooo-               $2 -ooooooooooooo. \n"
+        "$1  ooooooooo-                   $2 .-oooooooooo.\n"
+        "$1 ooooooooo.                       $2 -ooooooooo";
+    )
+    FF_LOGO_COLORS(
+    "\033[34m", //blue
+    "\033[32m" //green
+    )
+    FF_LOGO_RETURN
+}
+
+
 typedef const FFlogo*(*GetLogoMethod)();
 
 static GetLogoMethod* getLogoMethods()
@@ -734,6 +768,7 @@ static GetLogoMethod* getLogoMethods()
         getLogoUnknown,
         getLogoArch,
         getLogoArchSmall,
+        getLogoArcoLinux,
         getLogoArtix,
         getLogoArtixSmall,
         getLogoCelOS,
