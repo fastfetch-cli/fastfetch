@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include <string.h>
 
+static char* CHAR_NULL_PTR = "";
+
 static bool strbufCharsLeft(uint32_t i, const void* strbuf)
 {
     return i < ((const FFstrbuf*) strbuf)->length;
@@ -42,15 +44,12 @@ void ffStrbufInitC(FFstrbuf* strbuf, const char c)
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
 {
-    if(allocate == 0)
-    {
-        fprintf(stderr, "ffStrbufInitA(): allocation size == 0, changing to 1");
-        allocate = 1;
-    }
-
     strbuf->allocated = allocate;
-    strbuf->chars = (char*) malloc(sizeof(char) * strbuf->allocated);
 
+    if(strbuf->allocated > 0)
+        strbuf->chars = (char*) malloc(sizeof(char) * strbuf->allocated);
+
+    //This will set the length to zero and the null byte.
     ffStrbufClear(strbuf);
 }
 
@@ -91,23 +90,37 @@ void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t allocate)
 {
     if(strbuf->allocated >= allocate)
         return;
+
+    if(strbuf->allocated == 0)
+        strbuf->chars = malloc(sizeof(char) * allocate);
+    else
+        strbuf->chars = realloc(strbuf->chars, sizeof(char) * allocate);
+
     strbuf->allocated = allocate;
-    strbuf->chars = realloc(strbuf->chars, sizeof(char) * strbuf->allocated);
 }
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 {
+    if(free == 0)
+        return;
+
     uint32_t allocate = strbuf->allocated;
     if(allocate < 2)
         allocate = 2;
+
     while((strbuf->length + free) > allocate)
         allocate *= 2;
+
     ffStrbufEnsureCapacity(strbuf, allocate);
 }
 
 void ffStrbufClear(FFstrbuf* strbuf)
 {
-    strbuf->chars[0] = '\0';
+    if(strbuf->allocated == 0)
+        strbuf->chars = CHAR_NULL_PTR;
+    else
+        strbuf->chars[0] = '\0';
+
     strbuf->length = 0;
 }
 
