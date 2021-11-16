@@ -15,26 +15,26 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
     ffStrbufWriteTo(&instance->config.color, stdout);
 
-    FF_STRBUF_CREATE(key);
-
     if(customKeyFormat == NULL || customKeyFormat->length == 0)
     {
-        ffStrbufAppendS(&key, moduleName);
+        fputs(moduleName, stdout);
 
         if(moduleIndex > 0)
-            ffStrbufAppendF(&key, " %hhu", moduleIndex);
+            printf(" %hhu", moduleIndex);
     }
     else
     {
+        FFstrbuf key;
+        ffStrbufInit(&key);
         ffParseFormatString(&key, customKeyFormat, NULL, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
         });
+        ffStrbufWriteTo(&key, stdout);
+        ffStrbufDestroy(&key);
     }
 
-    ffStrbufWriteTo(&key, stdout);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
     ffStrbufWriteTo(&instance->config.separator, stdout);
-    ffStrbufDestroy(&key);
 }
 
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...)
