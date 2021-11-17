@@ -101,7 +101,7 @@ static void setCapacity(FFstrbuf* strbuf, uint32_t capacity)
 
 void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity)
 {
-    if(strbuf->allocated > capacity)
+    if(strbuf->allocated > capacity || capacity == 0)
         return;
 
     setCapacity(strbuf, capacity + 1); // + 1 for the null byte

@@ -431,16 +431,7 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer)
         (uint32_t) readed == free
     ) {
         buffer->length += readed;
-
-        //GCC is complaining about a possible write to an array of length zero.
-        //It believes (buffer->allocated * 2) - 1) can be zero.                            | This is done in ffStrbufEnsureCapacity.
-        //This would happen when buffer->allocated is zero: 0 * 2 = 0; 0 - 1 = UINT32_MAX; UINT32_MAX + 1 = 0;
-        //However, this can never be true, because of our ffStrbufEnsureFree call above.
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wstringop-overflow"
         ffStrbufEnsureCapacity(buffer, (buffer->allocated * 2) - 1); // -1 for null terminator
-        #pragma GCC diagnostic pop
-
         free = ffStrbufGetFree(buffer);
     }
 
