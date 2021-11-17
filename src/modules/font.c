@@ -37,7 +37,7 @@ void ffPrintFont(FFinstance* instance)
     ffFontInitPango(&gtk4, gtk4Raw->chars);
 
     FFstrbuf gtk;
-    ffStrbufInit(&gtk);
+    ffStrbufInitA(&gtk, 64);
     ffGetGtkPretty(&gtk, &gtk2.pretty, &gtk3.pretty, &gtk4.pretty);
 
     if(instance->config.fontFormat.length == 0)

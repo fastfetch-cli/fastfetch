@@ -86,32 +86,48 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     ffStrbufAppendVF(strbuf, format, arguments);
 }
 
-void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t allocate)
+static void setCapacity(FFstrbuf* strbuf, uint32_t capacity)
 {
-    if(strbuf->allocated >= allocate)
+    if(strbuf->allocated == 0)
+    {
+        strbuf->chars = malloc(sizeof(char) * capacity);
+        strbuf->chars[0] = '\0';
+    }
+    else
+        strbuf->chars = realloc(strbuf->chars, sizeof(char) * capacity);
+
+    strbuf->allocated = capacity;
+}
+
+void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity)
+{
+    if(strbuf->allocated > capacity)
         return;
 
-    if(strbuf->allocated == 0)
-        strbuf->chars = malloc(sizeof(char) * allocate);
-    else
-        strbuf->chars = realloc(strbuf->chars, sizeof(char) * allocate);
-
-    strbuf->allocated = allocate;
+    setCapacity(strbuf, capacity + 1); // + 1 for the null byte
 }
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 {
-    if(free == 0)
+    if(ffStrbufGetFree(strbuf) >= free)
         return;
 
     uint32_t allocate = strbuf->allocated;
     if(allocate < 2)
         allocate = 2;
 
-    while((strbuf->length + free) > allocate)
+    while((strbuf->length + free + 1) > allocate) // + 1 for the null byte
         allocate *= 2;
 
-    ffStrbufEnsureCapacity(strbuf, allocate);
+    setCapacity(strbuf, allocate);
+}
+
+uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
+{
+    if(strbuf->allocated == 0)
+        return 0;
+
+    return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
 }
 
 void ffStrbufClear(FFstrbuf* strbuf)
@@ -276,13 +292,13 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     va_list localArguments;
     va_copy(localArguments, arguments);
 
-    uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length, format, localArguments);
+    uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length - 1, format, localArguments); // -1 for the null byte
 
     va_end(localArguments);
 
-    if(strbuf->length + written >= strbuf->allocated)
+    if(strbuf->length + written >= strbuf->allocated - 1) // -1 for the null byte
     {
-        ffStrbufEnsureCapacity(strbuf, strbuf->allocated * 2);
+        setCapacity(strbuf, strbuf->allocated * 2);
         ffStrbufAppendVF(strbuf, format, arguments); //Try again with larger buffer
     }
     else

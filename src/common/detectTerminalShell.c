@@ -237,12 +237,12 @@ const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance)
     init = true;
 
     ffStrbufInit(&result.shellProcessName);
-    ffStrbufInit(&result.shellExe);
+    ffStrbufInitA(&result.shellExe, 128);
     result.shellExeName = result.shellExe.chars;
     ffStrbufInit(&result.shellVersion);
 
     ffStrbufInit(&result.terminalProcessName);
-    ffStrbufInit(&result.terminalExe);
+    ffStrbufInitA(&result.terminalExe, 128);
     result.terminalExeName = result.terminalExe.chars;
 
     ffStrbufInit(&result.userShellExe);

@@ -221,7 +221,7 @@ void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8
     for(uint32_t i = 0; i < numArgs; i++)
     {
         FFstrbuf buffer;
-        ffStrbufInit(&buffer);
+        ffStrbufInitA(&buffer, 64);
         ffFormatAppendFormatArg(&buffer, &arguments[i]);
         ffStrbufWriteTo(&buffer, cache->split);
         ffStrbufDestroy(&buffer);
@@ -421,13 +421,21 @@ void ffWriteFileContent(const char* fileName, const FFstrbuf* content)
 
 void ffAppendFDContent(int fd, FFstrbuf* buffer)
 {
-    ssize_t readed;
-    while((readed = read(fd, buffer->chars + buffer->length, buffer->allocated - buffer->length)) == (buffer->allocated - buffer->length))
-    {
-        buffer->length += (uint32_t) readed;
-        ffStrbufEnsureCapacity(buffer, buffer->allocated * 2);
+    ssize_t readed = 0;
+
+    ffStrbufEnsureFree(buffer, 31); // 32 - 1 for the null terminator
+    uint32_t free = ffStrbufGetFree(buffer);
+
+    while(
+        (readed = read(fd, buffer->chars + buffer->length, free)) > 0 &&
+        (uint32_t) readed == free
+    ) {
+        buffer->length += readed;
+        ffStrbufEnsureCapacity(buffer, (buffer->allocated * 2) - 1); // -1 for null terminator
+        free = ffStrbufGetFree(buffer);
     }
 
+    // In case of failure, read returns -1. We don't want to substract the length of the buffer.
     if(readed > 0)
         buffer->length += (uint32_t) readed;
 

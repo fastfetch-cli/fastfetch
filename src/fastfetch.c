@@ -383,7 +383,7 @@ static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
     ssize_t read;
 
     FFstrbuf line;
-    ffStrbufInitA(&line, 128); //The default structure line needs this size
+    ffStrbufInitA(&line, 256); //The default structure line needs this size
 
     while ((read = getline(&lineStart, &len, file)) != -1)
     {
@@ -497,7 +497,7 @@ static inline void optionParseString(const char* key, const char* value, FFstrbu
         fprintf(stderr, "Error: usage: %s <str>\n", key);
         exit(477);
     }
-    ffStrbufEnsureCapacity(buffer, 64); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
+    ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
     ffStrbufSetS(buffer, value);
 }
 

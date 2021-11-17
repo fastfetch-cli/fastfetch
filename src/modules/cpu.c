@@ -47,10 +47,10 @@ void ffPrintCPU(FFinstance* instance)
     }
 
     FFstrbuf name;
-    ffStrbufInit(&name);
+    ffStrbufInitA(&name, 64);
 
     FFstrbuf vendor;
-    ffStrbufInit(&vendor);
+    ffStrbufInitA(&vendor, 64);
 
     FFstrbuf physicalCoresString;
     ffStrbufInit(&physicalCoresString);

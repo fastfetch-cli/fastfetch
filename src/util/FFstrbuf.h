@@ -34,6 +34,8 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
+uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
+
 void ffStrbufClear(FFstrbuf* strbuf);
 
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
