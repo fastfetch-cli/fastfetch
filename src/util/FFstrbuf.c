@@ -289,23 +289,17 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     if(format == NULL)
         return;
 
-    va_list localArguments;
-    va_copy(localArguments, arguments);
+    uint32_t free = ffStrbufGetFree(strbuf);
+    uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, free, format, arguments);
 
-    uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated - strbuf->length - 1, format, localArguments); // -1 for the null byte
-
-    va_end(localArguments);
-
-    if(strbuf->length + written >= strbuf->allocated - 1) // -1 for the null byte
+    if(strbuf->length + written > free)
     {
-        setCapacity(strbuf, strbuf->allocated * 2);
-        ffStrbufAppendVF(strbuf, format, arguments); //Try again with larger buffer
+        ffStrbufEnsureFree(strbuf, written);
+        written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, ffStrbufGetFree(strbuf), format, arguments);
     }
-    else
-    {
-        strbuf->length += written;
-        strbuf->chars[strbuf->length] = '\0';
-    }
+
+    strbuf->length += written;
+    strbuf->chars[strbuf->length] = '\0';
 }
 
 char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index)
@@ -665,4 +659,5 @@ void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);
+    strbuf->allocated = 0;
 }
