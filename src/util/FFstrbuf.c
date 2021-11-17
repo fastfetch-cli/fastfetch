@@ -104,6 +104,12 @@ void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity)
     if(strbuf->allocated > capacity || capacity == 0)
         return;
 
+    if(capacity == UINT32_MAX)
+    {
+        capacity = UINT32_MAX - 1;
+        fprintf(stderr, "Warning: ffStrbufEnsureCapacity called with UINT32_MAX. Highest allowed value is UINT32_MAX - 1. Reducing capacity.\n");
+    }
+
     setCapacity(strbuf, capacity + 1); // + 1 for the null byte
 }
 
