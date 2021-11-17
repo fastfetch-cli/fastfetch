@@ -123,11 +123,11 @@ static void pciFillGPUs(FFinstance* instance, FFlist* results)
             GPUResult* result = ffListAdd(results);
 
             ffStrbufInitA(&result->vendor, 256);
-            ffpci_lookup_name(pacc, result->vendor.chars, result->vendor.allocated -1, PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
+            ffpci_lookup_name(pacc, result->vendor.chars, (int) result->vendor.allocated -1, PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
             ffStrbufRecalculateLength(&result->vendor);
 
             ffStrbufInitA(&result->name, 256);
-            ffpci_lookup_name(pacc, result->name.chars, result->name.allocated - 1, PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
+            ffpci_lookup_name(pacc, result->name.chars, (int) result->name.allocated - 1, PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
             ffStrbufRecalculateLength(&result->name);
         };
     }
@@ -197,7 +197,7 @@ void ffPrintGPU(FFinstance* instance)
             vulkanFillGPUs(instance, &gpus);
     #endif
 
-    for(uint32_t i = 0; i < gpus.length; i++)
+    for(uint8_t i = 0; i < gpus.length; i++)
         printGPUResult(instance, gpus.length == 1 ? 0 : i + 1, &cache, ffListGet(&gpus, i));
 
     if(gpus.length == 0)

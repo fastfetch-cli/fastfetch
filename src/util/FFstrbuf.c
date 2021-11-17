@@ -201,7 +201,7 @@ void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transfor
     {
         if(i % 16 == 0)
             ffStrbufEnsureFree(strbuf, 16);
-        strbuf->chars[strbuf->length++] = transformFunc(value[i]);
+        strbuf->chars[strbuf->length++] = (char) transformFunc(value[i]);
     }
     strbuf->chars[strbuf->length] = '\0';
 }
@@ -609,7 +609,7 @@ bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const 
 
 bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
 {
-    uint32_t endLength = strlen(end);
+    uint32_t endLength = (uint32_t) strlen(end);
 
     if(endLength > strbuf->length)
         return false;
@@ -625,7 +625,7 @@ bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
 
 static bool testEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end, uint32_t* endLength)
 {
-    *endLength = strlen(end);
+    *endLength = (uint32_t) strlen(end);
 
     if(*endLength > strbuf->length)
         return false;

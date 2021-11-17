@@ -26,12 +26,12 @@ static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs
 {
     const uint32_t GB = 1024 * 1024 * 1024;
 
-    uint32_t total     = (fs->f_blocks * fs->f_frsize) / GB;
-    uint32_t available = (fs->f_bfree  * fs->f_frsize) / GB;
+    uint32_t total     = ((uint32_t) (fs->f_blocks * fs->f_frsize)) / GB;
+    uint32_t available = ((uint32_t) (fs->f_bfree  * fs->f_frsize)) / GB;
     uint32_t used      = total - available;
-    uint8_t percentage = (used / (double) total) * 100.0;
+    uint8_t percentage = (uint8_t) ((used / (double) total) * 100.0);
 
-    uint32_t files = fs->f_files - fs->f_ffree;
+    uint32_t files = (uint32_t) (fs->f_files - fs->f_ffree);
 
     if(instance->config.diskFormat.length == 0)
     {

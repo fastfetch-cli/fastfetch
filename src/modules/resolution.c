@@ -9,9 +9,9 @@
 
 typedef struct ResolutionResult
 {
-    int width;
-    int height;
-    int refreshRate;
+    uint32_t width;
+    uint32_t height;
+    uint32_t refreshRate;
 } ResolutionResult;
 
 static bool printResolutionResultList(FFinstance* instance, FFlist* results)
@@ -19,7 +19,7 @@ static bool printResolutionResultList(FFinstance* instance, FFlist* results)
     for(uint32_t i = 0; i < results->length; i++)
     {
         ResolutionResult* result = ffListGet(results, i);
-        uint8_t moduleIndex = results->length == 1 ? 0 : i + 1;
+        uint8_t moduleIndex = results->length == 1 ? 0 : (uint8_t) i + 1;
 
         if(instance->config.resolutionFormat.length == 0)
         {
@@ -108,7 +108,7 @@ static void printResolutionDRMBackend(FFinstance* instance)
 
 #if defined(FF_HAVE_XRANDR) || defined(FF_HAVE_WAYLAND)
 
-static int parseRefreshRate(int32_t refreshRate)
+static uint32_t parseRefreshRate(int32_t refreshRate)
 {
     if(refreshRate <= 0)
         return 0;
@@ -123,7 +123,7 @@ static int parseRefreshRate(int32_t refreshRate)
     if(refreshRate == 145)
         refreshRate = 144;
 
-    return refreshRate;
+    return (uint32_t) refreshRate;
 }
 
 #endif //FF_HAVE_XRANDR || FF_HAVE_WAYLAND
@@ -131,14 +131,14 @@ static int parseRefreshRate(int32_t refreshRate)
 #ifdef FF_HAVE_X11
 #include <X11/Xlib.h>
 
-static void x11AddScreenAsResult(FFlist* results, Screen* screen, int refreshRate)
+static void x11AddScreenAsResult(FFlist* results, Screen* screen, uint32_t refreshRate)
 {
     if(WidthOfScreen(screen) == 0 || HeightOfScreen(screen) == 0)
         return;
 
     ResolutionResult* result = ffListAdd(results);
-    result->width = WidthOfScreen(screen);
-    result->height = HeightOfScreen(screen);
+    result->width = (uint32_t) WidthOfScreen(screen);
+    result->height = (uint32_t) HeightOfScreen(screen);
     result->refreshRate = refreshRate;
 }
 
@@ -192,7 +192,7 @@ typedef struct XrandrData
     FFlist results;
 
     //Init per screen
-    int defaultRefreshRate;
+    uint32_t defaultRefreshRate;
     XRRScreenResources* screenResources;
 } XrandrData;
 
@@ -222,7 +222,7 @@ static bool xrandrHandleOutputInfo(XrandrData* data, XRROutputInfo* outputInfo)
     ResolutionResult* result = ffListAdd(&data->results);
     result->width = modeInfo->width;
     result->height = modeInfo->height;
-    result->refreshRate = parseRefreshRate(modeInfo->dotClock / (modeInfo->hTotal * modeInfo->vTotal));
+    result->refreshRate = parseRefreshRate((int32_t) (modeInfo->dotClock / (modeInfo->hTotal * modeInfo->vTotal)));
 
     if(result->refreshRate == 0)
         result->refreshRate = data->defaultRefreshRate;
@@ -238,9 +238,9 @@ static bool xrandrHandleMonitorFallback(XrandrData* data, XRRMonitorInfo* monito
         return false;
 
     ResolutionResult* result = ffListAdd(&data->results);
-    result->width = monitorInfo->width;
-    result->height = monitorInfo->height;
-    result->refreshRate = data->defaultRefreshRate;
+    result->width = (uint32_t) monitorInfo->width;
+    result->height = (uint32_t) monitorInfo->height;
+    result->refreshRate = (uint32_t) data->defaultRefreshRate;
     return true;
 }
 
@@ -286,7 +286,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
     XRRScreenConfiguration* screenConfiguration = data->ffXRRGetScreenInfo(data->display, window);
     if(screenConfiguration != NULL)
     {
-        data->defaultRefreshRate = (int) data->ffXRRConfigCurrentRate(screenConfiguration);
+        data->defaultRefreshRate = (uint32_t) data->ffXRRConfigCurrentRate(screenConfiguration);
         data->ffXRRFreeScreenConfigInfo(screenConfiguration);
     }
     else
@@ -402,7 +402,7 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
 
     wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
 
-    if(width == 0 || height == 0)
+    if(width <= 0 || height <= 0)
         return;
 
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -412,8 +412,8 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
 
     pthread_mutex_unlock(&mutex);
 
-    result->width = (int) width;
-    result->height = (int) height;
+    result->width = (uint32_t) width;
+    result->height = (uint32_t) height;
     result->refreshRate = parseRefreshRate(refreshRate / 1000);
 }
 

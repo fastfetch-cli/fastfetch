@@ -8,7 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
 
 if(BUILD_TESTS)

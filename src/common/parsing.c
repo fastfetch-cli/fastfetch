@@ -194,7 +194,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
     while(**data != ' ' && **data != '\t' && **data != ',' && **data != '\0' && **data != '`' && **data != '\\')
         ++(*data);
 
-    uint32_t wordLength = *data - wordStart;
+    uint32_t wordLength = (uint32_t) (*data - wordStart);
     if(wordLength == 0)
         return;
 

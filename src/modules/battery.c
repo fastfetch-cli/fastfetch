@@ -6,7 +6,7 @@
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFinstance* instance, FFstrbuf* dir, uint32_t index)
+static void printBattery(FFinstance* instance, FFstrbuf* dir, uint8_t index)
 {
     uint32_t dirLength = dir->length;
 
@@ -147,7 +147,7 @@ void ffPrintBattery(FFinstance* instance)
         return;
     }
 
-    for(uint32_t i = 0; i < dirs.length; i++)
+    for(uint8_t i = 0; i < dirs.length; i++)
     {
         FFstrbuf* name = ffListGet(&dirs, i);
         ffStrbufAppend(&baseDir, name);
