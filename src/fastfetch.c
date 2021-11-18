@@ -761,6 +761,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
+    else if(strcasecmp(key, "--separator-string") == 0)
+        optionParseString(key, value, &instance->config.separatorString);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         instance->config.localIpShowIpV4 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)
@@ -812,8 +814,11 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 {
     for(int i = 1; i < argc; i++)
     {
-        if(i == argc - 1 || (*argv[i + 1] == '-' && strcasecmp(argv[i], "--offsetx") != 0)) // --offsetx allows negative values
-        {
+        if(i == argc - 1 || (
+            *argv[i + 1] == '-' &&
+            strcasecmp(argv[i], "--offsetx") != 0 && // --offsetx allows negative values
+            strcasecmp(argv[i], "--separator-string") != 0 // Separator string can start with a -
+        )) {
             parseOption(instance, data, argv[i], NULL);
         }
         else

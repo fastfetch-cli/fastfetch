@@ -1,107 +1,108 @@
 Usage: fastfetch <options>
 
 Informative options:
-   -h,           --help:            shows this message and exits
-   -h <command>, --help <command>:  shows help for a specific command and exits
-   -v            --version:         prints the version of fastfetch and exits
-                 --list-logos:      list available logos and exits
-                 --list-modules:    lists available modules and exits
-                 --list-presets:    list presets fastfetch knows about and exits. They can be loaded with --load-config. (+)
-                 --list-features:   list the supported features fastfetch was compiled with and exits. Mainly for development.
-                 --print-logos:     show available logos and exits
-                 --print-config:    prints the default config and exits
-                 --print-structure: prints the default stucture and exits
+    -h,           --help:            shows this message and exits
+    -h <command>, --help <command>:  shows help for a specific command and exits
+    -v            --version:         prints the version of fastfetch and exits
+                  --list-logos:      list available logos and exits
+                  --list-modules:    lists available modules and exits
+                  --list-presets:    list presets fastfetch knows about and exits. They can be loaded with --load-config. (+)
+                  --list-features:   list the supported features fastfetch was compiled with and exits. Mainly for development.
+                  --print-logos:     show available logos and exits
+                  --print-config:    prints the default config and exits
+                  --print-structure: prints the default stucture and exits
 
 General options:
-                --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
-                --set <key=value>:                hard set the value of a key
-   -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)
-                --spacing <width>:                sets the distance between logo and text
-   -s <str>,    --separator <str>:                sets the separator between key and value. Default is a colon with a space
-   -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.
-                --show-errors <?value>:           print occuring errors
-   -r <?value>  --recache <?value>:               generate new cached values
-                --nocache <?value>:               don't use cached values, but also don't overwrite existing ones
-                --print-remaining-logo <?value>:  print the remaining logo, if it is higher than the number of lines shown
-                --multithreading <?value>:        use multiple threads to detect values
-                --load-config <file>:             load a config file (+)
-                --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
-                --disable-linewrap <?value>:      Disable linewrap during the run
-                --hide-cursor <?value>:           Hide the cursor during the run
+                 --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
+                 --set <key=value>:                hard set the value of a key
+    -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)
+                 --spacing <width>:                sets the distance between logo and text
+    -s <str>,    --separator <str>:                sets the separator between key and value. Default is a colon with a space
+    -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.
+                 --show-errors <?value>:           print occuring errors
+    -r <?value>  --recache <?value>:               generate new cached values
+                 --nocache <?value>:               don't use cached values, but also don't overwrite existing ones
+                 --print-remaining-logo <?value>:  print the remaining logo, if it is higher than the number of lines shown
+                 --multithreading <?value>:        use multiple threads to detect values
+                 --load-config <file>:             load a config file (+)
+                 --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
+                 --disable-linewrap <?value>:      Disable linewrap during the run
+                 --hide-cursor <?value>:           Hide the cursor during the run
 
 Logo options:
-   -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a valid path.
-              --color-logo <?value>: if set to false, the logo will be black / white
+    -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a valid path.
+               --color-logo <?value>: if set to false, the logo will be black / white
 
 Format options: Provide the format string for custom output. Use fastfetch --help *-format for specific help.
-   --os-format <format>
-   --host-format <format>
-   --kernel-format <format>
-   --uptime-format <format>
-   --processes-format <format>
-   --packages-format <format>
-   --shell-format <format>
-   --resolution-format <format>
-   --de-format <format>
-   --wm-format <format>
-   --wm-theme-format <format>
-   --theme-format <format>
-   --icons-format <format>
-   --font-format <format>
-   --cursor-format <format>
-   --terminal-format <format>
-   --terminal-font-format <format>
-   --cpu-format <format>
-   --gpu-format <format>
-   --memory-format <format>
-   --disk-format <format>
-   --battery-format <format>
-   --locale-format <format>
-   --local-ip-format <format>
+    --os-format <format>
+    --host-format <format>
+    --kernel-format <format>
+    --uptime-format <format>
+    --processes-format <format>
+    --packages-format <format>
+    --shell-format <format>
+    --resolution-format <format>
+    --de-format <format>
+    --wm-format <format>
+    --wm-theme-format <format>
+    --theme-format <format>
+    --icons-format <format>
+    --font-format <format>
+    --cursor-format <format>
+    --terminal-format <format>
+    --terminal-font-format <format>
+    --cpu-format <format>
+    --gpu-format <format>
+    --memory-format <format>
+    --disk-format <format>
+    --battery-format <format>
+    --locale-format <format>
+    --local-ip-format <format>
 
 Key options: Provide a custom key for an output
-   --os-key <key>
-   --host-key <key>
-   --kernel-key <key>
-   --uptime-key <key>
-   --processes-key <key>
-   --packages-key <key>
-   --shell-key <key>
-   --resolution-key <key>: takes the resolution index as argument
-   --de-key <key>
-   --wm-key <key>
-   --wm-theme-key <key>
-   --theme-key <key>
-   --icons-key <key>
-   --font-key <key>
-   --cursor-key <key>
-   --terminal-key <key>
-   --terminal-font-key <key>
-   --cpu-key <key>
-   --gpu-key <key>: takes the gpu index as format argument
-   --memory-key <key>
-   --disk-key <key>: takes the mount path as format argument
-   --battery-key <key>: takes the battery index as format argument
-   --locale-key <key>
-   --local-ip-key <key>: takes the name of this network interface as format argument
+    --os-key <key>
+    --host-key <key>
+    --kernel-key <key>
+    --uptime-key <key>
+    --processes-key <key>
+    --packages-key <key>
+    --shell-key <key>
+    --resolution-key <key>: takes the resolution index as argument
+    --de-key <key>
+    --wm-key <key>
+    --wm-theme-key <key>
+    --theme-key <key>
+    --icons-key <key>
+    --font-key <key>
+    --cursor-key <key>
+    --terminal-key <key>
+    --terminal-font-key <key>
+    --cpu-key <key>
+    --gpu-key <key>: takes the gpu index as format argument
+    --memory-key <key>
+    --disk-key <key>: takes the mount path as format argument
+    --battery-key <key>: takes the battery index as format argument
+    --locale-key <key>
+    --local-ip-key <key>: takes the name of this network interface as format argument
 
 Library options: Set the path of a library to load
-   --lib-PCI <path>
-   --lib-vulkan <path>
-   --lib-X11 <path>
-   --lib-Xrandr <path>
-   --lib-gio <path>
-   --lib-DConf <path>
-   --lib-wayland <path>
-   --lib-XFConf <path>
-   --lib-RPM <path>
+    --lib-PCI <path>
+    --lib-vulkan <path>
+    --lib-X11 <path>
+    --lib-Xrandr <path>
+    --lib-gio <path>
+    --lib-DConf <path>
+    --lib-wayland <path>
+    --lib-XFConf <path>
+    --lib-RPM <path>
 
 Module specific options:
-   --disk-folders <folders>:     A colon separated list of folder paths for the disk output. Default is "/:/home"
-   --battery-dir <folder>:       The directory where the battery folders are. Standard: /sys/class/power_supply/
-   --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true
-   --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false
-   --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false
+    --separator-string <str>:     Set the string printed by the separator module
+    --disk-folders <folders>:     A colon separated list of folder paths for the disk output. Default is "/:/home"
+    --battery-dir <folder>:       The directory where the battery folders are. Standard: /sys/class/power_supply/
+    --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true
+    --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false
+    --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

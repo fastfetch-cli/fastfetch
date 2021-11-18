@@ -114,6 +114,8 @@ typedef struct FFconfig
 
     FFstrbuf batteryDir;
 
+    FFstrbuf separatorString;
+
     bool localIpShowLoop;
     bool localIpShowIpV4;
     bool localIpShowIpV6;

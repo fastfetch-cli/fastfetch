@@ -180,6 +180,8 @@ static void defaultConfig(FFinstance* instance)
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
+    ffStrbufInitA(&instance->config.separatorString, 0);
+
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;

@@ -97,6 +97,12 @@
 # Default is true.
 #--color-logo true
 
+# Separator string option:
+# Sets the string printed by the "separator" module (usually between title and rest of output)
+# Must be any string. It is repated / cut to fit perfectly.
+# Default is "-"
+#--separator-string -
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
