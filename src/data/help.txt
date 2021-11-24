@@ -52,6 +52,7 @@ Format options: Provide the format string for custom output. Use fastfetch --hel
     --terminal-format <format>
     --terminal-font-format <format>
     --cpu-format <format>
+    --cpu-usage-format <format>
     --gpu-format <format>
     --memory-format <format>
     --disk-format <format>
@@ -78,6 +79,7 @@ Key options: Provide a custom key for an output
     --terminal-key <key>
     --terminal-font-key <key>
     --cpu-key <key>
+    --cpu-usage-key <key>
     --gpu-key <key>: takes the gpu index as format argument
     --memory-key <key>
     --disk-key <key>: takes the mount path as format argument

@@ -172,6 +172,7 @@ set(SRCS
     src/modules/terminal.c
     src/modules/terminalfont.c
     src/modules/cpu.c
+    src/modules/cpuUsage.c
     src/modules/gpu.c
     src/modules/memory.c
     src/modules/disk.c
