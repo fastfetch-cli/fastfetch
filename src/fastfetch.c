@@ -242,6 +242,12 @@ static inline void printCommandHelp(const char* command)
             "most accurate frequeny"
         );
     }
+    else if(strcasecmp(command, "cpu-usage-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("cpu-usage", "{0}%", 1,
+            "CPU usage without percent mark"
+        );
+    }
     else if(strcasecmp(command, "gpu-format") == 0)
     {
         constructAndPrintCommandHelpFormat("gpu", "{2} {4}", 4,
@@ -713,8 +719,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.termFontKey);
     else if(strcasecmp(key, "--cpu-format") == 0)
         optionParseString(key, value, &instance->config.cpuFormat);
+    else if(strcasecmp(key, "--cpu-usage-format") == 0)
+        optionParseString(key, value, &instance->config.cpuUsageFormat);
     else if(strcasecmp(key, "--cpu-key") == 0)
         optionParseString(key, value, &instance->config.cpuKey);
+    else if(strcasecmp(key, "--cpu-usage-key") == 0)
+        optionParseString(key, value, &instance->config.cpuUsageKey);
     else if(strcasecmp(key, "--gpu-format") == 0)
         optionParseString(key, value, &instance->config.gpuFormat);
     else if(strcasecmp(key, "--gpu-key") == 0)
@@ -889,6 +899,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintTerminalFont(instance);
     else if(strcasecmp(line, "cpu") == 0)
         ffPrintCPU(instance);
+    else if(strcasecmp(line, "cpuusage") == 0)
+        ffPrintCPUUsage(instance);
     else if(strcasecmp(line, "gpu") == 0)
         ffPrintGPU(instance);
     else if(strcasecmp(line, "memory") == 0)

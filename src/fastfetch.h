@@ -87,6 +87,8 @@ typedef struct FFconfig
     FFstrbuf termFontKey;
     FFstrbuf cpuFormat;
     FFstrbuf cpuKey;
+    FFstrbuf cpuUsageFormat;
+    FFstrbuf cpuUsageKey;
     FFstrbuf gpuFormat;
     FFstrbuf gpuKey;
     FFstrbuf memoryFormat;
@@ -424,6 +426,7 @@ void ffPrintCursor(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintCPU(FFinstance* instance);
+void ffPrintCPUUsage(FFinstance* instance);
 void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
 void ffPrintDisk(FFinstance* instance);
