@@ -852,7 +852,7 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
         ffStrbufDestroy(&logoChars);
         if(instance->config.showErrors)
             printf(FASTFETCH_TEXT_MODIFIER_ERROR"Error: unknown logo / logo file not found: %s"FASTFETCH_TEXT_MODIFIER_RESET"\n", logo);
-        instance->config.logo = getLogoUnknown();
+        setLogo(instance, getLogoUnknown());
         return;
     }
 

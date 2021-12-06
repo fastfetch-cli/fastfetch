@@ -1,0 +1,18 @@
+#compdef _fastfetch fastfetch
+
+function _fastfetch() {
+    local line
+
+    # single options
+
+    _arguments -C
+
+    if [[ ${#line[@]} -eq 0 ]]; then
+         _arguments -C \
+            {-h,--help}'[print help message and exit]' \
+            {-v,--version}'[print version and exit]'
+    fi
+
+    _arguments -C \
+        '(--structure)'{-s,--structure}'[Supply the structure to use]'
+}
