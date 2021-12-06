@@ -2,6 +2,7 @@ Battery
 Break
 Colors
 CPU
+CPUUsage
 Cursor
 DE
 Disk

@@ -124,6 +124,7 @@
 #--terminal-key Terminal
 #--terminal-font-key Terminal Font
 #--cpu-key CPU
+#--cpu-usage-key CPU Usage
 #--gpu-key GPU {1}
 #--memory-key Memory
 #--disk-key Disk ({1})
@@ -154,6 +155,7 @@
 #--terminal-format
 #--terminal-font-format
 #--cpu-format
+#--cpu-usage-format
 #--gpu-format
 #--memory-format
 #--disk-format

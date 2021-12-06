@@ -153,6 +153,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.termFontKey, 0);
     ffStrbufInitA(&instance->config.cpuFormat, 0);
     ffStrbufInitA(&instance->config.cpuKey, 0);
+    ffStrbufInitA(&instance->config.cpuUsageFormat, 0);
+    ffStrbufInitA(&instance->config.cpuUsageKey, 0);
     ffStrbufInitA(&instance->config.gpuFormat, 0);
     ffStrbufInitA(&instance->config.gpuKey, 0);
     ffStrbufInitA(&instance->config.memoryFormat, 0);
