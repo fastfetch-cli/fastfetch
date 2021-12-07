@@ -839,15 +839,6 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
     }
 }
 
-static void applyData(FFinstance* instance, FFdata* data)
-{
-    if(data->logoName.length > 0)
-        ffLoadLogoSet(instance, data->logoName.chars);
-
-    if(instance->config.color.length == 0)
-        ffStrbufSetS(&instance->config.color, instance->config.logo->colors[0]);
-}
-
 static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
 {
     const char* setValue = ffValuestoreGet(&data->valuestore, line);
