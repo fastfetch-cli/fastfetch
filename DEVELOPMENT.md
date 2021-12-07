@@ -24,3 +24,4 @@ Here i just add things that are easy to forget.
 - [ ] General feature parity with neofetch, to demonstrate supremity of c
 - [ ] Find wayland compositor by looking at \${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY:-wayland-0}
 - [ ] Make LocalIP module more configurable
+- [ ] Automatic migrate old config files to newer versions
