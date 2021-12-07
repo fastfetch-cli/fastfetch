@@ -919,49 +919,49 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintError(instance, line, 0, NULL, NULL, 0, "<no implementation provided>");
 }
 
-static void run(FFinstance* instance, FFdata* data)
-{
-    if(data->multithreading)
-        ffStartDetectionThreads(instance);
-
-    if(data->structure.length == 0)
-        ffStrbufSetS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
-
-    ffStart(instance);
-
-    uint32_t startIndex = 0;
-    while (startIndex < data->structure.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
-        data->structure.chars[colonIndex] = '\0';
-
-        parseStructureCommand(instance, data, data->structure.chars + startIndex);
-
-        startIndex = colonIndex + 1;
-    }
-
-    ffFinish(instance);
-}
-
-static void initData(FFdata* data)
-{
-    ffValuestoreInit(&data->valuestore);
-    ffStrbufInitA(&data->structure, 256);
-    ffStrbufInit(&data->logoName);
-    data->multithreading = true;
-}
-
 int main(int argc, const char** argv)
 {
     FFinstance instance;
     ffInitInstance(&instance);
 
+    //Data stores things only needed for the configuration of fastfetch
     FFdata data;
-    initData(&data);
+    ffValuestoreInit(&data.valuestore);
+    ffStrbufInitA(&data.structure, 256);
+    ffStrbufInitA(&data.logoName, 0);
+    data.multithreading = true;
 
     parseDefaultConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
-    applyData(&instance, &data); //Here we do things that need to be done after parsing all options
 
-    run(&instance, &data);
+    //Load custom logo if it exists
+    if(data.logoName.length > 0)
+        ffLoadLogoSet(&instance, data.logoName.chars);
+
+    //If we haven't set key color, use primary color of logo
+    if(instance.config.color.length == 0)
+        ffStrbufSetS(&instance.config.color, instance.config.logo->colors[0]);
+
+    //Start detection threads
+    if(data.multithreading)
+        ffStartDetectionThreads(&instance);
+
+    //If we don't have a custom structure, use the default one
+    if(data.structure.length == 0)
+        ffStrbufSetS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
+
+    ffStart(&instance);
+
+    uint32_t startIndex = 0;
+    while (startIndex < data.structure.length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
+        data.structure.chars[colonIndex] = '\0';
+
+        parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
+
+        startIndex = colonIndex + 1;
+    }
+
+    ffFinish(&instance);
 }

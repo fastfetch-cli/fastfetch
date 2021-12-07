@@ -8,9 +8,9 @@
 # This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
 # Use fastfetch --print-config > ~/.config/fastfetch/config.conf to overwrite this with the current defaults
 
-# Below some options are listed. Uncomment and modify them so they take affect.
-# Note that there are a lot more options than listed here, take a look at "fastfetch --help".
-# Of course all of the can be made persistent here too.
+# Below some often usefull options are listed. Uncomment and modify them so they take affect.
+# Note that there are a lot more options than the ones listed here, take a look at "fastfetch --help".
+# Of course all of them can be made persistent here too.
 
 # Config option:
 # Load additional config files.
@@ -22,10 +22,9 @@
 
 # Structure option:
 # Sets the modules to use and their order.
+# Must be a list of module names, separated by colons.
 # List available modules with "fastfetch --list-modules".
 # Get the default structure with "fastfetch --print-structure".
-# Must be a list of module names, separated by colons.
-# Default is $"FASTFETCH_DATATEXT_STRUCTURE$".
 #--structure $"FASTFETCH_DATATEXT_STRUCTURE$"
 
 # Logo option:
