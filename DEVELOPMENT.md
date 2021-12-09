@@ -25,3 +25,5 @@ Here i just add things that are easy to forget.
 - [ ] Find wayland compositor by looking at \${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY:-wayland-0}
 - [ ] Make LocalIP module more configurable
 - [ ] Automatic migrate old config files to newer versions
+- [ ] ZSH completions
+- [ ] fish completions
