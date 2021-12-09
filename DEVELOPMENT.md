@@ -27,3 +27,4 @@ Here i just add things that are easy to forget.
 - [ ] Automatic migrate old config files to newer versions
 - [ ] ZSH completions
 - [ ] fish completions
+- [ ] Add an easteregg
