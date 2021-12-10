@@ -28,3 +28,5 @@ Here i just add things that are easy to forget.
 - [ ] ZSH completions
 - [ ] fish completions
 - [ ] Add an easteregg
+- [ ] Make CPU usage detection much faster and more accurate
+- [ ] Detect CPU usage in a separate thread and expose it both to the cpuUsage module and the cpu format string
