@@ -948,7 +948,7 @@ void ffPrintLogoLine(FFinstance* instance)
     uint32_t colorPlaceholdersLength = 0;
 
 
-    //If offset x is negative, we will cut the logo. Save the totol amount to cut, and the currently cut amount
+    //If offset x is negative, we will cut the logo. Save the total amount to cut, and the currently cut amount
     uint32_t cutValue = instance->config.offsetx < 0 ? (uint32_t) (instance->config.offsetx * -1) : 0;
     uint32_t cut = cutValue;
 
