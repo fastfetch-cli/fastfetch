@@ -3,7 +3,6 @@
 #include <malloc.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <pthread.h>
 
 #define FF_IO_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_IO_CACHE_SPLIT_EXTENSION "ffcs"
@@ -463,33 +462,31 @@ bool ffGetFileContent(const char* fileName, FFstrbuf* buffer)
     return ffAppendFileContent(fileName, buffer);
 }
 
-static volatile bool originalPipesSet = false;
-static volatile int originalStdout = -1;
-static volatile int originalStderr = -1;
-
-void ffDisableOutput()
+// Not thread safe!
+void ffSuppressIO(bool suppress)
 {
-    fflush(stdout);
-    fflush(stderr);
+    static bool init = false;
+    static int origOut = -1;
+    static int origErr = -1;
+    static int nullFile = -1;
 
-    if(!originalPipesSet)
+    if(!init)
     {
-        originalStdout = dup(STDOUT_FILENO);
-        originalStderr = dup(STDERR_FILENO);
-        originalPipesSet = true;
+        if(!suppress)
+            return;
+
+        origOut = dup(STDOUT_FILENO);
+        origErr = dup(STDERR_FILENO);
+        nullFile = open("/dev/null", O_WRONLY);
+        init = true;
     }
 
-    int nullFile = open("/dev/null", O_WRONLY);
-    dup2(nullFile, STDOUT_FILENO);
-    dup2(nullFile, STDERR_FILENO);
-    close(nullFile);
-}
+    if(nullFile == -1)
+        return;
 
-void ffEnableOutput()
-{
     fflush(stdout);
     fflush(stderr);
 
-    dup2(originalStdout, STDOUT_FILENO);
-    dup2(originalStderr, STDERR_FILENO);
+    dup2(suppress ? nullFile : origOut, STDOUT_FILENO);
+    dup2(suppress ? nullFile : origErr, STDERR_FILENO);
 }

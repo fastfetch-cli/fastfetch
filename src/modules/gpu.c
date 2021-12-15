@@ -24,7 +24,7 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
 
     //Some drivers (nvdc) print messages to stdout
     //and thats the best way i found to disable that
-    ffDisableOutput();
+    ffSuppressIO(true);
 
     const VkApplicationInfo applicationInfo = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -51,7 +51,7 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
     if(ffvkCreateInstance(&instanceCreateInfo, NULL, &vkInstance) != VK_SUCCESS)
     {
         dlclose(vulkan);
-        ffEnableOutput();
+        ffSuppressIO(false);
         return;
     }
 
@@ -60,7 +60,7 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
     {
         ffvkDestroyInstance(vkInstance, NULL);
         dlclose(vulkan);
-        ffEnableOutput();
+        ffSuppressIO(false);
         return;
     }
 
@@ -70,7 +70,7 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
         free(physicalDevices);
         ffvkDestroyInstance(vkInstance, NULL);
         dlclose(vulkan);
-        ffEnableOutput();
+        ffSuppressIO(false);
         return;
     }
 
@@ -93,7 +93,7 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
     free(physicalDevices);
     ffvkDestroyInstance(vkInstance, NULL);
     dlclose(vulkan);
-    ffEnableOutput();
+    ffSuppressIO(false);
     return;
 }
 
