@@ -328,6 +328,9 @@ bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
+void ffDisableOutput();
+void ffEnableOutput();
+
 // They return true if the file was found, independently if start was found
 // Buffers which already contain content are not overwritten
 // The last occurence of start in the first file will be the one used

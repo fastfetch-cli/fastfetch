@@ -462,3 +462,34 @@ bool ffGetFileContent(const char* fileName, FFstrbuf* buffer)
     ffStrbufClear(buffer);
     return ffAppendFileContent(fileName, buffer);
 }
+
+static volatile bool originalPipesSet = false;
+static volatile int originalStdout = -1;
+static volatile int originalStderr = -1;
+
+void ffDisableOutput()
+{
+    fflush(stdout);
+    fflush(stderr);
+
+    if(!originalPipesSet)
+    {
+        originalStdout = dup(STDOUT_FILENO);
+        originalStderr = dup(STDERR_FILENO);
+        originalPipesSet = true;
+    }
+
+    int nullFile = open("/dev/null", O_WRONLY);
+    dup2(nullFile, STDOUT_FILENO);
+    dup2(nullFile, STDERR_FILENO);
+    close(nullFile);
+}
+
+void ffEnableOutput()
+{
+    fflush(stdout);
+    fflush(stderr);
+
+    dup2(originalStdout, STDOUT_FILENO);
+    dup2(originalStderr, STDERR_FILENO);
+}
