@@ -16,6 +16,7 @@ General options:
                  --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
                  --set <key=value>:                hard set the value of a key
     -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)
+                 --color-[1-9] <color>:            overwrites a color of the logo. Must be a linux console color code
                  --spacing <width>:                sets the distance between logo and text
     -s <str>,    --separator <str>:                sets the separator between key and value. Default is a colon with a space
     -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.
@@ -28,6 +29,7 @@ General options:
                  --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
                  --disable-linewrap <?value>:      Disable linewrap during the run
                  --hide-cursor <?value>:           Hide the cursor during the run
+                 --logo-raw <?value>:              Print a custom logo as is, without any color replacements
 
 Logo options:
     -l <name>, --logo <name>:         sets the shown logo. Also changes the main color accordingly. This will also load file contents as logo if the given argument is a valid path.

@@ -7,7 +7,7 @@
 #define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true; logo.isFromUser = false;
 #define FF_LOGO_NAMES(...) static const char* names[] = (const char*[]) { __VA_ARGS__, NULL }; logo.names = names;
 #define FF_LOGO_LINES(x) logo.lines = x;
-#define FF_LOGO_COLORS(...) static const char* colors[] = (const char*[]) { __VA_ARGS__, NULL }; logo.colors = colors;
+#define FF_LOGO_COLORS(...) static const char* colors[] = (const char*[]) { __VA_ARGS__, NULL }; logo.builtinColors = colors;
 #define FF_LOGO_RETURN return &logo;
 
 static const FFlogo* getLogoUnknown()
@@ -73,7 +73,7 @@ static const FFlogo* getLogoArch()
         "$1.`                                 `/";
     )
     FF_LOGO_COLORS(
-        "\033[36m" //cyan
+        "36" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -92,7 +92,7 @@ static const FFlogo* getLogoArchSmall()
         "$1/_-''    ''-_\\"
     )
     FF_LOGO_COLORS(
-        "\033[36m" //cyan
+        "36" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -124,7 +124,7 @@ static const FFlogo* getLogoArtix()
         "$1'`                                  `'";
     )
     FF_LOGO_COLORS(
-        "\033[36m" //cyan
+        "36" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -143,7 +143,7 @@ static const FFlogo* getLogoArtixSmall()
         "$1/.,'`     `'.\\"
     )
     FF_LOGO_COLORS(
-        "\033[36m" //cyan
+        "36" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -175,8 +175,8 @@ static const FFlogo* getLogoArcoLinux()
         "$1 ooooooooo.                       $2 -ooooooooo";
     )
     FF_LOGO_COLORS(
-    "\033[34m", //blue
-    "\033[32m" //green
+    "34", //blue
+    "32" //green
     )
     FF_LOGO_RETURN
 }
@@ -203,8 +203,8 @@ static const FFlogo* getLogoCelOS()
         "$1            `.:/+ooooo+:-`           "
     )
     FF_LOGO_COLORS(
-        "\033[35m", //magenta
-        "\033[30m" //black
+        "35", //magenta
+        "30" //black
     )
     FF_LOGO_RETURN
 }
@@ -235,11 +235,11 @@ static const FFlogo* getLogoCentOS()
         "$1                 ''                 "
     )
     FF_LOGO_COLORS(
-        "\033[33m", //yellow
-        "\033[32m", //green
-        "\033[34m", //blue
-        "\033[35m", //magenta
-        "\033[37m" //white
+        "33", //yellow
+        "32", //green
+        "34", //blue
+        "35", //magenta
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -258,10 +258,10 @@ static const FFlogo* getLogoCentOSSmall()
         "$2     v     "
     )
     FF_LOGO_COLORS(
-        "\033[33m", //yellow
-        "\033[32m", //green
-        "\033[34m", //blue
-        "\033[35m" //magenta
+        "33", //yellow
+        "32", //green
+        "34", //blue
+        "35" //magenta
     )
     FF_LOGO_RETURN
 }
@@ -290,8 +290,8 @@ static const FFlogo* getLogoDebian()
         "$2             `\"\"\"          "
     )
     FF_LOGO_COLORS(
-        "\033[31m", //red
-        "\033[37m" //white
+        "31", //red
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -309,7 +309,7 @@ static const FFlogo* getLogoDebianSmall()
         "$1  --_    "
     )
     FF_LOGO_COLORS(
-        "\033[31m" //red
+        "31" //red
     )
     FF_LOGO_RETURN
 }
@@ -340,8 +340,8 @@ static const FFlogo* getLogoFedora()
         "$1 ':cccccccccccccccc::;,.              "
     )
     FF_LOGO_COLORS(
-        "\033[34m", //blue
-        "\033[37m" //white
+        "34", //blue
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -362,7 +362,7 @@ static const FFlogo* getLogoFedoraSmall()
         "$1   '''''        "
     )
     FF_LOGO_COLORS(
-        "\033[34m" //blue
+        "34" //blue
     )
     FF_LOGO_RETURN
 }
@@ -391,8 +391,8 @@ static const FFlogo* getLogoFedoraOld()
         "$1:---------------------://         "
     )
     FF_LOGO_COLORS(
-        "\033[34m", //blue
-        "\033[37m" //white
+        "34", //blue
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -422,7 +422,7 @@ static const FFlogo* getLogoGaruda()
         "$1          .d988999889889899dd.                "
     )
     FF_LOGO_COLORS(
-        "\033[31m" //red
+        "31" //red
     )
     FF_LOGO_RETURN
 }
@@ -452,8 +452,8 @@ static const FFlogo* getLogoGentoo()
         "$1  `-//////:--.                     "
     )
     FF_LOGO_COLORS(
-        "\033[35m", //magenta
-        "\033[37m" //white
+        "35", //magenta
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -472,8 +472,8 @@ static const FFlogo* getLogoGentooSmall()
         "$2\\____-      "
     )
     FF_LOGO_COLORS(
-        "\033[35m", //magenta
-        "\033[37m" //white
+        "35", //magenta
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -499,7 +499,7 @@ static const FFlogo* getLogoManjaro()
         "$1████████  ████████  ████████"
     )
     FF_LOGO_COLORS(
-        "\033[32m" //green
+        "32" //green
     )
     FF_LOGO_RETURN
 }
@@ -518,7 +518,7 @@ static const FFlogo* getLogoManjaroSmall()
         "$1|||| |||| ||||"
     )
     FF_LOGO_COLORS(
-        "\033[32m" //green
+        "32" //green
     )
     FF_LOGO_RETURN
 }
@@ -549,8 +549,8 @@ static const FFlogo* getLogoMint()
         "$2               ``-:::::-``              "
     )
     FF_LOGO_COLORS(
-        "\033[32m", //green
-        "\033[37m" //white
+        "32", //green
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -569,8 +569,8 @@ static const FFlogo* getLogoMintSmall()
         "$1  \\_________/"
     )
     FF_LOGO_COLORS(
-        "\033[32m", //green
-        "\033[37m" //white
+        "32", //green
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -598,8 +598,8 @@ static const FFlogo* getLogoMintOld()
         "$1          .MMMMMMMMMMMMMMMMMMM     "
     )
     FF_LOGO_COLORS(
-        "\033[32m", //green
-        "\033[37m" //white
+        "32", //green
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -631,8 +631,8 @@ static const FFlogo* getLogoPop()
         "$1             /////////////             "
     )
     FF_LOGO_COLORS(
-        "\033[36m", //cyan
-        "\033[37m" //white
+        "36", //cyan
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -652,7 +652,7 @@ static const FFlogo* getLogoPopSmall()
     "$1  (___________)` "
     )
     FF_LOGO_COLORS(
-        "\033[36m" //cyan
+        "36" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -684,8 +684,8 @@ static const FFlogo* getLogoUbuntu()
         "$1           .-/+oossssoo+/-.             "
     )
     FF_LOGO_COLORS(
-        "\033[31m", //red
-        "\033[37m" //white
+        "31", //red
+        "37" //white
     )
     FF_LOGO_RETURN
 }
@@ -703,7 +703,7 @@ static const FFlogo* getLogoUbuntuSmall()
         "$1     ---(_)"
     )
     FF_LOGO_COLORS(
-        "\033[31m" //red
+        "31" //red
     )
     FF_LOGO_RETURN
 }
@@ -733,8 +733,8 @@ static const FFlogo* getLogoVoid()
         "$1               -~|{*l}*|~                    "
     )
     FF_LOGO_COLORS(
-        "\033[32m", //green
-        "\033[30m" //black
+        "32", //green
+        "30" //black
     )
     FF_LOGO_RETURN
 }
@@ -753,7 +753,7 @@ static const FFlogo* getLogoVoidSmall()
         "$1 -_______\\   "
     )
     FF_LOGO_COLORS(
-        "\033[32m" //green
+        "32" //green
     )
     FF_LOGO_RETURN
 }
@@ -813,11 +813,24 @@ static bool logoHasName(const FFlogo* logo, const char* name)
     return false;
 }
 
-static inline void setLogo(FFinstance* instance, const FFlogo* logo)
+static void setLogo(FFinstance* instance, const FFlogo* logo)
 {
     instance->config.logo = logo;
     instance->state.logoWidth = 0;
     instance->state.logoLinesIndex = logo->lines;
+
+    const char** colors = logo->builtinColors;
+    int counter = 0;
+
+    while(!logo->isFromUser && *colors != NULL)
+    {
+        ffStrbufSetS(&instance->config.logoColors[counter], *colors);
+        ++counter;
+        ++colors;
+    }
+
+    for(; counter < FASTFETCH_LOGO_MAX_COLORS; ++counter)
+        ffStrbufClear(&instance->config.logoColors[counter]);
 }
 
 static bool loadLogoSet(FFinstance* instance, const char* name)
@@ -858,11 +871,7 @@ void ffLoadLogoSet(FFinstance* instance, const char* logo)
 
     static FFlogo dummyLogo;
     dummyLogo.isFromUser = true;
-    dummyLogo.colors = getLogoNone()->colors;
     dummyLogo.lines = logoChars.chars;
-    static const char* NULLSTR = NULL;
-    dummyLogo.names = &NULLSTR;
-
     setLogo(instance, &dummyLogo);
 }
 
@@ -959,18 +968,48 @@ void ffPrintLogoLine(FFinstance* instance)
     {
         //Get the current char
         char current = *instance->state.logoLinesIndex;
-        ++instance->state.logoLinesIndex;
+
+        //We have a color encoding directly in the logo. Print it and increase colorPlaceholdersLength
+        if(instance->config.logo->isFromUser && current == '\033' && *(instance->state.logoLinesIndex + 1) == '[')
+        {
+            //At this point we don't know if the start ends with a 'm', so we need to buffer
+            FFstrbuf colorBuffer;
+            ffStrbufInit(&colorBuffer);
+
+            char* indexCopy = instance->state.logoLinesIndex;
+            while(*indexCopy != '\n' && *indexCopy != '\0')
+            {
+                ffStrbufAppendC(&colorBuffer, *indexCopy);
+
+                if(*indexCopy == 'm')
+                    break;
+
+                ++indexCopy;
+            }
+
+            //It was a color encoding, write it and increase colorPlaceholdersLength
+            if(*indexCopy == 'm')
+            {
+                ffStrbufWriteTo(&colorBuffer, stdout);
+                colorPlaceholdersLength += colorBuffer.length;
+                instance->state.logoLinesIndex = indexCopy + 1; // + 1 to skip the 'm'
+                current = *instance->state.logoLinesIndex;
+            }
+
+            ffStrbufDestroy(&colorBuffer);
+        }
 
         //Not a color placeholder, just print it. User files don't support colors this way.
-        if(current != '$' || instance->config.logo->isFromUser)
+        if(current != '$' || instance->config.userLogoIsRaw)
         {
             LOGO_LINE_PRINT_CHAR(current, cut);
+            ++instance->state.logoLinesIndex;
             continue;
         }
 
         //Skip the dollar sign
-        current = *instance->state.logoLinesIndex;
         ++instance->state.logoLinesIndex;
+        current = *instance->state.logoLinesIndex;
 
         //We have a dollar sign at the end of the line. Just print it.
         if(current == '\n' || current == '\0')
@@ -980,11 +1019,15 @@ void ffPrintLogoLine(FFinstance* instance)
             break;
         }
 
+        //We definitly have something to print and are not at the end of the line.
+        //Already increase it here, so i don't have to write it multiple times
+        ++instance->state.logoLinesIndex;
+
         //We have two dollar signs. Print one.
         if(current == '$')
         {
-            ++colorPlaceholdersLength;
             LOGO_LINE_PRINT_CHAR('$', cut);
+            ++colorPlaceholdersLength;
             continue;
         }
 
@@ -992,7 +1035,7 @@ void ffPrintLogoLine(FFinstance* instance)
         int index = ((int) current) - 49;
 
         //Invalid index, just print the $ and the following char
-        if(index < 0 || index > 9)
+        if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
         {
             LOGO_LINE_PRINT_CHAR('$', cut);
             LOGO_LINE_PRINT_CHAR(current, cut);
@@ -1002,9 +1045,11 @@ void ffPrintLogoLine(FFinstance* instance)
         //Index can maximal be 9, so we have exactly two chars for the color
         colorPlaceholdersLength += 2;
 
-        //Print the color, if color support is on.
-        if(instance->config.colorLogo)
-            fputs(instance->config.logo->colors[index], stdout);
+        // If we don't color our logo, skip it
+        if(!instance->config.colorLogo)
+            continue;
+
+        ffPrintColor(&instance->config.logoColors[index]);
     }
 
     //Reset out bold logo
@@ -1045,7 +1090,7 @@ void ffPrintLogos(FFinstance* instance)
     while(*methods != NULL)
     {
         setLogo(instance, (*methods)());
-        printf(FASTFETCH_TEXT_MODIFIER_BOLT"%s%s"FASTFETCH_TEXT_MODIFIER_RESET":\n", instance->config.colorLogo ? instance->config.logo->colors[0] : "", instance->config.logo->names[0]);
+        printf(FASTFETCH_TEXT_MODIFIER_BOLT"\033[%sm%s"FASTFETCH_TEXT_MODIFIER_RESET":\n", instance->config.colorLogo ? instance->config.logo->builtinColors[0] : "", instance->config.logo->names[0]);
         ffPrintRemainingLogo(instance);
         puts("\n");
         ++methods;

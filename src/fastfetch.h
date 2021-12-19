@@ -26,17 +26,20 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
 #define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
 
+#define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
+
 typedef struct FFlogo
 {
     const char** names; //Null terminated
     char* lines;
-    const char** colors; // colors[0] is used as key color
     bool isFromUser;
+    const char** builtinColors; // [0] is used as key color, if not user specified
 } FFlogo;
 
 typedef struct FFconfig
 {
     const FFlogo* logo;
+    FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
 
     uint16_t logoKeySpacing;
     FFstrbuf separator;
@@ -50,6 +53,7 @@ typedef struct FFconfig
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
+    bool userLogoIsRaw;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;
@@ -330,6 +334,8 @@ void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
 // Not thread safe!
 void ffSuppressIO(bool suppress);
+
+void ffPrintColor(const FFstrbuf* colorValue);
 
 // They return true if the file was found, independently if start was found
 // Buffers which already contain content are not overwritten

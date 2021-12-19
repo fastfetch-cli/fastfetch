@@ -114,6 +114,10 @@ static void defaultConfig(FFinstance* instance)
     instance->config.allowSlowOperations = false;
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
+    instance->config.userLogoIsRaw = false;
+
+    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
+        ffStrbufInit(&instance->config.logoColors[i]);
 
     ffLoadLogo(instance);
 

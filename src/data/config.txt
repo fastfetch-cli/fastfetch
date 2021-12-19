@@ -102,6 +102,24 @@
 # Default is "-"
 #--separator-string -
 
+# Logo color options:
+# Overwrite a color in the logo. Also works for user provided logos.
+# In the user logo, they replace $[1-9]. Use $$ to print a single $ sign.
+# Must be linux console color codes.
+# Default is the one specified by the logo.
+# Use "fastfetch --help color" to learn more and see examples.
+# Valid index range is [1-9].
+#--color-1 31
+#--color-2 32
+# [...]
+#--color-9 39
+
+# User logo raw option:
+# Sets if color replacements should be performed on the user provided logo.
+# Must be true or false.
+# Default is true.
+#--color-raw true
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.

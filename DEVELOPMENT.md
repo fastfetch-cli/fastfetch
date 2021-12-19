@@ -5,9 +5,7 @@ Here i just add things that are easy to forget.
 
 ## Features i am planning to implement
 
-- [ ] Support overwriting logo colors (e.g. --color-1 35 --color-2 31)
 - [ ] Support for color name mapping (e.g. --color red)
-- [ ] Support for colors in user provided logo files (requires point 1 to be implemented)
 - [ ] Support for printing images as ascii art logos (using imlib2 and libcaca probably)
 - [ ] Support for printing images in terminals that support it
 - [ ] Better documentation (especially default config file and the various --help options. Colored output?)

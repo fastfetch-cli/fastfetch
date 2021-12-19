@@ -12,7 +12,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     ffPrintLogoLine(instance);
 
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    ffStrbufWriteTo(&instance->config.color, stdout);
+    ffPrintColor(&instance->config.color);
 
     if(customKeyFormat == NULL || customKeyFormat->length == 0)
     {
@@ -489,4 +489,11 @@ void ffSuppressIO(bool suppress)
 
     dup2(suppress ? nullFile : origOut, STDOUT_FILENO);
     dup2(suppress ? nullFile : origErr, STDERR_FILENO);
+}
+
+void ffPrintColor(const FFstrbuf* colorValue)
+{
+    fputs("\033[", stdout);
+    ffStrbufWriteTo(colorValue, stdout);
+    fputc('m', stdout);
 }

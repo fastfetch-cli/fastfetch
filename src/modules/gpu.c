@@ -205,7 +205,7 @@ void ffPrintGPU(FFinstance* instance)
             vulkanFillGPUs(instance, &gpus);
     #endif
 
-    for(uint8_t i = 0; i < gpus.length; i++)
+    for(uint8_t i = 0; i < (uint8_t) gpus.length; i++)
         printGPUResult(instance, gpus.length == 1 ? 0 : i + 1, &cache, ffListGet(&gpus, i));
 
     if(gpus.length == 0)

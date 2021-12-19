@@ -147,7 +147,7 @@ void ffPrintBattery(FFinstance* instance)
         return;
     }
 
-    for(uint8_t i = 0; i < dirs.length; i++)
+    for(uint8_t i = 0; i < (uint8_t) dirs.length; i++)
     {
         FFstrbuf* name = ffListGet(&dirs, i);
         ffStrbufAppend(&baseDir, name);

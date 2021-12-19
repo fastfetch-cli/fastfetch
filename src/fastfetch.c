@@ -14,6 +14,7 @@ typedef struct FFdata
     FFvaluestore valuestore;
     FFstrbuf structure;
     FFstrbuf logoName;
+    FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
     bool multithreading;
 } FFdata;
 
@@ -632,6 +633,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.disableLinewrap = optionParseBoolean(value);
     else if(strcasecmp(key, "--hide-cursor") == 0)
         instance->config.hideCursor = optionParseBoolean(value);
+    else if(strcasecmp(key, "--logo-raw") == 0)
+        instance->config.userLogoIsRaw = optionParseBoolean(value);
     else if(strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
@@ -639,16 +642,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
-    {
-        if(value == NULL)
-        {
-            fprintf(stderr, "Error: usage: %s <str>\n", key);
-            exit(477);
-        }
-        ffStrbufSetS(&instance->config.color, "\033[");
-        ffStrbufAppendS(&instance->config.color, value);
-        ffStrbufAppendC(&instance->config.color, 'm');
-    }
+        optionParseString(key, value, &instance->config.color);
     else if(strcasecmp(key, "--os-format") == 0)
         optionParseString(key, value, &instance->config.osFormat);
     else if(strcasecmp(key, "--os-key") == 0)
@@ -779,6 +773,20 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowIpV6 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-loop") == 0)
         instance->config.localIpShowLoop = optionParseBoolean(value);
+    else if(strncasecmp(key, "--color-", 7) == 0 && key[8] != '\0' && key[9] == '\0') // matches "--color-*"
+    {
+        //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
+        int index = (int)key[8] - 49;
+
+        //Match only --color-[1-9]
+        if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
+        {
+            fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[8]);
+            exit(472);
+        }
+
+        optionParseString(key, value, &data->logoColors[index]);
+    }
     else
     {
         fprintf(stderr, "Error: unknown option: %s\n", key);
@@ -922,6 +930,9 @@ int main(int argc, const char** argv)
     ffStrbufInitA(&data.logoName, 0);
     data.multithreading = true;
 
+    for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
+        ffStrbufInitA(&data.logoColors[i], 0);
+
     parseDefaultConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
@@ -931,7 +942,14 @@ int main(int argc, const char** argv)
 
     //If we haven't set key color, use primary color of logo
     if(instance.config.color.length == 0)
-        ffStrbufSetS(&instance.config.color, instance.config.logo->colors[0]);
+        ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
+
+    //Overwrite logo colors with custom colors
+    for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
+    {
+        if(data.logoColors[i].length > 0)
+            ffStrbufSet(&instance.config.logoColors[i], &data.logoColors[i]);
+    }
 
     //Start detection threads
     if(data.multithreading)
@@ -943,6 +961,7 @@ int main(int argc, const char** argv)
 
     ffStart(&instance);
 
+    //Parse the structure and call the modules
     uint32_t startIndex = 0;
     while (startIndex < data.structure.length)
     {
