@@ -485,7 +485,7 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
     exit(414);
 }
 
-static inline bool optionParseBoolean(const char* str)
+static bool optionParseBoolean(const char* str)
 {
     return (
         str == NULL ||
@@ -497,7 +497,7 @@ static inline bool optionParseBoolean(const char* str)
     );
 }
 
-static inline void optionParseString(const char* key, const char* value, FFstrbuf* buffer)
+static inline void optionCheckString(const char* key, const char* value, FFstrbuf* buffer)
 {
     if(value == NULL)
     {
@@ -505,7 +505,88 @@ static inline void optionParseString(const char* key, const char* value, FFstrbu
         exit(477);
     }
     ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
+}
+
+static void optionParseString(const char* key, const char* value, FFstrbuf* buffer)
+{
+    optionCheckString(key, value, buffer);
     ffStrbufSetS(buffer, value);
+}
+
+static void optionParseColor(const char* key, const char* value, FFstrbuf* buffer)
+{
+    optionCheckString(key, value, buffer);
+
+    static const char reset[] = "reset_";
+    static const char bright[] = "bright_";
+
+    static const char black[] = "black";
+    static const char red[] = "red";
+    static const char green[] = "green";
+    static const char yellow[] = "yellow";
+    static const char blue[] = "blue";
+    static const char magenta[] = "magenta";
+    static const char cyan[] = "cyan";
+    static const char white[] = "white";
+
+    while(*value != '\0')
+    {
+        if(strncasecmp(value, reset, sizeof(reset) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "0;");
+            value += sizeof(reset) - 1;
+        }
+        else if(strncasecmp(value, bright, sizeof(bright) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "1;");
+            value += sizeof(bright) - 1;
+        }
+        else if(strncasecmp(value, black, sizeof(black) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "30");
+            value += sizeof(black) - 1;
+        }
+        else if(strncasecmp(value, red, sizeof(red) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "31");
+            value += sizeof(red) - 1;
+        }
+        else if(strncasecmp(value, green, sizeof(green) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "32");
+            value += sizeof(green) - 1;
+        }
+        else if(strncasecmp(value, yellow, sizeof(yellow) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "33");
+            value += sizeof(yellow) - 1;
+        }
+        else if(strncasecmp(value, blue, sizeof(blue) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "34");
+            value += sizeof(blue) - 1;
+        }
+        else if(strncasecmp(value, magenta, sizeof(magenta) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "35");
+            value += sizeof(magenta) - 1;
+        }
+        else if(strncasecmp(value, cyan, sizeof(cyan) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "36");
+            value += sizeof(cyan) - 1;
+        }
+        else if(strncasecmp(value, white, sizeof(white) - 1) == 0)
+        {
+            ffStrbufAppendS(buffer, "37");
+            value += sizeof(white) - 1;
+        }
+        else
+        {
+            ffStrbufAppendC(buffer, *value);
+            ++value;
+        }
+    }
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -642,7 +723,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
-        optionParseString(key, value, &instance->config.color);
+        optionParseColor(key, value, &instance->config.color);
     else if(strcasecmp(key, "--os-format") == 0)
         optionParseString(key, value, &instance->config.osFormat);
     else if(strcasecmp(key, "--os-key") == 0)
@@ -785,7 +866,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             exit(472);
         }
 
-        optionParseString(key, value, &data->logoColors[index]);
+        optionParseColor(key, value, &data->logoColors[index]);
     }
     else
     {

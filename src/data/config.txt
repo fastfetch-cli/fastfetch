@@ -37,10 +37,10 @@
 
 # Color option:
 # Sets the color of the keys.
-# Must be linux console color codes.
+# Must be linux console color codes or the name of a color.
 # Default is the primary color of the logo.
 # Use "fastfetch --help color" to learn more and see examples.
-#--color 35
+#--color magenta
 
 # Spacing option:
 # Sets the amount of whitespace between the logo and keys.
@@ -105,14 +105,14 @@
 # Logo color options:
 # Overwrite a color in the logo. Also works for user provided logos.
 # In the user logo, they replace $[1-9]. Use $$ to print a single $ sign.
-# Must be linux console color codes.
+# Must be linux console color codes or the name of a color.
 # Default is the one specified by the logo.
 # Use "fastfetch --help color" to learn more and see examples.
 # Valid index range is [1-9].
-#--color-1 31
+#--color-1 red
 #--color-2 32
 # [...]
-#--color-9 39
+#--color-9 yellow
 
 # User logo raw option:
 # Sets if color replacements should be performed on the user provided logo.

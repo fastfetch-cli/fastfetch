@@ -5,7 +5,6 @@ Here i just add things that are easy to forget.
 
 ## Features i am planning to implement
 
-- [ ] Support for color name mapping (e.g. --color red)
 - [ ] Support for printing images as ascii art logos (using imlib2 and libcaca probably)
 - [ ] Support for printing images in terminals that support it
 - [ ] Better documentation (especially default config file and the various --help options. Colored output?)

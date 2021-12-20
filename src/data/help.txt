@@ -15,8 +15,8 @@ Informative options:
 General options:
                  --structure <structure>:          sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
                  --set <key=value>:                hard set the value of a key
-    -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code (+)
-                 --color-[1-9] <color>:            overwrites a color of the logo. Must be a linux console color code
+    -c <color>,  --color <color>:                  sets the color of the keys. Must be a linux console color code or the name of a color (+)
+                 --color-[1-9] <color>:            overwrites a color of the logo. Must be a linux console color code or the name of a color
                  --spacing <width>:                sets the distance between logo and text
     -s <str>,    --separator <str>:                sets the separator between key and value. Default is a colon with a space
     -x <offset>, --offsetx <offset>:               sets the x offset. Can be negative to cut the logo, but no more than logo width.
