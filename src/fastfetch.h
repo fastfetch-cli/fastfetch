@@ -389,18 +389,18 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #endif
 
-//common/detectPlasma.c
+//detection/plasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
 
-//common/detectGTK.c
+//detection/gtk.c
 const FFGTKResult* ffDetectGTK2(FFinstance* instance);
 const FFGTKResult* ffDetectGTK4(FFinstance* instance);
 const FFGTKResult* ffDetectGTK3(FFinstance* instance);
 
-//common/detectWMDE.c
+//detection/wmde.c
 const FFWMDEResult* ffDetectWMDE(FFinstance* instance);
 
-//common/detectTerminalShell.c
+//detection/terminalShell.c
 const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
 
 /********************/

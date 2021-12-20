@@ -146,10 +146,10 @@ set(SRCS
     src/common/format.c
     src/common/parsing.c
     src/common/settings.c
-    src/common/detectPlasma.c
-    src/common/detectGTK.c
-    src/common/detectWMDE.c
-    src/common/detectTerminalShell.c
+    src/detection/plasma.c
+    src/detection/gtk.c
+    src/detection/wmde.c
+    src/detection/terminalShell.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c

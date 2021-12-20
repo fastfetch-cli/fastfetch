@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 
     FASTFETCH_TEST_PERFORMANCE(
         puts("Configuration");
-        ffStrbufSetS(&instance.config.color, instance.config.logo->colors[0]);
+        ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
         instance.config.showErrors = true;
         instance.config.recache = argc == 1;
         instance.config.cacheSave = false;
