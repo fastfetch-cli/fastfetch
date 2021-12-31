@@ -100,6 +100,7 @@ bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start);
 bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start);
 bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const char* start);
 
+bool ffStrbufEndsWithC(const FFstrbuf* strbuf, char c);
 bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end);
 
 bool ffStrbufEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end);

@@ -6,54 +6,98 @@
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFinstance* instance, FFstrbuf* dir, uint8_t index)
+typedef struct BatteryResult
+{
+    FFstrbuf manufacturer;
+    FFstrbuf modelName;
+    FFstrbuf technology;
+    FFstrbuf capacity;
+    FFstrbuf status;
+} BatteryResult;
+
+static void parseBattery(FFstrbuf* dir, FFlist* results)
 {
     uint32_t dirLength = dir->length;
 
-    FF_STRBUF_CREATE(manufactor);
-    ffStrbufAppendS(dir, "/manufacturer");
-    ffGetFileContent(dir->chars, &manufactor);
+    FFstrbuf testBatteryBuffer;
+    ffStrbufInit(&testBatteryBuffer);
+
+    //type must exist and be "Battery"
+    ffStrbufAppendS(dir, "/type");
+    ffGetFileContent(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
-    FF_STRBUF_CREATE(model);
-    ffStrbufAppendS(dir, "/model_name");
-    ffGetFileContent(dir->chars, &model);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    FF_STRBUF_CREATE(technology);
-    ffStrbufAppendS(dir, "/technology");
-    ffGetFileContent(dir->chars, &technology);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    FF_STRBUF_CREATE(capacity);
-    ffStrbufAppendS(dir, "/capacity");
-    ffGetFileContent(dir->chars, &capacity);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    FF_STRBUF_CREATE(status);
-    ffStrbufAppendS(dir, "/status");
-    ffGetFileContent(dir->chars, &status);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if(ffStrbufIgnCaseCompS(&status, "Unknown") == 0)
-        ffStrbufClear(&status);
-
-    if(capacity.length == 0 && status.length == 0)
+    if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Battery") != 0)
     {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "No file in %s could be read or all battery options are disabled", dir->chars);
+        ffStrbufDestroy(&testBatteryBuffer);
         return;
     }
 
+    //scope may not exist or must not be "Device"
+    ffStrbufAppendS(dir, "/scope");
+    ffGetFileContent(dir->chars, &testBatteryBuffer);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Device") == 0)
+    {
+        ffStrbufDestroy(&testBatteryBuffer);
+        return;
+    }
+
+    ffStrbufDestroy(&testBatteryBuffer);
+    BatteryResult* result = ffListAdd(results);
+
+    //capacity must exist and be not empty
+    ffStrbufInit(&result->capacity);
+    ffStrbufAppendS(dir, "/capacity");
+    ffGetFileContent(dir->chars, &result->capacity);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    if(result->capacity.length == 0)
+    {
+        ffStrbufDestroy(&result->capacity);
+        --results->length;
+        return;
+    }
+
+    //At this point, we have a battery. Try to get as much values as possible.
+
+    ffStrbufInit(&result->manufacturer);
+    ffStrbufAppendS(dir, "/manufacturer");
+    ffGetFileContent(dir->chars, &result->manufacturer);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    ffStrbufInit(&result->modelName);
+    ffStrbufAppendS(dir, "/model_name");
+    ffGetFileContent(dir->chars, &result->modelName);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    ffStrbufInit(&result->technology);
+    ffStrbufAppendS(dir, "/technology");
+    ffGetFileContent(dir->chars, &result->technology);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    ffStrbufInit(&result->status);
+    ffStrbufAppendS(dir, "/status");
+    ffGetFileContent(dir->chars, &result->status);
+    ffStrbufSubstrBefore(dir, dirLength);
+}
+
+static void printBattery(FFinstance* instance, const BatteryResult* result, uint8_t index)
+{
     if(instance->config.batteryFormat.length == 0)
     {
 
         ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey);
 
-        bool showStatus = status.length > 0 && ffStrbufIgnCaseCompS(&status, "Full") != 0;
+        bool showStatus =
+            result->status.length > 0 &&
+            ffStrbufIgnCaseCompS(&result->status, "Full") != 0 &&
+            ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
-        if(capacity.length > 0)
+        if(result->capacity.length > 0)
         {
-            ffStrbufWriteTo(&capacity, stdout);
+            ffStrbufWriteTo(&result->capacity, stdout);
             putchar('%');
 
             if(showStatus)
@@ -62,9 +106,9 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint8_t index)
 
         if(showStatus)
         {
-            ffStrbufWriteTo(&status, stdout);
+            ffStrbufWriteTo(&result->status, stdout);
 
-            if(capacity.length > 0)
+            if(result->capacity.length > 0)
                 putchar(']');
         }
 
@@ -73,19 +117,13 @@ static void printBattery(FFinstance* instance, FFstrbuf* dir, uint8_t index)
     else
     {
         ffPrintFormatString(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, NULL, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &manufactor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &model},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &technology},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &capacity},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &status}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->capacity},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->status}
         });
     }
-
-    ffStrbufDestroy(&manufactor);
-    ffStrbufDestroy(&model);
-    ffStrbufDestroy(&technology);
-    ffStrbufDestroy(&capacity);
-    ffStrbufDestroy(&status);
 }
 
 void ffPrintBattery(FFinstance* instance)
@@ -95,19 +133,13 @@ void ffPrintBattery(FFinstance* instance)
     if(instance->config.batteryDir.length > 0)
     {
         ffStrbufAppend(&baseDir, &instance->config.batteryDir);
-
-        if(baseDir.length == 0)
-        {
-            ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "custom battery dir is an empty string");
-            ffStrbufDestroy(&baseDir);
-            return;
-        }
-
-        if(baseDir.chars[baseDir.length - 1] != '/')
+        if(!ffStrbufEndsWithC(&baseDir, '/'))
             ffStrbufAppendC(&baseDir, '/');
     }
     else
+    {
         ffStrbufAppendS(&baseDir, "/sys/class/power_supply/");
+    }
 
     uint32_t baseDirLength = baseDir.length;
 
@@ -119,43 +151,34 @@ void ffPrintBattery(FFinstance* instance)
         return;
     }
 
-    FFlist dirs;
-    ffListInitA(&dirs, sizeof(FFstrbuf), 4);
+    FFlist results;
+    ffListInitA(&results, sizeof(BatteryResult), 4);
 
     struct dirent* entry;
-
     while((entry = readdir(dirp)) != NULL)
     {
         ffStrbufAppendS(&baseDir, entry->d_name);
-        ffStrbufAppendS(&baseDir, "/capacity");
-
-        if(access(baseDir.chars, F_OK) == 0)
-        {
-            FFstrbuf* name = ffListAdd(&dirs);
-            ffStrbufInit(name);
-            ffStrbufSetS(name, entry->d_name);
-        }
-
+        parseBattery(&baseDir, &results);
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
 
-    if(dirs.length == 0)
+    closedir(dirp);
+
+    for(uint8_t i = 0; i < (uint8_t) results.length; i++)
     {
+        BatteryResult* result = ffListGet(&results, i);
+        printBattery(instance, result, i);
+
+        ffStrbufDestroy(&result->manufacturer);
+        ffStrbufDestroy(&result->modelName);
+        ffStrbufDestroy(&result->technology);
+        ffStrbufDestroy(&result->capacity);
+        ffStrbufDestroy(&result->status);
+    }
+
+    if(results.length == 0)
         ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "%s doesn't contain any battery folder", baseDir.chars);
-        ffListDestroy(&dirs);
-        ffStrbufDestroy(&baseDir);
-        return;
-    }
 
-    for(uint8_t i = 0; i < (uint8_t) dirs.length; i++)
-    {
-        FFstrbuf* name = ffListGet(&dirs, i);
-        ffStrbufAppend(&baseDir, name);
-        printBattery(instance, &baseDir, dirs.length == 1 ? 0 : i + 1);
-        ffStrbufSubstrBefore(&baseDir, baseDirLength);
-        ffStrbufDestroy(name);
-    }
-
-    ffListDestroy(&dirs);
+    ffListDestroy(&results);
     ffStrbufDestroy(&baseDir);
 }
