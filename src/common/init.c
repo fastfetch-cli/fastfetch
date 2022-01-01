@@ -80,7 +80,7 @@ static void initCacheDir(FFstate* state)
         ffStrbufAppendS(&state->cacheDir, state->passwd->pw_dir);
         ffStrbufAppendS(&state->cacheDir, "/.cache/");
     }
-    else if(state->cacheDir.chars[state->cacheDir.length - 1] != '/')
+    else if(!ffStrbufEndsWithC(&state->cacheDir, '/'))
         ffStrbufAppendC(&state->cacheDir, '/');
 
     mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder, but who knows
