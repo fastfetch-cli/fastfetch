@@ -3,6 +3,70 @@
 #ifdef FF_HAVE_X11
 #include <X11/Xlib.h>
 
+typedef struct X11PropertyData
+{
+    FF_LIBRARY_SYMBOL(XInternAtom)
+    FF_LIBRARY_SYMBOL(XGetWindowProperty)
+} X11PropertyData;
+
+static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Window window, const char* request)
+{
+    Atom requestAtom = data->ffXInternAtom(display, request, False);
+    if(requestAtom == None)
+        return NULL;
+
+    Atom actualType;
+    unsigned long unused;
+    unsigned char* result = NULL;
+
+    data->ffXGetWindowProperty(
+        display,
+        window,
+        requestAtom,
+        0,
+        64,
+        False,
+        AnyPropertyType,
+        &actualType,
+        (int*) &unused,
+        &unused,
+        &unused,
+        &result
+    );
+
+    return result;
+}
+
+static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
+{
+    if(result->wmProcessName.length > 0)
+        return;
+
+    Window root = DefaultRootWindow(display);
+    if(root == None)
+        return;
+
+    unsigned char* wmWindowID = x11GetProperty(data, display, root, "_NET_SUPPORTING_WM_CHECK");
+    if(wmWindowID == NULL)
+        return;
+
+    Window wmWindow = *(Window*) wmWindowID;
+    if(wmWindow == None)
+        return;
+
+    unsigned char* wmName = x11GetProperty(data, display, wmWindow, "_NET_WM_NAME");
+    if(wmName == NULL)
+        wmName = x11GetProperty(data, display, wmWindow, "WM_NAME");
+    if(wmName == NULL)
+        return;
+
+    const char* wmNameString = (const char*) wmName;
+    if(*wmNameString == '\0')
+        return;
+
+    ffStrbufSetS(&result->wmProcessName, wmNameString);
+}
+
 static void x11AddScreenAsResult(FFlist* results, Screen* screen, uint32_t refreshRate)
 {
     if(WidthOfScreen(screen) == 0 || HeightOfScreen(screen) == 0)
@@ -20,6 +84,10 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL(x11, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay,)
 
+    X11PropertyData propertyData;
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(x11, propertyData.ffXInternAtom, XInternAtom,)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(x11, propertyData.ffXGetWindowProperty, XGetWindowProperty,)
+
     Display* display = ffXOpenDisplay(x11);
     if(display == NULL)
     {
@@ -29,6 +97,8 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 
     for(int i = 0; i < ScreenCount(display); i++)
         x11AddScreenAsResult(&result->resolutions, ScreenOfDisplay(display, i), 0);
+
+    x11DetectWMFromEWMH(&propertyData, display, result);
 
     ffXCloseDisplay(display);
     dlclose(x11);
@@ -216,6 +286,10 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeMonitors, XRRFreeMonitors,);
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeScreenConfigInfo, XRRFreeScreenConfigInfo,);
 
+    X11PropertyData propertyData;
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, propertyData.ffXInternAtom, XInternAtom,)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, propertyData.ffXGetWindowProperty, XGetWindowProperty,)
+
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)
     {
@@ -227,6 +301,8 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
     for(int i = 0; i < ScreenCount(data.display); i++)
         xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i));
+
+    x11DetectWMFromEWMH(&propertyData, data.display, result);
 
     ffXCloseDisplay(data.display);
     dlclose(xrandr);

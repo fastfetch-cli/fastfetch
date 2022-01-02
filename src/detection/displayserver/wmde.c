@@ -266,6 +266,13 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
         return;
     }
 
+    env = getenv("DISPLAY");
+    if(env != NULL && *env != '\0')
+    {
+        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        return;
+    }
+
     env = getenv("TERM");
     if(env != NULL && *env != '\0')
     {
@@ -308,7 +315,7 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
         if(result->wmPrettyName.length == 0)
             applyPrettyNameIfWM(result, processName.chars);
 
-        if(result->deProcessName.length > 0 && result->wmPrettyName.length > 0)
+        if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
     }
 
@@ -323,6 +330,19 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
     //If all connections failed, use the environment variables to detect protocol name
     if(result->wmProtocolName.length == 0)
         getWMProtocolNameFromEnv(result);
+
+    //We don't want to detect anything in TTY
+    if(ffStrbufIgnCaseCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY) == 0)
+        return;
+
+    //If we found the processName via display server, use it.
+    //This will set the pretty name if it is a known WM, otherwise the prettyName to the processName
+    if(result->wmProcessName.length > 0)
+    {
+        applyPrettyNameIfWM(result, result->wmProcessName.chars);
+        if(result->wmPrettyName.length == 0)
+            ffStrbufSet(&result->wmPrettyName, &result->wmProcessName);
+    }
 
     const char* env = parseEnv();
 
