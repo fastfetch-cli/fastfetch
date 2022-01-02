@@ -3,11 +3,11 @@
 #include <string.h>
 
 #define FF_DE_MODULE_NAME "DE"
-#define FF_DE_NUM_FORMAT_ARGS 4
+#define FF_DE_NUM_FORMAT_ARGS 3
 
 void ffPrintDesktopEnvironment(FFinstance* instance)
 {
-    const FFWMDEResult* result = ffDetectWMDE(instance);
+    const FFDisplayServerResult* result = ffConnectDisplayServer(instance);
 
     if(result->dePrettyName.length == 0)
     {
@@ -32,7 +32,6 @@ void ffPrintDesktopEnvironment(FFinstance* instance)
     else
     {
         ffPrintFormatString(instance, FF_DE_MODULE_NAME, 0, &instance->config.deKey, &instance->config.deFormat, NULL, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, result->sessionDesktop},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->deVersion}

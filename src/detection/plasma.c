@@ -85,7 +85,7 @@ const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
     ffStrbufInit(&result.icons);
     ffStrbufInit(&result.font);
 
-    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
     if(ffStrbufIgnCaseCompS(&wmde->deProcessName, "plasmashell") != 0)
     {
         pthread_mutex_unlock(&mutex);

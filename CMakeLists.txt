@@ -148,8 +148,11 @@ set(SRCS
     src/common/settings.c
     src/detection/plasma.c
     src/detection/gtk.c
-    src/detection/wmde.c
     src/detection/terminalShell.c
+    src/detection/displayserver/displayServer.c
+    src/detection/displayserver/wayland.c
+    src/detection/displayserver/xlib.c
+    src/detection/displayserver/wmde.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c

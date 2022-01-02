@@ -203,16 +203,23 @@ typedef struct FFTerminalShellResult
     FFstrbuf userShellVersion;
 } FFTerminalShellResult;
 
-typedef struct FFWMDEResult
+typedef struct FFResolutionResult
 {
-    const char* sessionDesktop;
+    uint32_t width;
+    uint32_t height;
+    uint32_t refreshRate;
+} FFResolutionResult;
+
+typedef struct FFDisplayServerResult
+{
     FFstrbuf wmProcessName;
     FFstrbuf wmPrettyName;
     FFstrbuf wmProtocolName;
     FFstrbuf deProcessName;
     FFstrbuf dePrettyName;
     FFstrbuf deVersion;
-} FFWMDEResult;
+    FFlist resolutions; //List of FFResolutionResult
+} FFDisplayServerResult;
 
 typedef enum FFformatargtype
 {
@@ -342,10 +349,10 @@ void ffPrintColor(const FFstrbuf* colorValue);
 // The last occurence of start in the first file will be the one used
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer);
-bool ffParsePropFileHomeValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
-bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
-bool ffParsePropFileConfigValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
-bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
+bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
+bool ffParsePropFileHome(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
+bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
+bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
@@ -397,8 +404,8 @@ const FFGTKResult* ffDetectGTK2(FFinstance* instance);
 const FFGTKResult* ffDetectGTK4(FFinstance* instance);
 const FFGTKResult* ffDetectGTK3(FFinstance* instance);
 
-//detection/wmde.c
-const FFWMDEResult* ffDetectWMDE(FFinstance* instance);
+//detection/displayServer.c
+const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
 
 //detection/terminalShell.c
 const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);

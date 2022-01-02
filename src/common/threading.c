@@ -26,9 +26,9 @@ static inline void* detectGTK4ThreadMain(void* instance)
     return NULL;
 }
 
-static inline void* detectWMDEThreadMain(void* instance)
+static inline void* connectDisplayServerThreadMain(void* instance)
 {
-    ffDetectWMDE((FFinstance*)instance);
+    ffConnectDisplayServer((FFinstance*)instance);
     return NULL;
 }
 
@@ -40,9 +40,9 @@ static inline void* detectTerminalShellThreadMain(void* instance)
 
 static inline void* startThreadsThreadMain(void* instance)
 {
-    pthread_t wmdeThread;
-    pthread_create(&wmdeThread, NULL, detectWMDEThreadMain, instance);
-    pthread_detach(wmdeThread);
+    pthread_t dsThread;
+    pthread_create(&dsThread, NULL, connectDisplayServerThreadMain, instance);
+    pthread_detach(dsThread);
 
     pthread_t gtk2Thread;
     pthread_create(&gtk2Thread, NULL, detectGTK2ThreadMain, instance);

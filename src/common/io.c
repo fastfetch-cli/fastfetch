@@ -341,7 +341,7 @@ bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
     return ffParsePropFileValues(filename, 1, (FFpropquery[]){{start, buffer}});
 }
 
-bool ffParsePropFileHomeValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
+bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
@@ -356,12 +356,12 @@ bool ffParsePropFileHomeValues(FFinstance* instance, const char* relativeFile, u
     return result;
 }
 
-bool ffParsePropFileHome(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
+bool ffParsePropFileHome(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
 {
     return ffParsePropFileHomeValues(instance, relativeFile, 1, (FFpropquery[]){{start, buffer}});
 }
 
-bool ffParsePropFileConfigValues(FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
+bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
     bool foundAFile = false;
 
@@ -397,7 +397,7 @@ bool ffParsePropFileConfigValues(FFinstance* instance, const char* relativeFile,
     return foundAFile;
 }
 
-bool ffParsePropFileConfig(FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
+bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
 {
     return ffParsePropFileConfigValues(instance, relativeFile, 1, (FFpropquery[]){{start, buffer}});
 }

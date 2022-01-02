@@ -30,7 +30,7 @@ static void printTerminalFont(FFinstance* instance, const char* raw, FFfont* fon
 
 static const char* getSystemMonospaceFont(FFinstance* instance)
 {
-    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
     {

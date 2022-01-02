@@ -129,8 +129,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "de-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("de", "{3} {4}", 4,
-            "Session desktop",
+        constructAndPrintCommandHelpFormat("de", "{2} {3}", 3,
             "DE process name",
             "DE pretty name",
             "DE version"
@@ -138,8 +137,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "wm-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("wm", "{3} ({4})", 4,
-            "Session desktop",
+        constructAndPrintCommandHelpFormat("wm", "{2} ({3})", 3,
             "WM process name",
             "WM pretty name",
             "WM protocol name"

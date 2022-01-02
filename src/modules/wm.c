@@ -1,11 +1,11 @@
 #include "fastfetch.h"
 
 #define FF_WM_MODULE_NAME "WM"
-#define FF_WM_NUM_FORMAT_ARGS 4
+#define FF_WM_NUM_FORMAT_ARGS 3
 
 void ffPrintWM(FFinstance* instance)
 {
-    const FFWMDEResult* result = ffDetectWMDE(instance);
+    const FFDisplayServerResult* result = ffConnectDisplayServer(instance);
 
     if(result->wmPrettyName.length == 0)
     {
@@ -15,7 +15,7 @@ void ffPrintWM(FFinstance* instance)
 
     if(instance->config.wmFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, "WM", 0, &instance->config.wmKey);
+        ffPrintLogoAndKey(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey);
 
         if(result->wmPrettyName.length == 0 && result->wmProcessName.length == 0)
         {
@@ -41,7 +41,6 @@ void ffPrintWM(FFinstance* instance)
     else
     {
         ffPrintFormatString(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey, &instance->config.wmFormat, NULL, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, result->sessionDesktop},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName}

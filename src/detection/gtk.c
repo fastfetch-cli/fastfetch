@@ -51,7 +51,7 @@ static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
 
     init = true;
 
-    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
     {

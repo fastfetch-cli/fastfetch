@@ -5,7 +5,7 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
-    const FFWMDEResult* wmde = ffDetectWMDE(instance);
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
     {

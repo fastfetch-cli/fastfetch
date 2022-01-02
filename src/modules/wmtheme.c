@@ -223,7 +223,7 @@ static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
 
 void ffPrintWMTheme(FFinstance* instance)
 {
-    const FFWMDEResult* result = ffDetectWMDE(instance);
+    const FFDisplayServerResult* result = ffConnectDisplayServer(instance);
 
     if(result->wmPrettyName.length == 0)
     {
