@@ -8,7 +8,6 @@ Here i just add things that are easy to forget.
 - [ ] Support for printing images as ascii art logos (using imlib2 and libcaca probably)
 - [ ] Support for printing images in terminals that support it
 - [ ] Better documentation (especially default config file and the various --help options. Colored output?)
-- [ ] Unifing resolution and WM/DE code. For example when having a x server connection, it can be used to detect WM with XProperties too.
 - [ ] Better OS output for all possible combinations of /etc/os-release variables.
 - [ ] Fallback OS detection with lsb
 - [ ] Android support

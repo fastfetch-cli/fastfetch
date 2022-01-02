@@ -60,12 +60,16 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
         ffStrbufSetS(&result->wmPrettyName, "Xfwm4");
     else if(strcasecmp(processName, "Marco") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Marco");
+    else if(strcasecmp(processName, "xmonad") == 0)
+        ffStrbufSetS(&result->wmPrettyName, "XMonad");
     else if(strcasecmp(processName, "gnome-session-binary") == 0 || strcasecmp(processName, "Mutter") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Mutter");
     else if(strcasecmp(processName, "cinnamon-session") == 0 || strcasecmp(processName, "Muffin") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Muffin");
     else if( // WMs where the pretty name matches the process name
-        strcasecmp(processName, "dwm") == 0
+        strcasecmp(processName, "dwm") == 0 ||
+        strcasecmp(processName, "bspwm") == 0 ||
+        strcasecmp(processName, "tinywm") == 0
     ) ffStrbufSetS(&result->wmPrettyName, processName);
 
     if(result->wmPrettyName.length > 0 && result->wmProcessName.length == 0)
