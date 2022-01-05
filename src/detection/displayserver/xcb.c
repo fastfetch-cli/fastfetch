@@ -124,6 +124,10 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
 
     ffxcb_disconnect(connection);
     dlclose(xcb);
+
+    //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
+    if(result->wmProtocolName.length == 0)
+        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
 }
 
 #else
