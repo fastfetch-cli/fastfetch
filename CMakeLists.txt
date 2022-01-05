@@ -68,12 +68,26 @@ else(VULKAN_FOUND)
     message(WARNING "Package vulkan not found. Building without support.")
 endif(VULKAN_FOUND)
 
-pkg_check_modules (X11 x11)
-if(X11_FOUND)
-    add_compile_definitions(FF_HAVE_X11=1)
-else(X11_FOUND)
-    message(WARNING "Package x11 not found. Building without support.")
-endif(X11_FOUND)
+pkg_check_modules (WAYLAND wayland-client)
+if(WAYLAND_FOUND)
+    add_compile_definitions(FF_HAVE_WAYLAND=1)
+else(WAYLAND_FOUND)
+    message(WARNING "Package wayland-client not found. Building without support.")
+endif(WAYLAND_FOUND)
+
+pkg_check_modules (XCB_RANDR xcb-randr)
+if(XCB_RANDR_FOUND)
+    add_compile_definitions(FF_HAVE_XCB_RANDR=1)
+else(XCB_RANDR_FOUND)
+    message(WARNING "Package xcb-randr not found. Building without support.")
+endif(XCB_RANDR_FOUND)
+
+pkg_check_modules (XCB xcb)
+if(XCB_FOUND)
+    add_compile_definitions(FF_HAVE_XCB=1)
+else(XCB_FOUND)
+    message(WARNING "Package xcb not found. Building without support.")
+endif(XCB_FOUND)
 
 pkg_check_modules (XRANDR xrandr)
 if(XRANDR_FOUND)
@@ -82,12 +96,12 @@ else(XRANDR_FOUND)
     message(WARNING "Package xrandr not found. Building without support.")
 endif(XRANDR_FOUND)
 
-pkg_check_modules (WAYLAND wayland-client)
-if(WAYLAND_FOUND)
-    add_compile_definitions(FF_HAVE_WAYLAND=1)
-else(WAYLAND_FOUND)
-    message(WARNING "Package wayland-client not found. Building without support.")
-endif(WAYLAND_FOUND)
+pkg_check_modules (X11 x11)
+if(X11_FOUND)
+    add_compile_definitions(FF_HAVE_X11=1)
+else(X11_FOUND)
+    message(WARNING "Package x11 not found. Building without support.")
+endif(X11_FOUND)
 
 pkg_check_modules (GIO gio-2.0)
 if(GIO_FOUND)
@@ -121,9 +135,12 @@ include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/src
     ${LIBPCI_INCLUDE_DIRS}
-    ${X11_INCLUDE_DIRS}
-    ${XRANDR_INCLUDE_DIRS}
+    ${VULKAN_INCLUDE_DIRS}
     ${WAYLAND_INCLUDE_DIRS}
+    ${XCB_RANDR_INCLUDE_DIRS}
+    ${XCB_INCLUDE_DIRS}
+    ${XRANDR_INCLUDE_DIRS}
+    ${X11_INCLUDE_DIRS}
     ${GIO_INCLUDE_DIRS}
     ${DCONF_INCLUDE_DIRS}
     ${XFCONF_INCLUDE_DIRS}
@@ -151,6 +168,7 @@ set(SRCS
     src/detection/terminalShell.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
+    src/detection/displayserver/xcb.c
     src/detection/displayserver/xlib.c
     src/detection/displayserver/wmde.c
     src/modules/break.c

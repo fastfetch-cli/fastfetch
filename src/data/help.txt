@@ -92,11 +92,13 @@ Key options: Provide a custom key for an output
 Library options: Set the path of a library to load
     --lib-PCI <path>
     --lib-vulkan <path>
-    --lib-X11 <path>
+    --lib-wayland <path>
+    --lib-xcb-randr <path>
+    --lib-xcb <path>
     --lib-Xrandr <path>
+    --lib-X11 <path>
     --lib-gio <path>
     --lib-DConf <path>
-    --lib-wayland <path>
     --lib-XFConf <path>
     --lib-RPM <path>
 

@@ -20,6 +20,19 @@ uint32_t ffdsParseRefreshRate(int32_t refreshRate)
     return (uint32_t) refreshRate;
 }
 
+bool ffdsAppendResolution(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate)
+{
+    if(width == 0 || height == 0)
+        return false;
+
+    FFResolutionResult* resolution = ffListAdd(&result->resolutions);
+    resolution->width = width;
+    resolution->height = height;
+    resolution->refreshRate = refreshRate;
+
+    return true;
+}
+
 static void parseDRM(FFDisplayServerResult* result)
 {
     const char* drmDirPath = "/sys/class/drm/";
@@ -95,7 +108,13 @@ const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance)
     //They respect wmProtocolName, and only detect resolution if it is set.
 
     if(result.resolutions.length == 0)
+        ffdsConnectXcbRandr(instance, &result);
+
+    if(result.resolutions.length == 0)
         ffdsConnectXrandr(instance, &result);
+
+    if(result.resolutions.length == 0)
+        ffdsConnectXcb(instance, &result);
 
     if(result.resolutions.length == 0)
         ffdsConnectXlib(instance, &result);

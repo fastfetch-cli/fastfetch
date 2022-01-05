@@ -174,11 +174,13 @@ static void defaultConfig(FFinstance* instance)
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
-    ffStrbufInitA(&instance->config.libX11, 0);
+    ffStrbufInitA(&instance->config.libWayland, 0);
+    ffStrbufInitA(&instance->config.libXcbRandr, 0);
+    ffStrbufInitA(&instance->config.libXcb, 0);
     ffStrbufInitA(&instance->config.libXrandr, 0);
+    ffStrbufInitA(&instance->config.libX11, 0);
     ffStrbufInitA(&instance->config.libGIO, 0);
     ffStrbufInitA(&instance->config.libDConf, 0);
-    ffStrbufInitA(&instance->config.libWayland, 0);
     ffStrbufInitA(&instance->config.libXFConf, 0);
     ffStrbufInitA(&instance->config.librpm, 0);
 

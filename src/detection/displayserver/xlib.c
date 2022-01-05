@@ -9,6 +9,14 @@ typedef struct X11PropertyData
     FF_LIBRARY_SYMBOL(XGetWindowProperty)
 } X11PropertyData;
 
+static bool x11InitPropertyData(void* libraryHandle, X11PropertyData* propertyData)
+{
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffXInternAtom, XInternAtom, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffXGetWindowProperty, XGetWindowProperty, false)
+
+    return true;
+}
+
 static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Window window, const char* request)
 {
     Atom requestAtom = data->ffXInternAtom(display, request, False);
@@ -19,20 +27,7 @@ static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Wi
     unsigned long unused;
     unsigned char* result = NULL;
 
-    data->ffXGetWindowProperty(
-        display,
-        window,
-        requestAtom,
-        0,
-        64,
-        False,
-        AnyPropertyType,
-        &actualType,
-        (int*) &unused,
-        &unused,
-        &unused,
-        &result
-    );
+    data->ffXGetWindowProperty(display, window, requestAtom, 0, 64, False, AnyPropertyType, &actualType, (int*) &unused, &unused, &unused, &result);
 
     return result;
 }
@@ -42,40 +37,17 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     if(result->wmProcessName.length > 0)
         return;
 
-    Window root = DefaultRootWindow(display);
-    if(root == None)
+    Window* wmWindow = (Window*) x11GetProperty(data, display, DefaultRootWindow(display), "_NET_SUPPORTING_WM_CHECK");
+    if(wmWindow == NULL)
         return;
 
-    unsigned char* wmWindowID = x11GetProperty(data, display, root, "_NET_SUPPORTING_WM_CHECK");
-    if(wmWindowID == NULL)
-        return;
-
-    Window wmWindow = *(Window*) wmWindowID;
-    if(wmWindow == None)
-        return;
-
-    unsigned char* wmName = x11GetProperty(data, display, wmWindow, "_NET_WM_NAME");
+    const char* wmName = (const char*) x11GetProperty(data, display, *wmWindow, "_NET_WM_NAME");
     if(wmName == NULL)
-        wmName = x11GetProperty(data, display, wmWindow, "WM_NAME");
-    if(wmName == NULL)
+        wmName = (const char*) x11GetProperty(data, display, *wmWindow, "WM_NAME");
+    if(wmName == NULL || *wmName == '\0')
         return;
 
-    const char* wmNameString = (const char*) wmName;
-    if(*wmNameString == '\0')
-        return;
-
-    ffStrbufSetS(&result->wmProcessName, wmNameString);
-}
-
-static void x11AddScreenAsResult(FFlist* results, Screen* screen, uint32_t refreshRate)
-{
-    if(WidthOfScreen(screen) == 0 || HeightOfScreen(screen) == 0)
-        return;
-
-    FFResolutionResult* result = ffListAdd(results);
-    result->width = (uint32_t) WidthOfScreen(screen);
-    result->height = (uint32_t) HeightOfScreen(screen);
-    result->refreshRate = refreshRate;
+    ffStrbufSetS(&result->wmProcessName, wmName);
 }
 
 void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
@@ -85,8 +57,7 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay,)
 
     X11PropertyData propertyData;
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(x11, propertyData.ffXInternAtom, XInternAtom,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(x11, propertyData.ffXGetWindowProperty, XGetWindowProperty,)
+    bool propertyDataInitialized = x11InitPropertyData(x11, &propertyData);
 
     Display* display = ffXOpenDisplay(x11);
     if(display == NULL)
@@ -95,10 +66,19 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
         return;
     }
 
-    for(int i = 0; i < ScreenCount(display); i++)
-        x11AddScreenAsResult(&result->resolutions, ScreenOfDisplay(display, i), 0);
+    if(propertyDataInitialized && ScreenCount(display) > 0)
+        x11DetectWMFromEWMH(&propertyData, display, result);
 
-    x11DetectWMFromEWMH(&propertyData, display, result);
+    for(int i = 0; i < ScreenCount(display); i++)
+    {
+        Screen* screen = ScreenOfDisplay(display, i);
+        ffdsAppendResolution(
+            result,
+            (uint32_t) screen->width,
+            (uint32_t) screen->height,
+            0
+        );
+    }
 
     ffXCloseDisplay(display);
     dlclose(x11);
@@ -138,101 +118,115 @@ typedef struct XrandrData
 
     //Init once
     Display* display;
-    FFlist* results;
+    FFDisplayServerResult* result;
 
     //Init per screen
     uint32_t defaultRefreshRate;
     XRRScreenResources* screenResources;
 } XrandrData;
 
-static XRRModeInfo* xrandrGetModeInfo(XRRScreenResources* screenResources, RRMode mode)
+static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
 {
-    for(int i = 0; i < screenResources->nmode; i++)
-    {
-        if(screenResources->modes[i].id == mode)
-            return &screenResources->modes[i];
-    }
-    return NULL;
+    uint32_t refreshRate = ffdsParseRefreshRate((int32_t) (
+        modeInfo->dotClock / (modeInfo->hTotal * modeInfo->vTotal)
+    ));
+
+    return ffdsAppendResolution(
+        data->result,
+        (uint32_t) modeInfo->width,
+        (uint32_t) modeInfo->height,
+        refreshRate == 0 ? data->defaultRefreshRate : refreshRate
+    );
 }
 
-static bool xrandrHandleOutputInfo(XrandrData* data, XRROutputInfo* outputInfo)
+static bool xrandrHandleMode(XrandrData* data, RRMode mode)
 {
-    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, data->screenResources, outputInfo->crtc);
+    for(int i = 0; i < data->screenResources->nmode; i++)
+    {
+        if(data->screenResources->modes[i].id == mode)
+            return xrandrHandleModeInfo(data, &data->screenResources->modes[i]);
+    }
+    return false;
+}
+
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
+{
+    //We do the check here, because we want the best fallback resolution if this call failed
+    if(data->screenResources == NULL)
+        return false;
+
+    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, data->screenResources, crtc);
     if(crtcInfo == NULL)
         return false;
 
-    XRRModeInfo* modeInfo = xrandrGetModeInfo(data->screenResources, crtcInfo->mode);
-    if(modeInfo == NULL || modeInfo->width == 0 || modeInfo->height == 0)
-    {
-        data->ffXRRFreeCrtcInfo(crtcInfo);
-        return false;
-    }
-
-    FFResolutionResult* result = ffListAdd(data->results);
-    result->width = modeInfo->width;
-    result->height = modeInfo->height;
-    result->refreshRate = ffdsParseRefreshRate((int32_t) (modeInfo->dotClock / (modeInfo->hTotal * modeInfo->vTotal)));
-
-    if(result->refreshRate == 0)
-        result->refreshRate = data->defaultRefreshRate;
+    bool res = xrandrHandleMode(data, crtcInfo->mode);
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
 
-    return true;
+    return res ? true : ffdsAppendResolution(
+        data->result,
+        (uint32_t) crtcInfo->width,
+        (uint32_t) crtcInfo->height,
+        data->defaultRefreshRate
+    );
 }
 
-static bool xrandrHandleMonitorFallback(XrandrData* data, XRRMonitorInfo* monitorInfo)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output)
 {
-    if(monitorInfo->width == 0 || monitorInfo->height == 0)
+    XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
+    if(outputInfo == NULL)
         return false;
 
-    FFResolutionResult* result = ffListAdd(data->results);
-    result->width = (uint32_t) monitorInfo->width;
-    result->height = (uint32_t) monitorInfo->height;
-    result->refreshRate = (uint32_t) data->defaultRefreshRate;
-    return true;
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc);
+
+    data->ffXRRFreeOutputInfo(outputInfo);
+
+    return res;
 }
 
 static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
-    bool foundMode = false;
+    bool foundOutput = false;
 
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, monitorInfo->outputs[i]);
-        if(outputInfo == NULL)
-            continue;
-
-        if(xrandrHandleOutputInfo(data, outputInfo))
-            foundMode = true;
-
-        data->ffXRRFreeOutputInfo(outputInfo);
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i]))
+            foundOutput = true;
     }
 
-    if(!foundMode)
-        return xrandrHandleMonitorFallback(data, monitorInfo);
-
-    return true;
+    return foundOutput ? true : ffdsAppendResolution(
+        data->result,
+        (uint32_t) monitorInfo->width,
+        (uint32_t) monitorInfo->height,
+        data->defaultRefreshRate
+    );
 }
 
-static inline bool xrandrLoopMonitors(XrandrData* data, XRRMonitorInfo* monitorInfos, int numberOfMonitors, bool(*monitorFunc)(XrandrData* data, XRRMonitorInfo* monitorInfo))
+static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
 {
-    bool foundAMonitor = false;
+    int numberOfMonitors;
+    XRRMonitorInfo* monitorInfos = data->ffXRRGetMonitors(data->display, RootWindowOfScreen(screen), True, &numberOfMonitors);
+    if(monitorInfos == NULL)
+        return false;
+
+    bool foundAMonitor;
 
     for(int i = 0; i < numberOfMonitors; i++)
     {
-        if(monitorFunc(data, &monitorInfos[i]))
+        if(xrandrHandleMonitor(data, &monitorInfos[i]))
             foundAMonitor = true;
     }
+
+    data->ffXRRFreeMonitors(monitorInfos);
 
     return foundAMonitor;
 }
 
 static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 {
-    Window window = RootWindowOfScreen(screen);
+    //Init screen configuration. This is used to get the default refresh rate. If this fails, default refresh rate is simply 0.
+    XRRScreenConfiguration* screenConfiguration = data->ffXRRGetScreenInfo(data->display, RootWindowOfScreen(screen));
 
-    XRRScreenConfiguration* screenConfiguration = data->ffXRRGetScreenInfo(data->display, window);
     if(screenConfiguration != NULL)
     {
         data->defaultRefreshRate = (uint32_t) data->ffXRRConfigCurrentRate(screenConfiguration);
@@ -241,28 +235,23 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
     else
         data->defaultRefreshRate = 0;
 
-    int numberOfMonitors;
-    XRRMonitorInfo* monitorInfos = data->ffXRRGetMonitors(data->display, window, True, &numberOfMonitors);
-    if(monitorInfos == NULL)
-    {
-        x11AddScreenAsResult(data->results, screen, data->defaultRefreshRate);
-        return;
-    }
+    //Init screen resources
+    data->screenResources = data->ffXRRGetScreenResources(data->display, RootWindowOfScreen(screen));
 
-    data->screenResources = data->ffXRRGetScreenResources(data->display, window);
-
-    bool foundAMonitor;
-
-    if(data->screenResources != NULL)
-        foundAMonitor = xrandrLoopMonitors(data, monitorInfos, numberOfMonitors, xrandrHandleMonitor);
-    else
-        foundAMonitor = xrandrLoopMonitors(data, monitorInfos, numberOfMonitors, xrandrHandleMonitorFallback);
-
-    if(!foundAMonitor)
-        x11AddScreenAsResult(data->results, screen, data->defaultRefreshRate);
+    bool ret = xrandrHandleMonitors(data, screen);
 
     data->ffXRRFreeScreenResources(data->screenResources);
-    data->ffXRRFreeMonitors(monitorInfos);
+
+    if(ret)
+        return;
+
+    //Fallback to screen
+    ffdsAppendResolution(
+        data->result,
+        (uint32_t) WidthOfScreen(screen),
+        (uint32_t) HeightOfScreen(screen),
+        data->defaultRefreshRate
+    );
 }
 
 void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
@@ -287,8 +276,7 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeScreenConfigInfo, XRRFreeScreenConfigInfo,);
 
     X11PropertyData propertyData;
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, propertyData.ffXInternAtom, XInternAtom,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, propertyData.ffXGetWindowProperty, XGetWindowProperty,)
+    bool propertyDataInitialized = x11InitPropertyData(xrandr, &propertyData);
 
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)
@@ -297,12 +285,13 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
         return;
     }
 
-    data.results = &result->resolutions;
+    if(propertyDataInitialized && ScreenCount(data.display) > 0)
+        x11DetectWMFromEWMH(&propertyData, data.display, result);
+
+    data.result = result;
 
     for(int i = 0; i < ScreenCount(data.display); i++)
         xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i));
-
-    x11DetectWMFromEWMH(&propertyData, data.display, result);
 
     ffXCloseDisplay(data.display);
     dlclose(xrandr);

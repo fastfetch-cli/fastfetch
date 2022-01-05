@@ -20,9 +20,11 @@ In order to run properly on every machine, fastfetch dynamically loads needed li
 The following libraries are used if present:
 *  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 *  [`libvulkan`](https://www.vulkan.org/): Fallback for GPU output.
-*  [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): Needed for resolution output
-*  [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr): Needed for appending refresh rate to resolution output.
-*  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance in wayland sessions.
+*  [`libxcb-randr`](https://xcb.freedesktop.org/),
+   [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
+   [`libxcb`](https://xcb.freedesktop.org/),
+   [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support. The `libxcb*` ones usually have better performance.
+*  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
 *  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 *  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.

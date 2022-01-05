@@ -185,10 +185,12 @@
 # Must be a valid path to a library.
 #--lib-PCI /usr/lib/libpci.so
 #--lib-vulkan /usr/lib/libvulkan.so
-#--lib-X11 /usr/lib/libX11.so
+#--lib-wayland /usr/lib/libwayland-client.so
+#--lib-xcb-randr /usr/lib/libxcb-randr.so
+#--lib-xcb /usr/lib/libxcb.so
 #--lib-Xrandr /usr/lib/libXrandr.so
+#--lib-X11 /usr/lib/libX11.so
 #--lib-gio /usr/lib/libgio-2.0.so
 #--lib-DConf /usr/lib/libdconf.so
-#--lib-wayland /usr/lib/libwayland-client.so
 #--lib-XFConf /usr/lib/libxfconf-0.so
 #--lib-rpm /usr/lib/librpm.so

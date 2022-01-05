@@ -108,9 +108,11 @@ typedef struct FFconfig
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
-    FFstrbuf libX11;
-    FFstrbuf libXrandr;
     FFstrbuf libWayland;
+    FFstrbuf libXcbRandr;
+    FFstrbuf libXcb;
+    FFstrbuf libXrandr;
+    FFstrbuf libX11;
     FFstrbuf libGIO;
     FFstrbuf libDConf;
     FFstrbuf libXFConf;

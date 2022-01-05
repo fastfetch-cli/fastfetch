@@ -354,14 +354,20 @@ static inline void listSupportedFeatures()
         #ifdef FF_HAVE_VULKAN
             "vulkan\n"
         #endif
-        #ifdef FF_HAVE_X11
-            "x11\n"
+        #ifdef FF_HAVE_WAYLAND
+            "wayland\n"
+        #endif
+        #ifdef FF_HAVE_XCB_RANDR
+            "xcb-randr\n"
+        #endif
+        #ifdef FF_HAVE_XCB
+            "xcb\n"
         #endif
         #ifdef FF_HAVE_XRANDR
             "xrandr\n"
         #endif
-        #ifdef FF_HAVE_WAYLAND
-            "wayland\n"
+        #ifdef FF_HAVE_X11
+            "x11\n"
         #endif
         #ifdef FF_HAVE_GIO
             "gio\n"
@@ -826,16 +832,20 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-vulkan") == 0)
         optionParseString(key, value, &instance->config.libVulkan);
-    else if(strcasecmp(key, "--lib-X11") == 0)
-        optionParseString(key, value, &instance->config.libX11);
+    else if(strcasecmp(key, "--lib-wayland") == 0)
+        optionParseString(key, value, &instance->config.libWayland);
+    else if(strcasecmp(key, "--lib-xcb-randr") == 0)
+        optionCheckString(key, value, &instance->config.libXcbRandr);
+    else if(strcasecmp(key, "--lib-xcb") == 0)
+        optionParseString(key, value, &instance->config.libXcb);
     else if(strcasecmp(key, "--lib-Xrandr") == 0)
         optionParseString(key, value, &instance->config.libXrandr);
+    else if(strcasecmp(key, "--lib-X11") == 0)
+        optionParseString(key, value, &instance->config.libX11);
     else if(strcasecmp(key, "--lib-gio") == 0)
         optionParseString(key, value, &instance->config.libGIO);
     else if(strcasecmp(key, "--lib-DConf") == 0)
         optionParseString(key, value, &instance->config.libDConf);
-    else if(strcasecmp(key, "--lib-wayland") == 0)
-        optionParseString(key, value, &instance->config.libWayland);
     else if(strcasecmp(key, "--lib-XFConf") == 0)
         optionParseString(key, value, &instance->config.libXFConf);
     else if(strcasecmp(key, "--lib-rpm") == 0)
