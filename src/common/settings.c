@@ -5,7 +5,7 @@
 #ifdef FF_HAVE_GIO
 #include <gio/gio.h>
 
-#define FF_LIBRARY_DATA_LOAD_INIT(dataObject, libraryName, userLibraryName) \
+#define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
     static FFInitState initState = FF_INITSTATE_UNINITIALIZED; \
@@ -15,8 +15,8 @@
         return initState == FF_INITSTATE_SUCCESSFUL ? &data : NULL; \
     } \
     initState = FF_INITSTATE_SUCCESSFUL; \
-    void* libraryHandle = dlopen(userLibraryName.length == 0 ? libraryName : userLibraryName.chars, RTLD_LAZY); \
-    if(dlerror() != NULL || libraryHandle == NULL) { \
+    void* libraryHandle = ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL); \
+    if(libraryHandle == NULL) { \
         initState = FF_INITSTATE_FAILED; \
         pthread_mutex_unlock(&mutex); \
         return NULL; \
@@ -24,7 +24,7 @@
 
 #define FF_LIBRARY_DATA_LOAD_SYMBOL(symbolName) \
     data.ff ## symbolName = dlsym(libraryHandle, #symbolName); \
-    if(dlerror() != NULL || data.ff ## symbolName == NULL) { \
+    if(data.ff ## symbolName == NULL) { \
         dlclose(libraryHandle); \
         initState = FF_INITSTATE_FAILED; \
         pthread_mutex_unlock(&mutex); \
@@ -80,7 +80,7 @@ typedef struct GSettingsData
 
 static const GSettingsData* getGSettingsData(FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, "libgio-2.0.so", instance->config.libGIO)
+    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0.so", "libgio-2.0.so.0");
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
@@ -152,7 +152,7 @@ typedef struct DConfData
 
 static const DConfData* getDConfData(FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(DConfData, "libdconf.so", instance->config.libDConf)
+    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf.so", "libdconf.so.1");
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
@@ -222,7 +222,7 @@ typedef struct XFConfData
 
 static const XFConfData* getXFConfData(FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, "libxfconf-0.so", instance->config.libXFConf)
+    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0.so", "libxfconf-0.so.3");
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)

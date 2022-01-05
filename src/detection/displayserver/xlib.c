@@ -52,7 +52,7 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
 
 void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(x11, "libX11.so", instance->config.libX11,)
+    FF_LIBRARY_LOAD(x11, instance->config.libX11, , "libX11.so", "libX11.so.6", "libX11-xcb.so", "libX11-xcb.so.1")
     FF_LIBRARY_LOAD_SYMBOL(x11, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay,)
 
@@ -256,7 +256,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 
 void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xrandr, "libXrandr.so", instance->config.libXrandr,);
+    FF_LIBRARY_LOAD(xrandr, instance->config.libXrandr, , "libXrandr.so", "libXrandr.so.2")
 
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XCloseDisplay,)

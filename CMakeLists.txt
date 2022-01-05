@@ -163,6 +163,7 @@ set(SRCS
     src/common/format.c
     src/common/parsing.c
     src/common/settings.c
+    src/common/library.c
     src/detection/plasma.c
     src/detection/gtk.c
     src/detection/terminalShell.c

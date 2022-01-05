@@ -89,7 +89,7 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
 
 void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xcb, "libxcb.so", instance->config.libXcb,)
+    FF_LIBRARY_LOAD(xcb, instance->config.libXcb, , "libxcb.so", "libxcb.so.1")
     FF_LIBRARY_LOAD_SYMBOL(xcb, xcb_connect,)
     FF_LIBRARY_LOAD_SYMBOL(xcb, xcb_get_setup,)
     FF_LIBRARY_LOAD_SYMBOL(xcb, xcb_setup_roots_iterator,)
@@ -324,7 +324,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
 
 void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xcbRandr, "libxcb-randr.so", instance->config.libXcbRandr,)
+    FF_LIBRARY_LOAD(xcbRandr, instance->config.libXcbRandr, , "libxcb-randr.so", "libxcb-randr.so.0")
     FF_LIBRARY_LOAD_SYMBOL(xcbRandr, xcb_connect,)
     FF_LIBRARY_LOAD_SYMBOL(xcbRandr, xcb_get_setup,)
     FF_LIBRARY_LOAD_SYMBOL(xcbRandr, xcb_setup_roots_iterator,)

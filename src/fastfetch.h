@@ -292,14 +292,14 @@ typedef enum FFInitState
 #define FF_LIBRARY_SYMBOL(symbolName) \
     __typeof__(&symbolName) ff ## symbolName;
 
-#define FF_LIBRARY_LOAD(libraryObjectName, libraryName, userLibraryName, returnValue) \
-    void* libraryObjectName =  dlopen(userLibraryName.length == 0 ? libraryName : userLibraryName.chars, RTLD_LAZY); \
-    if(dlerror() != NULL || libraryObjectName == NULL) \
+#define FF_LIBRARY_LOAD(libraryObjectName, userLibraryName, returnValue, ...) \
+    void* libraryObjectName =  ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL);\
+    if(libraryObjectName == NULL) \
         return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADRESS(library, symbolMapping, symbolName, returnValue) \
     symbolMapping = dlsym(library, #symbolName); \
-    if(dlerror() != NULL || symbolMapping == NULL) \
+    if(symbolMapping == NULL) \
     { \
         dlclose(library); \
         return returnValue; \
@@ -358,6 +358,9 @@ bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile,
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
+
+//common/libraries.c
+void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 
 //common/logo.c
 void ffLoadLogoSet(FFinstance* instance, const char* logo);
