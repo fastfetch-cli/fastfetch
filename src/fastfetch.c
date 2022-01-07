@@ -492,8 +492,7 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
 static bool optionParseBoolean(const char* str)
 {
     return (
-        str == NULL ||
-        *str == '\0' ||
+        !ffStrSet(str) ||
         strcasecmp(str, "true") == 0 ||
         strcasecmp(str, "yes")  == 0 ||
         strcasecmp(str, "on")   == 0 ||

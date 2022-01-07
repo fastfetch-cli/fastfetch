@@ -55,8 +55,8 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
 
     if(
         fscanf(stat, "%*s (%255[^)]) %*c %255s", name, ppid) != 2 || //stat (comm) state ppid
-        *name == '\0' ||
-        *ppid == '\0' ||
+        !ffStrSet(name) ||
+        !ffStrSet(ppid) ||
         *ppid == '-' ||
         strcasecmp(ppid, "0") == 0
     ) {
@@ -119,15 +119,15 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         term = getenv("SSH_TTY");
 
     //Windows Terminal
-    if((term == NULL || *term == '\0') && getenv("WT_SESSION") != NULL)
+    if(!ffStrSet(term) && getenv("WT_SESSION") != NULL)
         term = "Windows Terminal";
 
     //Normal Terminal
-    if(term == NULL || *term == '\0')
+    if(!ffStrSet(term))
         term = getenv("TERM");
 
     //TTY
-    if(term == NULL || *term == '\0' || strcasecmp(term, "linux") == 0)
+    if(!ffStrSet(term) || strcasecmp(term, "linux") == 0)
         term = ttyname(STDIN_FILENO);
 
     ffStrbufSetS(&result->terminalProcessName, term);

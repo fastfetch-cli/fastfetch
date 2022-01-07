@@ -155,7 +155,7 @@ static bool printCursorFromEnv(FFinstance* instance)
 {
     const char* xcursor_theme = getenv("XCURSOR_THEME");
 
-    if(xcursor_theme == NULL || *xcursor_theme == '\0')
+    if(!ffStrSet(xcursor_theme))
         return false;
 
     FFstrbuf theme;

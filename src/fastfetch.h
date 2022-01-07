@@ -391,6 +391,8 @@ bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buf
 
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
 
+bool ffStrSet(const char* str);
+
 //common/settings.c
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);
 FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type);

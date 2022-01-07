@@ -9,23 +9,23 @@ static const char* parseEnv()
     const char* env;
 
     env = getenv("XDG_CURRENT_DESKTOP");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
         return env;
 
     env = getenv("XDG_SESSION_DESKTOP");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
         return env;
 
     env = getenv("CURRENT_DESKTOP");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
         return env;
 
     env = getenv("SESSION_DESKTOP");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
         return env;
 
     env = getenv("DESKTOP_SESSION");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
         return env;
 
     if(getenv("KDE_FULL_SESSION") != NULL || getenv("KDE_SESSION_UID") != NULL || getenv("KDE_SESSION_VERSION") != NULL)
@@ -45,7 +45,7 @@ static const char* parseEnv()
 
 static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* processName)
 {
-    if(processName == NULL || *processName == '\0')
+    if(!ffStrSet(processName))
         return;
 
     if(strcasecmp(processName, "kwin_wayland") == 0 || strcasecmp(processName, "kwin_x11") == 0 || strcasecmp(processName, "kwin") == 0)
@@ -80,7 +80,7 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
 
 static void applyBetterWM(FFDisplayServerResult* result, const char* processName)
 {
-    if(processName == NULL || *processName == '\0')
+    if(!ffStrSet(processName))
         return;
 
     //If it is a known wm, this will set the pretty name
@@ -211,7 +211,7 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
 
 static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResult* result, const char* name)
 {
-    if(name == NULL || *name == '\0')
+    if(!ffStrSet(name))
         return;
 
     else if(
@@ -260,7 +260,7 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     //We don't need to check for wayland here, as the wayland code will always set the protocol name to wayland
 
     const char* env = getenv("XDG_SESSION_TYPE");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
     {
         if(strcasecmp(env, "x11") == 0)
             ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
@@ -273,14 +273,14 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     }
 
     env = getenv("DISPLAY");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
     {
         ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
         return;
     }
 
     env = getenv("TERM");
-    if(env != NULL && *env != '\0')
+    if(ffStrSet(env))
     {
         ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY);
         return;
@@ -398,7 +398,7 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
     //Return if both wm and de are set, or if env doesn't contain anything
     if(
         (result->wmPrettyName.length > 0 && result->dePrettyName.length > 0) ||
-        (env == NULL || *env == '\0')
+        !ffStrSet(env)
     ) return;
 
     //If nothing is set, use env as WM

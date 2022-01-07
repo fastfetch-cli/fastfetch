@@ -64,7 +64,7 @@ static void printWMThemeFromSettings(FFinstance* instance, const char* dconfKey,
 {
     const char* theme = ffSettingsGet(instance, dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
 
-    if(theme == NULL || *theme == '\0')
+    if(!ffStrSet(theme))
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find WM theme in DConf or GSettings");
         return;
@@ -105,7 +105,7 @@ static void printGTKThemeAsWMTheme(FFinstance* instance)
 static void printMutter(FFinstance* instance)
 {
     const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
-    if(theme != NULL && *theme != '\0')
+    if(ffStrSet(theme))
     {
         printWMTheme(instance, theme);
         return;
