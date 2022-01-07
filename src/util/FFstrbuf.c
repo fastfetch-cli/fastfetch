@@ -329,6 +329,9 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
 
 int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
+    if(strbuf->length != comp->length)
+        return (int) strbuf->length - (int) comp->length;
+
     return ffStrbufCompS(strbuf, comp->chars);
 }
 
@@ -339,6 +342,9 @@ int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
 
 int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
+    if(strbuf->length != comp->length)
+        return (int) strbuf->length - (int) comp->length;
+
     return ffStrbufIgnCaseCompS(strbuf, comp->chars);
 }
 

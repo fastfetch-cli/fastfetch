@@ -1,6 +1,8 @@
 #include "displayServer.h"
 #include <dirent.h>
 #include <string.h>
+#include <unistd.h>
+#include <ctype.h>
 
 static const char* parseEnv()
 {
@@ -297,20 +299,43 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
 
     uint32_t procPathLength = procPath.length;
 
+    FFstrbuf userID;
+    ffStrbufInit(&userID);
+    ffStrbufAppendF(&userID, "%i", getuid());
+
+    FFstrbuf loginuid;
+    ffStrbufInit(&loginuid);
+
     FFstrbuf processName;
     ffStrbufInitA(&processName, 256); //Some processes have large command lines (looking at you chrome)
 
     struct dirent* dirent;
     while((dirent = readdir(proc)) != NULL)
     {
-        if(dirent->d_type != DT_DIR || dirent->d_name[0] == '.')
+        //Match only folders starting with a number (the pid folders)
+        if(dirent->d_type != DT_DIR || !isdigit(dirent->d_name[0]))
             continue;
 
         ffStrbufAppendS(&procPath, dirent->d_name);
+        uint32_t procFolderPathLength = procPath.length;
+
+        //Don't check for processes not owend by the current user.
+        ffStrbufAppendS(&procPath, "/loginuid");
+        ffGetFileContent(procPath.chars, &loginuid);
+        if(ffStrbufComp(&userID, &loginuid) != 0)
+        {
+            ffStrbufSubstrBefore(&procPath, procPathLength);
+            continue;
+        }
+
+        ffStrbufSubstrBefore(&procPath, procFolderPathLength);
+
+        //We check the cmdline for the process name, because it is not trimmed.
         ffStrbufAppendS(&procPath, "/cmdline");
         ffGetFileContent(procPath.chars, &processName);
         ffStrbufSubstrBeforeFirstC(&processName, '\0'); //Trim the arguments
         ffStrbufSubstrAfterLastC(&processName, '/');
+
         ffStrbufSubstrBefore(&procPath, procPathLength);
 
         if(result->dePrettyName.length == 0)
@@ -326,6 +351,8 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
     closedir(proc);
 
     ffStrbufDestroy(&processName);
+    ffStrbufDestroy(&loginuid);
+    ffStrbufDestroy(&userID);
     ffStrbufDestroy(&procPath);
 }
 
@@ -336,40 +363,68 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
         getWMProtocolNameFromEnv(result);
 
     //We don't want to detect anything in TTY
+    //This can't happen if a X11 connection succeeded, so we don't need to clear wmProcessName
     if(ffStrbufIgnCaseCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY) == 0)
         return;
 
-    //If we found the processName via display server, use it.
-    //This will set the pretty name if it is a known WM, otherwise the prettyName to the processName
+    const char* env = parseEnv();
+
     if(result->wmProcessName.length > 0)
     {
+        //If we found the processName via display server, use it.
+        //This will set the pretty name if it is a known WM, otherwise the prettyName to the processName
         applyPrettyNameIfWM(result, result->wmProcessName.chars);
         if(result->wmPrettyName.length == 0)
             ffStrbufSet(&result->wmPrettyName, &result->wmProcessName);
     }
-
-    const char* env = parseEnv();
+    else
+    {
+        //if env is a known WM, use it
+        applyPrettyNameIfWM(result, env);
+    }
 
     //Connecting to a display server only gives WM results, not DE results.
     //If we find it in the environment, use that.
     applyPrettyNameIfDE(instance, result, env);
 
-    //If WM was found by connection to the sever, and DE in the environment, we can return.
+    //If WM was found by connection to the sever, and DE in the environment, we can return
+    //This way we never call getFromProcDir(), which has slow initalization time
     if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
         return;
-
-    //If WM is not set, prefer the environment variable over process names,
-    //to avoid matching processes from  different users.
-    if(result->wmPrettyName.length == 0)
-        applyPrettyNameIfWM(result, env);
 
     //Get missing WM / DE from processes.
     getFromProcDir(instance, result);
 
-    //Fallback for unknown WMs and DEs. This will falsely detect DEs as WMs if they (and their used WM) are unknown
-    if(result->wmPrettyName.length == 0 && result->dePrettyName.length == 0)
+    //Return if both wm and de are set, or if env doesn't contain anything
+    if(
+        (result->wmPrettyName.length > 0 && result->dePrettyName.length > 0) ||
+        (env == NULL || *env == '\0')
+    ) return;
+
+    //If nothing is set, use env as WM
+    else if(result->wmPrettyName.length == 0 && result->dePrettyName.length == 0)
     {
         ffStrbufSetS(&result->wmProcessName, env);
         ffStrbufSetS(&result->wmPrettyName, env);
+    }
+
+    //If only WM is not set, and DE doesn't equal env, use env as WM
+    else if(
+        result->wmPrettyName.length == 0 &&
+        ffStrbufIgnCaseCompS(&result->deProcessName, env) != 0 &&
+        ffStrbufIgnCaseCompS(&result->dePrettyName, env) != 0
+    ) {
+        ffStrbufSetS(&result->wmProcessName, env);
+        ffStrbufSetS(&result->wmPrettyName, env);
+    }
+
+    //If only DE is not set, and WM doesn't equal env, use env as DE
+    else if(
+        result->dePrettyName.length == 0 &&
+        ffStrbufIgnCaseCompS(&result->wmProcessName, env) != 0 &&
+        ffStrbufIgnCaseCompS(&result->wmPrettyName, env) != 0
+    ) {
+        ffStrbufSetS(&result->deProcessName, env);
+        ffStrbufSetS(&result->dePrettyName, env);
     }
 }
