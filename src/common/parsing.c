@@ -394,11 +394,6 @@ void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* mino
     ffStrbufAppend(buffer, patch);
 }
 
-static inline bool charIsNegliable(char c)
-{
-    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-}
-
 bool ffStrSet(const char* str)
 {
     if(str == NULL)
@@ -406,7 +401,7 @@ bool ffStrSet(const char* str)
 
     while(*str != '\0')
     {
-        if(!charIsNegliable(*str))
+        if(*str != ' ' && *str != '\t' && *str != '\n' && *str != '\r')
             return true;
     }
 

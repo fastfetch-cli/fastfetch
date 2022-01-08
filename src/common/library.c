@@ -2,7 +2,6 @@
 
 #include <stdarg.h>
 
-//common/libraries.c
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
 {
     if(userProvidedName->length > 0)
@@ -12,13 +11,12 @@ void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
     va_start(defaultNames, userProvidedName);
 
     void* result = NULL;
+    const char* name = va_arg(defaultNames, const char*);
 
-    while(result == NULL)
+    while(result == NULL && name != NULL)
     {
-        const char* name = va_arg(defaultNames, const char*);
-        if(name == NULL)
-            break;
         result = dlopen(name, RTLD_LAZY);
+        name = va_arg(defaultNames, const char*);
     }
 
     va_end(defaultNames);
