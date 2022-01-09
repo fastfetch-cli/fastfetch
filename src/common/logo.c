@@ -47,6 +47,55 @@ static const FFlogo* getLogoNone()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoAndroid()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("android")
+    FF_LOGO_LINES(
+        "$1         -o          o-         \n"
+        "$1          +hydNNNNdyh+          \n"
+        "$1        +mMMMMMMMMMMMMm+        \n"
+        "$1      `dMM$2m:$1NMMMMMMN$2:m$1MMd`      \n"
+        "$1      hMMMMMMMMMMMMMMMMMMh      \n"
+        "$1  ..  yyyyyyyyyyyyyyyyyyyy  ..  \n"
+        "$1.mMMm`MMMMMMMMMMMMMMMMMMMM`mMMm.\n"
+        "$1:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:\n"
+        "$1:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:\n"
+        "$1:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:\n"
+        "$1:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM:\n"
+        "$1-MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM-\n"
+        "$1 +yy+ MMMMMMMMMMMMMMMMMMMM +yy+ \n"
+        "$1      mMMMMMMMMMMMMMMMMMMm      \n"
+        "$1      `/++MMMMh++hMMMM++/`      \n"
+        "$1          MMMMo  oMMMM          \n"
+        "$1          MMMMo  oMMMM          \n"
+        "$1          oNMm-  -mMNs          "
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "37" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAndroidSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("android-small", "android_small")
+    FF_LOGO_LINES(
+        "$1  ;,           ,;  \n"
+        "$1   ';,.-----.,;'   \n"
+        "$1  ,'           ',  \n"
+        "$1 /    O     O    \\ \n"
+        "$1|                 |\n"
+        "$1'-----------------'"
+    )
+    FF_LOGO_COLORS(
+        "32" //green
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoArch()
 {
     FF_LOGO_INIT
@@ -765,6 +814,8 @@ static GetLogoMethod* getLogoMethods()
     static GetLogoMethod logoMethods[] = {
         getLogoNone,
         getLogoUnknown,
+        getLogoAndroid,
+        getLogoAndroidSmall,
         getLogoArch,
         getLogoArchSmall,
         getLogoArcoLinux,

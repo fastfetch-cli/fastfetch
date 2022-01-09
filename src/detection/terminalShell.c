@@ -249,8 +249,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance)
     result.userShellExeName = result.userShellExe.chars;
     ffStrbufInit(&result.userShellVersion);
 
-    char ppid[256];
-    snprintf(ppid, 255, "%i", getppid());
+    char ppid[32];
+    snprintf(ppid, sizeof(ppid) - 1, "%i", getppid());
     getTerminalShell(&result, ppid);
 
     getTerminalFromEnv(&result);

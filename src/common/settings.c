@@ -271,6 +271,6 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 #include <sys/system_properties.h>
 void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
     ffStrbufEnsureCapacity(result, PROP_VALUE_MAX);
-    result->length = __system_property_get(propName, result->chars);
+    result->length = (uint32_t) __system_property_get(propName, result->chars);
 }
 #endif

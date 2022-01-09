@@ -153,10 +153,10 @@ void ffPrintCPU(FFinstance* instance)
     else if(vendor.length > 0)
     {
         ffStrbufAppend(&cpu, &vendor);
-        ffStrbufAppendS(&cpu, " unknown processor");
+        ffStrbufAppendS(&cpu, " CPU");
     }
     else
-        ffStrbufAppendS(&cpu, "unknown processor");
+        ffStrbufAppendS(&cpu, "CPU");
 
     if(numProcs > 1)
         ffStrbufAppendF(&cpu, " (%i)", numProcs);

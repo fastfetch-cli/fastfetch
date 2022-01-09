@@ -32,12 +32,6 @@ static inline void* connectDisplayServerThreadMain(void* instance)
     return NULL;
 }
 
-static inline void* detectTerminalShellThreadMain(void* instance)
-{
-    ffDetectTerminalShell((FFinstance*)instance);
-    return NULL;
-}
-
 static inline void* startThreadsThreadMain(void* instance)
 {
     pthread_t dsThread;
@@ -55,10 +49,6 @@ static inline void* startThreadsThreadMain(void* instance)
     pthread_t gtk4Thread;
     pthread_create(&gtk4Thread, NULL, detectGTK4ThreadMain, instance);
     pthread_detach(gtk4Thread);
-
-    pthread_t terminalShellThread;
-    pthread_create(&terminalShellThread, NULL, detectTerminalShellThreadMain, instance);
-    pthread_detach(terminalShellThread);
 
     pthread_t plasmaThread;
     pthread_create(&plasmaThread, NULL, detectPlasmaThreadMain, instance);
