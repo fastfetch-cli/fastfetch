@@ -78,7 +78,7 @@ void ffPrintHost(FFinstance* instance)
     #else
         ffSettingsGetAndroidProperty("ro.product.brand", &name);
         if(name.length > 0){
-            name.chars[0] = toupper(name.chars[0]);
+            name.chars[0] = (char) toupper(name.chars[0]);
             ffStrbufAppendC(&name, ' ');
         }
 

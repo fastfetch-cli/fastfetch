@@ -11,7 +11,6 @@ Here i just add things that are easy to forget.
 - [ ] Support for printing images in terminals that support it
 - [ ] Better OS output for all possible combinations of /etc/os-release variables.
 - [ ] Fallback OS detection with lsb
-- [ ] Android support
 - [ ] Expose temperatures to CPU format string
 - [ ] Expose temperatures to GPU format string
 - [ ] Create a GPU driver module
