@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <ctype.h>
+
 #define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 3
 
@@ -30,7 +32,7 @@ static bool hostValueSet(FFstrbuf* value)
     ;
 }
 
-static inline void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
+static void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
     ffGetFileContent(devicesPath, buffer);
 
@@ -45,33 +47,51 @@ void ffPrintHost(FFinstance* instance)
 
     FFstrbuf family;
     ffStrbufInit(&family);
-    getHostValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &family);
+    #ifndef __ANDROID__
+        getHostValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &family);
+    #else
+        ffSettingsGetAndroidProperty("ro.product.device", &family);
+    #endif
     bool familySet = hostValueSet(&family);
 
     FFstrbuf name;
     ffStrbufInit(&name);
-    getHostValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &name);
+    #ifndef __ANDROID__
+        getHostValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &name);
 
-    if(name.length == 0)
-        ffGetFileContent("/sys/firmware/devicetree/base/model", &name);
+        if(name.length == 0)
+            ffGetFileContent("/sys/firmware/devicetree/base/model", &name);
 
-    if(name.length == 0)
-        ffGetFileContent("/tmp/sysinfo/model", &name);
+        if(name.length == 0)
+            ffGetFileContent("/tmp/sysinfo/model", &name);
 
+        if(ffStrbufStartsWithS(&name, "Standard PC"))
+        {
+            FFstrbuf copy;
+            ffStrbufInitCopy(&copy, &name);
+            ffStrbufSetS(&name, "KVM/QEMU ");
+            ffStrbufAppend(&name, &copy);
+            ffStrbufDestroy(&copy);
+        }
+    #else
+        ffSettingsGetAndroidProperty("ro.product.brand", buffer);
+        if(buffer->length > 0){
+            toupper(buffer->chars[0]);
+            ffStrbufAppendC(buffer, ' ');
+        }
+
+        if(!ffSettingsGetAndroidProperty("ro.product.model", buffer))
+            ffSettingsGetAndroidProperty("ro.product.name", buffer);
+
+        ffStrbufTrimRight(buffer, ' ');
+    #endif
     bool nameSet = hostValueSet(&name);
-
-    if(ffStrbufStartsWithS(&name, "Standard PC"))
-    {
-        FFstrbuf copy;
-        ffStrbufInitCopy(&copy, &name);
-        ffStrbufSetS(&name, "KVM/QEMU ");
-        ffStrbufAppend(&name, &copy);
-        ffStrbufDestroy(&copy);
-    }
 
     FFstrbuf version;
     ffStrbufInit(&version);
-    getHostValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &version);
+    #ifndef __ANDROID__
+        getHostValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &version);
+    #endif
     bool versionSet = hostValueSet(&version);
 
     if(!familySet && !nameSet)

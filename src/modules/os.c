@@ -75,9 +75,9 @@ const FFOSResult* ffDetectOS(FFinstance* instance)
     ffStrbufSetS(&result.name, "Android");
     ffStrbufSetS(&result.id, "android");
     ffSettingsGetAndroidProperty("ro.build.version.release", &result.versionID);
-    ffSettingsGetAndroidProperty("ro.build.version.sdk", &result.version);
+    ffSettingsGetAndroidProperty("ro.build.version.release", &result.version);
     ffSettingsGetAndroidProperty("ro.build.version.codename", &result.codename);
-    ffSettingsGetAndroidProperty("ro.build.display.id", &result.buildID);
+    ffSettingsGetAndroidProperty("ro.build.id", &result.buildID);
 #endif
 
     pthread_mutex_unlock(&mutex);

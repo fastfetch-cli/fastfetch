@@ -400,7 +400,7 @@ FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* 
 FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type);
 
 #ifdef __ANDROID__
-void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
+bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #endif
 
 //detection/plasma.c
