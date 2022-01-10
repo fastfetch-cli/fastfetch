@@ -827,6 +827,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.localIpKey);
     else if(strcasecmp(key, "--local-ip-format") == 0)
         optionParseString(key, value, &instance->config.localIpFormat);
+    else if(strcasecmp(key, "--public-ip-key") == 0)
+        optionParseString(key, value, &instance->config.publicIpKey);
+    else if(strcasecmp(key, "--public-ip-format") == 0)
+        optionParseString(key, value, &instance->config.publicIpFormat);
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-vulkan") == 0)
@@ -834,7 +838,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--lib-wayland") == 0)
         optionParseString(key, value, &instance->config.libWayland);
     else if(strcasecmp(key, "--lib-xcb-randr") == 0)
-        optionCheckString(key, value, &instance->config.libXcbRandr);
+        optionParseString(key, value, &instance->config.libXcbRandr);
     else if(strcasecmp(key, "--lib-xcb") == 0)
         optionParseString(key, value, &instance->config.libXcb);
     else if(strcasecmp(key, "--lib-Xrandr") == 0)
@@ -861,6 +865,20 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowIpV6 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-loop") == 0)
         instance->config.localIpShowLoop = optionParseBoolean(value);
+    else if(strcasecmp(key, "--public-ip-timeout") == 0)
+    {
+        if(value == NULL)
+        {
+            fprintf(stderr, "Error: usage: %s <value>\n", key);
+            exit(465);
+        }
+
+        if(sscanf(value, "%u", &instance->config.publicIpTimeout) != 1)
+        {
+            fprintf(stderr, "Error: couldn't parse %s to uint32_t\n", value);
+            exit(466);
+        }
+    }
     else if(strncasecmp(key, "--color-", 7) == 0 && key[8] != '\0' && key[9] == '\0') // matches "--color-*"
     {
         //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
@@ -1000,6 +1018,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintLocale(instance);
     else if(strcasecmp(line, "localip") == 0)
         ffPrintLocalIp(instance);
+    else if(strcasecmp(line, "publicip") == 0)
+        ffPrintPublicIp(instance);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else

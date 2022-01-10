@@ -12,11 +12,12 @@ Host
 Icons
 Kernel
 Locale
-LocalIp
+LocalIP
 Memory
 OS
 Packages
 Processes
+PublicIP
 Resolution
 Separator
 Shell

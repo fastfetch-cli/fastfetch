@@ -105,6 +105,8 @@ typedef struct FFconfig
     FFstrbuf localeKey;
     FFstrbuf localIpKey;
     FFstrbuf localIpFormat;
+    FFstrbuf publicIpKey;
+    FFstrbuf publicIpFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -127,6 +129,8 @@ typedef struct FFconfig
     bool localIpShowLoop;
     bool localIpShowIpV4;
     bool localIpShowIpV6;
+
+    uint32_t publicIpTimeout;
 
 } FFconfig;
 
@@ -362,6 +366,9 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 //common/libraries.c
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 
+//common/networking.c
+void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);
+
 //common/logo.c
 void ffLoadLogoSet(FFinstance* instance, const char* logo);
 void ffLoadLogo(FFinstance* instance);
@@ -456,6 +463,7 @@ void ffPrintDisk(FFinstance* instance);
 void ffPrintBattery(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
+void ffPrintPublicIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 
 #endif

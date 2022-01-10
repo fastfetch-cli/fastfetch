@@ -6,16 +6,6 @@
 
 static char* CHAR_NULL_PTR = "";
 
-static bool strbufCharsLeft(uint32_t i, const void* strbuf)
-{
-    return i < ((const FFstrbuf*) strbuf)->length;
-}
-
-static bool strbufCharsLeftS(uint32_t i, const void* str)
-{
-    return ((const char*) str)[i] != '\0';
-}
-
 void ffStrbufInit(FFstrbuf* strbuf)
 {
     ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
@@ -37,7 +27,7 @@ void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     ffStrbufInitANS(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC, length, value);
 }
 
-void ffStrbufInitC(FFstrbuf* strbuf, const char c)
+void ffStrbufInitC(FFstrbuf* strbuf, char c)
 {
     ffStrbufInitAC(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC, c);
 }
@@ -65,7 +55,7 @@ void ffStrbufInitANS(FFstrbuf* strbuf, uint32_t allocate, uint32_t length, const
     ffStrbufAppendNS(strbuf, length, value);
 }
 
-void ffStrbufInitAC(FFstrbuf* strbuf, uint32_t allocate, const char c)
+void ffStrbufInitAC(FFstrbuf* strbuf, uint32_t allocate, char c)
 {
     ffStrbufInitA(strbuf, allocate);
     ffStrbufAppendC(strbuf, c);
@@ -164,7 +154,7 @@ void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     ffStrbufAppendNS(strbuf, length, value);
 }
 
-void ffStrbufSetC(FFstrbuf* strbuf, const char c)
+void ffStrbufSetC(FFstrbuf* strbuf, char c)
 {
     ffStrbufClear(strbuf);
     ffStrbufAppendC(strbuf, c);
@@ -272,7 +262,7 @@ void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* va
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufAppendC(FFstrbuf* strbuf, const char c)
+void ffStrbufAppendC(FFstrbuf* strbuf, char c)
 {
     ffStrbufEnsureFree(strbuf, 1);
     strbuf->chars[strbuf->length++] = c;
@@ -436,6 +426,16 @@ uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
     return strbuf->length;
 }
 
+static bool strbufCharsLeft(uint32_t i, const void* strbuf)
+{
+    return i < ((const FFstrbuf*) strbuf)->length;
+}
+
+static bool strbufCharsLeftS(uint32_t i, const void* str)
+{
+    return ((const char*) str)[i] != '\0';
+}
+
 static uint32_t strbufNextIndex(const FFstrbuf* strbuf, uint32_t start, const char* chars, const void* container, bool(*charsLeft)(uint32_t, const void*))
 {
     for(uint32_t i = start; i < strbuf->length; i++)
@@ -514,12 +514,12 @@ void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, const char c)
+void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c)
 {
     ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
 }
 
-void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, const char c)
+void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c)
 {
     ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
 }
@@ -537,14 +537,21 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, const char c)
+void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c)
 {
     uint32_t index = ffStrbufFirstIndexC(strbuf, c);
     if(index < strbuf->length)
         ffStrbufSubstrAfter(strbuf, index);
 }
 
-void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, const char c)
+void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str)
+{
+    uint32_t index = ffStrbufFirstIndexS(strbuf, str) + (uint32_t) strlen(str);
+    if(index < strbuf->length)
+        ffStrbufSubstrAfter(strbuf, index);
+}
+
+void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
 {
     uint32_t index = ffStrbufLastIndexC(strbuf, c);
     if(index < strbuf->length)

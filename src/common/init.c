@@ -171,6 +171,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.localeKey, 0);
     ffStrbufInitA(&instance->config.localIpKey, 0);
     ffStrbufInitA(&instance->config.localIpFormat, 0);
+    ffStrbufInitA(&instance->config.publicIpKey, 0);
+    ffStrbufInitA(&instance->config.publicIpFormat, 0);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -193,6 +195,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
+
+    instance->config.publicIpTimeout = 250;
 }
 
 void ffInitInstance(FFinstance* instance)

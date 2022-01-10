@@ -120,6 +120,13 @@
 # Default is true.
 #--color-raw true
 
+# Public IP timeout option:
+# Sets the time to wait for the public ip server to respond.
+# Must be a positive integer.
+# Set to 0 to disable timeout.
+# Default is 250.
+#--public-ip-timeout 250
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
@@ -148,6 +155,7 @@
 #--battery-key Battery {1}
 #--locale-key Locale
 #--local-ip-key Local IP ({1})
+#--public-ip-key Public IP
 
 # Format options:
 # Sets the format string for module values.
@@ -179,6 +187,7 @@
 #--battery-format
 #--locale-format
 #--local-ip-format
+#--public-ip-format
 
 # Library options:
 # Sets an user specific path to a library to load.

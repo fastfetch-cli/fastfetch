@@ -44,6 +44,7 @@ int main(int argc, char** argv)
     ffPrintDisk(&instance);
     ffPrintBattery(&instance);
     //ffPrintLocalIp(&instance);
+    //ffPrintPublicIp(&instance);
     ffPrintLocale(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);

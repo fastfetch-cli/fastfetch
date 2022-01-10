@@ -164,6 +164,7 @@ set(SRCS
     src/common/parsing.c
     src/common/settings.c
     src/common/library.c
+    src/common/networking.c
     src/detection/plasma.c
     src/detection/gtk.c
     src/detection/terminalShell.c
@@ -201,6 +202,7 @@ set(SRCS
     src/modules/battery.c
     src/modules/locale.c
     src/modules/localip.c
+    src/modules/publicip.c
     src/modules/colors.c
 )
 
