@@ -59,6 +59,13 @@ static inline void* startThreadsThreadMain(void* instance)
 
 void ffStartDetectionThreads(FFinstance* instance)
 {
+    //Android needs none of the things that are detected here
+    //And using gsettings sometimes hangs the program in android for some unknown reason,
+    //and since we don't need it we just never call it.
+    #ifdef __ANDROID__
+        return;
+    #endif
+
     pthread_t startThreadsThread;
     pthread_create(&startThreadsThread, NULL, startThreadsThreadMain, instance);
     pthread_detach(startThreadsThread);

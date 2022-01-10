@@ -5,6 +5,11 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
+    #ifdef __ANDROID__
+        ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.iconsKey, &instance->config.iconsFormat, FF_ICONS_NUM_FORMAT_ARGS, "Icons detection is not supported on Android");
+        return;
+    #endif
+
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)

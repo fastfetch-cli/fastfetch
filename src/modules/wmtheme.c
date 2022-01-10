@@ -223,6 +223,11 @@ static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
 
 void ffPrintWMTheme(FFinstance* instance)
 {
+    #ifdef __ANDROID__
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "WM theme detection is not supported on Android");
+        return;
+    #endif
+
     const FFDisplayServerResult* result = ffConnectDisplayServer(instance);
 
     if(result->wmPrettyName.length == 0)

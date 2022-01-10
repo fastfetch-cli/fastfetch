@@ -5,6 +5,11 @@
 
 void ffPrintFont(FFinstance* instance)
 {
+    #ifdef __ANDROID__
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_FONT_NUM_FORMAT_ARGS, "Font detection is not supported on Android");
+        return;
+    #endif
+
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)

@@ -175,6 +175,11 @@ static bool printCursorFromEnv(FFinstance* instance)
 
 void ffPrintCursor(FFinstance* instance)
 {
+    #ifdef __ANDROID__
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Cursor detection is not supported on Android");
+        return;
+    #endif
+
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)

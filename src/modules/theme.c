@@ -5,6 +5,11 @@
 
 void ffPrintTheme(FFinstance* instance)
 {
+    #ifdef __ANDROID__
+        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey, &instance->config.themeFormat, FF_THEME_NUM_FORMAT_ARGS, "Theme detection is not supported on Android");
+        return;
+    #endif
+
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)

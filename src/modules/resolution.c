@@ -5,6 +5,11 @@
 
 void ffPrintResolution(FFinstance* instance)
 {
+    #ifdef __ANDROID__
+        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.resolutionKey, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS, "Resolution detection is not supported on Android");
+        return;
+    #endif
+
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer(instance);
 
     for(uint32_t i = 0; i < dsResult->resolutions.length; i++)
