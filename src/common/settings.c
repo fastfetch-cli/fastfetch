@@ -2,9 +2,6 @@
 
 #include <pthread.h>
 
-#ifdef FF_HAVE_GIO
-#include <gio/gio.h>
-
 #define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
@@ -43,6 +40,9 @@
         pthread_mutex_unlock(&mutex); \
         return NULL; \
     }
+
+#ifdef FF_HAVE_GIO
+#include <gio/gio.h>
 
 typedef struct GVariantGetters
 {
@@ -231,7 +231,7 @@ static const XFConfData* getXFConfData(FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_int)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_init)
 
-    if(data.ffxfconf_init(NULL) == FALSE)
+    if(data.ffxfconf_init(NULL) == false)
         FF_LIBRARY_DATA_LOAD_ERROR
 
     FF_LIBRARY_DATA_LOAD_RETURN
