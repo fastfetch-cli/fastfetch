@@ -32,6 +32,7 @@ static bool hostValueSet(FFstrbuf* value)
     ;
 }
 
+#ifndef __ANDROID__
 static void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
     ffGetFileContent(devicesPath, buffer);
@@ -39,6 +40,7 @@ static void getHostValue(const char* devicesPath, const char* classPath, FFstrbu
     if(buffer->length == 0)
         ffGetFileContent(classPath, buffer);
 }
+#endif
 
 void ffPrintHost(FFinstance* instance)
 {
@@ -76,7 +78,7 @@ void ffPrintHost(FFinstance* instance)
     #else
         ffSettingsGetAndroidProperty("ro.product.brand", &name);
         if(name.length > 0){
-            toupper(name.chars[0]);
+            name.chars[0] = toupper(name.chars[0]);
             ffStrbufAppendC(&name, ' ');
         }
 
