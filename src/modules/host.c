@@ -74,16 +74,16 @@ void ffPrintHost(FFinstance* instance)
             ffStrbufDestroy(&copy);
         }
     #else
-        ffSettingsGetAndroidProperty("ro.product.brand", buffer);
-        if(buffer->length > 0){
-            toupper(buffer->chars[0]);
-            ffStrbufAppendC(buffer, ' ');
+        ffSettingsGetAndroidProperty("ro.product.brand", &name);
+        if(name.length > 0){
+            toupper(name.chars[0]);
+            ffStrbufAppendC(&name, ' ');
         }
 
-        if(!ffSettingsGetAndroidProperty("ro.product.model", buffer))
-            ffSettingsGetAndroidProperty("ro.product.name", buffer);
+        if(!ffSettingsGetAndroidProperty("ro.product.model", &name))
+            ffSettingsGetAndroidProperty("ro.product.name", &name);
 
-        ffStrbufTrimRight(buffer, ' ');
+        ffStrbufTrimRight(&name, ' ');
     #endif
     bool nameSet = hostValueSet(&name);
 
