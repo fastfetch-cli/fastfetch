@@ -289,6 +289,18 @@ static inline void printCommandHelp(const char* command)
             "Locale code"
         );
     }
+    else if(strcasecmp(command, "local-ip-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("local-ip", "{}", 1,
+            "Local IP address"
+        );
+    }
+    else if(strcasecmp(command, "public-ip-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("public-ip", "{}", 1,
+            "Public IP address"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
