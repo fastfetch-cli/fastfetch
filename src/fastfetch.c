@@ -249,11 +249,12 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "gpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("gpu", "{2} {4}", 4,
+        constructAndPrintCommandHelpFormat("gpu", "{2} {4}", 5,
             "GPU vendor",
             "GPU vendor pretty",
             "GPU name",
-            "GPU name pretty"
+            "GPU name pretty",
+            "GPU driver"
         );
     }
     else if(strcasecmp(command, "memory-format") == 0)

@@ -176,14 +176,22 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     if(format == NULL)
         return;
 
+    va_list copy;
+    va_copy(copy, arguments);
+
     uint32_t free = ffStrbufGetFree(strbuf);
     uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, free, format, arguments);
 
     if(strbuf->length + written > free)
     {
         ffStrbufEnsureFree(strbuf, written);
-        written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, ffStrbufGetFree(strbuf), format, arguments);
+        written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, ffStrbufGetFree(strbuf), format, copy);
     }
+
+    va_end(copy);
+
+    if(written <= 0)
+        return;
 
     strbuf->length += written;
     strbuf->chars[strbuf->length] = '\0';

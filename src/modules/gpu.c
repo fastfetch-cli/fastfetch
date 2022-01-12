@@ -3,12 +3,13 @@
 #include <string.h>
 
 #define FF_GPU_MODULE_NAME "GPU"
-#define FF_GPU_NUM_FORMAT_ARGS 4
+#define FF_GPU_NUM_FORMAT_ARGS 5
 
 typedef struct GPUResult
 {
     FFstrbuf vendor;
     FFstrbuf name;
+    FFstrbuf driver;
 } GPUResult;
 
 #ifdef FF_HAVE_VULKAN
@@ -86,6 +87,7 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
         GPUResult* result = ffListAdd(results);
         ffStrbufInit(&result->vendor);
         ffStrbufInit(&result->name);
+        ffStrbufInit(&result->driver);
 
         ffStrbufAppendS(&result->name, physicalDeviceProperties.deviceName);
     }
@@ -101,6 +103,33 @@ static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
 
 #ifdef FF_HAVE_LIBPCI
 #include <pci/pci.h>
+#include <unistd.h>
+
+//see https://github.com/pciutils/pciutils/blob/5bdf63b6b1bc35b59c4b3f47f7ca83ca1868155b/ls-kernel.c#L220
+static void pciGetDriver(struct pci_dev* dev, FFstrbuf* driver, char*(*ffpci_get_param)(struct pci_access*, char*))
+{
+    if(dev->access->method != PCI_ACCESS_SYS_BUS_PCI)
+        return;
+
+    const char* base = ffpci_get_param(dev->access, "sysfs.path");
+    if(!ffStrSet(base))
+        return;
+
+    FFstrbuf path;
+    ffStrbufInitA(&path, 64);
+    ffStrbufAppendF(&path, "%s/devices/%04x:%02x:%02x.%d/driver", base, dev->domain, dev->bus, dev->dev, dev->func);
+
+    ffStrbufEnsureFree(driver, 1023);
+    ssize_t resultLength = readlink(path.chars, driver->chars, driver->allocated - 1); //-1 for null terminator
+    if(resultLength > 0)
+    {
+        driver->length = (uint32_t) resultLength;
+        driver->chars[resultLength] = '\0';
+        ffStrbufSubstrAfterLastC(driver, '/');
+    }
+
+    ffStrbufDestroy(&path);
+}
 
 static void pciFillGPUs(FFinstance* instance, FFlist* results)
 {
@@ -110,6 +139,7 @@ static void pciFillGPUs(FFinstance* instance, FFlist* results)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_scan_bus,)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_fill_info,)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_lookup_name,)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_get_param,)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_cleanup,)
 
     struct pci_access *pacc = ffpci_alloc();
@@ -136,6 +166,10 @@ static void pciFillGPUs(FFinstance* instance, FFlist* results)
             ffStrbufInitA(&result->name, 256);
             ffpci_lookup_name(pacc, result->name.chars, (int) result->name.allocated - 1, PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
             ffStrbufRecalculateLength(&result->name);
+
+            ffStrbufInit(&result->driver);
+            if(instance->config.gpuFormat.length > 0) //We only need it for the format string, so don't detect it if it isn't needed
+                pciGetDriver(dev, &result->driver, ffpci_get_param);
         };
     }
 
@@ -177,9 +211,13 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->vendor},
         {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty}
+        {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result->driver},
     });
 
+    ffStrbufDestroy(&result->vendor);
+    ffStrbufDestroy(&result->name);
+    ffStrbufDestroy(&result->driver);
     ffStrbufDestroy(&gpu);
     ffStrbufDestroy(&namePretty);
 }
