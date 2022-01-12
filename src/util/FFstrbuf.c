@@ -31,6 +31,12 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
 
 static void setCapacity(FFstrbuf* strbuf, uint32_t capacity)
 {
+    if(capacity == 0)
+    {
+        ffStrbufDestroy(strbuf);
+        return;
+    }
+
     if(strbuf->allocated == 0)
     {
         strbuf->chars = malloc(sizeof(*strbuf->chars) * capacity);
@@ -530,4 +536,5 @@ void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);
     strbuf->allocated = 0;
+    strbuf->length = 0;
 }
