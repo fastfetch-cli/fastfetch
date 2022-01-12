@@ -3,33 +3,13 @@
 #include <malloc.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 static char* CHAR_NULL_PTR = "";
 
 void ffStrbufInit(FFstrbuf* strbuf)
 {
     ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
-}
-
-void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
-{
-    ffStrbufInitA(strbuf, src->allocated);
-    ffStrbufAppend(strbuf, src);
-}
-
-void ffStrbufInitS(FFstrbuf* strbuf, const char* value)
-{
-    ffStrbufInitAS(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC, value);
-}
-
-void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* value)
-{
-    ffStrbufInitANS(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC, length, value);
-}
-
-void ffStrbufInitC(FFstrbuf* strbuf, char c)
-{
-    ffStrbufInitAC(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC, c);
 }
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
@@ -43,48 +23,21 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
     ffStrbufClear(strbuf);
 }
 
-void ffStrbufInitAS(FFstrbuf* strbuf, uint32_t allocate, const char* value)
+void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
 {
-    ffStrbufInitA(strbuf, allocate);
-    ffStrbufAppendS(strbuf, value);
-}
-
-void ffStrbufInitANS(FFstrbuf* strbuf, uint32_t allocate, uint32_t length, const char* value)
-{
-    ffStrbufInitA(strbuf, allocate);
-    ffStrbufAppendNS(strbuf, length, value);
-}
-
-void ffStrbufInitAC(FFstrbuf* strbuf, uint32_t allocate, char c)
-{
-    ffStrbufInitA(strbuf, allocate);
-    ffStrbufAppendC(strbuf, c);
-}
-
-void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
-{
-    ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufAppendVF(strbuf, format, arguments);
-    va_end(arguments);
-}
-
-void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
-{
-    ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
-    ffStrbufAppendVF(strbuf, format, arguments);
+    ffStrbufInitA(strbuf, src->allocated);
+    ffStrbufAppend(strbuf, src);
 }
 
 static void setCapacity(FFstrbuf* strbuf, uint32_t capacity)
 {
     if(strbuf->allocated == 0)
     {
-        strbuf->chars = malloc(sizeof(char) * capacity);
+        strbuf->chars = malloc(sizeof(*strbuf->chars) * capacity);
         strbuf->chars[0] = '\0';
     }
     else
-        strbuf->chars = realloc(strbuf->chars, sizeof(char) * capacity);
+        strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * capacity);
 
     strbuf->allocated = capacity;
 }
@@ -96,8 +49,8 @@ void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity)
 
     if(capacity == UINT32_MAX)
     {
-        capacity = UINT32_MAX - 1;
-        fprintf(stderr, "Warning: ffStrbufEnsureCapacity called with UINT32_MAX. Highest allowed value is UINT32_MAX - 1. Reducing capacity.\n");
+        fprintf(stderr, "Warning: ffStrbufEnsureCapacity called with UINT32_MAX. Highest allowed value is UINT32_MAX - 1. Exiting.\n");
+        exit(812);
     }
 
     setCapacity(strbuf, capacity + 1); // + 1 for the null byte
@@ -136,43 +89,9 @@ void ffStrbufClear(FFstrbuf* strbuf)
     strbuf->length = 0;
 }
 
-void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
+void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 {
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, value->length, value->chars);
-}
-
-void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendS(strbuf, value);
-}
-
-void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, length, value);
-}
-
-void ffStrbufSetC(FFstrbuf* strbuf, char c)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendC(strbuf, c);
-}
-
-void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
-{
-    ffStrbufClear(strbuf);
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufAppendVF(strbuf, format, arguments);
-    va_end(arguments);
-}
-
-void ffStrbufSetVF(FFstrbuf* strbuf, const char* format, va_list arguments)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendVF(strbuf, format, arguments);
+    for(strbuf->length = 0; strbuf->chars[strbuf->length] != '\0'; ++strbuf->length);
 }
 
 void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
@@ -182,17 +101,10 @@ void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
-void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int))
+void ffStrbufAppendC(FFstrbuf* strbuf, char c)
 {
-    if(value == NULL)
-        return;
-
-    for(uint32_t i = 0; value[i] != '\0'; i++)
-    {
-        if(i % 16 == 0)
-            ffStrbufEnsureFree(strbuf, 16);
-        strbuf->chars[strbuf->length++] = (char) transformFunc(value[i]);
-    }
+    ffStrbufEnsureFree(strbuf, 1);
+    strbuf->chars[strbuf->length++] = c;
     strbuf->chars[strbuf->length] = '\0';
 }
 
@@ -229,23 +141,6 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufAppendSExcludingC(FFstrbuf* strbuf, const char* value, char exclude)
-{
-    if(value == NULL)
-        return;
-
-    for(uint32_t i = 0; value[i] != '\0'; i++)
-    {
-        if(i % 16 == 0)
-            ffStrbufEnsureFree(strbuf, 16);
-
-        if(value[i] != exclude)
-            strbuf->chars[strbuf->length++] = value[i];
-    }
-
-    strbuf->chars[strbuf->length] = '\0';
-}
-
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude)
 {
     if(value == NULL)
@@ -262,22 +157,18 @@ void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* va
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufAppendC(FFstrbuf* strbuf, char c)
+void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int))
 {
-    ffStrbufEnsureFree(strbuf, 1);
-    strbuf->chars[strbuf->length++] = c;
-    strbuf->chars[strbuf->length] = '\0';
-}
-
-void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...)
-{
-    if(format == NULL)
+    if(value == NULL)
         return;
 
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufAppendVF(strbuf, format, arguments);
-    va_end(arguments);
+    for(uint32_t i = 0; value[i] != '\0'; i++)
+    {
+        if(i % 16 == 0)
+            ffStrbufEnsureFree(strbuf, 16);
+        strbuf->chars[strbuf->length++] = (char) transformFunc(value[i]);
+    }
+    strbuf->chars[strbuf->length] = '\0';
 }
 
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
@@ -298,23 +189,27 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-char ffStrbufGetC(FFstrbuf* strbuf, uint32_t index)
+void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...)
 {
-    if(index >= strbuf->length)
-        return '\0';
+    if(format == NULL)
+        return;
 
-    return strbuf->chars[index];
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufAppendVF(strbuf, format, arguments);
+    va_end(arguments);
 }
 
-void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file)
+void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
 {
-    fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
+    ffStrbufClear(strbuf);
+    ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
-void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
+void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
 {
-    fwrite(strbuf->chars, sizeof(char), strbuf->length, file);
-    fputc('\n', file);
+    ffStrbufClear(strbuf);
+    ffStrbufAppendS(strbuf, value);
 }
 
 int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
@@ -370,42 +265,40 @@ void ffStrbufTrim(FFstrbuf* strbuf, char c)
     ffStrbufTrimLeft(strbuf, c);
 }
 
-static bool strbufRemoveTest(FFstrbuf* strbuf, uint32_t i, const char* substr)
+void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex)
 {
-    uint32_t k;
-    for(k = 0; substr[k] != '\0'; k++)
-    {
-        if(i + k > strbuf->length)
-            return false;
+    if(startIndex > strbuf->length || startIndex >= endIndex)
+        return;
 
-        if(strbuf->chars[i + k] != substr[k])
-            return false;
+    if(endIndex > strbuf->length)
+    {
+        ffStrbufSubstrBefore(strbuf, startIndex);
+        return;
     }
 
-    memmove(&strbuf->chars[i], &strbuf->chars[i + k], strbuf->length - i - k);
-    strbuf->length -= k;
+    memmove(strbuf->chars + startIndex, strbuf->chars + endIndex, strbuf->length - endIndex);
+    strbuf->length -= (endIndex - startIndex);
     strbuf->chars[strbuf->length] = '\0';
-    return true;
+}
+
+void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str)
+{
+    uint32_t stringLength = (uint32_t) strlen(str);
+
+    for(uint32_t i = ffStrbufNextIndexS(strbuf, 0, str); i < strbuf->length; i = ffStrbufNextIndexS(strbuf, i, str))
+        ffStrbufRemoveSubstr(strbuf, i, i + stringLength);
 }
 
 void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
 {
-    for(uint32_t k = 0; k < numStrings; k++)
-    {
-        for(uint32_t i = 0; i < strbuf->length; i++)
-            while(strbufRemoveTest(strbuf, i, strings[k]));
-    }
+    for(uint32_t i = 0; i < numStrings; i++)
+        ffStrbufRemoveS(strbuf, strings[i]);
 }
 
 void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments)
 {
-    const char** strings = calloc(numStrings, sizeof(const char*));
     for(uint32_t i = 0; i < numStrings; i++)
-        strings[i] = va_arg(arguments, const char*);
-
-    ffStrbufRemoveStringsA(strbuf, numStrings, strings);
-
-    free(strings);
+        ffStrbufRemoveS(strbuf, va_arg(arguments, const char*));
 }
 
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
@@ -426,28 +319,18 @@ uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
     return strbuf->length;
 }
 
-static bool strbufCharsLeft(uint32_t i, const void* strbuf)
-{
-    return i < ((const FFstrbuf*) strbuf)->length;
-}
-
-static bool strbufCharsLeftS(uint32_t i, const void* str)
-{
-    return ((const char*) str)[i] != '\0';
-}
-
-static uint32_t strbufNextIndex(const FFstrbuf* strbuf, uint32_t start, const char* chars, const void* container, bool(*charsLeft)(uint32_t, const void*))
+uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str)
 {
     for(uint32_t i = start; i < strbuf->length; i++)
     {
         bool found = true;
 
-        for(uint32_t k = 0; charsLeft(k, container); k++)
+        for(uint32_t k = 0; str[k] != '\0'; k++)
         {
             if(i + k == strbuf->length)
                 return strbuf->length;
 
-            if(strbuf->chars[i + k] != chars[k])
+            if(strbuf->chars[i + k] != str[k])
             {
                 found = false;
                 break;
@@ -461,16 +344,6 @@ static uint32_t strbufNextIndex(const FFstrbuf* strbuf, uint32_t start, const ch
     return strbuf->length;
 }
 
-uint32_t ffStrbufNextIndex(const FFstrbuf* strbuf, uint32_t start, const FFstrbuf* searched)
-{
-    return strbufNextIndex(strbuf, start, searched->chars, searched, strbufCharsLeft);
-}
-
-uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str)
-{
-    return strbufNextIndex(strbuf, start, str, str, strbufCharsLeftS);
-}
-
 uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
 {
     return ffStrbufNextIndexC(strbuf, 0, c);
@@ -478,7 +351,7 @@ uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
 
 uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched)
 {
-    return ffStrbufNextIndex(strbuf, 0, searched);
+    return ffStrbufNextIndexS(strbuf, 0, searched->chars);
 }
 
 uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str)
@@ -546,7 +419,10 @@ void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c)
 
 void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str)
 {
-    uint32_t index = ffStrbufFirstIndexS(strbuf, str) + (uint32_t) strlen(str);
+    if(*str == '\0')
+        return;
+
+    uint32_t index = ffStrbufFirstIndexS(strbuf, str) + (uint32_t) strlen(str) - 1; // -1, because firstIndexS is already pointing to str[0], we want to add only the remaining length
     if(index < strbuf->length)
         ffStrbufSubstrAfter(strbuf, index);
 }
@@ -556,11 +432,6 @@ void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
     uint32_t index = ffStrbufLastIndexC(strbuf, c);
     if(index < strbuf->length)
         ffStrbufSubstrAfter(strbuf, index);
-}
-
-bool ffStrbufStartsWith(const FFstrbuf* strbuf, const FFstrbuf* start)
-{
-    return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
 }
 
 bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start)
@@ -576,40 +447,14 @@ bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start)
     return true;
 }
 
-bool ffStrbufStartsWithNS(const FFstrbuf* strbuf, uint32_t length, const char* start)
-{
-    for(uint32_t i = 0; i < length; i++)
-    {
-        if(i >= strbuf->length)
-            return false;
-
-        if(strbuf->chars[i] != start[i])
-            return false;
-    }
-    return true;
-}
-
 bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start)
 {
-    return ffStrbufStartsWithNS(strbuf, start->length, start->chars);
+    return ffStrbufStartsWithS(strbuf, start->chars);
 }
 
 bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start)
 {
     for(uint32_t i = 0; start[i] != '\0'; i++)
-    {
-        if(i >= strbuf->length)
-            return false;
-
-        if(tolower(strbuf->chars[i]) != tolower(start[i]))
-            return false;
-    }
-    return true;
-}
-
-bool ffStrbufStartsWithIgnCaseNS(const FFstrbuf* strbuf, uint32_t length, const char* start)
-{
-    for(uint32_t i = 0; i < length; i++)
     {
         if(i >= strbuf->length)
             return false;
@@ -633,9 +478,9 @@ bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
     if(endLength > strbuf->length)
         return false;
 
-    for(uint32_t i = 0; i < endLength; ++i)
+    for(uint32_t i = endLength; i > 0; i--)
     {
-        if(strbuf->chars[strbuf->length - endLength + i] != end[i])
+        if(strbuf->chars[strbuf->length - endLength + i - 1] != end[i - 1])
             return false;
     }
 
@@ -658,12 +503,6 @@ static bool testEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end, uint32
     return true;
 }
 
-bool ffStrbufEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end)
-{
-    uint32_t dummy;
-    return testEndsWithIgnCaseS(strbuf, end, &dummy);
-}
-
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
 {
     uint32_t endLength;
@@ -676,9 +515,15 @@ bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
     return false;
 }
 
-void ffStrbufRecalculateLength(FFstrbuf* strbuf)
+void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file)
 {
-    for(strbuf->length = 0; strbuf->chars[strbuf->length] != '\0'; ++strbuf->length);
+    fwrite(strbuf->chars, sizeof(*strbuf->chars), strbuf->length, file);
+}
+
+void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
+{
+    ffStrbufWriteTo(strbuf, file);
+    fputc('\n', file);
 }
 
 void ffStrbufDestroy(FFstrbuf* strbuf)

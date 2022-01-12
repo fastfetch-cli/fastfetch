@@ -2,6 +2,6 @@
 rm -rf tests/build/
 mkdir -p tests/build/
 cd tests/build/
-cmake ../.. -DBUILD_TESTS=ON
-cmake --build . -j$(nproc) --target fastfetch-test-performance
+cmake ../..
+cmake --build . --target fastfetch-test-performance -j$(nproc)
 ./fastfetch-test-performance "$@"

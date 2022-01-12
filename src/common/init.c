@@ -103,8 +103,11 @@ static void initState(FFstate* state)
 static void defaultConfig(FFinstance* instance)
 {
     ffStrbufInit(&instance->config.color);
+
+    ffStrbufInit(&instance->config.separator);
+    ffStrbufAppendS(&instance->config.separator, ": ");
+
     instance->config.logoKeySpacing = 4;
-    ffStrbufInitS(&instance->config.separator, ": ");
     instance->config.offsetx = 0;
     instance->config.colorLogo = true;
     instance->config.showErrors = false;

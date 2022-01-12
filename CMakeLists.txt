@@ -2,18 +2,12 @@ cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch LANGUAGES C)
 
-option(BUILD_TESTS "Build test programs" OFF)
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
-
-if(BUILD_TESTS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -mtune=native -pipe -fno-plt")
-endif(BUILD_TESTS)
 
 execute_process(
     COMMAND git rev-list --count HEAD
@@ -221,9 +215,12 @@ target_compile_definitions(flashfetch PUBLIC
     FASTFETCH_BUILD_FLASHFETCH
 )
 
-if(BUILD_TESTS)
-    add_executable(fastfetch-test-performance
-        tests/performance.c
-        ${SRCS}
-    )
-endif(BUILD_TESTS)
+add_executable(fastfetch-test-performance
+    tests/performance.c
+    ${SRCS}
+)
+
+add_executable(fastfetch-test-strbuf
+    tests/strbuf.c
+    ${SRCS}
+)

@@ -14,7 +14,7 @@ static void printValue(FFinstance* instance, const char* ifaName, const char* ad
     FF_STRBUF_CREATE(key);
 
     if (instance->config.localIpKey.length == 0) {
-        ffStrbufSetF(&key, FF_LOCALIP_MODULE_NAME " (%s)", ifaName);
+        ffStrbufAppendF(&key, FF_LOCALIP_MODULE_NAME " (%s)", ifaName);
     } else {
         ffParseFormatString(&key, &instance->config.localIpKey, NULL, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, ifaName}

@@ -2,5 +2,5 @@
 mkdir -p build/
 cd build/
 cmake ..
-cmake --build . -j$(nproc)
+cmake --build . --target fastfetch -j$(nproc)
 ./fastfetch "$@"
