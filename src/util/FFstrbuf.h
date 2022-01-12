@@ -23,7 +23,7 @@ void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
 
-void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t allocate);
+void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity);
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);

@@ -49,8 +49,7 @@ void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity)
 
     if(capacity == UINT32_MAX)
     {
-        --capacity; //This is required to silence a gcc compiler warning
-        fprintf(stderr, "Warning: ffStrbufEnsureCapacity called with UINT32_MAX. Highest allowed value is UINT32_MAX - 1. Exiting.\n");
+        fputs("Warning: ffStrbufEnsureCapacity called with UINT32_MAX. Highest allowed value is UINT32_MAX - 1. Exiting.\n", stderr);
         exit(812);
     }
 
