@@ -536,5 +536,5 @@ void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);
     strbuf->allocated = 0;
-    strbuf->length = 0;
+    ffStrbufClear(strbuf);
 }
