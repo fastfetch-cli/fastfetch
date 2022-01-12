@@ -111,7 +111,7 @@ Module specific options:
     --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false
     --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false
-    --public-ip-timeout:          Time in milliseconds to wait for the public ip server to respond. Default is 250. Set to 0 to disable timeout.
+    --public-ip-timeout:          Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

@@ -123,9 +123,8 @@
 # Public IP timeout option:
 # Sets the time to wait for the public ip server to respond.
 # Must be a positive integer.
-# Set to 0 to disable timeout.
-# Default is 250.
-#--public-ip-timeout 250
+# Default is 0 (disabled).
+#--public-ip-timeout 0
 
 # Key options:
 # Sets the displayed key of a module

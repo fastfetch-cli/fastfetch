@@ -199,7 +199,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
 
-    instance->config.publicIpTimeout = 250;
+    instance->config.publicIpTimeout = 0;
 }
 
 void ffInitInstance(FFinstance* instance)
