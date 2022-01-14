@@ -153,9 +153,9 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
     if(xdgSessionType != NULL && strcasecmp(xdgSessionType, "wayland") != 0)
         return;
 
-    //If XDG_SESSION_TYPE is not set, check if WAYLAND_DISPLAY is set.
+    //If XDG_SESSION_TYPE is not set, check if WAYLAND_DISPLAY or WAYLAND_SOCKET is set.
     //If not, there is no indicator for a wayland session
-    if(xdgSessionType == NULL && getenv("WAYLAND_DISPLAY") == NULL)
+    if(xdgSessionType == NULL && getenv("WAYLAND_DISPLAY") == NULL && getenv("WAYLAND_SOCKET") == NULL)
         return;
 
     //We are probably running a wayland compositor at this point, but fastfetch was compiled without the required library.
