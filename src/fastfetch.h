@@ -410,6 +410,9 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #endif
 
+//detection/os.c
+const FFOSResult* ffDetectOS(FFinstance* instance);
+
 //detection/plasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
 
@@ -429,7 +432,6 @@ const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
 /********************/
 
 //Common
-const FFOSResult* ffDetectOS(FFinstance* instance);
 const FFTitleResult* ffDetectTitle(FFinstance* instance);
 
 //Printing

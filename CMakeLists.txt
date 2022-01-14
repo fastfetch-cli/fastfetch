@@ -159,6 +159,7 @@ set(SRCS
     src/common/settings.c
     src/common/library.c
     src/common/networking.c
+    src/detection/os.c
     src/detection/plasma.c
     src/detection/gtk.c
     src/detection/terminalShell.c
