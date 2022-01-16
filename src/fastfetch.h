@@ -227,6 +227,18 @@ typedef struct FFDisplayServerResult
     FFlist resolutions; //List of FFResolutionResult
 } FFDisplayServerResult;
 
+typedef struct FFTempValue
+{
+    FFstrbuf name;
+    FFstrbuf value;
+    FFstrbuf class;
+} FFTempValue;
+
+typedef struct FFTempsResult
+{
+    FFlist values; //List of FFTempValue
+} FFTempsResult;
+
 typedef enum FFformatargtype
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
@@ -426,6 +438,9 @@ const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
 
 //detection/terminalShell.c
 const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
+
+//detection/temps.c (currently unused)
+const FFTempsResult* ffDetectTemps(const FFinstance* instance);
 
 /********************/
 /* Module functions */
