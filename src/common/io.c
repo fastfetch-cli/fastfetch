@@ -302,7 +302,7 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     if(allSet)
     {
         free(searchedValues);
-        return access(filename, R_OK) == 0;
+        return true;
     }
 
     FILE* file = fopen(filename, "r");

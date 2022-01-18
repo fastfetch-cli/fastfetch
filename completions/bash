@@ -27,6 +27,7 @@ __fastfetch_complete_help()
         "battery-format"
         "locale-format"
         "local-ip-format"
+        "public-ip-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -191,9 +192,12 @@ __fastfetch_completion()
         "--disk-key"
         "--local-ip-format"
         "--local-ip-key"
+        "--public-ip-format"
+        "--public-ip-key"
     )
 
     local FF_OPTIONS_PATH=(
+        "--os-file"
         "--lib-PCI"
         "--lib-vulkan"
         "--lib-wayland"

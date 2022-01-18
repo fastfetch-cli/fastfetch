@@ -132,6 +132,8 @@ typedef struct FFconfig
 
     uint32_t publicIpTimeout;
 
+    FFstrbuf osFile;
+
 } FFconfig;
 
 typedef struct FFstate
@@ -173,7 +175,6 @@ typedef struct FFOSResult
     FFstrbuf codename;
     FFstrbuf buildID;
     FFstrbuf architecture;
-    FFstrbuf error;
 } FFOSResult;
 
 typedef struct FFPlasmaResult
@@ -365,6 +366,7 @@ void ffPrintColor(const FFstrbuf* colorValue);
 // They return true if the file was found, independently if start was found
 // Buffers which already contain content are not overwritten
 // The last occurence of start in the first file will be the one used
+// The *Values methods always return true, if all properties were already found before, without testing if the file exists
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer);
 bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);

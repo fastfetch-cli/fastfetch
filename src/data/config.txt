@@ -126,6 +126,13 @@
 # Default is 0 (disabled).
 #--public-ip-timeout 0
 
+# OS file option
+# Sets the path to the file containing the operating system information.
+# Should be a valid path to an existing file.
+# Note that you might need to run fastfetch with --recache once for it to take affect.
+# Default is /etc/os-release.
+--os-file /etc/os-release
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.

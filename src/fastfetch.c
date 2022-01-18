@@ -878,6 +878,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowIpV6 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-loop") == 0)
         instance->config.localIpShowLoop = optionParseBoolean(value);
+    else if(strcasecmp(key, "--os-file") == 0)
+        optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--public-ip-timeout") == 0)
     {
         if(value == NULL)
@@ -1060,6 +1062,8 @@ int main(int argc, const char** argv)
     //Load custom logo if it exists
     if(data.logoName.length > 0)
         ffLoadLogoSet(&instance, data.logoName.chars);
+    else
+        ffLoadLogo(&instance);
 
     //If we haven't set key color, use primary color of logo
     if(instance.config.color.length == 0)

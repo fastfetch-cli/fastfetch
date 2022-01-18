@@ -122,8 +122,6 @@ static void defaultConfig(FFinstance* instance)
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufInit(&instance->config.logoColors[i]);
 
-    ffLoadLogo(instance);
-
     ffStrbufInitA(&instance->config.osFormat, 0);
     ffStrbufInitA(&instance->config.osKey, 0);
     ffStrbufInitA(&instance->config.hostFormat, 0);
@@ -200,6 +198,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.localIpShowLoop = false;
 
     instance->config.publicIpTimeout = 0;
+
+    ffStrbufInitA(&instance->config.osFile, 0);
 }
 
 void ffInitInstance(FFinstance* instance)

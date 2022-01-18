@@ -106,6 +106,7 @@ Library options: Set the path of a library to load
 
 Module specific options:
     --separator-string <str>:     Set the string printed by the separator module
+    --os-file <path>:             Set the path to the file containing OS informations
     --disk-folders <folders>:     A colon separated list of folder paths for the disk output. Default is "/:/home"
     --battery-dir <folder>:       The directory where the battery folders are. Standard: /sys/class/power_supply/
     --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true

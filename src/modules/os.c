@@ -10,9 +10,9 @@ void ffPrintOS(FFinstance* instance)
 
     const FFOSResult* result = ffDetectOS(instance);
 
-    if(result->error.length > 0)
+    if(result->name.length == 0 && result->prettyName.length == 0)
     {
-        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, result->error.chars);
+        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, "Could not detect OS");
         return;
     }
 

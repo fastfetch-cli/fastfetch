@@ -8,7 +8,9 @@ int main(int argc, char** argv)
     FFinstance instance;
     ffInitInstance(&instance); //This also applys default configuration to instance.config
 
-    //ffLoadLogoSet(&instance, "my custom logo");
+    //Modify instance.config here
+
+    ffLoadLogo(&instance); //ffLoadLogoSet(&instance, "my custom logo");
     ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]); //Use the primary color of the logo as key color
 
     //Multithreading --> better performance
