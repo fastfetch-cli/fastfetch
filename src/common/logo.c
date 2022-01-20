@@ -399,6 +399,35 @@ static const FFlogo* getLogoDebianSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoEndeavour()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("endeavour", "endeavour-linux", "endeavouros", "endeavouros-linux")
+    FF_LOGO_LINES(
+        "$2                     ./$1o$3.               \n"
+        "$2                   ./$1sssso$3-             \n"
+        "$2                 `:$1osssssss+$3-           \n"
+        "$2               `:+$1sssssssssso$3/.         \n"
+        "$2             `-/o$1ssssssssssssso$3/.       \n"
+        "$2           `-/+$1sssssssssssssssso$3+:`     \n"
+        "$2         `-:/+$1sssssssssssssssssso$3+/.    \n"
+        "$2       `.://o$1sssssssssssssssssssso$3++-   \n"
+        "$2      .://+$1ssssssssssssssssssssssso$3++:  \n"
+        "$2    .:///o$1ssssssssssssssssssssssssso$3++: \n"
+        "$2  `:////$1ssssssssssssssssssssssssssso$3+++.\n"
+        "$2`-////+$1ssssssssssssssssssssssssssso$3++++-\n"
+        "$2 `..-+$1oosssssssssssssssssssssssso$3+++++/`\n"
+        "$3./++++++++++++++++++++++++++++++/:.     \n"
+        "$3`:::::::::::::::::::::::::------``      "
+    )
+    FF_LOGO_COLORS(
+        "35", //magenta
+        "31", //red
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoFedora()
 {
     FF_LOGO_INIT
@@ -863,6 +892,7 @@ static GetLogoMethod* getLogoMethods()
         getLogoCentOSSmall,
         getLogoDebian,
         getLogoDebianSmall,
+        getLogoEndeavour,
         getLogoFedora,
         getLogoFedoraSmall,
         getLogoFedoraOld,
