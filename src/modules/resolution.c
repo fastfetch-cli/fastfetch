@@ -15,7 +15,7 @@ void ffPrintResolution(FFinstance* instance)
     for(uint32_t i = 0; i < dsResult->resolutions.length; i++)
     {
         FFResolutionResult* result = ffListGet(&dsResult->resolutions, i);
-        uint8_t moduleIndex = dsResult->resolutions.length == 1 ? 0 : (uint8_t) i + 1;
+        uint8_t moduleIndex = dsResult->resolutions.length == 1 ? 0 : (uint8_t) (i + 1);
 
         if(instance->config.resolutionFormat.length == 0)
         {

@@ -329,7 +329,7 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
 
             ffStrbufAppendS(folder, entry->d_name);
             ffStrbufAppendC(folder, '/');
-            listAvailablePresetsFromFolder(folder, indentation + 1, entry->d_name);
+            listAvailablePresetsFromFolder(folder, (uint8_t) (indentation + 1), entry->d_name);
             ffStrbufSubstrBefore(folder, folderLength);
             continue;
         }
