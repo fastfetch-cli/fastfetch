@@ -1,14 +1,14 @@
 #!/bin/sh
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 echo "cleanup"
 rm -rf ./build ./fastfetch fastfetch.deb
 
 echo "building fastfetch"
 mkdir build
-cd build
+cd build || exit
 cmake ../../..
-cmake --build . -j$(nproc)
+cmake --build . --target fastfetch "-j$(nproc)"
 
 echo "generating package contents"
 # deb versions must start with a number, hence the 1 added before the rXXX
@@ -21,7 +21,6 @@ sed "s/<VERSION>/$version/g" control-template > fastfetch/DEBIAN/control
 
 mkdir -p fastfetch/usr/bin
 cp build/fastfetch fastfetch/usr/bin/
-cp build/flashfetch fastfetch/usr/bin/
 mkdir -p fastfetch/usr/share/bash-completion/completions
 cp ../../completions/bash fastfetch/usr/share/bash-completion/completions/fastfetch
 
