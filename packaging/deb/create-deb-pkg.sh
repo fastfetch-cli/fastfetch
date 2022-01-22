@@ -23,6 +23,8 @@ mkdir -p fastfetch/usr/bin
 cp build/fastfetch fastfetch/usr/bin/
 mkdir -p fastfetch/usr/share/bash-completion/completions
 cp ../../completions/bash fastfetch/usr/share/bash-completion/completions/fastfetch
+mkdir -p fastfetch/usr/share/fastfetch/
+cp -r ../../presets fastfetch/usr/share/fastfetch/
 
 echo "building package"
 dpkg-deb --build fastfetch
