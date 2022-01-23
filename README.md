@@ -16,7 +16,7 @@ There are some presets defined for fastfech in [`presets`](presets), you can can
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency are `libc` (any implementation of the c standard library), `libdl` and `libpthread`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
+Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and `libpthread`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
 
 The following libraries are used if present at runtime:
 *  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
