@@ -65,7 +65,7 @@ konsole, gnome-terminal-server, tilix, xfce4-terminal, lxterminal, TTY
 
 ## Building
 
-fastfetch uses [`cmake`](https://cmake.org/) and [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) for building. The simplest steps to build fastfetch and flashfetch project are:  
+fastfetch uses [`cmake`](https://cmake.org/) and [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) for building. The simplest steps to build fastfetch and flashfetch project are:  
 ```bash
 mkdir -p build
 cd build
