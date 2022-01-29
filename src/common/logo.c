@@ -217,11 +217,11 @@ static const FFlogo* getLogoArcoLinux()
         "$1       :ooooooooo.      :ooooooooo           \n"
         "$1      :oooarcooo         .oooarcooo          \n"
         "$1     :ooooooooy           .ooooooooo         \n"
-        "$1    :ooooooooo     $2 /ooooooooooooooooooo     \n"
-        "$1   :ooooooooo        $2 .-ooooooooooooooooo.   \n"
-        "$1   ooooooooo-               $2 -ooooooooooooo. \n"
-        "$1  ooooooooo-                   $2 .-oooooooooo.\n"
-        "$1 ooooooooo.                       $2 -ooooooooo";
+        "$1    :ooooooooo  $2 /ooooooooooooooooooo        \n"
+        "$1   :ooooooooo     $2 .-ooooooooooooooooo.      \n"
+        "$1   ooooooooo-           $2 -ooooooooooooo.     \n"
+        "$1  ooooooooo-               $2 .-oooooooooo.    \n"
+        "$1 ooooooooo.                   $2 -ooooooooo    ";
     )
     FF_LOGO_COLORS(
     "34", //blue
