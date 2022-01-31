@@ -243,7 +243,7 @@ void ffPrintGPU(FFinstance* instance)
     #endif
 
     for(uint8_t i = 0; i < (uint8_t) gpus.length; i++)
-        printGPUResult(instance, gpus.length == 1 ? 0 : i + 1, &cache, ffListGet(&gpus, i));
+        printGPUResult(instance, gpus.length == 1 ? 0 : (uint8_t) (i + 1), &cache, ffListGet(&gpus, i));
 
     if(gpus.length == 0)
         ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPUs found.");

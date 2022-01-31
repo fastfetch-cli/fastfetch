@@ -16,8 +16,9 @@ There are some presets defined for fastfech in [`presets`](presets), you can can
 
 ## Dependencies
 
-In order to run properly on every machine, fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependency is [`glibc`](https://www.gnu.org/software/libc/) (`libc`, `libdl` and `libpthread` are actually used) which is automatically shipped with every linux system.  
-The following libraries are used if present:
+Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and `libpthread`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
+
+The following libraries are used if present at runtime:
 *  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 *  [`libvulkan`](https://www.vulkan.org/): Fallback for GPU output.
 *  [`libxcb-randr`](https://xcb.freedesktop.org/),
@@ -64,25 +65,25 @@ konsole, gnome-terminal-server, tilix, xfce4-terminal, lxterminal, TTY
 
 ## Building
 
-fastfetch uses [`cmake`](https://cmake.org/) for building. The simplest steps to build the entire project are:  
+fastfetch uses [`cmake`](https://cmake.org/) and [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) for building. The simplest steps to build the fastfetch and flashfetch binaries are:  
 ```bash
 mkdir -p build
 cd build
 cmake ..
-cmake --build . -j$(nproc)
+cmake --build . -j$(nproc) --target fastfetch --target flashfetch
 ```
-  
-This will produce `build/fastfetch` and `build/flashfetch`, both standalone executables.  
-Command line completions for bash can be found in [`completions/bash`](completions/bash).  
 
-[pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/) is also required for building. It is used to find the header files for the libraries listed in [Dependencies](#Dependencies). If pkg-config fails to find a package, a warning will be printed and fastfetch will be build without support for the features depending on it.  
-
-Note that building with a feature enabled, doesn't mean the library must be present to run fastfetch, as they are still loaded dynamically during runtime.
+If pkg-config fails to find the headers for a library listed in [dependencies](#dependencies), fastfetch will simply build without support for that specific feature. This means, it won't look for it at runtime and just act like it isn't available.
 
 ## Packaging
 
-At the moment, i only package for the [AUR](https://aur.archlinux.org/packages/fastfetch-git/). This package will install both the fastfetch and the flashfetch binary (with default configuration), as well as the bash completion.  
-There is also a package in the [Manjaro Repositories](https://gitlab.manjaro.org/packages/community/fastfetch), not packaged by me, but usually very up-to-date.
+* [AUR](https://aur.archlinux.org/packages/fastfetch-git/): Packaged by me. Will install the fastfetch binary, bash completion and the presets. Git version
+* [Manjaro Repositories](https://gitlab.manjaro.org/packages/community/fastfetch): Packaged by a manjaro maintainer. Usually a bit outdated.
+* DEB: You need to build deb packages yourself. Run [`packaging/deb/create-deb-pkg.sh`](packaging/deb/create-deb-pkg.sh) for that.
+* Manually: Follow the [build instructions](#building). Then:
+    * Copy the binaries `build/fastfetch` and `build/flashfetch` to `/usr/local/bin/`.
+    * Copy the [bash completion](completions/bash) to `/usr/share/bash-completion/completions/fastfetch`.
+    * Copy the [presets](presets/) to `/usr/share/fastfetch/presets/`.
 
 ## FAQ
 

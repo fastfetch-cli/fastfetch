@@ -1,9 +1,9 @@
 #include "displayServer.h"
+#include <string.h>
 
 #ifdef FF_HAVE_WAYLAND
 #include <wayland-client.h>
 #include <pthread.h>
-#include <string.h>
 
 typedef struct WaylandData
 {

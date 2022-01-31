@@ -27,6 +27,7 @@ int main(int argc, char** argv)
 
     FASTFETCH_TEST_PERFORMANCE(
         puts("Configuration");
+        ffLoadLogo(&instance);
         ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
         instance.config.showErrors = true;
         instance.config.recache = argc == 1;
