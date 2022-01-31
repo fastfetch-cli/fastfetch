@@ -19,27 +19,30 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    # Install dependencies, so that CMake enables all modules
     - name: install packages
       run: sudo apt-get update && sudo apt-get install -y libpci-dev vulkan-tools libvulkan-dev libwayland-client0 libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libxfconf-0-3 libxfconf-0-dev librpm-dev rpm libzstd-dev libxcb-randr0-dev
+    
+    # Just build fastfetch normally. This is to check for compilation/program errors.
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
-      # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
+    
     - name: Run fastfetch
       working-directory: ${{github.workspace}}/build
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ./fastfetch
       
+    # Kick off the debian packaging
     - name: Create deb package
       working-directory: ${{github.workspace}}/packaging/deb
       run: sh ./create-deb-pkg.sh
       
+      
+    # Create a release draft with the fastfetch.deb file
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
