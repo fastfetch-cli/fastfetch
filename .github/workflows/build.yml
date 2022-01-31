@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install packages
-      run: sudo apt-get update && sudo apt-get install -y libpci-dev vulkan-tools libvulkan-dev libwayland-client0 libwayland-dev libxrandr-dev libxcb-randr0-dev dconf-cli dconf-gsettings-backend libxfconf-0-3 libxfconf-0-dev librpm-dev rpm libxcb-randr0-dev
+      run: sudo apt-get update && sudo apt-get install -y libpci-dev vulkan-tools libvulkan-dev libwayland-client0 libwayland-dev libxrandr-dev libxcb-randr0-dev dconf libxfconf-0-3 libxfconf-0-dev librpm-dev rpm libzstd-dev libxcb-randr0-dev
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
