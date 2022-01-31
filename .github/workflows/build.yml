@@ -19,7 +19,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
+    - name: install packages
+      run: sudo apt-get update && sudo apt-get install -y sudo apt install libpci-dev vulkan-tools libvulkan-dev libwayland-client0 libxcb-randr0-dev dconf-cli dconf-gsettings-backend libxfconf-0-3 libxfconf-0-dev librpm-dev
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
@@ -34,4 +35,29 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ./fastfetch
+    - name: Create deb package
+      working-directory: ${{github.workspace}}/packaging/deb
+      run: sh ./create-deb-pkg.sh
+      
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Debian package for ${{ github.ref }}
+        draft: true
+        prerelease: false
+        
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./fastfetch.deb
+        asset_name: fastfetch.deb
+        asset_content_type: application/vnd.debian.binary-package
       
