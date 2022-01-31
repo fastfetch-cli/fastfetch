@@ -35,6 +35,7 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ./fastfetch
+      
     - name: Create deb package
       working-directory: ${{github.workspace}}/packaging/deb
       run: sh ./create-deb-pkg.sh
@@ -56,6 +57,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        working-directory: ${{github.workspace}}/packaging/deb
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ./fastfetch.deb
         asset_name: fastfetch.deb
