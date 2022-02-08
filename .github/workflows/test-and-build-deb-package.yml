@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v2
     # Install dependencies, so that CMake enables all modules
     - name: install packages
-      run: sudo apt-get update && sudo apt-get install -y libpci-dev vulkan-tools libvulkan-dev libwayland-client0 libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libxfconf-0-3 libxfconf-0-dev librpm-dev rpm libzstd-dev libxcb-randr0-dev
+      run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libxfconf-0-dev librpm-dev libzstd-dev
     
     # Just build fastfetch normally. This is to check for compilation/program errors.
     - name: Configure CMake
