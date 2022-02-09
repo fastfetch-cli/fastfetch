@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "util/FFvaluestore.h"
 
 #include <string.h>
 #include <malloc.h>

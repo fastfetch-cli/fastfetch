@@ -20,7 +20,6 @@ Here i just add things that are easy to forget.
 - [ ] Fish completions
 - [ ] Make CPU usage detection much faster and more accurate
 - [ ] Detect CPU usage in a common detection methode and expose it both to the cpuUsage module and the cpu format string
-- [ ] Build fastfetch as a **static** lib and link `fastfetch`, `flashfetch` and the tests against it, to reduce build time
 - [ ] Per session caching
 
 ### General

@@ -1199,8 +1199,6 @@ void ffPrintRemainingLogo(FFinstance* instance)
     }
 }
 
-#ifndef FASTFETCH_BUILD_FLASHFETCH
-
 void ffPrintLogos(FFinstance* instance)
 {
     GetLogoMethod* methods = getLogoMethods();
@@ -1252,5 +1250,3 @@ void ffListLogosForAutocompletion()
         ++methods;
     }
 }
-
-#endif

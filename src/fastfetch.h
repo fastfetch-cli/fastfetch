@@ -18,6 +18,7 @@
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
+#include "util/FFvaluestore.h"
 
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
@@ -389,11 +390,9 @@ void ffLoadLogo(FFinstance* instance);
 void ffPrintLogoLine(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 
-#ifndef FASTFETCH_BUILD_FLASHFATCH
-    void ffPrintLogos(FFinstance* instance);
-    void ffListLogos();
-    void ffListLogosForAutocompletion();
-#endif
+void ffPrintLogos(FFinstance* instance);
+void ffListLogos();
+void ffListLogosForAutocompletion();
 
 //common/format.c
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);

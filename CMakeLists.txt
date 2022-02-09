@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch LANGUAGES C)
 
+OPTION(ENABLE_LIBPCI "Enable libpci" ON)
+OPTION(ENABLE_VULKAN "Enable vulkan" ON)
+OPTION(ENABLE_WAYLAND "Enable wayland-client" ON)
+OPTION(ENABLE_XCB_RANDR "Enable xcb-randr" ON)
+OPTION(ENABLE_XCB "Enable xcb" ON)
+OPTION(ENABLE_XRANDR "Enable xrandr" ON)
+OPTION(ENABLE_X11 "Enable x11" ON)
+OPTION(ENABLE_GIO "Enable gio-2.0" ON)
+OPTION(ENABLE_DCONF "Enable dconf" ON)
+OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
+OPTION(ENABLE_RPM "Enable rpm" ON)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -48,141 +60,10 @@ find_package(Threads REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 
-OPTION(ENABLE_LIBPCI "Enable libpci" ON)
-OPTION(ENABLE_VULKAN "Enable vulkan" ON)
-OPTION(ENABLE_WAYLAND "Enable wayland-client" ON)
-OPTION(ENABLE_XCB_RANDR "Enable xcb-randr" ON)
-OPTION(ENABLE_XCB "Enable xcb" ON)
-OPTION(ENABLE_XRANDR "Enable xrandr" ON)
-OPTION(ENABLE_X11 "Enable x11" ON)
-OPTION(ENABLE_GIO "Enable gio-2.0" ON)
-OPTION(ENABLE_DCONF "Enable dconf" ON)
-OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
-OPTION(ENABLE_RPM "Enable rpm" ON)
-
-if(ENABLE_LIBPCI)
-    pkg_check_modules (LIBPCI libpci)
-    if(LIBPCI_FOUND)
-        add_compile_definitions(FF_HAVE_LIBPCI=1)
-    else(LIBPCI_FOUND)
-        message(WARNING "Package libpci not found. Building without support.")
-    endif(LIBPCI_FOUND)
-endif(ENABLE_LIBPCI)
-
-if(ENABLE_VULKAN)
-    pkg_check_modules (VULKAN vulkan)
-    if(VULKAN_FOUND)
-        add_compile_definitions(FF_HAVE_VULKAN=1)
-    else(VULKAN_FOUND)
-        message(WARNING "Package vulkan not found. Building without support.")
-    endif(VULKAN_FOUND)
-endif(ENABLE_VULKAN)
-
-if(ENABLE_WAYLAND)
-    pkg_check_modules (WAYLAND wayland-client)
-    if(WAYLAND_FOUND)
-        add_compile_definitions(FF_HAVE_WAYLAND=1)
-    else(WAYLAND_FOUND)
-        message(WARNING "Package wayland-client not found. Building without support.")
-    endif(WAYLAND_FOUND)
-endif(ENABLE_WAYLAND)
-
-if(ENABLE_XCB_RANDR)
-    pkg_check_modules (XCB_RANDR xcb-randr)
-    if(XCB_RANDR_FOUND)
-        add_compile_definitions(FF_HAVE_XCB_RANDR=1)
-    else(XCB_RANDR_FOUND)
-        message(WARNING "Package xcb-randr not found. Building without support.")
-    endif(XCB_RANDR_FOUND)
-endif(ENABLE_XCB_RANDR)
-
-if(ENABLE_XCB)
-    pkg_check_modules (XCB xcb)
-    if(XCB_FOUND)
-        add_compile_definitions(FF_HAVE_XCB=1)
-    else(XCB_FOUND)
-        message(WARNING "Package xcb not found. Building without support.")
-    endif(XCB_FOUND)
-endif(ENABLE_XCB)
-
-if(ENABLE_XRANDR)
-    pkg_check_modules (XRANDR xrandr)
-    if(XRANDR_FOUND)
-        add_compile_definitions(FF_HAVE_XRANDR=1)
-    else(XRANDR_FOUND)
-        message(WARNING "Package xrandr not found. Building without support.")
-    endif(XRANDR_FOUND)
-endif(ENABLE_XRANDR)
-
-if(ENABLE_X11)
-    pkg_check_modules (X11 x11)
-    if(X11_FOUND)
-        add_compile_definitions(FF_HAVE_X11=1)
-    else(X11_FOUND)
-        message(WARNING "Package x11 not found. Building without support.")
-    endif(X11_FOUND)
-endif(ENABLE_X11)
-
-if(ENABLE_GIO)
-    pkg_check_modules (GIO gio-2.0)
-    if(GIO_FOUND)
-        add_compile_definitions(FF_HAVE_GIO=1)
-    else(GIO_FOUND)
-        message(WARNING "Package gio-2.0 not found. Building without support.")
-    endif(GIO_FOUND)
-endif(ENABLE_GIO)
-
-if(ENABLE_DCONF)
-    pkg_check_modules (DCONF dconf)
-    if(DCONF_FOUND)
-        add_compile_definitions(FF_HAVE_DCONF=1)
-    else(DCONF_FOUND)
-        message(WARNING "Package dconf not found. Building without support.")
-    endif(DCONF_FOUND)
-endif(ENABLE_DCONF)
-
-if(ENABLE_XFCONF)
-    pkg_check_modules (XFCONF libxfconf-0)
-    if(XFCONF_FOUND)
-        add_compile_definitions(FF_HAVE_XFCONF=1)
-    else(XFCONF_FOUND)
-        message(WARNING "Package libxfconf-0 not found. Building without support.")
-    endif(XFCONF_FOUND)
-endif(ENABLE_XFCONF)
-
-if(ENABLE_RPM)
-    pkg_check_modules (RPM rpm)
-    if(RPM_FOUND)
-        add_compile_definitions(FF_HAVE_RPM=1)
-    else(RPM_FOUND)
-        message(WARNING "Package librpm not found. Building without support.")
-    endif(RPM_FOUND)
-endif(ENABLE_RPM)
-
-include_directories(
-    ${PROJECT_BINARY_DIR}
-    ${PROJECT_SOURCE_DIR}/src
-    ${LIBPCI_INCLUDE_DIRS}
-    ${VULKAN_INCLUDE_DIRS}
-    ${WAYLAND_INCLUDE_DIRS}
-    ${XCB_RANDR_INCLUDE_DIRS}
-    ${XCB_INCLUDE_DIRS}
-    ${XRANDR_INCLUDE_DIRS}
-    ${X11_INCLUDE_DIRS}
-    ${GIO_INCLUDE_DIRS}
-    ${DCONF_INCLUDE_DIRS}
-    ${XFCONF_INCLUDE_DIRS}
-    ${RPM_INCLUDE_DIRS}
-)
-
-link_libraries(
-    ${CMAKE_DL_LIBS}
-    Threads::Threads
-)
-
-set(SRCS
+add_library(libfastfetch STATIC
     src/util/FFstrbuf.c
     src/util/FFlist.c
+    src/util/FFvaluestore.c
     src/common/init.c
     src/common/threading.c
     src/common/io.c
@@ -235,27 +116,153 @@ set(SRCS
     src/modules/colors.c
 )
 
+if(ENABLE_LIBPCI)
+    pkg_check_modules (LIBPCI libpci)
+    if(LIBPCI_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBPCI=1)
+    else(LIBPCI_FOUND)
+        message(WARNING "Package libpci not found. Building without support.")
+    endif(LIBPCI_FOUND)
+endif(ENABLE_LIBPCI)
+
+if(ENABLE_VULKAN)
+    pkg_check_modules (VULKAN vulkan)
+    if(VULKAN_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_VULKAN=1)
+    else(VULKAN_FOUND)
+        message(WARNING "Package vulkan not found. Building without support.")
+    endif(VULKAN_FOUND)
+endif(ENABLE_VULKAN)
+
+if(ENABLE_WAYLAND)
+    pkg_check_modules (WAYLAND wayland-client)
+    if(WAYLAND_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WAYLAND=1)
+    else(WAYLAND_FOUND)
+        message(WARNING "Package wayland-client not found. Building without support.")
+    endif(WAYLAND_FOUND)
+endif(ENABLE_WAYLAND)
+
+if(ENABLE_XCB_RANDR)
+    pkg_check_modules (XCB_RANDR xcb-randr)
+    if(XCB_RANDR_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XCB_RANDR=1)
+    else(XCB_RANDR_FOUND)
+        message(WARNING "Package xcb-randr not found. Building without support.")
+    endif(XCB_RANDR_FOUND)
+endif(ENABLE_XCB_RANDR)
+
+if(ENABLE_XCB)
+    pkg_check_modules (XCB xcb)
+    if(XCB_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XCB=1)
+    else(XCB_FOUND)
+        message(WARNING "Package xcb not found. Building without support.")
+    endif(XCB_FOUND)
+endif(ENABLE_XCB)
+
+if(ENABLE_XRANDR)
+    pkg_check_modules (XRANDR xrandr)
+    if(XRANDR_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XRANDR=1)
+    else(XRANDR_FOUND)
+        message(WARNING "Package xrandr not found. Building without support.")
+    endif(XRANDR_FOUND)
+endif(ENABLE_XRANDR)
+
+if(ENABLE_X11)
+    pkg_check_modules (X11 x11)
+    if(X11_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_X11=1)
+    else(X11_FOUND)
+        message(WARNING "Package x11 not found. Building without support.")
+    endif(X11_FOUND)
+endif(ENABLE_X11)
+
+if(ENABLE_GIO)
+    pkg_check_modules (GIO gio-2.0)
+    if(GIO_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GIO=1)
+    else(GIO_FOUND)
+        message(WARNING "Package gio-2.0 not found. Building without support.")
+    endif(GIO_FOUND)
+endif(ENABLE_GIO)
+
+if(ENABLE_DCONF)
+    pkg_check_modules (DCONF dconf)
+    if(DCONF_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_DCONF=1)
+    else(DCONF_FOUND)
+        message(WARNING "Package dconf not found. Building without support.")
+    endif(DCONF_FOUND)
+endif(ENABLE_DCONF)
+
+if(ENABLE_XFCONF)
+    pkg_check_modules (XFCONF libxfconf-0)
+    if(XFCONF_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XFCONF=1)
+    else(XFCONF_FOUND)
+        message(WARNING "Package libxfconf-0 not found. Building without support.")
+    endif(XFCONF_FOUND)
+endif(ENABLE_XFCONF)
+
+if(ENABLE_RPM)
+    pkg_check_modules (RPM rpm)
+    if(RPM_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_RPM=1)
+    else(RPM_FOUND)
+        message(WARNING "Package librpm not found. Building without support.")
+    endif(RPM_FOUND)
+endif(ENABLE_RPM)
+
+target_include_directories(libfastfetch
+    PUBLIC ${PROJECT_BINARY_DIR}
+    PUBLIC ${PROJECT_SOURCE_DIR}/src
+
+    PRIVATE ${LIBPCI_INCLUDE_DIRS}
+    PRIVATE ${VULKAN_INCLUDE_DIRS}
+    PRIVATE ${WAYLAND_INCLUDE_DIRS}
+    PRIVATE ${XCB_RANDR_INCLUDE_DIRS}
+    PRIVATE ${XCB_INCLUDE_DIRS}
+    PRIVATE ${XRANDR_INCLUDE_DIRS}
+    PRIVATE ${X11_INCLUDE_DIRS}
+    PRIVATE ${GIO_INCLUDE_DIRS}
+    PRIVATE ${DCONF_INCLUDE_DIRS}
+    PRIVATE ${XFCONF_INCLUDE_DIRS}
+    PRIVATE ${RPM_INCLUDE_DIRS}
+)
+
+target_link_libraries(libfastfetch
+    PRIVATE ${CMAKE_DL_LIBS}
+    PRIVATE Threads::Threads
+)
+
+set_target_properties(libfastfetch PROPERTIES OUTPUT_NAME "fastfetch")
+
 add_executable(fastfetch
     src/fastfetch.c
-    src/util/FFvaluestore.c
-    ${SRCS}
+)
+target_link_libraries(fastfetch
+    PRIVATE libfastfetch
 )
 
 add_executable(flashfetch
     src/flashfetch.c
-    ${SRCS}
 )
-
-target_compile_definitions(flashfetch PUBLIC
-    FASTFETCH_BUILD_FLASHFETCH
+target_link_libraries(flashfetch
+    PRIVATE libfastfetch
 )
 
 add_executable(fastfetch-test-performance
     tests/performance.c
-    ${SRCS}
+)
+target_link_libraries(fastfetch-test-performance
+    PRIVATE libfastfetch
 )
 
 add_executable(fastfetch-test-strbuf
     tests/strbuf.c
-    ${SRCS}
+)
+target_link_libraries(fastfetch-test-strbuf
+    PRIVATE libfastfetch
 )
