@@ -33,7 +33,7 @@ static uint32_t getRpmPackageCount(FFinstance* instance)
     if (ffrpmReadConfigFiles(NULL, NULL)) goto exit;
     if (!(ts = ffrpmtsCreate())) goto exit;
     if (!(mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0))) goto exit;
-    count = ffrpmdbGetIteratorCount(mi);
+    count = (uint32_t) ffrpmdbGetIteratorCount(mi);
 
 exit:
     if (mi) ffrpmdbFreeIterator(mi);
