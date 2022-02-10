@@ -5,7 +5,7 @@
 --kernel-format "Sysname: {}; Release: {}; Version: {}"
 --uptime-format "Days: {}; Hours: {}; Minutes: {}; Seconds: {}"
 --processes-format "Count: {}"
---packages-format "All: {}; pacman: {}; pacman branch: {}; dpkg: {}; rpm: {}; xbps: {}; flatpak: {}; snap: {}"
+--packages-format "All: {}; pacman: {}; pacman branch: {}; dpkg: {}; rpm: {}; xbps: {}; flatpak: {}; snap: {}; emerge: {}"
 --shell-format "Process name: {}; Process path: {}; Process exe: {}; Process version: {}; User path: {}; User exe: {}; User version: {}"
 --resolution-format "Width: {}; Height: {}; Refresh rate: {}"
 --de-format "Session desktop: {}; Process name: {}; Pretty name: {}; Version: {}"

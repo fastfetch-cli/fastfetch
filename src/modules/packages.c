@@ -2,9 +2,10 @@
 
 #include <string.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 8
+#define FF_PACKAGES_NUM_FORMAT_ARGS 9
 
 #ifdef FF_HAVE_RPM
 #include <rpm/rpmlib.h>
@@ -91,6 +92,65 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
     return count;
 }
 
+static const size_t BUFSIZE = PATH_MAX;
+static size_t filename_len_cache = 0;
+
+// Make sure filename_len_cache is correct when calling this
+static uint32_t countFilesRecursive(const char* filename, char* dirBuffer, char* end)
+{
+    if ((size_t)(end - dirBuffer) + filename_len_cache + 2 >= BUFSIZE)
+        return 0;
+
+    *end = '/';
+    memcpy(end + 1, filename, filename_len_cache + 1); // Copy the NUL terminator too
+
+    struct stat exist;
+    if (stat(dirBuffer, &exist) == 0 && (exist.st_mode & S_IFMT) == S_IFREG)    // Found it, count it
+        return 1;
+
+    *end = 0;
+
+    // Did not find it, search below
+    DIR* dirp = opendir(dirBuffer);
+
+    if (!dirp)
+        return 0;
+
+    *end = '/';
+
+    uint32_t sum = 0;
+    struct dirent *entry;
+    while ((entry = readdir(dirp)) != NULL) {
+        // According to the PMS, neither category nor package name can begin with '.', so no need to check for . or .. specifically
+        if (entry->d_type == DT_DIR && entry->d_name[0] != '.') {
+            size_t len = strlen(entry->d_name);
+            char *c = end + 1 + len;
+            if ((size_t)(c - dirBuffer) < BUFSIZE - 1) {
+                memcpy(end + 1, entry->d_name, len + 1);	// Copy NUL terminator
+                sum += countFilesRecursive(filename, dirBuffer, c);
+            }
+        }
+    }
+
+    closedir(dirp);
+    return sum;
+}
+
+static uint32_t countFilesIn(const char* dirname, const char* filename)
+{
+    char buffer[BUFSIZE];
+    size_t len = strlen(dirname);
+
+    if (len >= BUFSIZE)
+        return 0;
+
+    char* c = buffer + len;
+    memcpy(buffer, dirname, len + 1);   // Copy the NUL terminator too
+
+    filename_len_cache = strlen(filename);  // Cache this
+    return countFilesRecursive(filename, buffer, c);
+}
+
 void ffPrintPackages(FFinstance* instance)
 {
     uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
@@ -109,12 +169,13 @@ void ffPrintPackages(FFinstance* instance)
     uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
     uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
     uint32_t snap = getNumElements("/snap", DT_DIR);
+    uint32_t emerge = countFilesIn("/var/db/pkg", "SIZE");
 
     //Accounting for the /snap/bin folder
     if(snap > 0)
         --snap;
 
-    uint32_t all = pacman + dpkg + rpm + xbps + flatpak + snap;
+    uint32_t all = pacman + dpkg + rpm + xbps + flatpak + snap + emerge;
 
     if(all == 0)
     {
@@ -153,6 +214,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
+        FF_PRINT_PACKAGE(emerge)
 
         //Fix linter warning of unused value of all
         (void) all;
@@ -171,7 +233,8 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &rpm},
             {FF_FORMAT_ARG_TYPE_UINT, &xbps},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpak},
-            {FF_FORMAT_ARG_TYPE_UINT, &snap}
+            {FF_FORMAT_ARG_TYPE_UINT, &snap},
+            {FF_FORMAT_ARG_TYPE_UINT, &emerge},
         });
     }
 
