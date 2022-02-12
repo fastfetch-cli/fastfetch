@@ -235,7 +235,7 @@ typedef struct FFTempValue
 {
     FFstrbuf name;
     FFstrbuf value;
-    FFstrbuf class;
+    FFstrbuf deviceClass;
 } FFTempValue;
 
 typedef struct FFTempsResult

@@ -3,7 +3,6 @@
 #include <pthread.h>
 #include <dirent.h>
 #include <string.h>
-#include <inttypes.h>
 
 static bool isTempFile(const char* name)
 {
@@ -47,10 +46,10 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufAppendS(dir, "device/class");
-    ffGetFileContent(dir->chars, &value->class);
+    ffGetFileContent(dir->chars, &value->deviceClass);
     ffStrbufSubstrBefore(dir, dirLength);
 
-    return value->name.length > 0 || value->class.length > 0;
+    return value->name.length > 0 || value->deviceClass.length > 0;
 }
 
 const FFTempsResult* ffDetectTemps(const FFinstance* instance)
@@ -95,12 +94,12 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance)
 
         FFTempValue* temp = ffListAdd(&result.values);
         ffStrbufInit(&temp->name);
-        ffStrbufInit(&temp->class);
+        ffStrbufInit(&temp->deviceClass);
         ffStrbufInit(&temp->value);
         if(!parseHwmonDir(&baseDir, temp))
         {
             ffStrbufDestroy(&temp->name);
-            ffStrbufDestroy(&temp->class);
+            ffStrbufDestroy(&temp->deviceClass);
             ffStrbufDestroy(&temp->value);
             --result.values.length;
         }
