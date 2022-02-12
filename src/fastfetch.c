@@ -95,7 +95,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (xps), {7}, (flatpak), {8} (snap)", 8,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (xps), {7}, (flatpak), {8} (snap), {9} (emerge)", 9,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
@@ -103,7 +103,8 @@ static inline void printCommandHelp(const char* command)
             "Number of rpm packages",
             "Number of xbps packages",
             "Number of flatpak packages",
-            "Number of snap packages"
+            "Number of snap packages",
+            "Number of emerge packages"
         );
     }
     else if(strcasecmp(command, "shell-format") == 0)

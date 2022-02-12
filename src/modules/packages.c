@@ -2,7 +2,6 @@
 
 #include <string.h>
 #include <dirent.h>
-#include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 9
@@ -92,44 +91,35 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
     return count;
 }
 
-static const size_t BUFSIZE = PATH_MAX;
-static size_t filename_len_cache = 0;
-
-// Make sure filename_len_cache is correct when calling this
-static uint32_t countFilesRecursive(const char* filename, char* dirBuffer, char* end)
+static uint32_t countFilesRecursive(FFstrbuf* baseDirPath, const char* filename)
 {
-    if ((size_t)(end - dirBuffer) + filename_len_cache + 2 >= BUFSIZE)
-        return 0;
+    uint32_t baseDirPathLength = baseDirPath->length;
 
-    *end = '/';
-    memcpy(end + 1, filename, filename_len_cache + 1); // Copy the NUL terminator too
-
-    struct stat exist;
-    if (stat(dirBuffer, &exist) == 0 && (exist.st_mode & S_IFMT) == S_IFREG)    // Found it, count it
+    ffStrbufAppendC(baseDirPath, '/');
+    ffStrbufAppendS(baseDirPath, filename);
+    bool exists = ffFileExists(baseDirPath->chars, S_IFREG);
+    ffStrbufSubstrBefore(baseDirPath, baseDirPathLength);
+    if(exists)
         return 1;
 
-    *end = 0;
-
-    // Did not find it, search below
-    DIR* dirp = opendir(dirBuffer);
-
-    if (!dirp)
+    DIR* dirp = opendir(baseDirPath->chars);
+    if(dirp == NULL)
         return 0;
 
-    *end = '/';
+    ffStrbufAppendC(baseDirPath, '/');
+    baseDirPathLength = baseDirPath->length;
 
     uint32_t sum = 0;
+
     struct dirent *entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while((entry = readdir(dirp)) != NULL) {
         // According to the PMS, neither category nor package name can begin with '.', so no need to check for . or .. specifically
-        if (entry->d_type == DT_DIR && entry->d_name[0] != '.') {
-            size_t len = strlen(entry->d_name);
-            char *c = end + 1 + len;
-            if ((size_t)(c - dirBuffer) < BUFSIZE - 1) {
-                memcpy(end + 1, entry->d_name, len + 1);	// Copy NUL terminator
-                sum += countFilesRecursive(filename, dirBuffer, c);
-            }
-        }
+        if(entry->d_type != DT_DIR || entry->d_name[0] == '.')
+            continue;
+
+        ffStrbufAppendS(baseDirPath, entry->d_name);
+        sum += countFilesRecursive(baseDirPath, filename);
+        ffStrbufSubstrBefore(baseDirPath, baseDirPathLength);
     }
 
     closedir(dirp);
@@ -138,17 +128,12 @@ static uint32_t countFilesRecursive(const char* filename, char* dirBuffer, char*
 
 static uint32_t countFilesIn(const char* dirname, const char* filename)
 {
-    char buffer[BUFSIZE];
-    size_t len = strlen(dirname);
-
-    if (len >= BUFSIZE)
-        return 0;
-
-    char* c = buffer + len;
-    memcpy(buffer, dirname, len + 1);   // Copy the NUL terminator too
-
-    filename_len_cache = strlen(filename);  // Cache this
-    return countFilesRecursive(filename, buffer, c);
+    FFstrbuf baseDirPath;
+    ffStrbufInitA(&baseDirPath, 128);
+    ffStrbufAppendS(&baseDirPath, dirname);
+    uint32_t result = countFilesRecursive(&baseDirPath, filename);
+    ffStrbufDestroy(&baseDirPath);
+    return result;
 }
 
 void ffPrintPackages(FFinstance* instance)

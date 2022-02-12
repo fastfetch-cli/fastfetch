@@ -45,7 +45,7 @@ Android, Arch, Arco, Artix, CachyOS, CentOS, Debian, Endeavour, Fedora, Garuda, 
 
 ##### Package managers
 ```
-Pacman, dpkg, rpm, xbps, Flatpak, Snap
+Pacman, dpkg, rpm, emerge, xbps, Flatpak, Snap
 ```
 
 ##### WM themes

@@ -497,3 +497,9 @@ void ffPrintColor(const FFstrbuf* colorValue)
     ffStrbufWriteTo(colorValue, stdout);
     fputc('m', stdout);
 }
+
+bool ffFileExists(const char* fileName, mode_t mode)
+{
+    struct stat fileStat;
+    return stat(fileName, &fileStat) == 0 && ((fileStat.st_mode & S_IFMT) == mode);
+}

@@ -10,8 +10,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <pwd.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
+#include <sys/stat.h>
 #include <dlfcn.h>
 
 #include "fastfetch_config.h"
@@ -358,6 +360,8 @@ bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer); //returns true
 bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
+
+bool ffFileExists(const char* fileName, mode_t mode);
 
 // Not thread safe!
 void ffSuppressIO(bool suppress);
