@@ -151,16 +151,16 @@ void ffPrintPackages(FFinstance* instance)
         uint32_t rpm = 0;
     #endif
 
+    uint32_t emerge = countFilesIn("/var/db/pkg", "SIZE");
     uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
     uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
     uint32_t snap = getNumElements("/snap", DT_DIR);
-    uint32_t emerge = countFilesIn("/var/db/pkg", "SIZE");
 
     //Accounting for the /snap/bin folder
     if(snap > 0)
         --snap;
 
-    uint32_t all = pacman + dpkg + rpm + xbps + flatpak + snap + emerge;
+    uint32_t all = pacman + dpkg + rpm + emerge + xbps + flatpak + snap;
 
     if(all == 0)
     {
@@ -196,10 +196,10 @@ void ffPrintPackages(FFinstance* instance)
 
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
+        FF_PRINT_PACKAGE(emerge)
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
-        FF_PRINT_PACKAGE(emerge)
 
         //Fix linter warning of unused value of all
         (void) all;
@@ -216,10 +216,10 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &manjaroBranch},
             {FF_FORMAT_ARG_TYPE_UINT, &dpkg},
             {FF_FORMAT_ARG_TYPE_UINT, &rpm},
+            {FF_FORMAT_ARG_TYPE_UINT, &emerge},
             {FF_FORMAT_ARG_TYPE_UINT, &xbps},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpak},
-            {FF_FORMAT_ARG_TYPE_UINT, &snap},
-            {FF_FORMAT_ARG_TYPE_UINT, &emerge},
+            {FF_FORMAT_ARG_TYPE_UINT, &snap}
         });
     }
 

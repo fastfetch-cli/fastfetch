@@ -95,16 +95,16 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (xps), {7}, (flatpak), {8} (snap), {9} (emerge)", 9,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (xps), {8}, (flatpak), {9} (snap)", 9,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
             "Number of dpkg packages",
             "Number of rpm packages",
+            "Number of emerge packages",
             "Number of xbps packages",
             "Number of flatpak packages",
-            "Number of snap packages",
-            "Number of emerge packages"
+            "Number of snap packages"
         );
     }
     else if(strcasecmp(command, "shell-format") == 0)
