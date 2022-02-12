@@ -92,7 +92,6 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
 
         bool showStatus =
             result->status.length > 0 &&
-            ffStrbufIgnCaseCompS(&result->status, "Full") != 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
         if(result->capacity.length > 0)
