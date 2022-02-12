@@ -27,7 +27,7 @@ static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* resul
         if(line[0] == '[')
         {
             char categoryName[32];
-            sscanf(line, "[%32[^]]", categoryName);
+            sscanf(line, "[%31[^]]", categoryName);
 
             if(strcasecmp(categoryName, "General") == 0)
                 category = PLASMA_CATEGORY_GENERAL;

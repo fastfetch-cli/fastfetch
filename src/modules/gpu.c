@@ -197,9 +197,9 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
     ffStrbufSubstrAfterFirstC(&namePretty, '[');
 
     FFstrbuf gpu;
-    ffStrbufInitA(&gpu, result->vendor.length + namePretty.length);
+    ffStrbufInitA(&gpu, result->vendor.length + 1 + namePretty.length);
 
-    if(*vendorPretty != '\0')
+    if(ffStrSet(vendorPretty))
     {
         ffStrbufAppendS(&gpu, vendorPretty);
         ffStrbufAppendC(&gpu, ' ');

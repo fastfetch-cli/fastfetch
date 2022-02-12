@@ -87,7 +87,6 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
 {
     if(instance->config.batteryFormat.length == 0)
     {
-
         ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey);
 
         bool showStatus =

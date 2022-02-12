@@ -131,7 +131,7 @@
 # Should be a valid path to an existing file.
 # Note that you might need to run fastfetch with --recache once for it to take affect.
 # Default is /etc/os-release.
---os-file /etc/os-release
+#--os-file /etc/os-release
 
 # Key options:
 # Sets the displayed key of a module

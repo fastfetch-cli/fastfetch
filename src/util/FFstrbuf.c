@@ -190,7 +190,7 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 
     va_end(copy);
 
-    if(written <= 0)
+    if(written == 0)
         return;
 
     strbuf->length += written;

@@ -22,26 +22,16 @@ void ffPrintWM(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey);
 
-        if(result->wmPrettyName.length == 0 && result->wmProcessName.length == 0)
-        {
-            ffStrbufPutTo(&result->wmProtocolName, stdout);
-        }
-        else
-        {
-            if(result->wmPrettyName.length > 0)
-                ffStrbufWriteTo(&result->wmPrettyName, stdout);
-            else
-                ffStrbufWriteTo(&result->wmProcessName, stdout);
+        ffStrbufWriteTo(&result->wmPrettyName, stdout);
 
-            if(result->wmProtocolName.length > 0)
-            {
-                fputs(" (", stdout);
-                ffStrbufWriteTo(&result->wmProtocolName, stdout);
-                putchar(')');
-            }
-
-            putchar('\n');
+        if(result->wmProtocolName.length > 0)
+        {
+            fputs(" (", stdout);
+            ffStrbufWriteTo(&result->wmProtocolName, stdout);
+            putchar(')');
         }
+
+        putchar('\n');
     }
     else
     {

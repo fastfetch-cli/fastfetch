@@ -927,23 +927,20 @@ static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
 
     ffStrbufAppendS(filename, "config.conf");
 
-    if(access(filename->chars, F_OK) != 0)
+    FILE* file = fopen(filename->chars, "r");
+    if(file != NULL)
     {
-        FILE* file = fopen(filename->chars, "w");
-        if(file != NULL)
-        {
-            fputs(FASTFETCH_DATATEXT_CONFIG, file);
-            fclose(file);
-        }
+        parseConfigFile(instance, data, file);
+        fclose(file);
+        ffStrbufSubstrBefore(filename, filenameLength);
+        return;
     }
-    else
+
+    file = fopen(filename->chars, "w");
+    if(file != NULL)
     {
-        FILE* file = fopen(filename->chars, "r");
-        if(file != NULL)
-        {
-            parseConfigFile(instance, data, file);
-            fclose(file);
-        }
+        fputs(FASTFETCH_DATATEXT_CONFIG, file);
+        fclose(file);
     }
 
     ffStrbufSubstrBefore(filename, filenameLength);
