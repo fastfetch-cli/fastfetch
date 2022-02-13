@@ -7,6 +7,10 @@ Here i just add things that are easy to forget.
 
 ### Specific
 
+- [ ] Split the project in different libs / executables, all linking static by default:
+  - `libffdetect`: contains all the detection stuff. To be used by anything that needs system information
+  - `libffprint`: contains the printing functions, logos, format etc
+  - `fastfetch` and `flashfetch`: Executables, that initialize the config of libffprint. Fist ony at runtime, second one at compile time
 - [ ] Support for printing images as ascii art logos (using imlib2 and libcaca probably)
 - [ ] Support for printing images in terminals that support it
 - [ ] Better OS output for all possible combinations of /etc/os-release variables.
