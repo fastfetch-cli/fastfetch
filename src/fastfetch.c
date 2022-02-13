@@ -302,6 +302,20 @@ static inline void printCommandHelp(const char* command)
             "Public IP address"
         );
     }
+    else if(strcasecmp(command, "player-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("player", "{}", 1,
+            "Player name"
+        );
+    }
+    else if(strcasecmp(command, "song-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("song", "{2} - {3} - {1}", 3,
+            "Song name",
+            "Artist name",
+            "Album name"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -356,46 +370,6 @@ static inline void listAvailablePresets(FFinstance* instance)
     listAvailablePresetsFromFolder(&folder, 0, NULL);
 
     ffStrbufDestroy(&folder);
-}
-
-static inline void listSupportedFeatures()
-{
-    fputs(
-        #ifdef FF_HAVE_LIBPCI
-            "libpci\n"
-        #endif
-        #ifdef FF_HAVE_VULKAN
-            "vulkan\n"
-        #endif
-        #ifdef FF_HAVE_WAYLAND
-            "wayland\n"
-        #endif
-        #ifdef FF_HAVE_XCB_RANDR
-            "xcb-randr\n"
-        #endif
-        #ifdef FF_HAVE_XCB
-            "xcb\n"
-        #endif
-        #ifdef FF_HAVE_XRANDR
-            "xrandr\n"
-        #endif
-        #ifdef FF_HAVE_X11
-            "x11\n"
-        #endif
-        #ifdef FF_HAVE_GIO
-            "gio\n"
-        #endif
-        #ifdef FF_HAVE_DCONF
-            "dconf\n"
-        #endif
-        #ifdef FF_HAVE_XFCONF
-            "xfconf\n"
-        #endif
-        #ifdef FF_HAVE_RPM
-            "librpm\n"
-        #endif
-        ""
-    , stdout);
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
@@ -654,7 +628,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--list-features") == 0)
     {
-        listSupportedFeatures();
+        ffListFeatures();
         exit(0);
     }
     else if(strcasecmp(key, "--spacing") == 0)
@@ -844,6 +818,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.publicIpKey);
     else if(strcasecmp(key, "--public-ip-format") == 0)
         optionParseString(key, value, &instance->config.publicIpFormat);
+    else if(strcasecmp(key, "--player-key") == 0)
+        optionParseString(key, value, &instance->config.playerKey);
+    else if(strcasecmp(key, "--player-format") == 0)
+        optionParseString(key, value, &instance->config.playerFormat);
+    else if(strcasecmp(key, "--song-key") == 0)
+        optionParseString(key, value, &instance->config.songKey);
+    else if(strcasecmp(key, "--song-format") == 0)
+        optionParseString(key, value, &instance->config.songFormat);
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-vulkan") == 0)
@@ -862,6 +844,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libGIO);
     else if(strcasecmp(key, "--lib-DConf") == 0)
         optionParseString(key, value, &instance->config.libDConf);
+    else if(strcasecmp(key, "--lib-dbus") == 0)
+        optionParseString(key, value, &instance->config.libDBus);
     else if(strcasecmp(key, "--lib-XFConf") == 0)
         optionParseString(key, value, &instance->config.libXFConf);
     else if(strcasecmp(key, "--lib-rpm") == 0)
@@ -880,6 +864,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowLoop = optionParseBoolean(value);
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
+    else if(strcasecmp(key, "--player-name") == 0)
+        optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--public-ip-timeout") == 0)
     {
         if(value == NULL)
@@ -1032,6 +1018,10 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintLocalIp(instance);
     else if(strcasecmp(line, "publicip") == 0)
         ffPrintPublicIp(instance);
+    else if(strcasecmp(line, "player") == 0)
+        ffPrintPlayer(instance);
+    else if(strcasecmp(line, "song") == 0)
+        ffPrintSong(instance);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else

@@ -11,6 +11,7 @@ OPTION(ENABLE_XRANDR "Enable xrandr" ON)
 OPTION(ENABLE_X11 "Enable x11" ON)
 OPTION(ENABLE_GIO "Enable gio-2.0" ON)
 OPTION(ENABLE_DCONF "Enable dconf" ON)
+OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
 
@@ -78,6 +79,7 @@ add_library(libfastfetch STATIC
     src/detection/plasma.c
     src/detection/gtk.c
     src/detection/terminalShell.c
+    src/detection/media.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
     src/detection/displayserver/xcb.c
@@ -113,6 +115,8 @@ add_library(libfastfetch STATIC
     src/modules/locale.c
     src/modules/localip.c
     src/modules/publicip.c
+    src/modules/player.c
+    src/modules/song.c
     src/modules/colors.c
 )
 
@@ -197,6 +201,15 @@ if(ENABLE_DCONF)
     endif(DCONF_FOUND)
 endif(ENABLE_DCONF)
 
+if(ENABLE_DBUS)
+    pkg_check_modules (DBUS dbus-1)
+    if(DBUS_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_DBUS=1)
+    else(DBUS_FOUND)
+        message(WARNING "Package dbus-1 not found. Building without support.")
+    endif(DBUS_FOUND)
+endif(ENABLE_DBUS)
+
 if(ENABLE_XFCONF)
     pkg_check_modules (XFCONF libxfconf-0)
     if(XFCONF_FOUND)
@@ -228,6 +241,7 @@ target_include_directories(libfastfetch
     PRIVATE ${X11_INCLUDE_DIRS}
     PRIVATE ${GIO_INCLUDE_DIRS}
     PRIVATE ${DCONF_INCLUDE_DIRS}
+    PRIVATE ${DBUS_INCLUDE_DIRS}
     PRIVATE ${XFCONF_INCLUDE_DIRS}
     PRIVATE ${RPM_INCLUDE_DIRS}
 )

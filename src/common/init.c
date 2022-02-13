@@ -174,6 +174,10 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.localIpFormat, 0);
     ffStrbufInitA(&instance->config.publicIpKey, 0);
     ffStrbufInitA(&instance->config.publicIpFormat, 0);
+    ffStrbufInitA(&instance->config.playerKey, 0);
+    ffStrbufInitA(&instance->config.playerFormat, 0);
+    ffStrbufInitA(&instance->config.songKey, 0);
+    ffStrbufInitA(&instance->config.songFormat, 0);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -184,6 +188,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libX11, 0);
     ffStrbufInitA(&instance->config.libGIO, 0);
     ffStrbufInitA(&instance->config.libDConf, 0);
+    ffStrbufInitA(&instance->config.libDBus, 0);
     ffStrbufInitA(&instance->config.libXFConf, 0);
     ffStrbufInitA(&instance->config.librpm, 0);
 
@@ -200,6 +205,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.publicIpTimeout = 0;
 
     ffStrbufInitA(&instance->config.osFile, 0);
+
+    ffStrbufInitA(&instance->config.playerName, 0);
 }
 
 void ffInitInstance(FFinstance* instance)
@@ -253,4 +260,47 @@ void ffFinish(FFinstance* instance)
         ffPrintRemainingLogo(instance);
 
     resetConsole(instance->config.disableLinewrap, instance->config.hideCursor);
+}
+
+void ffListFeatures()
+{
+    fputs(
+        #ifdef FF_HAVE_LIBPCI
+            "libpci\n"
+        #endif
+        #ifdef FF_HAVE_VULKAN
+            "vulkan\n"
+        #endif
+        #ifdef FF_HAVE_WAYLAND
+            "wayland\n"
+        #endif
+        #ifdef FF_HAVE_XCB_RANDR
+            "xcb-randr\n"
+        #endif
+        #ifdef FF_HAVE_XCB
+            "xcb\n"
+        #endif
+        #ifdef FF_HAVE_XRANDR
+            "xrandr\n"
+        #endif
+        #ifdef FF_HAVE_X11
+            "x11\n"
+        #endif
+        #ifdef FF_HAVE_GIO
+            "gio\n"
+        #endif
+        #ifdef FF_HAVE_DCONF
+            "dconf\n"
+        #endif
+        #ifdef FF_HAVE_DBUS
+            "dbus\n"
+        #endif
+        #ifdef FF_HAVE_XFCONF
+            "xfconf\n"
+        #endif
+        #ifdef FF_HAVE_RPM
+            "librpm\n"
+        #endif
+        ""
+    , stdout);
 }

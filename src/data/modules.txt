@@ -16,11 +16,13 @@ LocalIP
 Memory
 OS
 Packages
+Player
 Processes
 PublicIP
 Resolution
 Separator
 Shell
+Song
 Terminal
 TerminalFont
 Theme

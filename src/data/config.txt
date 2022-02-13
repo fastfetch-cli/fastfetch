@@ -133,6 +133,12 @@
 # Default is /etc/os-release.
 #--os-file /etc/os-release
 
+# Player name option
+# Sets the name of the player. This is also used in song detection
+# Must be the exact name of the player or a dbus address (e.g. org.mpris.MediaPlayer2.spotify)
+# Default is the first match starting with org.mpris.MediaPlayer2.
+#--player-name spotify
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
@@ -162,6 +168,8 @@
 #--locale-key Locale
 #--local-ip-key Local IP ({1})
 #--public-ip-key Public IP
+#--player-key Media Player
+#--song-key Song
 
 # Format options:
 # Sets the format string for module values.
@@ -194,6 +202,8 @@
 #--locale-format
 #--local-ip-format
 #--public-ip-format
+#--player-format
+#--song-format
 
 # Library options:
 # Sets an user specific path to a library to load.
@@ -207,5 +217,6 @@
 #--lib-X11 /usr/lib/libX11.so
 #--lib-gio /usr/lib/libgio-2.0.so
 #--lib-DConf /usr/lib/libdconf.so
+#--lib-DBus /usr/lib/libdbus-1.so
 #--lib-XFConf /usr/lib/libxfconf-0.so
 #--lib-rpm /usr/lib/librpm.so

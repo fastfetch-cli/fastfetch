@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     ffPrintHost(&instance);
     ffPrintKernel(&instance);
     ffPrintUptime(&instance);
-    ffPrintProcesses(&instance);
+    //ffPrintProcesses(&instance);
     ffPrintPackages(&instance);
     ffPrintShell(&instance);
     ffPrintResolution(&instance);
@@ -47,6 +47,8 @@ int main(int argc, char** argv)
     ffPrintBattery(&instance);
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
+    //ffPrintPlayer(&instance);
+    //ffPrintSong(&instance);
     ffPrintLocale(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);

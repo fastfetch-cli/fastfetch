@@ -110,6 +110,10 @@ typedef struct FFconfig
     FFstrbuf localIpFormat;
     FFstrbuf publicIpKey;
     FFstrbuf publicIpFormat;
+    FFstrbuf playerKey;
+    FFstrbuf playerFormat;
+    FFstrbuf songKey;
+    FFstrbuf songFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -120,6 +124,7 @@ typedef struct FFconfig
     FFstrbuf libX11;
     FFstrbuf libGIO;
     FFstrbuf libDConf;
+    FFstrbuf libDBus;
     FFstrbuf libXFConf;
     FFstrbuf librpm;
 
@@ -137,6 +142,7 @@ typedef struct FFconfig
 
     FFstrbuf osFile;
 
+    FFstrbuf playerName;
 } FFconfig;
 
 typedef struct FFstate
@@ -243,6 +249,14 @@ typedef struct FFTempsResult
     FFlist values; //List of FFTempValue
 } FFTempsResult;
 
+typedef struct FFMediaResult
+{
+    FFstrbuf player;
+    FFstrbuf song;
+    FFstrbuf artist;
+    FFstrbuf album;
+} FFMediaResult;
+
 typedef enum FFformatargtype
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
@@ -336,6 +350,8 @@ typedef enum FFInitState
 void ffInitInstance(FFinstance* instance);
 void ffStart(FFinstance* instance);
 void ffFinish(FFinstance* instance);
+
+void ffListFeatures();
 
 //common/threading.c
 void ffStartDetectionThreads(FFinstance* instance);
@@ -447,6 +463,9 @@ const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
 //detection/temps.c (currently unused)
 const FFTempsResult* ffDetectTemps(const FFinstance* instance);
 
+//detection/media.c
+const FFMediaResult* ffDetectMedia(FFinstance* instance);
+
 /********************/
 /* Module functions */
 /********************/
@@ -486,6 +505,8 @@ void ffPrintBattery(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
+void ffPrintPlayer(FFinstance* instance);
+void ffPrintSong(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 
 #endif

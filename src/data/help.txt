@@ -62,6 +62,8 @@ Format options: Provide the format string for custom output. Use fastfetch --hel
     --locale-format <format>
     --local-ip-format <format>
     --public-ip-format <format>
+    --player-format <format>
+    --song-format <format>
 
 Key options: Provide a custom key for an output
     --os-key <key>
@@ -90,6 +92,8 @@ Key options: Provide a custom key for an output
     --locale-key <key>
     --local-ip-key <key>: takes the name of this network interface as format argument
     --public-ip-key <key>
+    --player-key <key>
+    --song-key <key>
 
 Library options: Set the path of a library to load
     --lib-PCI <path>
@@ -101,6 +105,7 @@ Library options: Set the path of a library to load
     --lib-X11 <path>
     --lib-gio <path>
     --lib-DConf <path>
+    --lib-DBus <path>
     --lib-XFConf <path>
     --lib-RPM <path>
 
@@ -113,6 +118,7 @@ Module specific options:
     --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false
     --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --public-ip-timeout:          Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
+    --player-name:                The name of the player to use
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.
