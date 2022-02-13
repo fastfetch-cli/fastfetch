@@ -1,4 +1,4 @@
-name: "build, run and analyze fastfetch"
+name: "Build, Run and Analyze fastfetch"
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Update and install packages
-      run: sudo apt-get update && sudo apt upgrade && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
+      run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
@@ -37,10 +37,13 @@ jobs:
       run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} .
 
     - name: Build
-      run: cmake --build .
+      run: cmake --build . -j$(nproc)
 
     - name: Run fastfetch
-      run: ./fastfetch
+      run: ./fastfetch --recache --disable-linewrap false --disable-linewrap false --show-errors true
+
+    - name: Run flashfetch
+      run: ./flashfetch
 
     - name: Run fastfetch-test-strbuf
       run: ./fastfetch-test-strbuf
