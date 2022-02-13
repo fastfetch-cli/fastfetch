@@ -25,8 +25,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install packages
-      run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev
+    - name: Update and install packages
+      run: sudo apt-get update && sudo apt upgrade && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
 
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} .
@@ -39,11 +44,6 @@ jobs:
 
     - name: Run fastfetch-test-strbuf
       run: ./fastfetch-test-strbuf
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: ${{ matrix.language }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
