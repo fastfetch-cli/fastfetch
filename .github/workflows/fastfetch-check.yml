@@ -1,4 +1,4 @@
-name: "Build, Run and Analyze fastfetch"
+name: Build, Run and Analyze fastfetch
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
 
 jobs:
   default:
-    name: Build
+    name: Build, Run and Analyze fastfetch
     runs-on: ubuntu-latest
     permissions:
       actions: read

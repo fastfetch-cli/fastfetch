@@ -35,7 +35,7 @@ The following libraries are used if present at runtime:
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
-### Modules
+#### Available Modules
 ```
 Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, LocalIP, PublicIP, Player, Song, Locale, Colors, Break, Custom
 ```
