@@ -40,7 +40,7 @@ jobs:
       run: cmake --build . -j$(nproc)
 
     - name: Run fastfetch
-      run: ./fastfetch --recache --disable-linewrap false --disable-linewrap false --show-errors true
+      run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
 
     - name: Run flashfetch
       run: ./flashfetch
