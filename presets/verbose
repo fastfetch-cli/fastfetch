@@ -23,3 +23,5 @@
 --memory-format "Used: {}; Total: {}; Percentage: {}"
 --disk-format "Used: {}; Total: {}; Files: {}; Percentage: {}"
 --battery-format "Manufactor: {}; Model: {}; Technology: {}; Capacaty: {}; Status: {}"
+--player-format "Name: {}"
+--song-format "Song: {}; Artist: {}; Album: {}"

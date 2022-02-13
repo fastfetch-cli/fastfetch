@@ -12,3 +12,6 @@ trim_trailing_whitespace = false
 
 [*.{txt,fflogo}]
 insert_final_newline = false
+
+[*.yml]
+tab_width = 2

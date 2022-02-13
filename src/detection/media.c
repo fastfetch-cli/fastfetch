@@ -3,10 +3,10 @@
 #include <string.h>
 #include <pthread.h>
 
+#define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
+
 #ifdef FF_HAVE_DBUS
 #include <dbus/dbus.h>
-
-#define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
 
 #define FF_DBUS_ITER_CONTINUE(iterator) \
     { \
