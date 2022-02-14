@@ -64,8 +64,7 @@ static void getArray(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
         FF_DBUS_ITER_CONTINUE(arrayIter);
     }
 
-    if(ffStrbufEndsWithS(result, ", "))
-        ffStrbufSubstrBefore(result, result->length - 2);
+    ffStrbufRemoveIgnCaseEndS(result, ", ");
 }
 
 static bool detectSong(const char* player, FFMediaResult* result, DBusData* data)

@@ -5,8 +5,6 @@
 
 static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstrbuf* cursorSize)
 {
-    ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey);
-
     ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursors");
     ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursor");
     ffStrbufTrimRight(cursorTheme, '_');
@@ -14,16 +12,27 @@ static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstr
     if(cursorTheme->length == 0)
         ffStrbufAppendS(cursorTheme, "default");
 
-    ffStrbufWriteTo(cursorTheme, stdout);
-
-    if(cursorSize != NULL && cursorSize->length > 0)
+    if(instance->config.cursorFormat.length == 0)
     {
-        fputs(" (", stdout);
-        ffStrbufWriteTo(cursorSize, stdout);
-        fputs("px)", stdout);
-    }
+        ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey);
+        ffStrbufWriteTo(cursorTheme, stdout);
 
-    putchar('\n');
+        if(cursorSize != NULL && cursorSize->length > 0)
+        {
+            fputs(" (", stdout);
+            ffStrbufWriteTo(cursorSize, stdout);
+            fputs("px)", stdout);
+        }
+
+        putchar('\n');
+    }
+    else
+    {
+        ffPrintFormatString(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, NULL, FF_CURSOR_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, cursorTheme},
+            {FF_FORMAT_ARG_TYPE_STRBUF, cursorSize}
+        });
+    }
 }
 
 static void printCursorGTK(FFinstance* instance)
