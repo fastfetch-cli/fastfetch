@@ -10,7 +10,7 @@
         clock_gettime(CLOCK_REALTIME, &end); \
         long nanos = end.tv_nsec - start.tv_nsec; \
         printf("\033[F"); \
-        for(uint8_t i = 0; i < 110; i++) printf("\033[C"); \
+        for(uint8_t i = 0; i < 125; i++) printf("\033[C"); \
         printf("%08ldns\n", nanos); \
     } \
 
@@ -28,11 +28,13 @@ int main(int argc, char** argv)
     FASTFETCH_TEST_PERFORMANCE(
         puts("Configuration");
         ffLoadLogo(&instance);
-        ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
-        instance.config.showErrors = true;
-        instance.config.recache = argc == 1;
-        instance.config.cacheSave = false;
     )
+
+    ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
+    instance.config.showErrors = true;
+    instance.config.recache = argc == 1;
+    instance.config.cacheSave = false;
+    ffStrbufSetS(&instance.config.songFormat, "{}"); //Otherwise the line is too long
 
     FASTFETCH_TEST_PERFORMANCE(
         puts("Thread starting");
@@ -45,6 +47,7 @@ int main(int argc, char** argv)
     FASTFETCH_TEST_PERFORMANCE(ffPrintHost(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintKernel(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintUptime(&instance))
+    FASTFETCH_TEST_PERFORMANCE(ffPrintProcesses(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintPackages(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintShell(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintResolution(&instance))
@@ -57,10 +60,15 @@ int main(int argc, char** argv)
     FASTFETCH_TEST_PERFORMANCE(ffPrintTerminal(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintTerminalFont(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintCPU(&instance))
+    //FASTFETCH_TEST_PERFORMANCE(ffPrintCPUUsage(&instance)) // Doesn't make sense, contains a sleep call
     FASTFETCH_TEST_PERFORMANCE(ffPrintGPU(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintMemory(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintDisk(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintBattery(&instance))
+    FASTFETCH_TEST_PERFORMANCE(ffPrintPlayer(&instance))
+    FASTFETCH_TEST_PERFORMANCE(ffPrintSong(&instance))
+    FASTFETCH_TEST_PERFORMANCE(ffPrintLocalIp(&instance))
+    FASTFETCH_TEST_PERFORMANCE(ffPrintPublicIp(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintLocale(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintBreak(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintColors(&instance))

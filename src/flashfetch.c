@@ -45,10 +45,10 @@ int main(int argc, char** argv)
     ffPrintMemory(&instance);
     ffPrintDisk(&instance);
     ffPrintBattery(&instance);
-    //ffPrintLocalIp(&instance);
-    //ffPrintPublicIp(&instance);
     //ffPrintPlayer(&instance);
     //ffPrintSong(&instance);
+    //ffPrintLocalIp(&instance);
+    //ffPrintPublicIp(&instance);
     ffPrintLocale(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);

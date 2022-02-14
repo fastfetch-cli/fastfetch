@@ -1,7 +1,6 @@
 #!/bin/env sh
-rm -rf tests/build/
-mkdir -p tests/build/
-cd tests/build/
-cmake ../..
+mkdir -p build/
+cd build
+cmake ..
 cmake --build . --target fastfetch-test-performance -j$(nproc)
 ./fastfetch-test-performance "$@"

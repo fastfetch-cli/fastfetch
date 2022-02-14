@@ -503,10 +503,10 @@ void ffPrintMemory(FFinstance* instance);
 void ffPrintDisk(FFinstance* instance);
 void ffPrintBattery(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
-void ffPrintLocalIp(FFinstance* instance);
-void ffPrintPublicIp(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintSong(FFinstance* instance);
+void ffPrintLocalIp(FFinstance* instance);
+void ffPrintPublicIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 
 #endif
