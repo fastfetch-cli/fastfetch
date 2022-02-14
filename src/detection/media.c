@@ -37,14 +37,15 @@ typedef struct DBusData
     DBusConnection *connection;
 } DBusData;
 
-static void getString(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
+static bool getString(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
 {
     if(data->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_STRING)
-        return;
+        return false;
 
     const char* value;
     data->ffdbus_message_iter_get_basic(iter, &value);
     ffStrbufAppendS(result, value);
+    return ffStrSet(value);
 }
 
 static void getArray(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
@@ -57,8 +58,8 @@ static void getArray(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
 
     while(true)
     {
-        getString(&arrayIter, result, data);
-        ffStrbufAppendS(result, ", ");
+        if(getString(&arrayIter, result, data))
+            ffStrbufAppendS(result, ", ");
 
         FF_DBUS_ITER_CONTINUE(arrayIter);
     }
