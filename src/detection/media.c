@@ -37,34 +37,42 @@ typedef struct DBusData
     DBusConnection *connection;
 } DBusData;
 
-static bool getString(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
+static bool getValue(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
 {
-    if(data->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_STRING)
+    int argType = data->ffdbus_message_iter_get_arg_type(iter);
+
+    if(argType == DBUS_TYPE_STRING)
+    {
+        const char* value;
+        data->ffdbus_message_iter_get_basic(iter, &value);
+
+        if(!ffStrSet(value))
+            return false;
+
+        ffStrbufAppendS(result, value);
+        return true;
+    }
+
+    if(argType != DBUS_TYPE_ARRAY)
         return false;
-
-    const char* value;
-    data->ffdbus_message_iter_get_basic(iter, &value);
-    ffStrbufAppendS(result, value);
-    return ffStrSet(value);
-}
-
-static void getArray(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
-{
-    if(data->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
-        return;
 
     DBusMessageIter arrayIter;
     data->ffdbus_message_iter_recurse(iter, &arrayIter);
 
+    bool foundAValue = false;
+
     while(true)
     {
-        if(getString(&arrayIter, result, data))
+        if((foundAValue = getValue(&arrayIter, result, data)))
             ffStrbufAppendS(result, ", ");
 
         FF_DBUS_ITER_CONTINUE(arrayIter);
     }
 
-    ffStrbufRemoveIgnCaseEndS(result, ", ");
+    if(foundAValue)
+        ffStrbufSubstrBefore(result, result->length - 2);
+
+    return foundAValue;
 }
 
 static bool detectSong(const char* player, FFMediaResult* result, DBusData* data)
@@ -127,11 +135,11 @@ static bool detectSong(const char* player, FFMediaResult* result, DBusData* data
         if(data->ffdbus_message_iter_get_arg_type(&dictIterator) != DBUS_TYPE_STRING)
             FF_DBUS_ITER_CONTINUE(arrayIterator)
 
-        const char* key;
-        data->ffdbus_message_iter_get_basic(&dictIterator, &key);
-
         if(!data->ffdbus_message_iter_has_next(&dictIterator))
             FF_DBUS_ITER_CONTINUE(arrayIterator)
+
+        const char* key;
+        data->ffdbus_message_iter_get_basic(&dictIterator, &key);
 
         data->ffdbus_message_iter_next(&dictIterator);
 
@@ -142,11 +150,11 @@ static bool detectSong(const char* player, FFMediaResult* result, DBusData* data
         data->ffdbus_message_iter_recurse(&dictIterator, &valueIter);
 
         if(strcmp(key, "xesam:title") == 0)
-            getString(&valueIter, &result->song, data);
+            getValue(&valueIter, &result->song, data);
         else if(strcmp(key, "xesam:album") == 0)
-            getString(&valueIter, &result->album, data);
+            getValue(&valueIter, &result->album, data);
         else if(strcmp(key, "xesam:artist") == 0)
-            getArray(&valueIter, &result->artist, data);
+            getValue(&valueIter, &result->artist, data);
 
         if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0)
             break;
