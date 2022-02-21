@@ -16,6 +16,7 @@ OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
+OPTION(BUILD_TESTS "Build tests" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -277,19 +278,24 @@ target_link_libraries(flashfetch
 
 # Testing.
 
-add_executable(fastfetch-test-performance
-    tests/performance.c
-)
-target_link_libraries(fastfetch-test-performance
-    PRIVATE libfastfetch
-)
+if (BUILD_TESTS)
+    add_executable(fastfetch-test-performance
+        tests/performance.c
+    )
+    target_link_libraries(fastfetch-test-performance
+        PRIVATE libfastfetch
+    )
 
-add_executable(fastfetch-test-strbuf
-    tests/strbuf.c
-)
-target_link_libraries(fastfetch-test-strbuf
-    PRIVATE libfastfetch
-)
+    add_executable(fastfetch-test-strbuf
+        tests/strbuf.c
+    )
+    target_link_libraries(fastfetch-test-strbuf
+        PRIVATE libfastfetch
+    )
+
+    enable_testing()
+    add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
+endif()
 
 # Installation.
 
