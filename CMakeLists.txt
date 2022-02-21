@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch LANGUAGES C)
 
+include(GNUInstallDirs)
+
 OPTION(ENABLE_LIBPCI "Enable libpci" ON)
 OPTION(ENABLE_VULKAN "Enable vulkan" ON)
 OPTION(ENABLE_WAYLAND "Enable wayland-client" ON)
@@ -60,6 +62,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 find_package(PkgConfig REQUIRED)
+
+# Init CMake targets.
 
 add_library(libfastfetch STATIC
     src/util/FFstrbuf.c
@@ -267,6 +271,8 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
 
+# Testing.
+
 add_executable(fastfetch-test-performance
     tests/performance.c
 )
@@ -279,4 +285,17 @@ add_executable(fastfetch-test-strbuf
 )
 target_link_libraries(fastfetch-test-strbuf
     PRIVATE libfastfetch
+)
+
+# Installation.
+
+install(TARGETS fastfetch DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(FILES completions/bash
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions
+    RENAME ${CMAKE_PROJECT_NAME}
+)
+
+install(DIRECTORY presets
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}
 )
