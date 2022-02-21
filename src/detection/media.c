@@ -43,7 +43,7 @@ static bool getValue(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
 
     if(argType == DBUS_TYPE_STRING)
     {
-        const char* value;
+        const char* value = NULL;
         data->ffdbus_message_iter_get_basic(iter, &value);
 
         if(!ffStrSet(value))

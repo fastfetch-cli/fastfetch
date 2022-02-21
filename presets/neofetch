@@ -2,7 +2,7 @@
 --host-format "{/2}{-}{/}{2}{?3} {3}{?}"
 --os-format "{3} {12}"
 --resolution-format "{}x{}"
---de-format "{3} {4}"
+--de-format "{2} {3}"
 --theme-format "{?1}{1}{?3} {3}{?} [Plasma], {?}{7}"
 --terminal-font-format "{/2}{-}{/}{2}{?3} {3}{?}"
 --memory-format "{/1}{-}{/}{/2}{-}{/}{}MiB / {}MiB"
