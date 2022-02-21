@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch LANGUAGES C)
 
+include(GNUInstallDirs)
+
 OPTION(ENABLE_LIBPCI "Enable libpci" ON)
 OPTION(ENABLE_VULKAN "Enable vulkan" ON)
 OPTION(ENABLE_WAYLAND "Enable wayland-client" ON)
@@ -14,6 +16,7 @@ OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
+OPTION(BUILD_TESTS "Build tests" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -22,21 +25,25 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
 
-execute_process(
-    COMMAND git rev-list --count HEAD
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_VARIABLE GIT_REV_LIST
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-execute_process(
-    COMMAND git rev-parse --short HEAD
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    OUTPUT_VARIABLE GIT_REV_PARSE
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+set(PROJECT_VERSION "r0.0" CACHE STRING "Full version")
+set(PROJECT_VERSION_MAJOR "0" CACHE STRING "Major version")
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND git rev-list --count HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_REV_LIST
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(
+        COMMAND git rev-parse --short HEAD
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE GIT_REV_PARSE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
-set(PROJECT_VERSION_MAJOR "${GIT_REV_LIST}")
+    set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
+    set(PROJECT_VERSION_MAJOR "${GIT_REV_LIST}")
+endif()
 
 function(fastfetch_load_text FILENAME OUTVAR)
     file(READ "${FILENAME}" TEMP)
@@ -60,6 +67,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 find_package(PkgConfig REQUIRED)
+
+# Init CMake targets.
 
 add_library(libfastfetch STATIC
     src/util/FFstrbuf.c
@@ -267,16 +276,36 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
 
-add_executable(fastfetch-test-performance
-    tests/performance.c
-)
-target_link_libraries(fastfetch-test-performance
-    PRIVATE libfastfetch
+# Testing.
+
+if (BUILD_TESTS)
+    add_executable(fastfetch-test-performance
+        tests/performance.c
+    )
+    target_link_libraries(fastfetch-test-performance
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-strbuf
+        tests/strbuf.c
+    )
+    target_link_libraries(fastfetch-test-strbuf
+        PRIVATE libfastfetch
+    )
+
+    enable_testing()
+    add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
+endif()
+
+# Installation.
+
+install(TARGETS fastfetch DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(FILES completions/bash
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions
+    RENAME ${CMAKE_PROJECT_NAME}
 )
 
-add_executable(fastfetch-test-strbuf
-    tests/strbuf.c
-)
-target_link_libraries(fastfetch-test-strbuf
-    PRIVATE libfastfetch
+install(DIRECTORY presets
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}
 )

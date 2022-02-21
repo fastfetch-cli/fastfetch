@@ -45,8 +45,8 @@ jobs:
     - name: Run flashfetch
       run: ./flashfetch
 
-    - name: Run fastfetch-test-strbuf
-      run: ./fastfetch-test-strbuf
+    - name: Run tests
+      run: ctest
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
