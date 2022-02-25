@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-#define FF_DATETIME_MODULE_NAME "Date Time"
+#define FF_DATETIME_MODULE_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
 
 void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* key, const FFstrbuf* format)
