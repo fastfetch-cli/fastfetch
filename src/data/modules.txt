@@ -4,6 +4,8 @@ Colors
 CPU
 CPUUsage
 Cursor
+Date
+Datetime
 DE
 Disk
 Font
@@ -26,6 +28,7 @@ Song
 Terminal
 TerminalFont
 Theme
+Time
 Title
 Uptime
 WM

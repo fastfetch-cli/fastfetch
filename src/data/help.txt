@@ -64,6 +64,9 @@ Format options: Provide the format string for custom output. Use fastfetch --hel
     --public-ip-format <format>
     --player-format <format>
     --song-format <format>
+    --datetime-format <format>
+    --time-format <format>
+    --date-format <format>
 
 Key options: Provide a custom key for an output
     --os-key <key>
@@ -94,6 +97,9 @@ Key options: Provide a custom key for an output
     --public-ip-key <key>
     --player-key <key>
     --song-key <key>
+    --datetime-key <key>
+    --time-key <key>
+    --date-key <key>
 
 Library options: Set the path of a library to load
     --lib-PCI <path>

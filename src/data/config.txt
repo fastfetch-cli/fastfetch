@@ -170,6 +170,7 @@
 #--public-ip-key Public IP
 #--player-key Media Player
 #--song-key Song
+#--datetime-key Date Time
 
 # Format options:
 # Sets the format string for module values.
@@ -204,6 +205,7 @@
 #--public-ip-format
 #--player-format
 #--song-format
+#--datetime-format
 
 # Library options:
 # Sets an user specific path to a library to load.

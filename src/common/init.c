@@ -178,6 +178,12 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.playerFormat, 0);
     ffStrbufInitA(&instance->config.songKey, 0);
     ffStrbufInitA(&instance->config.songFormat, 0);
+    ffStrbufInitA(&instance->config.dateTimeKey, 0);
+    ffStrbufInitA(&instance->config.dateTimeFormat, 0);
+    ffStrbufInitA(&instance->config.dateKey, 0);
+    ffStrbufInitA(&instance->config.dateFormat, 0);
+    ffStrbufInitA(&instance->config.timeKey, 0);
+    ffStrbufInitA(&instance->config.timeFormat, 0);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);

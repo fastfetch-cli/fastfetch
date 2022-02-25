@@ -114,6 +114,12 @@ typedef struct FFconfig
     FFstrbuf playerFormat;
     FFstrbuf songKey;
     FFstrbuf songFormat;
+    FFstrbuf dateTimeKey;
+    FFstrbuf dateTimeFormat;
+    FFstrbuf dateKey;
+    FFstrbuf dateFormat;
+    FFstrbuf timeKey;
+    FFstrbuf timeFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -256,6 +262,31 @@ typedef struct FFMediaResult
     FFstrbuf artist;
     FFstrbuf album;
 } FFMediaResult;
+
+typedef struct FFDateTimeResult
+{
+    //Examples for 21.02.2022 - 15:18:37
+    uint16_t year; //2022
+    uint8_t yearShort; //22
+    uint8_t month; //2
+    FFstrbuf monthPretty; //02
+    FFstrbuf monthName; //February
+    FFstrbuf monthNameShort; //Feb
+    uint8_t week; //8
+    FFstrbuf weekday; //Monday
+    FFstrbuf weekdayShort; //Mon
+    uint16_t dayInYear; //52
+    uint8_t dayInMonth; //21
+    uint8_t dayInWeek; //1
+    uint8_t hour; //15
+    FFstrbuf hourPretty; //15
+    uint8_t hour12; //3
+    FFstrbuf hour12Pretty; //03
+    uint8_t minute; //18
+    FFstrbuf minutePretty; //18
+    uint8_t second; //37
+    FFstrbuf secondPretty; //37
+} FFDateTimeResult;
 
 typedef enum FFformatargtype
 {
@@ -466,12 +497,17 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance);
 //detection/media.c
 const FFMediaResult* ffDetectMedia(FFinstance* instance);
 
+//detection/dateTime.c
+const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance);
+
 /********************/
 /* Module functions */
 /********************/
 
 //Common
 const FFTitleResult* ffDetectTitle(FFinstance* instance);
+
+void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* key, const FFstrbuf* format);
 
 //Printing
 
@@ -505,6 +541,9 @@ void ffPrintBattery(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintSong(FFinstance* instance);
+void ffPrintDateTime(FFinstance* instance);
+void ffPrintDate(FFinstance* instance);
+void ffPrintTime(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);

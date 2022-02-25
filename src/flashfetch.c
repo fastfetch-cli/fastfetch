@@ -50,6 +50,9 @@ int main(int argc, char** argv)
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
     ffPrintLocale(&instance);
+    //ffPrintDateTime(&instance);
+    //ffPrintDate(&instance);
+    //ffPrintTime(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 

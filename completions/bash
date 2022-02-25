@@ -28,6 +28,9 @@ __fastfetch_complete_help()
         "locale-format"
         "local-ip-format"
         "public-ip-format"
+        "datetime-format"
+        "date-format"
+        "time-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -198,6 +201,12 @@ __fastfetch_completion()
         "--player-key"
         "--song-format"
         "--song-key"
+        "--datetime-key"
+        "--datetime-format"
+        "--date-format"
+        "--date-key"
+        "--time-format"
+        "--time-key"
     )
 
     local FF_OPTIONS_PATH=(

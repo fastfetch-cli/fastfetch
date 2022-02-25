@@ -89,6 +89,7 @@ add_library(libfastfetch STATIC
     src/detection/gtk.c
     src/detection/terminalShell.c
     src/detection/media.c
+    src/detection/datetime.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
     src/detection/displayserver/xcb.c
@@ -126,6 +127,9 @@ add_library(libfastfetch STATIC
     src/modules/publicip.c
     src/modules/player.c
     src/modules/song.c
+    src/modules/datetime.c
+    src/modules/date.c
+    src/modules/time.c
     src/modules/colors.c
 )
 

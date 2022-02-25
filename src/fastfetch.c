@@ -316,6 +316,31 @@ static inline void printCommandHelp(const char* command)
             "Album name"
         );
     }
+    else if(strcasecmp(command, "datetime-format") == 0 || strcasecmp(command, "date-format") == 0 || strcasecmp(command, "time-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("[date][time]", "{1}-{4}-{11} {14}:{18}:{20}", 20,
+            "year",
+            "last two digits of year",
+            "month",
+            "month with leading zero",
+            "month name",
+            "month name short",
+            "week number on year",
+            "weekday",
+            "weekday short",
+            "day in year",
+            "day in month",
+            "day in Week",
+            "hour",
+            "hout with leading zero",
+            "hour 12h format",
+            "hour 12h format with leading zero",
+            "minute",
+            "minute with leading zero",
+            "second",
+            "second with leading zero"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -826,6 +851,18 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.songKey);
     else if(strcasecmp(key, "--song-format") == 0)
         optionParseString(key, value, &instance->config.songFormat);
+    else if(strcasecmp(key, "--datetime-key") == 0)
+        optionParseString(key, value, &instance->config.dateTimeKey);
+    else if(strcasecmp(key, "--datetime-format") == 0)
+        optionParseString(key, value, &instance->config.dateTimeFormat);
+    else if(strcasecmp(key, "--date-key") == 0)
+        optionParseString(key, value, &instance->config.dateKey);
+    else if(strcasecmp(key, "--date-format") == 0)
+        optionParseString(key, value, &instance->config.dateFormat);
+    else if(strcasecmp(key, "--time-key") == 0)
+        optionParseString(key, value, &instance->config.timeKey);
+    else if(strcasecmp(key, "--time-format") == 0)
+        optionParseString(key, value, &instance->config.timeFormat);
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-vulkan") == 0)
@@ -1022,6 +1059,12 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintPlayer(instance);
     else if(strcasecmp(line, "song") == 0)
         ffPrintSong(instance);
+    else if(strcasecmp(line, "datetime") == 0)
+        ffPrintDateTime(instance);
+    else if(strcasecmp(line, "date") == 0)
+        ffPrintDate(instance);
+    else if(strcasecmp(line, "time") == 0)
+        ffPrintTime(instance);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else
