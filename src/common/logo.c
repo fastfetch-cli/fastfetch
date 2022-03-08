@@ -872,6 +872,35 @@ static const FFlogo* getLogoVoidSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoZorin()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("zorin", "zorin-linux", "zorinos", "zorinos-linux")
+    FF_LOGO_LINES(
+        "$1        `osssssssssssssssssssso`        \n"
+        "$1       .osssssssssssssssssssssso.       \n"
+        "$1      .+oooooooooooooooooooooooo+.      \n"
+        "                                        \n"
+        "                                        \n"
+        "$1  `::::::::::::::::::::::.         .:`  \n"
+        "$1 `+ssssssssssssssssss+:.`     `.:+ssso` \n"
+        "$1.ossssssssssssssso/.       `-+ossssssso.\n"
+        "$1ssssssssssssso/-`      `-/osssssssssssss\n"
+        "$1.ossssssso/-`      .-/ossssssssssssssso.\n"
+        "$1 `+sss+:.      `.:+ssssssssssssssssss+` \n"
+        "$1  `:.         .::::::::::::::::::::::`  \n"
+        "                                        \n"
+        "                                        \n"
+        "$1      .+oooooooooooooooooooooooo+.      \n"
+        "$1       -osssssssssssssssssssssso-       \n"
+        "$1        `osssssssssssssssssssso`        "
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 typedef const FFlogo*(*GetLogoMethod)();
 
 static GetLogoMethod* getLogoMethods()
@@ -910,6 +939,7 @@ static GetLogoMethod* getLogoMethods()
         getLogoUbuntuSmall,
         getLogoVoid,
         getLogoVoidSmall,
+        getLogoZorin,
         NULL
     };
 
