@@ -303,13 +303,23 @@ endif()
 
 # Installation.
 
-install(TARGETS fastfetch DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(
+    TARGETS fastfetch
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/
+)
 
-install(FILES completions/bash
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions
+install(
+    FILES completions/bash
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions/
     RENAME ${CMAKE_PROJECT_NAME}
 )
 
-install(DIRECTORY presets
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}
+install(
+    DIRECTORY presets
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}/
+)
+
+install(
+    FILES ./LICENSE
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}/
 )
