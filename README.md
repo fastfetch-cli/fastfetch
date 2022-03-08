@@ -86,10 +86,9 @@ If pkg-config fails to find the headers for a library listed in [dependencies](#
 * [AUR](https://aur.archlinux.org/packages/fastfetch-git/): Packaged by me. Will install the fastfetch binary, bash completion and the presets. Git version
 * [Manjaro Repositories](https://gitlab.manjaro.org/packages/community/fastfetch): Packaged by a manjaro maintainer. Usually a bit outdated.
 * DEB: You need to build deb packages yourself. Run [`packaging/deb/create-deb-pkg.sh`](packaging/deb/create-deb-pkg.sh) for that.
-* Manually: Follow the [build instructions](#building). Then:
-    * Copy the binaries `build/fastfetch` and `build/flashfetch` to `/usr/local/bin/`.
-    * Copy the [bash completion](completions/bash) to `/usr/share/bash-completion/completions/fastfetch`.
-    * Copy the [presets](presets/) to `/usr/share/fastfetch/presets/`.
+* Manually:
+    * Build: Follow the [build instructions](#building).
+    * Install: `sudo cmake --install build --prefix /usr/local`
 
 ## FAQ
 
