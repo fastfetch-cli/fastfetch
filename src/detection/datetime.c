@@ -23,9 +23,9 @@ const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
     const time_t t = time(NULL);
     struct tm* tm = localtime(&t);
 
-    result.year = (uint16_t) tm->tm_year + 1900;
+    result.year = (uint16_t) (tm->tm_year + 1900);
     result.yearShort = (uint8_t) (result.year % 100);
-    result.month = (uint8_t) tm->tm_mon + 1;
+    result.month = (uint8_t) (tm->tm_mon + 1);
 
     ffStrbufInit(&result.monthPretty);
     result.monthPretty.length = (uint32_t) strftime(result.monthPretty.chars, ffStrbufGetFree(&result.monthPretty), "%m", tm);
@@ -44,7 +44,7 @@ const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
     ffStrbufInit(&result.weekdayShort);
     result.weekdayShort.length = (uint32_t) strftime(result.weekdayShort.chars, ffStrbufGetFree(&result.weekdayShort), "%a", tm);
 
-    result.dayInYear = (uint8_t) tm->tm_yday + 1;
+    result.dayInYear = (uint8_t) (tm->tm_yday + 1);
     result.dayInMonth = (uint8_t) tm->tm_mday;
     result.dayInWeek = tm->tm_wday == 0 ? 7 : (uint8_t) tm->tm_wday;
 
