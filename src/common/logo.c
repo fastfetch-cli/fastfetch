@@ -592,6 +592,32 @@ static const FFlogo* getLogoGentooSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("linux", "linux-generic")
+    FF_LOGO_LINES(
+        "$2        #####        \n"
+        "$2       #######       \n"
+        "$2       ##$1O$2#$1O$2##       \n"
+        "$2       #$3#####$2#       \n"
+        "$2     ##$1##$3###$1##$2##     \n"
+        "$2    #$1##########$2##    \n"
+        "$2   #$1############$2##   \n"
+        "$2   #$1############$2###  \n"
+        "$3  ##$2#$1###########$2##$3#  \n"
+        "$3######$2#$1#######$2#$3######\n"
+        "$3#######$2#$1#####$2#$3#######\n"
+        "$3  #####$2#######$3#####  "
+    )
+    FF_LOGO_COLORS(
+        "37", //white
+        "30", //black
+        "33" //yellow
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoManjaro()
 {
     FF_LOGO_INIT
@@ -776,30 +802,30 @@ static const FFlogo* getLogoReborn()
     FF_LOGO_INIT
     FF_LOGO_NAMES("reborn", "reborn-os", "rebornos", "rebornos-linux", "reborn-os-linux")
     FF_LOGO_LINES(
-        "$1            :::::::::::::::::::::::            \n"           
-        "$1          .:^!!!!!!!!!^.^!!!!!!!!!^:.          \n"         
-        "$1         .:~!!!!!!!!!!^.^!!!!!!!!!!~:.         \n"         
-        "$1        .:~!!!!!~~~~~~^.^~~~~~~!!!!!~:.        \n"        
-        "$1       .^!!!!!~::$2=====:.:=====$1::~!!!!!^.       \n"       
-        "$1     .::^~~!!~:$2^77777?~.~?77777^$1:~!!~~^::.     \n"     
-        "$1    .:~~^:::^.$2^77777!!^.^7!77777^$1.^:::^~~:.    \n"    
-        "$1   .:~!!!!~::::$2^~!!::^^^^^::!!~^$1::::~!!!!~:.   \n"   
-        "$1  .^!!!!!~::$2!7!~^:.^?JJJJJ?^.:^~!7!$1::~!!!!!^.  \n"  
+        "$1            :::::::::::::::::::::::            \n"
+        "$1          .:^!!!!!!!!!^.^!!!!!!!!!^:.          \n"
+        "$1         .:~!!!!!!!!!!^.^!!!!!!!!!!~:.         \n"
+        "$1        .:~!!!!!~~~~~~^.^~~~~~~!!!!!~:.        \n"
+        "$1       .^!!!!!~::$2=====:.:=====$1::~!!!!!^.       \n"
+        "$1     .::^~~!!~:$2^77777?~.~?77777^$1:~!!~~^::.     \n"
+        "$1    .:~~^:::^.$2^77777!!^.^7!77777^$1.^:::^~~:.    \n"
+        "$1   .:~!!!!~::::$2^~!!::^^^^^::!!~^$1::::~!!!!~:.   \n"
+        "$1  .^!!!!!~::$2!7!~^:.^?JJJJJ?^.:^~!7!$1::~!!!!!^.  \n"
         "$1.:^!!!!!~:$2^77777~.~JJJJJJJJJ~.~77777^$1:~!!!!!^:.\n"
         "$1.:^!!!!!~:$2^77777~.~JJJJJJJJJ~.~77777^$1:~!!!!!^:.\n"
-        "$1  .^!!!!!~::$2!7!~^:.^?JJJJJ?^.:^~!7!$1::~!!!!!^.  \n"  
-        "$1   .:~!!!!~::$2::^~!!::^^^^^::!!~^::$1::~!!!!~:.   \n"   
-        "$1    .:~~^:::^.$2^77777!!^.^7!77777^.$1^:::^~~:.    \n"    
-        "$1     .::^~~!!~:$2^77777?~.~?77777^$1:~!!~~^::.     \n"     
-        "$1       .^!!!!!~::$2=====:.:=====$1::~!!!!!^.       \n"       
-        "$1        .:~!!!!!~~~~~~^.^~~~~~~!!!!!~:.        \n"        
-        "$1         .:~!!!!!!!!!!^.^!!!!!!!!!!~:.         \n"         
-        "$1          .:^!!!!!!!!!^.^!!!!!!!!!^:.          \n"           
-        "$1            :::::::::::::::::::::::            \n"  
+        "$1  .^!!!!!~::$2!7!~^:.^?JJJJJ?^.:^~!7!$1::~!!!!!^.  \n"
+        "$1   .:~!!!!~::$2::^~!!::^^^^^::!!~^::$1::~!!!!~:.   \n"
+        "$1    .:~~^:::^.$2^77777!!^.^7!77777^.$1^:::^~~:.    \n"
+        "$1     .::^~~!!~:$2^77777?~.~?77777^$1:~!!~~^::.     \n"
+        "$1       .^!!!!!~::$2=====:.:=====$1::~!!!!!^.       \n"
+        "$1        .:~!!!!!~~~~~~^.^~~~~~~!!!!!~:.        \n"
+        "$1         .:~!!!!!!!!!!^.^!!!!!!!!!!~:.         \n"
+        "$1          .:^!!!!!!!!!^.^!!!!!!!!!^:.          \n"
+        "$1            :::::::::::::::::::::::            \n"
     )
     FF_LOGO_COLORS(
         "34", //blue
-        "36" //cyan        
+        "36" //cyan
     )
     FF_LOGO_RETURN
 }
@@ -816,13 +842,13 @@ static const FFlogo* getLogoRebornSmall()
         "$1 /    /   \\___/   \\    \\     \n"
         "$1/____/____/   \\____\\____\\    \n"
         "$1\\    \\    \\___/    /    /    \n"
-        "$1 \\    \\  /     \\  /    /     \n" 
+        "$1 \\    \\  /     \\  /    /     \n"
         "$1  \\    \\/_______\\/    /      \n"
         "$1   \\   /         \\   /       \n"
         "$1    \\_/___________\\_/        \n"
     )
     FF_LOGO_COLORS(
-        "34" //blue       
+        "34" //blue
     )
     FF_LOGO_RETURN
 }
@@ -984,6 +1010,7 @@ static GetLogoMethod* getLogoMethods()
         getLogoGaruda,
         getLogoGentoo,
         getLogoGentooSmall,
+        getLogoLinux,
         getLogoManjaro,
         getLogoManjaroSmall,
         getLogoMint,
@@ -1110,10 +1137,10 @@ void ffLoadLogo(FFinstance* instance)
     const FFOSResult* result = ffDetectOS(instance);
 
     if(
-        !loadLogoSetWithVersion(instance, &result->versionID, &result->name) &&
-        !loadLogoSetWithVersion(instance, &result->versionID, &result->id) &&
-        !loadLogoSetWithVersion(instance, &result->versionID, &result->systemName) &&
-        !loadLogoSetWithVersion(instance, &result->versionID, &result->idLike)
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->name) &&    //e.g. Pop!_OS
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->id) &&      //e.g. popos
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->idLike) &&  //e.g. ubuntu
+        !loadLogoSetWithVersion(instance, &result->versionID, &result->systemName) //e.g. linux
     ) setLogo(instance, getLogoUnknown());
 }
 

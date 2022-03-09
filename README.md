@@ -42,11 +42,11 @@ Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resoluti
 
 ##### Logos
 ```
-Android, Arch, Arco, Artix, CachyOS, CentOS, Debian, Endeavour, Fedora, Garuda, Gentoo, Manjaro, Mint, Pop!_OS, RebornOS, Ubuntu, Void, Zorin
+Android, Arch, Arco, Artix, CachyOS, CentOS, Debian, Endeavour, Fedora, Garuda, Gentoo, Linux, Manjaro, Mint, Pop!_OS, RebornOS, Ubuntu, Void, Zorin
 ```
 * Most of the logos have a small variant. Access it by appending _small to the logo name.
 * Some logos have an old variant. Access it by appending _old to the logo name.
-* Unknown/unsupported logos will be replaced with a question mark when running fastfetch.
+* Unknown/unsupported logos will be replaced with a generic linux logo when running fastfetch.
 * Get a list of all available logos with `fastfetch --print-logos`.
 
 ##### Package managers
