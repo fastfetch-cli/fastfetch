@@ -21,7 +21,7 @@ void ffPrintUptime(FFinstance* instance)
         else
         {
             if(days > 0)
-                printf("%u day%s, ", days, days <= 1 ? "" : "s");
+                printf("%u day%s%s, ", days, days <= 1 ? "" : "s", days < 100 ? "" : "(!)");
             if(hours > 0)
                 printf("%u hour%s, ", hours, hours <= 1 ? "" : "s");
             if(minutes > 0)
