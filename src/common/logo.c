@@ -592,6 +592,37 @@ static const FFlogo* getLogoGentooSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoKDENeon()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("kde", "kde-neon", "neon")
+    FF_LOGO_LINES(
+        "$1             `..---+/---..`             \n"
+        "$1         `---.``   ``   `.---.`         \n"
+        "$1      .--.`        ``        `-:-.      \n"
+        "$1    `:/:     `.----//----.`     :/-     \n"
+        "$1   .:.    `---`          `--.`    .:`   \n"
+        "$1  .:`   `--`                .:-    `:.  \n"
+        "$1 `/    `:.      `.-::-.`      -:`   `/` \n"
+        "$1 /.    /.     `:++++++++:`     .:    .: \n"
+        "$1`/    .:     `+++++++++++/      /`   `+`\n"
+        "$1/+`   --     .++++++++++++`     :.   .+:\n"
+        "$1`/    .:     `+++++++++++/      /`   `+`\n"
+        "$1 /`    /.     `:++++++++:`     .:    .: \n"
+        "$1 ./    `:.      `.:::-.`      -:`   `/` \n"
+        "$1  .:`   `--`                .:-    `:.  \n"
+        "$1   .:.    `---`          `--.`    .:`   \n"
+        "$1    `:/:     `.----//----.`     :/-     \n"
+        "$1      .-:.`        ``        `-:-.      \n"
+        "$1         `---.``   ``   `.---.`         \n"
+        "$1             `..---+/---..`             ";
+    )
+    FF_LOGO_COLORS(
+        "32" //green
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoLinux()
 {
     FF_LOGO_INIT
@@ -1010,6 +1041,7 @@ static GetLogoMethod* getLogoMethods()
         getLogoGaruda,
         getLogoGentoo,
         getLogoGentooSmall,
+        getLogoKDENeon,
         getLogoLinux,
         getLogoManjaro,
         getLogoManjaroSmall,
