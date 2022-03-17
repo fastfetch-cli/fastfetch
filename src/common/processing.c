@@ -15,6 +15,7 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     if(childPid == -1)
         return;
 
+    //Child
     if(childPid == 0)
     {
         dup2(pipes[1], STDOUT_FILENO);
@@ -24,11 +25,10 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
         execvp(argv[0], argv);
         exit(901);
     }
-    else
-    {
-        close(pipes[1]);
-        waitpid(childPid, NULL, 0);
-        ffAppendFDContent(pipes[0], buffer);
-        close(pipes[0]);
-    }
+
+    //Parent
+    close(pipes[1]);
+    waitpid(childPid, NULL, 0);
+    ffAppendFDContent(pipes[0], buffer);
+    close(pipes[0]);
 }
