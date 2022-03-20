@@ -1,4 +1,4 @@
-name: Build, Run and Analyze fastfetch
+name: Manage pushes and pull requests
 
 on:
   push:
@@ -56,14 +56,14 @@ jobs:
 
     - name: Upload binary
       if: github.event_name == 'push'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: fastfetch
         path: ./fastfetch
 
     - name: Upload deb package
       if: github.event_name == 'push'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: fastfetch.deb
         path: ./packaging/deb/fastfetch.deb
@@ -77,13 +77,13 @@ jobs:
       contents: read
     steps:
       - name: Download binary
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: fastfetch
           path: ./fastfetch
 
       - name: Download deb package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: fastfetch.deb
           path: ./fastfetch.deb
