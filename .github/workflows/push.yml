@@ -51,8 +51,8 @@ jobs:
     - name: Build deb package
       run: sh packaging/deb/create.sh .
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+    # - name: Perform CodeQL Analysis
+    #   uses: github/codeql-action/analyze@v1
 
     - name: Create tarball
       if: github.event_name == 'push'
@@ -80,7 +80,7 @@ jobs:
           path: ./fastfetch.tar
 
       - name: Extract tarball
-        run: tar --overwrite -xvf ./fastfetch.tar
+        run: tar --overwrite -xvf ./fastfetch.tar/fastfetch.tar
 
       - name: Get fastfetch version
         id: get_version_fastfetch
