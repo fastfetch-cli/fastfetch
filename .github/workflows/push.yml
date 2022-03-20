@@ -55,44 +55,44 @@ jobs:
       uses: github/codeql-action/analyze@v1
 
     - name: Upload binary
-      if: github.event_name == "push"
+      if: github.event_name == 'push'
       uses: actions/upload-artifact@v3
       with:
         name: fastfetch
         path: ./fastfetch
 
     - name: Upload deb package
-      if: github.event_name == "push"
+      if: github.event_name == 'push'
       uses: actions/upload-artifact@v3
       with:
         name: fastfetch.deb
         path: ./packaging/deb/fastfetch.deb
 
   deploy:
-    name: "Create GitHub release"
+    name: Create GitHub release
     runs-on: ubuntu-latest
     needs: check
-    if: github.event_name == "push"
+    if: github.event_name == 'push'
     steps:
-      - name: "Download binary"
+      - name: Download binary
         uses: actions/download-artifact@v3
         with:
           name: fastfetch
           path: ./fastfetch
 
-      - name: "Download deb package"
+      - name: Download deb package
         uses: actions/download-artifact@v3
         with:
           name: fastfetch.deb
           path: ./fastfetch.deb
 
-      - name: "Get latest release version"
+      - name: Get latest release version
         id: get_version
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ${{ github.repository }}
 
-      - name: "Create GitHub release"
+      - name: Push release
         if: steps.get_version.outputs.release != $(./fastfetch --version)
         uses: softprops/action-gh-release@v1
         with:
