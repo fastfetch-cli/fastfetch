@@ -96,7 +96,7 @@ jobs:
         if: steps.get_version.outputs.release != $(./fastfetch --version)
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ $(./fastfetch --version) }}
+          tag_name: $(./fastfetch --version)
           generate_release_notes: true
           files: |
             ./fastfetch
