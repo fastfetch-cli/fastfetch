@@ -80,7 +80,7 @@ jobs:
           path: ./fastfetch.tar
 
       - name: Extract tarball
-        run: tar -xvf --overwrite ./fastfetch.tar
+        run: tar --overwrite -xvf ./fastfetch.tar
 
       - name: Get fastfetch version
         id: get_version_fastfetch
