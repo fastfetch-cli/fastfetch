@@ -86,14 +86,18 @@ jobs:
           name: fastfetch.deb
           path: ./fastfetch.deb
 
+      - name: Get fastfetch version
+        id: get_version_fastfetch
+        run: echo "::set-output name=release::$(./fastfetch --version)"
+
       - name: Get latest release version
-        id: get_version
+        id: get_version_release
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ${{ github.repository }}
 
       - name: Push release
-        if: steps.get_version.outputs.release != $(./fastfetch --version)
+        if: steps.get_version_fastfetch.outputs.release != steps.get_version_release.outputs.release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: $(./fastfetch --version)
