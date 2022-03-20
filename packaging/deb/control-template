@@ -3,7 +3,7 @@ Version: <VERSION>
 Section: utils
 Priority: extra
 Architecture: amd64
-Maintainer: peter@bohner.me
+Maintainer: Linus@Dierheimer.de
 Homepage: https://github.com/LinusDierheimer/fastfetch
 Installed-Size: 410K
 Description: A fast alternative to neofetch

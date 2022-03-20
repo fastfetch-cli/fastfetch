@@ -613,7 +613,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-v") == 0 || strcasecmp(key, "--version") == 0)
     {
-        puts(FASTFETCH_PROJECT_NAME" "FASTFETCH_PROJECT_VERSION);
+        puts(FASTFETCH_PROJECT_VERSION);
         exit(0);
     }
     else if(strcasecmp(key, "--list-logos") == 0)

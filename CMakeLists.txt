@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
-project(fastfetch LANGUAGES C)
+project(fastfetch
+    VERSION 0.1.0
+    LANGUAGES C
+)
 
 include(GNUInstallDirs)
 
@@ -24,26 +27,6 @@ endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
-
-set(PROJECT_VERSION "r0.0" CACHE STRING "Full version")
-set(PROJECT_VERSION_MAJOR "0" CACHE STRING "Major version")
-if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
-    execute_process(
-        COMMAND git rev-list --count HEAD
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        OUTPUT_VARIABLE GIT_REV_LIST
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    execute_process(
-        COMMAND git rev-parse --short HEAD
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        OUTPUT_VARIABLE GIT_REV_PARSE
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    set(PROJECT_VERSION "r${GIT_REV_LIST}.${GIT_REV_PARSE}")
-    set(PROJECT_VERSION_MAJOR "${GIT_REV_LIST}")
-endif()
 
 function(fastfetch_load_text FILENAME OUTVAR)
     file(READ "${FILENAME}" TEMP)

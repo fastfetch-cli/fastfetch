@@ -10,7 +10,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  default:
+  check:
     name: Build, Run and Analyze fastfetch
     runs-on: ubuntu-latest
     permissions:
@@ -50,3 +50,18 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+
+    - name: Build deb package
+      run: sh packaging/deb/create.sh .
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: fastfetch
+        path: ./fastfetch
+
+    - name: Upload deb package
+      uses: actions/upload-artifact@v2
+      with:
+        name: fastfetch.deb
+        path: ./packaging/deb/fastfetch.deb
