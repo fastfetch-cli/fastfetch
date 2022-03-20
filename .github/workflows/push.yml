@@ -55,7 +55,7 @@ jobs:
       uses: github/codeql-action/analyze@v1
 
     - name: Create tarball
-      if: github.event_name == "push"
+      if: github.event_name == 'push'
       run: tar -cvf fastfetch.tar ./fastfetch -C packaging/deb ./fastfetch.deb
 
     - name: Upload tarball
