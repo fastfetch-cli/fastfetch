@@ -71,7 +71,7 @@ jobs:
     needs: check
     if: github.event_name == 'push'
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Download tarball
         uses: actions/download-artifact@v3
@@ -94,10 +94,8 @@ jobs:
 
       - name: Push release
         if: steps.get_version_fastfetch.outputs.release != steps.get_version_release.outputs.release
-        uses: softprops/action-gh-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          name: ${{ steps.get_version_fastfetch.outputs.release }}
-          generate_release_notes: true
-          files: |
-            ./fastfetch
-            ./fastfetch.deb
+          tag: ${{ steps.get_version_fastfetch.outputs.release }}
+          commit: ${{ github.sha }}
+          artifacts: ./fastfetch,./fastfetch.deb
