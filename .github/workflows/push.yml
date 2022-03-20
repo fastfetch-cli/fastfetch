@@ -54,19 +54,16 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
 
-    - name: Upload binary
-      if: github.event_name == 'push'
-      uses: actions/upload-artifact@v2
-      with:
-        name: fastfetch
-        path: ./fastfetch
+    - name: Create tarball
+      if: github.event_name == "push"
+      run: tar -cvf fastfetch.tar ./fastfetch -C packaging/deb ./fastfetch.deb
 
-    - name: Upload deb package
+    - name: Upload tarball
       if: github.event_name == 'push'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
-        name: fastfetch.deb
-        path: ./packaging/deb/fastfetch.deb
+        name: fastfetch.tar
+        path: ./fastfetch.tar
 
   deploy:
     name: Create GitHub release
@@ -76,21 +73,18 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Download binary
-        uses: actions/download-artifact@v2
+      - name: Download tarball
+        uses: actions/download-artifact@v3
         with:
-          name: fastfetch
-          path: ./fastfetch
+          name: fastfetch.tar
+          path: ./fastfetch.tar
 
-      - name: Download deb package
-        uses: actions/download-artifact@v2
-        with:
-          name: fastfetch.deb
-          path: ./fastfetch.deb
+      - name: Extract tarball
+        run: tar -xvf --overwrite ./fastfetch.tar
 
       - name: Get fastfetch version
         id: get_version_fastfetch
-        run: echo "::set-output name=release::$(./fastfetch/fastfetch --version)"
+        run: echo "::set-output name=release::$(./fastfetch --version)"
 
       - name: Get latest release version
         id: get_version_release
@@ -105,5 +99,5 @@ jobs:
           tag_name: ${{ steps.get_version_fastfetch.outputs.release }}
           generate_release_notes: true
           files: |
-            ./fastfetch/fastfetch
-            ./fastfetch.deb/fastfetch.deb
+            ./fastfetch
+            ./fastfetch.deb
