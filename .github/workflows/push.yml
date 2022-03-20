@@ -28,10 +28,10 @@ jobs:
     - name: Update and install packages
       run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: ${{ matrix.language }}
+    # - name: Initialize CodeQL
+    #   uses: github/codeql-action/init@v1
+    #   with:
+    #     languages: ${{ matrix.language }}
 
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} .
@@ -96,7 +96,7 @@ jobs:
         if: steps.get_version_fastfetch.outputs.release != steps.get_version_release.outputs.release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.get_version_fastfetch.outputs.release }}
+          name: ${{ steps.get_version_fastfetch.outputs.release }}
           generate_release_notes: true
           files: |
             ./fastfetch
