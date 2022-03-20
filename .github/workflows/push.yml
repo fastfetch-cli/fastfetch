@@ -28,10 +28,10 @@ jobs:
     - name: Update and install packages
       run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
 
-    # - name: Initialize CodeQL
-    #   uses: github/codeql-action/init@v1
-    #   with:
-    #     languages: ${{ matrix.language }}
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
 
     - name: Configure
       run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} .
@@ -51,8 +51,8 @@ jobs:
     - name: Build deb package
       run: sh packaging/deb/create.sh .
 
-    # - name: Perform CodeQL Analysis
-    #   uses: github/codeql-action/analyze@v1
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
 
     - name: Create tarball
       if: github.event_name == 'push'
