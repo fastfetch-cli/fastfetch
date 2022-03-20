@@ -88,7 +88,7 @@ jobs:
 
       - name: Get fastfetch version
         id: get_version_fastfetch
-        run: echo "::set-output name=release::$(./fastfetch --version)"
+        run: echo "::set-output name=release::$(./fastfetch/fastfetch --version)"
 
       - name: Get latest release version
         id: get_version_release
@@ -100,8 +100,8 @@ jobs:
         if: steps.get_version_fastfetch.outputs.release != steps.get_version_release.outputs.release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: $(./fastfetch --version)
+          tag_name: ${{ steps.get_version_fastfetch.outputs.release }}
           generate_release_notes: true
           files: |
-            ./fastfetch
-            ./fastfetch.deb
+            ./fastfetch/fastfetch
+            ./fastfetch.deb/fastfetch.deb
