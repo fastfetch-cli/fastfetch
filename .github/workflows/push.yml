@@ -84,7 +84,7 @@ jobs:
 
       - name: Get fastfetch version
         id: get_version_fastfetch
-        run: echo "::set-output name=release::$(./fastfetch --version)"
+        run: echo "::set-output name=release::$(./fastfetch --version-raw)"
 
       - name: Get latest release version
         id: get_version_release

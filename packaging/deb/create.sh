@@ -22,7 +22,7 @@ fi
 # Populate the files
 cmake --install "${BUILD_DIR}" --prefix "${PACKAGE_DIR}/usr" || exit 5
 mkdir -p "${PACKAGE_DIR}/DEBIAN" || exit 6
-sed "s/<VERSION>/$("${BUILD_DIR}/fastfetch" --version)/g" "${ROOT_DIR}/packaging/deb/control-template" > "${PACKAGE_DIR}/DEBIAN/control" || exit 7
+sed "s/<VERSION>/$("${BUILD_DIR}/fastfetch" --version-raw)/g" "${ROOT_DIR}/packaging/deb/control-template" > "${PACKAGE_DIR}/DEBIAN/control" || exit 7
 
 # Create the package
 dpkg-deb --build "${PACKAGE_DIR}" || exit 8

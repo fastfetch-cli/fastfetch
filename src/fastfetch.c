@@ -613,6 +613,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-v") == 0 || strcasecmp(key, "--version") == 0)
     {
+        puts("fastfetch "FASTFETCH_PROJECT_VERSION""FASTFETCH_PROJECT_VERSION_EXTRA);
+        exit(0);
+    }
+    else if(strcasecmp(key, "--version-raw") == 0)
+    {
         puts(FASTFETCH_PROJECT_VERSION);
         exit(0);
     }

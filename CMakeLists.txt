@@ -5,6 +5,10 @@ project(fastfetch
     LANGUAGES C
 )
 
+#e.g. -alpha or -beta or +1
+#This allows to track builds between versions, without GitHub creating a new release
+set(PROJECT_VERSION_EXTRA "+1")
+
 include(GNUInstallDirs)
 
 OPTION(ENABLE_LIBPCI "Enable libpci" ON)
