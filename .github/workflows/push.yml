@@ -55,14 +55,14 @@ jobs:
       uses: github/codeql-action/analyze@v1
 
     - name: Upload binary
-      if: ${{ github.event_name == "push" }}
+      if: github.event_name == "push"
       uses: actions/upload-artifact@v3
       with:
         name: fastfetch
         path: ./fastfetch
 
     - name: Upload deb package
-      if: ${{ github.event_name == "push" }}
+      if: github.event_name == "push"
       uses: actions/upload-artifact@v3
       with:
         name: fastfetch.deb
@@ -72,7 +72,7 @@ jobs:
     name: "Create GitHub release"
     runs-on: ubuntu-latest
     needs: check
-    if: ${{ github.event_name == "push" }}
+    if: github.event_name == "push"
     steps:
       - name: "Download binary"
         uses: actions/download-artifact@v3
