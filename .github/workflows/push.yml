@@ -73,6 +73,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: check
     if: github.event_name == 'push'
+    permissions:
+      contents: read
     steps:
       - name: Download binary
         uses: actions/download-artifact@v3
