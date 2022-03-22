@@ -257,10 +257,13 @@ typedef struct FFTempsResult
 
 typedef struct FFMediaResult
 {
-    FFstrbuf player;
+    FFstrbuf busNameShort; //e.g. plasma-browser-integration
+    FFstrbuf player; // e.g. Google Chrome
+    FFstrbuf playerPretty; // e.g. YouTube (Google Chrome)
     FFstrbuf song;
     FFstrbuf artist;
     FFstrbuf album;
+    FFstrbuf url;
 } FFMediaResult;
 
 typedef struct FFDateTimeResult

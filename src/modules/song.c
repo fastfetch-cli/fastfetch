@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 
 #define FF_SONG_MODULE_NAME "Song"
-#define FF_SONG_NUM_FORMAT_ARGS 3
+#define FF_SONG_NUM_FORMAT_ARGS 4
 
 void ffPrintSong(FFinstance* instance)
 {
@@ -36,7 +36,8 @@ void ffPrintSong(FFinstance* instance)
         ffPrintFormatString(instance, FF_SONG_MODULE_NAME, 0, &instance->config.songKey, &instance->config.songFormat, NULL, FF_SONG_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
         });
     }
 }

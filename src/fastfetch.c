@@ -304,16 +304,19 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "player-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("player", "{}", 1,
-            "Player name"
+        constructAndPrintCommandHelpFormat("player", "{}", 3,
+            "Pretty player name",
+            "Player name",
+            "DBus bus name"
         );
     }
     else if(strcasecmp(command, "song-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("song", "{2} - {3} - {1}", 3,
+        constructAndPrintCommandHelpFormat("song", "{2} - {3} - {1}", 4,
             "Song name",
             "Artist name",
-            "Album name"
+            "Album name",
+            "Song url"
         );
     }
     else if(strcasecmp(command, "datetime-format") == 0 || strcasecmp(command, "date-format") == 0 || strcasecmp(command, "time-format") == 0)
