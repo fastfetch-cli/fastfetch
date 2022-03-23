@@ -81,6 +81,22 @@ static bool getValue(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
     return foundAValue;
 }
 
+static DBusMessage* getReply(DBusMessage* request, DBusData* data)
+{
+    DBusPendingCall* pendingCall = NULL;
+    dbus_bool_t succesfull = data->ffdbus_connection_send_with_reply(data->connection, request, &pendingCall, DBUS_TIMEOUT_USE_DEFAULT);
+    data->ffdbus_message_unref(request);
+    if(!succesfull || pendingCall == NULL)
+        return NULL;
+
+    data->ffdbus_connection_flush(data->connection);
+    data->ffdbus_pending_call_block(pendingCall);
+
+    DBusMessage* reply = data->ffdbus_pending_call_steal_reply(pendingCall);
+    data->ffdbus_pending_call_unref(pendingCall);
+    return reply;
+}
+
 static DBusMessage* getProperty(const char* busName, const char* objectPath, const char* interface, const char* property, DBusData* data)
 {
     DBusMessage* message = data->ffdbus_message_new_method_call(busName, objectPath, "org.freedesktop.DBus.Properties", "Get");
@@ -102,20 +118,7 @@ static DBusMessage* getProperty(const char* busName, const char* objectPath, con
         return NULL;
     }
 
-    DBusPendingCall* pending;
-    bool sendSuccessfull = data->ffdbus_connection_send_with_reply(data->connection, message, &pending, DBUS_TIMEOUT_USE_DEFAULT);
-    data->ffdbus_message_unref(message);
-    if(pending == NULL || !sendSuccessfull)
-        return NULL;
-
-    data->ffdbus_connection_flush(data->connection);
-    data->ffdbus_pending_call_block(pending);
-
-    DBusMessage* reply = data->ffdbus_pending_call_steal_reply(pending);
-
-    data->ffdbus_pending_call_unref(pending);
-
-    return reply;
+    return getReply(message, data);
 }
 
 static void getPropertyString(const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result, DBusData* data)
@@ -244,17 +247,7 @@ static void getBestBus(FFMediaResult* result, DBusData* data)
     if(message == NULL)
         return;
 
-    DBusPendingCall* pending;
-    bool sendSuccessfull = data->ffdbus_connection_send_with_reply(data->connection, message, &pending, DBUS_TIMEOUT_USE_DEFAULT);
-    data->ffdbus_message_unref(message);
-    if(pending == NULL || !sendSuccessfull)
-        return;
-
-    data->ffdbus_connection_flush(data->connection);
-    data->ffdbus_pending_call_block(pending);
-
-    DBusMessage* reply = data->ffdbus_pending_call_steal_reply(pending);
-    data->ffdbus_pending_call_unref(pending);
+    DBusMessage* reply = getReply(message, data);
     if(reply == NULL)
         return;
 
@@ -323,6 +316,28 @@ static void getMedia(FFinstance* instance, FFMediaResult* result)
         getBestBus(result, &data);
 
     dlclose(dbus);
+
+    //If we are on a website, prepend the website name
+    if(ffStrbufStartsWithS(&result->url, "https://www."))
+        ffStrbufAppendS(&result->playerPretty, result->url.chars + 12);
+    else if(ffStrbufStartsWithS(&result->url, "http://www."))
+        ffStrbufAppendS(&result->playerPretty, result->url.chars + 11);
+    else if(ffStrbufStartsWithS(&result->url, "https://"))
+        ffStrbufAppendS(&result->playerPretty, result->url.chars + 8);
+    else if(ffStrbufStartsWithS(&result->url, "http://"))
+        ffStrbufAppendS(&result->playerPretty, result->url.chars + 7);
+
+    //If we found a website name, make it more pretty
+    if(result->playerPretty.length > 0)
+    {
+        ffStrbufSubstrBeforeFirstC(&result->playerPretty, '/'); //Remove the path
+        ffStrbufSubstrBeforeLastC(&result->playerPretty, '.'); //Remove the TLD
+    }
+
+    //Check again for length, as we may have removed everything.
+    //If we don't have subdomains, it is usually more pretty to capitalize the first letter.
+    if(result->playerPretty.length > 0 && ffStrbufFirstIndexC(&result->playerPretty, '.') < result->playerPretty.length)
+        result->playerPretty.chars[0] = (char) toupper(result->playerPretty.chars[0]);
 }
 
 #endif
@@ -354,7 +369,7 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance)
     #endif
 
     //Set busNameShort if a custom player was given, but loading dbus failed
-    if(instance->config.playerName.length > 0 && result.player.length == 0)
+    if(instance->config.playerName.length > 0 && result.busNameShort.length == 0)
     {
         if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
             ffStrbufAppendS(&result.busNameShort, instance->config.playerName.chars + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
@@ -366,35 +381,10 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance)
     if(result.player.length == 0)
         ffStrbufAppend(&result.player, &result.busNameShort);
 
-    //If we are on a website, prepend the website name
-    if(ffStrbufStartsWithS(&result.url, "https://www.")) {
-        ffStrbufAppendS(&result.playerPretty, result.url.chars + 12);
-    }
-    else if(ffStrbufStartsWithS(&result.url, "http://www.")) {
-        ffStrbufAppendS(&result.playerPretty, result.url.chars + 11);
-    }
-    else if(ffStrbufStartsWithS(&result.url, "https://")) {
-        ffStrbufAppendS(&result.playerPretty, result.url.chars + 8);
-    }
-    else if(ffStrbufStartsWithS(&result.url, "http://")) {
-        ffStrbufAppendS(&result.playerPretty, result.url.chars + 7);
-    }
-
-    //If we found a website name, make it more pretty
-    if(result.playerPretty.length > 0)
-    {
-        ffStrbufSubstrBeforeFirstC(&result.playerPretty, '/'); //Remove the path
-        ffStrbufSubstrBeforeLastC(&result.playerPretty, '.'); //Remove the TLD
-    }
-
-    //We may have removed everything
     bool hasCustomPrettyName = result.playerPretty.length > 0;
 
     if(hasCustomPrettyName)
-    {
-        result.playerPretty.chars[0] = (char) toupper(result.playerPretty.chars[0]);
         ffStrbufAppendS(&result.playerPretty, " (");
-    }
 
     ffStrbufAppend(&result.playerPretty, &result.player);
 
