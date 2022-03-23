@@ -87,7 +87,8 @@ void ffPrintSong(FFinstance* instance)
             fputs(" - ", stdout);
         }
 
-        if(media->album.length > 0)
+        //Some sites (e.g. reddit) expose their url as album. We don't want to show that
+        if(media->album.length > 0 && !ffStrbufStartsWithIgnCaseS(&media->album, "http"))
         {
             ffStrbufWriteTo(&media->album, stdout);
             fputs(" - ", stdout);

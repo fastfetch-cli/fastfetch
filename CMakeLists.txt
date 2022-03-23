@@ -7,7 +7,7 @@ project(fastfetch
 
 #e.g. +1
 #This allows to track builds between versions, without GitHub creating a new release
-set(PROJECT_VERSION_EXTRA "+2")
+set(PROJECT_VERSION_EXTRA "+3")
 
 include(GNUInstallDirs)
 
