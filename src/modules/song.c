@@ -56,7 +56,10 @@ void ffPrintSong(FFinstance* instance)
         "(Official Music Video)", "(Official Video)", "(Music Video)",
         "[Official Music Video]", "[Official Video]", "[Music Video]",
         "| Official Music Video", "| Official Video", "| Music Video",
-        "[Official Audio]", "[Audio]", "(Audio)", "| Official Audio", "| Audio", "| OFFICIAL AUDIO"
+        "[Official Audio]", "[Audio]", "(Audio)", "| Official Audio", "| Audio", "| OFFICIAL AUDIO",
+        "(Lyric Video)", "(Official Lyric Video)", "(Lyrics)",
+        "[Lyric Video]", "[Official Lyric Video]", "[Lyrics]",
+        "| Lyric Video", "| Official Lyric Video", "| Lyrics",
     };
     ffStrbufRemoveStringsA(&songPretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
     ffStrbufTrimRight(&songPretty, ' ');
