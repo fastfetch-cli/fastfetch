@@ -259,7 +259,6 @@ typedef struct FFMediaResult
 {
     FFstrbuf busNameShort; //e.g. plasma-browser-integration
     FFstrbuf player; // e.g. Google Chrome
-    FFstrbuf playerPretty; // e.g. YouTube (Google Chrome)
     FFstrbuf song;
     FFstrbuf artist;
     FFstrbuf album;

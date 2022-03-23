@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch
-    VERSION 1.1.2
+    VERSION 1.2.0
     LANGUAGES C
 )
 

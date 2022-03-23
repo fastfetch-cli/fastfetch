@@ -312,7 +312,8 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "song-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("song", "{2} - {3} - {1}", 4,
+        constructAndPrintCommandHelpFormat("song", "{3} - {4} - {1}", 5,
+            "Song name pretty",
             "Song name",
             "Artist name",
             "Album name",

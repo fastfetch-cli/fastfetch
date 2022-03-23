@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 
-#include <ctype.h>
 #include <string.h>
 #include <pthread.h>
 
@@ -316,28 +315,6 @@ static void getMedia(FFinstance* instance, FFMediaResult* result)
         getBestBus(result, &data);
 
     dlclose(dbus);
-
-    //If we are on a website, prepend the website name
-    if(ffStrbufStartsWithS(&result->url, "https://www."))
-        ffStrbufAppendS(&result->playerPretty, result->url.chars + 12);
-    else if(ffStrbufStartsWithS(&result->url, "http://www."))
-        ffStrbufAppendS(&result->playerPretty, result->url.chars + 11);
-    else if(ffStrbufStartsWithS(&result->url, "https://"))
-        ffStrbufAppendS(&result->playerPretty, result->url.chars + 8);
-    else if(ffStrbufStartsWithS(&result->url, "http://"))
-        ffStrbufAppendS(&result->playerPretty, result->url.chars + 7);
-
-    //If we found a website name, make it more pretty
-    if(result->playerPretty.length > 0)
-    {
-        ffStrbufSubstrBeforeFirstC(&result->playerPretty, '/'); //Remove the path
-        ffStrbufSubstrBeforeLastC(&result->playerPretty, '.'); //Remove the TLD
-    }
-
-    //Check again for length, as we may have removed everything.
-    //If we don't have subdomains, it is usually more pretty to capitalize the first letter.
-    if(result->playerPretty.length > 0 && ffStrbufFirstIndexC(&result->playerPretty, '.') == result->playerPretty.length)
-        result->playerPretty.chars[0] = (char) toupper(result->playerPretty.chars[0]);
 }
 
 #endif
@@ -358,7 +335,6 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance)
 
     ffStrbufInit(&result.busNameShort);
     ffStrbufInit(&result.player);
-    ffStrbufInit(&result.playerPretty);
     ffStrbufInit(&result.song);
     ffStrbufInit(&result.artist);
     ffStrbufInit(&result.album);
@@ -380,16 +356,6 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance)
     //Set player to busNameShort, if detection failed
     if(result.player.length == 0)
         ffStrbufAppend(&result.player, &result.busNameShort);
-
-    bool hasCustomPrettyName = result.playerPretty.length > 0;
-
-    if(hasCustomPrettyName)
-        ffStrbufAppendS(&result.playerPretty, " (");
-
-    ffStrbufAppend(&result.playerPretty, &result.player);
-
-    if(hasCustomPrettyName)
-        ffStrbufAppendC(&result.playerPretty, ')');
 
     pthread_mutex_unlock(&mutex);
     return &result;
