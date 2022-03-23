@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch
-    VERSION 1.1.0
+    VERSION 1.1.1
     LANGUAGES C
 )
 
 #e.g. +1
 #This allows to track builds between versions, without GitHub creating a new release
-set(PROJECT_VERSION_EXTRA "+1")
+set(PROJECT_VERSION_EXTRA "")
 
 include(GNUInstallDirs)
 

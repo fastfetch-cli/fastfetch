@@ -246,9 +246,10 @@ void ffCacheValidate(FFinstance* instance)
     ffStrbufInit(&content);
     ffAppendFileContent(path.chars, &content);
 
-    if(ffStrbufCompS(&content, FASTFETCH_PROJECT_VERSION) == 0)
+    bool isSameVersion = ffStrbufCompS(&content, FASTFETCH_PROJECT_VERSION) == 0;
+    ffStrbufDestroy(&content);
+    if(isSameVersion)
     {
-        ffStrbufDestroy(&content);
         ffStrbufDestroy(&path);
         return;
     }
@@ -261,7 +262,6 @@ void ffCacheValidate(FFinstance* instance)
     ffWriteFileContent(path.chars, &version);
     ffStrbufDestroy(&version);
 
-    ffStrbufDestroy(&content);
     ffStrbufDestroy(&path);
 }
 
@@ -409,7 +409,7 @@ bool ffWriteFDContent(int fd, const FFstrbuf* content)
 
 void ffWriteFileContent(const char* fileName, const FFstrbuf* content)
 {
-    int fd = open(fileName, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(fd == -1)
         return;
 
