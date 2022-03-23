@@ -336,7 +336,7 @@ static void getMedia(FFinstance* instance, FFMediaResult* result)
 
     //Check again for length, as we may have removed everything.
     //If we don't have subdomains, it is usually more pretty to capitalize the first letter.
-    if(result->playerPretty.length > 0 && ffStrbufFirstIndexC(&result->playerPretty, '.') < result->playerPretty.length)
+    if(result->playerPretty.length > 0 && ffStrbufFirstIndexC(&result->playerPretty, '.') == result->playerPretty.length)
         result->playerPretty.chars[0] = (char) toupper(result->playerPretty.chars[0]);
 }
 
