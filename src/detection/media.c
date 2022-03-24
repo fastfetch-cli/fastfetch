@@ -208,6 +208,7 @@ static bool getBusProperties(const char* busName, FFMediaResult* result, DBusDat
     {
         ffStrbufClear(&result->artist);
         ffStrbufClear(&result->album);
+        ffStrbufClear(&result->url);
         return false;
     }
 
