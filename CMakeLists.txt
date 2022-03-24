@@ -5,9 +5,17 @@ project(fastfetch
     LANGUAGES C
 )
 
-#e.g. +1
-#This allows to track builds between versions, without GitHub creating a new release
-set(PROJECT_VERSION_EXTRA "+3")
+# Track commits between version bumps for output in --version
+# Ignored by --version-raw and github actions
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND git describe --tags
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE PROJECT_VERSION_TWEAK
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
+endif()
 
 include(GNUInstallDirs)
 
