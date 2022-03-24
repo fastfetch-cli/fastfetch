@@ -1,0 +1,10 @@
+name: manage pull requests
+
+on: pull_request
+
+jobs:
+  manage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: run build and check
+        uses: ./.github/workflows/check.yml

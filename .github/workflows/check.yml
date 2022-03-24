@@ -1,0 +1,48 @@
+name: run build and checks
+
+on: workflow_call
+
+jobs:
+  check:
+    name: Build, Run and Analyze fastfetch
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp' ]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Update and install packages
+      run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Configure
+      # We reuse the build binary only for the releases.
+      # We set tweak version to off, because it is wrong, as git tag will happen after this step. Releases don't have a tweak, so this is ok.
+      run: cmake -DSET_TWEAK=Off .
+
+    - name: Build
+      run: cmake --build . -j$(nproc)
+
+    - name: Run fastfetch
+      run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
+
+    - name: Run flashfetch
+      run: ./flashfetch
+
+    - name: Run tests
+      run: ctest
+
+    - name: Build deb package
+      run: sh packaging/deb/create.sh .
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1

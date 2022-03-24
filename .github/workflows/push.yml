@@ -1,86 +1,18 @@
-name: Manage pushes and pull requests
+name: manage pushes
 
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-env:
-  BUILD_TYPE: Release
 
 jobs:
-  check:
-    name: Build, Run and Analyze fastfetch
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: write
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'cpp' ]
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Update and install packages
-      run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: ${{ matrix.language }}
-
-    - name: Configure
-      run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} .
-
-    - name: Build
-      run: cmake --build . -j$(nproc)
-
-    - name: Run fastfetch
-      run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
-
-    - name: Run flashfetch
-      run: ./flashfetch
-
-    - name: Run tests
-      run: ctest
-
-    - name: Build deb package
-      run: sh packaging/deb/create.sh .
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
-
-    - name: Create tarball
-      if: github.event_name == 'push'
-      run: tar -cvf fastfetch.tar ./fastfetch -C packaging/deb ./fastfetch.deb
-
-    - name: Upload tarball
-      if: github.event_name == 'push'
-      uses: actions/upload-artifact@v3
-      with:
-        name: fastfetch.tar
-        path: ./fastfetch.tar
-
-  deploy:
+  manage:
     name: Create GitHub release
     runs-on: ubuntu-latest
-    needs: check
-    if: github.event_name == 'push'
     permissions:
       contents: write
     steps:
-      - name: Download tarball
-        uses: actions/download-artifact@v3
-        with:
-          name: fastfetch.tar
-          path: ./fastfetch.tar
-
-      - name: Extract tarball
-        run: tar --overwrite -xvf ./fastfetch.tar/fastfetch.tar
+      - name: run build and check
+        uses: ./.github/workflows/check.yml
 
       - name: Get fastfetch version
         id: get_version_fastfetch
@@ -98,4 +30,4 @@ jobs:
         with:
           tag: ${{ steps.get_version_fastfetch.outputs.release }}
           commit: ${{ github.sha }}
-          artifacts: ./fastfetch,./fastfetch.deb
+          artifacts: ./fastfetch,./packaging/deb/fastfetch.deb

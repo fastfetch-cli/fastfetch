@@ -5,9 +5,12 @@ project(fastfetch
     LANGUAGES C
 )
 
+# This is used by github actions for release builds
+OPTION(SET_TWEAK "Add tweak to project version" ON)
+
 # Track commits between version bumps for output in --version
 # Ignored by --version-raw and github actions
-if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process(
         COMMAND git describe --tags
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
