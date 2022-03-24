@@ -3,7 +3,7 @@ name: manage pull requests
 on: pull_request
 
 jobs:
-  manage:
+  check:
     name: manage pull request
     runs-on: ubuntu-latest
     permissions:
@@ -13,4 +13,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: run build and check
-        uses: ./.github/actions/check
+        uses: ./.github/workflows/check

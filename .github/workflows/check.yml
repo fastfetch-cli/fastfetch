@@ -1,0 +1,37 @@
+name: build and check
+
+on: workflow_call
+
+jobs:
+  check:
+    name: build and check
+    runs-on: ubuntu-latest
+    steps:
+    - name: install required packages
+      run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libxfconf-0-dev librpm-dev libzstd-dev
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+
+    - name: configure project
+      # We reuse the build binary only for the releases.
+      # We set tweak version to off, because it is wrong, as git tag will happen after this step. Releases don't have a tweak, so this is ok.
+      run: cmake -DSET_TWEAK=Off .
+
+    - name: build project
+      run: cmake --build . -j$(nproc)
+
+    - name: run fastfetch
+      run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
+
+    - name: run flashfetch
+      run: ./flashfetch
+
+    - name: run tests
+      run: ctest
+
+    - name: build deb package
+      run: sh packaging/deb/create.sh .
+
+    - name: perform CodeQL analysis
+      uses: github/codeql-action/analyze@v1
