@@ -6,6 +6,8 @@ jobs:
   manage:
     name: manage pull request
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: checkout repository
         uses: actions/checkout@v2
