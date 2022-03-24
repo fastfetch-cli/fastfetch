@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: run build and check
-        uses: ./.github/workflows/check.yml@master
+        uses: LinusDierheimer/fastfetch/.github/workflows/check.yml@master
 
       - name: get fastfetch version
         id: get_version_fastfetch
