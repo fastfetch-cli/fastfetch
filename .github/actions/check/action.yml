@@ -40,5 +40,4 @@ runs:
     run: sh packaging/deb/create.sh .
 
   - name: perform CodeQL analysis
-    shell: sh
     uses: github/codeql-action/analyze@v1
