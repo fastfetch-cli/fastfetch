@@ -6,25 +6,28 @@ on:
 
 jobs:
   manage:
-    name: Create GitHub release
+    name: manage push
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+
       - name: run build and check
         uses: ./.github/workflows/check.yml
 
-      - name: Get fastfetch version
+      - name: get fastfetch version
         id: get_version_fastfetch
         run: echo "::set-output name=release::$(./fastfetch --version-raw)"
 
-      - name: Get latest release version
+      - name: get latest release version
         id: get_version_release
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ${{ github.repository }}
 
-      - name: Push release
+      - name: create release
         if: steps.get_version_fastfetch.outputs.release != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
