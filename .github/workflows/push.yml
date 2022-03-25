@@ -57,4 +57,4 @@ jobs:
         with:
           tag: ${{ steps.get_version_fastfetch.outputs.release }}
           commit: ${{ github.sha }}
-          artifacts: ./fastfetch,./fastfetch-*.*
+          artifacts: ./fastfetch-*.*

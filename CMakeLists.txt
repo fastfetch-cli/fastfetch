@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch
-    VERSION 1.2.0
+    VERSION 1.2.1
     LANGUAGES C
 )
 
@@ -337,6 +337,7 @@ set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/LinusDierheimer")
 
 set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
 set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "
     libpci3
     libvulkan1
