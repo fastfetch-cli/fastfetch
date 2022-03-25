@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch
-    VERSION 1.2.1
+    VERSION 1.2.2
     LANGUAGES C
 )
 
@@ -325,7 +325,7 @@ install(
 
 # Packaging
 
-set(CPACK_GENERATOR "DEB;RPM;TZST")
+set(CPACK_GENERATOR "DEB;RPM;TGZ;ZIP")
 
 set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neofetch clone written in C")
