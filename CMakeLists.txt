@@ -352,4 +352,6 @@ set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "
     libxfconf-0-3
 ")
 
+set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+
 include(CPack)
