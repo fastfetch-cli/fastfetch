@@ -1,3 +1,0 @@
-[submodule "packaging/aur"]
-	path = packaging/aur
-	url = https://aur.archlinux.org/fastfetch-git.git

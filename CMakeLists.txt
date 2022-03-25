@@ -5,22 +5,11 @@ project(fastfetch
     LANGUAGES C
 )
 
-# This is used by github actions for release builds
+# This is set to off by github actions for release builds
 OPTION(SET_TWEAK "Add tweak to project version" ON)
 
-# Track commits between version bumps for output in --version
-# Ignored by --version-raw and github actions
-if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
-    execute_process(
-        COMMAND git describe --tags
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        OUTPUT_VARIABLE PROJECT_VERSION_TWEAK
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
-endif()
-
-include(GNUInstallDirs)
+# Also create test executables
+OPTION(BUILD_TESTS "Build tests" OFF)
 
 OPTION(ENABLE_LIBPCI "Enable libpci" ON)
 OPTION(ENABLE_VULKAN "Enable vulkan" ON)
@@ -34,7 +23,17 @@ OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
-OPTION(BUILD_TESTS "Build tests" ON)
+
+# Track commits between version bumps for output in --version
+if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND git describe --tags
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        OUTPUT_VARIABLE PROJECT_VERSION_TWEAK
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -66,7 +65,7 @@ find_package(Threads REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 
-# Init CMake targets.
+# Init CMake targets
 
 add_library(libfastfetch STATIC
     src/util/FFstrbuf.c
@@ -278,7 +277,7 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
 
-# Testing.
+# Testing
 
 if (BUILD_TESTS)
     add_executable(fastfetch-test-performance
@@ -299,7 +298,9 @@ if (BUILD_TESTS)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
 endif()
 
-# Installation.
+# Installation
+
+include(GNUInstallDirs)
 
 install(
     TARGETS fastfetch
@@ -321,3 +322,33 @@ install(
     FILES ./LICENSE
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}
 )
+
+# Packaging
+
+set(CPACK_GENERATOR "DEB;RPM;TZST")
+
+set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neofetch clone written in C")
+set(CPACK_PACKAGE_DESCRIPTION "
+    fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way.
+    It is written in c to achieve much better performance.
+")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/LinusDierheimer")
+
+set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "
+    libpci3
+    libvulkan1
+    libwayland-client0
+    libxcb-randr0
+    xcb
+    libxrandr2
+    libx11-6
+    libdconf1
+    libglib2.0-0
+    libdbus-1-3
+    libxfconf-0-3
+")
+
+include(CPack)
