@@ -775,6 +775,111 @@ static const FFlogo* getLogoMintOld()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoOpenSuse()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("suse", "opensuse", "open_suse", "open-suse", "suse-linux")
+    FF_LOGO_LINES(
+        "$2           .;ldkO0000Okdl;.           \n"
+        "$2       .;d00xl:^''''''^:ok00d;.       \n"
+        "$2     .d00l'                'o00d.     \n"
+        "$2   .d0Kd'$1  Okxol:;,.          $2:O0d    \n"
+        "$2  .OK$1KKK0kOKKKKKKKKKKOxo:,      $2lKO.  \n"
+        "$2 ,0K$1KKKKKKKKKKKKKKK0P^$2,,,$1^dx:$2    ;00, \n"
+        "$2.OK$1KKKKKKKKKKKKKKKk'$2.oOPPb.$1'0k.$2   cKO.\n"
+        "$2:KK$1KKKKKKKKKKKKKKK: $2kKx..dd $1lKd$2   'OK:\n"
+        "$2dKK$1KKKKKKKKKOx0KKKd $2^0KKKO' $1kKKc$2   dKd\n"
+        "$2dKK$1KKKKKKKKKK;.;oOKx,..$2^$1..;kKKK0.$2  dKd\n"
+        "$2:KK$1KKKKKKKKKK0o;...^cdxxOK0O/^^'  $2.0K:\n"
+        "$2 kKK$1KKKKKKKKKKKKK0x;,,......,;od  $2lKk \n"
+        "$2 '0K$1KKKKKKKKKKKKKKKKKKKK00KKOo^  $2c00' \n"
+        "$2  'kK$1KKOxddxkOO00000Okxoc;''   $2.dKk'  \n"
+        "$2    l0Ko.                    .c00l'   \n"
+        "$2     'l0Kk:.              .;xK0l'     \n"
+        "$2        'lkK0xl:;,,,,;:ldO0kl'        \n"
+        "$2            '^:ldxkkkkxdl:^'          "
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "37" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenSuseSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("suse_small", "opensuse_small", "open_suse_small", "open-suse_small")
+    FF_LOGO_LINES(
+        "$1  _______  \n"
+        "$1__|   __ \\ \n"
+        "$1     / .\\ \\\n"
+        "$1     \\__/ |\n"
+        "$1   _______|\n"
+        "$1   \\_______\n"
+        "$1__________/"
+    )
+    FF_LOGO_COLORS(
+        "32" //green
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenSuseLeap()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("opensuse_leap", "open_suse_leap", "opensuse-leap", "open-suse-leap", "suse_leap", "suse-leap", "opensuseleap")
+    FF_LOGO_LINES(
+        "$2                 .-++:.                 \n"
+        "$2               ./oooooo/-               \n"
+        "$2            `:oooooooooooo:.            \n"
+        "$2          -+oooooooooooooooo+-`         \n"
+        "$2       ./oooooooooooooooooooooo/-       \n"
+        "$2      :oooooooooooooooooooooooooo:      \n"
+        "$2    `  `-+oooooooooooooooooooo/-   `    \n"
+        "$2 `:oo/-   .:ooooooooooooooo+:`  `-+oo/. \n"
+        "$2`/oooooo:.   -/oooooooooo/.   ./oooooo/.\n"
+        "$2  `:+ooooo+-`  `:+oooo+-   `:oooooo+:`  \n"
+        "$2     .:oooooo/.   .::`   -+oooooo/.     \n"
+        "$2        -/oooooo:.    ./oooooo+-        \n"
+        "$2          `:+ooooo+-:+oooooo:`          \n"
+        "$2             ./oooooooooo/.             \n"
+        "$2                -/oooo+:`               \n"
+        "$2                  `:/.                  "
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "37" //white
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenSuseTumbleweed()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("opensuse_tumbleweed", "open_suse_tumbleweed", "opensuse-tumbleweed", "open-suse-tumbleweed", "suse_tumbleweed", "suse-tumbleweed", "opensusetumbleweed")
+    FF_LOGO_LINES(
+        "$2                                    ......          \n"
+        "$2     .,cdxxxoc,.               .:kKMMMNWMMMNk:.     \n"
+        "$2    cKMMN0OOOKWMMXo. ;        ;0MWk:.      .:OMMk.  \n"
+        "$2  ;WMK;.       .lKMMNM,     :NMK,             .OMW; \n"
+        "$2 cMW;            'WMMMN   ,XMK,                 oMM'\n"
+        "$2.MMc               ..;l. xMN:                    KM0\n"
+        "$2'MM.                   'NMO                      oMM\n"
+        "$2.MM,                 .kMMl                       xMN\n"
+        "$2 KM0               .kMM0. .dl:,..               .WMd\n"
+        "$2 .XM0.           ,OMMK,    OMMMK.              .XMK \n"
+        "$2   oWMO:.    .;xNMMk,       NNNMKl.          .xWMx  \n"
+        "$2     :ONMMNXMMMKx;          .  ,xNMWKkxllox0NMWk,   \n"
+        "$2         .....                    .:dOOXXKOxl,      "
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "37" //white
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoPop()
 {
     FF_LOGO_INIT
@@ -1048,6 +1153,10 @@ static GetLogoMethod* getLogoMethods()
         getLogoMint,
         getLogoMintSmall,
         getLogoMintOld,
+        getLogoOpenSuse,
+        getLogoOpenSuseSmall,
+        getLogoOpenSuseLeap,
+        getLogoOpenSuseTumbleweed,
         getLogoPop,
         getLogoPopSmall,
         getLogoReborn,
