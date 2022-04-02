@@ -25,12 +25,6 @@ int main(int argc, char** argv)
         ffInitInstance(&instance);
     )
 
-    FASTFETCH_TEST_PERFORMANCE(
-        puts("Configuration");
-        ffLoadLogo(&instance);
-    )
-
-    ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
     instance.config.showErrors = true;
     instance.config.recache = argc == 1;
     instance.config.cacheSave = false;
@@ -39,6 +33,11 @@ int main(int argc, char** argv)
     FASTFETCH_TEST_PERFORMANCE(
         puts("Thread starting");
         ffStartDetectionThreads(&instance);
+    )
+
+    FASTFETCH_TEST_PERFORMANCE(
+        puts("Starting");
+        ffStart(&instance);
     )
 
     FASTFETCH_TEST_PERFORMANCE(ffPrintTitle(&instance))
@@ -73,6 +72,11 @@ int main(int argc, char** argv)
     FASTFETCH_TEST_PERFORMANCE(ffPrintLocale(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintBreak(&instance))
     FASTFETCH_TEST_PERFORMANCE(ffPrintColors(&instance))
+
+    FASTFETCH_TEST_PERFORMANCE(
+        puts("Finishing");
+        ffFinish(&instance);
+    )
 
     return 0;
 }
