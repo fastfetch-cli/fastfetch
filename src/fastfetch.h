@@ -31,32 +31,32 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
-typedef struct FFlogo
+typedef enum FFLogoType
 {
-    const char** names; //Null terminated
-    char* lines;
-    bool isFromUser;
-    const char** builtinColors; // [0] is used as key color, if not user specified
-} FFlogo;
+    FF_LOGO_TYPE_AUTO,    //If something is given, first try builtin, then file. Otherwise detect logo
+    FF_LOGO_TYPE_BUILTIN, //Builtin ascii art.
+    FF_LOGO_TYPE_FILE,    //Raw text file, printed as is.
+    FF_LOGO_TYPE_RAW,     //Raw text file, printed with color codes replacement.
+} FFLogoType;
 
 typedef struct FFconfig
 {
-    const FFlogo* logo;
+    FFstrbuf logoName;
+    FFLogoType logoType;
     FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
+    uint32_t logoPaddingLeft;
+    uint32_t logoPaddingRight;
+    bool logoPrintRemaining;
 
-    uint16_t logoKeySpacing;
+    FFstrbuf mainColor; //If this is empty, ffPrintLogo will set it to the main color of the logo
     FFstrbuf separator;
-    int16_t offsetx;
-    FFstrbuf color;
-    bool colorLogo;
+
     bool showErrors;
     bool recache;
     bool cacheSave;
-    bool printRemainingLogo;
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
-    bool userLogoIsRaw;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;
@@ -153,8 +153,9 @@ typedef struct FFconfig
 
 typedef struct FFstate
 {
-    uint32_t logoWidth;
-    char* logoLinesIndex;
+    FFstrbuf logoWidthEscapeCode;
+    uint32_t logoHeight;
+    uint32_t keysHeight;
 
     struct passwd* passwd;
     struct utsname utsname;
@@ -375,9 +376,9 @@ typedef enum FFInitState
 #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADRESS(library, ff ## symbolName, symbolName, returnValue);
 
-/*************************/
-/* Common util functions */
-/*************************/
+//////////////////////
+// Common functions //
+//////////////////////
 
 //common/init.c
 void ffInitInstance(FFinstance* instance);
@@ -390,7 +391,6 @@ void ffListFeatures();
 void ffStartDetectionThreads(FFinstance* instance);
 
 //common/io.c
-void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
 void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
 void ffGetCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer);
@@ -437,16 +437,6 @@ void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 //common/networking.c
 void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);
 
-//common/logo.c
-void ffLoadLogoSet(FFinstance* instance, const char* logo);
-void ffLoadLogo(FFinstance* instance);
-void ffPrintLogoLine(FFinstance* instance);
-void ffPrintRemainingLogo(FFinstance* instance);
-
-void ffPrintLogos(FFinstance* instance);
-void ffListLogos();
-void ffListLogosForAutocompletion();
-
 //common/format.c
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
@@ -476,8 +466,26 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
 bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #endif
 
+////////////////////
+// Logo functions //
+////////////////////
+
+void ffPrintLogo(FFinstance* instance);
+void ffPrintRemainingLogo(FFinstance* instance);
+
+void ffPrintLogoLine(FFinstance* instance);
+void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
+
+void ffPrintBuiltinLogos(FFinstance* instance);
+void ffListBuiltinLogos();
+void ffListBuiltinLogosAutocompletion();
+
+/////////////////////////
+// Detection functions //
+/////////////////////////
+
 //detection/os.c
-const FFOSResult* ffDetectOS(FFinstance* instance);
+const FFOSResult* ffDetectOS(const FFinstance* instance);
 
 //detection/plasma.c
 const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
@@ -502,9 +510,9 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance);
 //detection/dateTime.c
 const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance);
 
-/********************/
-/* Module functions */
-/********************/
+//////////////////////
+// Module functions //
+//////////////////////
 
 //Common
 const FFTitleResult* ffDetectTitle(FFinstance* instance);

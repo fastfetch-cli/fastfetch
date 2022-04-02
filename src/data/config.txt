@@ -27,38 +27,17 @@
 # Get the default structure with "fastfetch --print-structure".
 #--structure $"FASTFETCH_DATATEXT_STRUCTURE$"
 
-# Logo option:
-# Sets the logo to use.
-# List available logos with "fastfetch --list-logos".
-# Print available logos with "fastfetch --print-logos".
-# Must be the name of an available logo or a path to a text file containing a custom logo.
-# Default is the current distribution.
-#--logo arch
+# Multithreading option:
+# Sets if fastfetch should use multiple threads to detect the values.
+# Must be true or false.
+# Default is true.
+#--multithreading true
 
-# Color option:
-# Sets the color of the keys.
-# Must be linux console color codes or the name of a color.
-# Default is the primary color of the logo.
-# Use "fastfetch --help color" to learn more and see examples.
-#--color magenta
-
-# Spacing option:
-# Sets the amount of whitespace between the logo and keys.
-# Must be an positive integer.
-# Default is 4.
-#--spacing 4
-
-# Separator option:
-# Sets the string placed between a key and its value.
-# Can be any string.
-# Default is ": ".
-#--separator ": "
-
-# Offset option:
-# Sets the amount of whitespace before the logo. Can be negative to cut the logo.
-# Must be an integer.
-# Default is 0.
-#--offsetx 0
+# Slow operations option:
+# Sets if fastfetch is allowed to use known slow operations to detect more / better values.
+# Must be true or false.
+# Default is false.
+#--allow-slow-operations false
 
 # Linewrap option:
 # Sets if fastfetch should disable linewrap during the run.
@@ -72,35 +51,19 @@
 # Default is true.
 #--hide-cursor true
 
-# Remaing logo option:
-# Sets if the remaining logo should be printed, if it is higher than the information printed.
-# Must be true or false.
-# Default is true.
-#--print-remaining-logo true
+# Logo option:
+# Sets the logo to use.
+# List available logos with "fastfetch --list-logos".
+# Print available logos with "fastfetch --print-logos".
+# Must be the name of an available logo or a path to a text file containing a custom logo.
+# Default is the current distribution.
+#--logo arch
 
-# Multithreading option:
-# Sets if fastfetch should use multiple threads to detect the values.
-# Must be true or false.
-# Default is true.
-#--multithreading true
-
-# Slow operations option:
-# Sets if fastfetch is allowed to use known slow operations to detect more / better values.
-# Must be true or false.
-# Default is false.
-#--allow-slow-operations false
-
-# Color logo option:
-# Sets if the logo should be colored.
-# Must be true or false.
-# Default is true.
-#--color-logo true
-
-# Separator string option:
-# Sets the string printed by the "separator" module (usually between title and rest of output)
-# Must be any string. It is repated / cut to fit perfectly.
-# Default is "-"
-#--separator-string -
+# Logo type option:
+# Sets the logo type to use.
+# Must be auto, builtin, file or raw.
+# Default is auto.
+#--logo-type auto
 
 # Logo color options:
 # Overwrite a color in the logo. Also works for user provided logos.
@@ -109,16 +72,53 @@
 # Default is the one specified by the logo.
 # Use "fastfetch --help color" to learn more and see examples.
 # Valid index range is [1-9].
-#--color-1 red
-#--color-2 32
+#--logo-color-1 red
+#--logo-color-2 32
 # [...]
-#--color-9 yellow
+#--logo-color-9 yellow
 
-# User logo raw option:
-# Sets if color replacements should be performed on the user provided logo.
+# Logo padding option:
+# Adds a padding to the left and the right side of the logo.
+# Must be a positive integer.
+# Default is 0.
+#--logo-padding 0
+
+# Logo padding left option:
+# Adds a padding to the left side of the logo.
+# Must be a positive integer.
+# Default is 0.
+#--logo-padding-left 0
+
+# Logo padding right option:
+# Adds a padding to the right side of the logo.
+# Must be a positive integer.
+# Default is 0.
+#--logo-padding-right 0
+
+# Logo print remaining option:
+# Sets if the remaining logo should be printed, it is has more lines than modules to show.
 # Must be true or false.
 # Default is true.
-#--color-raw true
+#--logo-print-remaining true
+
+# Color option:
+# Sets the color of the keys.
+# Must be linux console color codes or the name of a color.
+# Default is the primary color of the logo.
+# Use "fastfetch --help color" to learn more and see examples.
+#--color magenta
+
+# Separator option:
+# Sets the string placed between a key and its value.
+# Can be any string.
+# Default is ": ".
+#--separator ": "
+
+# Separator string option:
+# Sets the string printed by the "separator" module (usually between title and rest of output)
+# Must be any string. It is repated / cut to fit perfectly.
+# Default is "-"
+#--separator-string -
 
 # Public IP timeout option:
 # Sets the time to wait for the public ip server to respond.

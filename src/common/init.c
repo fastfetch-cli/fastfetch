@@ -91,7 +91,9 @@ static void initCacheDir(FFstate* state)
 
 static void initState(FFstate* state)
 {
-    state->logoWidth = 0;
+    ffStrbufInit(&state->logoWidthEscapeCode);
+    state->logoHeight = 0;
+    state->keysHeight = 0;
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
     sysinfo(&state->sysinfo);
@@ -102,25 +104,24 @@ static void initState(FFstate* state)
 
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInit(&instance->config.color);
+    ffStrbufInit(&instance->config.logoName);
+    instance->config.logoType = FF_LOGO_TYPE_AUTO;
+    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
+        ffStrbufInit(&instance->config.logoColors[i]);
+    instance->config.logoPaddingLeft = 0;
+    instance->config.logoPaddingRight = 4;
+    instance->config.logoPrintRemaining = true;
 
+    ffStrbufInit(&instance->config.mainColor);
     ffStrbufInit(&instance->config.separator);
     ffStrbufAppendS(&instance->config.separator, ": ");
 
-    instance->config.logoKeySpacing = 4;
-    instance->config.offsetx = 0;
-    instance->config.colorLogo = true;
     instance->config.showErrors = false;
     instance->config.recache = false;
     instance->config.cacheSave = true;
-    instance->config.printRemainingLogo = true;
     instance->config.allowSlowOperations = false;
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
-    instance->config.userLogoIsRaw = false;
-
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufInit(&instance->config.logoColors[i]);
 
     ffStrbufInitA(&instance->config.osFormat, 0);
     ffStrbufInitA(&instance->config.osKey, 0);
@@ -253,21 +254,25 @@ void ffStart(FFinstance* instance)
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
 
+    //reset everything to default before we start printing
+    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
     if(instance->config.hideCursor)
         fputs("\033[?25l", stdout);
 
     if(instance->config.disableLinewrap)
         fputs("\033[?7l", stdout);
+
+    ffPrintLogo(instance);
 }
 
 void ffFinish(FFinstance* instance)
 {
-    if(instance->config.printRemainingLogo)
-        ffPrintRemainingLogo(instance);
-
+    ffPrintRemainingLogo(instance);
     resetConsole(instance->config.disableLinewrap, instance->config.hideCursor);
 }
 
+//Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
 void ffListFeatures()
 {
     fputs(

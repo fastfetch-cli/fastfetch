@@ -7,35 +7,6 @@
 #define FF_IO_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_IO_CACHE_SPLIT_EXTENSION "ffcs"
 
-void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat)
-{
-    ffPrintLogoLine(instance);
-
-    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    ffPrintColor(&instance->config.color);
-
-    if(customKeyFormat == NULL || customKeyFormat->length == 0)
-    {
-        fputs(moduleName, stdout);
-
-        if(moduleIndex > 0)
-            printf(" %hhu", moduleIndex);
-    }
-    else
-    {
-        FFstrbuf key;
-        ffStrbufInit(&key);
-        ffParseFormatString(&key, customKeyFormat, NULL, 1, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
-        });
-        ffStrbufWriteTo(&key, stdout);
-        ffStrbufDestroy(&key);
-    }
-
-    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
-    ffStrbufWriteTo(&instance->config.separator, stdout);
-}
-
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...)
 {
     if(!instance->config.showErrors)

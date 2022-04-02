@@ -28,7 +28,7 @@ static void parseFile(const char* fileName, FFOSResult* result)
 
 #endif
 
-const FFOSResult* ffDetectOS(FFinstance* instance)
+const FFOSResult* ffDetectOS(const FFinstance* instance)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static FFOSResult result;

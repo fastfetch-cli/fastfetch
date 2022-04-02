@@ -31,7 +31,7 @@ const FFTitleResult* ffDetectTitle(FFinstance* instance)
 static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
 {
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    ffPrintColor(&instance->config.color);
+    ffPrintColor(&instance->config.mainColor);
     ffStrbufWriteTo(content, stdout);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }

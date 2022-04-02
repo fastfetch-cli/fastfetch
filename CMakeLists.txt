@@ -75,12 +75,13 @@ add_library(libfastfetch STATIC
     src/common/threading.c
     src/common/io.c
     src/common/processing.c
-    src/common/logo.c
     src/common/format.c
     src/common/parsing.c
     src/common/settings.c
     src/common/library.c
     src/common/networking.c
+    src/logo/logo.c
+    src/logo/builtin.c
     src/detection/os.c
     src/detection/plasma.c
     src/detection/gtk.c

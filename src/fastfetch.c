@@ -12,8 +12,6 @@ typedef struct FFdata
 {
     FFvaluestore valuestore;
     FFstrbuf structure;
-    FFstrbuf logoName;
-    FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
     bool multithreading;
 } FFdata;
 
@@ -608,8 +606,31 @@ static void optionParseColor(const char* key, const char* value, FFstrbuf* buffe
     }
 }
 
+static uint32_t optionParseUInt32(const char* key, const char* value)
+{
+    if(value == NULL)
+    {
+        fprintf(stderr, "Error: usage: %s <num>\n", key);
+        exit(480);
+    }
+
+    char* end;
+    uint32_t num = (uint32_t) strtoul(value, &end, 10);
+    if(*end != '\0')
+    {
+        fprintf(stderr, "Error: usage: %s <num>\n", key);
+        exit(479);
+    }
+
+    return num;
+}
+
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
+    ///////////////////////
+    //Informative options//
+    ///////////////////////
+
     if(strcasecmp(key, "-h") == 0 || strcasecmp(key, "--help") == 0)
     {
         printCommandHelp(value);
@@ -623,21 +644,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--version-raw") == 0)
     {
         puts(FASTFETCH_PROJECT_VERSION);
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-logos") == 0)
-    {
-        ffListLogos();
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-logos-autocompletion") == 0)
-    {
-        ffListLogosForAutocompletion();
-        exit(0);
-    }
-    else if(strcasecmp(key, "--print-logos") == 0)
-    {
-        ffPrintLogos(instance);
         exit(0);
     }
     else if(strcasecmp(key, "--print-config") == 0)
@@ -665,32 +671,115 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         ffListFeatures();
         exit(0);
     }
-    else if(strcasecmp(key, "--spacing") == 0)
+    else if(strcasecmp(key, "--list-logos") == 0)
+    {
+        ffListBuiltinLogos();
+        exit(0);
+    }
+    else if(strcasecmp(key, "--list-logos-autocompletion") == 0)
+    {
+        ffListBuiltinLogosAutocompletion();
+        exit(0);
+    }
+    else if(strcasecmp(key, "--print-logos") == 0)
+    {
+        ffPrintBuiltinLogos(instance);
+        exit(0);
+    }
+
+    ///////////////////
+    //General options//
+    ///////////////////
+
+    else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
+    {
+        //Set cacheSave as well, beacuse the user expects the values to be cached when expliciting using --recache
+        instance->config.recache = optionParseBoolean(value);
+        instance->config.cacheSave = instance->config.recache;
+    }
+    else if(strcasecmp(key, "--nocache") == 0)
+    {
+        instance->config.recache = optionParseBoolean(value);
+        instance->config.cacheSave = false;
+    }
+    else if(strcasecmp(key, "--load-config") == 0)
+        optionParseConfigFile(instance, data, key, value);
+    else if(strcasecmp(key, "--multithreading") == 0)
+        data->multithreading = optionParseBoolean(value);
+    else if(strcasecmp(key, "--allow-slow-operations") == 0)
+        instance->config.allowSlowOperations = optionParseBoolean(value);
+
+    ////////////////
+    //Logo options//
+    ////////////////
+
+    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
+        optionParseString(key, value, &instance->config.logoName);
+    else if(strcasecmp(key, "--logo-type") == 0)
     {
         if(value == NULL)
         {
-            fprintf(stderr, "Error: usage: %s <width>\n", key);
-            exit(404);
+            fprintf(stderr, "Error: usage: %s <type>\n", key);
+            exit(476);
         }
-        if(sscanf(value, "%hu", &instance->config.logoKeySpacing) != 1)
+
+        if(strcasecmp(value, "auto") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_AUTO;
+        else if(strcasecmp(value, "builtin") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_BUILTIN;
+        else if(strcasecmp(value, "file") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_FILE;
+        else if(strcasecmp(value, "raw") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_RAW;
+        else
         {
-            fprintf(stderr, "Error: couldn't parse %s to uint16_t\n", value);
-            exit(405);
+            fprintf(stderr, "Error: unknown logo type: %s\n", value);
+            exit(478);
         }
     }
-    else if(strcasecmp(key, "-x") == 0 || strcasecmp(key, "--offsetx") == 0)
+    else if(strncasecmp(key, "--logo-color-", 13) == 0 && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
     {
-        if(value == NULL)
+        //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
+        int index = (int)key[13] - 49;
+
+        //Match only --logo-color-[1-9]
+        if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
         {
-            fprintf(stderr, "Error: usage: %s <offset>\n", key);
-            exit(408);
+            fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
+            exit(472);
         }
-        if(sscanf(value, "%hi", &instance->config.offsetx) != 1)
-        {
-            fprintf(stderr, "Error: couldn't parse %s to int16_t\n", value);
-            exit(409);
-        }
+
+        optionParseColor(key, value, &instance->config.logoColors[index]);
     }
+    else if(strcasecmp(key, "--logo-padding") == 0)
+    {
+        uint32_t padding = optionParseUInt32(key, value);
+        instance->config.logoPaddingLeft = padding;
+        instance->config.logoPaddingRight = padding;
+    }
+    else if(strcasecmp(key, "--logo-padding-left") == 0)
+        instance->config.logoPaddingLeft = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--logo-padding-right") == 0)
+        instance->config.logoPaddingRight = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--logo-print-remaining") == 0)
+        instance->config.logoPrintRemaining = optionParseBoolean(value);
+
+    ///////////////////
+    //Display options//
+    ///////////////////
+
+    else if(strcasecmp(key, "--show-errors") == 0)
+        instance->config.showErrors = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disable-linewrap") == 0)
+        instance->config.disableLinewrap = optionParseBoolean(value);
+    else if(strcasecmp(key, "--hide-cursor") == 0)
+        instance->config.hideCursor = optionParseBoolean(value);
+    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--structure") == 0)
+        optionParseString(key, value, &data->structure);
+    else if(strcasecmp(key, "--separator") == 0)
+        optionParseString(key, value, &instance->config.separator);
+    else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
+        optionParseColor(key, value, &instance->config.mainColor);
     else if(strcasecmp(key, "--set") == 0)
     {
         if(value == NULL)
@@ -711,43 +800,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
         ffValuestoreSet(&data->valuestore, value, separator + 1);
     }
-    else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
-    {
-        //Set cacheSave as well, beacuse the user expects the values to be cached when expliciting using --recache
-        instance->config.recache = optionParseBoolean(value);
-        instance->config.cacheSave = instance->config.recache;
-    }
-    else if(strcasecmp(key, "--nocache") == 0)
-    {
-        instance->config.recache = optionParseBoolean(value);
-        instance->config.cacheSave = false;
-    }
-    else if(strcasecmp(key, "--load-config") == 0)
-        optionParseConfigFile(instance, data, key, value);
-    else if(strcasecmp(key, "--show-errors") == 0)
-        instance->config.showErrors = optionParseBoolean(value);
-    else if(strcasecmp(key, "--color-logo") == 0)
-        instance->config.colorLogo = optionParseBoolean(value);
-    else if(strcasecmp(key, "--print-remaining-logo") == 0)
-        instance->config.printRemainingLogo = optionParseBoolean(value);
-    else if(strcasecmp(key, "--multithreading") == 0)
-        data->multithreading = optionParseBoolean(value);
-    else if(strcasecmp(key, "--allow-slow-operations") == 0)
-        instance->config.allowSlowOperations = optionParseBoolean(value);
-    else if(strcasecmp(key, "--disable-linewrap") == 0)
-        instance->config.disableLinewrap = optionParseBoolean(value);
-    else if(strcasecmp(key, "--hide-cursor") == 0)
-        instance->config.hideCursor = optionParseBoolean(value);
-    else if(strcasecmp(key, "--logo-raw") == 0)
-        instance->config.userLogoIsRaw = optionParseBoolean(value);
-    else if(strcasecmp(key, "--structure") == 0)
-        optionParseString(key, value, &data->structure);
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
-        optionParseString(key, value, &data->logoName);
-    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--separator") == 0)
-        optionParseString(key, value, &instance->config.separator);
-    else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
-        optionParseColor(key, value, &instance->config.color);
+
+    ////////////////////////
+    //Format + Key options//
+    ////////////////////////
+
     else if(strcasecmp(key, "--os-format") == 0)
         optionParseString(key, value, &instance->config.osFormat);
     else if(strcasecmp(key, "--os-key") == 0)
@@ -872,6 +929,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.timeKey);
     else if(strcasecmp(key, "--time-format") == 0)
         optionParseString(key, value, &instance->config.timeFormat);
+
+    ///////////////////
+    //Library options//
+    ///////////////////
+
     else if(strcasecmp(key, "--lib-PCI") == 0)
         optionParseString(key, value, &instance->config.libPCI);
     else if(strcasecmp(key, "--lib-vulkan") == 0)
@@ -896,6 +958,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libXFConf);
     else if(strcasecmp(key, "--lib-rpm") == 0)
         optionParseString(key, value, &instance->config.librpm);
+
+    //////////////////
+    //Module options//
+    //////////////////
+
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)
@@ -913,33 +980,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--public-ip-timeout") == 0)
-    {
-        if(value == NULL)
-        {
-            fprintf(stderr, "Error: usage: %s <value>\n", key);
-            exit(465);
-        }
+        instance->config.publicIpTimeout = optionParseUInt32(key, value);
 
-        if(sscanf(value, "%u", &instance->config.publicIpTimeout) != 1)
-        {
-            fprintf(stderr, "Error: couldn't parse %s to uint32_t\n", value);
-            exit(466);
-        }
-    }
-    else if(strncasecmp(key, "--color-", 7) == 0 && key[8] != '\0' && key[9] == '\0') // matches "--color-*"
-    {
-        //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-        int index = (int)key[8] - 49;
+    //////////////////
+    //Unknown option//
+    //////////////////
 
-        //Match only --color-[1-9]
-        if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
-        {
-            fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[8]);
-            exit(472);
-        }
-
-        optionParseColor(key, value, &data->logoColors[index]);
-    }
     else
     {
         fprintf(stderr, "Error: unknown option: %s\n", key);
@@ -1089,31 +1135,10 @@ int main(int argc, const char** argv)
     FFdata data;
     ffValuestoreInit(&data.valuestore);
     ffStrbufInitA(&data.structure, 256);
-    ffStrbufInitA(&data.logoName, 0);
     data.multithreading = true;
-
-    for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
-        ffStrbufInitA(&data.logoColors[i], 0);
 
     parseDefaultConfigFile(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
-
-    //Load custom logo if it exists
-    if(data.logoName.length > 0)
-        ffLoadLogoSet(&instance, data.logoName.chars);
-    else
-        ffLoadLogo(&instance);
-
-    //If we haven't set key color, use primary color of logo
-    if(instance.config.color.length == 0)
-        ffStrbufSet(&instance.config.color, &instance.config.logoColors[0]);
-
-    //Overwrite logo colors with custom colors
-    for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
-    {
-        if(data.logoColors[i].length > 0)
-            ffStrbufSet(&instance.config.logoColors[i], &data.logoColors[i]);
-    }
 
     //Start detection threads
     if(data.multithreading)
