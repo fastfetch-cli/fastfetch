@@ -160,8 +160,10 @@ static void logoPrintDetected(FFinstance* instance)
 {
     if(instance->config.logoName.length > 0)
     {
-        if(!ffLogoPrintBuiltinIfExists(instance))
-            logoPrintFile(instance, true);
+        if(
+            !ffLogoPrintBuiltinIfExists(instance) &&
+            !ffLogoPrintSixelIfExists(instance)
+        ) logoPrintFile(instance, true);
         return;
     }
 

@@ -767,6 +767,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.logoPaddingRight = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-print-remaining") == 0)
         instance->config.logoPrintRemaining = optionParseBoolean(value);
+    else if(strcasecmp(key, "--sixel") == 0)
+    {
+        optionParseString(key, value, &instance->config.logoName);
+        instance->config.logoType = FF_LOGO_TYPE_SIXEL;
+    }
 
     ///////////////////
     //Display options//

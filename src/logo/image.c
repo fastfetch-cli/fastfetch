@@ -106,14 +106,16 @@ static bool printSixel(FFinstance* instance)
 
 #endif
 
+bool ffLogoPrintSixelIfExists(FFinstance* instance)
+{
+    #ifdef FF_HAVE_IMAGEMAGICK
+        return printSixel(instance);
+    #endif
+    return false;
+}
+
 void ffLogoPrintSixel(FFinstance* instance)
 {
-    bool sixelPrinted = false;
-
-    #ifdef FF_HAVE_IMAGEMAGICK
-        sixelPrinted = printSixel(instance);
-    #endif
-
-    if(!sixelPrinted)
+    if(!ffLogoPrintSixelIfExists(instance))
         ffLogoPrintBuiltinDetected(instance);
 }
