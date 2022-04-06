@@ -16,4 +16,7 @@ void ffLogoPrintBuiltin(FFinstance* instance);
 bool ffLogoPrintBuiltinIfExists(FFinstance* instance);
 void ffLogoPrintBuiltinDetected(FFinstance* instance);
 
+//image.c
+void ffLogoPrintSixel(FFinstance* instance);
+
 #endif

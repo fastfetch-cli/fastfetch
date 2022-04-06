@@ -37,6 +37,7 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_BUILTIN, //Builtin ascii art.
     FF_LOGO_TYPE_FILE,    //Raw text file, printed as is.
     FF_LOGO_TYPE_RAW,     //Raw text file, printed with color codes replacement.
+    FF_LOGO_TYPE_SIXEL,   //Image file, printed as sixel codes.
 } FFLogoType;
 
 typedef struct FFconfig
@@ -44,6 +45,7 @@ typedef struct FFconfig
     FFstrbuf logoName;
     FFLogoType logoType;
     FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
+    uint32_t logoWidth;
     uint32_t logoPaddingLeft;
     uint32_t logoPaddingRight;
     bool logoPrintRemaining;
@@ -133,6 +135,7 @@ typedef struct FFconfig
     FFstrbuf libDBus;
     FFstrbuf libXFConf;
     FFstrbuf librpm;
+    FFstrbuf libImageMagick;
 
     FFstrbuf diskFolders;
 
@@ -153,7 +156,7 @@ typedef struct FFconfig
 
 typedef struct FFstate
 {
-    FFstrbuf logoWidthEscapeCode;
+    uint32_t logoWidth;
     uint32_t logoHeight;
     uint32_t keysHeight;
 
@@ -399,6 +402,8 @@ void ffWriteCacheFile(FFinstance* instance, const char* moduleName, const char* 
 bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs);
 void ffPrintAndSaveToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
 void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
+
+void ffPrintChar(char c, uint32_t times);
 
 void ffCacheValidate(FFinstance* instance);
 void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache);

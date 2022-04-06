@@ -61,9 +61,15 @@
 
 # Logo type option:
 # Sets the logo type to use.
-# Must be auto, builtin, file or raw.
+# Must be auto, builtin, file, raw or sixel.
 # Default is auto.
 #--logo-type auto
+
+# Logo width option:
+# Sets the width of the logos (in characters) if the logo is an image.
+# Must be a positive integer.
+# Default is 65.
+#--logo-width 65
 
 # Logo color options:
 # Overwrite a color in the logo. Also works for user provided logos.

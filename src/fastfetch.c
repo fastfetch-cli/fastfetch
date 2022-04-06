@@ -731,6 +731,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logoType = FF_LOGO_TYPE_FILE;
         else if(strcasecmp(value, "raw") == 0)
             instance->config.logoType = FF_LOGO_TYPE_RAW;
+        else if(strcasecmp(value, "sixel") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_SIXEL;
         else
         {
             fprintf(stderr, "Error: unknown logo type: %s\n", value);
@@ -751,6 +753,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
         optionParseColor(key, value, &instance->config.logoColors[index]);
     }
+    else if(strcasecmp(key, "--logo-width") == 0)
+        instance->config.logoWidth = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-padding") == 0)
     {
         uint32_t padding = optionParseUInt32(key, value);
@@ -958,6 +962,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libXFConf);
     else if(strcasecmp(key, "--lib-rpm") == 0)
         optionParseString(key, value, &instance->config.librpm);
+    else if(strcasecmp(key, "--lib-imagemagick") == 0)
+        optionParseString(key, value, &instance->config.libImageMagick);
 
     //////////////////
     //Module options//

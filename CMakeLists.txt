@@ -5,6 +5,11 @@ project(fastfetch
     LANGUAGES C
 )
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+find_package(PkgConfig REQUIRED)
+
 # This is set to off by github actions for release builds
 OPTION(SET_TWEAK "Add tweak to project version" ON)
 
@@ -23,6 +28,7 @@ OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
+OPTION(ENABLE_IMAGEMAGICK "Enable imagemagick" ON)
 
 # Track commits between version bumps for output in --version
 if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
@@ -60,11 +66,6 @@ fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-find_package(PkgConfig REQUIRED)
-
 # Init CMake targets
 
 add_library(libfastfetch STATIC
@@ -82,6 +83,7 @@ add_library(libfastfetch STATIC
     src/common/networking.c
     src/logo/logo.c
     src/logo/builtin.c
+    src/logo/image.c
     src/detection/os.c
     src/detection/plasma.c
     src/detection/gtk.c
@@ -239,6 +241,15 @@ if(ENABLE_RPM)
     endif(RPM_FOUND)
 endif(ENABLE_RPM)
 
+if(ENABLE_IMAGEMAGICK)
+    pkg_check_modules (IMAGEMAGICK ImageMagick)
+    if(IMAGEMAGICK_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_IMAGEMAGICK=1)
+    else(IMAGEMAGICK_FOUND)
+        message(WARNING "Package imagemagick not found. Building without support.")
+    endif(IMAGEMAGICK_FOUND)
+endif(ENABLE_IMAGEMAGICK)
+
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
     PUBLIC ${PROJECT_SOURCE_DIR}/src
@@ -255,6 +266,23 @@ target_include_directories(libfastfetch
     PRIVATE ${DBUS_INCLUDE_DIRS}
     PRIVATE ${XFCONF_INCLUDE_DIRS}
     PRIVATE ${RPM_INCLUDE_DIRS}
+    PRIVATE ${IMAGEMAGICK_INCLUDE_DIRS}
+)
+
+target_compile_options(libfastfetch
+    PRIVATE ${LIBPCI_CFLAGS_OTHER}
+    PRIVATE ${VULKAN_CFLAGS_OTHER}
+    PRIVATE ${WAYLAND_CFLAGS_OTHER}
+    PRIVATE ${XCB_RANDR_CFLAGS_OTHER}
+    PRIVATE ${XCB_CFLAGS_OTHER}
+    PRIVATE ${XRANDR_CFLAGS_OTHER}
+    PRIVATE ${X11_CFLAGS_OTHER}
+    PRIVATE ${GIO_CFLAGS_OTHER}
+    PRIVATE ${DCONF_CFLAGS_OTHER}
+    PRIVATE ${DBUS_CFLAGS_OTHER}
+    PRIVATE ${XFCONF_CFLAGS_OTHER}
+    PRIVATE ${RPM_CFLAGS_OTHER}
+    PRIVATE ${IMAGEMAGICK_CFLAGS_OTHER}
 )
 
 target_link_libraries(libfastfetch
@@ -305,6 +333,11 @@ include(GNUInstallDirs)
 
 install(
     TARGETS fastfetch
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+    TARGETS flashfetch
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 

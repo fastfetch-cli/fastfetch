@@ -21,7 +21,8 @@ General options:
 
 Logo options:
     -l,--logo <logo>:                set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file
-    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file or raw
+    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file, raw or sixel
+    --logo-width <width>:            set the width of the logo (in characters), if it is an image
     --logo-color-[1-9] <color>:      overwrite a color in the logo
     --logo-padding <padding>:        set the padding on the left and the right of the logo
     --logo-padding-left <padding>:   set the padding on the left of the logo

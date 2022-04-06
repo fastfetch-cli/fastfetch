@@ -2,19 +2,12 @@
 
 #include <ctype.h>
 
-static inline void printSpaces(uint32_t padding)
-{
-    for(uint32_t i = 0; i < padding; i++)
-        putchar(' ');
-}
-
 void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement)
 {
-    uint32_t maxLineLength = 0;
     uint32_t currentlineLength = 0;
 
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    printSpaces(instance->config.logoPaddingLeft);
+    ffPrintChar(' ', instance->config.logoPaddingLeft);
 
     //Use logoColor[0] as the default color
     if(doColorReplacement)
@@ -25,7 +18,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
         //We are at the end of a line. Print paddings and update max line length
         if(*data == '\n' || (*data == '\r' && *(data + 1) == '\n'))
         {
-            printSpaces(instance->config.logoPaddingRight);
+            ffPrintChar(' ', instance->config.logoPaddingRight);
 
             //We have \r\n, skip the \r
             if(*data == '\r')
@@ -34,10 +27,10 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
             putchar('\n');
             ++data;
 
-            printSpaces(instance->config.logoPaddingLeft);
+            ffPrintChar(' ', instance->config.logoPaddingLeft);
 
-            if(currentlineLength > maxLineLength)
-                maxLineLength = currentlineLength;
+            if(currentlineLength > instance->state.logoWidth)
+                instance->state.logoWidth = currentlineLength;
 
             currentlineLength = 0;
             ++instance->state.logoHeight;
@@ -47,7 +40,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
         //Always print tabs as 4 spaces, to have consistent spacing
         if(*data == '\t')
         {
-            printSpaces(4);
+            ffPrintChar(' ', 4);
             ++data;
             continue;
         }
@@ -135,25 +128,21 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
         }
     }
 
-    printSpaces(instance->config.logoPaddingRight);
+    ffPrintChar(' ', instance->config.logoPaddingRight);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     //Happens if the last line is the longest
-    if(currentlineLength > maxLineLength)
-        maxLineLength = currentlineLength;
+    if(currentlineLength > instance->state.logoWidth)
+        instance->state.logoWidth = currentlineLength;
 
-    maxLineLength += instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
+    instance->state.logoWidth += instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
 
-    //If the logo is none, and we have no padding, don't go to the left
-    if(maxLineLength > 0)
-        ffStrbufAppendF(&instance->state.logoWidthEscapeCode, "\033[%uC", maxLineLength);
+    //Go to the leftmost position
+    fputs("\033[9999999D", stdout);
 
     //If the logo height is > 1, go up the height
     if(instance->state.logoHeight > 0)
         printf("\033[%uA", instance->state.logoHeight);
-
-    //Go to the leftmost position
-    fputs("\033[9999999D", stdout);
 }
 
 static void logoPrintFile(FFinstance* instance, bool doColorReplacement)
@@ -187,9 +176,9 @@ void ffPrintLogo(FFinstance* instance)
     if(( //Logo type needs set logo name, but nothing was given. Print question mark
         instance->config.logoType == FF_LOGO_TYPE_BUILTIN ||
         instance->config.logoType == FF_LOGO_TYPE_FILE ||
-        instance->config.logoType == FF_LOGO_TYPE_RAW
-        ) && instance->config.logoName.length == 0
-    )
+        instance->config.logoType == FF_LOGO_TYPE_RAW ||
+        instance->config.logoType == FF_LOGO_TYPE_SIXEL
+    ) && instance->config.logoName.length == 0)
         ffLogoPrintUnknown(instance);
     else if(instance->config.logoType == FF_LOGO_TYPE_BUILTIN)
         ffLogoPrintBuiltin(instance);
@@ -197,8 +186,16 @@ void ffPrintLogo(FFinstance* instance)
         logoPrintFile(instance, true);
     else if(instance->config.logoType == FF_LOGO_TYPE_RAW)
         logoPrintFile(instance, false);
+    else if(instance->config.logoType == FF_LOGO_TYPE_SIXEL)
+        ffLogoPrintSixel(instance);
     else
         logoPrintDetected(instance);
+}
+
+static inline void printLogoWidth(const FFinstance* instance)
+{
+    if(instance->state.logoWidth > 0)
+        printf("\033[%uC", instance->state.logoWidth);
 }
 
 void ffPrintRemainingLogo(FFinstance* instance)
@@ -207,12 +204,15 @@ void ffPrintRemainingLogo(FFinstance* instance)
         return;
 
     for(uint32_t i = instance->state.keysHeight; i <= instance->state.logoHeight; i++)
-        ffStrbufPutTo(&instance->state.logoWidthEscapeCode, stdout);
+    {
+        printLogoWidth(instance);
+        putchar('\n');
+    }
 }
 
 void ffPrintLogoLine(FFinstance* instance)
 {
-    ffStrbufWriteTo(&instance->state.logoWidthEscapeCode, stdout);
+    printLogoWidth(instance);
     ++instance->state.keysHeight;
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }

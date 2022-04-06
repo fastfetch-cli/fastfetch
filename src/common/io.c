@@ -307,6 +307,12 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     return true;
 }
 
+void ffPrintChar(char c, uint32_t times)
+{
+    for(uint32_t i = 0; i < times; i++)
+        putchar(c);
+}
+
 bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
 {
     return ffParsePropFileValues(filename, 1, (FFpropquery[]){{start, buffer}});

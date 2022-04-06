@@ -1260,14 +1260,12 @@ static const FFlogo* detectBuiltinLogo(const FFinstance* instance)
 
 void ffLogoSetMainColor(FFinstance* instance)
 {
-    const FFlogo* logo;
+    const FFlogo* logo = NULL;
+
     if(instance->config.logoName.length > 0)
-    {
-        logo = getBuiltinLogo(instance->config.logoName.chars);
-        if(logo == NULL)
-            logo = getLogoUnknown();
-    }
-    else
+       logo = getBuiltinLogo(instance->config.logoName.chars);
+
+    if(logo == NULL)
         logo = detectBuiltinLogo(instance);
 
     ffStrbufAppendS(&instance->config.mainColor, logo->builtinColors[0]);

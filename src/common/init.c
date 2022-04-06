@@ -91,7 +91,7 @@ static void initCacheDir(FFstate* state)
 
 static void initState(FFstate* state)
 {
-    ffStrbufInit(&state->logoWidthEscapeCode);
+    state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
     state->passwd = getpwuid(getuid());
@@ -108,6 +108,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logoType = FF_LOGO_TYPE_AUTO;
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufInit(&instance->config.logoColors[i]);
+    instance->config.logoWidth = 65;
     instance->config.logoPaddingLeft = 0;
     instance->config.logoPaddingRight = 4;
     instance->config.logoPrintRemaining = true;
@@ -198,6 +199,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libDBus, 0);
     ffStrbufInitA(&instance->config.libXFConf, 0);
     ffStrbufInitA(&instance->config.librpm, 0);
+    ffStrbufInitA(&instance->config.libImageMagick, 0);
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
 

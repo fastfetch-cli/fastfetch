@@ -28,6 +28,7 @@ The following libraries are used if present at runtime:
 *  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
 *  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 *  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
+*  [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel
 *  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 *  [`librpm`](http://rpm.org/): Needed for rpm package count.
