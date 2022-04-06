@@ -242,11 +242,11 @@ if(ENABLE_RPM)
 endif(ENABLE_RPM)
 
 if(ENABLE_IMAGEMAGICK)
-    pkg_check_modules (IMAGEMAGICK ImageMagick)
+    pkg_check_modules (IMAGEMAGICK MagickCore-7.Q16HDRI)
     if(IMAGEMAGICK_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_IMAGEMAGICK=1)
     else(IMAGEMAGICK_FOUND)
-        message(WARNING "Package imagemagick not found. Building without support.")
+        message(WARNING "Package MagickCore-7.Q16HDRI not found. Building without support.")
     endif(IMAGEMAGICK_FOUND)
 endif(ENABLE_IMAGEMAGICK)
 
