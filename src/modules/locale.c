@@ -39,7 +39,7 @@ void ffPrintLocale(FFinstance* instance)
         return;
     }
 
-    ffPrintAndSaveToCache(instance, FF_LOCALE_MODULE_NAME, &instance->config.localeKey, &locale, &instance->config.localeFormat, FF_LOCALE_NUM_FORMAT_ARGS, (FFformatarg[]){
+    ffPrintAndWriteToCache(instance, FF_LOCALE_MODULE_NAME, &instance->config.localeKey, &locale, &instance->config.localeFormat, FF_LOCALE_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &locale}
     });
 

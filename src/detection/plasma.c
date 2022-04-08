@@ -42,20 +42,20 @@ static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* resul
         }
 
         if(category == PLASMA_CATEGORY_KDE && result->widgetStyle.length == 0)
-            ffGetPropValue(line, "widgetStyle =", &result->widgetStyle);
+            ffParsePropLine(line, "widgetStyle =", &result->widgetStyle);
         else if(category == PLASMA_CATEGORY_ICONS && result->icons.length == 0)
-            ffGetPropValue(line, "Theme =", &result->icons);
+            ffParsePropLine(line, "Theme =", &result->icons);
         else if(category == PLASMA_CATEGORY_GENERAL)
         {
             if(result->colorScheme.length == 0)
-                ffGetPropValue(line, "ColorScheme =", &result->colorScheme);
+                ffParsePropLine(line, "ColorScheme =", &result->colorScheme);
 
             if(result->font.length == 0)
-                ffGetPropValue(line, "font =", &result->font);
+                ffParsePropLine(line, "font =", &result->font);
 
             //Before plasma 5.23, "Font" was the key instead of "font". Since a lot of distros ship older versions, we test for both.
             if(result->font.length == 0)
-                ffGetPropValue(line, "Font =", &result->font);
+                ffParsePropLine(line, "Font =", &result->font);
         }
     }
 

@@ -394,21 +394,6 @@ void ffListFeatures();
 void ffStartDetectionThreads(FFinstance* instance);
 
 //common/io.c
-void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
-void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
-void ffGetCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer);
-void ffReadCacheFile(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer);
-void ffWriteCacheFile(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* content);
-bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs);
-void ffPrintAndSaveToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
-void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
-
-void ffPrintChar(char c, uint32_t times);
-
-void ffCacheValidate(FFinstance* instance);
-void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache);
-void ffCacheClose(FFcache* cache);
-
 void ffAppendFDContent(int fd, FFstrbuf* buffer);
 bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer); //returns true if open() succeeds. This is used to differentiate between <file not found> and <empty file>
 bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
@@ -416,22 +401,48 @@ bool ffWriteFDContent(int fd, const FFstrbuf* content);
 void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
 bool ffFileExists(const char* fileName, mode_t mode);
+void ffSuppressIO(bool suppress); // Not thread safe!
 
-// Not thread safe!
-void ffSuppressIO(bool suppress);
-
+//common/printing.c
+void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
+void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
 void ffPrintColor(const FFstrbuf* colorValue);
+void ffPrintCharTimes(char c, uint32_t times);
 
-// They return true if the file was found, independently if start was found
-// Buffers which already contain content are not overwritten
-// The last occurence of start in the first file will be the one used
-// The *Values methods always return true, if all properties were already found before, without testing if the file exists
+//common/caching.c
+void ffCacheValidate(FFinstance* instance);
+
+void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache);
+void ffCacheClose(FFcache* cache);
+
+bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs);
+void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
+void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
+
+//common/properties.c
+bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer);
+bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer);
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer);
 bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFileHome(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
 bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer);
+
+//common/font.c
+void ffFontInitQt(FFfont* font, const char* data);
+void ffFontInitPango(FFfont* font, const char* data);
+void ffFontInitCopy(FFfont* font, const char* name);
+void ffFontDestroy(FFfont* font);
+
+//common/format.c
+void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
+void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
+
+//common/parsing.c
+bool ffStrSet(const char* str);
+void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
+void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
@@ -441,25 +452,6 @@ void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 
 //common/networking.c
 void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);
-
-//common/format.c
-void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
-void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
-
-//common/parsing.c
-void ffGetGtkPretty(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
-
-void ffFontInitQt(FFfont* font, const char* data);
-void ffFontInitPango(FFfont* font, const char* data);
-void ffFontInitCopy(FFfont* font, const char* name);
-void ffFontDestroy(FFfont* font);
-
-bool ffGetPropValue(const char* line, const char* start, FFstrbuf* buffer);
-bool ffGetPropValueFromLines(const char* lines, const char* start, FFstrbuf* buffer);
-
-void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
-
-bool ffStrSet(const char* str);
 
 //common/settings.c
 FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type);

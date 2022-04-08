@@ -173,7 +173,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
                 appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
             else
             {
-                ffStrbufAppendS(buffer, "\033[0m");
+                ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
                 --numOpenColors;
             }
 
@@ -284,6 +284,5 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
 
     ffStrbufTrimRight(buffer, ' ');
 
-    if(numOpenColors > 0)
-        ffStrbufAppendS(buffer, "\033[0m");
+    ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }

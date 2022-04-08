@@ -197,7 +197,7 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
         });
 
         result->deVersion.length = 0; //don't set '\0' byte
-        ffGetPropValueFromLines(result->deVersion.chars , "liblxqt", &result->deVersion);
+        ffParsePropLines(result->deVersion.chars , "liblxqt", &result->deVersion);
     }
 
     FFstrbuf wmProcessNameBuffer;

@@ -119,7 +119,7 @@ void ffPrintHost(FFinstance* instance)
         ffStrbufAppend(&host, &version);
     }
 
-    ffPrintAndSaveToCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &host, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
+    ffPrintAndWriteToCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &host, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
         {FF_FORMAT_ARG_TYPE_STRBUF, &family},
         {FF_FORMAT_ARG_TYPE_STRBUF, &name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &version}

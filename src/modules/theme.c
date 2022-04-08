@@ -38,7 +38,7 @@ void ffPrintTheme(FFinstance* instance)
     ffStrbufTrim(&plasmaColorPretty, ' ');
 
     FF_STRBUF_CREATE(gtkPretty);
-    ffGetGtkPretty(&gtkPretty, gtk2, gtk3, gtk4);
+    ffParseGTK(&gtkPretty, gtk2, gtk3, gtk4);
 
     if(instance->config.themeFormat.length == 0)
     {

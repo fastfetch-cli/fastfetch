@@ -68,11 +68,11 @@ void ffPrintCPU(FFinstance* instance)
             break;
 
         (void)(
-            ffGetPropValue(line, "model name :", &name) ||
-            ffGetPropValue(line, "vendor_id :", &vendor) ||
-            ffGetPropValue(line, "cpu cores :", &physicalCoresString) ||
-            ffGetPropValue(line, "cpu MHz :", &procGhzString) ||
-            (name.length == 0 && ffGetPropValue(line, "Hardware :", &name)) //For Android devices
+            ffParsePropLine(line, "model name :", &name) ||
+            ffParsePropLine(line, "vendor_id :", &vendor) ||
+            ffParsePropLine(line, "cpu cores :", &physicalCoresString) ||
+            ffParsePropLine(line, "cpu MHz :", &procGhzString) ||
+            (name.length == 0 && ffParsePropLine(line, "Hardware :", &name)) //For Android devices
         );
     }
 
@@ -164,7 +164,7 @@ void ffPrintCPU(FFinstance* instance)
     if(ghz > 0)
         ffStrbufAppendF(&cpu, " @ %.9gGHz", ghz);
 
-    ffPrintAndSaveToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &cpu, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+    ffPrintAndWriteToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &cpu, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
         {FF_FORMAT_ARG_TYPE_STRBUF, &vendor},

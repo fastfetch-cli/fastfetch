@@ -69,7 +69,7 @@ void ffPrintOS(FFinstance* instance)
         ffStrbufAppendC(&os, ']');
     }
 
-    ffPrintAndSaveToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+    ffPrintAndWriteToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},

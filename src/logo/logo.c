@@ -7,7 +7,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
     uint32_t currentlineLength = 0;
 
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    ffPrintChar(' ', instance->config.logoPaddingLeft);
+    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
 
     //Use logoColor[0] as the default color
     if(doColorReplacement)
@@ -18,7 +18,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
         //We are at the end of a line. Print paddings and update max line length
         if(*data == '\n' || (*data == '\r' && *(data + 1) == '\n'))
         {
-            ffPrintChar(' ', instance->config.logoPaddingRight);
+            ffPrintCharTimes(' ', instance->config.logoPaddingRight);
 
             //We have \r\n, skip the \r
             if(*data == '\r')
@@ -27,7 +27,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
             putchar('\n');
             ++data;
 
-            ffPrintChar(' ', instance->config.logoPaddingLeft);
+            ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
 
             if(currentlineLength > instance->state.logoWidth)
                 instance->state.logoWidth = currentlineLength;
@@ -40,7 +40,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
         //Always print tabs as 4 spaces, to have consistent spacing
         if(*data == '\t')
         {
-            ffPrintChar(' ', 4);
+            ffPrintCharTimes(' ', 4);
             ++data;
             continue;
         }
@@ -128,7 +128,7 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
         }
     }
 
-    ffPrintChar(' ', instance->config.logoPaddingRight);
+    ffPrintCharTimes(' ', instance->config.logoPaddingRight);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     //Happens if the last line is the longest

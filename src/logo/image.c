@@ -74,7 +74,7 @@ static bool printSixel(FFinstance* instance)
         return false;
     }
 
-    ffPrintChar(' ', instance->config.logoPaddingLeft);
+    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
 
     imageInfoOut->file = stdout;
     ffCopyMagickString(imageInfoOut->magick, "SIXEL", 6);
