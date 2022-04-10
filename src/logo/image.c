@@ -41,9 +41,9 @@ static bool printSixel(FFinstance* instance)
     //+1, because we need to copy the null byte too
     ffCopyMagickString(imageInfoIn->filename, instance->config.logoName.chars, instance->config.logoName.length + 1);
 
-    Image* image = ffReadImage(imageInfoIn, exceptionInfo);
+    Image* originalImage = ffReadImage(imageInfoIn, exceptionInfo);
     ffDestroyImageInfo(imageInfoIn);
-    if(image == NULL)
+    if(originalImage == NULL)
     {
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
@@ -55,10 +55,19 @@ static bool printSixel(FFinstance* instance)
 
     //We keep the values as double, to have more precise calculations later
     double imagePixelWidth = (double) instance->config.logoWidth * characterPixelWidth;
-    double imagePixelHeight = (imagePixelWidth / (double) image->columns) * (double) image->rows;
+    double imagePixelHeight = (imagePixelWidth / (double) originalImage->columns) * (double) originalImage->rows;
 
-    image = ffResizeImage(image, (size_t) imagePixelWidth, (size_t) imagePixelHeight, UndefinedFilter, exceptionInfo);
-    if(image == NULL)
+    if(imagePixelWidth < 1.0 || imagePixelHeight < 1.0)
+    {
+        ffDestroyImage(originalImage);
+        ffDestroyExceptionInfo(exceptionInfo);
+        dlclose(imageMagick);
+        return false;
+    }
+
+    Image* resizedImage = ffResizeImage(originalImage, (size_t) imagePixelWidth, (size_t) imagePixelHeight, UndefinedFilter, exceptionInfo);
+    ffDestroyImage(originalImage);
+    if(resizedImage == NULL)
     {
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
@@ -68,7 +77,7 @@ static bool printSixel(FFinstance* instance)
     ImageInfo* imageInfoOut = ffAcquireImageInfo();
     if(imageInfoOut == NULL)
     {
-        ffDestroyImage(image);
+        ffDestroyImage(resizedImage);
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
         return false;
@@ -79,10 +88,10 @@ static bool printSixel(FFinstance* instance)
     imageInfoOut->file = stdout;
     ffCopyMagickString(imageInfoOut->magick, "SIXEL", 6);
 
-    MagickBooleanType writeResult = ffWriteImage(imageInfoOut, image, exceptionInfo);
+    MagickBooleanType writeResult = ffWriteImage(imageInfoOut, resizedImage, exceptionInfo);
 
     ffDestroyImageInfo(imageInfoOut);
-    ffDestroyImage(image);
+    ffDestroyImage(resizedImage);
     ffDestroyExceptionInfo(exceptionInfo);
     dlclose(imageMagick);
 
@@ -90,18 +99,12 @@ static bool printSixel(FFinstance* instance)
         return false;
 
     instance->state.logoHeight = (uint32_t) (imagePixelHeight / characterPixelHeight);
-    instance->state.logoWidth =  (uint32_t) (imagePixelWidth / characterPixelWidth);
-    instance->state.logoWidth += instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
+    instance->state.logoWidth = instance->config.logoWidth + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
 
     fputs("\033[9999999D", stdout);
+    printf("\033[%uA", instance->state.logoHeight);
 
-    if(instance->state.logoHeight > 0)
-    {
-        printf("\033[%uA", instance->state.logoHeight);
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 #endif
