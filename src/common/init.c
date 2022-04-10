@@ -58,12 +58,12 @@ static void initConfigDirs(FFstate* state)
 
     FFstrbuf* systemConfigHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfigHome, 64);
-    ffStrbufAppendS(systemConfigHome, "/etc/xdg");
+    ffStrbufAppendS(systemConfigHome, FASTFETCH_TARGET_DIR_ROOT"/etc/xdg");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigHome)
 
     FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfig, 64);
-    ffStrbufAppendS(systemConfig, "/etc");
+    ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ROOT"/etc");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfig)
 
     #undef FF_ENSURE_ONLY_ONCE_IN_LIST

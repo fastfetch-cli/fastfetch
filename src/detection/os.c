@@ -64,9 +64,9 @@ const FFOSResult* ffDetectOS(const FFinstance* instance)
     }
     else
     {
-        parseFile("/etc/os-release", &result);
-        parseFile("/usr/lib/os-release", &result);
-        parseFile("/etc/lsb-release", &result);
+        parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/os-release", &result);
+        parseFile(FASTFETCH_TARGET_DIR_USR"/lib/os-release", &result);
+        parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/lsb-release", &result);
     }
 #else
     ffStrbufSetS(&result.name, "Android");

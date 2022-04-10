@@ -30,6 +30,32 @@ OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
 OPTION(ENABLE_IMAGEMAGICK "Enable imagemagick" ON)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
+
+# These variables are mainly here for android, which has a different root fs structure.
+if(NOT TARGET_DIR_ROOT)
+    set(TARGET_DIR_ROOT "")
+endif()
+if(NOT TARGET_DIR_USR)
+    set(TARGET_DIR_USR "${TARGET_DIR_ROOT}/usr")
+endif()
+if(NOT TARGET_DIR_HOME)
+    set(TARGET_DIR_HOME "${TARGET_DIR_ROOT}/home")
+endif()
+
+function(fastfetch_load_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    string(REPLACE "\n" "\\n" TEMP "${TEMP}")
+    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")
+    string(REPLACE "$\\" "" TEMP "${TEMP}")
+    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
+endfunction(fastfetch_load_text)
+
 # Track commits between version bumps for output in --version
 if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process(
@@ -40,21 +66,6 @@ if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     )
     string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
 endif()
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
-
-function(fastfetch_load_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REPLACE "\n" "\\n" TEMP "${TEMP}")
-    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")
-    string(REPLACE "$\\" "" TEMP "${TEMP}")
-    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
-endfunction(fastfetch_load_text)
 
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config.txt DATATEXT_CONFIG)

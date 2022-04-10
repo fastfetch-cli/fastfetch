@@ -9,10 +9,10 @@
 void ffPrintCPUUsage(FFinstance* instance)
 {
     long user, nice, system, idle, iowait, irq, softirq;
-    FILE* procStat = fopen("/proc/stat", "r");
+    FILE* procStat = fopen(FASTFETCH_TARGET_DIR_ROOT"/proc/stat", "r");
     if(procStat == NULL)
     {
-        ffPrintError(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsageKey, &instance->config.cpuUsageFormat, FF_CPU_USAGE_NUM_FORMAT_ARGS, "fopen(\"/proc/stat\", \"r\") == NULL");
+        ffPrintError(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsageKey, &instance->config.cpuUsageFormat, FF_CPU_USAGE_NUM_FORMAT_ARGS, "fopen(\""FASTFETCH_TARGET_DIR_ROOT"/proc/stat\", \"r\") == NULL");
         return;
     }
     if (fscanf(procStat, "cpu%ld%ld%ld%ld%ld%ld%ld", &user, &nice, &system, &idle, &iowait, &irq, &softirq) < 0) goto exit;

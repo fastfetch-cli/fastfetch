@@ -98,7 +98,7 @@ static void getKDE(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, "KDE Plasma");
-    ffParsePropFile("/usr/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     applyBetterWM(result, getenv("KDEWM"));
 }
 
@@ -106,14 +106,14 @@ static void getGnome(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
     ffStrbufSetS(&result->dePrettyName, "GNOME");
-    ffParsePropFile("/usr/share/gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
 }
 
 static void getCinnamon(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "cinnamon");
     ffStrbufSetS(&result->dePrettyName, "Cinnamon");
-    ffParsePropFile("/usr/share/applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
 }
 
 static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
@@ -130,7 +130,7 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
     FFstrbuf micro;
     ffStrbufInit(&micro);
 
-    ffParsePropFileValues("/usr/share/mate-about/mate-version.xml", 3, (FFpropquery[]) {
+    ffParsePropFileValues(FASTFETCH_TARGET_DIR_USR"/share/mate-about/mate-version.xml", 3, (FFpropquery[]) {
         {"<platform>", &major},
         {"<minor>", &minor},
         {"<micro>", &micro}
@@ -159,7 +159,7 @@ static void getXFCE4(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "xfce4-session");
     ffStrbufSetS(&result->dePrettyName, "Xfce4");
-    ffParsePropFile("/usr/share/gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -180,12 +180,12 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
     ffStrbufSetS(&result->dePrettyName, "LXQt");
-    ffParsePropFile("/usr/lib/pkgconfig/lxqt.pc", "Version:", &result->deVersion);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/lib/pkgconfig/lxqt.pc", "Version:", &result->deVersion);
 
     if(result->deVersion.length == 0)
-        ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
+        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFile("/usr/share/cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
+        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -289,13 +289,13 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
 
 static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    DIR* proc = opendir("/proc");
+    DIR* proc = opendir(FASTFETCH_TARGET_DIR_ROOT"/proc");
     if(proc == NULL)
         return;
 
     FFstrbuf procPath;
     ffStrbufInitA(&procPath, 64);
-    ffStrbufAppendS(&procPath, "/proc/");
+    ffStrbufAppendS(&procPath, FASTFETCH_TARGET_DIR_ROOT"/proc/");
 
     uint32_t procPathLength = procPath.length;
 

@@ -138,12 +138,8 @@ static uint32_t countFilesIn(const char* dirname, const char* filename)
 
 void ffPrintPackages(FFinstance* instance)
 {
-    uint32_t pacman = getNumElements("/var/lib/pacman/local", DT_DIR);
-    uint32_t dpkg = getNumStrings("/var/lib/dpkg/status", "Status: ");
-
-    #if __ANDROID__
-        dpkg += getNumStrings("/data/data/com.termux/files/usr/var/lib/dpkg/status", "Status: ");
-    #endif
+    uint32_t pacman = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/pacman/local", DT_DIR);
+    uint32_t dpkg = getNumStrings(FASTFETCH_TARGET_DIR_ROOT"/var/lib/dpkg/status", "Status: ");
 
     #ifdef FF_HAVE_RPM
         uint32_t rpm = getRpmPackageCount(instance);
@@ -151,10 +147,10 @@ void ffPrintPackages(FFinstance* instance)
         uint32_t rpm = 0;
     #endif
 
-    uint32_t emerge = countFilesIn("/var/db/pkg", "SIZE");
-    uint32_t xbps = getNumElements("/var/db/xbps", DT_REG);
-    uint32_t flatpak = getNumElements("/var/lib/flatpak/app", DT_DIR);
-    uint32_t snap = getNumElements("/snap", DT_DIR);
+    uint32_t emerge = countFilesIn(FASTFETCH_TARGET_DIR_ROOT"/var/db/pkg", "SIZE");
+    uint32_t xbps = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/db/xbps", DT_REG);
+    uint32_t flatpak = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/flatpak/app", DT_DIR);
+    uint32_t snap = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/snap", DT_DIR);
 
     //Accounting for the /snap/bin folder
     if(snap > 0)
@@ -170,7 +166,7 @@ void ffPrintPackages(FFinstance* instance)
 
     FFstrbuf manjaroBranch;
     ffStrbufInit(&manjaroBranch);
-    if(ffParsePropFile("/etc/pacman-mirrors.conf", "Branch =", &manjaroBranch) && manjaroBranch.length == 0)
+    if(ffParsePropFile(FASTFETCH_TARGET_DIR_ROOT"/etc/pacman-mirrors.conf", "Branch =", &manjaroBranch) && manjaroBranch.length == 0)
         ffStrbufSetS(&manjaroBranch, "stable");
 
     if(instance->config.packagesFormat.length == 0)

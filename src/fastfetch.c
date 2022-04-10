@@ -393,7 +393,7 @@ static inline void listAvailablePresets(FFinstance* instance)
     ffStrbufAppendS(&folder, "/.local/share/fastfetch/presets/");
     listAvailablePresetsFromFolder(&folder, 0, NULL);
 
-    ffStrbufSetS(&folder, "/usr/share/fastfetch/presets/");
+    ffStrbufSetS(&folder, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
     listAvailablePresetsFromFolder(&folder, 0, NULL);
 
     ffStrbufDestroy(&folder);
@@ -488,7 +488,7 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
         return;
     }
 
-    ffStrbufSetS(&filename, "/usr/share/fastfetch/presets/");
+    ffStrbufSetS(&filename, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
     ffStrbufAppendS(&filename, value);
 
     file = fopen(filename.chars, "r");

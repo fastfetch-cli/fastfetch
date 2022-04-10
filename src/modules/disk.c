@@ -79,18 +79,17 @@ void ffPrintDisk(FFinstance* instance)
 {
     if(instance->config.diskFolders.length == 0)
     {
-
         struct statvfs fsRoot;
         int rootRet = statvfs("/", &fsRoot);
 
         struct statvfs fsHome;
-        int homeRet = statvfs("/home", &fsHome);
+        int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
 
         if(rootRet != 0 && homeRet != 0)
         {
             FF_STRBUF_CREATE(key);
             getKey(instance, &key, "", false);
-            ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "statvfs failed for both / and /home");
+            ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "statvfs failed for both / and " FASTFETCH_TARGET_DIR_HOME);
             ffStrbufDestroy(&key);
             return;
         }
@@ -99,7 +98,7 @@ void ffPrintDisk(FFinstance* instance)
             printStatvfsCreateKey(instance, "/", &fsRoot);
 
         if(homeRet == 0 && (rootRet != 0 || fsRoot.f_fsid != fsHome.f_fsid))
-            printStatvfsCreateKey(instance, "/home", &fsHome);
+            printStatvfsCreateKey(instance, FASTFETCH_TARGET_DIR_HOME, &fsHome);
     }
     else
     {

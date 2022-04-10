@@ -184,7 +184,7 @@ static void printTTY(FFinstance* instance)
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
 
-    ffParsePropFile("/etc/vconsole.conf", "Font =", &fontName);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_ROOT"/etc/vconsole.conf", "Font =", &fontName);
 
     if(fontName.length == 0)
     {

@@ -147,7 +147,7 @@ static bool printCursorFromXDG(FFinstance* instance, bool user)
     if(user)
         ffParsePropFileHome(instance, ".icons/default/index.theme", "Inherits =", &theme);
     else
-        ffParsePropFile("/usr/share/icons/default/index.theme", "Inherits =", &theme);
+        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/icons/default/index.theme", "Inherits =", &theme);
 
     if(theme.length == 0)
     {
