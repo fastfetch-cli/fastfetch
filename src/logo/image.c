@@ -110,7 +110,10 @@ bool ffLogoPrintSixelIfExists(FFinstance* instance)
 {
     #ifdef FF_HAVE_IMAGEMAGICK
         return printSixel(instance);
+    #else
+        FF_UNUSED(instance);
     #endif
+
     return false;
 }
 
