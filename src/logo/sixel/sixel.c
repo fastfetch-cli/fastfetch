@@ -123,7 +123,7 @@ bool ffLogoPrintSixelIfExists(FFinstance* instance)
     #endif
 
     #ifdef FF_HAVE_IMAGEMAGICK6
-        return ffLogoPrintSixelIM6(instance) == FF_LOGO_SIXEL_RESULT_SUCCESS
+        return ffLogoPrintSixelIM6(instance) == FF_LOGO_SIXEL_RESULT_SUCCESS;
     #endif
 
     return false;
