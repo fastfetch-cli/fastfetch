@@ -693,7 +693,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
     {
-        //Set cacheSave as well, beacuse the user expects the values to be cached when expliciting using --recache
+        //Set cacheSave as well, because the user expects the values to be cached when expliciting using --recache
         instance->config.recache = optionParseBoolean(value);
         instance->config.cacheSave = instance->config.recache;
     }

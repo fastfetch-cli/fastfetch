@@ -222,7 +222,6 @@ void ffInitInstance(FFinstance* instance)
 {
     initState(&instance->state);
     defaultConfig(instance);
-    ffCacheValidate(instance);
 }
 
 static void resetConsole(bool disableLinewrap, bool hideCursor)
@@ -255,6 +254,9 @@ void ffStart(FFinstance* instance)
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
+
+    //We do the cache validation here, so we can skip it if --recache is given
+    ffCacheValidate(instance);
 
     //reset everything to default before we start printing
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
