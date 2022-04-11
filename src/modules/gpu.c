@@ -17,7 +17,7 @@ typedef struct GPUResult
 
 static void vulkanFillGPUs(FFinstance* instance, FFlist* results)
 {
-    FF_LIBRARY_LOAD(vulkan, instance->config.libVulkan, , "libvulkan.so", "libvulkan.so.1")
+    FF_LIBRARY_LOAD(vulkan, instance->config.libVulkan, , "libvulkan.so", 2)
     FF_LIBRARY_LOAD_SYMBOL(vulkan, vkCreateInstance,)
     FF_LIBRARY_LOAD_SYMBOL(vulkan, vkDestroyInstance,)
     FF_LIBRARY_LOAD_SYMBOL(vulkan, vkEnumeratePhysicalDevices,)
@@ -133,7 +133,7 @@ static void pciGetDriver(struct pci_dev* dev, FFstrbuf* driver, char*(*ffpci_get
 
 static void pciFillGPUs(FFinstance* instance, FFlist* results)
 {
-    FF_LIBRARY_LOAD(pci, instance->config.libPCI, , "libpci.so", "libpci.so.3")
+    FF_LIBRARY_LOAD(pci, instance->config.libPCI, , "libpci.so", 4)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_alloc,)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_init,)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_scan_bus,)

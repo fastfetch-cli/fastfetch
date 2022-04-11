@@ -80,7 +80,7 @@ typedef struct GSettingsData
 
 static const GSettingsData* getGSettingsData(FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0.so", "libgio-2.0.so.0");
+    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0.so", 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
@@ -152,7 +152,7 @@ typedef struct DConfData
 
 static const DConfData* getDConfData(FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf.so", "libdconf.so.1");
+    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf.so", 2);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
@@ -222,7 +222,7 @@ typedef struct XFConfData
 
 static const XFConfData* getXFConfData(FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0.so", "libxfconf-0.so.3");
+    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0.so", 4);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)

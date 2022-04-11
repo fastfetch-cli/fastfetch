@@ -2,6 +2,33 @@
 
 #include <stdarg.h>
 
+static void* libraryLoad(const char* path, int maxVersion)
+{
+    void* result = dlopen(path, RTLD_LAZY);
+    if(result != NULL)
+        return result;
+
+    FFstrbuf pathbuf;
+    ffStrbufInitA(&pathbuf, 64);
+    ffStrbufAppendS(&pathbuf, path);
+    ffStrbufAppendC(&pathbuf, '.');
+
+    for(int i = maxVersion; i >= 0; --i)
+    {
+        uint32_t originalLength = pathbuf.length;
+        ffStrbufAppendF(&pathbuf, "%i", i);
+
+        result = dlopen(pathbuf.chars, RTLD_LAZY);
+        if(result != NULL)
+            break;
+
+        ffStrbufSubstrBefore(&pathbuf, originalLength);
+    }
+
+    ffStrbufDestroy(&pathbuf);
+    return result;
+}
+
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
 {
     if(userProvidedName->length > 0)
@@ -11,12 +38,15 @@ void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
     va_start(defaultNames, userProvidedName);
 
     void* result = NULL;
-    const char* name = va_arg(defaultNames, const char*);
 
-    while(result == NULL && name != NULL)
+    while(result == NULL)
     {
-        result = dlopen(name, RTLD_LAZY);
-        name = va_arg(defaultNames, const char*);
+        const char* path = va_arg(defaultNames, const char*);
+        if(path == NULL)
+            break;
+
+        int maxVersion = va_arg(defaultNames, int);
+        result = libraryLoad(path, maxVersion);
     }
 
     va_end(defaultNames);

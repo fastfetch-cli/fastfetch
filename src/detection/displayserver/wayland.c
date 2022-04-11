@@ -78,7 +78,7 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
     if(getenv("XDG_RUNTIME_DIR") == NULL)
         return;
 
-    FF_LIBRARY_LOAD(wayland, instance->config.libWayland, , "libwayland-client.so", "libwayland-client.so.0")
+    FF_LIBRARY_LOAD(wayland, instance->config.libWayland, , "libwayland-client.so", 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect,)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_dispatch,)

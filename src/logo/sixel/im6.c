@@ -20,7 +20,7 @@ static bool logoWriteIM6(void* image, const void* imageInfo, void* exceptionInfo
 
 bool ffLogoPrintSixelIM6(FFinstance* instance)
 {
-    FF_LIBRARY_LOAD(imageMagick, instance->config.libImageMagick, "libMagickCore-6.Q16HDRI.so", "libMagickCore-6.Q16HDRI.so.6", "libMagickCore-6.Q16.so", "libMagickCore-6.Q16.so.6")
+    FF_LIBRARY_LOAD(imageMagick, instance->config.libImageMagick, false, "libMagickCore-6.Q16HDRI.so", 8, "libMagickCore-6.Q16.so", 8)
 
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffResizeImage, ResizeImage, false);
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffWriteImage, WriteImage, false);

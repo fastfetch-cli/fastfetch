@@ -285,7 +285,7 @@ static void getMedia(FFinstance* instance, FFMediaResult* result)
 {
     DBusData data;
 
-    FF_LIBRARY_LOAD(dbus, instance->config.libDBus, , "libdbus-1.so", "libdbus-1.so.3");
+    FF_LIBRARY_LOAD(dbus, instance->config.libDBus, , "libdbus-1.so", 4);
     FF_LIBRARY_LOAD_SYMBOL(dbus, dbus_bus_get,)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(dbus, data.ffdbus_message_new_method_call, dbus_message_new_method_call,)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(dbus, data.ffdbus_message_iter_init, dbus_message_iter_init,)
