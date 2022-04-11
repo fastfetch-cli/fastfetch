@@ -10,9 +10,7 @@ bool ffLogoPrintSixelIM7(FFinstance* instance);
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK6
-#ifndef isnan
-    #define isnan(x) ((x) != (x))
-#endif
+#include <math.h>
 bool ffLogoPrintSixelIM6(FFinstance* instance);
 #endif
 
