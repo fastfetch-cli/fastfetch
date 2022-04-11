@@ -17,12 +17,12 @@ static bool logoWriteIM7(void* image, const void* imageInfo, void* exceptionInfo
     return ffWriteImage(imageInfo, image, exceptionInfo) == MagickTrue;
 }
 
-bool ffLogoPrintSixelIM7(FFinstance* instance)
+FFLogoSixelResult ffLogoPrintSixelIM7(FFinstance* instance)
 {
-    FF_LIBRARY_LOAD(imageMagick, instance->config.libImageMagick, false, "libMagickCore-7.Q16HDRI.so", 11, "libMagickCore-7.Q16.so", 11)
+    FF_LIBRARY_LOAD(imageMagick, instance->config.libImageMagick, FF_LOGO_SIXEL_RESULT_INIT_ERROR, "libMagickCore-7.Q16HDRI.so", 11, "libMagickCore-7.Q16.so", 11)
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffResizeImage, ResizeImage, false);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffWriteImage, WriteImage, false);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_SIXEL_RESULT_INIT_ERROR);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffWriteImage, WriteImage, FF_LOGO_SIXEL_RESULT_INIT_ERROR);
 
     return ffLogoPrintSixelImpl(instance, imageMagick, logoResizeIM7, logoWriteIM7);
 }

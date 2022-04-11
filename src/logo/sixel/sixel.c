@@ -9,25 +9,25 @@
     #include <magick/MagickCore.h>
 #endif
 
-bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResizeFunc resizeFunc, FFLogoIMWriteFunc writeFunc)
+FFLogoSixelResult ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResizeFunc resizeFunc, FFLogoIMWriteFunc writeFunc)
 {
     struct winsize winsize;
     if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize) != 0)
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
 
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireExceptionInfo, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyExceptionInfo, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireImageInfo, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImageInfo, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, CopyMagickString, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, ReadImage, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImage, false)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireExceptionInfo, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyExceptionInfo, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireImageInfo, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImageInfo, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, CopyMagickString, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, ReadImage, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImage, FF_LOGO_SIXEL_RESULT_INIT_ERROR)
 
     ExceptionInfo* exceptionInfo = ffAcquireExceptionInfo();
     if(exceptionInfo == NULL)
     {
         dlclose(imageMagick);
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
     }
 
     ImageInfo* imageInfoIn = ffAcquireImageInfo();
@@ -35,7 +35,7 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
     {
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
     }
 
     //+1, because we need to copy the null byte too
@@ -47,7 +47,7 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
     {
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
     }
 
     double characterPixelWidth = winsize.ws_xpixel / (double) winsize.ws_col;
@@ -62,7 +62,7 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
         ffDestroyImage(originalImage);
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
     }
 
     Image* resizedImage = (Image*) resizeFunc(originalImage, (size_t) imagePixelWidth, (size_t) imagePixelHeight, exceptionInfo);
@@ -71,7 +71,7 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
     {
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
     }
 
     ImageInfo* imageInfoOut = ffAcquireImageInfo();
@@ -80,7 +80,7 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
         ffDestroyImage(resizedImage);
         ffDestroyExceptionInfo(exceptionInfo);
         dlclose(imageMagick);
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
     }
 
     ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
@@ -96,7 +96,7 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
     dlclose(imageMagick);
 
     if(writeResult == MagickFalse)
-        return false;
+        return FF_LOGO_SIXEL_RESULT_RUN_ERROR;
 
     instance->state.logoHeight = (uint32_t) (imagePixelHeight / characterPixelHeight);
     instance->state.logoWidth = instance->config.logoWidth + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
@@ -104,24 +104,26 @@ bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResiz
     fputs("\033[9999999D", stdout);
     printf("\033[%uA", instance->state.logoHeight);
 
-    return true;
+    return FF_LOGO_SIXEL_RESULT_SUCCESS;
 }
 #endif
 
 bool ffLogoPrintSixelIfExists(FFinstance* instance)
 {
+    #if !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
+        FF_UNUSED(instance);
+    #endif
+
     #ifdef FF_HAVE_IMAGEMAGICK7
-        if(ffLogoPrintSixelIM7(instance))
+        FFLogoSixelResult result = ffLogoPrintSixelIM7(instance);
+        if(result == FF_LOGO_SIXEL_RESULT_SUCCESS)
             return true;
+        else if(result == FF_LOGO_SIXEL_RESULT_RUN_ERROR)
+            return false;
     #endif
 
     #ifdef FF_HAVE_IMAGEMAGICK6
-        if(ffLogoPrintSixelIM6(instance))
-            return true;
-    #endif
-
-    #if !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
-        FF_UNUSED(instance);
+        return ffLogoPrintSixelIM6(instance) == FF_LOGO_SIXEL_RESULT_SUCCESS
     #endif
 
     return false;
