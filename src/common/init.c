@@ -308,8 +308,11 @@ void ffListFeatures()
         #ifdef FF_HAVE_DBUS
             "dbus\n"
         #endif
-        #ifdef FF_HAVE_IMAGEMAGICK
-            "imagemagick\n"
+        #ifdef FF_HAVE_IMAGEMAGICK7
+            "imagemagick7\n"
+        #endif
+        #ifdef FF_HAVE_IMAGEMAGICK6
+            "imagemagick6\n"
         #endif
         #ifdef FF_HAVE_XFCONF
             "xfconf\n"

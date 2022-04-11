@@ -1,26 +1,26 @@
-#include "logo.h"
+#include "sixel.h"
 
-#ifdef FF_HAVE_IMAGEMAGICK
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
-#include <MagickCore/MagickCore.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
+//We use only the defines from here, that are exactly the same in both versions
+#ifdef FF_HAVE_IMAGEMAGICK7
+    #include <MagickCore/MagickCore.h>
+#else
+    #include <magick/MagickCore.h>
+#endif
 
-static bool printSixel(FFinstance* instance)
+bool ffLogoPrintSixelImpl(FFinstance* instance, void* imageMagick, FFLogoIMResizeFunc resizeFunc, FFLogoIMWriteFunc writeFunc)
 {
     struct winsize winsize;
     if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize) != 0)
         return false;
 
-    FF_LIBRARY_LOAD(imageMagick, instance->config.libImageMagick, false, "libMagickCore-7.Q16HDRI.so", "libMagickCore-7.Q16HDRI.so.10")
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireExceptionInfo, false)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyExceptionInfo, false)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireImageInfo, false)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImageInfo, false)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, CopyMagickString, false)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, ReadImage, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, ResizeImage, false)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, WriteImage, false)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImage, false)
 
     ExceptionInfo* exceptionInfo = ffAcquireExceptionInfo();
@@ -65,7 +65,7 @@ static bool printSixel(FFinstance* instance)
         return false;
     }
 
-    Image* resizedImage = ffResizeImage(originalImage, (size_t) imagePixelWidth, (size_t) imagePixelHeight, UndefinedFilter, exceptionInfo);
+    Image* resizedImage = (Image*) resizeFunc(originalImage, (size_t) imagePixelWidth, (size_t) imagePixelHeight, exceptionInfo);
     ffDestroyImage(originalImage);
     if(resizedImage == NULL)
     {
@@ -88,7 +88,7 @@ static bool printSixel(FFinstance* instance)
     imageInfoOut->file = stdout;
     ffCopyMagickString(imageInfoOut->magick, "SIXEL", 6);
 
-    MagickBooleanType writeResult = ffWriteImage(imageInfoOut, resizedImage, exceptionInfo);
+    MagickBooleanType writeResult = writeFunc(resizedImage, imageInfoOut, exceptionInfo) ? MagickTrue : MagickFalse;
 
     ffDestroyImageInfo(imageInfoOut);
     ffDestroyImage(resizedImage);
@@ -106,22 +106,23 @@ static bool printSixel(FFinstance* instance)
 
     return true;
 }
-
 #endif
 
 bool ffLogoPrintSixelIfExists(FFinstance* instance)
 {
-    #ifdef FF_HAVE_IMAGEMAGICK
-        return printSixel(instance);
-    #else
+    #ifdef FF_HAVE_IMAGEMAGICK7
+        if(ffLogoPrintSixelIM7(instance))
+            return true;
+    #endif
+
+    #ifdef FF_HAVE_IMAGEMAGICK6
+        if(ffLogoPrintSixelIM6(instance))
+            return true;
+    #endif
+
+    #if !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
         FF_UNUSED(instance);
     #endif
 
     return false;
-}
-
-void ffLogoPrintSixel(FFinstance* instance)
-{
-    if(!ffLogoPrintSixelIfExists(instance))
-        ffLogoPrintBuiltinDetected(instance);
 }

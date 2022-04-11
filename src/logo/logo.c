@@ -189,7 +189,10 @@ void ffPrintLogo(FFinstance* instance)
     else if(instance->config.logoType == FF_LOGO_TYPE_RAW)
         logoPrintFile(instance, false);
     else if(instance->config.logoType == FF_LOGO_TYPE_SIXEL)
-        ffLogoPrintSixel(instance);
+    {
+        if(!ffLogoPrintSixelIfExists(instance))
+            ffLogoPrintUnknown(instance);
+    }
     else
         logoPrintDetected(instance);
 }

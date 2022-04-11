@@ -28,7 +28,8 @@ OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
-OPTION(ENABLE_IMAGEMAGICK "Enable imagemagick" ON)
+OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
+OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -112,7 +113,9 @@ add_library(libfastfetch STATIC
     src/common/networking.c
     src/logo/logo.c
     src/logo/builtin.c
-    src/logo/image.c
+    src/logo/sixel/sixel.c
+    src/logo/sixel/im7.c
+    src/logo/sixel/im6.c
     src/detection/os.c
     src/detection/plasma.c
     src/detection/gtk.c
@@ -163,121 +166,138 @@ add_library(libfastfetch STATIC
 )
 
 if(ENABLE_LIBPCI)
-    pkg_check_modules (LIBPCI libpci)
+    pkg_check_modules(LIBPCI libpci)
     if(LIBPCI_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBPCI=1)
-    else(LIBPCI_FOUND)
+    else()
         message(WARNING "Package libpci not found. Building without support.")
-    endif(LIBPCI_FOUND)
-endif(ENABLE_LIBPCI)
+    endif()
+endif()
 
 if(ENABLE_VULKAN)
-    pkg_check_modules (VULKAN vulkan)
+    pkg_check_modules(VULKAN vulkan)
     if(VULKAN_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_VULKAN=1)
-    else(VULKAN_FOUND)
+    else()
         message(WARNING "Package vulkan not found. Building without support.")
-    endif(VULKAN_FOUND)
-endif(ENABLE_VULKAN)
+    endif()
+endif()
 
 if(ENABLE_WAYLAND)
     pkg_check_modules (WAYLAND wayland-client)
     if(WAYLAND_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WAYLAND=1)
-    else(WAYLAND_FOUND)
+    else()
         message(WARNING "Package wayland-client not found. Building without support.")
-    endif(WAYLAND_FOUND)
-endif(ENABLE_WAYLAND)
+    endif()
+endif()
 
 if(ENABLE_XCB_RANDR)
-    pkg_check_modules (XCB_RANDR xcb-randr)
+    pkg_check_modules(XCB_RANDR xcb-randr)
     if(XCB_RANDR_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XCB_RANDR=1)
-    else(XCB_RANDR_FOUND)
+    else()
         message(WARNING "Package xcb-randr not found. Building without support.")
-    endif(XCB_RANDR_FOUND)
-endif(ENABLE_XCB_RANDR)
+    endif()
+endif()
 
 if(ENABLE_XCB)
     pkg_check_modules (XCB xcb)
     if(XCB_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XCB=1)
-    else(XCB_FOUND)
+    else()
         message(WARNING "Package xcb not found. Building without support.")
-    endif(XCB_FOUND)
-endif(ENABLE_XCB)
+    endif()
+endif()
 
 if(ENABLE_XRANDR)
-    pkg_check_modules (XRANDR xrandr)
+    pkg_check_modules(XRANDR xrandr)
     if(XRANDR_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XRANDR=1)
-    else(XRANDR_FOUND)
+    else()
         message(WARNING "Package xrandr not found. Building without support.")
-    endif(XRANDR_FOUND)
-endif(ENABLE_XRANDR)
+    endif()
+endif()
 
 if(ENABLE_X11)
-    pkg_check_modules (X11 x11)
+    pkg_check_modules(X11 x11)
     if(X11_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_X11=1)
-    else(X11_FOUND)
+    else()
         message(WARNING "Package x11 not found. Building without support.")
-    endif(X11_FOUND)
-endif(ENABLE_X11)
+    endif()
+endif()
 
 if(ENABLE_GIO)
-    pkg_check_modules (GIO gio-2.0)
+    pkg_check_modules(GIO gio-2.0)
     if(GIO_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GIO=1)
-    else(GIO_FOUND)
+    else()
         message(WARNING "Package gio-2.0 not found. Building without support.")
-    endif(GIO_FOUND)
-endif(ENABLE_GIO)
+    endif()
+endif()
 
 if(ENABLE_DCONF)
-    pkg_check_modules (DCONF dconf)
+    pkg_check_modules(DCONF dconf)
     if(DCONF_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_DCONF=1)
-    else(DCONF_FOUND)
+    else()
         message(WARNING "Package dconf not found. Building without support.")
-    endif(DCONF_FOUND)
-endif(ENABLE_DCONF)
+    endif()
+endif()
 
 if(ENABLE_DBUS)
-    pkg_check_modules (DBUS dbus-1)
+    pkg_check_modules(DBUS dbus-1)
     if(DBUS_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_DBUS=1)
-    else(DBUS_FOUND)
+    else()
         message(WARNING "Package dbus-1 not found. Building without support.")
-    endif(DBUS_FOUND)
-endif(ENABLE_DBUS)
+    endif()
+endif()
 
 if(ENABLE_XFCONF)
-    pkg_check_modules (XFCONF libxfconf-0)
+    pkg_check_modules(XFCONF libxfconf-0)
     if(XFCONF_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_XFCONF=1)
-    else(XFCONF_FOUND)
+    else()
         message(WARNING "Package libxfconf-0 not found. Building without support.")
-    endif(XFCONF_FOUND)
-endif(ENABLE_XFCONF)
+    endif()
+endif()
 
 if(ENABLE_RPM)
-    pkg_check_modules (RPM rpm)
+    pkg_check_modules(RPM rpm)
     if(RPM_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_RPM=1)
-    else(RPM_FOUND)
+    else()
         message(WARNING "Package librpm not found. Building without support.")
-    endif(RPM_FOUND)
-endif(ENABLE_RPM)
+    endif()
+endif()
 
-if(ENABLE_IMAGEMAGICK)
-    pkg_check_modules (IMAGEMAGICK MagickCore-7.Q16HDRI)
-    if(IMAGEMAGICK_FOUND)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_IMAGEMAGICK=1)
-    else(IMAGEMAGICK_FOUND)
-        message(WARNING "Package MagickCore-7.Q16HDRI not found. Building without support.")
-    endif(IMAGEMAGICK_FOUND)
-endif(ENABLE_IMAGEMAGICK)
+if(ENABLE_IMAGEMAGICK7)
+    pkg_check_modules(IMAGEMAGICK7 MagickCore-7.Q16HDRI)
+    if(NOT IMAGEMAGICK7_FOUND)
+        pkg_check_modules(IMAGEMAGICK7 MagickCore-7.Q16)
+    endif()
+
+    if(IMAGEMAGICK7_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_IMAGEMAGICK7=1)
+    else()
+        message(WARNING "Package MagickCore-7.Q16HDRI or MagickCore-7.Q16 not found. Building without support.")
+    endif()
+endif()
+
+if(ENABLE_IMAGEMAGICK6)
+    pkg_check_modules(IMAGEMAGICK6 MagickCore-6.Q16HDRI)
+    if(NOT IMAGEMAGICK6_FOUND)
+        pkg_check_modules(IMAGEMAGICK6 MagickCore-6.Q16)
+    endif()
+
+    if(IMAGEMAGICK6_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_IMAGEMAGICK6=1)
+    else()
+        message(WARNING "Package MagickCore-6.Q16HDRI or MagickCore-6.Q16 not found. Building without support.")
+    endif()
+endif()
 
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
@@ -295,23 +315,8 @@ target_include_directories(libfastfetch
     PRIVATE ${DBUS_INCLUDE_DIRS}
     PRIVATE ${XFCONF_INCLUDE_DIRS}
     PRIVATE ${RPM_INCLUDE_DIRS}
-    PRIVATE ${IMAGEMAGICK_INCLUDE_DIRS}
-)
-
-target_compile_options(libfastfetch
-    PRIVATE ${LIBPCI_CFLAGS_OTHER}
-    PRIVATE ${VULKAN_CFLAGS_OTHER}
-    PRIVATE ${WAYLAND_CFLAGS_OTHER}
-    PRIVATE ${XCB_RANDR_CFLAGS_OTHER}
-    PRIVATE ${XCB_CFLAGS_OTHER}
-    PRIVATE ${XRANDR_CFLAGS_OTHER}
-    PRIVATE ${X11_CFLAGS_OTHER}
-    PRIVATE ${GIO_CFLAGS_OTHER}
-    PRIVATE ${DCONF_CFLAGS_OTHER}
-    PRIVATE ${DBUS_CFLAGS_OTHER}
-    PRIVATE ${XFCONF_CFLAGS_OTHER}
-    PRIVATE ${RPM_CFLAGS_OTHER}
-    PRIVATE ${IMAGEMAGICK_CFLAGS_OTHER}
+    PRIVATE ${IMAGEMAGICK7_INCLUDE_DIRS}
+    PRIVATE ${IMAGEMAGICK6_INCLUDE_DIRS}
 )
 
 target_link_libraries(libfastfetch
