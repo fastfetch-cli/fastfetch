@@ -5,6 +5,17 @@
 
 #include "fastfetch.h"
 
+#ifdef FF_HAVE_IMAGEMAGICK7
+bool ffLogoPrintSixelIM7(FFinstance* instance);
+#endif
+
+#ifdef FF_HAVE_IMAGEMAGICK6
+#ifndef isnan
+    #define isnan(x) ((x) != (x))
+#endif
+bool ffLogoPrintSixelIM6(FFinstance* instance);
+#endif
+
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
 #include <sys/ioctl.h>
@@ -18,14 +29,6 @@ typedef bool(*FFLogoIMWriteFunc)(void* image, const void* imageInfo, void* excep
 
 bool ffLogoPrintSixelImpl(FFinstance* instance, void* library, FFLogoIMResizeFunc resizeFunc, FFLogoIMWriteFunc writeFunc);
 
-#endif
-
-#ifdef FF_HAVE_IMAGEMAGICK7
-bool ffLogoPrintSixelIM7(FFinstance* instance);
-#endif
-
-#ifdef FF_HAVE_IMAGEMAGICK6
-bool ffLogoPrintSixelIM6(FFinstance* instance);
 #endif
 
 #endif
