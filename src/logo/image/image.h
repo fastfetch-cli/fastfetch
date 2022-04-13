@@ -15,9 +15,9 @@
 
 typedef enum FFLogoImageResult
 {
-    FF_LOGO_SIXEL_RESULT_SUCCESS,    //Logo printed
-    FF_LOGO_SIXEL_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version
-    FF_LOGO_SIXEL_RESULT_RUN_ERROR   //Failed to load / convert image, cancle whole sixel code
+    FF_LOGO_IMAGE_RESULT_SUCCESS,    //Logo printed
+    FF_LOGO_IMAGE_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version
+    FF_LOGO_IMAGE_RESULT_RUN_ERROR   //Failed to load / convert image, cancle whole sixel code
 } FFLogoImageResult;
 
 typedef void*(*FFLogoIMResizeFunc)(const void* image, size_t width, size_t height, void* exceptionInfo);
@@ -32,7 +32,7 @@ FFLogoImageResult ffLogoPrintImageIM7(FFinstance* instance, FFLogoType type);
 
 #ifdef FF_HAVE_IMAGEMAGICK6
 #include <math.h>
-FFLogoSixelResult ffLogoPrintImageIM6(FFinstance* instance, FFLogoType type);
+FFLogoImageResult ffLogoPrintImageIM6(FFinstance* instance, FFLogoType type);
 #endif
 
 
