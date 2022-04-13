@@ -733,6 +733,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logoType = FF_LOGO_TYPE_RAW;
         else if(strcasecmp(value, "sixel") == 0)
             instance->config.logoType = FF_LOGO_TYPE_SIXEL;
+        else if(strcasecmp(value, "kitty") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_KITTY;
         else
         {
             fprintf(stderr, "Error: unknown logo type: %s\n", value);
@@ -771,6 +773,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         optionParseString(key, value, &instance->config.logoName);
         instance->config.logoType = FF_LOGO_TYPE_SIXEL;
+    }
+    else if(strcasecmp(key, "--kitty") == 0)
+    {
+        optionParseString(key, value, &instance->config.logoName);
+        instance->config.logoType = FF_LOGO_TYPE_KITTY;
     }
 
     ///////////////////

@@ -38,6 +38,7 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_FILE,    //Raw text file, printed as is.
     FF_LOGO_TYPE_RAW,     //Raw text file, printed with color codes replacement.
     FF_LOGO_TYPE_SIXEL,   //Image file, printed as sixel codes.
+    FF_LOGO_TYPE_KITTY    //Image file, printed as kitty graphics protocol
 } FFLogoType;
 
 typedef struct FFconfig

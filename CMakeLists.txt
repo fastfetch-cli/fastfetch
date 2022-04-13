@@ -113,9 +113,9 @@ add_library(libfastfetch STATIC
     src/common/networking.c
     src/logo/logo.c
     src/logo/builtin.c
-    src/logo/sixel/sixel.c
-    src/logo/sixel/im7.c
-    src/logo/sixel/im6.c
+    src/logo/image/image.c
+    src/logo/image/im7.c
+    src/logo/image/im6.c
     src/detection/os.c
     src/detection/plasma.c
     src/detection/gtk.c
@@ -418,6 +418,8 @@ set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "
     libglib2.0-0
     libdbus-1-3
     libxfconf-0-3
+    libmagickcore-6.q16hdri-6
+    libmagickcore-6.q16-6
 ")
 
 set(CPACK_RPM_PACKAGE_LICENSE "MIT")

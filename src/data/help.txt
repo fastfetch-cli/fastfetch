@@ -21,7 +21,7 @@ General options:
 
 Logo options:
     -l,--logo <logo>:                set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file
-    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file, raw or sixel
+    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file, raw, sixel or kitty.
     --logo-width <width>:            set the width of the logo (in characters), if it is an image
     --logo-color-[1-9] <color>:      overwrite a color in the logo
     --logo-padding <padding>:        set the padding on the left and the right of the logo
@@ -29,6 +29,7 @@ Logo options:
     --logo-padding-right <padding>:  set the padding on the right of the logo
     --logo-print-remaining <?value>: weather to print the remaining logo, if it has more lines than modules to display
     --sixel <file>:                  short for --logo-type sixel --logo <file>
+    --kitty <file>:                  short for --logo-type kitty --logo <file>
 
 Display options:
     -s,--structure <structure>:  sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.

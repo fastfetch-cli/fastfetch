@@ -162,7 +162,7 @@ static void logoPrintDetected(FFinstance* instance)
     {
         if(
             !ffLogoPrintBuiltinIfExists(instance) &&
-            !ffLogoPrintSixelIfExists(instance)
+            !ffLogoPrintImageIfExists(instance, FF_LOGO_TYPE_KITTY)
         ) logoPrintFile(instance, true);
         return;
     }
@@ -188,10 +188,10 @@ void ffPrintLogo(FFinstance* instance)
         logoPrintFile(instance, true);
     else if(instance->config.logoType == FF_LOGO_TYPE_RAW)
         logoPrintFile(instance, false);
-    else if(instance->config.logoType == FF_LOGO_TYPE_SIXEL)
+    else if(instance->config.logoType == FF_LOGO_TYPE_SIXEL || instance->config.logoType == FF_LOGO_TYPE_KITTY)
     {
-        if(!ffLogoPrintSixelIfExists(instance))
-            ffLogoPrintUnknown(instance);
+        if(!ffLogoPrintImageIfExists(instance, instance->config.logoType))
+            ffLogoPrintBuiltinDetected(instance);
     }
     else
         logoPrintDetected(instance);
