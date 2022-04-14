@@ -107,16 +107,12 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
 
     ExceptionInfo* exceptionInfo = ffAcquireExceptionInfo();
     if(exceptionInfo == NULL)
-    {
-        dlclose(imageMagick);
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
-    }
 
     ImageInfo* imageInfoIn = ffAcquireImageInfo();
     if(imageInfoIn == NULL)
     {
         ffDestroyExceptionInfo(exceptionInfo);
-        dlclose(imageMagick);
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -128,7 +124,6 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
     if(originalImage == NULL)
     {
         ffDestroyExceptionInfo(exceptionInfo);
-        dlclose(imageMagick);
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -143,7 +138,6 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
     {
         ffDestroyImage(originalImage);
         ffDestroyExceptionInfo(exceptionInfo);
-        dlclose(imageMagick);
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -152,7 +146,6 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
     if(resizedImage == NULL)
     {
         ffDestroyExceptionInfo(exceptionInfo);
-        dlclose(imageMagick);
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -161,7 +154,6 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
     {
         ffDestroyImage(resizedImage);
         ffDestroyExceptionInfo(exceptionInfo);
-        dlclose(imageMagick);
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -174,7 +166,6 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
     ffDestroyImageInfo(imageInfoOut);
     ffDestroyImage(resizedImage);
     ffDestroyExceptionInfo(exceptionInfo);
-    dlclose(imageMagick);
 
     if(!printSuccessful)
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;

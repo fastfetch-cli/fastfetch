@@ -22,7 +22,11 @@ FFLogoImageResult ffLogoPrintImageIM7(FFinstance* instance, FFLogoType type)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(imageMagick, ffWriteImage, WriteImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
 
-    return ffLogoPrintImageImpl(instance, imageMagick, logoResize, logoWrite, type);
+    FFLogoImageResult result = ffLogoPrintImageImpl(instance, imageMagick, logoResize, logoWrite, type);
+
+    dlclose(imageMagick);
+
+    return result;
 }
 
 #endif
