@@ -4,6 +4,40 @@
 
 #define FF_KITTY_MAX_CHUNK_SIZE 4096
 
+#ifdef FF_HAVE_ZLIB
+#include <zlib.h>
+
+static bool compressBlob(const FFinstance* instance, void** blob, size_t* length)
+{
+    FF_LIBRARY_LOAD(zlib, instance->config.libZ, false, "libz.so", 2)
+    FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
+    FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
+
+    uLong compressedLength = ffcompressBound(*length);
+    void* compressed = malloc(compressedLength);
+    if(compressed == NULL)
+    {
+        dlclose(zlib);
+        return false;
+    }
+
+    int compressResult = ffcompress2(compressed, &compressedLength, *blob, *length, Z_BEST_COMPRESSION);
+    dlclose(zlib);
+    if(compressResult != Z_OK)
+    {
+        free(compressed);
+        return false;
+    }
+
+    free(*blob);
+
+    *length = (size_t) compressedLength;
+    *blob = compressed;
+    return true;
+}
+
+#endif // FF_HAVE_ZLIB
+
 //We use only the defines from here, that are exactly the same in both versions
 #ifdef FF_HAVE_IMAGEMAGICK7
     #include <MagickCore/MagickCore.h>
@@ -44,7 +78,7 @@ static void printImageKittyChunc(char** blob, size_t* length, uint32_t chunkSize
     *length -= toWrite;
 }
 
-static bool printImageKitty(ImageInfo* imageInfo, Image* image, ExceptionInfo* ExceptionInfo, uint32_t paddingLeft, ImageMagickFunctions* functions)
+static bool printImageKitty(const FFinstance* instance, ImageInfo* imageInfo, Image* image, ExceptionInfo* ExceptionInfo, uint32_t paddingLeft, ImageMagickFunctions* functions)
 {
     functions->ffCopyMagickString(imageInfo->magick, "RGBA", 5);
 
@@ -53,16 +87,23 @@ static bool printImageKitty(ImageInfo* imageInfo, Image* image, ExceptionInfo* E
     if(!checkAllocationResult(blob, length))
         return false;
 
-    void* encoded = functions->ffBase64Encode(blob, length, &length);
+    #ifdef FF_HAVE_ZLIB
+        bool isCompressed = compressBlob(instance, &blob, &length);
+    #else
+        FF_UNUSED(instance)
+        bool isCompressed = false;
+    #endif
+
+    char* encoded = functions->ffBase64Encode(blob, length, &length);
     free(blob);
     if(!checkAllocationResult(encoded, length))
         return false;
 
     ffPrintCharTimes(' ', paddingLeft);
 
-    char* currentPos = (char*) encoded;
+    char* currentPos = encoded;
 
-    printf("\033_Ga=T,f=32,s=%u,v=%u,m=1;\033\\", (uint32_t) image->columns, (uint32_t) image->rows);
+    printf("\033_Ga=T,f=32,s=%u,v=%u,m=1%s;\033\\", (uint32_t) image->columns, (uint32_t) image->rows, isCompressed ? ",o=z" : "");
     while (length > 0)
         printImageKittyChunc(&currentPos, &length, FF_KITTY_MAX_CHUNK_SIZE);
     fputs("\033_Gm=0;\033\\", stdout);
@@ -159,7 +200,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
 
     bool printSuccessful;
     if(type == FF_LOGO_TYPE_KITTY)
-        printSuccessful = printImageKitty(imageInfoOut, resizedImage, exceptionInfo, instance->config.logoPaddingLeft, &functions);
+        printSuccessful = printImageKitty(instance, imageInfoOut, resizedImage, exceptionInfo, instance->config.logoPaddingLeft, &functions);
     else
         printSuccessful = printImageSixel(imageInfoOut, resizedImage, exceptionInfo, instance->config.logoPaddingLeft, &functions);
 
@@ -179,7 +220,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, 
     return FF_LOGO_IMAGE_RESULT_SUCCESS;
 }
 
-#endif
+#endif //FF_HAVE_IMAGEMAGICK{6, 7}
 
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {

@@ -119,6 +119,8 @@ Library options: Set the path of a library to load
     --lib-DBus <path>
     --lib-XFConf <path>
     --lib-RPM <path>
+    --lib-imagemagick <path>
+    --lib-z <path>
 
 Module specific options:
     --separator-string <str>:     Set the string printed by the separator module

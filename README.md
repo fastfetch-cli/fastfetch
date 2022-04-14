@@ -29,6 +29,7 @@ The following libraries are used if present at runtime:
 *  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 *  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
 *  [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel or kitty graphics protocol.
+*  [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
 *  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 *  [`librpm`](http://rpm.org/): Needed for rpm package count.

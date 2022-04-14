@@ -137,6 +137,7 @@ typedef struct FFconfig
     FFstrbuf libXFConf;
     FFstrbuf librpm;
     FFstrbuf libImageMagick;
+    FFstrbuf libZ;
 
     FFstrbuf diskFolders;
 

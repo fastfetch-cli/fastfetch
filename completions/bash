@@ -232,6 +232,8 @@ __fastfetch_completion()
         "--lib-DBus"
         "--lib-XFConf"
         "--lib-RPM"
+        "--lib-imagemagick"
+        "--lib-z"
         "--battery-dir"
         "--load-config"
     )

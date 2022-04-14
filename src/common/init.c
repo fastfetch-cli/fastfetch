@@ -200,6 +200,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libXFConf, 0);
     ffStrbufInitA(&instance->config.librpm, 0);
     ffStrbufInitA(&instance->config.libImageMagick, 0);
+    ffStrbufInitA(&instance->config.libZ, 0);
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
 
@@ -315,6 +316,9 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_IMAGEMAGICK6
             "imagemagick6\n"
+        #endif
+        #ifdef FF_HAVE_ZLIB
+            "zlib\n"
         #endif
         #ifdef FF_HAVE_XFCONF
             "xfconf\n"

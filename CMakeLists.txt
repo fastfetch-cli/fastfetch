@@ -30,6 +30,7 @@ OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_RPM "Enable rpm" ON)
 OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
 OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
+OPTION(ENABLE_ZLIB "Enable zlib" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -311,6 +312,15 @@ if(ENABLE_IMAGEMAGICK6)
     endif()
 endif()
 
+if(ENABLE_ZLIB)
+    pkg_check_modules(ZLIB zlib)
+    if(ZLIB_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_ZLIB=1)
+    else()
+        message(WARNING "Package zlib not found. Building without support")
+    endif()
+endif()
+
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
     PUBLIC ${PROJECT_SOURCE_DIR}/src
@@ -329,6 +339,7 @@ target_include_directories(libfastfetch
     PRIVATE ${RPM_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK7_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK6_INCLUDE_DIRS}
+    PRIVATE ${ZLIB_INCLUDE_DIRS}
 )
 
 target_link_libraries(libfastfetch

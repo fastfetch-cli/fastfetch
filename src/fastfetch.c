@@ -976,6 +976,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.librpm);
     else if(strcasecmp(key, "--lib-imagemagick") == 0)
         optionParseString(key, value, &instance->config.libImageMagick);
+    else if(strcasecmp(key, "--lib-z") == 0)
+        optionParseString(key, value, &instance->config.libZ);
 
     //////////////////
     //Module options//
