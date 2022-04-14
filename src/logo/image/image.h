@@ -21,8 +21,9 @@ typedef enum FFLogoImageResult
 } FFLogoImageResult;
 
 typedef void*(*FFLogoIMResizeFunc)(const void* image, size_t width, size_t height, void* exceptionInfo);
+typedef bool(*FFLogoIMWriteFunc)(void* imageInfo, void* image, void* exceptionInfo);
 
-FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* library, FFLogoIMResizeFunc resizeFunc, FFLogoType type);
+FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* library, FFLogoIMResizeFunc resizeFunc, FFLogoIMWriteFunc writeFunc, FFLogoType type);
 
 #endif
 
