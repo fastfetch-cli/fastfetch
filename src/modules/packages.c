@@ -171,7 +171,7 @@ void ffPrintPackages(FFinstance* instance)
 
     if(instance->config.packagesFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.batteryKey);
+        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey);
 
         #define FF_PRINT_PACKAGE(name) \
         if(name > 0) \
