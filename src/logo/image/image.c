@@ -4,6 +4,30 @@
 
 #define FF_KITTY_MAX_CHUNK_SIZE 4096
 
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <string.h> // memset
+
+static bool getTermInfo(struct winsize* winsize)
+{
+    //Initialize every member to 0, because it isn't guaranteed that every terminal sets them all
+    memset(winsize, 0, sizeof(struct winsize));
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, winsize);
+
+    if(winsize->ws_row == 0 || winsize->ws_col == 0)
+        ffGetTerminalResponse("\033[18t", 't', "\033[8;%hu;%hut", &winsize->ws_row, &winsize->ws_col);
+
+    if(winsize->ws_ypixel == 0 || winsize->ws_xpixel == 0)
+        ffGetTerminalResponse("\033[14t", 't', "\033[4;%hu;%hut", &winsize->ws_ypixel, &winsize->ws_xpixel);
+
+    return
+        winsize->ws_row > 0 &&
+        winsize->ws_col > 0 &&
+        winsize->ws_ypixel > 0 &&
+        winsize->ws_xpixel > 0;
+}
+
 #ifdef FF_HAVE_ZLIB
 #include <zlib.h>
 
@@ -129,7 +153,7 @@ static bool printImageSixel(ImageInfo* imageInfo, Image* image, ExceptionInfo* e
 FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, void* imageMagick, FFLogoIMResizeFunc resizeFunc, FFLogoIMWriteFunc writeFunc, FFLogoType type)
 {
     struct winsize winsize;
-    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize) != 0)
+    if(!getTermInfo(&winsize))
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)

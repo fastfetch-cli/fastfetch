@@ -7,9 +7,6 @@
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
-#include <sys/ioctl.h>
-#include <unistd.h>
-
 #define MAGICKCORE_HDRI_ENABLE 1
 #define MAGICKCORE_QUANTUM_DEPTH 16
 

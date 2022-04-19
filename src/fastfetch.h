@@ -405,6 +405,8 @@ void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 bool ffFileExists(const char* fileName, mode_t mode);
 void ffSuppressIO(bool suppress); // Not thread safe!
 
+void ffGetTerminalResponse(const char* request, char end, const char* format, ...);
+
 //common/printing.c
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
 void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);

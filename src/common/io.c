@@ -1,8 +1,11 @@
 #include "fastfetch.h"
 
+#include <stdio.h>
 #include <malloc.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdarg.h>
+#include <termios.h>
 
 bool ffWriteFDContent(int fd, const FFstrbuf* content)
 {
@@ -97,4 +100,34 @@ bool ffFileExists(const char* fileName, mode_t mode)
 {
     struct stat fileStat;
     return stat(fileName, &fileStat) == 0 && ((fileStat.st_mode & S_IFMT) == mode);
+}
+
+void ffGetTerminalResponse(const char* request, char end, const char* format, ...)
+{
+    struct termios oldTerm, newTerm;
+    tcgetattr(STDIN_FILENO, &oldTerm);
+
+    newTerm = oldTerm;
+    newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newTerm);
+
+    fputs(request, stdout);
+
+    char buffer[512];
+    int pos = 0;
+    while((size_t) pos < sizeof(buffer) - 1)
+    {
+        char c = (char) getc(stdin);
+        buffer[pos++] = c;
+        if(c == end)
+            break;
+    }
+    buffer[pos] = '\0';
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
+
+    va_list args;
+    va_start(args, format);
+    vsscanf(buffer, format, args);
+    va_end(args);
 }
