@@ -495,6 +495,17 @@ bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
     return true;
 }
 
+uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
+{
+    uint32_t result = 0;
+    for(uint32_t i = 0; i < strbuf->length; i++)
+    {
+        if(strbuf->chars[i] == c)
+            result++;
+    }
+    return result;
+}
+
 static bool testEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end, uint32_t* endLength)
 {
     *endLength = (uint32_t) strlen(end);

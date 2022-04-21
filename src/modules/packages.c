@@ -136,6 +136,48 @@ static uint32_t countFilesIn(const char* dirname, const char* filename)
     return result;
 }
 
+static uint32_t getNixPackages(const FFstrbuf* path)
+{
+    FFstrbuf output;
+    ffStrbufInitA(&output, 128);
+
+    ffProcessAppendStdOut(&output, (char* const[]) {
+        "nix-store",
+        "-qR",
+        path->chars,
+        NULL
+    });
+
+    //Each package is a new line in the output. If at least one line is found, add 1 for the last line.
+    uint32_t result = ffStrbufCountC(&output, '\n');
+    if(result > 0)
+        result++;
+
+    ffStrbufDestroy(&output);
+    return result;
+}
+
+static uint32_t getNixPackagesDefault()
+{
+    FFstrbuf path;
+    ffStrbufInitA(&path, 64);
+    ffStrbufAppendS(&path, FASTFETCH_TARGET_DIR_ROOT"/nix/var/nix/profiles/default");
+    uint32_t result = getNixPackages(&path);
+    ffStrbufDestroy(&path);
+    return result;
+}
+
+static uint32_t getNixPackagesUser(const FFinstance* instance)
+{
+    FFstrbuf path;
+    ffStrbufInitA(&path, 64);
+    ffStrbufAppendS(&path, instance->state.passwd->pw_dir);
+    ffStrbufAppendS(&path, "/.nix-profile");
+    uint32_t result = getNixPackages(&path);
+    ffStrbufDestroy(&path);
+    return result;
+}
+
 void ffPrintPackages(FFinstance* instance)
 {
     uint32_t pacman = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/pacman/local", DT_DIR);
@@ -149,6 +191,17 @@ void ffPrintPackages(FFinstance* instance)
 
     uint32_t emerge = countFilesIn(FASTFETCH_TARGET_DIR_ROOT"/var/db/pkg", "SIZE");
     uint32_t xbps = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/db/xbps", DT_REG);
+
+    uint32_t nixUser = 0;
+    uint32_t nixDefault = 0;
+
+    //Nix detection is kinda slow, so we only do it if the nix dir exists
+    if(ffFileExists(FASTFETCH_TARGET_DIR_ROOT"/nix", S_IFDIR))
+    {
+        nixUser = getNixPackagesUser(instance);
+        nixDefault = getNixPackagesDefault();
+    }
+
     uint32_t flatpak = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/flatpak/app", DT_DIR);
     uint32_t snap = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/snap", DT_DIR);
 
@@ -156,7 +209,7 @@ void ffPrintPackages(FFinstance* instance)
     if(snap > 0)
         --snap;
 
-    uint32_t all = pacman + dpkg + rpm + emerge + xbps + flatpak + snap;
+    uint32_t all = pacman + dpkg + rpm + emerge + xbps + nixUser + nixDefault + flatpak + snap;
 
     if(all == 0)
     {
@@ -193,7 +246,21 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
         FF_PRINT_PACKAGE(emerge)
-        FF_PRINT_PACKAGE(xbps)
+
+        if(nixUser > 0)
+        {
+            printf("%u (nix-user)", nixUser);
+            if((all = all - nixUser) > 0)
+                printf(", ");
+        }
+
+        if(nixDefault > 0)
+        {
+            printf("%u (nix-default)", nixDefault);
+            if((all = all - nixDefault) > 0)
+                printf(", ");
+        }
+
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
 

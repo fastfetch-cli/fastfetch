@@ -87,6 +87,8 @@ bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start);
 bool ffStrbufEndsWithC(const FFstrbuf* strbuf, char c);
 bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end);
 
+uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
+
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
 
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);

@@ -784,6 +784,90 @@ static const FFlogo* getLogoMintOld()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoNixOS()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("nixos", "nix", "nixos-linux", "nix-linux", "nix-os", "nix_os", "nix_os_linux")
+    FF_LOGO_LINES(
+        "$1          ▗▄▄▄       $2▗▄▄▄▄    ▄▄▄▖\n"
+        "$1          ▜███▙       $2▜███▙  ▟███▛\n"
+        "$1           ▜███▙       $2▜███▙▟███▛\n"
+        "$1            ▜███▙       $2▜██████▛\n"
+        "$1     ▟█████████████████▙ $2▜████▛     $1▟▙\n"
+        "$1    ▟███████████████████▙ $2▜███▙    $1▟██▙\n"
+        "$2           ▄▄▄▄▖           ▜███▙  $1▟███▛\n"
+        "$2          ▟███▛             ▜██▛ $1▟███▛\n"
+        "$2         ▟███▛               ▜▛ $1▟███▛\n"
+        "$2▟███████████▛                  $1▟██████████▙\n"
+        "$2▜██████████▛                  $1▟███████████▛\n"
+        "$2      ▟███▛ $1▟▙               ▟███▛\n"
+        "$2     ▟███▛ $1▟██▙             ▟███▛\n"
+        "$2    ▟███▛  $1▜███▙           ▝▀▀▀▀\n"
+        "$2    ▜██▛    $1▜███▙ $2▜██████████████████▛\n"
+        "$2     ▜▛     $1▟████▙ $2▜████████████████▛\n"
+        "$1           ▟██████▙       $2▜███▙\n"
+        "$1          ▟███▛▜███▙       $2▜███▙\n"
+        "$1         ▟███▛  ▜███▙       $2▜███▙\n"
+        "$1         ▝▀▀▀    ▀▀▀▀▘       $2▀▀▀▘"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "36" //cyan
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoNixOsOld()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("nixos_old", "nix-old", "nixos-old", "nix_old", "nix-os-old", "nix_os_old")
+    FF_LOGO_LINES(
+        "$1          ::::.    $2':::::     ::::'\n"
+        "$1          ':::::    $2':::::.  ::::'\n"
+        "$1            :::::     $2'::::.:::::\n"
+        "$1      .......:::::..... $2::::::::\n"
+        "$1     ::::::::::::::::::. $2::::::    $1::::.\n"
+        "    ::::::::::::::::::::: $2:::::.  $1.::::'\n"
+        "$2           .....           ::::' $1:::::'\n"
+        "$2          :::::            '::' $1:::::'\n"
+        "$2 ........:::::               ' $1:::::::::::.\n"
+        "$2:::::::::::::                 $1:::::::::::::\n"
+        "$2 ::::::::::: $1..              $1:::::\n"
+        "$2     .::::: $1.:::            $1:::::\n"
+        "$2    .:::::  $1:::::          $1'''''    $2.....\n"
+        "    :::::   $1':::::.  $2......:::::::::::::'\n"
+        "     :::     $1::::::. $2':::::::::::::::::'\n"
+        "$1            .:::::::: $2'::::::::::\n"
+        "$1           .::::''::::.     $2'::::.\n"
+        "$1          .::::'   ::::.     $2'::::.\n"
+        "$1         .::::      ::::      $2'::::."
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "36" //cyan
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoNixOsSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("nixos_small", "nix-small", "nixos-small", "nix_small", "nix-os-small", "nix_os_small")
+    FF_LOGO_LINES(
+        "$1  \\\\  \\\\ //\n"
+        " ==\\\\__\\\\/ //\n"
+        "   //   \\\\//\n"
+        "==//     //==\n"
+        " //\\\\___//\n"
+        "// /\\\\  \\\\==\n"
+        "  // \\\\  \\\\"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoOpenSuse()
 {
     FF_LOGO_INIT
@@ -1162,6 +1246,9 @@ static GetLogoMethod* getLogos()
         getLogoMint,
         getLogoMintSmall,
         getLogoMintOld,
+        getLogoNixOS,
+        getLogoNixOsOld,
+        getLogoNixOsSmall,
         getLogoOpenSuse,
         getLogoOpenSuseSmall,
         getLogoOpenSuseLeap,
