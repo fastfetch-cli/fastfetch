@@ -400,7 +400,7 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer);
 bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer); //returns true if open() succeeds. This is used to differentiate between <file not found> and <empty file>
 bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
 bool ffWriteFDContent(int fd, const FFstrbuf* content);
-void ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
+bool ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
 
 bool ffFileExists(const char* fileName, mode_t mode);
 void ffSuppressIO(bool suppress); // Not thread safe!

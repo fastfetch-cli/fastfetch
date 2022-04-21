@@ -12,15 +12,41 @@ bool ffWriteFDContent(int fd, const FFstrbuf* content)
     return write(fd, content->chars, content->length) != -1;
 }
 
-void ffWriteFileContent(const char* fileName, const FFstrbuf* content)
+static void createSubfolders(const char* fileName)
 {
-    int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if(fd == -1)
-        return;
+    FFstrbuf path;
+    ffStrbufInit(&path);
 
-    ffWriteFDContent(fd, content);
+    while(*fileName != '\0')
+    {
+        ffStrbufAppendC(&path, *fileName);
+        if(*fileName == '/')
+            mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
+        ++fileName;
+    }
+
+    ffStrbufDestroy(&path);
+}
+
+bool ffWriteFileContent(const char* fileName, const FFstrbuf* content)
+{
+    int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
+    int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+
+    int fd = open(fileName, openFlagsModes, openFlagsRights);
+    if(fd == -1)
+    {
+        createSubfolders(fileName);
+        fd = open(fileName, openFlagsModes, openFlagsRights);
+        if(fd == -1)
+            return false;
+    }
+
+    bool ret = ffWriteFDContent(fd, content);
 
     close(fd);
+
+    return ret;
 }
 
 void ffAppendFDContent(int fd, FFstrbuf* buffer)
@@ -118,6 +144,8 @@ void ffGetTerminalResponse(const char* request, char end, const char* format, ..
     while((size_t) pos < sizeof(buffer) - 1)
     {
         char c = (char) getc(stdin);
+        if(c == '\0')
+            break;
         buffer[pos++] = c;
         if(c == end)
             break;
