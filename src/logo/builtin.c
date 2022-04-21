@@ -1082,6 +1082,36 @@ static const FFlogo* getLogoRebornSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoRedHatEnterpriseLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("rhel", "redhat", "redhat-linux")
+    FF_LOGO_LINES(
+        "           .MMM..:MMMMMMM\n"
+        "          MMMMMMMMMMMMMMMMMM\n"
+        "          MMMMMMMMMMMMMMMMMMMM.\n"
+        "         MMMMMMMMMMMMMMMMMMMMMM\n"
+        "        ,MMMMMMMMMMMMMMMMMMMMMM:\n"
+        "        MMMMMMMMMMMMMMMMMMMMMMMM\n"
+        "  .MMMM'  MMMMMMMMMMMMMMMMMMMMMM\n"
+        " MMMMMM    `MMMMMMMMMMMMMMMMMMMM.\n"
+        "MMMMMMMM      MMMMMMMMMMMMMMMMMM .\n"
+        "MMMMMMMMM.       `MMMMMMMMMMMMM' MM.\n"
+        "MMMMMMMMMMM.                     MMMM\n"
+        "`MMMMMMMMMMMMM.                 ,MMMMM.\n"
+        " `MMMMMMMMMMMMMMMMM.          ,MMMMMMMM.\n"
+        "    MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n"
+        "      MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM:\n"
+        "         MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n"
+        "            `MMMMMMMMMMMMMMMMMMMMMMMM:\n"
+        "                ``MMMMMMMMMMMMMMMMM'"
+    )
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -1257,6 +1287,7 @@ static GetLogoMethod* getLogos()
         getLogoPopSmall,
         getLogoReborn,
         getLogoRebornSmall,
+        getLogoRedHatEnterpriseLinux,
         getLogoUbuntu,
         getLogoUbuntuSmall,
         getLogoVoid,
