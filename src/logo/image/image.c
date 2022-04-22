@@ -268,8 +268,6 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     return printSuccessful ? FF_LOGO_IMAGE_RESULT_SUCCESS : FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 }
 
-#endif //FF_HAVE_IMAGEMAGICK{6, 7}
-
 static int getCacheFD(FFLogoRequestData* requestData, const char* fileName)
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
@@ -396,3 +394,11 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     ffStrbufDestroy(&requestData.cacheDir);
     return result == FF_LOGO_IMAGE_RESULT_SUCCESS;
 }
+
+#else //FF_HAVE_IMAGEMAGICK{6, 7}
+bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+{
+    FF_UNUSED(instance);
+    return false;
+}
+#endif //FF_HAVE_IMAGEMAGICK{6, 7}
