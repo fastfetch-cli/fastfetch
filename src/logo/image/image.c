@@ -65,19 +65,6 @@ typedef struct ImageData
     ExceptionInfo* exceptionInfo;
 } ImageData;
 
-static void finishPrinting(FFinstance* instance, const FFLogoRequestData* requestData)
-{
-    instance->state.logoWidth = (uint32_t) (requestData->imagePixelWidth / requestData->characterPixelWidth) + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
-    instance->state.logoHeight = (uint32_t) (requestData->imagePixelHeight / requestData->characterPixelHeight);
-
-    //Seems to be required on all consoles that support sixel. TBH i don't know why.
-    if(requestData->type == FF_LOGO_TYPE_SIXEL)
-        instance->state.logoHeight += 1;
-
-    fputs("\033[9999999D", stdout);
-    printf("\033[%uA", instance->state.logoHeight);
-}
-
 static inline bool checkAllocationResult(void* data, size_t length)
 {
     if(data == NULL)
@@ -92,31 +79,81 @@ static inline bool checkAllocationResult(void* data, size_t length)
     return true;
 }
 
-static void writeCacheFile(FFLogoRequestData* requestData, const char* filename, char* blob, size_t length)
+static void finishPrinting(FFinstance* instance, const FFLogoRequestData* requestData)
 {
+    instance->state.logoWidth = (uint32_t) (requestData->imagePixelWidth / requestData->characterPixelWidth) + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
+    instance->state.logoHeight = (uint32_t) (requestData->imagePixelHeight / requestData->characterPixelHeight);
+
+    //Seems to be required on all consoles that support sixel. TBH i don't know why.
+    if(requestData->type == FF_LOGO_TYPE_SIXEL)
+        instance->state.logoHeight += 1;
+
+    fputs("\033[9999999D", stdout);
+    printf("\033[%uA", instance->state.logoHeight);
+}
+
+static void writeResult(FFinstance* instance, FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName)
+{
+    //Write result to stdout
+    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+    fflush(stdout);
+    ffWriteFDContent(STDOUT_FILENO, result);
+
+    //Write result to cache file
     uint32_t cacheDirLength = requestData->cacheDir.length;
-    ffStrbufAppendS(&requestData->cacheDir, filename);
-
-    FFstrbuf cachedContent;
-    cachedContent.chars = blob;
-    cachedContent.length = (uint32_t) length;
-    ffWriteFileContent(requestData->cacheDir.chars, &cachedContent);
-
+    ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
+    ffWriteFileContent(requestData->cacheDir.chars, result);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+
+    //Write height cache file
+    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
+    FFstrbuf content;
+    content.chars = (char*) &requestData->imagePixelHeight;
+    content.length = sizeof(requestData->imagePixelHeight);
+    ffWriteFileContent(requestData->cacheDir.chars, &content);
+    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+
+    //Write escape codes to stdout
+    finishPrinting(instance, requestData);
 }
 
-
-static void printImageKittyBlobChunk(const char** blob, size_t* length)
+static bool printImageSixel(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
-    size_t toWrite = FF_KITTY_MAX_CHUNK_SIZE < *length ? FF_KITTY_MAX_CHUNK_SIZE : *length;
-    fputs("\033_Gm=1;", stdout);
-    fwrite(*blob, sizeof(**blob), toWrite, stdout);
-    fputs("\033\\", stdout);
-    *blob += toWrite;
-    *length -= toWrite;
+    imageData->ffCopyMagickString(imageData->imageInfo->magick, "SIXEL", 6);
+
+    size_t length;
+    void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
+    if(!checkAllocationResult(blob, length))
+        return false;
+
+    FFstrbuf result;
+    result.chars = (char*) blob;
+    result.length = (uint32_t) length;
+
+    writeResult(instance, requestData, &result, FF_CACHE_FILE_SIXEL);
+
+    free(blob);
+    return true;
 }
 
-static bool printImageKitty(const FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
+static void appendKittyChunk(FFstrbuf* result, const char** blob, size_t* length, bool printEscapeCode)
+{
+    uint32_t chunkSize = *length > FF_KITTY_MAX_CHUNK_SIZE ? FF_KITTY_MAX_CHUNK_SIZE : (uint32_t) *length;
+
+    if(printEscapeCode)
+        ffStrbufAppendS(result, "\033_G");
+    else
+        ffStrbufAppendC(result, ',');
+
+    ffStrbufAppendS(result, chunkSize != *length ? "m=1" : "m=0");
+    ffStrbufAppendC(result, ';');
+    ffStrbufAppendNS(result, chunkSize, *blob);
+    ffStrbufAppendS(result, "\033\\");
+    *length -= chunkSize;
+    *blob += chunkSize;
+}
+
+static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
     imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
 
@@ -136,40 +173,23 @@ static bool printImageKitty(const FFinstance* instance, FFLogoRequestData* reque
     if(!checkAllocationResult(chars, length))
         return false;
 
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+    FFstrbuf result;
+    ffStrbufInitA(&result, (uint32_t) (length + 1024));
 
     const char* currentPos = chars;
     size_t remainingLength = length;
 
-    printf("\033_Ga=T,f=32,s=%u,v=%u%s,m=1;\033\\", requestData->imagePixelWidth, requestData->imagePixelHeight, isCompressed ? ",o=z" : "");
-    while(remainingLength > 0)
-        printImageKittyBlobChunk(&currentPos, &remainingLength);
-    fputs("\033_Gm=0;\033\\", stdout);
-
+    ffStrbufAppendF(&result, "\033_Ga=T,f=32,s=%u,v=%u", requestData->imagePixelWidth, requestData->imagePixelHeight);
     if(isCompressed)
-        writeCacheFile(requestData, FF_CACHE_FILE_KITTY_COMPRESSED, chars, length);
-    else
-        writeCacheFile(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED, chars, length);
+        ffStrbufAppendS(&result, ",o=z");
+    appendKittyChunk(&result, &currentPos, &remainingLength, false);
+    while(remainingLength > 0)
+        appendKittyChunk(&result, &currentPos, &remainingLength, true);
 
+    writeResult(instance, requestData, &result, isCompressed ? FF_CACHE_FILE_KITTY_COMPRESSED : FF_CACHE_FILE_KITTY_UNCOMPRESSED);
+
+    ffStrbufDestroy(&result);
     free(chars);
-    return true;
-}
-
-static bool printImageSixel(const FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
-{
-    imageData->ffCopyMagickString(imageData->imageInfo->magick, "SIXEL", 6);
-
-    size_t length;
-    void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
-    if(!checkAllocationResult(blob, length))
-        return false;
-
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
-    fwrite(blob, sizeof(*blob), length, stdout);
-
-    writeCacheFile(requestData, FF_CACHE_FILE_SIXEL, blob, length);
-
-    free(blob);
     return true;
 }
 
@@ -245,101 +265,21 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     ffDestroyImage(imageData.image);
     ffDestroyExceptionInfo(imageData.exceptionInfo);
 
-    if(!printSuccessful)
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
-
-    //Write height file
-    uint32_t folderPathLength = requestData->cacheDir.length;
-    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
-
-    FFstrbuf content;
-    content.chars = (char*) &requestData->imagePixelHeight;
-    content.length = sizeof(requestData->imagePixelHeight);
-    ffWriteFileContent(requestData->cacheDir.chars, &content);
-
-    ffStrbufSubstrBefore(&requestData->cacheDir, folderPathLength);
-
-    finishPrinting(instance, requestData);
-    return FF_LOGO_IMAGE_RESULT_SUCCESS;
+    return printSuccessful ? FF_LOGO_IMAGE_RESULT_SUCCESS : FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 }
 
 #endif //FF_HAVE_IMAGEMAGICK{6, 7}
 
-static bool printCachedSixelFile(const FFinstance* instance, const FFLogoRequestData* requestData)
-{
-    int fd = open(requestData->cacheDir.chars, O_RDONLY);
-    if(fd == -1)
-        return false;
-
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
-    fflush(stdout);
-
-    char buffer[4096];
-    ssize_t readBytes;
-
-    while((readBytes = read(fd, buffer, sizeof(buffer))) > 0)
-        write(STDOUT_FILENO, buffer, (size_t) readBytes);
-
-    close(fd);
-    return true;
-}
-
-static bool printCachedSixel(const FFinstance* instance, FFLogoRequestData* requestData)
+static int getCacheFD(FFLogoRequestData* requestData, const char* fileName)
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
-    bool result;
-
-    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_SIXEL);
-    result = printCachedSixelFile(instance, requestData);
-    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
-
-    return result;
-}
-
-static bool printCachedKittyFile(const FFinstance* instance, const FFLogoRequestData* requestData, bool isCompressed)
-{
+    ffStrbufAppendS(&requestData->cacheDir, fileName);
     int fd = open(requestData->cacheDir.chars, O_RDONLY);
-    if(fd == -1)
-        return false;
-
-    char buffer[FF_KITTY_MAX_CHUNK_SIZE];
-
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
-    printf("\033_Ga=T,f=32,s=%u,v=%u%s,m=1;\033\\", requestData->imagePixelWidth, requestData->imagePixelHeight, isCompressed ? ",o=z" : "");
-
-    ssize_t readBytes;
-    while((readBytes = read(fd, buffer, sizeof(buffer))) > 0)
-    {
-        fputs("\033_Gm=1;",stdout);
-        fwrite(buffer, 1, (size_t) readBytes, stdout);
-        fputs("\033\\", stdout);
-    }
-
-    fputs("\033_Gm=0;\033\\", stdout);
-
-    close(fd);
-    return true;
+    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+    return fd;
 }
 
-static bool printCachedKitty(const FFinstance* instance, FFLogoRequestData* requestData)
-{
-    uint32_t cacheDirLength = requestData->cacheDir.length;
-    bool result;
-
-    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_KITTY_COMPRESSED);
-    result = printCachedKittyFile(instance, requestData, true);
-    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
-    if(result)
-        return true;
-
-    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
-    result = printCachedKittyFile(instance, requestData, false);
-    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
-
-    return result;
-}
-
-static bool printCached(const FFinstance* instance, FFLogoRequestData* requestData)
+static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
@@ -357,10 +297,31 @@ static bool printCached(const FFinstance* instance, FFLogoRequestData* requestDa
     if(requestData->imagePixelHeight < 1)
         return false;
 
-    if(requestData->type == FF_LOGO_TYPE_SIXEL)
-        return printCachedSixel(instance, requestData);
+    int fd;
+    if(requestData->type == FF_LOGO_TYPE_KITTY)
+    {
+        fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
+        if(fd == -1)
+            fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
+    }
     else
-        return printCachedKitty(instance, requestData);
+        fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
+
+    if(fd == -1)
+        return false;
+
+    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+    fflush(stdout);
+
+    char buffer[32768];
+    ssize_t readBytes;
+    while((readBytes = read(fd, buffer, sizeof(buffer))) > 0)
+        (void) write(STDOUT_FILENO, buffer, (size_t) readBytes);
+
+    close(fd);
+
+    finishPrinting(instance, requestData);
+    return true;
 }
 
 static bool getTermInfo(struct winsize* winsize)
@@ -417,7 +378,6 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 
     if(!instance->config.recache && printCached(instance, &requestData))
     {
-        finishPrinting(instance, &requestData);
         ffStrbufDestroy(&requestData.cacheDir);
         return true;
     }
