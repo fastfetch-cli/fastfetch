@@ -30,6 +30,8 @@ Logo options:
     --logo-print-remaining <?value>: weather to print the remaining logo, if it has more lines than modules to display
     --sixel <file>:                  short for --logo-type sixel --logo <file>
     --kitty <file>:                  short for --logo-type kitty --logo <file>
+    --file <file>:                   short for --logo-type file --logo <file>
+    --raw <file>:                    short for --logo-type raw --logo <file>
 
 Display options:
     -s,--structure <structure>:  sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.

@@ -220,7 +220,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     }
 
     //+1, because we need to copy the null byte too
-    imageData.ffCopyMagickString(imageInfoIn->filename, instance->config.logoName.chars, instance->config.logoName.length + 1);
+    imageData.ffCopyMagickString(imageInfoIn->filename, instance->config.logoSource.chars, instance->config.logoSource.length + 1);
 
     Image* originalImage = ffReadImage(imageInfoIn, imageData.exceptionInfo);
     ffDestroyImageInfo(imageInfoIn);
@@ -363,7 +363,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     ffStrbufAppendS(&requestData.cacheDir, "images");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);
-    if(realpath(instance->config.logoName.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
+    if(realpath(instance->config.logoSource.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);

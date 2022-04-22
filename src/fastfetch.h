@@ -43,7 +43,7 @@ typedef enum FFLogoType
 
 typedef struct FFconfig
 {
-    FFstrbuf logoName;
+    FFstrbuf logoSource;
     FFLogoType logoType;
     FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
     uint32_t logoWidth;

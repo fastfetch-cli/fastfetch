@@ -12,7 +12,6 @@ void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement
 void ffLogoSetMainColor(FFinstance* instance);
 
 void ffLogoPrintUnknown(FFinstance* instance);
-void ffLogoPrintBuiltin(FFinstance* instance);
 bool ffLogoPrintBuiltinIfExists(FFinstance* instance);
 void ffLogoPrintBuiltinDetected(FFinstance* instance);
 

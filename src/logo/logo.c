@@ -150,7 +150,7 @@ static void logoPrintFile(FFinstance* instance, bool doColorReplacement)
     FFstrbuf content;
     ffStrbufInitA(&content, 2047);
 
-    if(ffAppendFileContent(instance->config.logoName.chars, &content))
+    if(ffAppendFileContent(instance->config.logoSource.chars, &content))
         ffLogoPrint(instance, content.chars, doColorReplacement);
     else
         ffLogoPrintUnknown(instance);
@@ -158,7 +158,7 @@ static void logoPrintFile(FFinstance* instance, bool doColorReplacement)
 
 static void logoPrintDetected(FFinstance* instance)
 {
-    if(instance->config.logoName.length > 0)
+    if(instance->config.logoSource.length > 0)
     {
         if(
             !ffLogoPrintBuiltinIfExists(instance) &&
@@ -180,10 +180,13 @@ void ffPrintLogo(FFinstance* instance)
         instance->config.logoType == FF_LOGO_TYPE_FILE ||
         instance->config.logoType == FF_LOGO_TYPE_RAW ||
         instance->config.logoType == FF_LOGO_TYPE_SIXEL
-    ) && instance->config.logoName.length == 0)
+    ) && instance->config.logoSource.length == 0)
         ffLogoPrintUnknown(instance);
     else if(instance->config.logoType == FF_LOGO_TYPE_BUILTIN)
-        ffLogoPrintBuiltin(instance);
+    {
+        if(!ffLogoPrintBuiltinIfExists(instance))
+            ffLogoPrintUnknown(instance);
+    }
     else if(instance->config.logoType == FF_LOGO_TYPE_FILE)
         logoPrintFile(instance, true);
     else if(instance->config.logoType == FF_LOGO_TYPE_RAW)

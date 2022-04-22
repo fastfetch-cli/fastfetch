@@ -1380,8 +1380,8 @@ void ffLogoSetMainColor(FFinstance* instance)
 {
     const FFlogo* logo = NULL;
 
-    if(instance->config.logoName.length > 0)
-       logo = getBuiltinLogo(instance->config.logoName.chars);
+    if(instance->config.logoSource.length > 0)
+       logo = getBuiltinLogo(instance->config.logoSource.chars);
 
     if(logo == NULL)
         logo = detectBuiltinLogo(instance);
@@ -1412,18 +1412,9 @@ void ffLogoPrintUnknown(FFinstance* instance)
     printLogoStruct(instance, getLogoUnknown(), false);
 }
 
-void ffLogoPrintBuiltin(FFinstance* instance)
-{
-    const FFlogo* logo = getBuiltinLogo(instance->config.logoName.chars);
-    if(logo == NULL)
-        ffLogoPrintUnknown(instance);
-    else
-        printLogoStruct(instance, logo, true);
-}
-
 bool ffLogoPrintBuiltinIfExists(FFinstance* instance)
 {
-    const FFlogo* logo = getBuiltinLogo(instance->config.logoName.chars);
+    const FFlogo* logo = getBuiltinLogo(instance->config.logoSource.chars);
     if(logo == NULL)
         return false;
 

@@ -104,7 +104,7 @@ static void initState(FFstate* state)
 
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInit(&instance->config.logoName);
+    ffStrbufInit(&instance->config.logoSource);
     instance->config.logoType = FF_LOGO_TYPE_AUTO;
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufInit(&instance->config.logoColors[i]);

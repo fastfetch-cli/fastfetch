@@ -714,7 +714,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     ////////////////
 
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
-        optionParseString(key, value, &instance->config.logoName);
+        optionParseString(key, value, &instance->config.logoSource);
     else if(strcasecmp(key, "--logo-type") == 0)
     {
         if(value == NULL)
@@ -771,13 +771,23 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.logoPrintRemaining = optionParseBoolean(value);
     else if(strcasecmp(key, "--sixel") == 0)
     {
-        optionParseString(key, value, &instance->config.logoName);
+        optionParseString(key, value, &instance->config.logoSource);
         instance->config.logoType = FF_LOGO_TYPE_SIXEL;
     }
     else if(strcasecmp(key, "--kitty") == 0)
     {
-        optionParseString(key, value, &instance->config.logoName);
+        optionParseString(key, value, &instance->config.logoSource);
         instance->config.logoType = FF_LOGO_TYPE_KITTY;
+    }
+    else if(strcasecmp(key, "--file") == 0)
+    {
+        optionCheckString(key, value, &instance->config.logoSource);
+        instance->config.logoType = FF_LOGO_TYPE_FILE;
+    }
+    else if(strcasecmp(key, "--raw") == 0)
+    {
+        optionParseString(key, value, &instance->config.logoSource);
+        instance->config.logoType = FF_LOGO_TYPE_RAW;
     }
 
     ///////////////////
