@@ -50,6 +50,7 @@ Android, Arch, Arco, Artix, CachyOS, CentOS, Debian, Endeavour, Fedora, Garuda, 
 * Some logos have an old variant. Access it by appending _old to the logo name.
 * Unknown/unsupported logos will be replaced with a generic linux logo when running fastfetch.
 * Get a list of all available logos with `fastfetch --print-logos`.
+* Printing images as logo is supported using Sixel or Kitty graphics protocol.
 
 ##### Package managers
 ```
