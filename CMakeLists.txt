@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
 
 project(fastfetch
-    VERSION 1.3.2
+    VERSION 1.3.3
     LANGUAGES C
 )
 
@@ -442,7 +442,7 @@ libglib2.0-0, \
 libdbus-1-3, \
 libxfconf-0-3, \
 libmagickcore-6.q16hdri-6, \
-zlib1g, \
+zlib1g \
 ")
 
 set(CPACK_RPM_PACKAGE_LICENSE "MIT")
