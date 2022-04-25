@@ -4,6 +4,7 @@
 #include <pthread.h>
 
 #define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
+#define FF_DBUS_TIMEOUT_MILLISECONDS 50
 
 #ifdef FF_HAVE_DBUS
 #include <dbus/dbus.h>
@@ -68,8 +69,11 @@ static bool getValue(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
 
     while(true)
     {
-        if((foundAValue = getValue(&subIter, result, data)))
+        if(getValue(&subIter, result, data))
+        {
+            foundAValue = true;
             ffStrbufAppendS(result, ", ");
+        }
 
         FF_DBUS_ITER_CONTINUE(subIter);
     }
@@ -83,7 +87,7 @@ static bool getValue(DBusMessageIter* iter, FFstrbuf* result, DBusData* data)
 static DBusMessage* getReply(DBusMessage* request, DBusData* data)
 {
     DBusPendingCall* pendingCall = NULL;
-    dbus_bool_t succesfull = data->ffdbus_connection_send_with_reply(data->connection, request, &pendingCall, DBUS_TIMEOUT_USE_DEFAULT);
+    dbus_bool_t succesfull = data->ffdbus_connection_send_with_reply(data->connection, request, &pendingCall, FF_DBUS_TIMEOUT_MILLISECONDS);
     data->ffdbus_message_unref(request);
     if(!succesfull || pendingCall == NULL)
         return NULL;
