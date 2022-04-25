@@ -632,6 +632,39 @@ static const FFlogo* getLogoKDENeon()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoKubuntu()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("kubuntu", "kubuntu-linux", "kde-ubuntu", "ubuntu-kde", "ubuntu-plasma")
+    FF_LOGO_LINES(
+        "$1           `.:/ossyyyysso/:.\n"
+        "        .:oyyyyyyyyyyyyyyyyyyo:`\n"
+        "      -oyyyyyyyo$2dMMy$1yyyyyyysyyyyo-\n"
+        "    -syyyyyyyyyy$2dMMy$1oyyyy$2dmMMy$1yyyys-\n"
+        "   oyyys$2dMy$1syyyy$2dMMMMMMMMMMMMMy$1yyyyyyo\n"
+        " `oyyyy$2dMMMMy$1syysoooooo$2dMMMMy$1yyyyyyyyo`\n"
+        " oyyyyyy$2dMMMMy$1yyyyyyyyyyys$2dMMy$1sssssyyyo\n"
+        "-yyyyyyyy$2dMy$1syyyyyyyyyyyyyys$2dMMMMMy$1syyy-\n"
+        "oyyyysoo$2dMy$1yyyyyyyyyyyyyyyyyy$2dMMMMy$1syyyo\n"
+        "yyys$2dMMMMMy$1yyyyyyyyyyyyyyyyyysosyyyyyyyy\n"
+        "yyys$2dMMMMMy$1yyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n"
+        "oyyyyysos$2dy$1yyyyyyyyyyyyyyyyyy$2dMMMMy$1syyyo\n"
+        "-yyyyyyyy$2dMy$1syyyyyyyyyyyyyys$2dMMMMMy$1syyy-\n"
+        " oyyyyyy$2dMMMy$1syyyyyyyyyyys$2dMMy$1oyyyoyyyo\n"
+        " `oyyyy$2dMMMy$1syyyoooooo$2dMMMMy$1oyyyyyyyyo\n"
+        "   oyyysyyoyyyys$2dMMMMMMMMMMMy$1yyyyyyyo\n"
+        "    -syyyyyyyyy$2dMMMy$1syyy$2dMMMy$1syyyys-\n"
+        "      -oyyyyyyy$2dMMy$1yyyyyysosyyyyo-\n"
+        "        ./oyyyyyyyyyyyyyyyyyyo/.\n"
+        "           `.:/oosyyyysso/:.`"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoLinux()
 {
     FF_LOGO_INIT
@@ -1270,6 +1303,7 @@ static GetLogoMethod* getLogos()
         getLogoGentoo,
         getLogoGentooSmall,
         getLogoKDENeon,
+        getLogoKubuntu,
         getLogoLinux,
         getLogoManjaro,
         getLogoManjaroSmall,
