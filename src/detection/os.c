@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <string.h>
+#include <ctype.h>
 #include <pthread.h>
 
 #if !defined(__ANDROID__)
@@ -24,6 +26,67 @@ static void parseFile(const char* fileName, FFOSResult* result)
         {"VERSION_CODENAME =", &result->codename},
         {"BUILD_ID =", &result->buildID}
     });
+}
+
+static void getUbuntuFlavour(FFOSResult* result)
+{
+    const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
+    if(!ffStrSet(xdgConfigDirs))
+        return;
+
+    if(strstr(xdgConfigDirs, "kde") != NULL || strstr(xdgConfigDirs, "plasma") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Kubuntu");
+        ffStrbufSetS(&result->prettyName, "Kubuntu");
+        ffStrbufSetS(&result->id, "kubuntu");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "xfce") != NULL || strstr(xdgConfigDirs, "xubuntu") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Xubuntu");
+        ffStrbufSetS(&result->prettyName, "Xubuntu");
+        ffStrbufSetS(&result->id, "xubuntu");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "lxde") != NULL || strstr(xdgConfigDirs, "lubuntu") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Lubuntu");
+        ffStrbufSetS(&result->prettyName, "Lubuntu");
+        ffStrbufSetS(&result->id, "lubuntu");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "budgie") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Budgie");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Budgie");
+        ffStrbufSetS(&result->id, "ubuntu-budgie");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "mate") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu MATE");
+        ffStrbufSetS(&result->prettyName, "Ubuntu MATE");
+        ffStrbufSetS(&result->id, "ubuntu-mate");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "studio") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Studio");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Studio");
+        ffStrbufSetS(&result->id, "ubuntu-studio");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
 }
 
 #endif
@@ -68,6 +131,10 @@ const FFOSResult* ffDetectOS(const FFinstance* instance)
         parseFile(FASTFETCH_TARGET_DIR_USR"/lib/os-release", &result);
         parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/lsb-release", &result);
     }
+
+    if(ffStrbufIgnCaseCompS(&result.id, "ubuntu") == 0)
+        getUbuntuFlavour(&result);
+
 #else
     ffStrbufSetS(&result.name, "Android");
     ffStrbufSetS(&result.id, "android");
