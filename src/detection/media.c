@@ -4,7 +4,7 @@
 #include <pthread.h>
 
 #define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
-#define FF_DBUS_TIMEOUT_MILLISECONDS 50
+#define FF_DBUS_TIMEOUT_MILLISECONDS 20
 
 #ifdef FF_HAVE_DBUS
 #include <dbus/dbus.h>

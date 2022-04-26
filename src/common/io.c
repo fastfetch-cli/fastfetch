@@ -1,11 +1,11 @@
 #include "fastfetch.h"
 
 #include <stdio.h>
-#include <malloc.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <termios.h>
+#include <poll.h>
 
 bool ffWriteFDContent(int fd, const FFstrbuf* content)
 {
@@ -128,31 +128,41 @@ bool ffFileExists(const char* fileName, mode_t mode)
     return stat(fileName, &fileStat) == 0 && ((fileStat.st_mode & S_IFMT) == mode);
 }
 
-void ffGetTerminalResponse(const char* request, char end, const char* format, ...)
+void ffGetTerminalResponse(const char* request, const char* format, ...)
 {
     struct termios oldTerm, newTerm;
-    tcgetattr(STDIN_FILENO, &oldTerm);
+    if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
+        return;
 
     newTerm = oldTerm;
     newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newTerm);
+    if(tcsetattr(STDIN_FILENO, TCSANOW, &newTerm) == -1)
+        return;
 
     fputs(request, stdout);
+    fflush(stdout);
+
+    struct pollfd pfd;
+    pfd.fd = STDIN_FILENO;
+    pfd.events = POLLIN;
+    pfd.revents = 0;
+
+    //Give the terminal 20ms to respond
+    if(poll(&pfd, 1, 20) <= 0)
+    {
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
+        return;
+    }
 
     char buffer[512];
-    int pos = 0;
-    while((size_t) pos < sizeof(buffer) - 1)
-    {
-        char c = (char) getc(stdin);
-        if(c == '\0')
-            break;
-        buffer[pos++] = c;
-        if(c == end)
-            break;
-    }
-    buffer[pos] = '\0';
+    ssize_t readed = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
+
+    if(readed <= 0)
+        return;
+
+    buffer[readed] = '\0';
 
     va_list args;
     va_start(args, format);
