@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 
 #include <string.h>
-#include <ctype.h>
 #include <pthread.h>
 
 #if !defined(__ANDROID__)
