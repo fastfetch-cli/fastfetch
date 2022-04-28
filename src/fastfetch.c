@@ -735,6 +735,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logoType = FF_LOGO_TYPE_SIXEL;
         else if(strcasecmp(value, "kitty") == 0)
             instance->config.logoType = FF_LOGO_TYPE_KITTY;
+        else if(strcasecmp(value, "chafa") == 0)
+            instance->config.logoType = FF_LOGO_TYPE_CHAFA;
         else
         {
             fprintf(stderr, "Error: unknown logo type: %s\n", value);
@@ -788,6 +790,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         optionParseString(key, value, &instance->config.logoSource);
         instance->config.logoType = FF_LOGO_TYPE_RAW;
+    }
+    else if(strcasecmp(key, "--chafa") == 0)
+    {
+        optionParseString(key, value, &instance->config.logoSource);
+        instance->config.logoType = FF_LOGO_TYPE_CHAFA;
     }
 
     ///////////////////
@@ -988,6 +995,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libImageMagick);
     else if(strcasecmp(key, "--lib-z") == 0)
         optionParseString(key, value, &instance->config.libZ);
+    else if(strcasecmp(key, "--lib-chafa") == 0)
+        optionParseString(key, value, &instance->config.libChafa);
 
     //////////////////
     //Module options//

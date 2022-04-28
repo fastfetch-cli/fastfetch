@@ -201,6 +201,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.librpm, 0);
     ffStrbufInitA(&instance->config.libImageMagick, 0);
     ffStrbufInitA(&instance->config.libZ, 0);
+    ffStrbufInitA(&instance->config.libChafa, 0);
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
 

@@ -8,6 +8,7 @@
 #define FF_CACHE_FILE_SIXEL "sixel"
 #define FF_CACHE_FILE_KITTY_COMPRESSED "kittyc"
 #define FF_CACHE_FILE_KITTY_UNCOMPRESSED "kittyu"
+#define FF_CACHE_FILE_CHAFA "chafa"
 
 #include <string.h>
 #include <unistd.h>
@@ -87,6 +88,10 @@ static void finishPrinting(FFinstance* instance, const FFLogoRequestData* reques
     //Seems to be required on all consoles that support sixel. TBH i don't know why.
     if(requestData->type == FF_LOGO_TYPE_SIXEL)
         instance->state.logoHeight += 1;
+
+    //Chafa ascii images don't have a newline at the end
+    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+        instance->state.logoHeight -= 1;
 
     fputs("\033[9999999D", stdout);
     printf("\033[%uA", instance->state.logoHeight);
@@ -193,6 +198,66 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
     return true;
 }
 
+#ifdef FF_HAVE_CHAFA
+#include <chafa/chafa.h>
+static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
+{
+    FF_LIBRARY_LOAD(chafa, instance->config.libChafa, false, "libchafa.so", 1)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_add_by_tags, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_geometry, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_symbol_map, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_new, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_draw_all_pixels, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_print, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_unref, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_unref, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_unref, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, g_string_free, false)
+
+    imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
+    size_t length;
+    void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
+    if(!checkAllocationResult(blob, length))
+        return false;
+
+    ChafaSymbolMap* symbolMap = ffchafa_symbol_map_new();
+    ffchafa_symbol_map_add_by_tags(symbolMap, CHAFA_SYMBOL_TAG_ALL);
+
+    //imagePixelHeight is calculated, as if the image was already resized
+    gint logoCharacterHeight = (gint) (requestData->imagePixelHeight / requestData->characterPixelHeight);
+
+    ChafaCanvasConfig* canvasConfig = ffchafa_canvas_config_new();
+    ffchafa_canvas_config_set_geometry(canvasConfig, (gint) instance->config.logoWidth, logoCharacterHeight);
+    ffchafa_canvas_config_set_symbol_map(canvasConfig, symbolMap);
+
+    ChafaCanvas* canvas = ffchafa_canvas_new(canvasConfig);
+    ffchafa_canvas_draw_all_pixels(
+        canvas,
+        CHAFA_PIXEL_RGBA8_UNASSOCIATED,
+        blob,
+        (gint) imageData->image->columns,
+        (gint) imageData->image->rows,
+        (gint) imageData->image->columns * 4
+    );
+
+    GString* str = ffchafa_canvas_print(canvas, NULL);
+
+    FFstrbuf result;
+    result.chars = str->str;
+    result.length = (uint32_t) str->len;
+    writeResult(instance, requestData, &result, FF_CACHE_FILE_CHAFA);
+
+    ffg_string_free(str, TRUE);
+    ffchafa_canvas_unref(canvas);
+    ffchafa_canvas_config_unref(canvasConfig);
+    ffchafa_symbol_map_unref(symbolMap);
+
+    return true;
+}
+#endif
+
 FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* requestData, const FFIMData* imData)
 {
     FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
@@ -239,12 +304,20 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
-    imageData.image = (Image*) imData->resizeFunc(originalImage, requestData->imagePixelWidth, requestData->imagePixelHeight, imageData.exceptionInfo);
-    ffDestroyImage(originalImage);
-    if(imageData.image == NULL)
+    if(instance->config.logoType != FF_LOGO_TYPE_CHAFA)
     {
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+        imageData.image = (Image*) imData->resizeFunc(originalImage, requestData->imagePixelWidth, requestData->imagePixelHeight, imageData.exceptionInfo);
+        ffDestroyImage(originalImage);
+        if(imageData.image == NULL)
+        {
+            ffDestroyExceptionInfo(imageData.exceptionInfo);
+            return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+        }
+    }
+    else
+    {
+        //We don't want to resize the image for chafa, because chafa does that while converting to ASCII.
+        imageData.image = originalImage;
     }
 
     imageData.imageInfo = ffAcquireImageInfo();
@@ -256,10 +329,18 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     }
 
     bool printSuccessful;
-    if(requestData->type == FF_LOGO_TYPE_KITTY)
-        printSuccessful = printImageKitty(instance, requestData, &imageData);
-    else
+    if(requestData->type == FF_LOGO_TYPE_SIXEL)
         printSuccessful = printImageSixel(instance, requestData, &imageData);
+    else if(requestData->type == FF_LOGO_TYPE_KITTY)
+        printSuccessful = printImageKitty(instance, requestData, &imageData);
+    else if(requestData->type == FF_LOGO_TYPE_CHAFA)
+        #ifdef FF_HAVE_CHAFA
+            printSuccessful = printImageChafa(instance, requestData, &imageData);
+        #else //should never happen at this point
+            printSuccessful = false;
+        #endif
+    else //should never happen at this point
+        printSuccessful = false;
 
     ffDestroyImageInfo(imageData.imageInfo);
     ffDestroyImage(imageData.image);
@@ -302,8 +383,12 @@ static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
         if(fd == -1)
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
     }
-    else
+    else if(requestData->type == FF_LOGO_TYPE_SIXEL)
         fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
+    else if(requestData->type == FF_LOGO_TYPE_CHAFA)
+        fd = getCacheFD(requestData, FF_CACHE_FILE_CHAFA);
+    else
+        fd = -1; //should never happen at this point
 
     if(fd == -1)
         return false;
@@ -344,6 +429,12 @@ static bool getTermInfo(struct winsize* winsize)
 
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
+    //Performance optimization
+    #ifndef FF_HAVE_CHAFA
+        if(type == FF_LOGO_TYPE_CHAFA)
+            return false;
+    #endif
+
     FFLogoRequestData requestData;
 
     if(!getTermInfo(&requestData.winsize))

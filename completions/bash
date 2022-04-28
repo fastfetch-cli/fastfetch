@@ -234,6 +234,7 @@ __fastfetch_completion()
         "--lib-RPM"
         "--lib-imagemagick"
         "--lib-z"
+        "--lib-chafa"
         "--battery-dir"
         "--load-config"
     )

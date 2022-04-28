@@ -61,7 +61,7 @@
 
 # Logo type option:
 # Sets the logo type to use.
-# Must be auto, builtin, file, raw, sixel or kitty.
+# Must be auto, builtin, file, raw, sixel, kitty or chafa.
 # Default is auto.
 #--logo-type auto
 
@@ -230,3 +230,4 @@
 #--lib-rpm /usr/lib/librpm.so
 #--lib-imagemagick /usr/lib/libMagickCore-7.Q16HDRI.so
 #--lib-z /usr/lib/libz.so
+#--lib-chafa /usr/lib/libchafa.so

@@ -162,7 +162,8 @@ static void logoPrintDetected(FFinstance* instance)
     {
         if(
             !ffLogoPrintBuiltinIfExists(instance) &&
-            !ffLogoPrintImageIfExists(instance, FF_LOGO_TYPE_KITTY)
+            !ffLogoPrintImageIfExists(instance, FF_LOGO_TYPE_KITTY) &&
+            !ffLogoPrintImageIfExists(instance, FF_LOGO_TYPE_CHAFA)
         ) logoPrintFile(instance, true);
         return;
     }
@@ -179,7 +180,9 @@ void ffPrintLogo(FFinstance* instance)
         instance->config.logoType == FF_LOGO_TYPE_BUILTIN ||
         instance->config.logoType == FF_LOGO_TYPE_FILE ||
         instance->config.logoType == FF_LOGO_TYPE_RAW ||
-        instance->config.logoType == FF_LOGO_TYPE_SIXEL
+        instance->config.logoType == FF_LOGO_TYPE_SIXEL ||
+        instance->config.logoType == FF_LOGO_TYPE_KITTY ||
+        instance->config.logoType == FF_LOGO_TYPE_CHAFA
     ) && instance->config.logoSource.length == 0)
         ffLogoPrintUnknown(instance);
     else if(instance->config.logoType == FF_LOGO_TYPE_BUILTIN)
@@ -191,7 +194,7 @@ void ffPrintLogo(FFinstance* instance)
         logoPrintFile(instance, true);
     else if(instance->config.logoType == FF_LOGO_TYPE_RAW)
         logoPrintFile(instance, false);
-    else if(instance->config.logoType == FF_LOGO_TYPE_SIXEL || instance->config.logoType == FF_LOGO_TYPE_KITTY)
+    else if(instance->config.logoType == FF_LOGO_TYPE_SIXEL || instance->config.logoType == FF_LOGO_TYPE_KITTY || instance->config.logoType == FF_LOGO_TYPE_CHAFA)
     {
         if(!ffLogoPrintImageIfExists(instance, instance->config.logoType))
             ffLogoPrintBuiltinDetected(instance);

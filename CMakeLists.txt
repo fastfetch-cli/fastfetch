@@ -31,6 +31,7 @@ OPTION(ENABLE_RPM "Enable rpm" ON)
 OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
 OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
 OPTION(ENABLE_ZLIB "Enable zlib" ON)
+OPTION(ENABLE_CHAFA "Enable chafa" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -321,6 +322,15 @@ if(ENABLE_ZLIB)
     endif()
 endif()
 
+if(ENABLE_CHAFA)
+    pkg_check_modules(CHAFA chafa)
+    if(CHAFA_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_CHAFA=1)
+    else()
+        message(WARNING "Package chafa not found. Building without support.")
+    endif()
+endif()
+
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
     PUBLIC ${PROJECT_SOURCE_DIR}/src
@@ -340,6 +350,7 @@ target_include_directories(libfastfetch
     PRIVATE ${IMAGEMAGICK7_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK6_INCLUDE_DIRS}
     PRIVATE ${ZLIB_INCLUDE_DIRS}
+    PRIVATE ${CHAFA_INCLUDE_DIRS}
 )
 
 target_link_libraries(libfastfetch
