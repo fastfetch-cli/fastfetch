@@ -160,7 +160,10 @@ static void logoPrintDetected(FFinstance* instance)
 {
     //If no logo source is given, detect the logo from OS and print the right builtin one
     if(instance->config.logoSource.length == 0)
+    {
         ffLogoPrintBuiltinDetected(instance);
+        return;
+    }
 
     //If a logo source is given, first look if it is the name of a builtin logo
     if(ffLogoPrintBuiltinIfExists(instance))
