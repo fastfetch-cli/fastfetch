@@ -318,6 +318,9 @@ void ffListFeatures()
         #ifdef FF_HAVE_IMAGEMAGICK6
             "imagemagick6\n"
         #endif
+        #ifdef FF_HAVE_CHAFA
+            "chafa\n"
+        #endif
         #ifdef FF_HAVE_ZLIB
             "zlib\n"
         #endif
