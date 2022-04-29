@@ -323,11 +323,11 @@ if(ENABLE_ZLIB)
 endif()
 
 if(ENABLE_CHAFA)
-    pkg_check_modules(CHAFA chafa)
+    pkg_check_modules(CHAFA chafa>=1.10)
     if(CHAFA_FOUND)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_CHAFA=1)
     else()
-        message(WARNING "Package chafa not found. Building without support.")
+        message(WARNING "Package chafa>=1.10 not found. Building without support.")
     endif()
 endif()
 
