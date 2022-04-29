@@ -15,7 +15,14 @@ void ffLogoPrintUnknown(FFinstance* instance);
 bool ffLogoPrintBuiltinIfExists(FFinstance* instance);
 void ffLogoPrintBuiltinDetected(FFinstance* instance);
 
+typedef enum FFLogoImageResult
+{
+    FF_LOGO_IMAGE_RESULT_SUCCESS,    //Logo printed
+    FF_LOGO_IMAGE_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version
+    FF_LOGO_IMAGE_RESULT_RUN_ERROR   //Failed to load / convert image, cancle whole sixel code
+} FFLogoImageResult;
+
 //image/image.c
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type);
+FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type);
 
 #endif

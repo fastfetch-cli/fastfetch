@@ -427,25 +427,24 @@ static bool getTermInfo(struct winsize* winsize)
         winsize->ws_xpixel > 0;
 }
 
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
-    //Performance optimization
     #ifndef FF_HAVE_CHAFA
         if(type == FF_LOGO_TYPE_CHAFA)
-            return false;
+            return FF_LOGO_IMAGE_RESULT_INIT_ERROR;
     #endif
 
     FFLogoRequestData requestData;
 
     if(!getTermInfo(&requestData.winsize))
-        return false;
+        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 
     requestData.type = type;
     requestData.characterPixelWidth = requestData.winsize.ws_xpixel / (double) requestData.winsize.ws_col;
     requestData.characterPixelHeight = requestData.winsize.ws_ypixel / (double) requestData.winsize.ws_row;
     requestData.imagePixelWidth = (uint32_t) (instance->config.logoWidth * requestData.characterPixelWidth);
     if(requestData.imagePixelWidth < 1)
-        return false;
+        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 
     ffStrbufInitA(&requestData.cacheDir, PATH_MAX * 2);
     ffStrbufAppend(&requestData.cacheDir, &instance->state.cacheDir);
@@ -456,7 +455,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
-        return false;
+        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
     if(!ffStrbufEndsWithC(&requestData.cacheDir, '/'))
@@ -468,7 +467,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     if(!instance->config.recache && printCached(instance, &requestData))
     {
         ffStrbufDestroy(&requestData.cacheDir);
-        return true;
+        return FF_LOGO_IMAGE_RESULT_SUCCESS;
     }
 
     FFLogoImageResult result = FF_LOGO_IMAGE_RESULT_INIT_ERROR;
@@ -483,13 +482,13 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     #endif
 
     ffStrbufDestroy(&requestData.cacheDir);
-    return result == FF_LOGO_IMAGE_RESULT_SUCCESS;
+    return result;
 }
 
 #else //FF_HAVE_IMAGEMAGICK{6, 7}
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
     FF_UNUSED(instance, type);
-    return false;
+    return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 }
 #endif //FF_HAVE_IMAGEMAGICK{6, 7}
