@@ -66,10 +66,16 @@
 #--logo-type auto
 
 # Logo width option:
-# Sets the width of the logos (in characters) if the logo is an image.
+# Sets the width of the logo (in characters) if the logo is an image.
 # Must be a positive integer.
 # Default is 65.
 #--logo-width 65
+
+# Logo height option:
+# Sets the height of the logo (in characters) if the logo is an image.
+# Must be a positive integer.
+# Default is 0 (keeps aspect ration).
+#--logo-height 0
 
 # Logo color options:
 # Overwrite a color in the logo. Also works for user provided logos.
