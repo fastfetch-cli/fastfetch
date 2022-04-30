@@ -759,6 +759,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--logo-width") == 0)
         instance->config.logoWidth = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--logo-height") == 0)
+        instance->config.logoHeight = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-padding") == 0)
     {
         uint32_t padding = optionParseUInt32(key, value);

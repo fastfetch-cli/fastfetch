@@ -48,6 +48,7 @@ typedef struct FFconfig
     FFLogoType logoType;
     FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
     uint32_t logoWidth;
+    uint32_t logoHeight;
     uint32_t logoPaddingLeft;
     uint32_t logoPaddingRight;
     bool logoPrintRemaining;

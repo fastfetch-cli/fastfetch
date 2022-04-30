@@ -83,7 +83,11 @@ static inline bool checkAllocationResult(void* data, size_t length)
 static void finishPrinting(FFinstance* instance, const FFLogoRequestData* requestData)
 {
     instance->state.logoWidth = (uint32_t) (requestData->imagePixelWidth / requestData->characterPixelWidth) + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
-    instance->state.logoHeight = (uint32_t) (requestData->imagePixelHeight / requestData->characterPixelHeight);
+
+    if(instance->config.logoHeight == 0)
+        instance->state.logoHeight = (uint32_t) (requestData->imagePixelHeight / requestData->characterPixelHeight);
+    else
+        instance->state.logoHeight = instance->config.logoHeight;
 
     //Seems to be required on all consoles that support sixel. TBH i don't know why.
     if(requestData->type == FF_LOGO_TYPE_SIXEL)
@@ -110,13 +114,16 @@ static void writeResult(FFinstance* instance, FFLogoRequestData* requestData, co
     ffWriteFileContent(requestData->cacheDir.chars, result);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 
-    //Write height cache file
-    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
-    FFstrbuf content;
-    content.chars = (char*) &requestData->imagePixelHeight;
-    content.length = sizeof(requestData->imagePixelHeight);
-    ffWriteFileContent(requestData->cacheDir.chars, &content);
-    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+    //If no custom height is given, we need to save the height in "height" file
+    if(instance->config.logoHeight == 0)
+    {
+        ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
+        FFstrbuf content;
+        content.chars = (char*) &requestData->imagePixelHeight;
+        content.length = sizeof(requestData->imagePixelHeight);
+        ffWriteFileContent(requestData->cacheDir.chars, &content);
+        ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+    }
 
     //Write escape codes to stdout
     finishPrinting(instance, requestData);
@@ -295,13 +302,17 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
-    //imagePixelWidth is set in ffLogoPrintImageIfExists
-    requestData->imagePixelHeight = (uint32_t) ((requestData->imagePixelWidth / (double) originalImage->columns) * (double) originalImage->rows);
-    if(requestData->imagePixelHeight < 1)
+    //imagePixelWidth is always set in ffLogoPrintImageIfExists
+    //imagePixelHeigght is set, if a custom one is given. Otherwise calculate right aspect ratio here
+    if(requestData->imagePixelHeight == 0)
     {
-        ffDestroyImage(originalImage);
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+        requestData->imagePixelHeight = (uint32_t) ((requestData->imagePixelWidth / (double) originalImage->columns) * (double) originalImage->rows);
+        if(requestData->imagePixelHeight == 0)
+        {
+            ffDestroyImage(originalImage);
+            ffDestroyExceptionInfo(imageData.exceptionInfo);
+            return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+        }
     }
 
     if(instance->config.logoType != FF_LOGO_TYPE_CHAFA)
@@ -360,21 +371,25 @@ static int getCacheFD(FFLogoRequestData* requestData, const char* fileName)
 
 static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
 {
-    uint32_t cacheDirLength = requestData->cacheDir.length;
-    ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
+    //If no custom height is given, read the height from file
+    if(requestData->imagePixelHeight == 0)
+    {
+        uint32_t cacheDirLength = requestData->cacheDir.length;
+        ffStrbufAppendS(&requestData->cacheDir, FF_CACHE_FILE_HEIGHT);
 
-    FFstrbuf content;
-    ffStrbufInitA(&content, sizeof(requestData->imagePixelHeight) + 1); // +1 because strbuf is null terminated
-    memset(content.chars, 0, sizeof(requestData->imagePixelHeight));
+        FFstrbuf content;
+        ffStrbufInitA(&content, sizeof(requestData->imagePixelHeight) + 1); // +1 because strbuf is null terminated
+        memset(content.chars, 0, sizeof(requestData->imagePixelHeight));
 
-    ffAppendFileContent(requestData->cacheDir.chars, &content);
-    memcpy(&requestData->imagePixelHeight, content.chars, sizeof(requestData->imagePixelHeight));
+        ffAppendFileContent(requestData->cacheDir.chars, &content);
+        memcpy(&requestData->imagePixelHeight, content.chars, sizeof(requestData->imagePixelHeight));
 
-    ffStrbufDestroy(&content);
-    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+        ffStrbufDestroy(&content);
+        ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 
-    if(requestData->imagePixelHeight < 1)
-        return false;
+        if(requestData->imagePixelHeight == 0)
+            return false;
+    }
 
     int fd;
     if(requestData->type == FF_LOGO_TYPE_KITTY)
@@ -446,6 +461,15 @@ FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type
     if(requestData.imagePixelWidth < 1)
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 
+    if(instance->config.logoHeight > 0)
+    {
+        requestData.imagePixelHeight = (uint32_t) (instance->config.logoHeight * requestData.characterPixelHeight);
+        if(requestData.imagePixelHeight == 0)
+            return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+    }
+    else
+        requestData.imagePixelHeight = 0;
+
     ffStrbufInitA(&requestData.cacheDir, PATH_MAX * 2);
     ffStrbufAppend(&requestData.cacheDir, &instance->state.cacheDir);
     ffStrbufAppendS(&requestData.cacheDir, "images");
@@ -461,7 +485,7 @@ FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type
     if(!ffStrbufEndsWithC(&requestData.cacheDir, '/'))
         ffStrbufAppendC(&requestData.cacheDir, '/');
 
-    ffStrbufAppendF(&requestData.cacheDir, "%u", requestData.imagePixelWidth);
+    ffStrbufAppendF(&requestData.cacheDir, "%u*%u", requestData.imagePixelWidth, requestData.imagePixelHeight);
     ffStrbufAppendC(&requestData.cacheDir, '/');
 
     if(!instance->config.recache && printCached(instance, &requestData))
