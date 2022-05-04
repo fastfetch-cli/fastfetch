@@ -1175,6 +1175,36 @@ static const FFlogo* getLogoRedHatEnterpriseLinux()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoRedstarOS()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("redstar", "redstar-os", "redstaros", "redstaros-linux", "redstar-os-linux")
+    FF_LOGO_LINES(
+        "$1                    ..\n"
+        "                  .oK0l\n"
+        "                 :0KKKKd.\n"
+        "               .xKO0KKKKd\n"
+        "              ,Od' .d0000l\n"
+        "             .c;.   .'''...           ..'.\n"
+        ".,:cloddxxxkkkkOOOOkkkkkkkkxxxxxxxxxkkkx:\n"
+        ";kOOOOOOOkxOkc'...',;;;;,,,'',;;:cllc:,.\n"
+        " .okkkkd,.lko  .......',;:cllc:;,,'''''.\n"
+        "   .cdo. :xd' cd:.  ..';'',,,'',,;;;,'.\n"
+        "      . .ddl.;doooc'..;oc;'..';::;,'.\n"
+        "        coo;.oooolllllllcccc:'.  .\n"
+        "       .ool''lllllccccccc:::::;.\n"
+        "       ;lll. .':cccc:::::::;;;;'\n"
+        "       :lcc:'',..';::::;;;;;;;,,.\n"
+        "       :cccc::::;...';;;;;,,,,,,.\n"
+        "       ,::::::;;;,'.  ..',,,,'''.\n"
+        "        ........          ......"
+    )
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -1353,6 +1383,7 @@ static GetLogoMethod* getLogos()
         getLogoReborn,
         getLogoRebornSmall,
         getLogoRedHatEnterpriseLinux,
+        getLogoRedstarOS,
         getLogoUbuntu,
         getLogoUbuntuSmall,
         getLogoVoid,
