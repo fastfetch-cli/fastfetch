@@ -29,7 +29,7 @@ Output of `fastfetch --list-features`:
 
 <!--
 If you get the following error: `Error: couldn't find config: [...]`, copy the files in [presets](../../presets/) to `/usr/share/fastfetch/presets/` or `~/.local/share/fastfetch/presets/`.
-If this isn't possible (or to much work) for you, post the output of `fastfetch --show-errors --recache --multithreading false --disable-linewrap false`. 
+If this isn't possible (or too much work) for you, post the output of `fastfetch --show-errors --recache --multithreading false --disable-linewrap false`. 
 -->
 
 Often helpful questions:
