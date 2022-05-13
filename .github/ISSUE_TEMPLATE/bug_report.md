@@ -7,6 +7,13 @@ assignees: ''
 
 ---
 
+# General description of bug:
+
+
+# Often helpful questions:
+* Does the issue occur across multiple terminal emulators? [Y/N]
+* Does the issue occur across multiple shells? (bash, zsh, fish, etc) [Y/N]
+
 Output of `fastfetch --version`:
 ```
 //paste here
@@ -32,6 +39,3 @@ If you get the following error: `Error: couldn't find config: [...]`, copy the f
 If this isn't possible (or too much work) for you, post the output of `fastfetch --show-errors --recache --multithreading false --disable-linewrap false`. 
 -->
 
-Often helpful questions:
-* Does the issue occur across multiple terminal emulators?
-* Does the issue occur across multiple shells? (bash, zsh, fish, etc)
