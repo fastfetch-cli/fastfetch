@@ -17,17 +17,43 @@ void ffPrintUptime(FFinstance* instance)
         if(days == 0 && hours == 0 && minutes == 0)
         {
             printf("%u seconds\n", seconds);
+            return;
         }
-        else
+
+        if(days > 0)
         {
-            if(days > 0)
-                printf("%u day%s%s, ", days, days <= 1 ? "" : "s", days < 100 ? "" : "(!)");
-            if(hours > 0)
-                printf("%u hour%s, ", hours, hours <= 1 ? "" : "s");
-            if(minutes > 0)
-                printf("%u min%s", minutes, minutes <= 1 ? "" : "s");
-            putchar('\n');
+            printf("%u day", days);
+
+            if(days > 1)
+                putchar('s');
+
+            if(days >= 100)
+                fputs("(!)", stdout);
+
+            if(hours > 0 || minutes > 0)
+                fputs(", ", stdout);
         }
+
+        if(hours > 0)
+        {
+            printf("%u hour", hours);
+
+            if(hours > 1)
+                putchar('s');
+
+            if(minutes > 0)
+                fputs(", ", stdout);
+        }
+
+        if(minutes > 0)
+        {
+            printf("%u min", minutes);
+
+            if(minutes > 1)
+                putchar('s');
+        }
+
+        putchar('\n');
     }
     else
     {
