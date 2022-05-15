@@ -408,36 +408,6 @@ static const FFlogo* getLogoDebianSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoDeepin()
-{
-    FF_LOGO_INIT
-    FF_LOGO_NAMES("deepin", "deepin-linux")
-    FF_LOGO_LINES(
-        "$1             ............\n"
-        "         .';;;;;.       .,;,.\n"
-        "      .,;;;;;;;.       ';;;;;;;.\n"
-        "    .;::::::::'     .,::;;,''''',.\n"
-        "   ,'.::::::::    .;;'.          ';\n"
-        "  ;'  'cccccc,   ,' :: '..        .:\n"
-        " ,,    :ccccc.  ;: .c, '' :.       ,;\n"
-        ".l.     cllll' ., .lc  :; .l'       l.\n"
-        ".c       :lllc  ;cl:  .l' .ll.      :'\n"
-        ".l        'looc. .   ,o:  'oo'      c,\n"
-        ".o.         .:ool::coc'  .ooo'      o.\n"
-        " ::            .....   .;dddo      ;c\n"
-        "  l:...            .';lddddo.     ,o\n"
-        "   lxxxxxdoolllodxxxxxxxxxc      :l\n"
-        "    ,dxxxxxxxxxxxxxxxxxxl.     'o,\n"
-        "      ,dkkkkkkkkkkkkko;.    .;o;\n"
-        "        .;okkkkkdl;.    .,cl:.\n"
-        "            .,:cccccccc:,."
-    )
-    FF_LOGO_COLORS(
-        "32" //green
-    )
-    FF_LOGO_RETURN
-}
-
 static const FFlogo* getLogoDevuan()
 {
     FF_LOGO_INIT
@@ -480,6 +450,36 @@ static const FFlogo* getLogoDevuanSmall()
     )
     FF_LOGO_COLORS(
         "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoDeepin()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("deepin", "deepin-linux")
+    FF_LOGO_LINES(
+        "$1             ............\n"
+        "         .';;;;;.       .,;,.\n"
+        "      .,;;;;;;;.       ';;;;;;;.\n"
+        "    .;::::::::'     .,::;;,''''',.\n"
+        "   ,'.::::::::    .;;'.          ';\n"
+        "  ;'  'cccccc,   ,' :: '..        .:\n"
+        " ,,    :ccccc.  ;: .c, '' :.       ,;\n"
+        ".l.     cllll' ., .lc  :; .l'       l.\n"
+        ".c       :lllc  ;cl:  .l' .ll.      :'\n"
+        ".l        'looc. .   ,o:  'oo'      c,\n"
+        ".o.         .:ool::coc'  .ooo'      o.\n"
+        " ::            .....   .;dddo      ;c\n"
+        "  l:...            .';lddddo.     ,o\n"
+        "   lxxxxxdoolllodxxxxxxxxxc      :l\n"
+        "    ,dxxxxxxxxxxxxxxxxxxl.     'o,\n"
+        "      ,dkkkkkkkkkkkkko;.    .;o;\n"
+        "        .;okkkkkdl;.    .,cl:.\n"
+        "            .,:cccccccc:,."
+    )
+    FF_LOGO_COLORS(
+        "32" //green
     )
     FF_LOGO_RETURN
 }
