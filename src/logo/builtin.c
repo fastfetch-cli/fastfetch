@@ -408,6 +408,52 @@ static const FFlogo* getLogoDebianSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoDevuan()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("devuan", "devuan-linux")
+    FF_LOGO_LINES(
+        "   ..,,;;;::;,..\n"
+        "           `':ddd;:,.\n"
+        "                 `'dPPd:,.\n"
+        "                     `:b$$b`.\n"
+        "                        'P$$$d`\n"
+        "                         .$$$$$`\n"
+        "                         ;$$$$$P\n"
+        "                      .:P$$$$$$`\n"
+        "                  .,:b$$$$$$$;'\n"
+        "             .,:dP$$$$$$$$b:'\n"
+        "      .,:;db$$$$$$$$$$Pd'`\n"
+        " ,db$$$$$$$$$$$$$$b:'`\n"
+        ":$$$$$$$$$$$$b:'`\n"
+        " `$$$$$bd:''`\n"
+        "   `'''`\n"
+    )
+    FF_LOGO_COLORS(
+        "35" //magenta
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoDevuanSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("devuan_small", "devuan-linux-small")
+    FF_LOGO_LINES(
+        " ..:::.\n"
+        "    ..-==-\n"
+        "        .+#:\n"
+        "         =@@\n"
+        "      :+%@#:\n"
+        ".:=+#@@%*:\n"
+        "#@@@#=:\n"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoDeepin()
 {
     FF_LOGO_INIT
@@ -1354,6 +1400,8 @@ static GetLogoMethod* getLogos()
         getLogoCentOS,
         getLogoCentOSSmall,
         getLogoDebian,
+        getLogoDevuan,
+        getLogoDevuanSmall,
         getLogoDebianSmall,
         getLogoDeepin,
         getLogoEndeavour,
