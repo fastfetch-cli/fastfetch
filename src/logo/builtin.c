@@ -22,7 +22,7 @@ typedef struct FFlogo
 static const FFlogo* getLogoUnknown()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("unkown", "question mark", "?")
+    FF_LOGO_NAMES("unknown", "question mark", "?")
     FF_LOGO_LINES(
         "       ________\n"
         "   _jgN########Ngg_\n"
