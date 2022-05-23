@@ -39,10 +39,10 @@ void ffPrintCPU(FFinstance* instance)
     if(ffPrintFromCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS))
         return;
 
-    FILE* cpuinfo = fopen(FASTFETCH_TARGET_DIR_ROOT"/proc/cpuinfo", "r");
+    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
     {
-        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "fopen(\""FASTFETCH_TARGET_DIR_ROOT"/proc/cpuinfo\", \"r\") == NULL");
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "fopen(\"""/proc/cpuinfo\", \"r\") == NULL");
         return;
     }
 

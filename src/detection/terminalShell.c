@@ -16,7 +16,7 @@ static void getProcessInformation(const char* pid, FFstrbuf* processName, FFstrb
 {
     FFstrbuf cmdlineFilePath;
     ffStrbufInit(&cmdlineFilePath);
-    ffStrbufAppendS(&cmdlineFilePath, FASTFETCH_TARGET_DIR_ROOT"/proc/");
+    ffStrbufAppendS(&cmdlineFilePath, "/proc/");
     ffStrbufAppendS(&cmdlineFilePath, pid);
     ffStrbufAppendS(&cmdlineFilePath, "/cmdline");
 
@@ -36,7 +36,7 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
 {
     FFstrbuf statFilePath;
     ffStrbufInit(&statFilePath);
-    ffStrbufAppendS(&statFilePath, FASTFETCH_TARGET_DIR_ROOT"/proc/");
+    ffStrbufAppendS(&statFilePath, "/proc/");
     ffStrbufAppendS(&statFilePath, pid);
     ffStrbufAppendS(&statFilePath, "/stat");
 

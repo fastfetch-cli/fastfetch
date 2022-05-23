@@ -6,9 +6,9 @@
 // Impl inspired by: https://github.com/sam-barr/paleofetch/blob/b7c58a52c0de39b53c9b5f417889a5886d324bfa/paleofetch.c#L544
 void ffPrintMemory(FFinstance* instance)
 {
-    FILE* meminfo = fopen(FASTFETCH_TARGET_DIR_ROOT"/proc/meminfo", "r");
+    FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL) {
-        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memoryKey, &instance->config.memoryFormat, FF_MEMORY_NUM_FORMAT_ARGS, "fopen(\""FASTFETCH_TARGET_DIR_ROOT"/proc/meminfo\", \"r\") == NULL");
+        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memoryKey, &instance->config.memoryFormat, FF_MEMORY_NUM_FORMAT_ARGS, "fopen(\"""/proc/meminfo\", \"r\") == NULL");
         return;
     }
 
@@ -42,7 +42,7 @@ void ffPrintMemory(FFinstance* instance)
 
     if(used_mem == 0 && total_mem == 0 && percentage == 0)
     {
-        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memoryKey, &instance->config.memoryFormat, FF_MEMORY_NUM_FORMAT_ARGS, FASTFETCH_TARGET_DIR_ROOT"/proc/meminfo could't be parsed");
+        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memoryKey, &instance->config.memoryFormat, FF_MEMORY_NUM_FORMAT_ARGS, "/proc/meminfo could't be parsed");
         return;
     }
 

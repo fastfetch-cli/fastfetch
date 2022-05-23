@@ -289,13 +289,13 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
 
 static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    DIR* proc = opendir(FASTFETCH_TARGET_DIR_ROOT"/proc");
+    DIR* proc = opendir("/proc");
     if(proc == NULL)
         return;
 
     FFstrbuf procPath;
     ffStrbufInitA(&procPath, 64);
-    ffStrbufAppendS(&procPath, FASTFETCH_TARGET_DIR_ROOT"/proc/");
+    ffStrbufAppendS(&procPath, "/proc/");
 
     uint32_t procPathLength = procPath.length;
 
