@@ -33,7 +33,7 @@ The following libraries are used if present at runtime:
 *  [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
 *  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
-*  [`librpm`](http://rpm.org/): Needed for rpm package count.
+*  [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.

@@ -1513,7 +1513,7 @@ static const FFlogo* detectBuiltinLogoWithVersion(const FFstrbuf* versionString,
         if(logoHasName(newLogo, name->chars)) \
         { \
             long version = strtol(versionString->chars, NULL, 10); \
-            return (version == 0 || version == LONG_MAX || version == LONG_MIN || version > ver) ? newLogo : oldLogo; \
+            return (version == 0 || version == LONG_MAX || version == LONG_MIN || version >= ver) ? newLogo : oldLogo; \
         }
 
     FF_PRINT_LOGO_VERSIONED_IF_EXISTS(getLogoFedora(), getLogoFedoraOld(), 34)

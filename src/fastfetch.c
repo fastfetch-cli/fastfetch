@@ -991,8 +991,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libDBus);
     else if(strcasecmp(key, "--lib-XFConf") == 0)
         optionParseString(key, value, &instance->config.libXFConf);
-    else if(strcasecmp(key, "--lib-rpm") == 0)
-        optionParseString(key, value, &instance->config.librpm);
+    else if(strcasecmp(key, "--lib-sqlite") == 0 || strcasecmp(key, "--lib-sqlite3") == 0)
+        optionParseString(key, value, &instance->config.libSQLite3);
     else if(strcasecmp(key, "--lib-imagemagick") == 0)
         optionParseString(key, value, &instance->config.libImageMagick);
     else if(strcasecmp(key, "--lib-z") == 0)

@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 
 #include <pthread.h>
+#include <string.h>
 
 #define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \
@@ -266,6 +267,74 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_XFCONF
+
+#ifdef FF_HAVE_SQLITE3
+#include <sqlite3.h>
+
+typedef struct SQLiteData
+{
+    FF_LIBRARY_SYMBOL(sqlite3_open_v2)
+    FF_LIBRARY_SYMBOL(sqlite3_prepare_v2)
+    FF_LIBRARY_SYMBOL(sqlite3_step)
+    FF_LIBRARY_SYMBOL(sqlite3_data_count)
+    FF_LIBRARY_SYMBOL(sqlite3_column_int)
+    FF_LIBRARY_SYMBOL(sqlite3_finalize)
+    FF_LIBRARY_SYMBOL(sqlite3_close)
+} SQLiteData;
+
+static const SQLiteData* getSQLiteData(const FFinstance* instance)
+{
+    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance->config.libSQLite3, "libsqlite3.so", 1);
+
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_open_v2)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_prepare_v2)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_step)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_data_count)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_column_int)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_finalize)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_close)
+
+    FF_LIBRARY_DATA_LOAD_RETURN
+}
+
+int ffSettingsGetSQLite3Int(FFinstance* instance, const char* dbPath, const char* query)
+{
+    const SQLiteData* data = getSQLiteData(instance);
+    if(data == NULL)
+        return 0;
+
+    sqlite3* db;
+    if(data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
+        return 0;
+
+    sqlite3_stmt* stmt;
+    if(data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, NULL) != SQLITE_OK)
+    {
+        data->ffsqlite3_close(db);
+        return 0;
+    }
+
+    if(data->ffsqlite3_step(stmt) != SQLITE_ROW || data->ffsqlite3_data_count(stmt) < 1)
+    {
+        data->ffsqlite3_finalize(stmt);
+        data->ffsqlite3_close(db);
+        return 0;
+    }
+
+    int result = data->ffsqlite3_column_int(stmt, 0);
+
+    data->ffsqlite3_finalize(stmt);
+    data->ffsqlite3_close(db);
+
+    return result;
+}
+#else //FF_HAVE_SQLITE3
+int ffSettingsGetSQLite3Int(FFinstance* instance, const char* dbPath, const char* query)
+{
+    FF_UNUSED(instance, dbPath, query)
+    return 0;
+}
+#endif //FF_HAVE_SQLITE3
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>

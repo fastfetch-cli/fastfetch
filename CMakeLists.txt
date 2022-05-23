@@ -27,7 +27,7 @@ OPTION(ENABLE_GIO "Enable gio-2.0" ON)
 OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
-OPTION(ENABLE_RPM "Enable rpm" ON)
+OPTION(ENABLE_SQLITE3 "Enable sqlite3" ON)
 OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
 OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
 OPTION(ENABLE_ZLIB "Enable zlib" ON)
@@ -266,12 +266,12 @@ if(ENABLE_XFCONF)
     endif()
 endif()
 
-if(ENABLE_RPM)
-    pkg_check_modules(RPM rpm)
-    if(RPM_FOUND)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_RPM=1)
+if(ENABLE_SQLITE3)
+    pkg_check_modules(SQLITE3 sqlite3)
+    if(SQLITE3_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_SQLITE3=1)
     else()
-        message(WARNING "Package librpm not found. Building without support.")
+        message(WARNING "Package sqlite3 not found. Building without support.")
     endif()
 endif()
 
@@ -346,7 +346,7 @@ target_include_directories(libfastfetch
     PRIVATE ${DCONF_INCLUDE_DIRS}
     PRIVATE ${DBUS_INCLUDE_DIRS}
     PRIVATE ${XFCONF_INCLUDE_DIRS}
-    PRIVATE ${RPM_INCLUDE_DIRS}
+    PRIVATE ${SQLITE3_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK7_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK6_INCLUDE_DIRS}
     PRIVATE ${ZLIB_INCLUDE_DIRS}

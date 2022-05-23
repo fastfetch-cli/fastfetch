@@ -137,7 +137,7 @@ typedef struct FFconfig
     FFstrbuf libDConf;
     FFstrbuf libDBus;
     FFstrbuf libXFConf;
-    FFstrbuf librpm;
+    FFstrbuf libSQLite3;
     FFstrbuf libImageMagick;
     FFstrbuf libZ;
     FFstrbuf libChafa;
@@ -465,6 +465,8 @@ FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttyp
 FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type);
 FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
 FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type);
+
+int ffSettingsGetSQLite3Int(FFinstance* instance, const char* dbPath, const char* query);
 
 #ifdef __ANDROID__
 bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);

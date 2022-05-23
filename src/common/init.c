@@ -199,7 +199,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libDConf, 0);
     ffStrbufInitA(&instance->config.libDBus, 0);
     ffStrbufInitA(&instance->config.libXFConf, 0);
-    ffStrbufInitA(&instance->config.librpm, 0);
+    ffStrbufInitA(&instance->config.libSQLite3, 0);
     ffStrbufInitA(&instance->config.libImageMagick, 0);
     ffStrbufInitA(&instance->config.libZ, 0);
     ffStrbufInitA(&instance->config.libChafa, 0);
@@ -328,8 +328,8 @@ void ffListFeatures()
         #ifdef FF_HAVE_XFCONF
             "xfconf\n"
         #endif
-        #ifdef FF_HAVE_RPM
-            "librpm\n"
+        #ifdef FF_HAVE_SQLITE3
+            "sqlite3\n"
         #endif
         ""
     , stdout);
