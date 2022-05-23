@@ -1251,6 +1251,37 @@ static const FFlogo* getLogoRedstarOS()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoRockyLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("rocky", "rocky-linux", "rockylinux")
+    FF_LOGO_LINES(
+        "          __wgliliiligw_,\n"
+        "       _williiiiiiliilililw,\n"
+        "     _%iiiiiilililiiiiiiiiiii_\n"
+        "   .Qliiiililiiiiiiililililiilm.\n"
+        "  _iiiiiliiiiiililiiiiiiiiiiliil,\n"
+        " .lililiiilililiiiilililililiiiii,\n"
+        "_liiiiiiliiiiiiiliiiiiF{iiiiiilili,\n"
+        "jliililiiilililiiili@`  ~ililiiiiiL\n"
+        "iiiliiiiliiiiiiili>`      ~liililii\n"
+        "liliiiliiilililii`         -9liiiil\n"
+        "iiiiiliiliiiiii~             ''4lili\n"
+        "4ililiiiiilil~|      -w,       )4lf\n"
+        "-liiiiililiF'       _liig,       )'\n"
+        " )iiiliii@`       _QIililig,\n"
+        "  )iiii>`       .Qliliiiililw\n"
+        "   )<>~       .mliiiiiliiiiiil,\n"
+        "            _gllilililiililii~\n"
+        "           giliiiiiiiiiiiiT`\n"
+        "          -^~$ililili@~~'"
+    )
+    FF_LOGO_COLORS(
+        "32" //green
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -1432,6 +1463,7 @@ static GetLogoMethod* getLogos()
         getLogoRebornSmall,
         getLogoRedHatEnterpriseLinux,
         getLogoRedstarOS,
+        getLogoRockyLinux,
         getLogoUbuntu,
         getLogoUbuntuSmall,
         getLogoVoid,
