@@ -343,7 +343,11 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
 
     bool printSuccessful = false;
     if(requestData->type == FF_LOGO_TYPE_CHAFA)
-        printSuccessful = printImageChafa(instance, requestData, &imageData);
+    {
+        #ifdef FF_HAVE_CHAFA
+            printSuccessful = printImageChafa(instance, requestData, &imageData);
+        #endif
+    }
     else if(requestData->type == FF_LOGO_TYPE_KITTY)
         printSuccessful = printImageKitty(instance, requestData, &imageData);
     else if(requestData->type == FF_LOGO_TYPE_SIXEL)
