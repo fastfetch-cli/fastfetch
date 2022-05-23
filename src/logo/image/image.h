@@ -7,8 +7,6 @@
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
-#include <sys/ioctl.h>
-
 #define MAGICKCORE_HDRI_ENABLE 1
 #define MAGICKCORE_QUANTUM_DEPTH 16
 
@@ -17,11 +15,14 @@ typedef struct FFLogoRequestData
     FFLogoType type;
     FFstrbuf cacheDir;
 
-    struct winsize winsize;
     double characterPixelWidth;
     double characterPixelHeight;
-    uint32_t imagePixelWidth;
-    uint32_t imagePixelHeight;
+
+    uint32_t logoPixelWidth;
+    uint32_t logoPixelHeight;
+
+    uint32_t logoCharacterHeight;
+    uint32_t logoCharacterWidth;
 } FFLogoRequestData;
 
 typedef struct FFIMData

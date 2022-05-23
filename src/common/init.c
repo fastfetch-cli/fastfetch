@@ -108,7 +108,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logoType = FF_LOGO_TYPE_AUTO;
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufInit(&instance->config.logoColors[i]);
-    instance->config.logoWidth = 65;
+    instance->config.logoWidth = 0;
     instance->config.logoHeight = 0; //preserve aspect ratio
     instance->config.logoPaddingLeft = 0;
     instance->config.logoPaddingRight = 4;
