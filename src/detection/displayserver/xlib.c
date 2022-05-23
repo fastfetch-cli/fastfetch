@@ -161,15 +161,15 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
         return false;
 
     bool res = xrandrHandleMode(data, crtcInfo->mode);
-
-    data->ffXRRFreeCrtcInfo(crtcInfo);
-
-    return res ? true : ffdsAppendResolution(
+    res = res ? true : ffdsAppendResolution(
         data->result,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
         data->defaultRefreshRate
     );
+
+    data->ffXRRFreeCrtcInfo(crtcInfo);
+    return res;
 }
 
 static bool xrandrHandleOutput(XrandrData* data, RROutput output)

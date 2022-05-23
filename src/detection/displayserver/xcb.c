@@ -213,15 +213,15 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
         return false;
 
     bool res = xcbRandrHandleMode(data, crtcInfoReply->mode);
-
-    free(crtcInfoReply);
-
-    return res ? true : ffdsAppendResolution(
+    res = res ? true : ffdsAppendResolution(
         data->result,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
         data->defaultRefreshRate
     );
+
+    free(crtcInfoReply);
+    return res;
 }
 
 static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output)
