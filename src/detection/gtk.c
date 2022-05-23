@@ -69,23 +69,14 @@ static void detectGTKFromDConf(FFinstance* instance, FFGTKResult* result)
         cursorTheme = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-theme", "org.mate.peripherals-mouse", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-size", "org.mate.peripherals-mouse", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
     }
-
-    //Fallback + Gnome impl
-
-    if(themeName == NULL)
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0)
+    {
         themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(iconsName == NULL)
         iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(fontName == NULL)
         fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(cursorTheme == NULL)
         cursorTheme = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
-
-    if(cursorSize <= 0)
         cursorSize = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+    }
 
     pthread_mutex_unlock(&mutex);
     applyGTKDConfSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize);
@@ -146,41 +137,8 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
     ffStrbufSubstrBefore(configDir, configDirLength);
 }
 
-static void detectGTK(FFinstance* instance, const char* version, const char* envVariable, FFGTKResult* result)
+static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* result)
 {
-    FFstrbuf buffer;
-    ffStrbufInitA(&buffer, 128);
-
-    // From ENV: GTK*_RC_FILES
-
-    ffStrbufSetS(&buffer, getenv(envVariable));
-    uint32_t startIndex = 0;
-    while (startIndex < buffer.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&buffer, startIndex, ':');
-        buffer.chars[colonIndex] = '\0';
-
-        detectGTKFromConfigFile(buffer.chars + startIndex, result);
-        if(allPropertiesSet(result))
-        {
-            ffStrbufDestroy(&buffer);
-            return;
-        }
-
-        startIndex = colonIndex + 1;
-    }
-
-    //From DConf / GSettings
-
-    detectGTKFromDConf(instance, result);
-    if(allPropertiesSet(result))
-    {
-        ffStrbufDestroy(&buffer);
-        return;
-    }
-
-    //From config dirs
-
     //We need to do this because we use multiple threads on configDirs
     FFstrbuf baseDirCopy;
     ffStrbufInitA(&baseDirCopy, 64);
@@ -191,14 +149,20 @@ static void detectGTK(FFinstance* instance, const char* version, const char* env
         ffStrbufSet(&baseDirCopy, baseDir);
         detectGTKFromConfigDir(&baseDirCopy, version, result);
         if(allPropertiesSet(result))
-            break;
+        {
+            ffStrbufDestroy(&baseDirCopy);
+            return;
+        }
     }
 
     ffStrbufDestroy(&baseDirCopy);
-    ffStrbufDestroy(&buffer);
+
+    //Mate, Cinnamon and Gnome use dconf to save theme config
+    //On other DEs, this will do nothing
+    detectGTKFromDConf(instance, result);
 }
 
-#define FF_CALCULATE_GTK_IMPL(version) \
+#define FF_DETECT_GTK_IMPL(version) \
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
     static FFGTKResult result; \
     static bool init = false; \
@@ -213,23 +177,23 @@ static void detectGTK(FFinstance* instance, const char* version, const char* env
     ffStrbufInit(&result.font); \
     ffStrbufInit(&result.cursor); \
     ffStrbufInit(&result.cursorSize); \
-    detectGTK(instance, #version, "GTK"#version"_RC_FILES", &result); \
+    detectGTK(instance, #version, &result); \
     pthread_mutex_unlock(&mutex); \
     return &result;
 
 const FFGTKResult* ffDetectGTK2(FFinstance* instance)
 {
-    FF_CALCULATE_GTK_IMPL(2)
+    FF_DETECT_GTK_IMPL(2)
 }
 
 const FFGTKResult* ffDetectGTK3(FFinstance* instance)
 {
-    FF_CALCULATE_GTK_IMPL(3)
+    FF_DETECT_GTK_IMPL(3)
 }
 
 const FFGTKResult* ffDetectGTK4(FFinstance* instance)
 {
-    FF_CALCULATE_GTK_IMPL(4)
+    FF_DETECT_GTK_IMPL(4)
 }
 
 #undef FF_CALCULATE_GTK_IMPL
