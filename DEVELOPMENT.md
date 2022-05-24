@@ -11,7 +11,6 @@ Here i just add things that are easy to forget.
   - `libffdetect`: contains all the detection stuff. To be used by anything that needs system information
   - `libffprint`: contains the printing functions, logos, format etc
   - `fastfetch` and `flashfetch`: Executables, that initialize the config of libffprint. Fist one at runtime, second one at compile time
-- [ ] Support for printing images as ascii art logos (using imlib2 and libcaca probably)
 - [ ] Better OS output for all possible combinations of /etc/os-release variables.
 - [ ] Expose temperatures to CPU format string
 - [ ] Expose temperatures to GPU format string
