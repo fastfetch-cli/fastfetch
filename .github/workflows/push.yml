@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev
+        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1

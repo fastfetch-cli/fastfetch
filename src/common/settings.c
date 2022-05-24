@@ -297,7 +297,7 @@ static const SQLiteData* getSQLiteData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-int ffSettingsGetSQLite3Int(FFinstance* instance, const char* dbPath, const char* query)
+int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
 {
     const SQLiteData* data = getSQLiteData(instance);
     if(data == NULL)
@@ -329,7 +329,7 @@ int ffSettingsGetSQLite3Int(FFinstance* instance, const char* dbPath, const char
     return result;
 }
 #else //FF_HAVE_SQLITE3
-int ffSettingsGetSQLite3Int(FFinstance* instance, const char* dbPath, const char* query)
+int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
 {
     FF_UNUSED(instance, dbPath, query)
     return 0;

@@ -234,6 +234,7 @@
 #--lib-DBus /usr/lib/libdbus-1.so
 #--lib-XFConf /usr/lib/libxfconf-0.so
 #--lib-sqlite3 /usr/lib/libsqlite3.so
+#--lib-rpm /usr/lib/librpm.so
 #--lib-imagemagick /usr/lib/libMagickCore-7.Q16HDRI.so
 #--lib-z /usr/lib/libz.so
 #--lib-chafa /usr/lib/libchafa.so

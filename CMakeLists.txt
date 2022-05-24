@@ -28,6 +28,7 @@ OPTION(ENABLE_DCONF "Enable dconf" ON)
 OPTION(ENABLE_DBUS "Enable dbus-1" ON)
 OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
 OPTION(ENABLE_SQLITE3 "Enable sqlite3" ON)
+OPTION(ENABLE_RPM "Enable rpm" ON)
 OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
 OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
 OPTION(ENABLE_ZLIB "Enable zlib" ON)
@@ -275,6 +276,15 @@ if(ENABLE_SQLITE3)
     endif()
 endif()
 
+if(ENABLE_RPM)
+    pkg_check_modules(RPM rpm)
+    if(RPM_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_RPM=1)
+    else()
+        message(WARNING "Package rpm not found. Building without support.")
+    endif()
+endif()
+
 if(ENABLE_IMAGEMAGICK7)
     pkg_check_modules(IMAGEMAGICK7 MagickCore-7.Q16HDRI)
     if(NOT IMAGEMAGICK7_FOUND)
@@ -347,6 +357,7 @@ target_include_directories(libfastfetch
     PRIVATE ${DBUS_INCLUDE_DIRS}
     PRIVATE ${XFCONF_INCLUDE_DIRS}
     PRIVATE ${SQLITE3_INCLUDE_DIRS}
+    PRIVATE ${RPM_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK7_INCLUDE_DIRS}
     PRIVATE ${IMAGEMAGICK6_INCLUDE_DIRS}
     PRIVATE ${ZLIB_INCLUDE_DIRS}

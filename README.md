@@ -34,6 +34,7 @@ The following libraries are used if present at runtime:
 *  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 *  [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
+*  [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.

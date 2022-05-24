@@ -6,6 +6,58 @@
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 9
 
+#ifdef FF_HAVE_RPM
+#include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
+#include <rpm/rpmdb.h>
+#include <rpm/rpmlog.h>
+
+static uint32_t getRpmFromLibrpm(const FFinstance* instance)
+{
+    FF_LIBRARY_LOAD(rpm, instance->config.librpm, 0, "librpm.so", 12)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbGetIteratorCount, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbFreeIterator, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsFree, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmlogSetMask, 0)
+
+    // Don't print any error messages
+    ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
+
+    if(ffrpmReadConfigFiles(NULL, NULL) != 0)
+    {
+        dlclose(rpm);
+        return 0;
+    }
+
+    rpmts ts = ffrpmtsCreate();
+    if(ts == NULL)
+    {
+        dlclose(rpm);
+        return 0;
+    }
+
+    rpmdbMatchIterator mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0);
+    if(mi == NULL)
+    {
+        ffrpmtsFree(ts);
+        dlclose(rpm);
+        return 0;
+    }
+
+    int count = ffrpmdbGetIteratorCount(mi);
+
+    ffrpmdbFreeIterator(mi);
+    ffrpmtsFree(ts);
+    dlclose(rpm);
+
+    return count > 0 ? (uint32_t) count : 0;
+}
+
+#endif
+
 static uint32_t getNumElements(const char* dirname, unsigned char type)
 {
     DIR* dirp = opendir(dirname);
@@ -140,19 +192,33 @@ static uint32_t getNixPackagesUser(const FFinstance* instance)
     return result;
 }
 
+static uint32_t getRpmPackageCount(const FFinstance* instance)
+{
+    // We do our own sql querys instead of using (lib)rpm, because:
+    // - simply faster
+    // - we don't need to regulary increase librpm version, which increases rapidly without providing a major version symlink
+    uint32_t rpm = (uint32_t) ffSettingsGetSQLite3Int(instance, FASTFETCH_TARGET_DIR_ROOT"/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
+    if(rpm != 0)
+        return rpm;
+
+    rpm = (uint32_t) ffSettingsGetSQLite3Int(instance, FASTFETCH_TARGET_DIR_ROOT"/var/cache/dnf/packages.db", "SELECT count(pkg) FROM installed");
+    if(rpm != 0)
+        return rpm;
+
+    // If SQL failed, we can still try with rpm.
+    // This is needed on openSUSE, which seems to use a proprietary database file
+    #ifdef FF_HAVE_RPM
+        return getRpmFromLibrpm(instance);
+    #endif
+
+    return 0;
+}
+
 void ffPrintPackages(FFinstance* instance)
 {
     uint32_t pacman = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/pacman/local", DT_DIR);
     uint32_t dpkg = getNumStrings(FASTFETCH_TARGET_DIR_ROOT"/var/lib/dpkg/status", "Status: ");
-
-    // We do our own sql querys instead of using (lib)rpm, because:
-    // - simply faster
-    // - we get package count on SUSE platforms
-    // - we don't need to regulary increase librpm version, which increases rapidly without providing a major version symlink
-    uint32_t rpm = (uint32_t) ffSettingsGetSQLite3Int(instance, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
-    if(rpm == 0)
-        rpm = (uint32_t) ffSettingsGetSQLite3Int(instance, "/var/cache/dnf/packages.db", "SELECT count(pkg) FROM installed");
-
+    uint32_t rpm = getRpmPackageCount(instance);
     uint32_t emerge = countFilesIn(FASTFETCH_TARGET_DIR_ROOT"/var/db/pkg", "SIZE");
     uint32_t xbps = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/db/xbps", DT_REG);
 

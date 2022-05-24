@@ -123,6 +123,7 @@ Library options: Set the path of a library to load
     --lib-DBus <path>
     --lib-XFConf <path>
     --lib-sqlite3 <path>
+    --lib-rpm <path>
     --lib-imagemagick <path>
     --lib-z <path>
     --lib-chafa <path>
