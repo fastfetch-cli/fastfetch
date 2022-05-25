@@ -7,7 +7,7 @@
 
 static void parseFile(const char* fileName, FFOSResult* result)
 {
-    if(result->name.length > 0 && result->prettyName.length > 0)
+    if(result->id.length > 0 && result->name.length > 0 && result->prettyName.length > 0)
         return;
 
     ffParsePropFileValues(fileName, 13, (FFpropquery[]) {
@@ -123,6 +123,18 @@ const FFOSResult* ffDetectOS(const FFinstance* instance)
     if(instance->config.osFile.length > 0)
     {
         parseFile(instance->config.osFile.chars, &result);
+    }
+    else if(ffFileExists(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", S_IFDIR)) {
+        parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", &result);
+
+        if(result.id.length == 0)
+            ffStrbufAppendS(&result.id, "bedrock");
+
+        if(result.name.length == 0)
+            ffStrbufAppendS(&result.name, "Bedrock");
+
+        if(result.prettyName.length == 0)
+            ffStrbufAppendS(&result.prettyName, "Bedrock Linux");
     }
     else
     {
