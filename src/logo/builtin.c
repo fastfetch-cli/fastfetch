@@ -239,6 +239,36 @@ static const FFlogo* getLogoArcoLinux()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoBedrock()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("bedrock", "bedrocklinux", "bedrock-linux")
+    FF_LOGO_LINES(
+        "--------------------------------------\n"
+        "--------------------------------------\n"
+        "--------------------------------------\n"
+        "---$2\\\\\\\\\\\\\\\\\\\\\\\\$1-----------------------\n"
+        "----$2\\\\\\      \\\\\\$1----------------------\n"
+        "-----$2\\\\\\      \\\\\\$1---------------------\n"
+        "------$2\\\\\\      \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\$1------\n"
+        "-------$2\\\\\\                    \\\\\\$1-----\n"
+        "--------$2\\\\\\                    \\\\\\$1----\n"
+        "---------$2\\\\\\        ______      \\\\\\$1---\n"
+        "----------$2\\\\\\                   ///$1---\n"
+        "-----------$2\\\\\\                 ///$1----\n"
+        "------------$2\\\\\\               ///$1-----\n"
+        "-------------$2\\\\\\////////////////$1------\n"
+        "--------------------------------------\n"
+        "--------------------------------------\n"
+        "--------------------------------------"
+    )
+    FF_LOGO_COLORS(
+        "90", //grey
+        "38" //yellow
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoCachyOS()
 {
     FF_LOGO_INIT
@@ -1426,6 +1456,7 @@ static GetLogoMethod* getLogos()
         getLogoArcoLinux,
         getLogoArtix,
         getLogoArtixSmall,
+        getLogoBedrock,
         getLogoCachyOS,
         getLogoCelOS,
         getLogoCentOS,
