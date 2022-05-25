@@ -264,7 +264,7 @@ static const FFlogo* getLogoBedrock()
     )
     FF_LOGO_COLORS(
         "90", //grey
-        "38" //yellow
+        "37" //white
     )
     FF_LOGO_RETURN
 }
