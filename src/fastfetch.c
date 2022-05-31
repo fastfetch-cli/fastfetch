@@ -343,6 +343,14 @@ static inline void printCommandHelp(const char* command)
             "second with leading zero"
         );
     }
+    else if(strcasecmp(command, "vulkan-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("vulkan", "{} (driver), {} (api version)", 3,
+            "Driver name",
+            "API version",
+            "Conformance version"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -964,6 +972,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.timeKey);
     else if(strcasecmp(key, "--time-format") == 0)
         optionParseString(key, value, &instance->config.timeFormat);
+    else if(strcasecmp(key, "--vulkan-key") == 0)
+        optionParseString(key, value, &instance->config.vulkanKey);
+    else if(strcasecmp(key, "--vulkan-format") == 0)
+        optionParseString(key, value, &instance->config.vulkanFormat);
 
     ///////////////////
     //Library options//
@@ -1165,6 +1177,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintTime(instance);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
+    else if(strcasecmp(line, "vulkan") == 0)
+        ffPrintVulkan(instance);
     else
         ffPrintError(instance, line, 0, NULL, NULL, 0, "<no implementation provided>");
 }

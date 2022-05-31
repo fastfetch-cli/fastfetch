@@ -41,7 +41,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
+Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, Vulkan, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
 ```
 
 ##### Logos

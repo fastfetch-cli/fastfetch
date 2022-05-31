@@ -123,6 +123,7 @@ add_library(libfastfetch STATIC
     src/detection/plasma.c
     src/detection/gtk.c
     src/detection/terminalShell.c
+    src/detection/vulkan.c
     src/detection/media.c
     src/detection/datetime.c
     src/detection/displayserver/displayServer.c
@@ -158,6 +159,7 @@ add_library(libfastfetch STATIC
     src/modules/disk.c
     src/modules/battery.c
     src/modules/locale.c
+    src/modules/vulkan.c
     src/modules/localip.c
     src/modules/publicip.c
     src/modules/player.c

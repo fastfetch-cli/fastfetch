@@ -183,6 +183,7 @@
 #--player-key Media Player
 #--song-key Song
 #--datetime-key Date Time
+#--vulkan-key Vulkan
 
 # Format options:
 # Sets the format string for module values.
@@ -218,6 +219,7 @@
 #--player-format
 #--song-format
 #--datetime-format
+#--vulkan-format
 
 # Library options:
 # Sets an user specific path to a library to load.

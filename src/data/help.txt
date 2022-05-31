@@ -76,6 +76,7 @@ Format options: Provide the format string for custom output. Use fastfetch --hel
     --datetime-format <format>
     --time-format <format>
     --date-format <format>
+    --vulkan-format <format>
 
 Key options: Provide a custom key for an output
     --os-key <key>
@@ -109,6 +110,7 @@ Key options: Provide a custom key for an output
     --datetime-key <key>
     --time-key <key>
     --date-key <key>
+    --vulkan-key <key>
 
 Library options: Set the path of a library to load
     --lib-PCI <path>

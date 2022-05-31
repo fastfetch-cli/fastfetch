@@ -125,6 +125,8 @@ typedef struct FFconfig
     FFstrbuf dateFormat;
     FFstrbuf timeKey;
     FFstrbuf timeFormat;
+    FFstrbuf vulkanKey;
+    FFstrbuf vulkanFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -180,6 +182,14 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
+typedef struct FFVersion
+{
+    uint32_t major;
+    uint32_t minor;
+    uint32_t patch;
+} FFVersion;
+#define FF_VERSION_INIT ((FFVersion) {0})
+
 typedef struct FFTitleResult
 {
     FFstrbuf userName;
@@ -234,6 +244,21 @@ typedef struct FFTerminalShellResult
     const char* userShellExeName; //pointer to a char in userShellExe
     FFstrbuf userShellVersion;
 } FFTerminalShellResult;
+
+typedef struct FFGPUResult
+{
+    FFstrbuf vendor;
+    FFstrbuf name;
+    FFstrbuf driver;
+} FFGPUResult;
+
+typedef struct FFVulkanResult
+{
+    FFstrbuf driver;
+    FFstrbuf apiVersion;
+    FFstrbuf conformanceVersion;
+    FFlist devices; //List of FFGPUResult
+} FFVulkanResult;
 
 typedef struct FFResolutionResult
 {
@@ -452,6 +477,9 @@ bool ffStrSet(const char* str);
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
 
+void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty);
+int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
+
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 
@@ -517,6 +545,9 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance);
 //detection/dateTime.c
 const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance);
 
+//detection/vulkan.c
+const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);
+
 //////////////////////
 // Module functions //
 //////////////////////
@@ -564,5 +595,6 @@ void ffPrintTime(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
+void ffPrintVulkan(FFinstance* instance);
 
 #endif

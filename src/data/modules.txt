@@ -31,5 +31,6 @@ Theme
 Time
 Title
 Uptime
+Vulkan
 WM
 WMTheme
