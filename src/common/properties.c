@@ -90,23 +90,32 @@ bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer)
 
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries)
 {
-    bool* searchedValues = malloc(sizeof(bool) * numQueries);
+    bool valueStorage[4];
+    bool* unsetValues;
+
+    if(numQueries > sizeof(valueStorage) / sizeof(valueStorage[0]))
+        unsetValues = malloc(sizeof(bool) * numQueries);
+    else
+        unsetValues = valueStorage;
+
     bool allSet = true;
     for(uint32_t i = 0; i < numQueries; i++)
     {
-        if((searchedValues[i] = queries[i].buffer->length == 0))
+        if((unsetValues[i] = queries[i].buffer->length == 0))
             allSet = false;
-    }
-
-    if(allSet)
-    {
-        free(searchedValues);
-        return true;
     }
 
     FILE* file = fopen(filename, "r");
     if(file == NULL)
         return false;
+
+    if(allSet)
+    {
+        fclose(file);
+        if(unsetValues != valueStorage)
+            free(unsetValues);
+        return true;
+    }
 
     char* line = NULL;
     size_t len = 0;
@@ -115,7 +124,7 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     {
         for(uint32_t i = 0; i < numQueries; i++)
         {
-            if(!searchedValues[i])
+            if(!unsetValues[i])
                 continue;
 
             uint32_t currentLength = queries[i].buffer->length;
@@ -125,12 +134,13 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
         }
     }
 
-    free(searchedValues);
-
     if(line != NULL)
         free(line);
 
     fclose(file);
+
+    if(unsetValues != valueStorage)
+        free(unsetValues);
 
     return true;
 }
