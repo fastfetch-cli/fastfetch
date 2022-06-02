@@ -20,7 +20,7 @@ Fastfetch dynamically loads needed libraries if they are available. Therefore it
 
 The following libraries are used if present at runtime:
 *  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
-*  [`libvulkan`](https://www.vulkan.org/): Fallback for GPU output.
+*  [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
 *  [`libxcb-randr`](https://xcb.freedesktop.org/),
    [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
    [`libxcb`](https://xcb.freedesktop.org/),

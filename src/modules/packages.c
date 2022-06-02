@@ -4,59 +4,21 @@
 #include <dirent.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 9
+#define FF_PACKAGES_NUM_FORMAT_ARGS 11
 
-#ifdef FF_HAVE_RPM
-#include <rpm/rpmlib.h>
-#include <rpm/rpmts.h>
-#include <rpm/rpmdb.h>
-#include <rpm/rpmlog.h>
-
-static uint32_t getRpmFromLibrpm(const FFinstance* instance)
+typedef struct PackageCounts
 {
-    FF_LIBRARY_LOAD(rpm, instance->config.librpm, 0, "librpm.so", 12)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbGetIteratorCount, 0)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbFreeIterator, 0)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsFree, 0)
-    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmlogSetMask, 0)
+    uint32_t pacman;
+    uint32_t dpkg;
+    uint32_t rpm;
+    uint32_t emerge;
+    uint32_t xbps;
+    uint32_t nixDefault;
+    uint32_t flatpak;
+    uint32_t snap;
 
-    // Don't print any error messages
-    ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
-
-    if(ffrpmReadConfigFiles(NULL, NULL) != 0)
-    {
-        dlclose(rpm);
-        return 0;
-    }
-
-    rpmts ts = ffrpmtsCreate();
-    if(ts == NULL)
-    {
-        dlclose(rpm);
-        return 0;
-    }
-
-    rpmdbMatchIterator mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0);
-    if(mi == NULL)
-    {
-        ffrpmtsFree(ts);
-        dlclose(rpm);
-        return 0;
-    }
-
-    int count = ffrpmdbGetIteratorCount(mi);
-
-    ffrpmdbFreeIterator(mi);
-    ffrpmtsFree(ts);
-    dlclose(rpm);
-
-    return count > 0 ? (uint32_t) count : 0;
-}
-
-#endif
+    FFstrbuf pacmanBranch;
+} PackageCounts;
 
 static uint32_t getNumElements(const char* dirname, unsigned char type)
 {
@@ -140,25 +102,19 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDirPath, const char* filename)
     return sum;
 }
 
-static uint32_t countFilesIn(const char* dirname, const char* filename)
+static uint32_t getNixPackages(char* path)
 {
-    FFstrbuf baseDirPath;
-    ffStrbufInitA(&baseDirPath, 128);
-    ffStrbufAppendS(&baseDirPath, dirname);
-    uint32_t result = countFilesRecursive(&baseDirPath, filename);
-    ffStrbufDestroy(&baseDirPath);
-    return result;
-}
+    //Nix detection is kinda slow, so we only do it if the dir exists
+    if(!ffFileExists(path, S_IFDIR))
+        return 0;
 
-static uint32_t getNixPackages(const FFstrbuf* path)
-{
     FFstrbuf output;
     ffStrbufInitA(&output, 128);
 
     ffProcessAppendStdOut(&output, (char* const[]) {
         "nix-store",
         "-qR",
-        path->chars,
+        path,
         NULL
     });
 
@@ -171,105 +127,191 @@ static uint32_t getNixPackages(const FFstrbuf* path)
     return result;
 }
 
-static uint32_t getNixPackagesDefault()
+#ifdef FF_HAVE_RPM
+#include <rpm/rpmlib.h>
+#include <rpm/rpmts.h>
+#include <rpm/rpmdb.h>
+#include <rpm/rpmlog.h>
+
+static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 {
-    FFstrbuf path;
-    ffStrbufInitA(&path, 64);
-    ffStrbufAppendS(&path, FASTFETCH_TARGET_DIR_ROOT"/nix/var/nix/profiles/default");
-    uint32_t result = getNixPackages(&path);
-    ffStrbufDestroy(&path);
-    return result;
+    FF_LIBRARY_LOAD(rpm, instance->config.librpm, 0, "librpm.so", 12)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbGetIteratorCount, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmdbFreeIterator, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsFree, 0)
+    FF_LIBRARY_LOAD_SYMBOL(rpm, rpmlogSetMask, 0)
+
+    // Don't print any error messages
+    ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
+
+    if(ffrpmReadConfigFiles(NULL, NULL) != 0)
+    {
+        dlclose(rpm);
+        return 0;
+    }
+
+    rpmts ts = ffrpmtsCreate();
+    if(ts == NULL)
+    {
+        dlclose(rpm);
+        return 0;
+    }
+
+    rpmdbMatchIterator mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0);
+    if(mi == NULL)
+    {
+        ffrpmtsFree(ts);
+        dlclose(rpm);
+        return 0;
+    }
+
+    int count = ffrpmdbGetIteratorCount(mi);
+
+    ffrpmdbFreeIterator(mi);
+    ffrpmtsFree(ts);
+    dlclose(rpm);
+
+    return count > 0 ? (uint32_t) count : 0;
+}
+#endif
+
+static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
+{
+    uint32_t baseDirLength = baseDir->length;
+
+    //pacman
+    ffStrbufAppendS(baseDir, "/var/lib/pacman/local");
+    packageCounts->pacman += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //dpkg
+    ffStrbufAppendS(baseDir, "/var/lib/dpkg/status");
+    packageCounts->dpkg += getNumStrings(baseDir->chars, "Status: ");
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //rpm
+    ffStrbufAppendS(baseDir, "/var/lib/rpm/rmpdb.sqlite");
+    packageCounts->rpm += (uint32_t) ffSettingsGetSQLite3Int(instance, baseDir->chars, "SELECT count(blob) FROM Packages");
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //emerge
+    ffStrbufAppendS(baseDir, "/var/db/pkg");
+    packageCounts->emerge += countFilesRecursive(baseDir, "SIZE");
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //xps
+    ffStrbufAppendS(baseDir, "/var/db/xbps");
+    packageCounts->xbps += getNumElements(baseDir->chars, DT_REG);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //flatpak
+    ffStrbufAppendS(baseDir, "/var/lib/flatpak/app");
+    packageCounts->flatpak += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //nix default
+    ffStrbufAppendS(baseDir, "/var/nix/profiles/default");
+    packageCounts->nixDefault += getNixPackages(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //snap
+    ffStrbufAppendS(baseDir, "/snap");
+    uint32_t snap = getNumElements(baseDir->chars, DT_DIR);
+    if(snap > 0)
+        packageCounts->snap += (snap - 1); //Accounting for the /snap/bin folder
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //pacman branch
+    ffStrbufAppendS(baseDir, "/etc/pacman-mirrors.conf");
+    if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
+        ffStrbufAppendS(&packageCounts->pacmanBranch, "stable");
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
-static uint32_t getNixPackagesUser(const FFinstance* instance)
+static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
 {
-    FFstrbuf path;
-    ffStrbufInitA(&path, 64);
-    ffStrbufAppendS(&path, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&path, "/.nix-profile");
-    uint32_t result = getNixPackages(&path);
-    ffStrbufDestroy(&path);
-    return result;
-}
+    uint32_t baseDirLength = baseDir->length;
 
-static uint32_t getRpmPackageCount(const FFinstance* instance)
-{
-    // We do our own sql querys instead of using (lib)rpm, because:
-    // - simply faster
-    // - we don't need to regulary increase librpm version, which increases rapidly without providing a major version symlink
-    uint32_t rpm = (uint32_t) ffSettingsGetSQLite3Int(instance, FASTFETCH_TARGET_DIR_ROOT"/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
-    if(rpm != 0)
-        return rpm;
+    ffStrbufAppendS(baseDir, "/bedrock/strata");
 
-    rpm = (uint32_t) ffSettingsGetSQLite3Int(instance, FASTFETCH_TARGET_DIR_ROOT"/var/cache/dnf/packages.db", "SELECT count(pkg) FROM installed");
-    if(rpm != 0)
-        return rpm;
+    DIR* dir = opendir(baseDir->chars);
+    if(dir == NULL)
+        return;
 
-    // If SQL failed, we can still try with rpm.
-    // This is needed on openSUSE, which seems to use a proprietary database file
-    #ifdef FF_HAVE_RPM
-        return getRpmFromLibrpm(instance);
-    #endif
+    ffStrbufAppendC(baseDir, '/');
+    baseDirLength = baseDir->length;
 
-    return 0;
+    struct dirent* entry;
+    while((entry = readdir(dir)) != NULL)
+    {
+        if(entry->d_type != DT_DIR)
+            continue;
+
+        ffStrbufAppendS(baseDir, entry->d_name);
+        getPackageCounts(instance, baseDir, packageCounts);
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+    }
+
+    closedir(dir);
 }
 
 void ffPrintPackages(FFinstance* instance)
 {
-    uint32_t pacman = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/pacman/local", DT_DIR);
-    uint32_t dpkg = getNumStrings(FASTFETCH_TARGET_DIR_ROOT"/var/lib/dpkg/status", "Status: ");
-    uint32_t rpm = getRpmPackageCount(instance);
-    uint32_t emerge = countFilesIn(FASTFETCH_TARGET_DIR_ROOT"/var/db/pkg", "SIZE");
-    uint32_t xbps = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/db/xbps", DT_REG);
+    PackageCounts counts = {0};
+    ffStrbufInit(&counts.pacmanBranch);
 
-    uint32_t nixUser = 0;
-    uint32_t nixDefault = 0;
+    FFstrbuf baseDir;
+    ffStrbufInitA(&baseDir, 512);
+    ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
-    //Nix detection is kinda slow, so we only do it if the nix dir exists
-    if(ffFileExists(FASTFETCH_TARGET_DIR_ROOT"/nix", S_IFDIR))
-    {
-        nixUser = getNixPackagesUser(instance);
-        nixDefault = getNixPackagesDefault();
-    }
+    if(ffStrbufIgnCaseCompS(&ffDetectOS(instance)->id, "bedrock") == 0)
+        getPackageCountsBedrock(instance, &baseDir, &counts);
+    else
+        getPackageCounts(instance, &baseDir, &counts);
 
-    uint32_t flatpak = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/var/lib/flatpak/app", DT_DIR);
-    uint32_t snap = getNumElements(FASTFETCH_TARGET_DIR_ROOT"/snap", DT_DIR);
+    // If SQL failed, we can still try with librpm.
+    // This is needed on openSUSE, which seems to use a proprietary database file
+    // This method doesn't work on bedrock, so we do it here.
+    #ifdef FF_HAVE_RPM
+        if(counts.rpm == 0)
+            counts.rpm = getRpmFromLibrpm(instance);
+    #endif
 
-    //Accounting for the /snap/bin folder
-    if(snap > 0)
-        --snap;
+    //nix user
+    ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
+    ffStrbufAppendS(&baseDir, "/.nix-profile");
+    uint32_t nixUser = getNixPackages(baseDir.chars);
 
-    uint32_t all = pacman + dpkg + rpm + emerge + xbps + nixUser + nixDefault + flatpak + snap;
+    ffStrbufDestroy(&baseDir);
 
+    uint32_t all = counts.dpkg + counts.emerge + counts.flatpak + counts.nixDefault + nixUser + counts.pacman + counts.rpm + counts.snap + counts.xbps;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, FF_PACKAGES_NUM_FORMAT_ARGS, "No packages from known package managers found");
         return;
     }
 
-    FFstrbuf manjaroBranch;
-    ffStrbufInit(&manjaroBranch);
-    if(ffParsePropFile(FASTFETCH_TARGET_DIR_ROOT"/etc/pacman-mirrors.conf", "Branch =", &manjaroBranch) && manjaroBranch.length == 0)
-        ffStrbufSetS(&manjaroBranch, "stable");
-
     if(instance->config.packagesFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey);
 
         #define FF_PRINT_PACKAGE(name) \
-        if(name > 0) \
+        if(counts.name > 0) \
         { \
-            printf("%u ("#name")", name); \
-            if((all = all - name) > 0) \
+            printf("%u ("#name")", counts.name); \
+            if((all = all - counts.name) > 0) \
                 printf(", "); \
         };
 
-        if(pacman > 0)
+        if(counts.pacman > 0)
         {
-            printf("%u (pacman)", pacman);
-            if(manjaroBranch.length > 0)
-                printf("[%s]", manjaroBranch.chars);
-            if((all = all - pacman) > 0)
+            printf("%u (pacman)", counts.pacman);
+            if(counts.pacmanBranch.length > 0)
+                printf("[%s]", counts.pacmanBranch.chars);
+            if((all = all - counts.pacman) > 0)
                 printf(", ");
         };
 
@@ -284,10 +326,10 @@ void ffPrintPackages(FFinstance* instance)
                 printf(", ");
         }
 
-        if(nixDefault > 0)
+        if(counts.nixDefault > 0)
         {
-            printf("%u (nix-default)", nixDefault);
-            if((all = all - nixDefault) > 0)
+            printf("%u (nix-default)", counts.nixDefault);
+            if((all = all - counts.nixDefault) > 0)
                 printf(", ");
         }
 
@@ -305,16 +347,18 @@ void ffPrintPackages(FFinstance* instance)
     {
         ffPrintFormatString(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, NULL, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &all},
-            {FF_FORMAT_ARG_TYPE_UINT, &pacman},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &manjaroBranch},
-            {FF_FORMAT_ARG_TYPE_UINT, &dpkg},
-            {FF_FORMAT_ARG_TYPE_UINT, &rpm},
-            {FF_FORMAT_ARG_TYPE_UINT, &emerge},
-            {FF_FORMAT_ARG_TYPE_UINT, &xbps},
-            {FF_FORMAT_ARG_TYPE_UINT, &flatpak},
-            {FF_FORMAT_ARG_TYPE_UINT, &snap}
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.pacman},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &counts.pacmanBranch},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.dpkg},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.rpm},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.emerge},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.xbps},
+            {FF_FORMAT_ARG_TYPE_UINT, &nixUser},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.nixDefault},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpak},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.snap}
         });
     }
 
-    ffStrbufDestroy(&manjaroBranch);
+    ffStrbufDestroy(&counts.pacmanBranch);
 }

@@ -343,7 +343,7 @@ if(ENABLE_CHAFA)
             message(WARNING "Package chafa>=1.10 not found. Building without support.")
         endif()
     else()
-        message(WARNING "Chafa not enabled, because neither ImageMagick6 nor ImageMagick7 is found. Builting without support.")
+        message(WARNING "Chafa not enabled, because neither ImageMagick6 nor ImageMagick7 is found. Building without support.")
     endif()
 endif()
 
