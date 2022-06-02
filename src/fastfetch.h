@@ -62,6 +62,7 @@ typedef struct FFconfig
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
+    bool escapeBedrock;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;

@@ -718,6 +718,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         data->multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
+    else if(strcasecmp(key, "--escape-bedrock") == 0)
+        instance->config.escapeBedrock = optionParseBoolean(value);
 
     ////////////////
     //Logo options//

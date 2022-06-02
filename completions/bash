@@ -130,6 +130,7 @@ __fastfetch_completion()
         "--localip-show-ipv4"
         "--localip-show-ipv6"
         "--localip-show-loop"
+        "--escape-bedrock"
     )
 
     local FF_OPTIONS_STRING=(

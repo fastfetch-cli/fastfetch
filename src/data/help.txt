@@ -18,6 +18,7 @@ General options:
     --load-config <file>:             load a config file or a preset (+)
     --multithreading <?value>:        use multiple threads to detect values
     --allow-slow-operations <?value>: allow operations that are usually very slow for more detailed output
+    --escape-bedrock <?value>:        on bedrock linux, sets if it should escape the bedrock jail or not
 
 Logo options:
     -l,--logo <logo>:                set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file

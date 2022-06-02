@@ -151,6 +151,12 @@
 # Default is the first match starting with org.mpris.MediaPlayer2.
 #--player-name spotify
 
+# Escape bedrock option
+# Sets if fastfetch should escape the bedrock jail, if it detectes that it is running in one
+# Must be true or false.
+# Default is true.
+#--escape-bedrock true
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.

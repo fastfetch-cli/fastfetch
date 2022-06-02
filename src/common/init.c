@@ -124,6 +124,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.allowSlowOperations = false;
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
+    instance->config.escapeBedrock = true;
 
     ffStrbufInitA(&instance->config.osFormat, 0);
     ffStrbufInitA(&instance->config.osKey, 0);

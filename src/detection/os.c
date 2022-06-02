@@ -124,7 +124,7 @@ const FFOSResult* ffDetectOS(const FFinstance* instance)
     {
         parseFile(instance->config.osFile.chars, &result);
     }
-    else if(ffFileExists(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", S_IFDIR)) {
+    else if(instance->config.escapeBedrock && ffFileExists(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", S_IFDIR)) {
         parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", &result);
 
         if(result.id.length == 0)
