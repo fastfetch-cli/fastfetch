@@ -10,7 +10,6 @@ typedef struct FFlogo
     const char* data;
     const char** names; //Null terminated
     const char** builtinColors; //Null terminated
-    bool performColorReplacement;
 } FFlogo;
 
 #define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true;

@@ -233,8 +233,6 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
 
 static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
 {
-    uint32_t baseDirLength = baseDir->length;
-
     ffStrbufAppendS(baseDir, "/bedrock/strata");
 
     DIR* dir = opendir(baseDir->chars);
@@ -242,7 +240,8 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
         return;
 
     ffStrbufAppendC(baseDir, '/');
-    baseDirLength = baseDir->length;
+
+    uint32_t baseDirLength = baseDir->length;
 
     struct dirent* entry;
     while((entry = readdir(dir)) != NULL)
