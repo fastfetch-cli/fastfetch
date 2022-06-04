@@ -353,6 +353,14 @@ static inline void printCommandHelp(const char* command)
             "Conformance version"
         );
     }
+    else if(strcasecmp(command, "opengl-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("opengl", "{}", 3,
+            "version",
+            "renderer",
+            "vendor"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -980,6 +988,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.vulkanKey);
     else if(strcasecmp(key, "--vulkan-format") == 0)
         optionParseString(key, value, &instance->config.vulkanFormat);
+    else if(strcasecmp(key, "--opengl-key") == 0)
+        optionParseString(key, value, &instance->config.openGLKey);
+    else if(strcasecmp(key, "--opengl-format") == 0)
+        optionParseString(key, value, &instance->config.openGLFormat);
 
     ///////////////////
     //Library options//
@@ -1017,6 +1029,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libZ);
     else if(strcasecmp(key, "--lib-chafa") == 0)
         optionParseString(key, value, &instance->config.libChafa);
+    else if(strcasecmp(key, "--lib-gl") == 0)
+        optionParseString(key, value, &instance->config.libGL);
+    else if(strcasecmp(key, "--lib-egl") == 0)
+        optionParseString(key, value, &instance->config.libEGL);
+    else if(strcasecmp(key, "--lib-glx") == 0)
+        optionParseString(key, value, &instance->config.libGLX);
 
     //////////////////
     //Module options//
@@ -1040,6 +1058,26 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--public-ip-timeout") == 0)
         instance->config.publicIpTimeout = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--gl") == 0)
+    {
+        if(value == NULL)
+        {
+            fprintf(stderr, "Error: usage: %s <type>\n", key);
+            exit(491);
+        }
+
+        if(strcasecmp(value, "auto") == 0)
+            instance->config.glType = FF_GL_TYPE_AUTO;
+        else if(strcasecmp(value, "egl") == 0)
+            instance->config.glType = FF_GL_TYPE_EGL;
+        else if(strcasecmp(value, "glx") == 0)
+            instance->config.glType = FF_GL_TYPE_GLX;
+        else
+        {
+            fprintf(stderr, "Error: unknown gl type: %s\n", value);
+            exit(492);
+        }
+    }
 
     //////////////////
     //Unknown option//
@@ -1183,6 +1221,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintColors(instance);
     else if(strcasecmp(line, "vulkan") == 0)
         ffPrintVulkan(instance);
+    else if(strcasecmp(line, "opengl") == 0)
+        ffPrintOpenGL(instance);
     else
         ffPrintError(instance, line, 0, NULL, NULL, 0, "<no implementation provided>");
 }

@@ -125,6 +125,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
     instance->config.escapeBedrock = true;
+    instance->config.glType = FF_GL_TYPE_AUTO;
 
     ffStrbufInitA(&instance->config.osFormat, 0);
     ffStrbufInitA(&instance->config.osKey, 0);
@@ -190,6 +191,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.timeFormat, 0);
     ffStrbufInitA(&instance->config.vulkanKey, 0);
     ffStrbufInitA(&instance->config.vulkanFormat, 0);
+    ffStrbufInitA(&instance->config.openGLKey, 0);
+    ffStrbufInitA(&instance->config.openGLFormat, 0);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -207,6 +210,9 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libImageMagick, 0);
     ffStrbufInitA(&instance->config.libZ, 0);
     ffStrbufInitA(&instance->config.libChafa, 0);
+    ffStrbufInitA(&instance->config.libGL, 0);
+    ffStrbufInitA(&instance->config.libEGL, 0);
+    ffStrbufInitA(&instance->config.libGLX, 0);
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
 
@@ -337,6 +343,15 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_RPM
             "rpm\n"
+        #endif
+        #ifdef FF_HAVE_GL
+            "gl\n"
+        #endif
+        #ifdef FF_HAVE_EGL
+            "egl\n"
+        #endif
+        #ifdef FF_HAVE_GLX
+            "glx\n"
         #endif
         ""
     , stdout);

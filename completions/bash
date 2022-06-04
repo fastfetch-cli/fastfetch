@@ -217,6 +217,7 @@ __fastfetch_completion()
         "--date-key"
         "--time-format"
         "--time-key"
+        "--gl"
     )
 
     local FF_OPTIONS_PATH=(
@@ -237,6 +238,9 @@ __fastfetch_completion()
         "--lib-imagemagick"
         "--lib-z"
         "--lib-chafa"
+        "--lib-gl"
+        "--lib-egl"
+        "--lib-glx"
         "--battery-dir"
         "--load-config"
     )

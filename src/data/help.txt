@@ -78,6 +78,7 @@ Format options: Provide the format string for custom output. Use fastfetch --hel
     --time-format <format>
     --date-format <format>
     --vulkan-format <format>
+    --opengl-format <format>
 
 Key options: Provide a custom key for an output
     --os-key <key>
@@ -112,6 +113,7 @@ Key options: Provide a custom key for an output
     --time-key <key>
     --date-key <key>
     --vulkan-key <key>
+    --opengl-key <key>
 
 Library options: Set the path of a library to load
     --lib-PCI <path>
@@ -130,6 +132,9 @@ Library options: Set the path of a library to load
     --lib-imagemagick <path>
     --lib-z <path>
     --lib-chafa <path>
+    --lib-gl <path>
+    --lib-egl <path>
+    --lib-glx <path>
 
 Module specific options:
     --separator-string <str>:     Set the string printed by the separator module
@@ -141,6 +146,7 @@ Module specific options:
     --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --public-ip-timeout:          Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --player-name:                The name of the player to use
+    --gl <value>:                 Sets the opengl context creation library to use. Must be auto, egl, or glx. Default is auto
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

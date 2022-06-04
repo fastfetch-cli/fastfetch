@@ -32,6 +32,9 @@ The following libraries are used if present at runtime:
 *  [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art.
 *  [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
 *  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
+*  [`libGL`](https://dri.freedesktop.org/wiki/libGL/):OpenGL module. At least one context creation library must be present too.
+*  [`libEGL`](https://www.khronos.org/registry/EGL/): OpenGL module, using EGL context.
+*  [`libGLX`](https://dri.freedesktop.org/wiki/GLX/): OpenGL module, using GLX context.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 *  [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
 *  [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.

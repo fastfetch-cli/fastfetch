@@ -157,6 +157,12 @@
 # Default is true.
 #--escape-bedrock true
 
+# GL option
+# Sets with opengl context creation library to use
+# Must be either auto, egl or glx
+# Default is auto.
+#--gl auto
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
@@ -190,6 +196,7 @@
 #--song-key Song
 #--datetime-key Date Time
 #--vulkan-key Vulkan
+#--opengl-key OpenGL
 
 # Format options:
 # Sets the format string for module values.
@@ -226,6 +233,7 @@
 #--song-format
 #--datetime-format
 #--vulkan-format
+#--opengl-format
 
 # Library options:
 # Sets an user specific path to a library to load.
@@ -246,3 +254,6 @@
 #--lib-imagemagick /usr/lib/libMagickCore-7.Q16HDRI.so
 #--lib-z /usr/lib/libz.so
 #--lib-chafa /usr/lib/libchafa.so
+#--lib-gl /usr/lib/libGL.so
+#--lib-egl /usr/lib/libEGL.so
+#--lib-GLX /usr/lib/libGLX.so

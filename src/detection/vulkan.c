@@ -216,6 +216,8 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
 
     #ifdef FF_HAVE_VULKAN
         detectVulkan(instance, &result);
+    #else
+        FF_UNUSED(instance);
     #endif
 
     pthread_mutex_unlock(&mutex);

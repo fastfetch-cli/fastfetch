@@ -42,6 +42,13 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_CHAFA    //Image file, printed as ascii art using libchafa
 } FFLogoType;
 
+typedef enum FFGLType
+{
+    FF_GL_TYPE_AUTO,
+    FF_GL_TYPE_EGL,
+    FF_GL_TYPE_GLX
+} FFGLType;
+
 typedef struct FFconfig
 {
     FFstrbuf logoSource;
@@ -63,6 +70,7 @@ typedef struct FFconfig
     bool disableLinewrap;
     bool hideCursor;
     bool escapeBedrock;
+    FFGLType glType;
 
     FFstrbuf osFormat;
     FFstrbuf osKey;
@@ -128,6 +136,8 @@ typedef struct FFconfig
     FFstrbuf timeFormat;
     FFstrbuf vulkanKey;
     FFstrbuf vulkanFormat;
+    FFstrbuf openGLKey;
+    FFstrbuf openGLFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -145,6 +155,9 @@ typedef struct FFconfig
     FFstrbuf libImageMagick;
     FFstrbuf libZ;
     FFstrbuf libChafa;
+    FFstrbuf libGL;
+    FFstrbuf libEGL;
+    FFstrbuf libGLX;
 
     FFstrbuf diskFolders;
 
@@ -597,5 +610,6 @@ void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
+void ffPrintOpenGL(FFinstance* instance);
 
 #endif
