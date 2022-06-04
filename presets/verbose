@@ -27,3 +27,5 @@
 --song-format "Song: {}; Artist: {}; Album: {}"
 --datetime-format "year: {}; yearShort: {}; month: {}; monthPretty: {}; monthName: {}; monthNameShort: {}; weekNumber: {}; weekday: {}; weekdayShort: {}; dayInYear: {}; dayInMonth: {}; dayInWeek: {}; hour: {}; hourPretty: {}; hour12: {}; hour12Pretty: {}; minute: {}; minutePretty: {}; second: {}; secondPretty: {}"
 --vulkan-format "driver: {}; Api Version: {}; Conformance Version: {}"
+--opengl-format "version: {}; renderer: {}; vendor: {}"
+--opencl-format "version: {}; device: {}; vendor: {}"

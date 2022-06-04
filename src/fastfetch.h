@@ -139,6 +139,8 @@ typedef struct FFconfig
     FFstrbuf vulkanFormat;
     FFstrbuf openGLKey;
     FFstrbuf openGLFormat;
+    FFstrbuf openCLKey;
+    FFstrbuf openCLFormat;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -159,6 +161,7 @@ typedef struct FFconfig
     FFstrbuf libEGL;
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
+    FFstrbuf libOpenCL;
 
     FFstrbuf diskFolders;
 
@@ -612,5 +615,6 @@ void ffPrintPublicIp(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
+void ffPrintOpenCL(FFinstance* instance);
 
 #endif

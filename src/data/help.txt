@@ -79,6 +79,7 @@ Format options: Provide the format string for custom output. Use fastfetch --hel
     --date-format <format>
     --vulkan-format <format>
     --opengl-format <format>
+    --opencl-format <format>
 
 Key options: Provide a custom key for an output
     --os-key <key>
@@ -114,6 +115,7 @@ Key options: Provide a custom key for an output
     --date-key <key>
     --vulkan-key <key>
     --opengl-key <key>
+    --opencl-key <key>
 
 Library options: Set the path of a library to load
     --lib-PCI <path>
@@ -135,6 +137,7 @@ Library options: Set the path of a library to load
     --lib-egl <path>
     --lib-glx <path>
     --lib-osmesa <path>
+    --lib-opencl <path>
 
 Module specific options:
     --separator-string <str>:     Set the string printed by the separator module

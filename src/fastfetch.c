@@ -362,6 +362,14 @@ static inline void printCommandHelp(const char* command)
             "shading language version"
         );
     }
+    else if(strcasecmp(command, "opencl-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("opencl", "{}", 3,
+            "version",
+            "device",
+            "vendor"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -993,6 +1001,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.openGLKey);
     else if(strcasecmp(key, "--opengl-format") == 0)
         optionParseString(key, value, &instance->config.openGLFormat);
+    else if(strcasecmp(key, "--opencl-key") == 0)
+        optionParseString(key, value, &instance->config.openCLKey);
+    else if(strcasecmp(key, "--opencl-format") == 0)
+        optionParseString(key, value, &instance->config.openCLFormat);
 
     ///////////////////
     //Library options//
@@ -1036,6 +1048,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libGLX);
     else if(strcasecmp(key, "--lib-osmesa") == 0)
         optionParseString(key, value, &instance->config.libOSMesa);
+    else if(strcasecmp(key, "--lib-opencl") == 0)
+        optionParseString(key, value, &instance->config.libOpenCL);
 
     //////////////////
     //Module options//
@@ -1226,6 +1240,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintVulkan(instance);
     else if(strcasecmp(line, "opengl") == 0)
         ffPrintOpenGL(instance);
+    else if(strcasecmp(line, "opencl") == 0)
+        ffPrintOpenCL(instance);
     else
         ffPrintError(instance, line, 0, NULL, NULL, 0, "<no implementation provided>");
 }

@@ -36,6 +36,7 @@ OPTION(ENABLE_CHAFA "Enable chafa" ON)
 OPTION(ENABLE_EGL "Enable egl" ON)
 OPTION(ENABLE_GLX "Enable glx" ON)
 OPTION(ENABLE_OSMESA "Enable osmesa" ON)
+OPTION(ENABLE_OPENCL "Enable opencl" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -172,6 +173,7 @@ add_library(libfastfetch STATIC
     src/modules/time.c
     src/modules/colors.c
     src/modules/opengl.c
+    src/modules/opencl.c
 )
 
 if(ENABLE_LIBPCI)
@@ -378,6 +380,15 @@ if(ENABLE_OSMESA)
     endif()
 endif()
 
+if(ENABLE_OPENCL)
+    pkg_check_modules(OPENCL OpenCL)
+    if(OPENCL_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_OPENCL=1)
+    else()
+        message(WARNING "Package opencl not found. Building without support.")
+    endif()
+endif()
+
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
     PUBLIC ${PROJECT_SOURCE_DIR}/src
@@ -403,6 +414,7 @@ target_include_directories(libfastfetch
     PRIVATE ${EGL_INCLUDE_DIRS}
     PRIVATE ${GLX_INCLUDE_DIRS}
     PRIVATE ${OSMESA_INCLUDE_DIRS}
+    PRIVATE ${OPENCL_INCLUDE_DIRS}
 )
 
 target_link_libraries(libfastfetch

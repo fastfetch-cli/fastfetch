@@ -197,6 +197,7 @@
 #--datetime-key Date Time
 #--vulkan-key Vulkan
 #--opengl-key OpenGL
+#--opencl-key OpenCL
 
 # Format options:
 # Sets the format string for module values.
@@ -234,6 +235,7 @@
 #--datetime-format
 #--vulkan-format
 #--opengl-format
+#--opencl-format
 
 # Library options:
 # Sets an user specific path to a library to load.
@@ -257,3 +259,4 @@
 #--lib-egl /usr/lib/libEGL.so
 #--lib-glx /usr/lib/libGLX.so
 #--lib-osmesa /usr/lib/libOSMesa.so
+#--lib-opencl /usr/lib/libOpenCL.so

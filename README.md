@@ -19,32 +19,33 @@ There are some presets defined for fastfech in [`presets`](presets), you can can
 Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and `libpthread`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
 
 The following libraries are used if present at runtime:
-*  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
-*  [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
-*  [`libxcb-randr`](https://xcb.freedesktop.org/),
+* [`libpci`](https://github.com/pciutils/pciutils): GPU output.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
+* [`libxcb-randr`](https://xcb.freedesktop.org/),
     [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
     [`libxcb`](https://xcb.freedesktop.org/),
-    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support. The `libxcb*` ones usually have better performance.
-*  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
-*  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
-*  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
-*  [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel or kitty graphics protocol.
-*  [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art.
-*  [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
-*  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
-*  [`libEGL`](https://www.khronos.org/registry/EGL/),
+    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support The `libxcb*` ones usually have better performance.
+* [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
+* [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
+* [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
+* [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel or kitty graphics protocol.
+* [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art.
+* [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
+* [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
+* [`libEGL`](https://www.khronos.org/registry/EGL/),
     [`libGLX`](https://dri.freedesktop.org/wiki/GLX/),
     [`libOSMesa`](https://docs.mesa3d.org/osmesa.html): At least one of them is needed by the OpenGL module for gl context creation.
-*  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
-*  [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
-*  [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
+* [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
+* [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
+* [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
+* [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, Vulkan, OpenGL, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
+Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
 ```
 
 ##### Logos

@@ -17,6 +17,7 @@ Locale
 LocalIP
 Memory
 OS
+OpenCL
 OpenGL
 Packages
 Player

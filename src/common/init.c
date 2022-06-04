@@ -193,6 +193,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.vulkanFormat, 0);
     ffStrbufInitA(&instance->config.openGLKey, 0);
     ffStrbufInitA(&instance->config.openGLFormat, 0);
+    ffStrbufInitA(&instance->config.openCLKey, 0);
+    ffStrbufInitA(&instance->config.openCLFormat, 0);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -213,6 +215,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libEGL, 0);
     ffStrbufInitA(&instance->config.libGLX, 0);
     ffStrbufInitA(&instance->config.libOSMesa, 0);
+    ffStrbufInitA(&instance->config.libOpenCL, 0);
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
 
@@ -352,6 +355,9 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_OSMESA
             "osmesa\n"
+        #endif
+        #ifdef FF_HAVE_OPENCL
+            "opencl\n"
         #endif
         ""
     , stdout);

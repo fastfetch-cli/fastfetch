@@ -153,6 +153,7 @@ __fastfetch_completion()
         "-s"
         "--structure"
         "--set"
+        "--gl"
         "--os-format"
         "--os-key"
         "--host-format"
@@ -217,7 +218,12 @@ __fastfetch_completion()
         "--date-key"
         "--time-format"
         "--time-key"
-        "--gl"
+        "--vulkan-key"
+        "--vulkan-format"
+        "--opengl-key"
+        "--opengl-format"
+        "--opencl-key"
+        "--opencl-format"
     )
 
     local FF_OPTIONS_PATH=(
@@ -241,6 +247,7 @@ __fastfetch_completion()
         "--lib-egl"
         "--lib-glx"
         "--lib-osmesa"
+        "--lib-opencl"
         "--battery-dir"
         "--load-config"
     )
