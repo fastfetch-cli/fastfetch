@@ -50,6 +50,8 @@ int main(int argc, char** argv)
     //ffPrintDateTime(&instance);
     //ffPrintDate(&instance);
     //ffPrintTime(&instance);
+    //ffPrintVulkan(&instance);
+    //ffPrintOpenGL(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 

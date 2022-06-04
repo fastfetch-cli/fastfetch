@@ -14,7 +14,6 @@ Here i just add things that are easy to forget.
 - [ ] Better OS output for all possible combinations of /etc/os-release variables.
 - [ ] Expose temperatures to CPU format string
 - [ ] Expose temperatures to GPU format string
-- [ ] Fallback GPU detection using GL (multi GPU suport somehow possible?)
 - [ ] Find wayland compositor by looking at \${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY:-wayland-0}
 - [ ] Make LocalIP module more configurable
 - [ ] Automatic migrate old config files to newer versions

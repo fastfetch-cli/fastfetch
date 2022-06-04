@@ -3,10 +3,14 @@
 #include <string.h>
 
 #define FF_OPENGL_MODULE_NAME "OpenGL"
-#define FF_OPENGL_NUM_FORMAT_ARGS 3
+#define FF_OPENGL_NUM_FORMAT_ARGS 4
 
-#ifdef FF_HAVE_GL
+#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA)
+#define FF_HAVE_GL 1
 #include <GL/gl.h>
+
+#define FF_OPENGL_BUFFER_WIDTH 1
+#define FF_OPENGL_BUFFER_HEIGHT 1
 
 typedef struct GLData
 {
@@ -21,6 +25,7 @@ static const char* glHandlePrint(FFinstance* instance, const GLData* data)
 
     const char* renderer = (const char*) data->ffglGetString(GL_RENDERER);
     const char* vendor = (const char*) data->ffglGetString(GL_VENDOR);
+    const char* slv = (const char*) data->ffglGetString(GL_SHADING_LANGUAGE_VERSION);
 
     if(instance->config.openGLFormat.length == 0)
     {
@@ -32,7 +37,8 @@ static const char* glHandlePrint(FFinstance* instance, const GLData* data)
         ffPrintFormatString(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGLKey, &instance->config.openGLFormat, NULL, FF_OPENGL_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRING, version},
             {FF_FORMAT_ARG_TYPE_STRING, renderer},
-            {FF_FORMAT_ARG_TYPE_STRING, vendor}
+            {FF_FORMAT_ARG_TYPE_STRING, vendor},
+            {FF_FORMAT_ARG_TYPE_STRING, slv}
         });
     }
 
@@ -44,8 +50,9 @@ static const char* glHandlePrint(FFinstance* instance, const GLData* data)
 
 typedef struct EGLData
 {
-    GLData* glData;
+    GLData glData;
 
+    FF_LIBRARY_SYMBOL(eglGetProcAddress);
     FF_LIBRARY_SYMBOL(eglGetDisplay);
     FF_LIBRARY_SYMBOL(eglInitialize);
     FF_LIBRARY_SYMBOL(eglBindAPI);
@@ -68,7 +75,7 @@ static const char* eglHandleContext(FFinstance* instance, EGLData* data)
     if(data->ffeglMakeCurrent(data->display, data->surface, data->surface, data->context) != EGL_TRUE)
         return "eglMakeCurrent returned EGL_FALSE";
 
-    return glHandlePrint(instance, data->glData);
+    return glHandlePrint(instance, &data->glData);
 }
 
 static const char* eglHandleSurface(FFinstance* instance, EGLData* data)
@@ -93,8 +100,8 @@ static const char* eglHandleDisplay(FFinstance* instance, EGLData* data)
         return "eglGetConfigs returned 0 configs";
 
     data->surface = data->ffeglCreatePbufferSurface(data->display, data->config, (EGLint[]){
-        EGL_WIDTH, 1,
-        EGL_HEIGHT, 1,
+        EGL_WIDTH, FF_OPENGL_BUFFER_WIDTH,
+        EGL_HEIGHT, FF_OPENGL_BUFFER_HEIGHT,
         EGL_NONE
     });
 
@@ -108,6 +115,10 @@ static const char* eglHandleDisplay(FFinstance* instance, EGLData* data)
 
 static const char* eglHandleData(FFinstance* instance, EGLData* data)
 {
+    data->glData.ffglGetString = (__typeof__(data->glData.ffglGetString)) data->ffeglGetProcAddress("glGetString");
+    if(!data->glData.ffglGetString)
+        return "eglGetProcAddress(glGetString) returned NULL";
+
     data->display = data->ffeglGetDisplay(EGL_DEFAULT_DISPLAY);
     if(data->display == EGL_NO_DISPLAY)
         return "eglGetDisplay returned EGL_NO_DISPLAY";
@@ -121,12 +132,12 @@ static const char* eglHandleData(FFinstance* instance, EGLData* data)
     return error;
 }
 
-static const char* eglPrint(FFinstance* instance, GLData* glData)
+static const char* eglPrint(FFinstance* instance)
 {
     EGLData eglData;
-    eglData.glData = glData;
 
     FF_LIBRARY_LOAD(egl, instance->config.libEGL, "dlopen egl failed", "libEGL.so", 1);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglGetProcAddress, eglGetProcAddress, "dlsym eglGetProcAddress failed");
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglGetDisplay, eglGetDisplay, "dlsym eglGetDisplay failed");
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglInitialize, eglInitialize, "dlsym eglInitialize failed");
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglBindAPI, eglBindAPI, "dlsym eglBindAPI failed");
@@ -150,8 +161,9 @@ static const char* eglPrint(FFinstance* instance, GLData* glData)
 
 typedef struct GLXData
 {
-    GLData* glData;
+    GLData glData;
 
+    FF_LIBRARY_SYMBOL(glXGetProcAddress);
     FF_LIBRARY_SYMBOL(XOpenDisplay);
     FF_LIBRARY_SYMBOL(glXChooseVisual);
     FF_LIBRARY_SYMBOL(XCreatePixmap);
@@ -175,7 +187,7 @@ static const char* glxHandleContext(FFinstance* instance, GLXData* data)
     if(data->ffglXMakeCurrent(data->display, data->glxPixmap, data->context) != True)
         return "glXMakeCurrent returned False";
 
-    return glHandlePrint(instance, data->glData);
+    return glHandlePrint(instance, &data->glData);
 }
 
 static const char* glxHandleGLXPixmap(FFinstance* instance, GLXData* data)
@@ -202,7 +214,7 @@ static const char* glxHandlePixmap(FFinstance* instance, GLXData* data)
 
 static const char* glxHandleVisualInfo(FFinstance* instance, GLXData* data)
 {
-    data->pixmap = data->ffXCreatePixmap(data->display, DefaultRootWindow(data->display), 1, 1, (unsigned int) data->visualInfo->depth);
+    data->pixmap = data->ffXCreatePixmap(data->display, DefaultRootWindow(data->display), FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, (unsigned int) data->visualInfo->depth);
     if(data->pixmap == None)
         return "XCreatePixmap returned None";
 
@@ -222,6 +234,10 @@ static const char* glxHandleDisplay(FFinstance* instance, GLXData* data)
 
 static const char* glxHandleData(FFinstance* instance, GLXData* data)
 {
+    data->glData.ffglGetString = (__typeof__(data->glData.ffglGetString)) data->ffglXGetProcAddress((const GLubyte*) "glGetString");
+    if(data->glData.ffglGetString == NULL)
+        return "glXGetProcAddress(glGetString) returned NULL";
+
     data->display = data->ffXOpenDisplay(NULL);
     if(data->display == NULL)
         return "XOpenDisplay returned NULL";
@@ -231,12 +247,12 @@ static const char* glxHandleData(FFinstance* instance, GLXData* data)
     return error;
 }
 
-static const char* glxPrint(FFinstance* instance, GLData* glData)
+static const char* glxPrint(FFinstance* instance)
 {
     GLXData data;
-    data.glData = glData;
 
     FF_LIBRARY_LOAD(glx, instance->config.libGLX, "dlopen glx failed", "libGLX.so", 1);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXGetProcAddress, glXGetProcAddress, "dlsym glXGetProcAddress failed");
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffXOpenDisplay, XOpenDisplay, "dlsym XOpenDisplay returned NULL");
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXChooseVisual, glXChooseVisual, "dlsym glXChooseVisual returned NULL");
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffXCreatePixmap, XCreatePixmap, "dlsym XCreatePixmap returned NULL");
@@ -255,54 +271,111 @@ static const char* glxPrint(FFinstance* instance, GLData* glData)
 
 #endif //FF_HAVE_GLX
 
-static const char* glHandleGL(FFinstance* instance, GLData* data)
+#ifdef FF_HAVE_OSMESA
+#include <GL/osmesa.h>
+
+typedef struct OSMesaData
+{
+    GLData glData;
+
+    FF_LIBRARY_SYMBOL(OSMesaGetProcAddress);
+    FF_LIBRARY_SYMBOL(OSMesaCreateContext);
+    FF_LIBRARY_SYMBOL(OSMesaMakeCurrent);
+    FF_LIBRARY_SYMBOL(OSMesaDestroyContext);
+
+    OSMesaContext context;
+} OSMesaData;
+
+static const char* osMesaHandleContext(FFinstance* instance, OSMesaData* data)
+{
+    unsigned char buffer[FF_OPENGL_BUFFER_WIDTH * FF_OPENGL_BUFFER_HEIGHT * sizeof(uint32_t)]; // 4 bytes per pixel (RGBA)
+
+    if(data->ffOSMesaMakeCurrent(data->context, buffer, GL_UNSIGNED_BYTE, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT) != GL_TRUE)
+        return "OSMesaMakeCurrent returned GL_FALSE";
+
+    return glHandlePrint(instance, &data->glData);
+}
+
+static const char* osMesaHandleData(FFinstance* instance, OSMesaData* data)
+{
+    //The case to void* is required here, because OSMESAproc can't be cast to (__typeof__(data->glData.ffglGetString)) without a warning, even though it is the actual type.
+    data->glData.ffglGetString = (__typeof__(data->glData.ffglGetString)) (void*) data->ffOSMesaGetProcAddress("glGetString");
+    if(data->glData.ffglGetString == NULL)
+        return "OSMesaGetProcAddress(glGetString) returned NULL";
+
+    data->context = data->ffOSMesaCreateContext(OSMESA_RGBA, NULL);
+    if(data->context == NULL)
+        return "OSMesaCreateContext returned NULL";
+
+    const char* error = osMesaHandleContext(instance, data);
+    data->ffOSMesaDestroyContext(data->context);
+    return error;
+}
+
+static const char* osMesaPrint(FFinstance* instance)
+{
+    OSMesaData data;
+
+    FF_LIBRARY_LOAD(osmesa, instance->config.libOSMesa, "dlopen osmesa failed", "libOSMesa.so", 8);
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaGetProcAddress, OSMesaGetProcAddress, "dlsym OSMesaGetProcAddress returned NULL");
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaCreateContext, OSMesaCreateContext, "dlsym OSMesaCreateContext returned NULL");
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaMakeCurrent, OSMesaMakeCurrent, "dlsym OSMesaMakeCurrent returned NULL");
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaDestroyContext, OSMesaDestroyContext, "dlsym OSMesaDestroyContext returned NULL");
+
+    const char* error = osMesaHandleData(instance, &data);
+    dlclose(osmesa);
+    return error;
+}
+
+#endif //FF_HAVE_OSMESA
+
+static const char* glPrint(FFinstance* instance)
 {
     if(instance->config.glType == FF_GL_TYPE_GLX)
     {
-        #ifdef FF_HAVE_GL
-            return glxPrint(instance, data);
+        #ifdef FF_HAVE_GLX
+            return glxPrint(instance);
         #else
-            return = "fastfetch was compiled without glx support";
+            return "fastfetch was compiled without glx support";
         #endif
     }
 
     if(instance->config.glType == FF_GL_TYPE_EGL)
     {
         #ifdef FF_HAVE_EGL
-            return eglPrint(instance, data);
+            return eglPrint(instance);
         #else
             return "fastfetch was compiled without egl support";
+        #endif
+    }
+
+    if(instance->config.glType == FF_GL_TYPE_OSMESA)
+    {
+        #ifdef FF_HAVE_OSMESA
+            return osMesaPrint(instance);
+        #else
+            return "fastfetch was compiled without osmesa support";
         #endif
     }
 
     const char* error = ""; // not NULL dummy value
 
     #ifdef FF_HAVE_EGL
-        error = eglPrint(instance, data);
+        error = eglPrint(instance);
     #endif
 
     #ifdef FF_HAVE_GLX
         if(error != NULL)
-            error = glxPrint(instance, data);
+            error = glxPrint(instance);
     #endif
 
+    //We don't use osmesa in auto mode here, because it is a software implementation,
+    //that doesn't reflect the opengl supported by the hardware
+
     return error;
 }
 
-static const char* glPrint(FFinstance* instance)
-{
-    GLData data;
-
-    FF_LIBRARY_LOAD(gl, instance->config.libGL, "dlopen gl failed", "libGL.so", 1);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(gl, data.ffglGetString, glGetString, "dlsym glGetString failed");
-
-    const char* error = glHandleGL(instance, &data);
-
-    dlclose(gl);
-    return error;
-}
-
-#endif //FF_HAVE_GL
+#endif // FF_HAVE_GL
 
 void ffPrintOpenGL(FFinstance* instance)
 {

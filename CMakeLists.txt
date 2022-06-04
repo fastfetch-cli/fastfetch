@@ -33,9 +33,9 @@ OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
 OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
 OPTION(ENABLE_ZLIB "Enable zlib" ON)
 OPTION(ENABLE_CHAFA "Enable chafa" ON)
-OPTION(ENABLE_GL "Enable gl" ON)
 OPTION(ENABLE_EGL "Enable egl" ON)
 OPTION(ENABLE_GLX "Enable glx" ON)
+OPTION(ENABLE_OSMESA "Enable osmesa" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -351,44 +351,30 @@ if(ENABLE_CHAFA)
     endif()
 endif()
 
-if(ENABLE_GL)
-    pkg_check_modules(GL gl)
-    if(NOT GL_FOUND)
-        message(WARNING "Package gl not found. Building without support.")
-    endif()
-endif()
-
 if(ENABLE_EGL)
-    if(GL_FOUND)
-        pkg_check_modules(EGL egl)
-        if(EGL_FOUND)
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EGL=1)
-        else()
-            message(WARNING "Package egl not found. Building without support.")
-        endif()
+    pkg_check_modules(EGL egl)
+    if(EGL_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EGL=1)
     else()
-        message(WARNING "egl not enabled, because gl was not enabled or found. Building without support.")
+        message(WARNING "Package egl not found. Building without support.")
     endif()
 endif()
 
 if(ENABLE_GLX)
-    if(GL_FOUND)
-        pkg_check_modules(GLX glx)
-        if(GLX_FOUND)
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLX=1)
-        else()
-            message(WARNING "Package glx not found. Building without support.")
-        endif()
+    pkg_check_modules(GLX glx)
+    if(GLX_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLX=1)
     else()
-        message(WARNING "glx not enabled, because gl was not enabled or found. Building without support")
+        message(WARNING "Package glx not found. Building without support.")
     endif()
 endif()
 
-if(GL_FOUND)
-    if(EGL_FOUND OR GLX_FOUND)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GL=1)
+if(ENABLE_OSMESA)
+    pkg_check_modules(OSMESA osmesa)
+    if(OSMESA_FOUND)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_OSMESA=1)
     else()
-        message(WARNING "gl not enabled, because neither egl nor glx were found. Building without support.")
+        message(WARNING "Package osmesa not found. Building without support.")
     endif()
 endif()
 
@@ -414,9 +400,9 @@ target_include_directories(libfastfetch
     PRIVATE ${ZLIB_INCLUDE_DIRS}
     PRIVATE ${CHAFA_INCLUDE_DIRS}
     PRIVATE ${VULKAN_INCLUDE_DIRS}
-    PRIVATE ${GL_INCLUDE_DIRS}
     PRIVATE ${EGL_INCLUDE_DIRS}
     PRIVATE ${GLX_INCLUDE_DIRS}
+    PRIVATE ${OSMESA_INCLUDE_DIRS}
 )
 
 target_link_libraries(libfastfetch

@@ -358,7 +358,8 @@ static inline void printCommandHelp(const char* command)
         constructAndPrintCommandHelpFormat("opengl", "{}", 3,
             "version",
             "renderer",
-            "vendor"
+            "vendor",
+            "shading language version"
         );
     }
     else
@@ -1029,12 +1030,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libZ);
     else if(strcasecmp(key, "--lib-chafa") == 0)
         optionParseString(key, value, &instance->config.libChafa);
-    else if(strcasecmp(key, "--lib-gl") == 0)
-        optionParseString(key, value, &instance->config.libGL);
     else if(strcasecmp(key, "--lib-egl") == 0)
         optionParseString(key, value, &instance->config.libEGL);
     else if(strcasecmp(key, "--lib-glx") == 0)
         optionParseString(key, value, &instance->config.libGLX);
+    else if(strcasecmp(key, "--lib-osmesa") == 0)
+        optionParseString(key, value, &instance->config.libOSMesa);
 
     //////////////////
     //Module options//
@@ -1072,6 +1073,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.glType = FF_GL_TYPE_EGL;
         else if(strcasecmp(value, "glx") == 0)
             instance->config.glType = FF_GL_TYPE_GLX;
+        else if(strcasecmp(value, "osmesa") == 0)
+            instance->config.glType = FF_GL_TYPE_OSMESA;
         else
         {
             fprintf(stderr, "Error: unknown gl type: %s\n", value);

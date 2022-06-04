@@ -238,9 +238,9 @@ __fastfetch_completion()
         "--lib-imagemagick"
         "--lib-z"
         "--lib-chafa"
-        "--lib-gl"
         "--lib-egl"
         "--lib-glx"
+        "--lib-osmesa"
         "--battery-dir"
         "--load-config"
     )

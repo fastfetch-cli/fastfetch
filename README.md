@@ -22,9 +22,9 @@ The following libraries are used if present at runtime:
 *  [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 *  [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
 *  [`libxcb-randr`](https://xcb.freedesktop.org/),
-   [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
-   [`libxcb`](https://xcb.freedesktop.org/),
-   [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support. The `libxcb*` ones usually have better performance.
+    [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
+    [`libxcb`](https://xcb.freedesktop.org/),
+    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support. The `libxcb*` ones usually have better performance.
 *  [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
 *  [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 *  [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
@@ -32,9 +32,9 @@ The following libraries are used if present at runtime:
 *  [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art.
 *  [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
 *  [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
-*  [`libGL`](https://dri.freedesktop.org/wiki/libGL/):OpenGL module. At least one context creation library must be present too.
-*  [`libEGL`](https://www.khronos.org/registry/EGL/): OpenGL module, using EGL context.
-*  [`libGLX`](https://dri.freedesktop.org/wiki/GLX/): OpenGL module, using GLX context.
+*  [`libEGL`](https://www.khronos.org/registry/EGL/),
+    [`libGLX`](https://dri.freedesktop.org/wiki/GLX/),
+    [`libOSMesa`](https://docs.mesa3d.org/osmesa.html): At least one of them is needed by the OpenGL module for gl context creation.
 *  [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 *  [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
 *  [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
@@ -44,7 +44,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, Vulkan, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
+Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, Vulkan, OpenGL, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
 ```
 
 ##### Logos

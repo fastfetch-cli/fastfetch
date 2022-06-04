@@ -132,9 +132,9 @@ Library options: Set the path of a library to load
     --lib-imagemagick <path>
     --lib-z <path>
     --lib-chafa <path>
-    --lib-gl <path>
     --lib-egl <path>
     --lib-glx <path>
+    --lib-osmesa <path>
 
 Module specific options:
     --separator-string <str>:     Set the string printed by the separator module

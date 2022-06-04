@@ -46,7 +46,8 @@ typedef enum FFGLType
 {
     FF_GL_TYPE_AUTO,
     FF_GL_TYPE_EGL,
-    FF_GL_TYPE_GLX
+    FF_GL_TYPE_GLX,
+    FF_GL_TYPE_OSMESA
 } FFGLType;
 
 typedef struct FFconfig
@@ -155,9 +156,9 @@ typedef struct FFconfig
     FFstrbuf libImageMagick;
     FFstrbuf libZ;
     FFstrbuf libChafa;
-    FFstrbuf libGL;
     FFstrbuf libEGL;
     FFstrbuf libGLX;
+    FFstrbuf libOSMesa;
 
     FFstrbuf diskFolders;
 

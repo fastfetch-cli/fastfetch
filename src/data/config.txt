@@ -254,6 +254,6 @@
 #--lib-imagemagick /usr/lib/libMagickCore-7.Q16HDRI.so
 #--lib-z /usr/lib/libz.so
 #--lib-chafa /usr/lib/libchafa.so
-#--lib-gl /usr/lib/libGL.so
 #--lib-egl /usr/lib/libEGL.so
-#--lib-GLX /usr/lib/libGLX.so
+#--lib-glx /usr/lib/libGLX.so
+#--lib-osmesa /usr/lib/libOSMesa.so

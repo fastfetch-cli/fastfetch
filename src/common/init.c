@@ -210,9 +210,9 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libImageMagick, 0);
     ffStrbufInitA(&instance->config.libZ, 0);
     ffStrbufInitA(&instance->config.libChafa, 0);
-    ffStrbufInitA(&instance->config.libGL, 0);
     ffStrbufInitA(&instance->config.libEGL, 0);
     ffStrbufInitA(&instance->config.libGLX, 0);
+    ffStrbufInitA(&instance->config.libOSMesa, 0);
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
 
@@ -344,14 +344,14 @@ void ffListFeatures()
         #ifdef FF_HAVE_RPM
             "rpm\n"
         #endif
-        #ifdef FF_HAVE_GL
-            "gl\n"
-        #endif
         #ifdef FF_HAVE_EGL
             "egl\n"
         #endif
         #ifdef FF_HAVE_GLX
             "glx\n"
+        #endif
+        #ifdef FF_HAVE_OSMESA
+            "osmesa\n"
         #endif
         ""
     , stdout);
