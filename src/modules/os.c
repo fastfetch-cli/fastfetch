@@ -5,9 +5,6 @@
 
 void ffPrintOS(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS))
-        return;
-
     const FFOSResult* result = ffDetectOS(instance);
 
     if(result->name.length == 0 && result->prettyName.length == 0)
@@ -69,20 +66,28 @@ void ffPrintOS(FFinstance* instance)
         ffStrbufAppendC(&os, ']');
     }
 
-    ffPrintAndWriteToCache(instance, FF_OS_MODULE_NAME, &instance->config.osKey, &os, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->id},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->idLike},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->variant},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->variantID},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->versionID},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->codename},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->buildID},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->architecture}
-    });
+    if(instance->config.osFormat.length == 0)
+    {
+        ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey);
+        ffStrbufPutTo(&os, stdout);
+    }
+    else
+    {
+        ffPrintFormatString(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, NULL, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->id},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->idLike},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->variant},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->variantID},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->versionID},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->codename},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->buildID},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->architecture}
+        });
+    }
 
     ffStrbufDestroy(&os);
 }
