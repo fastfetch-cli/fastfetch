@@ -126,6 +126,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.hideCursor = true;
     instance->config.escapeBedrock = true;
     instance->config.glType = FF_GL_TYPE_AUTO;
+    instance->config.pipe = false;
 
     ffStrbufInitA(&instance->config.osFormat, 0);
     ffStrbufInitA(&instance->config.osKey, 0);
@@ -240,29 +241,29 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-static void resetConsole(bool disableLinewrap, bool hideCursor)
-{
-    if(disableLinewrap)
-        fputs("\033[?7h", stdout);
-
-    if(hideCursor)
-        fputs("\033[?25h", stdout);
-}
-
 static volatile bool ffDisableLinewrap = true;
 static volatile bool ffHideCursor = true;
+
+static void resetConsole()
+{
+    if(ffDisableLinewrap)
+        fputs("\033[?7h", stdout);
+
+    if(ffHideCursor)
+        fputs("\033[?25h", stdout);
+}
 
 static void exitSignalHandler(int signal)
 {
     FF_UNUSED(signal);
-    resetConsole(ffDisableLinewrap, ffHideCursor);
+    resetConsole();
     exit(0);
 }
 
 void ffStart(FFinstance* instance)
 {
-    ffDisableLinewrap = instance->config.disableLinewrap;
-    ffHideCursor = instance->config.hideCursor;
+    ffDisableLinewrap = instance->config.disableLinewrap && !instance->config.pipe;
+    ffHideCursor = instance->config.hideCursor && !instance->config.pipe;
 
     struct sigaction action = {};
     action.sa_handler = exitSignalHandler;
@@ -272,15 +273,17 @@ void ffStart(FFinstance* instance)
     sigaction(SIGQUIT, &action, NULL);
 
     //We do the cache validation here, so we can skip it if --recache is given
-    ffCacheValidate(instance);
+    if(!instance->config.recache)
+        ffCacheValidate(instance);
 
     //reset everything to default before we start printing
-    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+    if(!instance->config.pipe)
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
-    if(instance->config.hideCursor)
+    if(ffHideCursor)
         fputs("\033[?25l", stdout);
 
-    if(instance->config.disableLinewrap)
+    if(ffDisableLinewrap)
         fputs("\033[?7l", stdout);
 
     ffPrintLogo(instance);
@@ -288,8 +291,10 @@ void ffStart(FFinstance* instance)
 
 void ffFinish(FFinstance* instance)
 {
-    ffPrintRemainingLogo(instance);
-    resetConsole(instance->config.disableLinewrap, instance->config.hideCursor);
+    if(instance->config.logoPrintRemaining)
+        ffPrintRemainingLogo(instance);
+
+    resetConsole();
 }
 
 //Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets

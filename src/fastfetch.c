@@ -737,13 +737,24 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--escape-bedrock") == 0)
         instance->config.escapeBedrock = optionParseBoolean(value);
+    else if(strcasecmp(key, "--pipe") == 0)
+        instance->config.pipe = optionParseBoolean(value);
 
     ////////////////
     //Logo options//
     ////////////////
 
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
+    {
         optionParseString(key, value, &instance->config.logoSource);
+
+        //this is usally wanted when using the none logo
+        if(strcasecmp(value, "none") == 0)
+        {
+            instance->config.logoPaddingRight = 0;
+            instance->config.logoPaddingLeft = 0;
+        }
+    }
     else if(strcasecmp(key, "--logo-type") == 0)
     {
         if(value == NULL)

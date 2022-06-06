@@ -35,9 +35,6 @@ static void writeCacheFile(FFinstance* instance, const char* moduleName, const c
 
 void ffCacheValidate(FFinstance* instance)
 {
-    if(instance->config.recache)
-        return;
-
     FFstrbuf content;
     ffStrbufInit(&content);
     readCacheFile(instance, "cacheversion", "ffv", &content);

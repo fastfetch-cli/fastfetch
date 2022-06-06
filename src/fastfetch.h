@@ -72,6 +72,7 @@ typedef struct FFconfig
     bool hideCursor;
     bool escapeBedrock;
     FFGLType glType;
+    bool pipe; //disables logo and all escape sequences
 
     FFstrbuf osFormat;
     FFstrbuf osKey;

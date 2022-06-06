@@ -2,6 +2,15 @@
 
 void ffPrintColors(FFinstance* instance)
 {
+    if(instance->config.pipe)
+    {
+        ffPrintLogoLine(instance);
+        puts("████████████████████████");
+        ffPrintLogoLine(instance);
+        puts("████████████████████████");
+        return;
+    }
+
     ffPrintLogoLine(instance);
 
     // 4%d: Set the background color

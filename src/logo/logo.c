@@ -199,6 +199,13 @@ static void logoPrintDetected(FFinstance* instance)
 
 void ffPrintLogo(FFinstance* instance)
 {
+    if(instance->config.pipe)
+    {
+        instance->state.logoHeight = 0;
+        instance->state.logoWidth = 0;
+        return;
+    }
+
     if(instance->config.mainColor.length == 0)
         ffLogoSetMainColor(instance);
 
@@ -225,37 +232,33 @@ void ffPrintLogo(FFinstance* instance)
         logoPrintDetected(instance);
 }
 
-static inline void printLogoWidth(const FFinstance* instance)
+
+void ffPrintLogoLine(FFinstance* instance)
 {
     if(instance->state.logoWidth > 0)
         printf("\033[%uC", instance->state.logoWidth);
+
+    ++instance->state.keysHeight;
 }
 
 void ffPrintRemainingLogo(FFinstance* instance)
 {
-    if(!instance->config.logoPrintRemaining)
-        return;
-
-    for(uint32_t i = instance->state.keysHeight; i <= instance->state.logoHeight; i++)
+    while(instance->state.keysHeight < instance->state.logoHeight)
     {
-        printLogoWidth(instance);
+        ffPrintLogoLine(instance);
         putchar('\n');
     }
-}
-
-void ffPrintLogoLine(FFinstance* instance)
-{
-    printLogoWidth(instance);
-    ++instance->state.keysHeight;
-    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }
 
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat)
 {
     ffPrintLogoLine(instance);
 
-    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    ffPrintColor(&instance->config.mainColor);
+    if(!instance->config.pipe)
+    {
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+        ffPrintColor(&instance->config.mainColor);
+    }
 
     if(customKeyFormat == NULL || customKeyFormat->length == 0)
     {
@@ -275,7 +278,11 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
         ffStrbufDestroy(&key);
     }
 
-    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+    if(!instance->config.pipe)
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
     ffStrbufWriteTo(&instance->config.separator, stdout);
-    fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
+    if(!instance->config.pipe)
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }
