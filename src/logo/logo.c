@@ -257,7 +257,11 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     if(!instance->config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(&instance->config.mainColor);
+
+        //If the main color is not set (e.g. none logo), this would reset in \0333[m, which resets everything,
+        //including the wanted bolt from above. So we only print it, if the main color is at least one char.
+        if(instance->config.mainColor.length > 0)
+            ffPrintColor(&instance->config.mainColor);
     }
 
     if(customKeyFormat == NULL || customKeyFormat->length == 0)
