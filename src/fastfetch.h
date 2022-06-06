@@ -456,6 +456,7 @@ void ffSuppressIO(bool suppress); // Not thread safe!
 void ffGetTerminalResponse(const char* request, const char* format, ...);
 
 //common/printing.c
+void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
 void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
 void ffPrintColor(const FFstrbuf* colorValue);
@@ -528,7 +529,6 @@ void ffPrintLogo(FFinstance* instance);
 void ffPrintRemainingLogo(FFinstance* instance);
 
 void ffPrintLogoLine(FFinstance* instance);
-void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
 
 void ffPrintBuiltinLogos(FFinstance* instance);
 void ffListBuiltinLogos();
