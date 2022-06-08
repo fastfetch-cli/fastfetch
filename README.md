@@ -92,7 +92,9 @@ If pkg-config fails to find the headers for a library listed in [dependencies](#
 
 ## Packaging
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
+### Repositories
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/fastfetch.svg?header=)](https://repology.org/project/fastfetch/versions)
 
 ### Manual
 
