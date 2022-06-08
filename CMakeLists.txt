@@ -1,20 +1,13 @@
-cmake_minimum_required(VERSION 3.1.0) # Threads::Threads and CMAKE_C_STANDARD
+cmake_minimum_required(VERSION 3.9.0) # CMAKE_INTERPROCEDURAL_OPTIMIZATION
 
 project(fastfetch
     VERSION 1.5.2
     LANGUAGES C
 )
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-find_package(PkgConfig REQUIRED)
-
-# This is set to off by github actions for release builds
-OPTION(SET_TWEAK "Add tweak to project version" ON)
-
-# Also create test executables
-OPTION(BUILD_TESTS "Build tests" OFF)
+#####################
+# Configure options #
+#####################
 
 OPTION(ENABLE_LIBPCI "Enable libpci" ON)
 OPTION(ENABLE_VULKAN "Enable vulkan" ON)
@@ -38,15 +31,39 @@ OPTION(ENABLE_GLX "Enable glx" ON)
 OPTION(ENABLE_OSMESA "Enable osmesa" ON)
 OPTION(ENABLE_OPENCL "Enable opencl" ON)
 
+OPTION(BUILD_TESTS "Build tests" OFF) # Also create test executables
+OPTION(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
+
+#############################
+# Compile time dependencies #
+#############################
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+find_package(PkgConfig REQUIRED)
+
+####################
+# Compiler options #
+####################
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
 
-# These variables are mainly here for android, which has a different root fs structure.
+include(CheckIPOSupported)
+check_ipo_supported(RESULT IPO_SUPPORTED)
+if(IPO_SUPPORTED)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+#######################
+# Target FS structure #
+#######################
+
 if(NOT TARGET_DIR_ROOT)
     if(NOT ANDROID)
         set(TARGET_DIR_ROOT "")
@@ -71,15 +88,10 @@ if(NOT TARGET_DIR_HOME)
     endif()
 endif()
 
-function(fastfetch_load_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REPLACE "\n" "\\n" TEMP "${TEMP}")
-    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")
-    string(REPLACE "$\\" "" TEMP "${TEMP}")
-    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
-endfunction(fastfetch_load_text)
+#################
+# Tweak version #
+#################
 
-# Track commits between version bumps for output in --version
 if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process(
         COMMAND git describe --tags
@@ -90,6 +102,18 @@ if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
 endif()
 
+#############
+# Text data #
+#############
+
+function(fastfetch_load_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    string(REPLACE "\n" "\\n" TEMP "${TEMP}")
+    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")
+    string(REPLACE "$\\" "" TEMP "${TEMP}")
+    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
+endfunction(fastfetch_load_text)
+
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config.txt DATATEXT_CONFIG)
 fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
@@ -98,9 +122,15 @@ fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
 fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
+######################
+# Configure config.h #
+######################
+
 configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
-# Init CMake targets
+#######################
+# libfastfetch target #
+#######################
 
 add_library(libfastfetch STATIC
     src/util/FFstrbuf.c
@@ -423,7 +453,13 @@ target_link_libraries(libfastfetch
     PRIVATE Threads::Threads
 )
 
-set_target_properties(libfastfetch PROPERTIES OUTPUT_NAME "fastfetch")
+set_target_properties(libfastfetch PROPERTIES
+    OUTPUT_NAME "fastfetch"
+)
+
+######################
+# Executable targets #
+######################
 
 add_executable(fastfetch
     src/fastfetch.c
@@ -439,7 +475,9 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
 
-# Testing
+###################
+# Testing targets #
+###################
 
 if (BUILD_TESTS)
     add_executable(fastfetch-test-performance
@@ -460,7 +498,9 @@ if (BUILD_TESTS)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
 endif()
 
-# Installation
+##################
+# install target #
+##################
 
 include(GNUInstallDirs)
 
@@ -490,7 +530,9 @@ install(
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}
 )
 
-# Packaging
+##################
+# package target #
+##################
 
 set(CPACK_GENERATOR "DEB;RPM;TGZ;ZIP")
 
@@ -505,21 +547,6 @@ set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/LinusDierheimer")
 set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
-set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "\
-libpci3, \
-libvulkan1, \
-libwayland-client0, \
-libxcb-randr0, \
-xcb, \
-libxrandr2, \
-libx11-6, \
-libdconf1, \
-libglib2.0-0, \
-libdbus-1-3, \
-libxfconf-0-3, \
-libmagickcore-6.q16hdri-6, \
-zlib1g \
-")
 
 set(CPACK_RPM_PACKAGE_LICENSE "MIT")
 
