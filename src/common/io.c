@@ -61,7 +61,7 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer)
         (uint32_t) readed == free
     ) {
         buffer->length += (uint32_t) readed;
-        ffStrbufEnsureCapacity(buffer, (buffer->allocated * 2) - 1); // -1 for null terminator
+        ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
 

@@ -29,31 +29,12 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
     ffStrbufAppend(strbuf, src);
 }
 
-static void setCapacity(FFstrbuf* strbuf, uint32_t capacity)
+uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
 {
     if(strbuf->allocated == 0)
-    {
-        strbuf->chars = malloc(sizeof(*strbuf->chars) * capacity);
-        strbuf->chars[0] = '\0';
-    }
-    else
-        strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * capacity);
+        return 0;
 
-    strbuf->allocated = capacity;
-}
-
-void ffStrbufEnsureCapacity(FFstrbuf* strbuf, uint32_t capacity)
-{
-    if(strbuf->allocated > capacity || capacity == 0)
-        return;
-
-    if(capacity == UINT32_MAX)
-    {
-        fputs("Warning: ffStrbufEnsureCapacity called with UINT32_MAX. Highest allowed value is UINT32_MAX - 1. Exiting.\n", stderr);
-        exit(812);
-    }
-
-    setCapacity(strbuf, capacity + 1); // + 1 for the null byte
+    return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
 }
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
@@ -68,15 +49,15 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
     while((strbuf->length + free + 1) > allocate) // + 1 for the null byte
         allocate *= 2;
 
-    setCapacity(strbuf, allocate);
-}
-
-uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
-{
     if(strbuf->allocated == 0)
-        return 0;
+    {
+        strbuf->chars = malloc(sizeof(*strbuf->chars) * allocate);
+        strbuf->chars[0] = '\0';
+    }
+    else
+        strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * allocate);
 
-    return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
+    strbuf->allocated = allocate;
 }
 
 void ffStrbufClear(FFstrbuf* strbuf)
