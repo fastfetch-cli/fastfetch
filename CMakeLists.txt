@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9.0) # CMAKE_INTERPROCEDURAL_OPTIMIZATION
 
 project(fastfetch
-    VERSION 1.5.2
+    VERSION 1.5.3
     LANGUAGES C
 )
 
