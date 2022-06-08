@@ -1,24 +1,12 @@
 #include "logo.h"
 
-#include <limits.h>
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-
-typedef struct FFlogo
-{
-    const char* data;
-    const char** names; //Null terminated
-    const char** builtinColors; //Null terminated
-} FFlogo;
-
 #define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true;
 #define FF_LOGO_NAMES(...) static const char* names[] = (const char*[]) { __VA_ARGS__, NULL }; logo.names = names;
 #define FF_LOGO_LINES(x) logo.data = x;
 #define FF_LOGO_COLORS(...) static const char* colors[] = (const char*[]) { __VA_ARGS__, NULL }; logo.builtinColors = colors;
 #define FF_LOGO_RETURN return &logo;
 
-static const FFlogo* getLogoUnknown()
+const FFlogo* ffLogoBuiltinGetUnknown()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("unknown", "question mark", "?")
@@ -1441,13 +1429,11 @@ static const FFlogo* getLogoZorin()
     FF_LOGO_RETURN
 }
 
-typedef const FFlogo*(*GetLogoMethod)();
-
-static GetLogoMethod* getLogos()
+GetLogoMethod* ffLogoBuiltinGetAll()
 {
     static GetLogoMethod logoMethods[] = {
+        ffLogoBuiltinGetUnknown,
         getLogoNone,
-        getLogoUnknown,
         getLogoAndroid,
         getLogoAndroidSmall,
         getLogoArch,
@@ -1503,188 +1489,4 @@ static GetLogoMethod* getLogos()
     };
 
     return logoMethods;
-}
-
-static bool logoHasName(const FFlogo* logo, const char* name)
-{
-    const char** logoName = logo->names;
-
-    while(*logoName != NULL)
-    {
-        if(strcasecmp(*logoName, name) == 0)
-            return true;
-        ++logoName;
-    }
-
-    return false;
-}
-
-static const FFlogo* getBuiltinLogo(const char* name)
-{
-    GetLogoMethod* methods = getLogos();
-
-    while(*methods != NULL)
-    {
-        const FFlogo* logo = (*methods)();
-        if(logoHasName(logo, name))
-            return logo;
-        ++methods;
-    }
-
-    return NULL;
-}
-
-static const FFlogo* detectBuiltinLogoWithVersion(const FFstrbuf* versionString, const FFstrbuf* name)
-{
-    if(versionString->length == 0)
-        return getBuiltinLogo(name->chars);
-
-    #define FF_PRINT_LOGO_VERSIONED_IF_EXISTS(newLogo, oldLogo, ver) \
-        if(logoHasName(newLogo, name->chars)) \
-        { \
-            long version = strtol(versionString->chars, NULL, 10); \
-            return (version == 0 || version == LONG_MAX || version == LONG_MIN || version >= ver) ? newLogo : oldLogo; \
-        }
-
-    FF_PRINT_LOGO_VERSIONED_IF_EXISTS(getLogoFedora(), getLogoFedoraOld(), 34)
-    FF_PRINT_LOGO_VERSIONED_IF_EXISTS(getLogoMint(), getLogoMintOld(), 19)
-
-    return getBuiltinLogo(name->chars);
-}
-
-static const FFlogo* detectBuiltinLogo(const FFinstance* instance)
-{
-    static const FFlogo* logo;
-    static bool detected = false;
-    if(detected)
-        return logo;
-
-    detected = true;
-
-    const FFOSResult* os = ffDetectOS(instance);
-
-    logo = detectBuiltinLogoWithVersion(&os->version, &os->name);
-    if(logo != NULL)
-        return logo;
-
-    logo = detectBuiltinLogoWithVersion(&os->version, &os->id);
-    if(logo != NULL)
-        return logo;
-
-    logo = detectBuiltinLogoWithVersion(&os->version, &os->idLike);
-    if(logo != NULL)
-        return logo;
-
-    logo = detectBuiltinLogoWithVersion(&os->version, &os->systemName);
-    if(logo != NULL)
-        return logo;
-
-    return getLogoUnknown();
-}
-
-void ffLogoSetMainColor(FFinstance* instance)
-{
-    const FFlogo* logo = NULL;
-
-    if(instance->config.logoSource.length > 0)
-       logo = getBuiltinLogo(instance->config.logoSource.chars);
-
-    if(logo == NULL)
-        logo = detectBuiltinLogo(instance);
-
-    ffStrbufAppendS(&instance->config.mainColor, logo->builtinColors[0]);
-}
-
-static void printLogoStruct(FFinstance* instance, const FFlogo* logo, bool doColorReplacement)
-{
-    if(!doColorReplacement)
-    {
-        ffLogoPrint(instance, logo->data, false);
-        return;
-    }
-
-    const char** colors = logo->builtinColors;
-    for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
-    {
-        if(instance->config.logoColors[i].length == 0)
-            ffStrbufAppendS(&instance->config.logoColors[i], *colors);
-    }
-
-    ffLogoPrint(instance, logo->data, true);
-}
-
-void ffLogoPrintUnknown(FFinstance* instance)
-{
-    printLogoStruct(instance, getLogoUnknown(), false);
-}
-
-bool ffLogoPrintBuiltinIfExists(FFinstance* instance)
-{
-    const FFlogo* logo = getBuiltinLogo(instance->config.logoSource.chars);
-    if(logo == NULL)
-        return false;
-
-    printLogoStruct(instance, logo, true);
-    return true;
-}
-
-void ffLogoPrintBuiltinDetected(FFinstance* instance)
-{
-    printLogoStruct(instance, detectBuiltinLogo(instance), true);
-}
-
-void ffPrintBuiltinLogos(FFinstance* instance)
-{
-    GetLogoMethod* methods = getLogos();
-
-    while(*methods != NULL)
-    {
-        const FFlogo* logo = (*methods)();
-        printf("\033[%sm%s:\033[0m\n", logo->builtinColors[0], logo->names[0]);
-        printLogoStruct(instance, logo, true);
-        ffPrintRemainingLogo(instance);
-
-        instance->state.logoHeight = 0;
-        for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
-            ffStrbufClear(&instance->config.logoColors[i]);
-
-        puts("\n");
-        ++methods;
-    }
-}
-
-void ffListBuiltinLogos()
-{
-    GetLogoMethod* methods = getLogos();
-
-    uint32_t counter = 0;
-
-    while(*methods != NULL)
-    {
-        const FFlogo* logo = (*methods)();
-        const char** names = logo->names;
-
-        printf("%u)%s ", counter, counter < 10 ? " " : "");
-        ++counter;
-
-        while(*names != NULL)
-        {
-            printf("\"%s\" ", *names);
-            ++names;
-        }
-
-        putchar('\n');
-        ++methods;
-    }
-}
-
-void ffListBuiltinLogosAutocompletion()
-{
-    GetLogoMethod* methods = getLogos();
-
-    while(*methods != NULL)
-    {
-        printf("%s\n", (*methods)()->names[0]);
-        ++methods;
-    }
 }

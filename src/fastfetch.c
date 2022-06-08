@@ -700,17 +700,17 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--list-logos") == 0)
     {
-        ffListBuiltinLogos();
+        ffLogoBuiltinList();
         exit(0);
     }
     else if(strcasecmp(key, "--list-logos-autocompletion") == 0)
     {
-        ffListBuiltinLogosAutocompletion();
+        ffLogoBuiltinListAutocompletion();
         exit(0);
     }
     else if(strcasecmp(key, "--print-logos") == 0)
     {
-        ffPrintBuiltinLogos(instance);
+        ffLogoBuiltinPrint(instance);
         exit(0);
     }
 

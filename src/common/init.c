@@ -286,13 +286,13 @@ void ffStart(FFinstance* instance)
     if(ffDisableLinewrap)
         fputs("\033[?7l", stdout);
 
-    ffPrintLogo(instance);
+    ffLogoPrint(instance);
 }
 
 void ffFinish(FFinstance* instance)
 {
     if(instance->config.logoPrintRemaining)
-        ffPrintRemainingLogo(instance);
+        ffLogoPrintRemaining(instance);
 
     resetConsole();
 }

@@ -61,7 +61,7 @@ typedef struct FFconfig
     uint32_t logoPaddingRight;
     bool logoPrintRemaining;
 
-    FFstrbuf mainColor; //If this is empty, ffPrintLogo will set it to the main color of the logo
+    FFstrbuf mainColor; //If this is empty, ffLogoPrint will set it to the main color of the logo
     FFstrbuf separator;
 
     bool showErrors;
@@ -525,14 +525,13 @@ bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 // Logo functions //
 ////////////////////
 
-void ffPrintLogo(FFinstance* instance);
-void ffPrintRemainingLogo(FFinstance* instance);
+void ffLogoPrint(FFinstance* instance);
+void ffLogoPrintRemaining(FFinstance* instance);
+void ffLogoPrintLine(FFinstance* instance);
 
-void ffPrintLogoLine(FFinstance* instance);
-
-void ffPrintBuiltinLogos(FFinstance* instance);
-void ffListBuiltinLogos();
-void ffListBuiltinLogosAutocompletion();
+void ffLogoBuiltinPrint(FFinstance* instance);
+void ffLogoBuiltinList();
+void ffLogoBuiltinListAutocompletion();
 
 /////////////////////////
 // Detection functions //

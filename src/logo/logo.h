@@ -5,24 +5,23 @@
 
 #include "fastfetch.h"
 
+typedef struct FFlogo
+{
+    const char* data;
+    const char** names; //Null terminated
+    const char** builtinColors; //Null terminated
+} FFlogo;
+
+typedef const FFlogo*(*GetLogoMethod)();
+
 //logo.c
-void ffLogoPrint(FFinstance* instance, const char* data, bool doColorReplacement);
+void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplacement);
 
 //builtin.c
-void ffLogoSetMainColor(FFinstance* instance);
-
-void ffLogoPrintUnknown(FFinstance* instance);
-bool ffLogoPrintBuiltinIfExists(FFinstance* instance);
-void ffLogoPrintBuiltinDetected(FFinstance* instance);
-
-typedef enum FFLogoImageResult
-{
-    FF_LOGO_IMAGE_RESULT_SUCCESS,    //Logo printed
-    FF_LOGO_IMAGE_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version
-    FF_LOGO_IMAGE_RESULT_RUN_ERROR   //Failed to load / convert image, cancle whole sixel code
-} FFLogoImageResult;
+const FFlogo* ffLogoBuiltinGetUnknown();
+GetLogoMethod* ffLogoBuiltinGetAll();
 
 //image/image.c
-FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type);
+bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type);
 
 #endif

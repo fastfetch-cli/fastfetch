@@ -2,6 +2,6 @@
 
 void ffPrintBreak(FFinstance* instance)
 {
-    ffPrintLogoLine(instance);
+    ffLogoPrintLine(instance);
     putchar('\n');
 }

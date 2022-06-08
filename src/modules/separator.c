@@ -5,7 +5,7 @@ void ffPrintSeparator(FFinstance* instance)
     const FFTitleResult* result = ffDetectTitle(instance);
     uint32_t titleLength = result->userName.length + 1 + result->hostname.length;
 
-    ffPrintLogoLine(instance);
+    ffLogoPrintLine(instance);
 
     if(instance->config.separatorString.length == 0)
     {

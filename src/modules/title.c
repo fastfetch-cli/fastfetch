@@ -46,7 +46,7 @@ void ffPrintTitle(FFinstance* instance)
 {
     const FFTitleResult* result = ffDetectTitle(instance);
 
-    ffPrintLogoLine(instance);
+    ffLogoPrintLine(instance);
 
     printTitlePart(instance, &result->userName);
     putchar('@');
