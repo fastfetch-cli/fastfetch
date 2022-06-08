@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0) # Threads::Threads
+cmake_minimum_required(VERSION 3.1.0) # Threads::Threads and CMAKE_C_STANDARD
 
 project(fastfetch
     VERSION 1.5.2
@@ -42,6 +42,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-O3")
 
