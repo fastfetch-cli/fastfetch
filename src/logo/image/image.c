@@ -563,7 +563,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 }
 
 #else //FF_HAVE_IMAGEMAGICK{6, 7}
-FFLogoImageResult ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
     FF_UNUSED(instance, type);
     return false;
