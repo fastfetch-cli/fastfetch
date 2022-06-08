@@ -365,7 +365,9 @@ void ffLogoBuiltinPrint(FFinstance* instance)
         logoPrintStruct(instance, logo);
         ffLogoPrintRemaining(instance);
 
+        //reset everything
         instance->state.logoHeight = 0;
+        instance->state.keysHeight = 0;
         for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
             ffStrbufClear(&instance->config.logoColors[i]);
 
