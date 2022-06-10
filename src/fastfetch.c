@@ -336,7 +336,7 @@ static inline void printCommandHelp(const char* command)
             "day in month",
             "day in Week",
             "hour",
-            "hout with leading zero",
+            "hour with leading zero",
             "hour 12h format",
             "hour 12h format with leading zero",
             "minute",
