@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.0) # CMAKE_INTERPROCEDURAL_OPTIMIZATION
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs
 
 project(fastfetch
     VERSION 1.5.3
@@ -132,7 +132,7 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 # libfastfetch target #
 #######################
 
-add_library(libfastfetch STATIC
+add_library(libfastfetch OBJECT
     src/util/FFstrbuf.c
     src/util/FFlist.c
     src/util/FFvaluestore.c
