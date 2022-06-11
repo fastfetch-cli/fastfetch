@@ -453,10 +453,6 @@ target_link_libraries(libfastfetch
     PRIVATE Threads::Threads
 )
 
-set_target_properties(libfastfetch PROPERTIES
-    OUTPUT_NAME "fastfetch"
-)
-
 ######################
 # Executable targets #
 ######################
