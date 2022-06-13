@@ -5,5 +5,3 @@
 cscope.*
 tags
 fastfetch.kdev4
-**/*.deb
-packaging/deb/fastfetch
