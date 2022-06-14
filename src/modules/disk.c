@@ -36,7 +36,7 @@ static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs
     if(instance->config.diskFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key->chars, 0, NULL);
-        printf("%uGB / %uGB (%u%%)\n", used, total, percentage);
+        printf("%uGiB / %uGiB (%u%%)\n", used, total, percentage);
     }
     else
     {

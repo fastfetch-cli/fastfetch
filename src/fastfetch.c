@@ -279,7 +279,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "disk-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("disk", "{}GB / {}GB ({4}%)", 4,
+        constructAndPrintCommandHelpFormat("disk", "{}GiB / {}GiB ({4}%)", 4,
             "Used disk space",
             "Total disk space",
             "Number of files",
