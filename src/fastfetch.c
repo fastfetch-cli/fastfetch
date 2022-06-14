@@ -28,7 +28,7 @@ static void constructAndPrintCommandHelpFormat(const char* name, const char* def
     for(uint32_t i = 1; i <= numArgs; i++)
         printf("        {%u}: %s\n", i, va_arg(argp, const char*));
 
-    printf("The default is something like \"%s\".\n", def);
+    printf("The default is something similar to \"%s\".\n", def);
 
     va_end(argp);
 }
@@ -62,10 +62,22 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "host-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("host", "{2} {3}", 3,
-            "Host family",
-            "Host name",
-            "Host version"
+        constructAndPrintCommandHelpFormat("host", "{2} {3}", 15,
+            "product family",
+            "product name",
+            "product version",
+            "product sku",
+            "bios date",
+            "bios release",
+            "bios vendor",
+            "bios version",
+            "board name",
+            "board vendor",
+            "board version",
+            "chassis type",
+            "chassis vendor",
+            "chassis version",
+            "sys vendor"
         );
     }
     else if(strcasecmp(command, "kernel-format") == 0)
