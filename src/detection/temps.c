@@ -7,10 +7,7 @@
 static bool isTempFile(const char* name)
 {
     return
-        name[0] == 't' &&
-        name[1] == 'e' &&
-        name[2] == 'm' &&
-        name[3] == 'p' &&
+        strncmp(name, "temp", 4) == 0 &&
         name[4] >= '0' &&
         name[4] <= '9' &&
         strncmp(name + 5, "_input", 6) == 0;
