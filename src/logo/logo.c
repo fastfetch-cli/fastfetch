@@ -347,7 +347,7 @@ void ffLogoPrintLine(FFinstance* instance)
 
 void ffLogoPrintRemaining(FFinstance* instance)
 {
-    while(instance->state.keysHeight < instance->state.logoHeight)
+    while(instance->state.keysHeight <= instance->state.logoHeight)
     {
         ffLogoPrintLine(instance);
         putchar('\n');
