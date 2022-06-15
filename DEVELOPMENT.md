@@ -12,7 +12,7 @@ Here i just add things that are easy to forget.
   - `libffprint`: contains the printing functions, logos, format etc
   - `fastfetch` and `flashfetch`: Executables, that initialize the config of libffprint. Fist one at runtime, second one at compile time
 - [ ] Better OS output for all possible combinations of /etc/os-release variables.
-- [ ] Expose temperatures to CPU format string
+- [X] Expose temperatures to CPU format string
 - [ ] Expose temperatures to GPU format string
 - [ ] Find wayland compositor by looking at \${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY:-wayland-0}
 - [ ] Make LocalIP module more configurable

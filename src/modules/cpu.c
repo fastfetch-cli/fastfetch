@@ -1,9 +1,16 @@
 #include "fastfetch.h"
 
 #include <string.h>
+#include <errno.h>
 
 #define FF_CPU_MODULE_NAME "CPU"
-#define FF_CPU_NUM_FORMAT_ARGS 14
+#define FF_CPU_NUM_FORMAT_ARGS 15
+
+// TODO: possibly add a config option for this
+char *FF_CPU_THERMAL_ZONES[] = {
+    "x86_pkg_temp",  // x86 CPU package temperature
+    "cpu-thermal"    // Raspberry Pi CPU temperature (possibly other ARM platforms aswell)
+};
 
 static double parseHz(FFstrbuf* content)
 {
@@ -104,6 +111,59 @@ void ffPrintCPU(FFinstance* instance)
     if(numProcs <= 1)
         numProcs = physicalCores;
 
+    double cpuPackageTemp = __DBL_MAX__;
+    // enumerate thermal zones until we either find the x86_pkg_temp zone or we run out of zones.
+    // NOTE: This should generally run just a couple times (~10 iterations), but maybe we should put this behind allowSlowOperations?
+    for (int tzIndex = 0;; tzIndex++)
+    {
+        char path[64];
+        snprintf(path, sizeof(path), "/sys/class/thermal/thermal_zone%d/type", tzIndex);
+
+        FFstrbuf fileContents;
+        ffStrbufInit(&fileContents);
+
+        if (!ffGetFileContent(path, &fileContents))
+        {
+            // this termal zone does not exist
+            ffStrbufDestroy(&fileContents);
+            break;
+        }
+
+        bool isTargetTZ = false;
+        for(size_t i = 0; i < sizeof(FF_CPU_THERMAL_ZONES) / sizeof(FF_CPU_THERMAL_ZONES[0]); i++)
+        {
+            if (strncmp(fileContents.chars, FF_CPU_THERMAL_ZONES[i], fileContents.length) == 0) {
+                isTargetTZ = true;
+                break;
+            }
+        }
+        if(isTargetTZ)
+        {
+            snprintf(path, sizeof(path), "/sys/class/thermal/thermal_zone%d/temp", tzIndex);
+            ffStrbufInit(&fileContents);
+            if (!ffGetFileContent(path, &fileContents))
+            {
+                ffStrbufDestroy(&fileContents);
+                break;
+            }
+            // The temperature is encoded in millicelsius, meaning "49000" is 49C
+            // NOTE: for strtol errno MUST be manually reset (see manpage)
+            errno = 0;
+            long sensorValue = strtol(fileContents.chars, NULL, 10);
+            if (!errno)
+                cpuPackageTemp = (float)sensorValue / 1000.0f; // convert to celsius
+            ffStrbufDestroy(&fileContents);
+            break;
+        }
+        ffStrbufDestroy(&fileContents);
+
+    }
+
+    if (cpuPackageTemp == __DBL_MAX__)
+    {
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "Could not find a CPU thermal zone");
+    }
+
     double ghz = biosLimit;
     if(ghz == 0)
         ghz = scalingMaxFreq;
@@ -163,6 +223,9 @@ void ffPrintCPU(FFinstance* instance)
 
     if(ghz > 0)
         ffStrbufAppendF(&cpu, " @ %.9gGHz", ghz);
+    
+    if (cpuPackageTemp != __DBL_MAX__)
+        ffStrbufAppendF(&cpu, " (%g°C)", cpuPackageTemp);
 
     ffPrintAndWriteToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &cpu, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &name},
@@ -172,6 +235,7 @@ void ffPrintCPU(FFinstance* instance)
         {FF_FORMAT_ARG_TYPE_INT, &numProcsAvailable},
         {FF_FORMAT_ARG_TYPE_INT, &physicalCores},
         {FF_FORMAT_ARG_TYPE_INT, &numProcs},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &cpuPackageTemp},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &biosLimit},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMaxFreq},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMinFreq},
