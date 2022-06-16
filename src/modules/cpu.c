@@ -6,17 +6,16 @@
 #define FF_CPU_MODULE_NAME "CPU"
 #define FF_CPU_NUM_FORMAT_ARGS 15
 
-
 static long parseLong(const FFstrbuf* content)
 {
     long value;
     if(sscanf(content->chars, "%li", &value) != 1)
         return -1;
-    return value;
 
+    return value;
 }
 
-static double parseHz(const FFstrbuf* content)
+static double parseDouble(const FFstrbuf* content)
 {
     double herz;
     if(sscanf(content->chars, "%lf", &herz) != 1)
@@ -34,7 +33,7 @@ static double getGhz(const char* policyFile, const char* cpuFile)
     if(content.length == 0)
         ffGetFileContent(cpuFile, &content);
 
-    double herz = parseHz(&content);
+    double herz = parseDouble(&content);
 
     ffStrbufDestroy(&content);
 
@@ -89,7 +88,7 @@ void ffPrintCPU(FFinstance* instance)
 
     fclose(cpuinfo);
 
-    double procGhz = parseHz(&procGhzString) / 1000.0; //to GHz
+    double procGhz = parseDouble(&procGhzString) / 1000.0; //to GHz
     ffStrbufDestroy(&procGhzString);
 
     double biosLimit      = getGhz("/sys/devices/system/cpu/cpufreq/policy0/bios_limit",       "/sys/devices/system/cpu/cpu0/cpufreq/bios_limit");
@@ -111,19 +110,6 @@ void ffPrintCPU(FFinstance* instance)
         numProcs = numProcsAvailable;
     if(numProcs <= 1)
         numProcs = physicalCores;
-
-
-    const FFTempsResult *temps = ffDetectTemps(&instance);
-    double cpuTemp = 0.0/0.0;
-    for(uint32_t i = 0; i< temps->values.length; i++)
-    {
-        FFTempValue *v = ffListGet(&temps->values, i);
-        if(ffStrbufFirstIndexS(&v->name, "cpu") == v->name.length
-            && ffStrbufCompS(&v->name, "k10temp") != 0
-            && ffStrbufCompS(&v->name, "coretemp") != 0)
-            break;
-        cpuTemp = (double) parseLong(&v->value) / 1000.0f;
-    }
 
     double ghz = biosLimit;
     if(ghz == 0)
@@ -163,6 +149,21 @@ void ffPrintCPU(FFinstance* instance)
     ffStrbufRemoveStringsA(&namePretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
     ffStrbufSubstrBeforeFirstC(&namePretty, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&namePretty, ' '); //If we removed the @ in previous step there was most likely a space before it
+
+    const FFTempsResult *temps = ffDetectTemps(&instance);
+    double cpuTemp = 0.0/0.0; //NaN
+
+    for(uint32_t i = 0; i< temps->values.length; i++)
+    {
+        FFTempValue *v = ffListGet(&temps->values, i);
+        if(
+            ffStrbufFirstIndexS(&v->name, "cpu") == v->name.length &&
+            ffStrbufCompS(&v->name, "k10temp") != 0 &&
+            ffStrbufCompS(&v->name, "coretemp") != 0
+        ) break;
+
+        cpuTemp = (double) parseLong(&v->value) / 1000.0;
+    }
 
     FFstrbuf cpu;
     ffStrbufInitA(&cpu, 128);
