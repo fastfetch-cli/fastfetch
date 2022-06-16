@@ -526,6 +526,15 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
     fputc('\n', file);
 }
 
+double ffStrbufToDouble(const FFstrbuf* strbuf)
+{
+    double value;
+    if(sscanf(strbuf->chars, "%lf", &value) != 1)
+        return 0.0 / 0.0; //NaN
+
+    return value;
+}
+
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     free(strbuf->chars);

@@ -93,6 +93,8 @@ bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
+double ffStrbufToDouble(const FFstrbuf* strbuf);
+
 void ffStrbufDestroy(FFstrbuf* strbuf);
 
 #endif

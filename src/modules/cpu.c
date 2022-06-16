@@ -6,24 +6,6 @@
 #define FF_CPU_MODULE_NAME "CPU"
 #define FF_CPU_NUM_FORMAT_ARGS 15
 
-static long parseLong(const FFstrbuf* content)
-{
-    long value;
-    if(sscanf(content->chars, "%li", &value) != 1)
-        return -1;
-
-    return value;
-}
-
-static double parseDouble(const FFstrbuf* content)
-{
-    double herz;
-    if(sscanf(content->chars, "%lf", &herz) != 1)
-        return 0;
-
-    return herz;
-}
-
 static double getGhz(const char* policyFile, const char* cpuFile)
 {
     FFstrbuf content;
@@ -33,9 +15,13 @@ static double getGhz(const char* policyFile, const char* cpuFile)
     if(content.length == 0)
         ffGetFileContent(cpuFile, &content);
 
-    double herz = parseDouble(&content);
+    double herz = ffStrbufToDouble(&content);
 
     ffStrbufDestroy(&content);
+
+    //ffStrbufToDouble failed
+    if(herz != herz)
+        return 0;
 
     herz /= 1000.0; //to MHz
     return herz / 1000.0; //to GHz
@@ -88,7 +74,12 @@ void ffPrintCPU(FFinstance* instance)
 
     fclose(cpuinfo);
 
-    double procGhz = parseDouble(&procGhzString) / 1000.0; //to GHz
+    double procGhz = ffStrbufToDouble(&procGhzString);
+    if(procGhz != procGhz)
+        procGhz = 0; //NaN
+    else
+        procGhz /= 1000.0; //To GHz
+
     ffStrbufDestroy(&procGhzString);
 
     double biosLimit      = getGhz("/sys/devices/system/cpu/cpufreq/policy0/bios_limit",       "/sys/devices/system/cpu/cpu0/cpufreq/bios_limit");
@@ -158,13 +149,19 @@ void ffPrintCPU(FFinstance* instance)
         FFTempValue* value = ffListGet(&temps->values, i);
 
         if(
-            ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
-            ffStrbufCompS(&value->name, "k10temp") == 0 ||
-            ffStrbufCompS(&value->name, "coretemp") == 0
-        ) {
-            cpuTemp = (double) parseLong(&value->value) / 1000.0;
-            break;
-        }
+            ffStrbufFirstIndexS(&value->name, "cpu") == value->name.length &&
+            ffStrbufCompS(&value->name, "k10temp") != 0 &&
+            ffStrbufCompS(&value->name, "coretemp") != 0
+        ) continue;
+
+        double temp = ffStrbufToDouble(&value->value);
+
+        //NaN
+        if(temp != temp)
+            continue;
+
+        cpuTemp = temp / 1000.0;
+        break;
     }
 
     FFstrbuf cpu;
