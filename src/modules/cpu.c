@@ -7,9 +7,10 @@
 #define FF_CPU_NUM_FORMAT_ARGS 15
 
 
-static long parseLong(const FFstrbuf* content) {
+static long parseLong(const FFstrbuf* content)
+{
     long value;
-    if(content->length == 0 || (sscanf(content->chars, "%li", &value) != 1))
+    if(sscanf(content->chars, "%li", &value) != 1)
         return -1;
     return value;
 
@@ -17,9 +18,6 @@ static long parseLong(const FFstrbuf* content) {
 
 static double parseHz(const FFstrbuf* content)
 {
-    if(content->length == 0)
-        return 0;
-
     double herz;
     if(sscanf(content->chars, "%lf", &herz) != 1)
         return 0;
@@ -117,7 +115,8 @@ void ffPrintCPU(FFinstance* instance)
 
     const FFTempsResult *temps = ffDetectTemps(&instance);
     double cpuTemp = 0.0/0.0;
-    for(uint32_t i = 0; i< temps->values.length; i++) {
+    for(uint32_t i = 0; i< temps->values.length; i++)
+    {
         FFTempValue *v = ffListGet(&temps->values, i);
         if(ffStrbufFirstIndexS(&v->name, "cpu") == v->name.length
             && ffStrbufCompS(&v->name, "k10temp") != 0
