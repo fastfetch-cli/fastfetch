@@ -236,7 +236,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "cpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {15}GHz ({8}°C)", 15,
+        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {15}GHz", 15,
             "CPU name",
             "Prettified CPU name",
             "CPU Vendor name (Vendor ID)",
