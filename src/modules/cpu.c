@@ -1,15 +1,23 @@
 #include "fastfetch.h"
 
 #include <string.h>
+#include <errno.h>
 
 #define FF_CPU_MODULE_NAME "CPU"
-#define FF_CPU_NUM_FORMAT_ARGS 14
+#define FF_CPU_NUM_FORMAT_ARGS 15
 
-static double parseHz(FFstrbuf* content)
+
+static long parseLong(const FFstrbuf* content)
 {
-    if(content->length == 0)
-        return 0;
+    long value;
+    if(sscanf(content->chars, "%li", &value) != 1)
+        return -1;
+    return value;
 
+}
+
+static double parseHz(const FFstrbuf* content)
+{
     double herz;
     if(sscanf(content->chars, "%lf", &herz) != 1)
         return 0;
@@ -104,6 +112,19 @@ void ffPrintCPU(FFinstance* instance)
     if(numProcs <= 1)
         numProcs = physicalCores;
 
+
+    const FFTempsResult *temps = ffDetectTemps(&instance);
+    double cpuTemp = 0.0/0.0;
+    for(uint32_t i = 0; i< temps->values.length; i++)
+    {
+        FFTempValue *v = ffListGet(&temps->values, i);
+        if(ffStrbufFirstIndexS(&v->name, "cpu") == v->name.length
+            && ffStrbufCompS(&v->name, "k10temp") != 0
+            && ffStrbufCompS(&v->name, "coretemp") != 0)
+            break;
+        cpuTemp = (double) parseLong(&v->value) / 1000.0f;
+    }
+
     double ghz = biosLimit;
     if(ghz == 0)
         ghz = scalingMaxFreq;
@@ -172,6 +193,7 @@ void ffPrintCPU(FFinstance* instance)
         {FF_FORMAT_ARG_TYPE_INT, &numProcsAvailable},
         {FF_FORMAT_ARG_TYPE_INT, &physicalCores},
         {FF_FORMAT_ARG_TYPE_INT, &numProcs},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &cpuTemp},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &biosLimit},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMaxFreq},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &scalingMinFreq},

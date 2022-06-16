@@ -236,7 +236,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "cpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {14}GHz", 14,
+        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {15}GHz", 15,
             "CPU name",
             "Prettified CPU name",
             "CPU Vendor name (Vendor ID)",
@@ -244,6 +244,7 @@ static inline void printCommandHelp(const char* command)
             "CPU logical core count configured",
             "CPU physical core count",
             "Always set core count",
+            "CPU package temperature",
             "frequency bios limit",
             "frequency scaling max",
             "frequency scaling min",
