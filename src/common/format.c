@@ -72,6 +72,7 @@ static inline bool formatArgSet(const FFformatarg* arg)
 {
     return arg->value != NULL && (
         (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value == *(double*)arg->value) || //NaN
         (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRING && *(const char*)arg->value != '\0') ||

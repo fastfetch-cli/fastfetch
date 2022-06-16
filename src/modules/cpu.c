@@ -150,19 +150,21 @@ void ffPrintCPU(FFinstance* instance)
     ffStrbufSubstrBeforeFirstC(&namePretty, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&namePretty, ' '); //If we removed the @ in previous step there was most likely a space before it
 
-    const FFTempsResult *temps = ffDetectTemps(&instance);
+    const FFTempsResult *temps = ffDetectTemps(instance);
     double cpuTemp = 0.0/0.0; //NaN
 
-    for(uint32_t i = 0; i< temps->values.length; i++)
+    for(uint32_t i = 0; i < temps->values.length; i++)
     {
-        FFTempValue *v = ffListGet(&temps->values, i);
-        if(
-            ffStrbufFirstIndexS(&v->name, "cpu") == v->name.length &&
-            ffStrbufCompS(&v->name, "k10temp") != 0 &&
-            ffStrbufCompS(&v->name, "coretemp") != 0
-        ) break;
+        FFTempValue* value = ffListGet(&temps->values, i);
 
-        cpuTemp = (double) parseLong(&v->value) / 1000.0;
+        if(
+            ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
+            ffStrbufCompS(&value->name, "k10temp") == 0 ||
+            ffStrbufCompS(&value->name, "coretemp") == 0
+        ) {
+            cpuTemp = (double) parseLong(&value->value) / 1000.0;
+            break;
+        }
     }
 
     FFstrbuf cpu;
