@@ -122,6 +122,13 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(!ffStrSet(term) && getenv("WT_SESSION") != NULL)
         term = "Windows Terminal";
 
+    //Termux
+    if(!ffStrSet(term) && (
+        getenv("TERMUX_VERSION") != NULL ||
+        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
+        getenv("TMUX_TMPDIR") != NULL
+    )) term = "Termux";
+
     //Normal Terminal
     if(!ffStrSet(term))
         term = getenv("TERM");
