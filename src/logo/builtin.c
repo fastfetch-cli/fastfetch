@@ -80,11 +80,11 @@ static const FFlogo* getLogoAlpineSmall()
     FF_LOGO_INIT
     FF_LOGO_NAMES("alpine_small", "alpine-linux-small")
     FF_LOGO_LINES(
-        "   /\\ /\\n"
-        "  // \\  \\n"
-        " //   \\  \\n"
-        "///    \\  \\n"
-        "//      \\  \\n"
+        "   /\\ /\\\n"
+        "  // \\  \\\n"
+        " //   \\  \\\n"
+        "///    \\  \\\n"
+        "//      \\  \\\n"
         "         \\n"
     )
     FF_LOGO_COLORS(
