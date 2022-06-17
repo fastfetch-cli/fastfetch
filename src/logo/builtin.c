@@ -75,6 +75,24 @@ static const FFlogo* getLogoAlpine()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoAlpineSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("alpine_small", "alpine-linux-small")
+    FF_LOGO_LINES(
+        "   /\\ /\\n"
+        "  // \\  \\n"
+        " //   \\  \\n"
+        "///    \\  \\n"
+        "//      \\  \\n"
+        "         \\n"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoAndroid()
 {
     FF_LOGO_INIT
@@ -1467,6 +1485,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         ffLogoBuiltinGetUnknown,
         getLogoNone,
         getLogoAlpine,
+        getLogoAlpineSmall,
         getLogoAndroid,
         getLogoAndroidSmall,
         getLogoArch,
