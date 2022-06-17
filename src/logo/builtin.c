@@ -85,7 +85,7 @@ static const FFlogo* getLogoAlpineSmall()
         " //   \\  \\\n"
         "///    \\  \\\n"
         "//      \\  \\\n"
-        "         \\n"
+        "         \\"
     )
     FF_LOGO_COLORS(
         "34" //blue
