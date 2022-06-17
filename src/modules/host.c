@@ -79,6 +79,13 @@ void ffPrintHost(FFinstance* instance)
 
         if(!hostValueSet(&product_name))
             ffStrbufClear(&product_name);
+
+        //On WSL, the real host can't be detected. Instead use WSL as host.
+        if(product_name.length == 0 && product_family.length == 0 && (
+            getenv("WSLENV") != NULL ||
+            getenv("WSL_DISTRO") != NULL ||
+            getenv("WSL_INTEROP") != NULL
+        )) ffStrbufAppendS(&product_family, "Windows Subsystem for Linux");
     #else
         ffSettingsGetAndroidProperty("ro.product.brand", &product_name);
         if(product_name.length > 0){
