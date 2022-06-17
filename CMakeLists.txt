@@ -477,13 +477,6 @@ target_link_libraries(flashfetch
 ###################
 
 if (BUILD_TESTS)
-    add_executable(fastfetch-test-performance
-        tests/performance.c
-    )
-    target_link_libraries(fastfetch-test-performance
-        PRIVATE libfastfetch
-    )
-
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
