@@ -27,14 +27,14 @@ static const char* glHandlePrint(FFinstance* instance, const GLData* data)
     const char* vendor = (const char*) data->ffglGetString(GL_VENDOR);
     const char* slv = (const char*) data->ffglGetString(GL_SHADING_LANGUAGE_VERSION);
 
-    if(instance->config.openGLFormat.length == 0)
+    if(instance->config.openGL.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGLKey);
+        ffPrintLogoAndKey(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL.key);
         puts(version);
     }
     else
     {
-        ffPrintFormatString(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGLKey, &instance->config.openGLFormat, NULL, FF_OPENGL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, FF_OPENGL_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRING, version},
             {FF_FORMAT_ARG_TYPE_STRING, renderer},
             {FF_FORMAT_ARG_TYPE_STRING, vendor},
@@ -388,5 +388,5 @@ void ffPrintOpenGL(FFinstance* instance)
     #endif
 
     if(error != NULL)
-        ffPrintError(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGLKey, &instance->config.openGLFormat, FF_OPENGL_NUM_FORMAT_ARGS, error);
+        ffPrintError(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, error);
 }

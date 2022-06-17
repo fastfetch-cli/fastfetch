@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include <inttypes.h>
+
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
@@ -85,9 +87,9 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
 static void printBattery(FFinstance* instance, const BatteryResult* result, uint8_t index)
 {
-    if(instance->config.batteryFormat.length == 0)
+    if(instance->config.battery.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey);
+        ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.battery.key);
 
         bool showStatus =
             result->status.length > 0 &&
@@ -114,7 +116,7 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
     }
     else
     {
-        ffPrintFormatString(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, NULL, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.battery, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
@@ -144,7 +146,7 @@ void ffPrintBattery(FFinstance* instance)
     DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
     {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "opendir(\"%s\") == NULL", baseDir.chars);
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.battery, "opendir(\"%s\") == NULL", baseDir.chars);
         ffStrbufDestroy(&baseDir);
         return;
     }
@@ -175,7 +177,7 @@ void ffPrintBattery(FFinstance* instance)
     }
 
     if(results.length == 0)
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "%s doesn't contain any battery folder", baseDir.chars);
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.battery, "%s doesn't contain any battery folder", baseDir.chars);
 
     ffListDestroy(&results);
     ffStrbufDestroy(&baseDir);

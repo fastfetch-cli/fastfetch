@@ -289,13 +289,13 @@ void ffPrintPackages(FFinstance* instance)
     uint32_t all = counts.dpkg + counts.emerge + counts.flatpak + counts.nixDefault + nixUser + counts.pacman + counts.rpm + counts.snap + counts.xbps;
     if(all == 0)
     {
-        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, FF_PACKAGES_NUM_FORMAT_ARGS, "No packages from known package managers found");
+        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
         return;
     }
 
-    if(instance->config.packagesFormat.length == 0)
+    if(instance->config.packages.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey);
+        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages.key);
 
         #define FF_PRINT_PACKAGE(name) \
         if(counts.name > 0) \
@@ -344,7 +344,7 @@ void ffPrintPackages(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packagesKey, &instance->config.packagesFormat, NULL, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &all},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pacman},
             {FF_FORMAT_ARG_TYPE_STRBUF, &counts.pacmanBranch},

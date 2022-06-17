@@ -46,7 +46,7 @@ void ffPrintSong(FFinstance* instance)
 
     if(media->song.length == 0)
     {
-        ffPrintError(instance, FF_SONG_MODULE_NAME, 0, &instance->config.songKey, &instance->config.songFormat, FF_SONG_NUM_FORMAT_ARGS, "No song detected");
+        ffPrintError(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song, "No song detected");
         return;
     }
 
@@ -67,7 +67,7 @@ void ffPrintSong(FFinstance* instance)
     if(songPretty.length == 0)
         ffStrbufAppend(&songPretty, &media->song);
 
-    if(instance->config.songFormat.length == 0)
+    if(instance->config.song.outputFormat.length == 0)
     {
         //We don't expose artistPretty to the format, as it might be empty (when the think that the artist is already in the song title)
         FFstrbuf artistPretty;
@@ -79,7 +79,7 @@ void ffPrintSong(FFinstance* instance)
         if(artistInSongTitle(&songPretty, &artistPretty))
             ffStrbufClear(&artistPretty);
 
-        ffPrintLogoAndKey(instance, FF_SONG_MODULE_NAME, 0, &instance->config.songKey);
+        ffPrintLogoAndKey(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song.key);
 
         if(artistPretty.length > 0)
         {
@@ -98,7 +98,7 @@ void ffPrintSong(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_SONG_MODULE_NAME, 0, &instance->config.songKey, &instance->config.songFormat, NULL, FF_SONG_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song, FF_SONG_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},

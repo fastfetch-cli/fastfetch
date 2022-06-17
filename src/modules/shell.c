@@ -12,13 +12,13 @@ void ffPrintShell(FFinstance* instance)
 
     if(result->shellProcessName.length == 0)
     {
-        ffPrintError(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shellKey, &instance->config.shellFormat, FF_SHELL_NUM_FORMAT_ARGS, "Couldn't detect shell");
+        ffPrintError(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shell, "Couldn't detect shell");
         return;
     }
 
-    if(instance->config.shellFormat.length == 0)
+    if(instance->config.shell.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shellKey);
+        ffPrintLogoAndKey(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shell.key);
         fputs(result->shellExeName, stdout);
 
         if(result->shellVersion.length > 0)
@@ -31,7 +31,7 @@ void ffPrintShell(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shellKey, &instance->config.shellFormat, NULL, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shell, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
             {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},

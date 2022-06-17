@@ -4,14 +4,14 @@
 
 void ffPrintTime(FFinstance* instance)
 {
-    if(instance->config.timeFormat.length > 0)
+    if(instance->config.time.outputFormat.length > 0)
     {
-        ffPrintDateTimeFormat(instance, FF_TIME_MODULE_NAME, &instance->config.timeKey, &instance->config.timeFormat);
+        ffPrintDateTimeFormat(instance, FF_TIME_MODULE_NAME, &instance->config.time);
         return;
     }
 
     const FFDateTimeResult* datetime = ffDetectDateTime(instance);
-    ffPrintLogoAndKey(instance, FF_TIME_MODULE_NAME, 0, &instance->config.timeKey);
+    ffPrintLogoAndKey(instance, FF_TIME_MODULE_NAME, 0, &instance->config.time.key);
 
     //hh:mm:ss
     printf("%s:%s:%s\n", datetime->hourPretty.chars, datetime->minutePretty.chars, datetime->secondPretty.chars);

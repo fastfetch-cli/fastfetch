@@ -33,7 +33,7 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
 
     ffStrbufAppend(&gpu, &namePretty);
 
-    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpuKey, cache, &gpu, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu, cache, &gpu, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->vendor},
         {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
@@ -129,7 +129,7 @@ static bool pciPrintGPUs(FFinstance* instance)
             ffStrbufRecalculateLength(&result->name);
 
             ffStrbufInit(&result->driver);
-            if(instance->config.gpuFormat.length > 0) //We only need it for the format string, so don't detect it if it isn't needed
+            if(instance->config.gpu.outputFormat.length > 0) //We only need it for the format string, so don't detect it if it isn't needed
                 pciGetDriver(dev, &result->driver, ffpci_get_param);
         };
     }
@@ -163,7 +163,7 @@ static bool vulkanPrintGPUs(FFinstance* instance)
 
 void ffPrintGPU(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
+    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS))
         return;
 
     #ifdef FF_HAVE_LIBPCI
@@ -174,5 +174,5 @@ void ffPrintGPU(FFinstance* instance)
     if(vulkanPrintGPUs(instance))
         return;
 
-    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPUs found.");
+    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "No GPUs found.");
 }

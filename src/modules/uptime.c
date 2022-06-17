@@ -10,9 +10,9 @@ void ffPrintUptime(FFinstance* instance)
     uint32_t minutes = (uint32_t) (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
     uint32_t seconds = (uint32_t)  instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
 
-    if(instance->config.uptimeFormat.length == 0)
+    if(instance->config.uptime.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptimeKey);
+        ffPrintLogoAndKey(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptime.key);
 
         if(days == 0 && hours == 0 && minutes == 0)
         {
@@ -57,7 +57,7 @@ void ffPrintUptime(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptimeKey, &instance->config.uptimeFormat, NULL, FF_UPTIME_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptime, FF_UPTIME_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &days},
             {FF_FORMAT_ARG_TYPE_UINT, &hours},
             {FF_FORMAT_ARG_TYPE_UINT, &minutes},

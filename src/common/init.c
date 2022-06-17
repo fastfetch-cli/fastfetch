@@ -102,6 +102,13 @@ static void initState(FFstate* state)
     initCacheDir(state);
 }
 
+static void initModuleArg(FFModuleArgs* args)
+{
+    ffStrbufInitA(&args->key, 0);
+    ffStrbufInitA(&args->outputFormat, 0);
+    ffStrbufInitA(&args->errorFormat, 0);
+}
+
 static void defaultConfig(FFinstance* instance)
 {
     ffStrbufInit(&instance->config.logoSource);
@@ -128,74 +135,40 @@ static void defaultConfig(FFinstance* instance)
     instance->config.glType = FF_GL_TYPE_AUTO;
     instance->config.pipe = false;
 
-    ffStrbufInitA(&instance->config.osFormat, 0);
-    ffStrbufInitA(&instance->config.osKey, 0);
-    ffStrbufInitA(&instance->config.hostFormat, 0);
-    ffStrbufInitA(&instance->config.hostKey, 0);
-    ffStrbufInitA(&instance->config.kernelFormat, 0);
-    ffStrbufInitA(&instance->config.kernelKey, 0);
-    ffStrbufInitA(&instance->config.uptimeFormat, 0);
-    ffStrbufInitA(&instance->config.uptimeKey, 0);
-    ffStrbufInitA(&instance->config.processesFormat, 0);
-    ffStrbufInitA(&instance->config.processesKey, 0);
-    ffStrbufInitA(&instance->config.packagesFormat, 0);
-    ffStrbufInitA(&instance->config.packagesKey, 0);
-    ffStrbufInitA(&instance->config.shellFormat, 0);
-    ffStrbufInitA(&instance->config.shellKey, 0);
-    ffStrbufInitA(&instance->config.resolutionFormat, 0);
-    ffStrbufInitA(&instance->config.resolutionKey, 0);
-    ffStrbufInitA(&instance->config.deFormat, 0);
-    ffStrbufInitA(&instance->config.deKey, 0);
-    ffStrbufInitA(&instance->config.wmFormat, 0);
-    ffStrbufInitA(&instance->config.wmKey, 0);
-    ffStrbufInitA(&instance->config.wmThemeFormat, 0);
-    ffStrbufInitA(&instance->config.wmThemeKey, 0);
-    ffStrbufInitA(&instance->config.themeFormat, 0);
-    ffStrbufInitA(&instance->config.themeKey, 0);
-    ffStrbufInitA(&instance->config.iconsFormat, 0);
-    ffStrbufInitA(&instance->config.iconsKey, 0);
-    ffStrbufInitA(&instance->config.fontFormat, 0);
-    ffStrbufInitA(&instance->config.fontKey, 0);
-    ffStrbufInitA(&instance->config.cursorKey, 0);
-    ffStrbufInitA(&instance->config.cursorFormat, 0);
-    ffStrbufInitA(&instance->config.terminalFormat, 0);
-    ffStrbufInitA(&instance->config.terminalKey, 0);
-    ffStrbufInitA(&instance->config.termFontFormat, 0);
-    ffStrbufInitA(&instance->config.termFontKey, 0);
-    ffStrbufInitA(&instance->config.cpuFormat, 0);
-    ffStrbufInitA(&instance->config.cpuKey, 0);
-    ffStrbufInitA(&instance->config.cpuUsageFormat, 0);
-    ffStrbufInitA(&instance->config.cpuUsageKey, 0);
-    ffStrbufInitA(&instance->config.gpuFormat, 0);
-    ffStrbufInitA(&instance->config.gpuKey, 0);
-    ffStrbufInitA(&instance->config.memoryFormat, 0);
-    ffStrbufInitA(&instance->config.memoryKey, 0);
-    ffStrbufInitA(&instance->config.diskFormat, 0);
-    ffStrbufInitA(&instance->config.diskKey, 0);
-    ffStrbufInitA(&instance->config.batteryFormat, 0);
-    ffStrbufInitA(&instance->config.batteryKey, 0);
-    ffStrbufInitA(&instance->config.localeFormat, 0);
-    ffStrbufInitA(&instance->config.localeKey, 0);
-    ffStrbufInitA(&instance->config.localIpKey, 0);
-    ffStrbufInitA(&instance->config.localIpFormat, 0);
-    ffStrbufInitA(&instance->config.publicIpKey, 0);
-    ffStrbufInitA(&instance->config.publicIpFormat, 0);
-    ffStrbufInitA(&instance->config.playerKey, 0);
-    ffStrbufInitA(&instance->config.playerFormat, 0);
-    ffStrbufInitA(&instance->config.songKey, 0);
-    ffStrbufInitA(&instance->config.songFormat, 0);
-    ffStrbufInitA(&instance->config.dateTimeKey, 0);
-    ffStrbufInitA(&instance->config.dateTimeFormat, 0);
-    ffStrbufInitA(&instance->config.dateKey, 0);
-    ffStrbufInitA(&instance->config.dateFormat, 0);
-    ffStrbufInitA(&instance->config.timeKey, 0);
-    ffStrbufInitA(&instance->config.timeFormat, 0);
-    ffStrbufInitA(&instance->config.vulkanKey, 0);
-    ffStrbufInitA(&instance->config.vulkanFormat, 0);
-    ffStrbufInitA(&instance->config.openGLKey, 0);
-    ffStrbufInitA(&instance->config.openGLFormat, 0);
-    ffStrbufInitA(&instance->config.openCLKey, 0);
-    ffStrbufInitA(&instance->config.openCLFormat, 0);
+    initModuleArg(&instance->config.os);
+    initModuleArg(&instance->config.host);
+    initModuleArg(&instance->config.kernel);
+    initModuleArg(&instance->config.uptime);
+    initModuleArg(&instance->config.processes);
+    initModuleArg(&instance->config.packages);
+    initModuleArg(&instance->config.shell);
+    initModuleArg(&instance->config.resolution);
+    initModuleArg(&instance->config.de);
+    initModuleArg(&instance->config.wm);
+    initModuleArg(&instance->config.wmTheme);
+    initModuleArg(&instance->config.theme);
+    initModuleArg(&instance->config.icons);
+    initModuleArg(&instance->config.font);
+    initModuleArg(&instance->config.cursor);
+    initModuleArg(&instance->config.terminal);
+    initModuleArg(&instance->config.terminalFont);
+    initModuleArg(&instance->config.cpu);
+    initModuleArg(&instance->config.cpuUsage);
+    initModuleArg(&instance->config.gpu);
+    initModuleArg(&instance->config.memory);
+    initModuleArg(&instance->config.disk);
+    initModuleArg(&instance->config.battery);
+    initModuleArg(&instance->config.locale);
+    initModuleArg(&instance->config.localIP);
+    initModuleArg(&instance->config.publicIP);
+    initModuleArg(&instance->config.player);
+    initModuleArg(&instance->config.song);
+    initModuleArg(&instance->config.dateTime);
+    initModuleArg(&instance->config.date);
+    initModuleArg(&instance->config.time);
+    initModuleArg(&instance->config.vulkan);
+    initModuleArg(&instance->config.openGL);
+    initModuleArg(&instance->config.openCL);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);

@@ -7,7 +7,7 @@
 
 static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, bool showFolderPath)
 {
-    if(instance->config.diskKey.length == 0)
+    if(instance->config.disk.key.length == 0)
     {
         if(showFolderPath)
             ffStrbufAppendF(key, FF_DISK_MODULE_NAME" (%s)", folderPath);
@@ -16,7 +16,7 @@ static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, 
     }
     else
     {
-        ffParseFormatString(key, &instance->config.diskKey, NULL, 1, (FFformatarg[]){
+        ffParseFormatString(key, &instance->config.disk.key, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, folderPath}
         });
     }
@@ -33,14 +33,14 @@ static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs
 
     uint32_t files = (uint32_t) (fs->f_files - fs->f_ffree);
 
-    if(instance->config.diskFormat.length == 0)
+    if(instance->config.disk.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key->chars, 0, NULL);
         printf("%uGiB / %uGiB (%u%%)\n", used, total, percentage);
     }
     else
     {
-        ffPrintFormatString(instance, key->chars, 0, NULL, &instance->config.diskFormat, NULL, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormatString(instance, key->chars, 0, NULL, &instance->config.disk.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &used},
             {FF_FORMAT_ARG_TYPE_UINT, &total},
             {FF_FORMAT_ARG_TYPE_UINT, &files},
@@ -64,9 +64,9 @@ static void printFolder(FFinstance* instance, const char* folderPath)
 
     struct statvfs fs;
     int ret = statvfs(folderPath, &fs);
-    if(ret != 0 && instance->config.diskFormat.length == 0)
+    if(ret != 0 && instance->config.disk.outputFormat.length == 0)
     {
-        ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "statvfs(\"%s\", &fs) != 0 (%i)", folderPath, ret);
+        ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs(\"%s\", &fs) != 0 (%i)", folderPath, ret);
         ffStrbufDestroy(&key);
         return;
     }
@@ -89,7 +89,7 @@ void ffPrintDisk(FFinstance* instance)
         {
             FF_STRBUF_CREATE(key);
             getKey(instance, &key, "", false);
-            ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "statvfs failed for both / and " FASTFETCH_TARGET_DIR_HOME);
+            ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs failed for both / and " FASTFETCH_TARGET_DIR_HOME);
             ffStrbufDestroy(&key);
             return;
         }
@@ -108,7 +108,7 @@ void ffPrintDisk(FFinstance* instance)
         {
             FF_STRBUF_CREATE(key);
             getKey(instance, &key, "", false);
-            ffPrintError(instance, key.chars, 0, NULL, &instance->config.diskFormat, FF_DISK_NUM_FORMAT_ARGS, "Custom disk folders string doesn't contain any folders");
+            ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "Custom disk folders string doesn't contain any folders");
             ffStrbufDestroy(&key);
             return;
         }

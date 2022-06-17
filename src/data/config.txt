@@ -237,6 +237,44 @@
 #--opengl-format
 #--opencl-format
 
+# Error options:
+# Sets the format string to use if an error occured
+# For information on format strings, see "fastfetch --help format".
+# Each of them take the error as first and only argument.
+# If one of them is set, the module will appear, even if --show-errors is not given.
+#--os-error
+#--host-error
+#--kernel-error
+#--uptime-error
+#--processes-error
+#--packages-error
+#--shell-error
+#--resolution-error
+#--de-error
+#--wm-error
+#--wm-theme-error
+#--theme-error
+#--icons-error
+#--font-error
+#--cursor-error
+#--terminal-error
+#--terminal-font-error
+#--cpu-error
+#--cpu-usage-error
+#--gpu-error
+#--memory-error
+#--disk-error
+#--battery-error
+#--locale-error
+#--local-ip-error
+#--public-ip-error
+#--player-error
+#--song-error
+#--datetime-error
+#--vulkan-error
+#--opengl-error
+#--opencl-error
+
 # Library options:
 # Sets an user specific path to a library to load.
 # Must be a valid path to a library.

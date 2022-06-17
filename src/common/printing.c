@@ -10,6 +10,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
         ffPrintColor(&instance->config.mainColor);
     }
 
+    //NULL check is required for modules with custom keys, e.g. disk with the folder path
     if(customKeyFormat == NULL || customKeyFormat->length == 0)
     {
         fputs(moduleName, stdout);
@@ -21,7 +22,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     {
         FFstrbuf key;
         ffStrbufInit(&key);
-        ffParseFormatString(&key, customKeyFormat, NULL, 1, (FFformatarg[]){
+        ffParseFormatString(&key, customKeyFormat, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
         });
         ffStrbufWriteTo(&key, stdout);
@@ -37,44 +38,12 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }
 
-void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...)
-{
-    if(!instance->config.showErrors)
-        return;
-
-    va_list arguments;
-    va_start(arguments, message);
-
-    if(formatString == NULL || formatString->length == 0)
-    {
-        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
-        fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
-        vprintf(message, arguments);
-        puts(FASTFETCH_TEXT_MODIFIER_RESET);
-    }
-    else
-    {
-        FF_STRBUF_CREATE(error);
-        ffStrbufAppendVF(&error, message, arguments);
-
-        // calloc sets all to 0 and FF_FORMAT_ARG_TYPE_NULL also has value 0 so we don't need to explictly set it
-        FFformatarg* nullArgs = calloc(numFormatArgs, sizeof(FFformatarg));
-
-        ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, formatString, &error, numFormatArgs, nullArgs);
-
-        free(nullArgs);
-        ffStrbufDestroy(&error);
-    }
-
-    va_end(arguments);
-}
-
-void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments)
+void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments)
 {
     FFstrbuf buffer;
     ffStrbufInitA(&buffer, 256);
 
-    ffParseFormatString(&buffer, formatString, error, numArgs, arguments);
+    ffParseFormatString(&buffer, format, numArgs, arguments);
 
     if(buffer.length > 0)
     {
@@ -83,6 +52,59 @@ void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t m
     }
 
     ffStrbufDestroy(&buffer);
+}
+
+void ffPrintFormat(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, uint32_t numArgs, const FFformatarg* arguments)
+{
+    ffPrintFormatString(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->outputFormat, numArgs, arguments);
+}
+
+static void printError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customErrorFormat, const char* message, va_list arguments)
+{
+    bool hasCustomErrorFormat = customErrorFormat != NULL && customErrorFormat->length > 0;
+    if(!hasCustomErrorFormat && !instance->config.showErrors)
+        return;
+
+    if(hasCustomErrorFormat)
+    {
+        FFstrbuf error;
+        ffStrbufInit(&error);
+        ffStrbufAppendVF(&error, message, arguments);
+
+        ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, customErrorFormat, 1, (FFformatarg[]) {
+            {FF_FORMAT_ARG_TYPE_STRBUF, &error}
+        });
+
+        ffStrbufDestroy(&error);
+    }
+    else
+    {
+        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
+
+        if(!instance->config.pipe)
+            fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
+
+        vprintf(message, arguments);
+
+        if(!instance->config.pipe)
+            puts(FASTFETCH_TEXT_MODIFIER_RESET);
+    }
+}
+
+void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customErrorFormat, const char* message, ...)
+{
+    va_list arguments;
+    va_start(arguments, message);
+    printError(instance, moduleName, moduleIndex, customKeyFormat, customErrorFormat, message, arguments);
+    va_end(arguments);
+}
+
+void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...)
+{
+    va_list arguments;
+    va_start(arguments, message);
+    printError(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->errorFormat, message, arguments);
+    va_end(arguments);
 }
 
 void ffPrintColor(const FFstrbuf* colorValue)

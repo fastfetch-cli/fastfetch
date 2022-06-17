@@ -29,13 +29,13 @@ static double getGhz(const char* policyFile, const char* cpuFile)
 
 void ffPrintCPU(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS))
+    if(ffPrintFromCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpu, FF_CPU_NUM_FORMAT_ARGS))
         return;
 
     FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
     {
-        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "fopen(\"""/proc/cpuinfo\", \"r\") == NULL");
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpu, "fopen(\"""/proc/cpuinfo\", \"r\") == NULL");
         return;
     }
 
@@ -122,7 +122,7 @@ void ffPrintCPU(FFinstance* instance)
     ) {
         ffStrbufDestroy(&name);
         ffStrbufDestroy(&vendor);
-        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpuKey, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, "No CPU info found in /proc/cpuinfo");
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpu, "No CPU info found in /proc/cpuinfo");
         return;
     }
 
@@ -185,7 +185,7 @@ void ffPrintCPU(FFinstance* instance)
     if(ghz > 0)
         ffStrbufAppendF(&cpu, " @ %.9gGHz", ghz);
 
-    ffPrintAndWriteToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpuKey, &cpu, &instance->config.cpuFormat, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+    ffPrintAndWriteToCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpu, &cpu, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
         {FF_FORMAT_ARG_TYPE_STRBUF, &vendor},

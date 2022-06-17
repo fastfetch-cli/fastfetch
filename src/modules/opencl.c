@@ -44,14 +44,14 @@ static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)
     char vendor[32];
     data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL);
 
-    if(instance->config.openCLFormat.length == 0)
+    if(instance->config.openCL.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCLKey);
+        ffPrintLogoAndKey(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL.key);
         puts(version);
     }
     else
     {
-        ffPrintFormatString(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCLKey, &instance->config.openCLFormat, NULL, FF_OPENCL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL, FF_OPENCL_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRING, version},
             {FF_FORMAT_ARG_TYPE_STRING, device},
             {FF_FORMAT_ARG_TYPE_STRING, vendor}
@@ -87,5 +87,5 @@ void ffPrintOpenCL(FFinstance* instance)
     #endif
 
     if(error != NULL)
-        ffPrintError(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCLKey, &instance->config.openCLFormat, FF_OPENCL_NUM_FORMAT_ARGS, error);
+        ffPrintError(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL, error);
 }

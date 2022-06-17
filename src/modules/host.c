@@ -44,7 +44,7 @@ static void getHostValue(const char* devicesPath, const char* classPath, FFstrbu
 
 void ffPrintHost(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS))
+    if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.host, FF_HOST_NUM_FORMAT_ARGS))
         return;
 
     FFstrbuf product_family;
@@ -96,7 +96,7 @@ void ffPrintHost(FFinstance* instance)
     {
         ffStrbufDestroy(&product_family);
         ffStrbufDestroy(&product_name);
-        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, "neither product_family nor product_name is set by O.E.M.");
+        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.host, "neither product_family nor product_name is set by O.E.M.");
         return;
     }
 
@@ -141,7 +141,7 @@ void ffPrintHost(FFinstance* instance)
         ffStrbufAppend(&host, &product_version);
     }
 
-    ffPrintAndWriteToCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &host, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
+    ffPrintAndWriteToCache(instance, FF_HOST_MODULE_NAME, &instance->config.host, &host, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
         {FF_FORMAT_ARG_TYPE_STRBUF, &product_family},
         {FF_FORMAT_ARG_TYPE_STRBUF, &product_name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &product_version},

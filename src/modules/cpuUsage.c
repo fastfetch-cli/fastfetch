@@ -12,7 +12,7 @@ void ffPrintCPUUsage(FFinstance* instance)
     FILE* procStat = fopen("/proc/stat", "r");
     if(procStat == NULL)
     {
-        ffPrintError(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsageKey, &instance->config.cpuUsageFormat, FF_CPU_USAGE_NUM_FORMAT_ARGS, "fopen(\"""/proc/stat\", \"r\") == NULL");
+        ffPrintError(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpu, "fopen(\"""/proc/stat\", \"r\") == NULL");
         return;
     }
     if (fscanf(procStat, "cpu%ld%ld%ld%ld%ld%ld%ld", &user, &nice, &system, &idle, &iowait, &irq, &softirq) < 0) goto exit;
@@ -31,15 +31,15 @@ void ffPrintCPUUsage(FFinstance* instance)
     long totalOverPeriod = totalJiffies2 - totalJiffies1;
     double cpuPercent = (double)workOverPeriod / (double)totalOverPeriod * 100;
 
-    if(instance->config.cpuUsageFormat.length == 0)
+    if(instance->config.cpuUsage.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsageKey);
+        ffPrintLogoAndKey(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsage.key);
 
         printf("%.2lf%%\n", cpuPercent);
     }
     else
     {
-        ffPrintFormatString(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsageKey, &instance->config.cpuUsageFormat, NULL, FF_CPU_USAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsage, FF_CPU_USAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_DOUBLE, &cpuPercent}
         });
     }

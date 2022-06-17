@@ -11,21 +11,28 @@
 
 static void printValue(FFinstance* instance, const char* ifaName, const char* addressBuffer)
 {
-    FF_STRBUF_CREATE(key);
+    FFstrbuf key;
+    ffStrbufInit(&key);
 
-    if (instance->config.localIpKey.length == 0) {
+    if (instance->config.localIP.key.length == 0)
+    {
         ffStrbufAppendF(&key, FF_LOCALIP_MODULE_NAME " (%s)", ifaName);
-    } else {
-        ffParseFormatString(&key, &instance->config.localIpKey, NULL, 1, (FFformatarg[]){
+    }
+    else
+    {
+        ffParseFormatString(&key, &instance->config.localIP.key, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, ifaName}
         });
     }
 
-    if (instance->config.localIpFormat.length == 0) {
-        ffPrintLogoAndKey(instance, FF_LOCALIP_MODULE_NAME, 0, &key);
+    if (instance->config.localIP.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(instance, key.chars, 0, NULL);
         puts(addressBuffer);
-    } else {
-        ffPrintFormatString(instance, FF_LOCALIP_MODULE_NAME, 0, &key, &instance->config.localIpFormat, NULL, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
+    }
+    else
+    {
+        ffPrintFormatString(instance, key.chars, 0, NULL, &instance->config.localIP.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, addressBuffer}
         });
     }
@@ -38,7 +45,7 @@ void ffPrintLocalIp(FFinstance* instance)
     struct ifaddrs* ifAddrStruct = NULL;
     int ret = getifaddrs(&ifAddrStruct);
     if (ret < 0) {
-        ffPrintError(instance, FF_LOCALIP_MODULE_NAME, 0, &instance->config.localIpKey, &instance->config.localIpFormat, FF_LOCALIP_NUM_FORMAT_ARGS, "getifaddrs(&ifAddrStruct) < 0 (%i)", ret);
+        ffPrintError(instance, FF_LOCALIP_MODULE_NAME, 0, &instance->config.localIP, "getifaddrs(&ifAddrStruct) < 0 (%i)", ret);
         return;
     }
 

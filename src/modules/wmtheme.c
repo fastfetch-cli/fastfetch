@@ -6,14 +6,14 @@
 
 static void printWMTheme(FFinstance* instance, const char* theme)
 {
-    if(instance->config.wmThemeFormat.length == 0)
+    if(instance->config.wmTheme.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey);
+        ffPrintLogoAndKey(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme.key);
         puts(theme);
     }
     else
     {
-        ffPrintFormatString(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, NULL, FF_WMTHEME_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, FF_WMTHEME_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, theme}
         });
     }
@@ -26,7 +26,7 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
 
     if(!ffParsePropFileConfig(instance, configFile, themeRegex, &theme))
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Config file %s doesn't exist", configFile);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Config file %s doesn't exist", configFile);
         ffStrbufDestroy(&theme);
         return;
     }
@@ -37,7 +37,7 @@ static void printWMThemeFromConfigFile(FFinstance* instance, const char* configF
 
         if(defaultValue == NULL)
         {
-            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find WM theme in %s", configFile);
+            ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't find WM theme in %s", configFile);
             return;
         }
 
@@ -66,7 +66,7 @@ static void printWMThemeFromSettings(FFinstance* instance, const char* dconfKey,
 
     if(!ffStrSet(theme))
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find WM theme in DConf or GSettings");
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't find WM theme in DConf or GSettings");
         return;
     }
 
@@ -99,7 +99,7 @@ static void printGTKThemeAsWMTheme(FFinstance* instance)
         return;
     }
 
-    ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't detect GTK4/3/2 theme");
+    ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't detect GTK4/3/2 theme");
 }
 
 static void printMutter(FFinstance* instance)
@@ -121,7 +121,7 @@ static void printMuffin(FFinstance* instance)
 
     if(name == NULL && theme == NULL)
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find muffin theme in GSettings / DConf");
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't find muffin theme in GSettings / DConf");
         return;
     }
 
@@ -150,7 +150,7 @@ static void printXFWM4(FFinstance* instance)
 
     if(theme == NULL)
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find xfwm4::/general/theme in XFConf");
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't find xfwm4::/general/theme in XFConf");
         return;
     }
 
@@ -177,7 +177,7 @@ static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
     FILE* file = fopen(absolutePath.chars, "r");
     if(file == NULL)
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't open \"%s\"", absolutePath.chars);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't open \"%s\"", absolutePath.chars);
         ffStrbufDestroy(&absolutePath);
 
         return;
@@ -213,7 +213,7 @@ static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
     fclose(file);
 
     if(theme.length == 0)
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Couldn't find theme name in \"%s\"", absolutePath.chars);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Couldn't find theme name in \"%s\"", absolutePath.chars);
     else
         printWMTheme(instance, theme.chars);
 
@@ -224,7 +224,7 @@ static void printOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName)
 void ffPrintWMTheme(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "WM theme detection is not supported on Android");
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "WM theme detection is not supported on Android");
         return;
     #endif
 
@@ -232,7 +232,7 @@ void ffPrintWMTheme(FFinstance* instance)
 
     if(result->wmPrettyName.length == 0)
     {
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "WM Theme needs sucessfull WM detection");
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "WM Theme needs sucessfull WM detection");
         return;
     }
 
@@ -254,5 +254,5 @@ void ffPrintWMTheme(FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(&result->wmPrettyName, "Openbox") == 0)
         printOpenbox(instance, &result->dePrettyName);
     else
-        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmThemeKey, &instance->config.wmThemeFormat, FF_WMTHEME_NUM_FORMAT_ARGS, "Unknown WM: %s", result->wmPrettyName.chars);
+        ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "Unknown WM: %s", result->wmPrettyName.chars);
 }
