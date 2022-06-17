@@ -1466,6 +1466,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
     static GetLogoMethod logoMethods[] = {
         ffLogoBuiltinGetUnknown,
         getLogoNone,
+        getLogoAlpine,
         getLogoAndroid,
         getLogoAndroidSmall,
         getLogoArch,
