@@ -85,7 +85,7 @@ void ffPrintHost(FFinstance* instance)
             getenv("WSLENV") != NULL ||
             getenv("WSL_DISTRO") != NULL ||
             getenv("WSL_INTEROP") != NULL
-        )) ffStrbufAppendS(&product_family, "Windows Subsystem for Linux");
+        )) ffStrbufAppendS(&product_name, "Windows Subsystem for Linux");
     #else
         ffSettingsGetAndroidProperty("ro.product.brand", &product_name);
         if(product_name.length > 0){
