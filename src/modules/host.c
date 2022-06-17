@@ -108,7 +108,7 @@ void ffPrintHost(FFinstance* instance)
     }
 
     #ifdef __ANDROID__
-        #define FF_HOST_DATA(name)
+        #define FF_HOST_DATA(name) \
             FFstrbuf name; \
             ffStrbufInitA(&name, 0);
     #else

@@ -8,7 +8,7 @@
 void ffPrintDesktopEnvironment(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_DE_MODULE_NAME, 0, &instance->config.de "DE detection is not supported on Android");
+        ffPrintError(instance, FF_DE_MODULE_NAME, 0, &instance->config.de, "DE detection is not supported on Android");
         return;
     #endif
 
