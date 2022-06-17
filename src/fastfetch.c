@@ -1009,6 +1009,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.cpuUsage.errorFormat);
     else if(strcasecmp(key, "--gpu-key") == 0)
         optionParseString(key, value, &instance->config.gpu.key);
+    else if(strcasecmp(key, "--gpu-format") == 0)
+        optionParseString(key, value, &instance->config.gpu.outputFormat);
+    else if(strcasecmp(key, "--gpu-error") == 0)
+        optionParseString(key, value, &instance->config.gpu.errorFormat);
     else if(strcasecmp(key, "--memory-key") == 0)
         optionParseString(key, value, &instance->config.memory.key);
     else if(strcasecmp(key, "--memory-format") == 0)
@@ -1057,11 +1061,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.song.outputFormat);
     else if(strcasecmp(key, "--song-error") == 0)
         optionParseString(key, value, &instance->config.song.errorFormat);
-    else if(strcasecmp(key, "--date-time-key") == 0)
+    else if(strcasecmp(key, "--datetime-key") == 0)
         optionParseString(key, value, &instance->config.dateTime.key);
-    else if(strcasecmp(key, "--date-time-format") == 0)
+    else if(strcasecmp(key, "--datetime-format") == 0)
         optionParseString(key, value, &instance->config.dateTime.outputFormat);
-    else if(strcasecmp(key, "--date-time-error") == 0)
+    else if(strcasecmp(key, "--datetime-error") == 0)
         optionParseString(key, value, &instance->config.dateTime.errorFormat);
     else if(strcasecmp(key, "--date-key") == 0)
         optionParseString(key, value, &instance->config.date.key);
