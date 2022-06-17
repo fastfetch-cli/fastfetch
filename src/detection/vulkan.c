@@ -174,6 +174,7 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
+        gpu->temperature = 0.0 / 0.0; //NaN, no way to detect temperature using vulkan
         ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
     }
 

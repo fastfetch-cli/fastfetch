@@ -242,6 +242,7 @@ typedef struct FFGPUResult
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
+    double temperature;
 } FFGPUResult;
 
 typedef struct FFVulkanResult
@@ -273,8 +274,8 @@ typedef struct FFDisplayServerResult
 typedef struct FFTempValue
 {
     FFstrbuf name;
-    FFstrbuf value;
     FFstrbuf deviceClass;
+    double value;
 } FFTempValue;
 
 typedef struct FFTempsResult

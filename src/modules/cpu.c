@@ -36,18 +36,10 @@ static double detectCPUTemp(const FFinstance* instance)
         FFTempValue* value = ffListGet(&temps->values, i);
 
         if(
-            ffStrbufFirstIndexS(&value->name, "cpu") == value->name.length &&
-            ffStrbufCompS(&value->name, "k10temp") != 0 &&
-            ffStrbufCompS(&value->name, "coretemp") != 0
-        ) continue;
-
-        double temp = ffStrbufToDouble(&value->value);
-
-        //NaN
-        if(temp != temp)
-            continue;
-
-        return temp / 1000.0; // millidegrees to degrees
+            ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
+            ffStrbufCompS(&value->name, "k10temp") == 0 ||
+            ffStrbufCompS(&value->name, "coretemp") == 0
+        ) return value->value;
     }
 
     return 0.0 / 0.0; //NaN
@@ -170,8 +162,6 @@ void ffPrintCPU(FFinstance* instance)
     double cpuTemp;
     if(instance->config.cpu.outputFormat.length > 0)
         cpuTemp = detectCPUTemp(instance);
-    else
-        cpuTemp = 0.0 / 0.0; //NaN
 
     FFstrbuf cpu;
     ffStrbufInitA(&cpu, 128);
