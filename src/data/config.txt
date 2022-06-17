@@ -194,7 +194,7 @@
 #--public-ip-key Public IP
 #--player-key Media Player
 #--song-key Song
-#--datetime-key Date Time
+#--date-time-key Date Time
 #--vulkan-key Vulkan
 #--opengl-key OpenGL
 #--opencl-key OpenCL
@@ -232,7 +232,7 @@
 #--public-ip-format
 #--player-format
 #--song-format
-#--datetime-format
+#--date-time-format
 #--vulkan-format
 #--opengl-format
 #--opencl-format
@@ -270,7 +270,7 @@
 #--public-ip-error
 #--player-error
 #--song-error
-#--datetime-error
+#--date-time-error
 #--vulkan-error
 #--opengl-error
 #--opencl-error
