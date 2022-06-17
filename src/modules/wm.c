@@ -6,7 +6,7 @@
 void ffPrintWM(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_WM_MODULE_NAME, 0, &instance->config.wmKey, &instance->config.wmFormat, FF_WM_NUM_FORMAT_ARGS, "WM detection is not supported on Android");
+        ffPrintError(instance, FF_WM_MODULE_NAME, 0, &instance->config.wm, "WM detection is not supported on Android");
         return;
     #endif
 

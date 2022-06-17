@@ -6,7 +6,7 @@
 void ffPrintResolution(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.resolutionKey, &instance->config.resolutionFormat, FF_RESOLUTION_NUM_FORMAT_ARGS, "Resolution detection is not supported on Android");
+        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.resolution, "Resolution detection is not supported on Android");
         return;
     #endif
 
