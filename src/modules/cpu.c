@@ -27,6 +27,32 @@ static double getGhz(const char* policyFile, const char* cpuFile)
     return herz / 1000.0; //to GHz
 }
 
+static double detectCPUTemp(const FFinstance* instance)
+{
+    const FFTempsResult *temps = ffDetectTemps(instance);
+
+    for(uint32_t i = 0; i < temps->values.length; i++)
+    {
+        FFTempValue* value = ffListGet(&temps->values, i);
+
+        if(
+            ffStrbufFirstIndexS(&value->name, "cpu") == value->name.length &&
+            ffStrbufCompS(&value->name, "k10temp") != 0 &&
+            ffStrbufCompS(&value->name, "coretemp") != 0
+        ) continue;
+
+        double temp = ffStrbufToDouble(&value->value);
+
+        //NaN
+        if(temp != temp)
+            continue;
+
+        return temp / 1000.0; // millidegrees to degrees
+    }
+
+    return 0.0 / 0.0; //NaN
+}
+
 void ffPrintCPU(FFinstance* instance)
 {
     if(ffPrintFromCache(instance, FF_CPU_MODULE_NAME, &instance->config.cpu, FF_CPU_NUM_FORMAT_ARGS))
@@ -141,28 +167,11 @@ void ffPrintCPU(FFinstance* instance)
     ffStrbufSubstrBeforeFirstC(&namePretty, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&namePretty, ' '); //If we removed the @ in previous step there was most likely a space before it
 
-    const FFTempsResult *temps = ffDetectTemps(instance);
-    double cpuTemp = 0.0/0.0; //NaN
-
-    for(uint32_t i = 0; i < temps->values.length; i++)
-    {
-        FFTempValue* value = ffListGet(&temps->values, i);
-
-        if(
-            ffStrbufFirstIndexS(&value->name, "cpu") == value->name.length &&
-            ffStrbufCompS(&value->name, "k10temp") != 0 &&
-            ffStrbufCompS(&value->name, "coretemp") != 0
-        ) continue;
-
-        double temp = ffStrbufToDouble(&value->value);
-
-        //NaN
-        if(temp != temp)
-            continue;
-
-        cpuTemp = temp / 1000.0;
-        break;
-    }
+    double cpuTemp;
+    if(instance->config.cpu.outputFormat.length > 0)
+        cpuTemp = detectCPUTemp(instance);
+    else
+        cpuTemp = 0.0 / 0.0; //NaN
 
     FFstrbuf cpu;
     ffStrbufInitA(&cpu, 128);
