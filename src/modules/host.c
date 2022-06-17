@@ -5,6 +5,7 @@
 #define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 15
 
+#ifndef __ANDROID__
 static bool hostValueSet(FFstrbuf* value)
 {
     ffStrbufTrimRight(value, '\n');
@@ -32,7 +33,6 @@ static bool hostValueSet(FFstrbuf* value)
     ;
 }
 
-#ifndef __ANDROID__
 static void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
     ffGetFileContent(devicesPath, buffer);
