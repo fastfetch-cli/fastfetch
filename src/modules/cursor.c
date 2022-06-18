@@ -193,6 +193,12 @@ void ffPrintCursor(FFinstance* instance)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
+    if(ffStrbufCompS(&wmde->wmPrettyName, "WSLg") == 0)
+    {
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "WSLg uses native windows cursor");
+        return;
+    }
+
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
     {
         ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Cursor isn't supported in TTY");

@@ -62,7 +62,7 @@ static void* xcbGetProperty(XcbPropertyData* data, xcb_connection_t* connection,
 
 static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connection, xcb_window_t rootWindow, FFDisplayServerResult* result)
 {
-    if(result->wmProcessName.length > 0)
+    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND) == 0)
         return;
 
     xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, connection, rootWindow, "_NET_SUPPORTING_WM_CHECK");

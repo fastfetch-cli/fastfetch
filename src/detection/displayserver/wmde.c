@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 static const char* parseEnv()
 {
@@ -41,6 +42,11 @@ static const char* parseEnv()
 
     if(getenv("TDE_FULL_SESSION") != NULL)
         return "Trinity";
+
+    if(
+        getenv("WAYLAND_DISPLAY") != NULL &&
+        ffFileExists("/mnt/wslg/", S_IFDIR)
+    ) return "WSLg";
 
     return NULL;
 }
