@@ -3,10 +3,9 @@
 #define FF_LOCALIP_MODULE_NAME "Local IP"
 #define FF_LOCALIP_NUM_FORMAT_ARGS 1
 
-#include <sys/types.h>
+#include <string.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
-#include <string.h>
 #include <arpa/inet.h>
 
 static void printValue(FFinstance* instance, const char* ifaName, const char* addressBuffer)

@@ -1,9 +1,8 @@
 #include "fastfetch.h"
 
+#include <string.h>
 #include <pthread.h>
 #include <dirent.h>
-#include <string.h>
-#include <math.h>
 
 static bool isTempFile(const char* name)
 {

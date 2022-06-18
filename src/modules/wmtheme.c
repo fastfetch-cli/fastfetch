@@ -1,4 +1,6 @@
 #include "fastfetch.h"
+
+#include <stdlib.h>
 #include <string.h>
 
 #define FF_WMTHEME_MODULE_NAME "WM Theme"

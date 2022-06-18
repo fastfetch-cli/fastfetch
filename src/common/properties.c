@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 static bool parsePropLinePointer(const char** line, const char* start, FFstrbuf* buffer)
 {
     if(**line == '\0')

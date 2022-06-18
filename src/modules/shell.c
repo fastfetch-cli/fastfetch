@@ -1,8 +1,5 @@
 #include "fastfetch.h"
 
-#include <string.h>
-#include <ctype.h>
-
 #define FF_SHELL_MODULE_NAME "Shell"
 #define FF_SHELL_NUM_FORMAT_ARGS 7
 

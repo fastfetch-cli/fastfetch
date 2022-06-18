@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_CACHE_SPLIT_EXTENSION "ffcs"
 

@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_MEMORY_MODULE_NAME "Memory"
 #define FF_MEMORY_NUM_FORMAT_ARGS 3
 

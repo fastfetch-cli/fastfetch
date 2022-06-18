@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 
-#include <stdio.h>
 #include <unistd.h>
 
 #define FF_CPU_USAGE_MODULE_NAME "CPU Usage"

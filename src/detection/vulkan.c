@@ -3,6 +3,8 @@
 #include <pthread.h>
 
 #ifdef FF_HAVE_VULKAN
+#include <stdlib.h>
+#include <dlfcn.h>
 #include <vulkan/vulkan.h>
 
 static inline void applyVulkanVersion(uint32_t vulkanVersion, FFVersion* ffVersion)

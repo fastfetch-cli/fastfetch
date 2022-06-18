@@ -1,9 +1,13 @@
 #include "fastfetch.h"
 
-#include <ctype.h>
+#include <stdlib.h>
 
 #define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 15
+
+#ifdef __ANDROID__
+    #include <ctype.h>
+#endif
 
 #ifndef __ANDROID__
 static bool hostValueSet(FFstrbuf* value)

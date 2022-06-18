@@ -3,20 +3,15 @@
 #ifndef FASTFETCH_INCLUDED
 #define FASTFETCH_INCLUDED
 
-#include <stddef.h>
+#include "fastfetch_config.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
+
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
-#include <sys/stat.h>
-#include <dlfcn.h>
-
-#include "fastfetch_config.h"
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"

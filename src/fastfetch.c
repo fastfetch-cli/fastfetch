@@ -1,11 +1,9 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 // Things only needed by fastfetch
 typedef struct FFdata

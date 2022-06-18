@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 
-#include <string.h>
-#include <errno.h>
+#include <stdlib.h>
 
 #define FF_CPU_MODULE_NAME "CPU"
 #define FF_CPU_NUM_FORMAT_ARGS 15

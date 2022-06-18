@@ -1,8 +1,6 @@
 #include "fastfetch.h"
 
 #include <string.h>
-#include <unistd.h>
-#include <pthread.h>
 
 #define FF_TERMINAL_MODULE_NAME "Terminal"
 #define FF_TERMINAL_NUM_FORMAT_ARGS 3

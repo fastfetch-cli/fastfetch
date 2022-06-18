@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_LOCALE_MODULE_NAME "Locale"
 #define FF_LOCALE_NUM_FORMAT_ARGS 1
 

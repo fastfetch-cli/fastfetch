@@ -1,8 +1,10 @@
 #include "displayServer.h"
-#include <dirent.h>
+
+#include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <ctype.h>
+#include <dirent.h>
 
 static const char* parseEnv()
 {

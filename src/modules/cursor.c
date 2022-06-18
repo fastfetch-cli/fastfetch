@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_CURSOR_MODULE_NAME "Cursor"
 #define FF_CURSOR_NUM_FORMAT_ARGS 2
 

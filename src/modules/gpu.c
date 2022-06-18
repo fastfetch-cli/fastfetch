@@ -1,7 +1,5 @@
 #include "fastfetch.h"
 
-#include <string.h>
-
 #define FF_GPU_MODULE_NAME "GPU"
 #define FF_GPU_NUM_FORMAT_ARGS 6
 
@@ -61,8 +59,10 @@ static void printGPUList(FFinstance* instance, const FFlist* list)
 }
 
 #ifdef FF_HAVE_LIBPCI
-#include <pci/pci.h>
+#include <string.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <pci/pci.h>
 
 //see https://github.com/pciutils/pciutils/blob/5bdf63b6b1bc35b59c4b3f47f7ca83ca1868155b/ls-kernel.c#L220
 static void pciGetDriver(struct pci_dev* dev, FFstrbuf* driver, char*(*ffpci_get_param)(struct pci_access*, char*))

@@ -1,8 +1,7 @@
-#include <stdint.h>
-#include <malloc.h>
-#include <string.h>
-
 #include "FFvaluestore.h"
+
+#include <string.h>
+#include <stdlib.h>
 
 void ffValuestoreInit(FFvaluestore* vs)
 {

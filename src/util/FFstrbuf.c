@@ -1,9 +1,8 @@
 #include "FFstrbuf.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <stdlib.h>
 
 static char* CHAR_NULL_PTR = "";
 

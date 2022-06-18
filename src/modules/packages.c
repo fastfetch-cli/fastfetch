@@ -1,7 +1,9 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 11
@@ -128,6 +130,7 @@ static uint32_t getNixPackages(char* path)
 }
 
 #ifdef FF_HAVE_RPM
+#include <dlfcn.h>
 #include <rpm/rpmlib.h>
 #include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>

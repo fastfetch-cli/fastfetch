@@ -7,6 +7,7 @@
 
 #if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA)
 #define FF_HAVE_GL 1
+#include <dlfcn.h>
 #include <GL/gl.h>
 
 #define FF_OPENGL_BUFFER_WIDTH 1

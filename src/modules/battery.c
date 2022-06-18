@@ -1,9 +1,6 @@
 #include "fastfetch.h"
 
-#include <unistd.h>
 #include <dirent.h>
-
-#include <inttypes.h>
 
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
