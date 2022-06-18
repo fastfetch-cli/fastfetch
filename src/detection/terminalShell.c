@@ -120,8 +120,10 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         term = getenv("SSH_TTY");
 
     //Windows Terminal
-    if(!ffStrSet(term) && getenv("WT_SESSION") != NULL)
-        term = "Windows Terminal";
+    if(!ffStrSet(term) && (
+        getenv("WT_SESSION") != NULL ||
+        getenv("WT_PROFILE_ID") != NULL
+    )) term = "Windows Terminal";
 
     //Termux
     if(!ffStrSet(term) && (
