@@ -76,32 +76,29 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     }
 }
 
-void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result)
+bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    if(getenv("XDG_RUNTIME_DIR") == NULL)
-        return;
+    FF_LIBRARY_LOAD(wayland, instance->config.libWayland, false, "libwayland-client.so", 1)
 
-    FF_LIBRARY_LOAD(wayland, instance->config.libWayland, , "libwayland-client.so", 1)
-
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect,)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_dispatch,)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_roundtrip,)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_proxy_marshal_constructor,)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_disconnect,)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_registry_interface,)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_dispatch, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_roundtrip, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_proxy_marshal_constructor, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_disconnect, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_registry_interface, false)
 
     WaylandData data;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, wl_proxy_marshal_constructor_versioned,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_destroy, wl_proxy_destroy,)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, wl_proxy_marshal_constructor_versioned, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_destroy, wl_proxy_destroy, false)
 
     struct wl_display* display = ffwl_display_connect(NULL);
     if(display == NULL)
     {
         dlclose(wayland);
-        return;
+        return false;
     }
 
     struct wl_registry* registry = (struct wl_registry*) ffwl_proxy_marshal_constructor((struct wl_proxy*) display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
@@ -109,7 +106,7 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
     {
         ffwl_display_disconnect(display);
         dlclose(wayland);
-        return;
+        return false;
     }
 
     data.instance = instance;
@@ -136,19 +133,20 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
     //So we can set set the session type to wayland.
     //This is used as an indicator that we are running wayland by the x11 backends.
     ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND);
+    return true;
 }
-
-#else
+#endif
 
 void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_UNUSED(instance);
-
-    //We try to detect wayland already here, so the x11 methods only to resolution detection.
-
     //Wayland requires this to be set
     if(getenv("XDG_RUNTIME_DIR") == NULL)
         return;
+
+    #ifdef FF_HAVE_WAYLAND
+        if(detectWayland(instance, result))
+            return;
+    #endif
 
     const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
 
@@ -161,9 +159,7 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
     if(xdgSessionType == NULL && getenv("WAYLAND_DISPLAY") == NULL && getenv("WAYLAND_SOCKET") == NULL)
         return;
 
-    //We are probably running a wayland compositor at this point, but fastfetch was compiled without the required library.
-    //Set the protocol name and use DRM for resolution detection.
+    //We are probably running a wayland compositor at this point,
+    //but fastfetch was compiled without the required library, or loading the library failed.
     ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND);
 }
-
-#endif
