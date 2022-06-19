@@ -23,10 +23,6 @@ static void initConfigDirs(FFstate* state)
         ffStrbufTrimRight(buffer, '/');
     }
 
-    FFstrbuf xdgConfigDirs;
-    ffStrbufInitA(&xdgConfigDirs, 64);
-    ffStrbufAppendS(&xdgConfigDirs, getenv("XDG_CONFIG_DIRS"));
-
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
         if(ffListFirstIndexComp(&state->configDirs, element, strbufEqualsAdapter) < state->configDirs.length - 1) \
             --state->configDirs.length;
@@ -41,6 +37,10 @@ static void initConfigDirs(FFstate* state)
     ffStrbufInitA(userHome, 64);
     ffStrbufAppendS(userHome, state->passwd->pw_dir);
     FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
+
+    FFstrbuf xdgConfigDirs;
+    ffStrbufInitA(&xdgConfigDirs, 64);
+    ffStrbufAppendS(&xdgConfigDirs, getenv("XDG_CONFIG_DIRS"));
 
     uint32_t startIndex = 0;
     while (startIndex < xdgConfigDirs.length)
