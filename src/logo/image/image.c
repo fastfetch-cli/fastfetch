@@ -94,7 +94,7 @@ static void writeCacheStrbuf(FFLogoRequestData* requestData, const FFstrbuf* val
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
-    ffWriteFileContent(requestData->cacheDir.chars, value);
+    ffWriteFileBuffer(requestData->cacheDir.chars, value);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 }
 
@@ -127,7 +127,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     //Write result to stdout
     ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
     fflush(stdout);
-    ffWriteFDContent(STDOUT_FILENO, result);
+    ffWriteFDBuffer(STDOUT_FILENO, result);
 
     //Go to upper left corner
     fputs("\033[9999999D", stdout);

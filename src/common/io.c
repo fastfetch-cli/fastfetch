@@ -6,11 +6,6 @@
 #include <termios.h>
 #include <poll.h>
 
-bool ffWriteFDContent(int fd, const FFstrbuf* content)
-{
-    return write(fd, content->chars, content->length) != -1;
-}
-
 static void createSubfolders(const char* fileName)
 {
     FFstrbuf path;
@@ -27,7 +22,17 @@ static void createSubfolders(const char* fileName)
     ffStrbufDestroy(&path);
 }
 
-bool ffWriteFileContent(const char* fileName, const FFstrbuf* content)
+bool ffWriteFDData(int fd, size_t dataSize, const void* data)
+{
+    return write(fd, data, dataSize) != -1;
+}
+
+bool ffWriteFDBuffer(int fd, const FFstrbuf* content)
+{
+    return ffWriteFDData(fd, content->length, content->chars);
+}
+
+bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
     int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
@@ -41,11 +46,16 @@ bool ffWriteFileContent(const char* fileName, const FFstrbuf* content)
             return false;
     }
 
-    bool ret = ffWriteFDContent(fd, content);
+    bool ret = ffWriteFDData(fd, dataSize, data);
 
     close(fd);
 
     return ret;
+}
+
+bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer)
+{
+    return ffWriteFileData(fileName, buffer->length, buffer->chars);
 }
 
 void ffAppendFDContent(int fd, FFstrbuf* buffer)

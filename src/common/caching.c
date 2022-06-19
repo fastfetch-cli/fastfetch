@@ -31,7 +31,7 @@ static void writeCacheFile(FFinstance* instance, const char* moduleName, const c
     FFstrbuf path;
     ffStrbufInitA(&path, 64);
     getCacheFilePath(instance, moduleName, extension, &path);
-    ffWriteFileContent(path.chars, content);
+    ffWriteFileBuffer(path.chars, content);
     ffStrbufDestroy(&path);
 }
 
