@@ -5,9 +5,9 @@
 #define FF_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_CACHE_SPLIT_EXTENSION "ffcs"
 
-#define FF_CACHE_EXTENSION_STRUCT "ffcs2"
+#define FF_CACHE_EXTENSION_DATA "ffcd"
 
-static void getCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
+static void getCacheFilePath(const FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
     ffStrbufAppend(buffer, &instance->state.cacheDir);
     ffStrbufAppendS(buffer, moduleName);
@@ -201,4 +201,26 @@ void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const 
     ffCacheOpenWrite(instance, moduleName, &cache);
     ffPrintAndAppendToCache(instance, moduleName, 0, moduleArgs, &cache, value, numArgs, arguments);
     ffCacheClose(&cache);
+}
+
+void ffCachingWriteData(const FFinstance* instance, const char* moduleName, size_t dataSize, const void* data)
+{
+    FFstrbuf path;
+    ffStrbufInitA(&path, 128);
+    getCacheFilePath(instance, moduleName, FF_CACHE_EXTENSION_DATA, &path);
+    ffWriteFileData(path.chars, dataSize, data);
+    ffStrbufDestroy(&path);
+}
+
+bool ffCachingReadData(const FFinstance* instance, const char* moduleName, size_t dataSize, void* data)
+{
+    if(instance->config.recache)
+        return false;
+
+    FFstrbuf path;
+    ffStrbufInitA(&path, 128);
+    getCacheFilePath(instance, moduleName, FF_CACHE_EXTENSION_DATA, &path);
+    ssize_t result = ffReadFileData(path.chars, dataSize, data);
+    ffStrbufDestroy(&path);
+    return result > 0 && (size_t) result == dataSize;
 }

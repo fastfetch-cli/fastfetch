@@ -418,9 +418,9 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);
 bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer);
 
 bool ffAppendFDBuffer(int fd, FFstrbuf* buffer);
-ssize_t ffGetFileData(const char* fileName, size_t dataSize, void* data);
+ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
-bool ffGetFileBuffer(const char* fileName, FFstrbuf* buffer);
+bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer);
 
 bool ffFileExists(const char* fileName, mode_t mode);
 void ffSuppressIO(bool suppress); // Not thread safe!
@@ -445,6 +445,9 @@ void ffCacheClose(FFcache* cache);
 bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, uint32_t numArgs);
 void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFcache* cache, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments);
 void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments);
+
+void ffCachingWriteData(const FFinstance* instance, const char* moduleName, size_t dataSize, const void* data);
+bool ffCachingReadData(const FFinstance* instance, const char* moduleName, size_t dataSize, void* data);
 
 //common/properties.c
 bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer);

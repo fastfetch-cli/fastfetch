@@ -82,7 +82,7 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
     return readed >= 0;
 }
 
-ssize_t ffGetFileData(const char* fileName, size_t dataSize, void* data)
+ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
@@ -108,7 +108,7 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
     return ret;
 }
 
-bool ffGetFileBuffer(const char* fileName, FFstrbuf* buffer)
+bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
     return ffAppendFileBuffer(fileName, buffer);

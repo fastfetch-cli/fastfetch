@@ -337,7 +337,7 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
 
         //Don't check for processes not owend by the current user.
         ffStrbufAppendS(&procPath, "/loginuid");
-        ffGetFileBuffer(procPath.chars, &loginuid);
+        ffReadFileBuffer(procPath.chars, &loginuid);
         if(ffStrbufComp(&userID, &loginuid) != 0)
         {
             ffStrbufSubstrBefore(&procPath, procPathLength);
@@ -348,7 +348,7 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
 
         //We check the cmdline for the process name, because it is not trimmed.
         ffStrbufAppendS(&procPath, "/cmdline");
-        ffGetFileBuffer(procPath.chars, &processName);
+        ffReadFileBuffer(procPath.chars, &processName);
         ffStrbufSubstrBeforeFirstC(&processName, '\0'); //Trim the arguments
         ffStrbufSubstrAfterLastC(&processName, '/');
 
