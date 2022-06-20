@@ -10,9 +10,9 @@ static double getGhz(const char* policyFile, const char* cpuFile)
     FFstrbuf content;
     ffStrbufInit(&content);
 
-    ffGetFileContent(policyFile, &content);
+    ffGetFileBuffer(policyFile, &content);
     if(content.length == 0)
-        ffGetFileContent(cpuFile, &content);
+        ffGetFileBuffer(cpuFile, &content);
 
     double herz = ffStrbufToDouble(&content);
 

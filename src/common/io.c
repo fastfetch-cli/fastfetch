@@ -22,14 +22,10 @@ static void createSubfolders(const char* fileName)
     ffStrbufDestroy(&path);
 }
 
-bool ffWriteFDData(int fd, size_t dataSize, const void* data)
-{
-    return write(fd, data, dataSize) != -1;
-}
 
 bool ffWriteFDBuffer(int fd, const FFstrbuf* content)
 {
-    return ffWriteFDData(fd, content->length, content->chars);
+    return write(fd, content->chars, content->length) != -1;
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
@@ -46,7 +42,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
             return false;
     }
 
-    bool ret = ffWriteFDData(fd, dataSize, data);
+    bool ret = write(fd, data, dataSize) != -1;
 
     close(fd);
 
@@ -58,7 +54,7 @@ bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer)
     return ffWriteFileData(fileName, buffer->length, buffer->chars);
 }
 
-void ffAppendFDContent(int fd, FFstrbuf* buffer)
+bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
     ssize_t readed = 0;
 
@@ -82,24 +78,40 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer)
 
     ffStrbufTrimRight(buffer, '\n');
     ffStrbufTrimRight(buffer, ' ');
+
+    return readed >= 0;
 }
 
-bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
+ssize_t ffGetFileData(const char* fileName, size_t dataSize, void* data)
+{
+    int fd = open(fileName, O_RDONLY);
+    if(fd == -1)
+        return -1;
+
+    ssize_t readed = read(fd, data, dataSize);
+
+    close(fd);
+
+    return readed;
+}
+
+bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return false;
 
-    ffAppendFDContent(fd, buffer);
+    bool ret = ffAppendFDBuffer(fd, buffer);
 
     close(fd);
-    return true;
+
+    return ret;
 }
 
-bool ffGetFileContent(const char* fileName, FFstrbuf* buffer)
+bool ffGetFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
-    return ffAppendFileContent(fileName, buffer);
+    return ffAppendFileBuffer(fileName, buffer);
 }
 
 // Not thread safe!

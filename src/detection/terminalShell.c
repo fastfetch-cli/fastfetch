@@ -21,7 +21,7 @@ static void getProcessInformation(const char* pid, FFstrbuf* processName, FFstrb
     ffStrbufAppendS(&cmdlineFilePath, pid);
     ffStrbufAppendS(&cmdlineFilePath, "/cmdline");
 
-    ffGetFileContent(cmdlineFilePath.chars, exe);
+    ffGetFileBuffer(cmdlineFilePath.chars, exe);
     ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
     ffStrbufTrimLeft(exe, '-'); //Happens in TTY
 

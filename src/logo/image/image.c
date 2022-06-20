@@ -375,7 +375,7 @@ static void readCachedStrbuf(FFLogoRequestData* requestData, FFstrbuf* result, c
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
-    ffAppendFileContent(requestData->cacheDir.chars, result);
+    ffAppendFileBuffer(requestData->cacheDir.chars, result);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 }
 

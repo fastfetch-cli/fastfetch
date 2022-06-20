@@ -29,6 +29,6 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     //Parent
     close(pipes[1]);
     waitpid(childPid, NULL, 0);
-    ffAppendFDContent(pipes[0], buffer);
+    ffAppendFDBuffer(pipes[0], buffer);
     close(pipes[0]);
 }

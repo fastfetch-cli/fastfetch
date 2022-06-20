@@ -249,7 +249,7 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement)
     FFstrbuf content;
     ffStrbufInitA(&content, 2047);
 
-    if(!ffAppendFileContent(instance->config.logoSource.chars, &content))
+    if(!ffAppendFileBuffer(instance->config.logoSource.chars, &content))
     {
         ffStrbufDestroy(&content);
         return false;

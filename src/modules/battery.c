@@ -23,7 +23,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
     //type must exist and be "Battery"
     ffStrbufAppendS(dir, "/type");
-    ffGetFileContent(dir->chars, &testBatteryBuffer);
+    ffGetFileBuffer(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Battery") != 0)
@@ -34,7 +34,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
     //scope may not exist or must not be "Device"
     ffStrbufAppendS(dir, "/scope");
-    ffGetFileContent(dir->chars, &testBatteryBuffer);
+    ffGetFileBuffer(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Device") == 0)
@@ -49,7 +49,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     //capacity must exist and be not empty
     ffStrbufInit(&result->capacity);
     ffStrbufAppendS(dir, "/capacity");
-    ffGetFileContent(dir->chars, &result->capacity);
+    ffGetFileBuffer(dir->chars, &result->capacity);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(result->capacity.length == 0)
@@ -63,22 +63,22 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
     ffStrbufInit(&result->manufacturer);
     ffStrbufAppendS(dir, "/manufacturer");
-    ffGetFileContent(dir->chars, &result->manufacturer);
+    ffGetFileBuffer(dir->chars, &result->manufacturer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->modelName);
     ffStrbufAppendS(dir, "/model_name");
-    ffGetFileContent(dir->chars, &result->modelName);
+    ffGetFileBuffer(dir->chars, &result->modelName);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->technology);
     ffStrbufAppendS(dir, "/technology");
-    ffGetFileContent(dir->chars, &result->technology);
+    ffGetFileBuffer(dir->chars, &result->technology);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->status);
     ffStrbufAppendS(dir, "/status");
-    ffGetFileContent(dir->chars, &result->status);
+    ffGetFileBuffer(dir->chars, &result->status);
     ffStrbufSubstrBefore(dir, dirLength);
 }
 

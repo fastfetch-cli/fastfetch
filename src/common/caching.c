@@ -5,6 +5,8 @@
 #define FF_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_CACHE_SPLIT_EXTENSION "ffcs"
 
+#define FF_CACHE_EXTENSION_STRUCT "ffcs2"
+
 static void getCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
     ffStrbufAppend(buffer, &instance->state.cacheDir);
@@ -22,7 +24,7 @@ static void readCacheFile(FFinstance* instance, const char* moduleName, const ch
     FFstrbuf path;
     ffStrbufInitA(&path, 64);
     getCacheFilePath(instance, moduleName, extension, &path);
-    ffAppendFileContent(path.chars, buffer);
+    ffAppendFileBuffer(path.chars, buffer);
     ffStrbufDestroy(&path);
 }
 

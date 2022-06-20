@@ -39,10 +39,10 @@ static bool hostValueSet(FFstrbuf* value)
 
 static void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
-    ffGetFileContent(devicesPath, buffer);
+    ffGetFileBuffer(devicesPath, buffer);
 
     if(buffer->length == 0)
-        ffGetFileContent(classPath, buffer);
+        ffGetFileBuffer(classPath, buffer);
 }
 #endif
 
@@ -67,10 +67,10 @@ void ffPrintHost(FFinstance* instance)
         getHostValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &product_name);
 
         if(product_name.length == 0)
-            ffGetFileContent("/sys/firmware/devicetree/base/model", &product_name);
+            ffGetFileBuffer("/sys/firmware/devicetree/base/model", &product_name);
 
         if(product_name.length == 0)
-            ffGetFileContent("/tmp/sysinfo/model", &product_name);
+            ffGetFileBuffer("/tmp/sysinfo/model", &product_name);
 
         if(ffStrbufStartsWithS(&product_name, "Standard PC"))
         {
