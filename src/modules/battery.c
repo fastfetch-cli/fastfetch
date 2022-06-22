@@ -130,8 +130,7 @@ void ffPrintBattery(FFinstance* instance)
     if(instance->config.batteryDir.length > 0)
     {
         ffStrbufAppend(&baseDir, &instance->config.batteryDir);
-        if(!ffStrbufEndsWithC(&baseDir, '/'))
-            ffStrbufAppendC(&baseDir, '/');
+        ffStrbufEndsWithC(&baseDir, '/');
     }
     else
     {

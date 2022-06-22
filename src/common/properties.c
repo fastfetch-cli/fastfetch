@@ -176,20 +176,17 @@ bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativ
 {
     bool foundAFile = false;
 
+    FFstrbuf baseDir;
+    ffStrbufInitA(&baseDir, 64);
+
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
     {
-        FFstrbuf* baseDir = (FFstrbuf*) ffListGet(&instance->state.configDirs, i);
-        uint32_t baseDirLength = baseDir->length;
+        //We need to copy the config dir each time, because it used by multiple threads, so we can't directly write to it.
+        ffStrbufSet(&baseDir, (FFstrbuf*) ffListGet(&instance->state.configDirs, i));
+        ffStrbufAppendS(&baseDir, relativeFile);
 
-        if(*relativeFile != '/')
-            ffStrbufAppendC(baseDir, '/');
-
-        ffStrbufAppendS(baseDir, relativeFile);
-
-        if(ffParsePropFileValues(baseDir->chars, numQueries, queries))
+        if(ffParsePropFileValues(baseDir.chars, numQueries, queries))
             foundAFile = true;
-
-        ffStrbufSubstrBefore(baseDir, baseDirLength);
 
         bool allSet = true;
         for(uint32_t k = 0; k < numQueries; k++)
@@ -204,6 +201,8 @@ bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativ
         if(allSet)
             break;
     }
+
+    ffStrbufDestroy(&baseDir);
 
     return foundAFile;
 }

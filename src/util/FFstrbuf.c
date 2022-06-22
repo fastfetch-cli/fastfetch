@@ -514,6 +514,12 @@ bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
     return false;
 }
 
+void ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c)
+{
+    if(!ffStrbufEndsWithC(strbuf, c))
+        ffStrbufAppendC(strbuf, c);
+}
+
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file)
 {
     fwrite(strbuf->chars, sizeof(*strbuf->chars), strbuf->length, file);

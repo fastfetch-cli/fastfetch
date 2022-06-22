@@ -20,7 +20,7 @@ static void initConfigDirs(FFstate* state)
         FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
         ffStrbufInitA(buffer, 64);
         ffStrbufAppendS(buffer, xdgConfigHome);
-        ffStrbufTrimRight(buffer, '/');
+        ffStrbufEnsureEndsWithC(buffer, '/');
     }
 
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
@@ -30,12 +30,13 @@ static void initConfigDirs(FFstate* state)
     FFstrbuf* userConfigHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(userConfigHome, 64);
     ffStrbufAppendS(userConfigHome, state->passwd->pw_dir);
-    ffStrbufAppendS(userConfigHome, "/.config");
+    ffStrbufAppendS(userConfigHome, "/.config/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(userConfigHome)
 
     FFstrbuf* userHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(userHome, 64);
     ffStrbufAppendS(userHome, state->passwd->pw_dir);
+    ffStrbufEnsureEndsWithC(userHome, '/');
     FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
 
     FFstrbuf xdgConfigDirs;
@@ -51,7 +52,7 @@ static void initConfigDirs(FFstate* state)
         FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
         ffStrbufInitA(buffer, 64);
         ffStrbufAppendS(buffer, xdgConfigDirs.chars + startIndex);
-        ffStrbufTrimRight(buffer, '/');
+        ffStrbufEnsureEndsWithC(buffer, '/');
         FF_ENSURE_ONLY_ONCE_IN_LIST(buffer);
 
         startIndex = colonIndex + 1;
@@ -59,12 +60,12 @@ static void initConfigDirs(FFstate* state)
 
     FFstrbuf* systemConfigHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfigHome, 64);
-    ffStrbufAppendS(systemConfigHome, FASTFETCH_TARGET_DIR_ROOT"/etc/xdg");
+    ffStrbufAppendS(systemConfigHome, FASTFETCH_TARGET_DIR_ROOT"/etc/xdg/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigHome)
 
     FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfig, 64);
-    ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ROOT"/etc");
+    ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ROOT"/etc/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfig)
 
     #undef FF_ENSURE_ONLY_ONCE_IN_LIST
@@ -81,8 +82,8 @@ static void initCacheDir(FFstate* state)
         ffStrbufAppendS(&state->cacheDir, state->passwd->pw_dir);
         ffStrbufAppendS(&state->cacheDir, "/.cache/");
     }
-    else if(!ffStrbufEndsWithC(&state->cacheDir, '/'))
-        ffStrbufAppendC(&state->cacheDir, '/');
+    else
+        ffStrbufEnsureEndsWithC(&state->cacheDir, '/');
 
     mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder, but who knows
 

@@ -535,8 +535,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
-    if(!ffStrbufEndsWithC(&requestData.cacheDir, '/'))
-        ffStrbufAppendC(&requestData.cacheDir, '/');
+    ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
 
     ffStrbufAppendF(&requestData.cacheDir, "%u", requestData.logoPixelWidth);
     ffStrbufAppendC(&requestData.cacheDir, '*');
