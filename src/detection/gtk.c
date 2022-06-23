@@ -145,7 +145,7 @@ static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* re
 
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
     {
-        ffStrbufSet(&baseDir, (FFstrbuf*) ffListGet(&instance->state.configDirs, i));
+        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
         detectGTKFromConfigDir(&baseDir, version, result);
         if(allPropertiesSet(result))
             break;

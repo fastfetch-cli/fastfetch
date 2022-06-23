@@ -182,7 +182,7 @@ bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativ
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
     {
         //We need to copy the config dir each time, because it used by multiple threads, so we can't directly write to it.
-        ffStrbufSet(&baseDir, (FFstrbuf*) ffListGet(&instance->state.configDirs, i));
+        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
         ffStrbufAppendS(&baseDir, relativeFile);
 
         if(ffParsePropFileValues(baseDir.chars, numQueries, queries))
