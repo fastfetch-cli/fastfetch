@@ -12,7 +12,7 @@ typedef struct WaylandData
 {
     const FFinstance* instance;
     FFlist* results;
-    FF_LIBRARY_SYMBOL(wl_proxy_marshal_flags)
+    FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned)
     FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
     FF_LIBRARY_SYMBOL(wl_proxy_destroy)
     const struct wl_interface* ffwl_output_interface;
@@ -68,7 +68,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
     if(strcmp(interface, wldata->ffwl_output_interface->name) == 0)
     {
-        struct wl_output* output = (struct wl_output*) wldata->ffwl_proxy_marshal_flags((struct wl_proxy *) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, 0, name, wldata->ffwl_output_interface->name, version, NULL);
+        struct wl_output* output = (struct wl_output*) wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy *) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
         if(output == NULL)
             return;
 
@@ -89,7 +89,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     WaylandData data;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_flags, wl_proxy_marshal_flags, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, ffwl_proxy_marshal_constructor, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_destroy, wl_proxy_destroy, false)
