@@ -29,6 +29,10 @@ Output of `fastfetch --load-config devinfo-verbose`:
 //paste here
 ```
 
+<!--
+Note that this output will contain you public IP. If it is not relevant for the issue, feel free to remove it before uploading.
+-->
+
 Output of `fastfetch --list-features`:
 ```
 //paste here
