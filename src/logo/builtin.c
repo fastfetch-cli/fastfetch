@@ -205,18 +205,18 @@ static const FFlogo* getLogoArtix()
         "              'oookkxxoo'\n"
         "             'oiioxkkxxoo'\n"
         "            ':;:iiiioxxxoo'\n"
-        "              `'.;::ioxxoo''\n"
+        "               `'.;::ioxxoo'\n"
         "          '-.      `':;jiooo'\n"
-        "        'oooio-..     `'i:io'\n"
-        "       'ooooxxxxoio:,.   `'-;'\n"
-        "      'ooooxxxxxkkxoooIi:-.  `'\n"
-        "     'ooooxxxxxkkkkxoiiiiiji'\n"
-        "    'ooooxxxxxkxxoiiii:'`     .i'\n"
-        "   'ooooxxxxxoi:::'`       .;ioxo'\n"
-        "  'ooooxooi::'`         .:iiixkxxo'\n"
-        " 'ooooi:'`                `'';ioxxo'\n"
-        "'i:'`                          '':io'\n"
-        "'`                                  `'";
+        "         'oooio-..     `'i:io'\n"
+        "        'ooooxxxxoio:,.   `'-;'\n"
+        "       'ooooxxxxxkkxoooIi:-.  `'\n"
+        "      'ooooxxxxxkkkkxoiiiiiji'\n"
+        "     'ooooxxxxxkxxoiiii:'`     .i'\n"
+        "    'ooooxxxxxoi:::'`       .;ioxo'\n"
+        "   'ooooxooi::'`         .:iiixkxxo'\n"
+        "  'ooooi:'`                `'';ioxxo'\n"
+        " 'i:'`                          '':io'\n"
+        "'`                                   `'";
     )
     FF_LOGO_COLORS(
         "36" //cyan
