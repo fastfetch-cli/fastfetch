@@ -1,3 +1,5 @@
+#define _GNU_SOURCE //required for struct ucred
+
 #include "displayServer.h"
 
 #include <stdlib.h>
@@ -7,6 +9,7 @@
 #include <pthread.h>
 #include <dlfcn.h>
 #include <wayland-client.h>
+#include <sys/socket.h>
 
 typedef struct WaylandData
 {
@@ -18,6 +21,25 @@ typedef struct WaylandData
     const struct wl_interface* ffwl_output_interface;
     struct wl_output_listener output_listener;
 } WaylandData;
+
+static void waylandDetectWM(int fd, FFDisplayServerResult* result)
+{
+    if(fd < 1)
+        return;
+
+    struct ucred ucred;
+    socklen_t len = sizeof(struct ucred);
+    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
+        return;
+
+    FFstrbuf procPath;
+    ffStrbufInit(&procPath);
+    ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
+    ffReadFileBuffer(procPath.chars, &result->wmProcessName);
+    ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
+    ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
+    ffStrbufDestroy(&procPath);
+}
 
 static void waylandGlobalRemoveListener(void* data, struct wl_registry* wl_registry, uint32_t name){
     FF_UNUSED(data, wl_registry, name);
@@ -81,6 +103,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     FF_LIBRARY_LOAD(wayland, instance->config.libWayland, false, "libwayland-client.so", 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
+    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_dispatch, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_roundtrip, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_proxy_marshal_constructor, false)
@@ -89,7 +112,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     WaylandData data;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, ffwl_proxy_marshal_constructor, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, wl_proxy_marshal_constructor_versioned, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_destroy, wl_proxy_destroy, false)
@@ -100,6 +123,8 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
         dlclose(wayland);
         return false;
     }
+
+    waylandDetectWM(ffwl_display_get_fd(display), result);
 
     struct wl_registry* registry = (struct wl_registry*) ffwl_proxy_marshal_constructor((struct wl_proxy*) display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
     if(registry == NULL)
