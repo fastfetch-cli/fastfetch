@@ -100,7 +100,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     waylandDetectWM(ffwl_display_get_fd(display), result);
 
-    struct wl_registry* registry = (struct wl_registry*) ffwl_proxy_marshal_constructor((struct wl_proxy*) display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
+    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
     if(registry == NULL)
     {
         ffwl_display_disconnect(display);
@@ -110,7 +110,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     data.results = &result->resolutions;
 
-    struct wl_registry_listener regestry_listener = {
+    struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener
     };
 
@@ -118,11 +118,11 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
         .mode = waylandOutputModeListener
     };
 
-    data.ffwl_proxy_add_listener((struct wl_proxy*) registry, (void(**)(void)) &regestry_listener, &data);
+    data.ffwl_proxy_add_listener(registry, (void(**)(void)) &registry_listener, &data);
     ffwl_display_dispatch(display);
     ffwl_display_roundtrip(display);
 
-    data.ffwl_proxy_destroy((struct wl_proxy*) registry);
+    data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(display);
     dlclose(wayland);
 
