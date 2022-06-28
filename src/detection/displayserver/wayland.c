@@ -13,7 +13,6 @@
 
 typedef struct WaylandData
 {
-    const FFinstance* instance;
     FFlist* results;
     FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned)
     FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
@@ -24,9 +23,6 @@ typedef struct WaylandData
 
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
-    if(fd < 1)
-        return;
-
     struct ucred ucred;
     socklen_t len = sizeof(struct ucred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
@@ -41,35 +37,13 @@ static void waylandDetectWM(int fd, FFDisplayServerResult* result)
     ffStrbufDestroy(&procPath);
 }
 
-static void waylandGlobalRemoveListener(void* data, struct wl_registry* wl_registry, uint32_t name){
-    FF_UNUSED(data, wl_registry, name);
-}
-
-static void waylandOutputGeometryListener(void* data, struct wl_output* wl_output, int32_t x, int32_t y, int32_t physical_width, int32_t physical_height, int32_t subpixel, const char* make, const char* model, int32_t transform)
-{
-    FF_UNUSED(data, wl_output, x, y, physical_width, physical_height, subpixel, make, model, transform);
-}
-
-static void waylandOutputDoneListener(void* data, struct wl_output* wl_output)
-{
-    FF_UNUSED(data, wl_output);
-}
-
-static void waylandOutputScaleListener(void* data, struct wl_output* wl_output, int32_t factor)
-{
-    FF_UNUSED(data, wl_output, factor);
-}
-
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
-    if(!(flags & WL_OUTPUT_MODE_CURRENT))
-        return;
-
-    WaylandData* wldata = (WaylandData*) data;
+    WaylandData* wldata = data;
 
     wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
 
-    if(width <= 0 || height <= 0)
+    if(!(flags & WL_OUTPUT_MODE_CURRENT) || width <= 0 || height <= 0)
         return;
 
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -90,11 +64,11 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
     if(strcmp(interface, wldata->ffwl_output_interface->name) == 0)
     {
-        struct wl_output* output = (struct wl_output*) wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy *) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
+        struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
         if(output == NULL)
             return;
 
-        wldata->ffwl_proxy_add_listener((struct wl_proxy*) output, (void(**)(void)) &wldata->output_listener, data);
+        wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &wldata->output_listener, data);
     }
 }
 
@@ -134,17 +108,15 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
         return false;
     }
 
-    data.instance = instance;
     data.results = &result->resolutions;
 
-    struct wl_registry_listener regestry_listener;
-    regestry_listener.global = waylandGlobalAddListener;
-    regestry_listener.global_remove = waylandGlobalRemoveListener;
+    struct wl_registry_listener regestry_listener = {
+        .global = waylandGlobalAddListener
+    };
 
-    data.output_listener.geometry = waylandOutputGeometryListener;
-    data.output_listener.mode = waylandOutputModeListener;
-    data.output_listener.done = waylandOutputDoneListener;
-    data.output_listener.scale = waylandOutputScaleListener;
+    data.output_listener = (struct wl_output_listener) {
+        .mode = waylandOutputModeListener
+    };
 
     data.ffwl_proxy_add_listener((struct wl_proxy*) registry, (void(**)(void)) &regestry_listener, &data);
     ffwl_display_dispatch(display);
