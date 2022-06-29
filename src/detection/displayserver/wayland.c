@@ -18,7 +18,6 @@ typedef struct WaylandData
     FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
     FF_LIBRARY_SYMBOL(wl_proxy_destroy)
     const struct wl_interface* ffwl_output_interface;
-    struct wl_output_listener output_listener;
 } WaylandData;
 
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
@@ -68,7 +67,12 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
         if(output == NULL)
             return;
 
-        wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &wldata->output_listener, data);
+        //Needs to be static, because the scope of the function will already be lost when calling the listener
+        static struct wl_output_listener outputListener = {
+            .mode = waylandOutputModeListener
+        };
+
+        wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, data);
     }
 }
 
@@ -112,10 +116,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener
-    };
-
-    data.output_listener = (struct wl_output_listener) {
-        .mode = waylandOutputModeListener
     };
 
     data.ffwl_proxy_add_listener(registry, (void(**)(void)) &registry_listener, &data);
