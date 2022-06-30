@@ -41,34 +41,6 @@ static void waylandOutputGeometryListener(void* data, struct wl_output* wl_outpu
     FF_UNUSED(data, wl_output, x, y, physical_width, physical_height, subpixel, make, model, transform);
 }
 
-#if WAYLAND_VERSION_MINOR >= 2
-
-static void waylandOutputDoneListener(void* data, struct wl_output* wl_output)
-{
-    FF_UNUSED(data, wl_output);
-}
-
-static void waylandOutputScaleListener(void* data, struct wl_output* wl_output, int32_t factor)
-{
-    FF_UNUSED(data, wl_output, factor);
-}
-
-#endif
-
-#if WAYLAND_VERSION_MINOR >= 4
-
-static void waylandOutputNameListener(void *data, struct wl_output *wl_output, const char *name)
-{
-    FF_UNUSED(data, wl_output, name);
-}
-
-static void waylandOutputDescriptionListener(void *data, struct wl_output *wl_output, const char *description)
-{
-    FF_UNUSED(data, wl_output, description);
-}
-
-#endif
-
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
     WaylandData* wldata = data;
@@ -108,16 +80,6 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
         static struct wl_output_listener outputListener = {
             .mode = waylandOutputModeListener, //This is the only one we really need
             .geometry = waylandOutputGeometryListener,
-
-            #if WAYLAND_VERSION_MINOR >= 2
-                .done = waylandOutputDoneListener,
-                .scale = waylandOutputScaleListener,
-            #endif
-
-            #if WAYLAND_VERSION_MINOR >= 4
-                .name = waylandOutputNameListener,
-                .description = waylandOutputDescriptionListener,
-            #endif
         };
 
         wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, data);
