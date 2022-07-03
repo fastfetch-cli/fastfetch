@@ -36,9 +36,9 @@ static void waylandDetectWM(int fd, FFDisplayServerResult* result)
     ffStrbufDestroy(&procPath);
 }
 
-static void waylandOutputGeometryListener(void* data, struct wl_output* wl_output, int32_t x, int32_t y, int32_t physical_width, int32_t physical_height, int32_t subpixel, const char* make, const char* model, int32_t transform)
+static void stubListener(void* data, ...)
 {
-    FF_UNUSED(data, wl_output, x, y, physical_width, physical_height, subpixel, make, model, transform);
+    (void) data;
 }
 
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
@@ -62,10 +62,6 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
     result->refreshRate = ffdsParseRefreshRate(refreshRate / 1000);
 }
 
-static void waylandGlobalRemoveListener(void* data, struct wl_registry* wl_registry, uint32_t name){
-    FF_UNUSED(data, wl_registry, name);
-}
-
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)
 {
     WaylandData* wldata = data;
@@ -78,8 +74,20 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
         //Needs to be static, because the scope of the function will already be lost when calling the listener
         static struct wl_output_listener outputListener = {
-            .mode = waylandOutputModeListener, //This is the only one we really need
-            .geometry = waylandOutputGeometryListener,
+            .mode = waylandOutputModeListener,
+            .geometry = (void*) stubListener,
+
+            //https://lists.freedesktop.org/archives/wayland-devel/2013-July/010278.html
+            #if WAYLAND_VERSION_MINOR >= 2
+                .done = (void*) stubListener,
+                .scale = (void*) stubListener,
+            #endif
+
+            //https://lists.freedesktop.org/archives/wayland-devel/2021-December/042064.html
+            #if WAYLAND_VERSION_MINOR >= 20
+                .name = (void*) stubListener,
+                .description = (void*) stubListener,
+            #endif
         };
 
         wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, data);
@@ -126,7 +134,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
-        .global_remove = waylandGlobalRemoveListener
+        .global_remove = (void*) stubListener
     };
 
     data.ffwl_proxy_add_listener(registry, (void(**)(void)) &registry_listener, &data);
