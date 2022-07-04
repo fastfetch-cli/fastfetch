@@ -12,18 +12,18 @@ void ffPrintPublicIp(FFinstance* instance)
 
     if(result.length == 0)
     {
-        ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIpKey, &instance->config.publicIpFormat, FF_PUBLICIP_NUM_FORMAT_ARGS, "Failed to connect to an IP detection server");
+        ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, "Failed to connect to an IP detection server");
         return;
     }
 
-    if(instance->config.publicIpFormat.length == 0)
+    if(instance->config.publicIP.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIpKey);
+        ffPrintLogoAndKey(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP.key);
         ffStrbufPutTo(&result, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIpKey, &instance->config.publicIpFormat, NULL, FF_PUBLICIP_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, FF_PUBLICIP_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
         });
     }

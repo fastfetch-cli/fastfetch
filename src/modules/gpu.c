@@ -1,9 +1,7 @@
 #include "fastfetch.h"
 
-#include <string.h>
-
 #define FF_GPU_MODULE_NAME "GPU"
-#define FF_GPU_NUM_FORMAT_ARGS 5
+#define FF_GPU_NUM_FORMAT_ARGS 6
 
 static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, FFGPUResult* result)
 {
@@ -33,12 +31,13 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
 
     ffStrbufAppend(&gpu, &namePretty);
 
-    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpuKey, cache, &gpu, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+    ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu, cache, &gpu, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->vendor},
         {FF_FORMAT_ARG_TYPE_STRING, vendorPretty},
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &namePretty},
         {FF_FORMAT_ARG_TYPE_STRBUF, &result->driver},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature}
     });
 
     ffStrbufDestroy(&result->vendor);
@@ -60,8 +59,10 @@ static void printGPUList(FFinstance* instance, const FFlist* list)
 }
 
 #ifdef FF_HAVE_LIBPCI
-#include <pci/pci.h>
+#include <string.h>
 #include <unistd.h>
+#include <dlfcn.h>
+#include <pci/pci.h>
 
 //see https://github.com/pciutils/pciutils/blob/5bdf63b6b1bc35b59c4b3f47f7ca83ca1868155b/ls-kernel.c#L220
 static void pciGetDriver(struct pci_dev* dev, FFstrbuf* driver, char*(*ffpci_get_param)(struct pci_access*, char*))
@@ -87,6 +88,26 @@ static void pciGetDriver(struct pci_dev* dev, FFstrbuf* driver, char*(*ffpci_get
     }
 
     ffStrbufDestroy(&path);
+}
+
+static double pciGetTemperatur(const FFinstance* instance, uint16_t deviceClass)
+{
+    const FFTempsResult* tempsResult = ffDetectTemps(instance);
+
+    for(uint32_t i = 0; i < tempsResult->values.length; i++)
+    {
+        FFTempValue* tempValue = ffListGet(&tempsResult->values, i);
+
+        uint32_t tempClass;
+        if(sscanf(tempValue->deviceClass.chars, "%x", &tempClass) != 1)
+            continue;
+
+        //The kernel exposes the device class multiplied by 256 for some reason
+        if(tempClass == deviceClass * 256)
+            return tempValue->value;
+    }
+
+    return 0.0 / 0.0; //NaN
 }
 
 static bool pciPrintGPUs(FFinstance* instance)
@@ -121,16 +142,22 @@ static bool pciPrintGPUs(FFinstance* instance)
             FFGPUResult* result = ffListAdd(&results);
 
             ffStrbufInitA(&result->vendor, 256);
-            ffpci_lookup_name(pacc, result->vendor.chars, (int) result->vendor.allocated -1, PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
+            ffpci_lookup_name(pacc, result->vendor.chars, (int) ffStrbufGetFree(&result->vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
             ffStrbufRecalculateLength(&result->vendor);
 
             ffStrbufInitA(&result->name, 256);
-            ffpci_lookup_name(pacc, result->name.chars, (int) result->name.allocated - 1, PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
+            ffpci_lookup_name(pacc, result->name.chars, (int) ffStrbufGetFree(&result->name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
             ffStrbufRecalculateLength(&result->name);
 
             ffStrbufInit(&result->driver);
-            if(instance->config.gpuFormat.length > 0) //We only need it for the format string, so don't detect it if it isn't needed
+            result->temperature = 0;
+
+            //We only need it for the format string, so don't detect it if it isn't needed
+            if(instance->config.gpu.outputFormat.length > 0)
+            {
                 pciGetDriver(dev, &result->driver, ffpci_get_param);
+                result->temperature = pciGetTemperatur(instance, dev->device_class);
+            }
         };
     }
 
@@ -163,7 +190,7 @@ static bool vulkanPrintGPUs(FFinstance* instance)
 
 void ffPrintGPU(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS))
+    if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS))
         return;
 
     #ifdef FF_HAVE_LIBPCI
@@ -174,5 +201,5 @@ void ffPrintGPU(FFinstance* instance)
     if(vulkanPrintGPUs(instance))
         return;
 
-    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpuKey, &instance->config.gpuFormat, FF_GPU_NUM_FORMAT_ARGS, "No GPUs found.");
+    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "No GPUs found.");
 }

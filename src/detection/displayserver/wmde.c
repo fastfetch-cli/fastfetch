@@ -1,8 +1,11 @@
 #include "displayServer.h"
-#include <dirent.h>
+
+#include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <ctype.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 static const char* parseEnv()
 {
@@ -40,6 +43,11 @@ static const char* parseEnv()
     if(getenv("TDE_FULL_SESSION") != NULL)
         return "Trinity";
 
+    if(
+        getenv("WAYLAND_DISPLAY") != NULL &&
+        ffFileExists("/mnt/wslg/", S_IFDIR)
+    ) return "WSLg";
+
     return NULL;
 }
 
@@ -48,8 +56,21 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
     if(!ffStrSet(processName))
         return;
 
-    if(strcasecmp(processName, "kwin_wayland") == 0 || strcasecmp(processName, "kwin_x11") == 0 || strcasecmp(processName, "kwin") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "KWin");
+    if(
+        strcasecmp(processName, "kwin_wayland") == 0 ||
+        strcasecmp(processName, "kwin_wayland_wrapper") == 0 ||
+        strcasecmp(processName, "kwin_x11") == 0 ||
+        strcasecmp(processName, "kwin_x11_wrapper") == 0 ||
+        strcasecmp(processName, "kwin") == 0
+    ) ffStrbufSetS(&result->wmPrettyName, "KWin");
+    else if(
+        strcasecmp(processName, "gnome-session-binary") == 0 ||
+        strcasecmp(processName, "Mutter") == 0
+    ) ffStrbufSetS(&result->wmPrettyName, "Mutter");
+    else if(
+        strcasecmp(processName, "cinnamon-session") == 0 ||
+        strcasecmp(processName, "Muffin") == 0
+    ) ffStrbufSetS(&result->wmPrettyName, "Muffin");
     else if(strcasecmp(processName, "sway") == 0)
         ffStrbufSetS(&result->wmPrettyName, "Sway");
     else if(strcasecmp(processName, "weston") == 0)
@@ -64,10 +85,6 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
         ffStrbufSetS(&result->wmPrettyName, "Marco");
     else if(strcasecmp(processName, "xmonad") == 0)
         ffStrbufSetS(&result->wmPrettyName, "XMonad");
-    else if(strcasecmp(processName, "gnome-session-binary") == 0 || strcasecmp(processName, "Mutter") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Mutter");
-    else if(strcasecmp(processName, "cinnamon-session") == 0 || strcasecmp(processName, "Muffin") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Muffin");
     else if( // WMs where the pretty name matches the process name
         strcasecmp(processName, "dwm") == 0 ||
         strcasecmp(processName, "bspwm") == 0 ||
@@ -329,7 +346,7 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
 
         //Don't check for processes not owend by the current user.
         ffStrbufAppendS(&procPath, "/loginuid");
-        ffGetFileContent(procPath.chars, &loginuid);
+        ffReadFileBuffer(procPath.chars, &loginuid);
         if(ffStrbufComp(&userID, &loginuid) != 0)
         {
             ffStrbufSubstrBefore(&procPath, procPathLength);
@@ -340,7 +357,7 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
 
         //We check the cmdline for the process name, because it is not trimmed.
         ffStrbufAppendS(&procPath, "/cmdline");
-        ffGetFileContent(procPath.chars, &processName);
+        ffReadFileBuffer(procPath.chars, &processName);
         ffStrbufSubstrBeforeFirstC(&processName, '\0'); //Trim the arguments
         ffStrbufSubstrAfterLastC(&processName, '/');
 
@@ -371,7 +388,7 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
         getWMProtocolNameFromEnv(result);
 
     //We don't want to detect anything in TTY
-    //This can't happen if a X11 connection succeeded, so we don't need to clear wmProcessName
+    //This can't happen if a connection succeeded, so we don't need to clear wmProcessName
     if(ffStrbufIgnCaseCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY) == 0)
         return;
 

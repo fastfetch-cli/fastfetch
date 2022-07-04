@@ -3,6 +3,8 @@
 #include <pthread.h>
 
 #ifdef FF_HAVE_VULKAN
+#include <stdlib.h>
+#include <dlfcn.h>
 #include <vulkan/vulkan.h>
 
 static inline void applyVulkanVersion(uint32_t vulkanVersion, FFVersion* ffVersion)
@@ -174,6 +176,7 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
+        gpu->temperature = 0.0 / 0.0; //NaN, no way to detect temperature using vulkan
         ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
     }
 

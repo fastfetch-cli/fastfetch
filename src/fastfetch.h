@@ -3,20 +3,15 @@
 #ifndef FASTFETCH_INCLUDED
 #define FASTFETCH_INCLUDED
 
-#include <stddef.h>
+#include "fastfetch_config.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
+
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
-#include <sys/stat.h>
-#include <dlfcn.h>
-
-#include "fastfetch_config.h"
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
@@ -50,6 +45,13 @@ typedef enum FFGLType
     FF_GL_TYPE_OSMESA
 } FFGLType;
 
+typedef struct FFModuleArgs
+{
+    FFstrbuf key;
+    FFstrbuf outputFormat;
+    FFstrbuf errorFormat;
+} FFModuleArgs;
+
 typedef struct FFconfig
 {
     FFstrbuf logoSource;
@@ -74,74 +76,40 @@ typedef struct FFconfig
     FFGLType glType;
     bool pipe; //disables logo and all escape sequences
 
-    FFstrbuf osFormat;
-    FFstrbuf osKey;
-    FFstrbuf hostFormat;
-    FFstrbuf hostKey;
-    FFstrbuf kernelFormat;
-    FFstrbuf kernelKey;
-    FFstrbuf uptimeFormat;
-    FFstrbuf uptimeKey;
-    FFstrbuf processesFormat;
-    FFstrbuf processesKey;
-    FFstrbuf packagesFormat;
-    FFstrbuf packagesKey;
-    FFstrbuf shellFormat;
-    FFstrbuf shellKey;
-    FFstrbuf resolutionFormat;
-    FFstrbuf resolutionKey;
-    FFstrbuf deFormat;
-    FFstrbuf deKey;
-    FFstrbuf wmFormat;
-    FFstrbuf wmKey;
-    FFstrbuf wmThemeFormat;
-    FFstrbuf wmThemeKey;
-    FFstrbuf themeFormat;
-    FFstrbuf themeKey;
-    FFstrbuf iconsFormat;
-    FFstrbuf iconsKey;
-    FFstrbuf fontFormat;
-    FFstrbuf fontKey;
-    FFstrbuf cursorFormat;
-    FFstrbuf cursorKey;
-    FFstrbuf terminalFormat;
-    FFstrbuf terminalKey;
-    FFstrbuf termFontFormat;
-    FFstrbuf termFontKey;
-    FFstrbuf cpuFormat;
-    FFstrbuf cpuKey;
-    FFstrbuf cpuUsageFormat;
-    FFstrbuf cpuUsageKey;
-    FFstrbuf gpuFormat;
-    FFstrbuf gpuKey;
-    FFstrbuf memoryFormat;
-    FFstrbuf memoryKey;
-    FFstrbuf diskFormat;
-    FFstrbuf diskKey;
-    FFstrbuf batteryFormat;
-    FFstrbuf batteryKey;
-    FFstrbuf localeFormat;
-    FFstrbuf localeKey;
-    FFstrbuf localIpKey;
-    FFstrbuf localIpFormat;
-    FFstrbuf publicIpKey;
-    FFstrbuf publicIpFormat;
-    FFstrbuf playerKey;
-    FFstrbuf playerFormat;
-    FFstrbuf songKey;
-    FFstrbuf songFormat;
-    FFstrbuf dateTimeKey;
-    FFstrbuf dateTimeFormat;
-    FFstrbuf dateKey;
-    FFstrbuf dateFormat;
-    FFstrbuf timeKey;
-    FFstrbuf timeFormat;
-    FFstrbuf vulkanKey;
-    FFstrbuf vulkanFormat;
-    FFstrbuf openGLKey;
-    FFstrbuf openGLFormat;
-    FFstrbuf openCLKey;
-    FFstrbuf openCLFormat;
+    FFModuleArgs os;
+    FFModuleArgs host;
+    FFModuleArgs kernel;
+    FFModuleArgs uptime;
+    FFModuleArgs processes;
+    FFModuleArgs packages;
+    FFModuleArgs shell;
+    FFModuleArgs resolution;
+    FFModuleArgs de;
+    FFModuleArgs wm;
+    FFModuleArgs wmTheme;
+    FFModuleArgs theme;
+    FFModuleArgs icons;
+    FFModuleArgs font;
+    FFModuleArgs cursor;
+    FFModuleArgs terminal;
+    FFModuleArgs terminalFont;
+    FFModuleArgs cpu;
+    FFModuleArgs cpuUsage;
+    FFModuleArgs gpu;
+    FFModuleArgs memory;
+    FFModuleArgs disk;
+    FFModuleArgs battery;
+    FFModuleArgs locale;
+    FFModuleArgs localIP;
+    FFModuleArgs publicIP;
+    FFModuleArgs player;
+    FFModuleArgs song;
+    FFModuleArgs dateTime;
+    FFModuleArgs date;
+    FFModuleArgs time;
+    FFModuleArgs vulkan;
+    FFModuleArgs openGL;
+    FFModuleArgs openCL;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -269,6 +237,7 @@ typedef struct FFGPUResult
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
+    double temperature;
 } FFGPUResult;
 
 typedef struct FFVulkanResult
@@ -300,8 +269,8 @@ typedef struct FFDisplayServerResult
 typedef struct FFTempValue
 {
     FFstrbuf name;
-    FFstrbuf value;
     FFstrbuf deviceClass;
+    double value;
 } FFTempValue;
 
 typedef struct FFTempsResult
@@ -444,11 +413,14 @@ void ffListFeatures();
 void ffStartDetectionThreads(FFinstance* instance);
 
 //common/io.c
-void ffAppendFDContent(int fd, FFstrbuf* buffer);
-bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer); //returns true if open() succeeds. This is used to differentiate between <file not found> and <empty file>
-bool ffGetFileContent(const char* fileName, FFstrbuf* buffer);
-bool ffWriteFDContent(int fd, const FFstrbuf* content);
-bool ffWriteFileContent(const char* fileName, const FFstrbuf* buffer);
+bool ffWriteFDBuffer(int fd, const FFstrbuf* content);
+bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);
+bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer);
+
+bool ffAppendFDBuffer(int fd, FFstrbuf* buffer);
+ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
+bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
+bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer);
 
 bool ffFileExists(const char* fileName, mode_t mode);
 void ffSuppressIO(bool suppress); // Not thread safe!
@@ -457,8 +429,10 @@ void ffGetTerminalResponse(const char* request, const char* format, ...);
 
 //common/printing.c
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
-void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numFormatArgs, const char* message, ...);
-void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
+void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments);
+void ffPrintFormat(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, uint32_t numArgs, const FFformatarg* arguments);
+void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customErrorFormat, const char* message, ...);
+void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...);
 void ffPrintColor(const FFstrbuf* colorValue);
 void ffPrintCharTimes(char c, uint32_t times);
 
@@ -468,9 +442,12 @@ void ffCacheValidate(FFinstance* instance);
 void ffCacheOpenWrite(FFinstance* instance, const char* moduleName, FFcache* cache);
 void ffCacheClose(FFcache* cache);
 
-bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs);
-void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
-void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments);
+bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, uint32_t numArgs);
+void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFcache* cache, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments);
+void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments);
+
+void ffCachingWriteData(const FFinstance* instance, const char* moduleName, size_t dataSize, const void* data);
+bool ffCachingReadData(const FFinstance* instance, const char* moduleName, size_t dataSize, void* data);
 
 //common/properties.c
 bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer);
@@ -490,7 +467,7 @@ void ffFontDestroy(FFfont* font);
 
 //common/format.c
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
-void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments);
+void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments);
 
 //common/parsing.c
 bool ffStrSet(const char* str);
@@ -573,7 +550,7 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);
 //Common
 const FFTitleResult* ffDetectTitle(FFinstance* instance);
 
-void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* key, const FFstrbuf* format);
+void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs);
 
 //Printing
 

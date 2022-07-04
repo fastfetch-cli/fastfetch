@@ -9,7 +9,7 @@ void ffPrintOS(FFinstance* instance)
 
     if(result->name.length == 0 && result->prettyName.length == 0)
     {
-        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, FF_OS_NUM_FORMAT_ARGS, "Could not detect OS");
+        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, "Could not detect OS");
         return;
     }
 
@@ -66,14 +66,14 @@ void ffPrintOS(FFinstance* instance)
         ffStrbufAppendC(&os, ']');
     }
 
-    if(instance->config.osFormat.length == 0)
+    if(instance->config.os.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey);
+        ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &instance->config.os.key);
         ffStrbufPutTo(&os, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, FF_OS_MODULE_NAME, 0, &instance->config.osKey, &instance->config.osFormat, NULL, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->systemName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},

@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 
-#include <unistd.h>
 #include <dirent.h>
 
 #define FF_BATTERY_MODULE_NAME "Battery"
@@ -24,7 +23,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
     //type must exist and be "Battery"
     ffStrbufAppendS(dir, "/type");
-    ffGetFileContent(dir->chars, &testBatteryBuffer);
+    ffReadFileBuffer(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Battery") != 0)
@@ -35,7 +34,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
     //scope may not exist or must not be "Device"
     ffStrbufAppendS(dir, "/scope");
-    ffGetFileContent(dir->chars, &testBatteryBuffer);
+    ffReadFileBuffer(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Device") == 0)
@@ -50,7 +49,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     //capacity must exist and be not empty
     ffStrbufInit(&result->capacity);
     ffStrbufAppendS(dir, "/capacity");
-    ffGetFileContent(dir->chars, &result->capacity);
+    ffReadFileBuffer(dir->chars, &result->capacity);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(result->capacity.length == 0)
@@ -64,30 +63,30 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 
     ffStrbufInit(&result->manufacturer);
     ffStrbufAppendS(dir, "/manufacturer");
-    ffGetFileContent(dir->chars, &result->manufacturer);
+    ffReadFileBuffer(dir->chars, &result->manufacturer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->modelName);
     ffStrbufAppendS(dir, "/model_name");
-    ffGetFileContent(dir->chars, &result->modelName);
+    ffReadFileBuffer(dir->chars, &result->modelName);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->technology);
     ffStrbufAppendS(dir, "/technology");
-    ffGetFileContent(dir->chars, &result->technology);
+    ffReadFileBuffer(dir->chars, &result->technology);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->status);
     ffStrbufAppendS(dir, "/status");
-    ffGetFileContent(dir->chars, &result->status);
+    ffReadFileBuffer(dir->chars, &result->status);
     ffStrbufSubstrBefore(dir, dirLength);
 }
 
 static void printBattery(FFinstance* instance, const BatteryResult* result, uint8_t index)
 {
-    if(instance->config.batteryFormat.length == 0)
+    if(instance->config.battery.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey);
+        ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.battery.key);
 
         bool showStatus =
             result->status.length > 0 &&
@@ -114,7 +113,7 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
     }
     else
     {
-        ffPrintFormatString(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.batteryKey, &instance->config.batteryFormat, NULL, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.battery, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
@@ -131,8 +130,7 @@ void ffPrintBattery(FFinstance* instance)
     if(instance->config.batteryDir.length > 0)
     {
         ffStrbufAppend(&baseDir, &instance->config.batteryDir);
-        if(!ffStrbufEndsWithC(&baseDir, '/'))
-            ffStrbufAppendC(&baseDir, '/');
+        ffStrbufEndsWithC(&baseDir, '/');
     }
     else
     {
@@ -144,7 +142,7 @@ void ffPrintBattery(FFinstance* instance)
     DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
     {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "opendir(\"%s\") == NULL", baseDir.chars);
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.battery, "opendir(\"%s\") == NULL", baseDir.chars);
         ffStrbufDestroy(&baseDir);
         return;
     }
@@ -175,7 +173,7 @@ void ffPrintBattery(FFinstance* instance)
     }
 
     if(results.length == 0)
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.batteryKey, &instance->config.batteryFormat, FF_BATTERY_NUM_FORMAT_ARGS, "%s doesn't contain any battery folder", baseDir.chars);
+        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &instance->config.battery, "%s doesn't contain any battery folder", baseDir.chars);
 
     ffListDestroy(&results);
     ffStrbufDestroy(&baseDir);

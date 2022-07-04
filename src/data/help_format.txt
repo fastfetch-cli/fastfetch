@@ -19,24 +19,18 @@ If a "{?}" is found without an opener, it is printed as is.
 To only print something if a variable is not set, do the same as with if, just replace every '?' with a '!'.
 For example to print a fallback for a second value if it is not set, use "{?2}{2}{?}{/2}Second value fallback{/}"
 
-There is a special variable set if an error occured during detection. You can access it with "{e}", "{error}" o
-You can use ifs and not ifs with it like with an index. For example use "{?e}some text{?}", to print a text if an
-
 To stop formatting at any point in the format string, use "{-}".
-For example to print an error instead of the normal output if it occured, prefix the format string with "{?e}{e}{-
 
 To print something with color, start a placeholder with a '#' and then the linux terminal color encoding.
 "\\033[" at the start, and an 'm' at the end is automatically added, so don't do that.
 A "{#}" is equivalent to a "{#0}" and resets everything to normal.
 For example to print something pink and underline, use "{#4;35}...{#}".
-If not in a format string, fastfetch wraps errors with "{#1;31}error{#}", so you might want to do that to if you
 Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Sele
 Which escape codes are supported and how they look is defined by your terminal.
 
 If a format string evaluates to an empty value, the whole line in the output will be discarded.
 You can therefore use --host-format " " to disable host output.
 Note that --host-format "" would evaluate as not set, and therefore use the built-in host format
-This can be used to print nothing if an error occured: prefix the format string with "{?e}{-}{?}...".
 
 Format string is also the way to go to set a fixed value - just use one without placeholders.
 For example when running in headless mode, you could use "--resolution-format "Preferred".

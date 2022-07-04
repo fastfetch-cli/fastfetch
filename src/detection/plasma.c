@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 
@@ -11,9 +12,9 @@ typedef enum PlasmaCategory
     PLASMA_CATEGORY_OTHER
 } PlasmaCategory;
 
-static bool detectFromConfigFile(const FFstrbuf* filename, FFPlasmaResult* result)
+static bool detectFromConfigFile(const char* filename, FFPlasmaResult* result)
 {
-    FILE* kdeglobals = fopen(filename->chars, "r");
+    FILE* kdeglobals = fopen(filename, "r");
     if(kdeglobals == NULL)
         return false;
 
@@ -95,17 +96,15 @@ const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
     bool foundAFile = false;
 
     //We need to do this because we use multiple threads on configDirs
-    FFstrbuf baseDirCopy;
-    ffStrbufInitA(&baseDirCopy, 64);
+    FFstrbuf baseDir;
+    ffStrbufInitA(&baseDir, 64);
 
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
     {
-        FFstrbuf* baseDir = (FFstrbuf*) ffListGet(&instance->state.configDirs, i);
+        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
+        ffStrbufAppendS(&baseDir, "kdeglobals");
 
-        ffStrbufSet(&baseDirCopy, baseDir);
-        ffStrbufAppendS(&baseDirCopy, "/kdeglobals");
-
-        if(detectFromConfigFile(&baseDirCopy, &result))
+        if(detectFromConfigFile(baseDir.chars, &result))
             foundAFile = true;
 
         if(
@@ -116,7 +115,7 @@ const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
         ) break;
     }
 
-    ffStrbufDestroy(&baseDirCopy);
+    ffStrbufDestroy(&baseDir);
 
     if(!foundAFile)
     {

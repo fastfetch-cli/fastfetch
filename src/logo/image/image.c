@@ -17,6 +17,8 @@
 #include <sys/ioctl.h>
 
 #ifdef FF_HAVE_ZLIB
+#include <stdlib.h>
+#include <dlfcn.h>
 #include <zlib.h>
 
 static bool compressBlob(const FFinstance* instance, void** blob, size_t* length)
@@ -92,7 +94,7 @@ static void writeCacheStrbuf(FFLogoRequestData* requestData, const FFstrbuf* val
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
-    ffWriteFileContent(requestData->cacheDir.chars, value);
+    ffWriteFileBuffer(requestData->cacheDir.chars, value);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 }
 
@@ -125,7 +127,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     //Write result to stdout
     ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
     fflush(stdout);
-    ffWriteFDContent(STDOUT_FILENO, result);
+    ffWriteFDBuffer(STDOUT_FILENO, result);
 
     //Go to upper left corner
     fputs("\033[9999999D", stdout);
@@ -373,7 +375,7 @@ static void readCachedStrbuf(FFLogoRequestData* requestData, FFstrbuf* result, c
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
-    ffAppendFileContent(requestData->cacheDir.chars, result);
+    ffAppendFileBuffer(requestData->cacheDir.chars, result);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 }
 
@@ -533,8 +535,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
-    if(!ffStrbufEndsWithC(&requestData.cacheDir, '/'))
-        ffStrbufAppendC(&requestData.cacheDir, '/');
+    ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
 
     ffStrbufAppendF(&requestData.cacheDir, "%u", requestData.logoPixelWidth);
     ffStrbufAppendC(&requestData.cacheDir, '*');

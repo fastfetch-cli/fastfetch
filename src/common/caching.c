@@ -1,9 +1,13 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_CACHE_SPLIT_EXTENSION "ffcs"
 
-static void getCacheFilePath(FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
+#define FF_CACHE_EXTENSION_DATA "ffcd"
+
+static void getCacheFilePath(const FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
     ffStrbufAppend(buffer, &instance->state.cacheDir);
     ffStrbufAppendS(buffer, moduleName);
@@ -20,7 +24,7 @@ static void readCacheFile(FFinstance* instance, const char* moduleName, const ch
     FFstrbuf path;
     ffStrbufInitA(&path, 64);
     getCacheFilePath(instance, moduleName, extension, &path);
-    ffAppendFileContent(path.chars, buffer);
+    ffAppendFileBuffer(path.chars, buffer);
     ffStrbufDestroy(&path);
 }
 
@@ -29,7 +33,7 @@ static void writeCacheFile(FFinstance* instance, const char* moduleName, const c
     FFstrbuf path;
     ffStrbufInitA(&path, 64);
     getCacheFilePath(instance, moduleName, extension, &path);
-    ffWriteFileContent(path.chars, content);
+    ffWriteFileBuffer(path.chars, content);
     ffStrbufDestroy(&path);
 }
 
@@ -77,7 +81,7 @@ void ffCacheClose(FFcache* cache)
         fclose(cache->split);
 }
 
-static bool printCachedValue(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat)
+static bool printCachedValue(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs)
 {
     FFstrbuf content;
     ffStrbufInitA(&content, 512);
@@ -95,7 +99,7 @@ static bool printCachedValue(FFinstance* instance, const char* moduleName, const
     {
         uint32_t nullByteIndex = ffStrbufNextIndexC(&content, startIndex, '\0');
         uint8_t moduleIndex = (moduleCounter == 1 && nullByteIndex == content.length) ? 0 : moduleCounter;
-        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
+        ffPrintLogoAndKey(instance, moduleName, moduleIndex, &moduleArgs->key);
         puts(content.chars + startIndex);
         startIndex = nullByteIndex + 1;
         ++moduleCounter;
@@ -106,7 +110,7 @@ static bool printCachedValue(FFinstance* instance, const char* moduleName, const
     return moduleCounter > 1;
 }
 
-static bool printCachedFormat(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs)
+static bool printCachedFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, uint32_t numArgs)
 {
     FFstrbuf content;
     ffStrbufInitA(&content, 512);
@@ -134,7 +138,7 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
         if(argumentCounter == numArgs)
         {
             uint8_t moduleIndex = (moduleCounter == 1 && nullByteIndex == content.length) ? 0 : moduleCounter;
-            ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, formatString, NULL, numArgs, arguments);
+            ffPrintFormat(instance, moduleName, moduleIndex, moduleArgs, numArgs, arguments);
             ++moduleCounter;
             argumentCounter = 0;
         }
@@ -148,27 +152,27 @@ static bool printCachedFormat(FFinstance* instance, const char* moduleName, cons
     return moduleCounter > 1;
 }
 
-bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* formatString, uint32_t numArgs)
+bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, uint32_t numArgs)
 {
     if(instance->config.recache)
         return false;
 
-    if(formatString == NULL || formatString->length == 0)
-        return printCachedValue(instance, moduleName, customKeyFormat);
+    if(moduleArgs->outputFormat.length == 0)
+        return printCachedValue(instance, moduleName, moduleArgs);
     else
-        return printCachedFormat(instance, moduleName, customKeyFormat, formatString, numArgs);
+        return printCachedFormat(instance, moduleName, moduleArgs, numArgs);
 }
 
-void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, FFcache* cache, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments)
+void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFcache* cache, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments)
 {
-    if(formatString == NULL || formatString->length == 0)
+    if(moduleArgs->outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
+        ffPrintLogoAndKey(instance, moduleName, moduleIndex, &moduleArgs->key);
         ffStrbufPutTo(value, stdout);
     }
     else
     {
-        ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, formatString, NULL, numArgs, arguments);
+        ffPrintFormat(instance, moduleName, moduleIndex, moduleArgs, numArgs, arguments);
     }
 
     if(cache->value != NULL)
@@ -191,10 +195,32 @@ void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8
     }
 }
 
-void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFstrbuf* customKeyFormat, const FFstrbuf* value, const FFstrbuf* formatString, uint32_t numArgs, const FFformatarg* arguments)
+void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments)
 {
     FFcache cache;
     ffCacheOpenWrite(instance, moduleName, &cache);
-    ffPrintAndAppendToCache(instance, moduleName, 0, customKeyFormat, &cache, value, formatString, numArgs, arguments);
+    ffPrintAndAppendToCache(instance, moduleName, 0, moduleArgs, &cache, value, numArgs, arguments);
     ffCacheClose(&cache);
+}
+
+void ffCachingWriteData(const FFinstance* instance, const char* moduleName, size_t dataSize, const void* data)
+{
+    FFstrbuf path;
+    ffStrbufInitA(&path, 128);
+    getCacheFilePath(instance, moduleName, FF_CACHE_EXTENSION_DATA, &path);
+    ffWriteFileData(path.chars, dataSize, data);
+    ffStrbufDestroy(&path);
+}
+
+bool ffCachingReadData(const FFinstance* instance, const char* moduleName, size_t dataSize, void* data)
+{
+    if(instance->config.recache)
+        return false;
+
+    FFstrbuf path;
+    ffStrbufInitA(&path, 128);
+    getCacheFilePath(instance, moduleName, FF_CACHE_EXTENSION_DATA, &path);
+    ssize_t result = ffReadFileData(path.chars, dataSize, data);
+    ffStrbufDestroy(&path);
+    return result > 0 && (size_t) result == dataSize;
 }

@@ -6,7 +6,7 @@
 void ffPrintFont(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_FONT_NUM_FORMAT_ARGS, "Font detection is not supported on Android");
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "Font detection is not supported on Android");
         return;
     #endif
 
@@ -14,7 +14,7 @@ void ffPrintFont(FFinstance* instance)
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
     {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_FONT_NUM_FORMAT_ARGS, "Font isn't supported in TTY");
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "Font isn't supported in TTY");
         return;
     }
 
@@ -25,7 +25,7 @@ void ffPrintFont(FFinstance* instance)
 
     if(plasmaRaw->length == 0 && gtk2Raw->length == 0 && gtk3Raw->length == 0 && gtk4Raw->length == 0)
     {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_FONT_NUM_FORMAT_ARGS, "No fonts found");
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "No fonts found");
         return;
     }
 
@@ -45,9 +45,9 @@ void ffPrintFont(FFinstance* instance)
     ffStrbufInitA(&gtk, 64);
     ffParseGTK(&gtk, &gtk2.pretty, &gtk3.pretty, &gtk4.pretty);
 
-    if(instance->config.fontFormat.length == 0)
+    if(instance->config.font.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey);
+        ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font.key);
         if(plasma.pretty.length > 0)
         {
             ffStrbufWriteTo(&plasma.pretty, stdout);
@@ -60,7 +60,7 @@ void ffPrintFont(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_FONT_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, NULL, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, plasmaRaw},
             {FF_FORMAT_ARG_TYPE_STRBUF, &plasma.name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &plasma.size},

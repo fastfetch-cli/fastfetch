@@ -1,16 +1,10 @@
 #include "fastfetch.h"
 
-#include <stdio.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <stdarg.h>
 #include <termios.h>
 #include <poll.h>
-
-bool ffWriteFDContent(int fd, const FFstrbuf* content)
-{
-    return write(fd, content->chars, content->length) != -1;
-}
 
 static void createSubfolders(const char* fileName)
 {
@@ -28,7 +22,13 @@ static void createSubfolders(const char* fileName)
     ffStrbufDestroy(&path);
 }
 
-bool ffWriteFileContent(const char* fileName, const FFstrbuf* content)
+
+bool ffWriteFDBuffer(int fd, const FFstrbuf* content)
+{
+    return write(fd, content->chars, content->length) != -1;
+}
+
+bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
     int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
@@ -42,14 +42,19 @@ bool ffWriteFileContent(const char* fileName, const FFstrbuf* content)
             return false;
     }
 
-    bool ret = ffWriteFDContent(fd, content);
+    bool ret = write(fd, data, dataSize) != -1;
 
     close(fd);
 
     return ret;
 }
 
-void ffAppendFDContent(int fd, FFstrbuf* buffer)
+bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer)
+{
+    return ffWriteFileData(fileName, buffer->length, buffer->chars);
+}
+
+bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
     ssize_t readed = 0;
 
@@ -73,24 +78,40 @@ void ffAppendFDContent(int fd, FFstrbuf* buffer)
 
     ffStrbufTrimRight(buffer, '\n');
     ffStrbufTrimRight(buffer, ' ');
+
+    return readed >= 0;
 }
 
-bool ffAppendFileContent(const char* fileName, FFstrbuf* buffer)
+ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
+{
+    int fd = open(fileName, O_RDONLY);
+    if(fd == -1)
+        return -1;
+
+    ssize_t readed = read(fd, data, dataSize);
+
+    close(fd);
+
+    return readed;
+}
+
+bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return false;
 
-    ffAppendFDContent(fd, buffer);
+    bool ret = ffAppendFDBuffer(fd, buffer);
 
     close(fd);
-    return true;
+
+    return ret;
 }
 
-bool ffGetFileContent(const char* fileName, FFstrbuf* buffer)
+bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
-    return ffAppendFileContent(fileName, buffer);
+    return ffAppendFileBuffer(fileName, buffer);
 }
 
 // Not thread safe!

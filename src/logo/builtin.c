@@ -43,6 +43,56 @@ static const FFlogo* getLogoNone()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoAlpine()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("alpine", "alpinelinux", "alpine-linux")
+    FF_LOGO_LINES(
+        "       .hddddddddddddddddddddddh.\n"
+        "      :dddddddddddddddddddddddddd:\n"
+        "     /dddddddddddddddddddddddddddd/\n"
+        "    +dddddddddddddddddddddddddddddd+\n"
+        "  `sdddddddddddddddddddddddddddddddds`\n"
+        " `ydddddddddddd++hdddddddddddddddddddy`\n"
+        ".hddddddddddd+`  `+ddddh:-sdddddddddddh.   \n"
+        "hdddddddddd+`      `+y:    .sddddddddddh\n"
+        "ddddddddh+`   `//`   `.`     -sddddddddd\n"
+        "ddddddh+`   `/hddh/`   `:s-    -sddddddd\n"
+        "ddddh+`   `/+/dddddh/`   `+s-    -sddddd\n"
+        "ddd+`   `/o` :dddddddh/`   `oy-    .yddd\n"
+        "hdddyo+ohddyosdddddddddho+oydddy++ohdddh\n"
+        ".hddddddddddddddddddddddddddddddddddddh.\n"
+        " `yddddddddddddddddddddddddddddddddddy`\n"
+        "  `sdddddddddddddddddddddddddddddddds`\n"
+        "    +dddddddddddddddddddddddddddddd+\n"
+        "     /dddddddddddddddddddddddddddd/\n"
+        "      :dddddddddddddddddddddddddd:\n"
+        "       .hddddddddddddddddddddddh.";
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAlpineSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("alpine_small", "alpine-linux-small")
+    FF_LOGO_LINES(
+        "   /\\ /\\\n"
+        "  // \\  \\\n"
+        " //   \\  \\\n"
+        "///    \\  \\\n"
+        "//      \\  \\\n"
+        "         \\"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoAndroid()
 {
     FF_LOGO_INIT
@@ -155,18 +205,18 @@ static const FFlogo* getLogoArtix()
         "              'oookkxxoo'\n"
         "             'oiioxkkxxoo'\n"
         "            ':;:iiiioxxxoo'\n"
-        "              `'.;::ioxxoo''\n"
+        "               `'.;::ioxxoo'\n"
         "          '-.      `':;jiooo'\n"
-        "        'oooio-..     `'i:io'\n"
-        "       'ooooxxxxoio:,.   `'-;'\n"
-        "      'ooooxxxxxkkxoooIi:-.  `'\n"
-        "     'ooooxxxxxkkkkxoiiiiiji'\n"
-        "    'ooooxxxxxkxxoiiii:'`     .i'\n"
-        "   'ooooxxxxxoi:::'`       .;ioxo'\n"
-        "  'ooooxooi::'`         .:iiixkxxo'\n"
-        " 'ooooi:'`                `'';ioxxo'\n"
-        "'i:'`                          '':io'\n"
-        "'`                                  `'";
+        "         'oooio-..     `'i:io'\n"
+        "        'ooooxxxxoio:,.   `'-;'\n"
+        "       'ooooxxxxxkkxoooIi:-.  `'\n"
+        "      'ooooxxxxxkkkkxoiiiiiji'\n"
+        "     'ooooxxxxxkxxoiiii:'`     .i'\n"
+        "    'ooooxxxxxoi:::'`       .;ioxo'\n"
+        "   'ooooxooi::'`         .:iiixkxxo'\n"
+        "  'ooooi:'`                `'';ioxxo'\n"
+        " 'i:'`                          '':io'\n"
+        "'`                                   `'";
     )
     FF_LOGO_COLORS(
         "36" //cyan
@@ -1434,6 +1484,8 @@ GetLogoMethod* ffLogoBuiltinGetAll()
     static GetLogoMethod logoMethods[] = {
         ffLogoBuiltinGetUnknown,
         getLogoNone,
+        getLogoAlpine,
+        getLogoAlpineSmall,
         getLogoAndroid,
         getLogoAndroidSmall,
         getLogoArch,

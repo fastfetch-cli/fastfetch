@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs
 
 project(fastfetch
-    VERSION 1.5.3
+    VERSION 1.5.6
     LANGUAGES C
 )
 
@@ -477,13 +477,6 @@ target_link_libraries(flashfetch
 ###################
 
 if (BUILD_TESTS)
-    add_executable(fastfetch-test-performance
-        tests/performance.c
-    )
-    target_link_libraries(fastfetch-test-performance
-        PRIVATE libfastfetch
-    )
-
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )

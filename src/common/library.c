@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 
 #include <stdarg.h>
+#include <dlfcn.h>
 
 static void* libraryLoad(const char* path, int maxVersion)
 {

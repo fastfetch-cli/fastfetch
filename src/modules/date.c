@@ -4,14 +4,14 @@
 
 void ffPrintDate(FFinstance* instance)
 {
-    if(instance->config.dateFormat.length > 0)
+    if(instance->config.date.outputFormat.length > 0)
     {
-        ffPrintDateTimeFormat(instance, FF_DATE_MODULE_NAME, &instance->config.dateKey, &instance->config.dateFormat);
+        ffPrintDateTimeFormat(instance, FF_DATE_MODULE_NAME, &instance->config.date);
         return;
     }
 
     const FFDateTimeResult* datetime = ffDetectDateTime(instance);
-    ffPrintLogoAndKey(instance, FF_DATE_MODULE_NAME, 0, &instance->config.dateKey);
+    ffPrintLogoAndKey(instance, FF_DATE_MODULE_NAME, 0, &instance->config.date.key);
 
     //yyyy-mm-dd
     printf("%u-%s-%u\n", datetime->year, datetime->monthPretty.chars, datetime->dayInMonth);

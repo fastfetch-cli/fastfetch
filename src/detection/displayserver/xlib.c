@@ -1,6 +1,7 @@
 #include "displayServer.h"
 
 #ifdef FF_HAVE_X11
+#include <dlfcn.h>
 #include <X11/Xlib.h>
 
 typedef struct X11PropertyData
@@ -34,7 +35,7 @@ static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Wi
 
 static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
 {
-    if(result->wmProcessName.length > 0)
+    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND) == 0)
         return;
 
     Window* wmWindow = (Window*) x11GetProperty(data, display, DefaultRootWindow(display), "_NET_SUPPORTING_WM_CHECK");

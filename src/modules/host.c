@@ -1,10 +1,15 @@
 #include "fastfetch.h"
 
-#include <ctype.h>
+#include <stdlib.h>
 
 #define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 15
 
+#ifdef __ANDROID__
+    #include <ctype.h>
+#endif
+
+#ifndef __ANDROID__
 static bool hostValueSet(FFstrbuf* value)
 {
     ffStrbufTrimRight(value, '\n');
@@ -32,19 +37,18 @@ static bool hostValueSet(FFstrbuf* value)
     ;
 }
 
-#ifndef __ANDROID__
 static void getHostValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
-    ffGetFileContent(devicesPath, buffer);
+    ffReadFileBuffer(devicesPath, buffer);
 
     if(buffer->length == 0)
-        ffGetFileContent(classPath, buffer);
+        ffReadFileBuffer(classPath, buffer);
 }
 #endif
 
 void ffPrintHost(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS))
+    if(ffPrintFromCache(instance, FF_HOST_MODULE_NAME, &instance->config.host, FF_HOST_NUM_FORMAT_ARGS))
         return;
 
     FFstrbuf product_family;
@@ -63,10 +67,10 @@ void ffPrintHost(FFinstance* instance)
         getHostValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &product_name);
 
         if(product_name.length == 0)
-            ffGetFileContent("/sys/firmware/devicetree/base/model", &product_name);
+            ffReadFileBuffer("/sys/firmware/devicetree/base/model", &product_name);
 
         if(product_name.length == 0)
-            ffGetFileContent("/tmp/sysinfo/model", &product_name);
+            ffReadFileBuffer("/tmp/sysinfo/model", &product_name);
 
         if(ffStrbufStartsWithS(&product_name, "Standard PC"))
         {
@@ -79,6 +83,13 @@ void ffPrintHost(FFinstance* instance)
 
         if(!hostValueSet(&product_name))
             ffStrbufClear(&product_name);
+
+        //On WSL, the real host can't be detected. Instead use WSL as host.
+        if(product_name.length == 0 && product_family.length == 0 && (
+            getenv("WSLENV") != NULL ||
+            getenv("WSL_DISTRO") != NULL ||
+            getenv("WSL_INTEROP") != NULL
+        )) ffStrbufAppendS(&product_name, "Windows Subsystem for Linux");
     #else
         ffSettingsGetAndroidProperty("ro.product.brand", &product_name);
         if(product_name.length > 0){
@@ -96,14 +107,14 @@ void ffPrintHost(FFinstance* instance)
     {
         ffStrbufDestroy(&product_family);
         ffStrbufDestroy(&product_name);
-        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.hostKey, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, "neither product_family nor product_name is set by O.E.M.");
+        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.host, "neither product_family nor product_name is set by O.E.M.");
         return;
     }
 
     #ifdef __ANDROID__
-        #define FF_HOST_DATA(name)
-            FFstrbuf product_name; \
-            ffStrbufInitA(&product_name, 0);
+        #define FF_HOST_DATA(name) \
+            FFstrbuf name; \
+            ffStrbufInitA(&name, 0);
     #else
         #define FF_HOST_DATA(name) \
             FFstrbuf name; \
@@ -141,7 +152,7 @@ void ffPrintHost(FFinstance* instance)
         ffStrbufAppend(&host, &product_version);
     }
 
-    ffPrintAndWriteToCache(instance, FF_HOST_MODULE_NAME, &instance->config.hostKey, &host, &instance->config.hostFormat, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
+    ffPrintAndWriteToCache(instance, FF_HOST_MODULE_NAME, &instance->config.host, &host, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
         {FF_FORMAT_ARG_TYPE_STRBUF, &product_family},
         {FF_FORMAT_ARG_TYPE_STRBUF, &product_name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &product_version},

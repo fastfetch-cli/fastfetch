@@ -1,9 +1,8 @@
 #include "FFstrbuf.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <stdlib.h>
 
 static char* CHAR_NULL_PTR = "";
 
@@ -515,6 +514,12 @@ bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
     return false;
 }
 
+void ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c)
+{
+    if(!ffStrbufEndsWithC(strbuf, c))
+        ffStrbufAppendC(strbuf, c);
+}
+
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file)
 {
     fwrite(strbuf->chars, sizeof(*strbuf->chars), strbuf->length, file);
@@ -524,6 +529,15 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
 {
     ffStrbufWriteTo(strbuf, file);
     fputc('\n', file);
+}
+
+double ffStrbufToDouble(const FFstrbuf* strbuf)
+{
+    double value;
+    if(sscanf(strbuf->chars, "%lf", &value) != 1)
+        return 0.0 / 0.0; //NaN
+
+    return value;
 }
 
 void ffStrbufDestroy(FFstrbuf* strbuf)

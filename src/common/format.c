@@ -32,15 +32,6 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     }
 }
 
-static inline bool placeholderValueIsForError(const FFstrbuf* placeholderValue)
-{
-    return
-        ffStrbufIgnCaseCompS(placeholderValue, "e") == 0 ||
-        ffStrbufIgnCaseCompS(placeholderValue, "error") == 0 ||
-        ffStrbufIgnCaseCompS(placeholderValue, "0") == 0
-    ;
-}
-
 static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
 {
     uint32_t result = UINT32_MAX;
@@ -72,6 +63,7 @@ static inline bool formatArgSet(const FFformatarg* arg)
 {
     return arg->value != NULL && (
         (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value == *(double*)arg->value) || //NaN
         (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRING && *(const char*)arg->value != '\0') ||
@@ -81,7 +73,7 @@ static inline bool formatArgSet(const FFformatarg* arg)
     );
 }
 
-void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFstrbuf* error, uint32_t numArgs, const FFformatarg* arguments)
+void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments)
 {
     uint32_t argCounter = 0;
 
@@ -127,13 +119,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
 
         while(i < formatstr->length && formatstr->chars[i] != '}')
             ffStrbufAppendC(&placeholderValue, formatstr->chars[i++]);
-
-        // test for error, if so print it
-        if(placeholderValueIsForError(&placeholderValue)) {
-            ffStrbufAppend(buffer, error);
-            ffStrbufDestroy(&placeholderValue);
-            continue;
-        }
 
          // test if for stop, if so break the loop
         if(placeholderValue.length == 1 && placeholderValue.chars[0] == '-')
@@ -186,14 +171,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
         {
             ffStrbufSubstrAfter(&placeholderValue, 0);
 
-            // continue if an error is set
-            if(placeholderValueIsForError(&placeholderValue) && error != NULL && error->length > 0)
-            {
-                ++numOpenIfs;
-                ffStrbufDestroy(&placeholderValue);
-                continue;
-            }
-
             uint32_t index = getArgumentIndex(&placeholderValue);
 
             // testing for an invalid index
@@ -222,14 +199,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, const FFst
         if(placeholderValue.chars[0] == '/')
         {
             ffStrbufSubstrAfter(&placeholderValue, 0);
-
-            //continue if an error os not set
-            if(placeholderValueIsForError(&placeholderValue) && (error == NULL || error->length == 0))
-            {
-                ++numOpenNotIfs;
-                ffStrbufDestroy(&placeholderValue);
-                continue;
-            }
 
             uint32_t index = getArgumentIndex(&placeholderValue);
 

@@ -90,8 +90,12 @@ uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
 
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
 
+void ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
+
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
+
+double ffStrbufToDouble(const FFstrbuf* strbuf);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
 

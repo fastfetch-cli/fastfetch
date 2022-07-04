@@ -6,7 +6,7 @@
 void ffPrintTheme(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey, &instance->config.themeFormat, FF_THEME_NUM_FORMAT_ARGS, "Theme detection is not supported on Android");
+        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, "Theme detection is not supported on Android");
         return;
     #endif
 
@@ -14,7 +14,7 @@ void ffPrintTheme(FFinstance* instance)
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
     {
-        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.fontKey, &instance->config.fontFormat, FF_THEME_NUM_FORMAT_ARGS, "Theme isn't supported in TTY");
+        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, "Theme isn't supported in TTY");
         return;
     }
 
@@ -25,7 +25,7 @@ void ffPrintTheme(FFinstance* instance)
 
     if(plasma->widgetStyle.length == 0 && plasma->colorScheme.length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
     {
-        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey, &instance->config.themeFormat, FF_THEME_NUM_FORMAT_ARGS, "No themes found");
+        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, "No themes found");
         return;
     }
 
@@ -40,9 +40,9 @@ void ffPrintTheme(FFinstance* instance)
     FF_STRBUF_CREATE(gtkPretty);
     ffParseGTK(&gtkPretty, gtk2, gtk3, gtk4);
 
-    if(instance->config.themeFormat.length == 0)
+    if(instance->config.theme.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey);
+        ffPrintLogoAndKey(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme.key);
 
         if(plasma->widgetStyle.length > 0)
         {
@@ -80,7 +80,7 @@ void ffPrintTheme(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_THEME_MODULE_NAME, 0, &instance->config.themeKey, &instance->config.themeFormat, NULL, FF_THEME_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, FF_THEME_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &plasma->widgetStyle},
             {FF_FORMAT_ARG_TYPE_STRBUF, &plasma->colorScheme},
             {FF_FORMAT_ARG_TYPE_STRBUF, &plasmaColorPretty},

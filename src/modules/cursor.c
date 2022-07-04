@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_CURSOR_MODULE_NAME "Cursor"
 #define FF_CURSOR_NUM_FORMAT_ARGS 2
 
@@ -12,9 +14,9 @@ static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstr
     if(cursorTheme->length == 0)
         ffStrbufAppendS(cursorTheme, "default");
 
-    if(instance->config.cursorFormat.length == 0)
+    if(instance->config.cursor.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey);
+        ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor.key);
         ffStrbufWriteTo(cursorTheme, stdout);
 
         if(cursorSize != NULL && cursorSize->length > 0)
@@ -28,7 +30,7 @@ static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstr
     }
     else
     {
-        ffPrintFormatString(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, NULL, FF_CURSOR_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, FF_CURSOR_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, cursorTheme},
             {FF_FORMAT_ARG_TYPE_STRBUF, cursorSize}
         });
@@ -47,7 +49,7 @@ static void printCursorGTK(FFinstance* instance)
 
     if(gtk->cursor.length == 0)
     {
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't detect GTK Cursor");
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Couldn't detect GTK Cursor");
         return;
     }
 
@@ -69,7 +71,7 @@ static void printCursorXFCE(FFinstance* instance)
 
     if(cursorTheme.length == 0)
     {
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't find xfce cursor in xfconf (xsettings::/Gtk/CursorThemeName)");
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Couldn't find xfce cursor in xfconf (xsettings::/Gtk/CursorThemeName)");
         return;
     }
 
@@ -105,7 +107,7 @@ static void printCursorFromConfigFile(FFinstance* instance, const char* relative
     }
 
     if(cursorTheme.length == 0)
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Couldn't find cursor in %s", relativeFilePath);
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Couldn't find cursor in %s", relativeFilePath);
     else
         printCursor(instance, &cursorTheme, &cursorSize);
 
@@ -185,15 +187,21 @@ static bool printCursorFromEnv(FFinstance* instance)
 void ffPrintCursor(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Cursor detection is not supported on Android");
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Cursor detection is not supported on Android");
         return;
     #endif
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
+    if(ffStrbufCompS(&wmde->wmPrettyName, "WSLg") == 0)
+    {
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "WSLg uses native windows cursor");
+        return;
+    }
+
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
     {
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursorKey, &instance->config.cursorFormat, FF_CURSOR_NUM_FORMAT_ARGS, "Cursor isn't supported in TTY");
+        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Cursor isn't supported in TTY");
         return;
     }
 

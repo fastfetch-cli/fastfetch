@@ -9,13 +9,13 @@ void ffPrintVulkan(FFinstance* instance)
 
     if(vulkan->apiVersion.length == 0 && vulkan->driver.length == 0)
     {
-        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkanKey, &instance->config.vulkanFormat, FF_VULKAN_NUM_FORMAT_ARGS, "Failed to detect vulkan");
+        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan, "Failed to detect vulkan");
         return;
     }
 
-    if(instance->config.vulkanFormat.length == 0)
+    if(instance->config.vulkan.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkanKey);
+        ffPrintLogoAndKey(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan.key);
 
         if(vulkan->driver.length > 0)
         {
@@ -32,7 +32,7 @@ void ffPrintVulkan(FFinstance* instance)
     }
     else
     {
-        ffPrintFormatString(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkanKey, &instance->config.vulkanFormat, NULL, FF_VULKAN_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan, FF_VULKAN_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->driver},
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->apiVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->conformanceVersion}

@@ -1,7 +1,6 @@
 #include "FFlist.h"
 
-#include <malloc.h>
-#include <memory.h>
+#include <stdlib.h>
 
 void ffListInit(FFlist* list, uint32_t elementSize)
 {

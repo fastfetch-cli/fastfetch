@@ -4,6 +4,7 @@
 #define FASTFETCH_INCLUDED_FFVALUESTORE
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct FFvaluestorePair
 {

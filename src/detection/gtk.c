@@ -103,7 +103,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
     uint32_t configDirLength = configDir->length;
 
     // <configdir>/gtk-<version>.0/settings.ini
-    ffStrbufAppendS(configDir, "/gtk-");
+    ffStrbufAppendS(configDir, "gtk-");
     ffStrbufAppendS(configDir, version);
     ffStrbufAppendS(configDir, ".0/settings.ini");
     detectGTKFromConfigFile(configDir->chars, result);
@@ -112,7 +112,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
         return;
 
     // <configdir>/gtk-<version>.0/gtkrc
-    ffStrbufAppendS(configDir, "/gtk-");
+    ffStrbufAppendS(configDir, "gtk-");
     ffStrbufAppendS(configDir, version);
     ffStrbufAppendS(configDir, ".0/gtkrc");
     detectGTKFromConfigFile(configDir->chars, result);
@@ -121,7 +121,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
         return;
 
     // <configdir>/gtkrc-<version>.0
-    ffStrbufAppendS(configDir, "/gtkrc-");
+    ffStrbufAppendS(configDir, "gtkrc-");
     ffStrbufAppendS(configDir, version);
     ffStrbufAppendS(configDir, ".0");
     detectGTKFromConfigFile(configDir->chars, result);
@@ -130,7 +130,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
         return;
 
     // <configdir>/.gtkrc-<version>.0
-    ffStrbufAppendS(configDir, "/.gtkrc-");
+    ffStrbufAppendS(configDir, ".gtkrc-");
     ffStrbufAppendS(configDir, version);
     ffStrbufAppendS(configDir, ".0");
     detectGTKFromConfigFile(configDir->chars, result);
@@ -140,22 +140,21 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
 static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* result)
 {
     //We need to do this because we use multiple threads on configDirs
-    FFstrbuf baseDirCopy;
-    ffStrbufInitA(&baseDirCopy, 64);
+    FFstrbuf baseDir;
+    ffStrbufInitA(&baseDir, 64);
 
     for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
     {
-        FFstrbuf* baseDir = (FFstrbuf*) ffListGet(&instance->state.configDirs, i);
-        ffStrbufSet(&baseDirCopy, baseDir);
-        detectGTKFromConfigDir(&baseDirCopy, version, result);
+        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
+        detectGTKFromConfigDir(&baseDir, version, result);
         if(allPropertiesSet(result))
-        {
-            ffStrbufDestroy(&baseDirCopy);
-            return;
-        }
+            break;
     }
 
-    ffStrbufDestroy(&baseDirCopy);
+    ffStrbufDestroy(&baseDir);
+
+    if(allPropertiesSet(result))
+        return;
 
     //Mate, Cinnamon and Gnome use dconf to save theme config
     //On other DEs, this will do nothing
