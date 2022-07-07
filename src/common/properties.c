@@ -109,7 +109,11 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
 
     FILE* file = fopen(filename, "r");
     if(file == NULL)
+    {
+        if(unsetValues != valueStorage)
+            free(unsetValues);
         return false;
+    }
 
     if(allSet)
     {
