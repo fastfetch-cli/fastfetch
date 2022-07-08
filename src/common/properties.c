@@ -88,10 +88,13 @@ bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer)
 // The following functions return true if the file was found, independently if start was found
 // Buffers which already contain content are not overwritten
 // The last occurence of start in the first file will be the one used
-// The *Values methods always return true, if all properties were already found before, without testing if the file exists
 
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries)
 {
+    FILE* file = fopen(filename, "r");
+    if(file == NULL)
+        return false;
+
     bool valueStorage[4];
     bool* unsetValues;
 
@@ -107,17 +110,8 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
             allSet = false;
     }
 
-    FILE* file = fopen(filename, "r");
-    if(file == NULL)
-        return false;
-
     if(allSet)
-    {
-        fclose(file);
-        if(unsetValues != valueStorage)
-            free(unsetValues);
-        return true;
-    }
+        goto done;
 
     char* line = NULL;
     size_t len = 0;
@@ -139,11 +133,10 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     if(line != NULL)
         free(line);
 
+done:
     fclose(file);
-
     if(unsetValues != valueStorage)
         free(unsetValues);
-
     return true;
 }
 
