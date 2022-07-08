@@ -16,7 +16,6 @@ typedef struct WaylandData
     FFlist* results;
     FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned)
     FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
-    FF_LIBRARY_SYMBOL(wl_proxy_destroy)
     const struct wl_interface* ffwl_output_interface;
 } WaylandData;
 
@@ -43,9 +42,9 @@ static void stubListener(void* data, ...)
 
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
-    WaylandData* wldata = data;
+    FF_UNUSED(output);
 
-    wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
+    WaylandData* wldata = data;
 
     if(!(flags & WL_OUTPUT_MODE_CURRENT) || width <= 0 || height <= 0)
         return;
@@ -111,7 +110,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, wl_proxy_marshal_constructor_versioned, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener, false)
     FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_destroy, wl_proxy_destroy, false)
 
     struct wl_display* display = ffwl_display_connect(NULL);
     if(display == NULL)
@@ -141,8 +139,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     ffwl_display_dispatch(display);
     ffwl_display_roundtrip(display);
 
-    data.ffwl_proxy_destroy(registry);
-    ffwl_display_disconnect(display);
+    ffwl_display_disconnect(display); //This will also destroy our wl_registry and wl_output proxies
     dlclose(wayland);
 
     //We successfully connected to wayland and detected the resolution.
