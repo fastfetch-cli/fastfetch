@@ -92,8 +92,6 @@ bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer)
 
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries)
 {
-    bool returnValue = true;
-
     bool valueStorage[4];
     bool* unsetValues;
 
@@ -110,10 +108,19 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     }
 
     FILE* file = fopen(filename, "r");
-    if(file == NULL || allSet)
+    if(file == NULL)
     {
-        returnValue = allSet;
-        goto cleanup;
+        if(unsetValues != valueStorage)
+            free(unsetValues);
+        return false;
+    }
+
+    if(allSet)
+    {
+        fclose(file);
+        if(unsetValues != valueStorage)
+            free(unsetValues);
+        return true;
     }
 
     char* line = NULL;
@@ -136,13 +143,12 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     if(line != NULL)
         free(line);
 
-cleanup:
-    if(file != NULL)
-        fclose(file);
+    fclose(file);
+
     if(unsetValues != valueStorage)
         free(unsetValues);
 
-    return returnValue;
+    return true;
 }
 
 bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
