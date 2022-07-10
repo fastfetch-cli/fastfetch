@@ -758,13 +758,13 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
     {
-        optionParseString(key, value, &instance->config.logoSource);
+        optionParseString(key, value, &instance->config.logo.source);
 
         //this is usally wanted when using the none logo
         if(strcasecmp(value, "none") == 0)
         {
-            instance->config.logoPaddingRight = 0;
-            instance->config.logoPaddingLeft = 0;
+            instance->config.logo.paddingRight = 0;
+            instance->config.logo.paddingLeft = 0;
         }
     }
     else if(strcasecmp(key, "--logo-type") == 0)
@@ -776,19 +776,19 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         }
 
         if(strcasecmp(value, "auto") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_AUTO;
+            instance->config.logo.type = FF_LOGO_TYPE_AUTO;
         else if(strcasecmp(value, "builtin") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_BUILTIN;
+            instance->config.logo.type = FF_LOGO_TYPE_BUILTIN;
         else if(strcasecmp(value, "file") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_FILE;
+            instance->config.logo.type = FF_LOGO_TYPE_FILE;
         else if(strcasecmp(value, "raw") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_RAW;
+            instance->config.logo.type = FF_LOGO_TYPE_RAW;
         else if(strcasecmp(value, "sixel") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_SIXEL;
+            instance->config.logo.type = FF_LOGO_TYPE_SIXEL;
         else if(strcasecmp(value, "kitty") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_KITTY;
+            instance->config.logo.type = FF_LOGO_TYPE_KITTY;
         else if(strcasecmp(value, "chafa") == 0)
-            instance->config.logoType = FF_LOGO_TYPE_CHAFA;
+            instance->config.logo.type = FF_LOGO_TYPE_CHAFA;
         else
         {
             fprintf(stderr, "Error: unknown logo type: %s\n", value);
@@ -807,48 +807,48 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             exit(472);
         }
 
-        optionParseColor(key, value, &instance->config.logoColors[index]);
+        optionParseColor(key, value, &instance->config.logo.colors[index]);
     }
     else if(strcasecmp(key, "--logo-width") == 0)
-        instance->config.logoWidth = optionParseUInt32(key, value);
+        instance->config.logo.width = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-height") == 0)
-        instance->config.logoHeight = optionParseUInt32(key, value);
+        instance->config.logo.height = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-padding") == 0)
     {
         uint32_t padding = optionParseUInt32(key, value);
-        instance->config.logoPaddingLeft = padding;
-        instance->config.logoPaddingRight = padding;
+        instance->config.logo.paddingLeft = padding;
+        instance->config.logo.paddingRight = padding;
     }
     else if(strcasecmp(key, "--logo-padding-left") == 0)
-        instance->config.logoPaddingLeft = optionParseUInt32(key, value);
+        instance->config.logo.paddingLeft = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-padding-right") == 0)
-        instance->config.logoPaddingRight = optionParseUInt32(key, value);
+        instance->config.logo.paddingRight = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--logo-print-remaining") == 0)
-        instance->config.logoPrintRemaining = optionParseBoolean(value);
+        instance->config.logo.printRemaining = optionParseBoolean(value);
     else if(strcasecmp(key, "--sixel") == 0)
     {
-        optionParseString(key, value, &instance->config.logoSource);
-        instance->config.logoType = FF_LOGO_TYPE_SIXEL;
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_SIXEL;
     }
     else if(strcasecmp(key, "--kitty") == 0)
     {
-        optionParseString(key, value, &instance->config.logoSource);
-        instance->config.logoType = FF_LOGO_TYPE_KITTY;
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_KITTY;
     }
     else if(strcasecmp(key, "--file") == 0)
     {
-        optionCheckString(key, value, &instance->config.logoSource);
-        instance->config.logoType = FF_LOGO_TYPE_FILE;
+        optionCheckString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_FILE;
     }
     else if(strcasecmp(key, "--raw") == 0)
     {
-        optionParseString(key, value, &instance->config.logoSource);
-        instance->config.logoType = FF_LOGO_TYPE_RAW;
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_RAW;
     }
     else if(strcasecmp(key, "--chafa") == 0)
     {
-        optionParseString(key, value, &instance->config.logoSource);
-        instance->config.logoType = FF_LOGO_TYPE_CHAFA;
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_CHAFA;
     }
 
     ///////////////////

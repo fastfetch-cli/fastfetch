@@ -8,18 +8,18 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
     uint32_t currentlineLength = 0;
 
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
 
     //Use logoColor[0] as the default color
     if(doColorReplacement)
-        ffPrintColor(&instance->config.logoColors[0]);
+        ffPrintColor(&instance->config.logo.colors[0]);
 
     while(*data != '\0')
     {
         //We are at the end of a line. Print paddings and update max line length
         if(*data == '\n' || (*data == '\r' && *(data + 1) == '\n'))
         {
-            ffPrintCharTimes(' ', instance->config.logoPaddingRight);
+            ffPrintCharTimes(' ', instance->config.logo.paddingRight);
 
             //We have \r\n, skip the \r
             if(*data == '\r')
@@ -28,7 +28,7 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
             putchar('\n');
             ++data;
 
-            ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+            ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
 
             if(currentlineLength > instance->state.logoWidth)
                 instance->state.logoWidth = currentlineLength;
@@ -96,7 +96,7 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
             }
             else
             {
-                ffPrintColor(&instance->config.logoColors[index]);
+                ffPrintColor(&instance->config.logo.colors[index]);
                 ++data;
                 continue;
             }
@@ -129,14 +129,14 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
         }
     }
 
-    ffPrintCharTimes(' ', instance->config.logoPaddingRight);
+    ffPrintCharTimes(' ', instance->config.logo.paddingRight);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     //Happens if the last line is the longest
     if(currentlineLength > instance->state.logoWidth)
         instance->state.logoWidth = currentlineLength;
 
-    instance->state.logoWidth += instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
+    instance->state.logoWidth += instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
     //Go to the leftmost position
     fputs("\033[9999999D", stdout);
@@ -222,8 +222,8 @@ static void logoPrintStruct(FFinstance* instance, const FFlogo* logo)
     const char** colors = logo->builtinColors;
     for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
     {
-        if(instance->config.logoColors[i].length == 0)
-            ffStrbufAppendS(&instance->config.logoColors[i], *colors);
+        if(instance->config.logo.colors[i].length == 0)
+            ffStrbufAppendS(&instance->config.logo.colors[i], *colors);
     }
 
     ffLogoPrintChars(instance, logo->data, true);
@@ -249,7 +249,7 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement)
     FFstrbuf content;
     ffStrbufInitA(&content, 2047);
 
-    if(!ffAppendFileBuffer(instance->config.logoSource.chars, &content))
+    if(!ffAppendFileBuffer(instance->config.logo.source.chars, &content))
     {
         ffStrbufDestroy(&content);
         return false;
@@ -261,9 +261,9 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement)
     return true;
 }
 
-static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logoType)
+static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo)
 {
-    if(!ffLogoPrintImageIfExists(instance, logoType))
+    if(!ffLogoPrintImageIfExists(instance, logo))
         return false;
 
     logoApplyMainColorDetected(instance);
@@ -274,14 +274,14 @@ static void logoPrintKnownType(FFinstance* instance)
 {
     bool successfull;
 
-    if(instance->config.logoType == FF_LOGO_TYPE_BUILTIN)
-        successfull = logoPrintBuiltinIfExists(instance, instance->config.logoSource.chars);
-    else if(instance->config.logoType == FF_LOGO_TYPE_FILE)
+    if(instance->config.logo.type == FF_LOGO_TYPE_BUILTIN)
+        successfull = logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars);
+    else if(instance->config.logo.type == FF_LOGO_TYPE_FILE)
         successfull = logoPrintFileIfExists(instance, true);
-    else if(instance->config.logoType == FF_LOGO_TYPE_RAW)
+    else if(instance->config.logo.type == FF_LOGO_TYPE_RAW)
         successfull = logoPrintFileIfExists(instance, false);
     else //image
-        successfull = logoPrintImageIfExists(instance, instance->config.logoType);
+        successfull = logoPrintImageIfExists(instance, instance->config.logo.type);
 
     if(!successfull)
         logoPrintDetected(instance);
@@ -300,21 +300,21 @@ void ffLogoPrint(FFinstance* instance)
     }
 
     //If the source is not set, we can directly print the detected logo.
-    if(instance->config.logoSource.length == 0)
+    if(instance->config.logo.source.length == 0)
     {
         logoPrintDetected(instance);
         return;
     }
 
     //If the source and source type is set to something else than auto, always print with the set type.
-    if(instance->config.logoSource.length > 0 && instance->config.logoType != FF_LOGO_TYPE_AUTO)
+    if(instance->config.logo.source.length > 0 && instance->config.logo.type != FF_LOGO_TYPE_AUTO)
     {
         logoPrintKnownType(instance);
         return;
     }
 
     //If source matches the name of a builtin logo, print it and return.
-    if(logoPrintBuiltinIfExists(instance, instance->config.logoSource.chars))
+    if(logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars))
         return;
 
     const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
@@ -369,7 +369,7 @@ void ffLogoBuiltinPrint(FFinstance* instance)
         instance->state.logoHeight = 0;
         instance->state.keysHeight = 0;
         for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
-            ffStrbufClear(&instance->config.logoColors[i]);
+            ffStrbufClear(&instance->config.logo.colors[i]);
 
         puts("\n");
         ++methods;

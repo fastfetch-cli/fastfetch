@@ -113,15 +113,15 @@ static void initModuleArg(FFModuleArgs* args)
 
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInit(&instance->config.logoSource);
-    instance->config.logoType = FF_LOGO_TYPE_AUTO;
+    ffStrbufInit(&instance->config.logo.source);
+    instance->config.logo.type = FF_LOGO_TYPE_AUTO;
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufInit(&instance->config.logoColors[i]);
-    instance->config.logoWidth = 0;
-    instance->config.logoHeight = 0; //preserve aspect ratio
-    instance->config.logoPaddingLeft = 0;
-    instance->config.logoPaddingRight = 4;
-    instance->config.logoPrintRemaining = true;
+        ffStrbufInit(&instance->config.logo.colors[i]);
+    instance->config.logo.width = 0;
+    instance->config.logo.height = 0; //preserve aspect ratio
+    instance->config.logo.paddingLeft = 0;
+    instance->config.logo.paddingRight = 4;
+    instance->config.logo.printRemaining = true;
 
     ffStrbufInit(&instance->config.mainColor);
     ffStrbufInit(&instance->config.separator);
@@ -266,7 +266,7 @@ void ffStart(FFinstance* instance)
 
 void ffFinish(FFinstance* instance)
 {
-    if(instance->config.logoPrintRemaining)
+    if(instance->config.logo.printRemaining)
         ffLogoPrintRemaining(instance);
 
     resetConsole();

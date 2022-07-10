@@ -54,14 +54,17 @@ typedef struct FFModuleArgs
 
 typedef struct FFconfig
 {
-    FFstrbuf logoSource;
-    FFLogoType logoType;
-    FFstrbuf logoColors[FASTFETCH_LOGO_MAX_COLORS];
-    uint32_t logoWidth;
-    uint32_t logoHeight;
-    uint32_t logoPaddingLeft;
-    uint32_t logoPaddingRight;
-    bool logoPrintRemaining;
+    struct
+    {
+        FFstrbuf source;
+        FFLogoType type;
+        FFstrbuf colors[FASTFETCH_LOGO_MAX_COLORS];
+        uint32_t width;
+        uint32_t height;
+        uint32_t paddingLeft;
+        uint32_t paddingRight;
+        bool printRemaining;
+    } logo;
 
     FFstrbuf mainColor; //If this is empty, ffLogoPrint will set it to the main color of the logo
     FFstrbuf separator;

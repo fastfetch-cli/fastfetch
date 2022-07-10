@@ -109,7 +109,7 @@ static void writeCacheUint32(FFLogoRequestData* requestData, uint32_t value, con
 static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName)
 {
     //Calculate character dimensions
-    instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
+    instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
     instance->state.logoHeight = requestData->logoCharacterHeight;
     if(requestData->type == FF_LOGO_TYPE_KITTY)
@@ -118,14 +118,14 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     //Write cache files
     writeCacheStrbuf(requestData, result, cacheFileName);
 
-    if(instance->config.logoWidth == 0)
+    if(instance->config.logo.width == 0)
         writeCacheUint32(requestData, instance->state.logoWidth, FF_CACHE_FILE_WIDTH);
 
-    if(instance->config.logoHeight == 0)
+    if(instance->config.logo.height == 0)
         writeCacheUint32(requestData, instance->state.logoHeight, FF_CACHE_FILE_HEIGHT);
 
     //Write result to stdout
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     fflush(stdout);
     ffWriteFDBuffer(STDOUT_FILENO, result);
 
@@ -296,7 +296,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     }
 
     //+1, because we need to copy the null byte too
-    imageData.ffCopyMagickString(imageInfoIn->filename, instance->config.logoSource.chars, instance->config.logoSource.length + 1);
+    imageData.ffCopyMagickString(imageInfoIn->filename, instance->config.logo.source.chars, instance->config.logo.source.length + 1);
 
     imageData.image = ffReadImage(imageInfoIn, imageData.exceptionInfo);
     ffDestroyImageInfo(imageInfoIn);
@@ -421,7 +421,7 @@ static bool printCachedChars(FFinstance* instance, FFLogoRequestData* requestDat
 
 static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestData)
 {
-    requestData->logoCharacterWidth = instance->config.logoWidth;
+    requestData->logoCharacterWidth = instance->config.logo.width;
     if(requestData->logoCharacterWidth == 0)
     {
         requestData->logoCharacterWidth = readCachedUint32(requestData, FF_CACHE_FILE_WIDTH);
@@ -429,7 +429,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
             return false;
     }
 
-    requestData->logoCharacterHeight = instance->config.logoHeight;
+    requestData->logoCharacterHeight = instance->config.logo.height;
     if(requestData->logoCharacterHeight == 0)
     {
         requestData->logoCharacterHeight = readCachedUint32(requestData, FF_CACHE_FILE_HEIGHT);
@@ -450,7 +450,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
     if(fd == -1)
         return false;
 
-    ffPrintCharTimes(' ', instance->config.logoPaddingLeft);
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     fflush(stdout);
 
     char buffer[32768];
@@ -460,7 +460,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
 
     close(fd);
 
-    instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logoPaddingLeft + instance->config.logoPaddingRight;
+    instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
     instance->state.logoHeight = requestData->logoCharacterHeight;
 
     //Go to upper left corner
@@ -515,20 +515,20 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     requestData.characterPixelHeight = 1;
 
     if(
-        (type != FF_LOGO_TYPE_CHAFA || instance->config.logoWidth == 0 || instance->config.logoHeight == 0) &&
+        (type != FF_LOGO_TYPE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
         !getCharacterPixelDimensions(&requestData)
     )
         return false;
 
-    requestData.logoPixelWidth = simpleCeil((double) instance->config.logoWidth * requestData.characterPixelWidth);
-    requestData.logoPixelHeight = simpleCeil((double) instance->config.logoHeight * requestData.characterPixelHeight);
+    requestData.logoPixelWidth = simpleCeil((double) instance->config.logo.width * requestData.characterPixelWidth);
+    requestData.logoPixelHeight = simpleCeil((double) instance->config.logo.height * requestData.characterPixelHeight);
 
     ffStrbufInitA(&requestData.cacheDir, PATH_MAX * 2);
     ffStrbufAppend(&requestData.cacheDir, &instance->state.cacheDir);
     ffStrbufAppendS(&requestData.cacheDir, "images");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);
-    if(realpath(instance->config.logoSource.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
+    if(realpath(instance->config.logo.source.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
