@@ -53,7 +53,6 @@ static void printTerminalFontFromConfigFile(FFinstance* instance, const char* co
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
     ffParsePropFileConfig(instance, configFile, start, &fontName);
-
     if(fontName.length == 0)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Couldn't find terminal font in \"$XDG_CONFIG_HOME/%s\"", configFile);
     else
@@ -179,6 +178,26 @@ static void printXCFETerminal(FFinstance* instance)
     }
 }
 
+static void printAlacritty(FFinstance* instance) {
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+    // alacritty parses config files in this order
+    ffParsePropFileConfig(instance, "alacritty/alacritty.yml", "family:", &fontName);
+    if(fontName.length == 0)
+        ffParsePropFileConfig(instance, "alacritty.yml", "family:", &fontName);
+    if(fontName.length == 0)
+        ffParsePropFileConfig(instance, ".alacritty.yml", "family:", &fontName);
+    if(fontName.length == 0)
+        ffStrbufAppendS(&fontName, "alacritty"); //by default alacritty uses it's own font called alacritty
+
+    FFfont font;
+    ffFontInitPango(&font, fontName.chars);
+    printTerminalFont(instance, fontName.chars, &font);
+    ffFontDestroy(&font);
+
+    ffStrbufDestroy(&fontName);
+}
+
 static void printTTY(FFinstance* instance)
 {
     FFstrbuf fontName;
@@ -227,6 +246,8 @@ void ffPrintTerminalFont(FFinstance* instance)
         printTerminalFontFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile");
     else if(ffStrbufStartsWithIgnCaseS(&result->terminalExe, "/dev/tty"))
         printTTY(instance);
+    else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "alacritty") == 0)
+        printAlacritty(instance);
     else
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Unknown terminal: %s", result->terminalProcessName.chars);
 }
