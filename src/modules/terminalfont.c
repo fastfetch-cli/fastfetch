@@ -196,12 +196,14 @@ static void printAlacritty(FFinstance* instance) {
         ffParsePropFileConfigValues(instance, "alacritty.yml", 2, fontQuery);
     if(fontName.length == 0 || fontSize.length == 0)
         ffParsePropFileConfigValues(instance, ".alacritty.yml", 2, fontQuery);
-    if(fontName.length == 0 || fontSize.length == 0)
-    {
-         //by default alacritty uses it's own font called alacritty at size 11
+
+    //by default alacritty uses it's own font called alacritty
+    if(fontName.length == 0)
         ffStrbufAppendS(&fontName, "alacritty");
+
+    // the default font size is 11
+    if(fontSize.length == 0)
         ffStrbufAppendS(&fontSize, "11");
-    }
 
     FFfont font;
     ffFontInitCopy(&font, fontName.chars);
