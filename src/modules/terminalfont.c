@@ -180,22 +180,36 @@ static void printXCFETerminal(FFinstance* instance)
 
 static void printAlacritty(FFinstance* instance) {
     FFstrbuf fontName;
+    FFstrbuf fontSize;
     ffStrbufInit(&fontName);
+    ffStrbufInit(&fontSize);
+
+    FFpropquery fontQuery[] = {
+        {"family:", &fontName},
+        {"size:", &fontSize},
+    };
+
     // alacritty parses config files in this order
-    ffParsePropFileConfig(instance, "alacritty/alacritty.yml", "family:", &fontName);
-    if(fontName.length == 0)
-        ffParsePropFileConfig(instance, "alacritty.yml", "family:", &fontName);
-    if(fontName.length == 0)
-        ffParsePropFileConfig(instance, ".alacritty.yml", "family:", &fontName);
-    if(fontName.length == 0)
-        ffStrbufAppendS(&fontName, "alacritty"); //by default alacritty uses it's own font called alacritty
+    ffParsePropFileConfigValues(instance, "alacritty/alacritty.yml", 2, fontQuery);
+    if(fontName.length == 0 || fontSize.length == 0)
+        ffParsePropFileConfigValues(instance, "alacritty.yml", 2, fontQuery);
+    if(fontName.length == 0 || fontSize.length == 0)
+        ffParsePropFileConfigValues(instance, ".alacritty.yml", 2, fontQuery);
+    if(fontName.length == 0 || fontSize.length == 0)
+    {
+         //by default alacritty uses it's own font called alacritty at size 11
+        ffStrbufAppendS(&fontName, "alacritty");
+        ffStrbufAppendS(&fontSize, "11");
+    }
 
     FFfont font;
-    ffFontInitPango(&font, fontName.chars);
+    ffFontInitCopy(&font, fontName.chars);
+    ffStrbufInitCopy(&font.size, &fontSize);
     printTerminalFont(instance, fontName.chars, &font);
     ffFontDestroy(&font);
 
     ffStrbufDestroy(&fontName);
+    ffStrbufDestroy(&fontSize);
 }
 
 static void printTTY(FFinstance* instance)
