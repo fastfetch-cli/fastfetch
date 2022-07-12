@@ -53,6 +53,7 @@ static void printTerminalFontFromConfigFile(FFinstance* instance, const char* co
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
     ffParsePropFileConfig(instance, configFile, start, &fontName);
+
     if(fontName.length == 0)
         ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Couldn't find terminal font in \"$XDG_CONFIG_HOME/%s\"", configFile);
     else
