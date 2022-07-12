@@ -207,7 +207,10 @@ static void printAlacritty(FFinstance* instance) {
 
     FFfont font;
     ffFontInitCopy(&font, fontName.chars);
-    ffStrbufAppend(&font.size, &fontSize);
+
+    if(fontSize.length > 0)
+        ffStrbufSet(&font.size, &fontSize);
+
     printTerminalFont(instance, fontName.chars, &font);
     ffFontDestroy(&font);
 
