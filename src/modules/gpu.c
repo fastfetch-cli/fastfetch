@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 #define FF_GPU_MODULE_NAME "GPU"
 #define FF_GPU_NUM_FORMAT_ARGS 6
 
@@ -192,6 +194,15 @@ void ffPrintGPU(FFinstance* instance)
 {
     if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS))
         return;
+
+    if(
+        getenv("WSLENV") != NULL ||
+        getenv("WSL_DISTRO") != NULL ||
+        getenv("WSL_INTEROP") != NULL
+    ) {
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "WSL doesn't expose sensefull GPU names");
+        return;
+    }
 
     #ifdef FF_HAVE_LIBPCI
         if(pciPrintGPUs(instance))
