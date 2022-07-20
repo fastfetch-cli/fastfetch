@@ -64,6 +64,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
         strcasecmp(processName, "kwin") == 0
     ) ffStrbufSetS(&result->wmPrettyName, "KWin");
     else if(
+        strcasecmp(processName, "gnome-shell") == 0 ||
+        strcasecmp(processName, "gnome shell") == 0 ||
         strcasecmp(processName, "gnome-session-binary") == 0 ||
         strcasecmp(processName, "Mutter") == 0
     ) ffStrbufSetS(&result->wmPrettyName, "Mutter");
