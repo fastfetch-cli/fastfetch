@@ -188,11 +188,19 @@ void ffFontInitPango(FFfont* font, const char* data)
     fontInitPretty(font);
 }
 
-void ffFontInitCopy(FFfont* font, const char* name)
+void ffFontInitValues(FFfont* font, const char* name, const char* size)
 {
     fontInit(font);
+
     ffStrbufAppendS(&font->name, name);
+    ffStrbufAppendS(&font->size, size);
+
     fontInitPretty(font);
+}
+
+void ffFontInitCopy(FFfont* font, const char* name)
+{
+    ffFontInitValues(font, name, NULL);
 }
 
 void ffFontDestroy(FFfont* font)

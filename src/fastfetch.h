@@ -466,6 +466,7 @@ bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile,
 void ffFontInitQt(FFfont* font, const char* data);
 void ffFontInitPango(FFfont* font, const char* data);
 void ffFontInitCopy(FFfont* font, const char* name);
+void ffFontInitValues(FFfont* font, const char* name, const char* size);
 void ffFontDestroy(FFfont* font);
 
 //common/format.c
