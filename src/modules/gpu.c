@@ -200,7 +200,7 @@ void ffPrintGPU(FFinstance* instance)
         getenv("WSL_DISTRO") != NULL ||
         getenv("WSL_INTEROP") != NULL
     ) {
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "WSL doesn't expose sensefull GPU names");
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "WSL doesn't expose senseful GPU names");
         return;
     }
 

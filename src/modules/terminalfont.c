@@ -197,7 +197,7 @@ static void printAlacritty(FFinstance* instance) {
     if(fontName.length == 0 || fontSize.length == 0)
         ffParsePropFileConfigValues(instance, ".alacritty.yml", 2, fontQuery);
 
-    //by default alacritty uses it's own font called alacritty
+    //by default alacritty uses its own font called alacritty
     if(fontName.length == 0)
         ffStrbufAppendS(&fontName, "alacritty");
 
