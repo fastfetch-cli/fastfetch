@@ -102,7 +102,7 @@ If pkg-config fails to find the headers for a library listed in [dependencies](#
 ```bash
 cmake .. \
     -DCMAKE_INSTALL_PREFIX="/usr" \
-	-DCMAKE_INSTALL_SYSCONFDIR="/etc"
+    -DCMAKE_INSTALL_SYSCONFDIR="/etc"
 
 cmake --build . --target fastfetch
 ```
@@ -111,7 +111,7 @@ cmake --build . --target fastfetch
 ```bash
 cmake .. \
     -DCMAKE_INSTALL_PREFIX="/usr/local" \
-	-DCMAKE_INSTALL_SYSCONFDIR="/etc"
+    -DCMAKE_INSTALL_SYSCONFDIR="/etc"
 
 sudo cmake --install .
 ```
