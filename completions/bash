@@ -108,7 +108,8 @@ __fastfetch_completion()
         "--list-presets"
         "--list-features"
         "--print-logos"
-        "--print-config"
+        "--print-config-system"
+        "--print-config-user"
         "--print-structure"
     )
 

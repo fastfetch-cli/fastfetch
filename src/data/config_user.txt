@@ -6,7 +6,7 @@
 # Empty lines or lines starting with # are ignored.
 
 # This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
-# Use fastfetch --print-config > ~/.config/fastfetch/config.conf to overwrite this with the current defaults
+# Use fastfetch --print-config-user > ~/.config/fastfetch/config.conf to overwrite this file with the current defaults
 
 # Below some often usefull options are listed. Uncomment and modify them so they take affect.
 # Note that there are a lot more options than the ones listed here, take a look at "fastfetch --help".

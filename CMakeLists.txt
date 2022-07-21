@@ -115,7 +115,8 @@ function(fastfetch_load_text FILENAME OUTVAR)
 endfunction(fastfetch_load_text)
 
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
-fastfetch_load_text(src/data/config.txt DATATEXT_CONFIG)
+fastfetch_load_text(src/data/config_system.txt DATATEXT_CONFIG_SYSTEM)
+fastfetch_load_text(src/data/config_user.txt DATATEXT_CONFIG_USER)
 fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
@@ -495,13 +496,14 @@ endif()
 include(GNUInstallDirs)
 
 install(
-    TARGETS fastfetch
+    TARGETS fastfetch flashfetch
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 install(
-    TARGETS flashfetch
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FILES src/data/config_system.txt
+    DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/${CMAKE_PROJECT_NAME}
+    RENAME "config.conf"
 )
 
 install(

@@ -1,0 +1,16 @@
+# Fastfetch system configuration
+# This file sets the defaults for all users of the system.
+
+# For more information about configuration files work,
+# see the file ~/.config/fastfetch/config.conf, generated during first
+# All options that can be put there (or passed as argument) can be put here too.
+
+# This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
+# Use fastfetch --print-config-system > /etc/fastfetch/config.conf to overwrite this file with the current defaults
+
+# User config option
+# Sets if fastfetch should load user provided configuration.
+# If this is off, fastfetch ignores the user config file and any passed arguments
+# Must be true or false
+# Default is true.
+#--load-user-config true

@@ -11,6 +11,7 @@ typedef struct FFdata
     FFvaluestore valuestore;
     FFstrbuf structure;
     bool multithreading;
+    bool loadUserConfig;
 } FFdata;
 
 static void constructAndPrintCommandHelpFormat(const char* name, const char* def, uint32_t numArgs, ...)
@@ -685,9 +686,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         puts(FASTFETCH_PROJECT_VERSION);
         exit(0);
     }
-    else if(strcasecmp(key, "--print-config") == 0)
+    else if(strcasecmp(key, "--print-config-system") == 0)
     {
-        fputs(FASTFETCH_DATATEXT_CONFIG, stdout);
+        fputs(FASTFETCH_DATATEXT_CONFIG_SYSTEM, stdout);
+        exit(0);
+    }
+    else if(strcasecmp(key, "--print-config-user") == 0)
+    {
+        fputs(FASTFETCH_DATATEXT_CONFIG_USER, stdout);
         exit(0);
     }
     else if(strcasecmp(key, "--print-structure") == 0)
@@ -751,6 +757,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.escapeBedrock = optionParseBoolean(value);
     else if(strcasecmp(key, "--pipe") == 0)
         instance->config.pipe = optionParseBoolean(value);
+    else if(strcasecmp(key, "--load-user-config") == 0)
+        data->loadUserConfig = optionParseBoolean(value);
 
     ////////////////
     //Logo options//
@@ -1198,8 +1206,21 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
 }
 
-static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
+static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
 {
+    FILE* file = fopen(FASTFETCH_TARGET_DIR_ROOT"/etc/fastfetch/config.conf", "r");
+    if(file == NULL)
+        return;
+
+    parseConfigFile(instance, data, file);
+    fclose(file);
+}
+
+static void parseConfigFileUser(FFinstance* instance, FFdata* data)
+{
+    if(!data->loadUserConfig)
+        return;
+
     FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
     uint32_t filenameLength = filename->length;
 
@@ -1222,7 +1243,7 @@ static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
     file = fopen(filename->chars, "w");
     if(file != NULL)
     {
-        fputs(FASTFETCH_DATATEXT_CONFIG, file);
+        fputs(FASTFETCH_DATATEXT_CONFIG_USER, file);
         fclose(file);
     }
 
@@ -1231,6 +1252,9 @@ static void parseDefaultConfigFile(FFinstance* instance, FFdata* data)
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)
 {
+    if(!data->loadUserConfig)
+        return;
+
     for(int i = 1; i < argc; i++)
     {
         if(i == argc - 1 || (
@@ -1347,8 +1371,10 @@ int main(int argc, const char** argv)
     ffValuestoreInit(&data.valuestore);
     ffStrbufInitA(&data.structure, 256);
     data.multithreading = true;
+    data.loadUserConfig = true;
 
-    parseDefaultConfigFile(&instance, &data);
+    parseConfigFileSystem(&instance, &data);
+    parseConfigFileUser(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
     //Start detection threads

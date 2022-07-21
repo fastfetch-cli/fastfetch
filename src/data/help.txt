@@ -1,16 +1,17 @@
 Usage: fastfetch <options>
 
 Informative options:
-    -h,--help:           shows this message and exits
-    -h,--help <command>: shows help for a specific command and exits
-    -v,--version:        prints the version of fastfetch and exits
-    --list-logos:        list available logos and exits
-    --list-modules:      lists available modules and exits
-    --list-presets:      list presets fastfetch knows about and exits. They can be loaded with --load-config. (+)
-    --list-features:     list the supported features fastfetch was compiled with and exits. Mainly for development.
-    --print-logos:       show available logos and exits
-    --print-config:      prints the default config and exits
-    --print-structure:   prints the default stucture and exits
+    -h,--help:             shows this message and exits
+    -h,--help <command>:   shows help for a specific command and exits
+    -v,--version:          prints the version of fastfetch and exits
+    --list-logos:          list available logos and exits
+    --list-modules:        lists available modules and exits
+    --list-presets:        list presets fastfetch knows about and exits. They can be loaded with --load-config. (+)
+    --list-features:       list the supported features fastfetch was compiled with and exits. Mainly for development.
+    --print-logos:         show available logos and exits
+    --print-config-system: prints the default system config and exits
+    --print-config-user:   prints the default user config and exits
+    --print-structure:     prints the default stucture and exits
 
 General options:
     -r,--recache <?value>:            generate new cached values
