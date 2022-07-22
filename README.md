@@ -104,7 +104,7 @@ cmake .. \
     -DCMAKE_INSTALL_PREFIX="usr" \
     -DCMAKE_INSTALL_SYSCONFDIR="etc"
 
-cmake --build . --target fastfetch
+cmake --build . --target package
 ```
 
 #### Install directly:
