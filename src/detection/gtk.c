@@ -53,13 +53,13 @@ static void detectGTKFromSettings(FFinstance* instance, FFGTKResult* result)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "XFCE") == 0)
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Xfce") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Xfce4") == 0)
     {
         themeName = ffSettingsGetXFConf(instance, "xsettings", "/Net/ThemeName", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGetXFConf(instance, "xsettings", "/Net/IconThemeName", FF_VARIANT_TYPE_STRING).strValue;
         fontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/FontName", FF_VARIANT_TYPE_STRING).strValue;
         cursorTheme = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeName", FF_VARIANT_TYPE_STRING).strValue;
-        cursorSize = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorSize", FF_VARIANT_TYPE_INT).intValue;
+        cursorSize = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
     }
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
     {
