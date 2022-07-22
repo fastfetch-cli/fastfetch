@@ -156,7 +156,7 @@ add_library(libfastfetch OBJECT
     src/logo/image/im7.c
     src/logo/image/im6.c
     src/detection/os.c
-    src/detection/plasma.c
+    src/detection/qt.c
     src/detection/gtk.c
     src/detection/terminalShell.c
     src/detection/vulkan.c

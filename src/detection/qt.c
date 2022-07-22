@@ -4,6 +4,15 @@
 #include <string.h>
 #include <pthread.h>
 
+static inline bool allValuesSet(const FFQtResult* result)
+{
+    return
+        result->widgetStyle.length > 0 &&
+        result->colorScheme.length > 0 &&
+        result->icons.length > 0 &&
+        result->font.length > 0;
+}
+
 typedef enum PlasmaCategory
 {
     PLASMA_CATEGORY_GENERAL,
@@ -12,7 +21,7 @@ typedef enum PlasmaCategory
     PLASMA_CATEGORY_OTHER
 } PlasmaCategory;
 
-static bool detectFromConfigFile(const char* filename, FFPlasmaResult* result)
+static bool detectPlasmaFromFile(const char* filename, FFQtResult* result)
 {
     FILE* kdeglobals = fopen(filename, "r");
     if(kdeglobals == NULL)
@@ -68,10 +77,62 @@ static bool detectFromConfigFile(const char* filename, FFPlasmaResult* result)
     return true;
 }
 
-const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
+static void detectPlasma(const FFinstance* instance, FFQtResult* result)
 {
+    bool foundAFile = false;
+
+    //We need to do this because we use multiple threads on configDirs
+    FFstrbuf baseDir;
+    ffStrbufInitA(&baseDir, 64);
+
+    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
+    {
+        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
+        ffStrbufAppendS(&baseDir, "kdeglobals");
+
+        if(detectPlasmaFromFile(baseDir.chars, result))
+            foundAFile = true;
+
+        if(allValuesSet(result))
+        {
+            ffStrbufDestroy(&baseDir);
+            return;
+        }
+    }
+
+    ffStrbufDestroy(&baseDir);
+    if(!foundAFile)
+        return;
+
+    //In Plasma the default value is never set in the config file, but the whole key-value is discarded.
+    ///We must set these values by our self if the file exists (it always does here)
+    if(result->widgetStyle.length == 0)
+        ffStrbufAppendS(&result->widgetStyle, "Breeze");
+
+    if(result->colorScheme.length == 0)
+        ffStrbufAppendS(&result->colorScheme, "BreezeLight");
+
+    if(result->icons.length == 0)
+        ffStrbufAppendS(&result->icons, "Breeze");
+
+    if(result->font.length == 0)
+        ffStrbufAppendS(&result->font, "Noto Sans, 10");
+}
+
+static void detectLXQt(const FFinstance* instance, FFQtResult* result)
+{
+    ffParsePropFileConfigValues(instance, "lxqt/lxqt.conf", 3, (FFpropquery[]) {
+        {"style = ", &result->widgetStyle},
+        {"icon_theme = ", &result->icons},
+        {"font = ", &result->font}
+    });
+}
+
+const FFQtResult* ffDetectQt(FFinstance* instance)
+{
+    static FFQtResult result;
+
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static FFPlasmaResult result;
     static bool init = false;
     pthread_mutex_lock(&mutex);
     if(init)
@@ -87,55 +148,11 @@ const FFPlasmaResult* ffDetectPlasma(FFinstance* instance)
     ffStrbufInit(&result.font);
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
-    if(ffStrbufIgnCaseCompS(&wmde->deProcessName, "plasmashell") != 0)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
 
-    bool foundAFile = false;
-
-    //We need to do this because we use multiple threads on configDirs
-    FFstrbuf baseDir;
-    ffStrbufInitA(&baseDir, 64);
-
-    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
-    {
-        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
-        ffStrbufAppendS(&baseDir, "kdeglobals");
-
-        if(detectFromConfigFile(baseDir.chars, &result))
-            foundAFile = true;
-
-        if(
-            result.widgetStyle.length > 0 &&
-            result.colorScheme.length > 0 &&
-            result.icons.length > 0 &&
-            result.font.length > 0
-        ) break;
-    }
-
-    ffStrbufDestroy(&baseDir);
-
-    if(!foundAFile)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
-
-    //In Plasma the default value is never set in the config file, but the whole key-value is discarded.
-    ///We must set these values by our self if the file exists (it always does here)
-    if(result.widgetStyle.length == 0)
-        ffStrbufAppendS(&result.widgetStyle, "Breeze");
-
-    if(result.colorScheme.length == 0)
-        ffStrbufAppendS(&result.colorScheme, "BreezeLight");
-
-    if(result.icons.length == 0)
-        ffStrbufAppendS(&result.icons, "Breeze");
-
-    if(result.font.length == 0)
-        ffStrbufAppendS(&result.font, "Noto Sans, 10");
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
+        detectPlasma(instance, &result);
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "LXQt") == 0)
+        detectLXQt(instance, &result);
 
     pthread_mutex_unlock(&mutex);
     return &result;

@@ -18,7 +18,7 @@ void ffPrintTheme(FFinstance* instance)
         return;
     }
 
-    const FFPlasmaResult* plasma = ffDetectPlasma(instance);
+    const FFQtResult* plasma = ffDetectQt(instance);
     const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->theme;
     const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->theme;
     const FFstrbuf* gtk4 = &ffDetectGTK4(instance)->theme;
@@ -70,7 +70,7 @@ void ffPrintTheme(FFinstance* instance)
 
         if(plasma->widgetStyle.length > 0 || plasma->colorScheme.length > 0)
         {
-            fputs(" [Plasma]", stdout);
+            fputs(" [QT]", stdout);
 
             if(gtkPretty.length > 0)
                 fputs(", ", stdout);

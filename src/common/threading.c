@@ -4,7 +4,7 @@
 
 static inline void* detectPlasmaThreadMain(void* instance)
 {
-    ffDetectPlasma((FFinstance*)instance);
+    ffDetectQt((FFinstance*)instance);
     return NULL;
 }
 

@@ -202,13 +202,13 @@ typedef struct FFOSResult
     FFstrbuf architecture;
 } FFOSResult;
 
-typedef struct FFPlasmaResult
+typedef struct FFQtResult
 {
     FFstrbuf widgetStyle;
     FFstrbuf colorScheme;
     FFstrbuf icons;
     FFstrbuf font;
-} FFPlasmaResult;
+} FFQtResult;
 
 typedef struct FFGTKResult
 {
@@ -522,7 +522,7 @@ void ffLogoBuiltinListAutocompletion();
 const FFOSResult* ffDetectOS(const FFinstance* instance);
 
 //detection/plasma.c
-const FFPlasmaResult* ffDetectPlasma(FFinstance* instance);
+const FFQtResult* ffDetectQt(FFinstance* instance);
 
 //detection/gtk.c
 const FFGTKResult* ffDetectGTK2(FFinstance* instance);

@@ -18,7 +18,7 @@ void ffPrintIcons(FFinstance* instance)
         return;
     }
 
-    const FFstrbuf* plasma = &ffDetectPlasma(instance)->icons;
+    const FFstrbuf* plasma = &ffDetectQt(instance)->icons;
     const FFstrbuf* gtk2 = &ffDetectGTK2(instance)->icons;
     const FFstrbuf* gtk3 = &ffDetectGTK3(instance)->icons;
     const FFstrbuf* gtk4 = &ffDetectGTK4(instance)->icons;
@@ -39,7 +39,7 @@ void ffPrintIcons(FFinstance* instance)
         if(plasma->length > 0)
         {
             ffStrbufWriteTo(plasma, stdout);
-            fputs(" [Plasma]", stdout);
+            fputs(" [QT]", stdout);
 
             if(gtkPretty.length > 0)
                 fputs(", ", stdout);

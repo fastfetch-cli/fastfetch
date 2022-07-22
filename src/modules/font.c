@@ -18,7 +18,7 @@ void ffPrintFont(FFinstance* instance)
         return;
     }
 
-    const FFstrbuf* plasmaRaw = &ffDetectPlasma(instance)->font;
+    const FFstrbuf* plasmaRaw = &ffDetectQt(instance)->font;
     const FFstrbuf* gtk2Raw = &ffDetectGTK2(instance)->font;
     const FFstrbuf* gtk3Raw = &ffDetectGTK3(instance)->font;
     const FFstrbuf* gtk4Raw = &ffDetectGTK4(instance)->font;
@@ -51,7 +51,7 @@ void ffPrintFont(FFinstance* instance)
         if(plasma.pretty.length > 0)
         {
             ffStrbufWriteTo(&plasma.pretty, stdout);
-            fputs(" [Plasma]", stdout);
+            fputs(" [QT]", stdout);
 
             if(gtk.length > 0)
                 fputs(", ", stdout);
