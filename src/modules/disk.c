@@ -24,26 +24,39 @@ static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, 
 
 static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs)
 {
-    const uint32_t GB = 1024 * 1024 * 1024;
+    const double GB = 1024 * 1024 * 1024;
 
-    uint32_t total     = (uint32_t) ((fs->f_blocks * fs->f_frsize) / GB);
-    uint32_t available = (uint32_t) ((fs->f_bfree  * fs->f_frsize) / GB);
-    uint32_t used      = total - available;
-    uint8_t percentage = (uint8_t) ((used / (double) total) * 100.0);
+    double total     = ((double) (fs->f_blocks * fs->f_frsize)) / GB;
+    double available = ((double) (fs->f_bfree  * fs->f_frsize)) / GB;
+    double used      = total - available;
+    uint8_t percentage = (uint8_t) ((used / total) * 100.0);
 
     uint32_t files = (uint32_t) (fs->f_files - fs->f_ffree);
 
     if(instance->config.disk.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key->chars, 0, NULL);
-        printf("%uGiB / %uGiB (%u%%)\n", used, total, percentage);
+
+        if(used >= 100.0)
+            printf("%.0f", used);
+        else
+            printf("%.1f", used);
+
+        fputs(" GB / ", stdout);
+
+        if(total >= 100.0)
+            printf("%.0f", total);
+        else
+            printf("%.1f", total);
+
+        printf("GiB (%u%%)\n", percentage);
     }
     else
     {
         ffPrintFormatString(instance, key->chars, 0, NULL, &instance->config.disk.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &used},
-            {FF_FORMAT_ARG_TYPE_UINT, &total},
-            {FF_FORMAT_ARG_TYPE_UINT, &files},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &used},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &total},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &files},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage}
         });
     }
