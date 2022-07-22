@@ -120,6 +120,12 @@
 # Use "fastfetch --help color" to learn more and see examples.
 #--color magenta
 
+# Title FQDN option:
+# Sets if the title should use the fully qualified domain name.
+# Must be true or false.
+# Default is false.
+#--title-fqdn false
+
 # Separator option:
 # Sets the string placed between a key and its value.
 # Can be any string.

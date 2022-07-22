@@ -1154,6 +1154,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
+    else if(strcasecmp(key, "--title-fqdn") == 0)
+        instance->config.titleFQDN = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--battery-dir") == 0)

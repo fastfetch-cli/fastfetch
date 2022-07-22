@@ -193,6 +193,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libOSMesa, 0);
     ffStrbufInitA(&instance->config.libOpenCL, 0);
 
+    instance->config.titleFQDN = false;
+
     ffStrbufInitA(&instance->config.diskFolders, 0);
 
     ffStrbufInitA(&instance->config.batteryDir, 0);

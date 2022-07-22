@@ -135,6 +135,8 @@ typedef struct FFconfig
     FFstrbuf libOSMesa;
     FFstrbuf libOpenCL;
 
+    bool titleFQDN;
+
     FFstrbuf diskFolders;
 
     FFstrbuf batteryDir;
@@ -184,6 +186,7 @@ typedef struct FFTitleResult
 {
     FFstrbuf userName;
     FFstrbuf hostname;
+    FFstrbuf fqdn; //Fully qualified domain name
 } FFTitleResult;
 
 typedef struct FFOSResult
@@ -518,6 +521,9 @@ void ffLogoBuiltinListAutocompletion();
 // Detection functions //
 /////////////////////////
 
+//detection/title.c
+const FFTitleResult* ffDetectTitle(const FFinstance* instance);
+
 //detection/os.c
 const FFOSResult* ffDetectOS(const FFinstance* instance);
 
@@ -552,7 +558,6 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);
 //////////////////////
 
 //Common
-const FFTitleResult* ffDetectTitle(FFinstance* instance);
 
 void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs);
 

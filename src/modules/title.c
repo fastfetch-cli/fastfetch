@@ -1,33 +1,5 @@
 #include "fastfetch.h"
 
-#include <unistd.h>
-#include <pthread.h>
-
-const FFTitleResult* ffDetectTitle(FFinstance* instance)
-{
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-    static FFTitleResult result;
-
-    pthread_mutex_lock(&mutex);
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
-    init = true;
-
-    ffStrbufInit(&result.userName);
-    ffStrbufAppendS(&result.userName, instance->state.passwd->pw_name);
-
-    ffStrbufInitA(&result.hostname, 256);
-    gethostname(result.hostname.chars, result.hostname.allocated);
-    ffStrbufRecalculateLength(&result.hostname);
-
-    pthread_mutex_unlock(&mutex);
-    return &result;
-}
-
 static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
 {
     if(!instance->config.pipe)
@@ -50,6 +22,6 @@ void ffPrintTitle(FFinstance* instance)
 
     printTitlePart(instance, &result->userName);
     putchar('@');
-    printTitlePart(instance, &result->hostname);
+    printTitlePart(instance, instance->config.titleFQDN ? &result->fqdn : &result->hostname);
     putchar('\n');
 }

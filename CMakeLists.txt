@@ -163,6 +163,7 @@ add_library(libfastfetch OBJECT
     src/detection/media.c
     src/detection/datetime.c
     src/detection/temps.c
+    src/detection/title.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
     src/detection/displayserver/xcb.c

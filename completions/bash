@@ -133,6 +133,7 @@ __fastfetch_completion()
         "--localip-show-loop"
         "--escape-bedrock"
         "--pipe"
+        "--title-fqdn"
     )
 
     local FF_OPTIONS_STRING=(
