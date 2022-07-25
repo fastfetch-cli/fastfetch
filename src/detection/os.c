@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/properties.h"
+#include "common/parsing.h"
 
 #include <string.h>
 #include <stdlib.h>

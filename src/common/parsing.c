@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/parsing.h"
 
 bool ffStrSet(const char* str)
 {

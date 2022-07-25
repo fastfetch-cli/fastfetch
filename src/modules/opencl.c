@@ -6,6 +6,7 @@
 
 #ifdef FF_HAVE_OPENCL
 #include "common/library.h"
+#include "common/parsing.h"
 
 #define CL_TARGET_OPENCL_VERSION 100
 #include <CL/cl.h>

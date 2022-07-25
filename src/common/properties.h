@@ -3,6 +3,8 @@
 #ifndef FF_INCLUDED_common_properties
 #define FF_INCLUDED_common_properties
 
+#include "util/FFstrbuf.h"
+
 typedef struct FFpropquery
 {
     const char* start;

@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/font.h"
 #include "common/printing.h"
+#include "common/parsing.h"
 
 #define FF_FONT_MODULE_NAME "Font"
 #define FF_FONT_NUM_FORMAT_ARGS 21

@@ -173,14 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFVersion
-{
-    uint32_t major;
-    uint32_t minor;
-    uint32_t patch;
-} FFVersion;
-#define FF_VERSION_INIT ((FFVersion) {0})
-
 typedef struct FFTitleResult
 {
     FFstrbuf userName;
@@ -374,14 +366,6 @@ void ffStartDetectionThreads(FFinstance* instance);
 //common/format.c
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments);
-
-//common/parsing.c
-bool ffStrSet(const char* str);
-void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
-void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
-
-void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty);
-int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);

@@ -2,6 +2,7 @@
 
 #ifdef FF_HAVE_X11
 #include "common/library.h"
+#include "common/parsing.h"
 #include <X11/Xlib.h>
 
 typedef struct X11PropertyData
