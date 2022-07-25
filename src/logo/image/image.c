@@ -1,5 +1,6 @@
 #include "image.h"
 #include "common/io.h"
+#include "common/printing.h"
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 

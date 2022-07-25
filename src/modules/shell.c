@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_SHELL_MODULE_NAME "Shell"
 #define FF_SHELL_NUM_FORMAT_ARGS 7

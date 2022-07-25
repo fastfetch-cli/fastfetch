@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_UPTIME_MODULE_NAME "Uptime"
 #define FF_UPTIME_NUM_FORMAT_ARGS 4

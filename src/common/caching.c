@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/io.h"
+#include "common/printing.h"
 
 #include <stdlib.h>
 

@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 void ffPrintSeparator(FFinstance* instance)
 {

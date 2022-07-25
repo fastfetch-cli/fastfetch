@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_DE_MODULE_NAME "DE"
 #define FF_DE_NUM_FORMAT_ARGS 3

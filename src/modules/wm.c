@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_WM_MODULE_NAME "WM"
 #define FF_WM_NUM_FORMAT_ARGS 3

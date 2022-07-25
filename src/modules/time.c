@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_TIME_MODULE_NAME "Time"
 

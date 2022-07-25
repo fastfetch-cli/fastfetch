@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_THEME_MODULE_NAME "Theme"
 #define FF_THEME_NUM_FORMAT_ARGS 7

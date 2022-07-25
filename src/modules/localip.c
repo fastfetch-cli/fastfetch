@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_LOCALIP_MODULE_NAME "Local IP"
 #define FF_LOCALIP_NUM_FORMAT_ARGS 1

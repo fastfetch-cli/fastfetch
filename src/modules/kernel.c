@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_KERNEL_MODULE_NAME "Kernel"
 #define FF_KERNEL_NUM_FORMAT_ARGS 3

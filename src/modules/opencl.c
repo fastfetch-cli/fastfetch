@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_OPENCL_MODULE_NAME "OpenCL"
 #define FF_OPENCL_NUM_FORMAT_ARGS 3

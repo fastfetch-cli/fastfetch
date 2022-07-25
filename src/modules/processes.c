@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/printing.h"
 
 #define FF_PROCESSES_MODULE_NAME "Processes"
 #define FF_PROCESSES_NUM_FORMAT_ARGS 1
