@@ -324,9 +324,6 @@ void ffListFeatures();
 //common/threading.c
 void ffStartDetectionThreads(FFinstance* instance);
 
-//common/networking.c
-void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);
-
 ////////////////////
 // Logo functions //
 ////////////////////

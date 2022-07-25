@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/networking.h"
 
 #include <unistd.h>
 #include <sys/socket.h>

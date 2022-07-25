@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/processing.h"
 #include "common/io.h"
 
 #include <stdlib.h>

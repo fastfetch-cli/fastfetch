@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "common/networking.h"
 
 #define FF_PUBLICIP_MODULE_NAME "Public IP"
 #define FF_PUBLICIP_NUM_FORMAT_ARGS 1
