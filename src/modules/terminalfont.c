@@ -2,6 +2,7 @@
 #include "common/properties.h"
 #include "common/printing.h"
 #include "common/font.h"
+#include "common/settings.h"
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 5

@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/settings.h"
 #include "common/library.h"
 #include "common/io.h"
 

@@ -2,6 +2,7 @@
 #include "common/io.h"
 #include "common/properties.h"
 #include "common/printing.h"
+#include "common/settings.h"
 
 #include <stdlib.h>
 #include <string.h>
