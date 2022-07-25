@@ -1,4 +1,5 @@
 #include "logo.h"
+#include "common/io.h"
 
 #include <ctype.h>
 #include <string.h>

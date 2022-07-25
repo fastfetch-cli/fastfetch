@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/io.h"
 
 #include <sys/stat.h>
 #include <unistd.h>

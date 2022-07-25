@@ -4,6 +4,7 @@
 
 #ifdef FF_HAVE_VULKAN
 #include "common/library.h"
+#include "common/io.h"
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 

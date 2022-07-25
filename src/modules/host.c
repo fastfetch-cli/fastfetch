@@ -5,7 +5,9 @@
 #define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 15
 
-#ifdef __ANDROID__
+#ifndef __ANDROID__
+    #include "common/io.h"
+#elif
     #include <ctype.h>
 #endif
 

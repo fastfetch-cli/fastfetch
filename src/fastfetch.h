@@ -9,7 +9,6 @@
 #include <stdbool.h>
 
 #include <pwd.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/sysinfo.h>
 
@@ -391,21 +390,6 @@ void ffListFeatures();
 
 //common/threading.c
 void ffStartDetectionThreads(FFinstance* instance);
-
-//common/io.c
-bool ffWriteFDBuffer(int fd, const FFstrbuf* content);
-bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);
-bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer);
-
-bool ffAppendFDBuffer(int fd, FFstrbuf* buffer);
-ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
-bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
-bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer);
-
-bool ffFileExists(const char* fileName, mode_t mode);
-void ffSuppressIO(bool suppress); // Not thread safe!
-
-void ffGetTerminalResponse(const char* request, const char* format, ...);
 
 //common/printing.c
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);

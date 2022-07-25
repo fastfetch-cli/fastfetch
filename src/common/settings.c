@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/library.h"
+#include "common/io.h"
 
 #include <pthread.h>
 #include <string.h>
