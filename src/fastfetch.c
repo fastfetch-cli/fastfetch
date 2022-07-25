@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "util/FFvaluestore.h"
 #include "common/printing.h"
 #include "common/parsing.h"
 

@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 static void testFailed(const FFstrbuf* strbuf, const char* message, ...)
 {

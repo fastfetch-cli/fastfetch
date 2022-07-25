@@ -14,7 +14,6 @@
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
-#include "util/FFvaluestore.h"
 
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
