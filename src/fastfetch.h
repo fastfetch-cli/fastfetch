@@ -310,8 +310,6 @@ typedef struct FFDateTimeResult
     FFstrbuf secondPretty; //37
 } FFDateTimeResult;
 
-#define FF_VARIANT_NULL ((FFvariant){.strValue = NULL})
-
 //////////////////////
 // Common functions //
 //////////////////////
@@ -325,9 +323,6 @@ void ffListFeatures();
 
 //common/threading.c
 void ffStartDetectionThreads(FFinstance* instance);
-
-//common/processing.c
-void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 
 //common/networking.c
 void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);
