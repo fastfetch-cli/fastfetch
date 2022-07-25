@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/properties.h"
 
 #include <stdlib.h>
 #include <string.h>

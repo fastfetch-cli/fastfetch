@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/properties.h"
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"
 #define FF_TERMFONT_NUM_FORMAT_ARGS 5

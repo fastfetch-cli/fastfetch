@@ -1,5 +1,6 @@
 #include "displayServer.h"
 #include "common/io.h"
+#include "common/properties.h"
 
 #include <stdlib.h>
 #include <ctype.h>

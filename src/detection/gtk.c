@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/properties.h"
 
 #include <pthread.h>
 
