@@ -310,25 +310,6 @@ typedef struct FFDateTimeResult
     FFstrbuf secondPretty; //37
 } FFDateTimeResult;
 
-typedef enum FFformatargtype
-{
-    FF_FORMAT_ARG_TYPE_NULL = 0,
-    FF_FORMAT_ARG_TYPE_UINT,
-    FF_FORMAT_ARG_TYPE_UINT16,
-    FF_FORMAT_ARG_TYPE_UINT8,
-    FF_FORMAT_ARG_TYPE_INT,
-    FF_FORMAT_ARG_TYPE_STRING,
-    FF_FORMAT_ARG_TYPE_STRBUF,
-    FF_FORMAT_ARG_TYPE_DOUBLE,
-    FF_FORMAT_ARG_TYPE_LIST
-} FFformatargtype;
-
-typedef struct FFformatarg
-{
-    FFformatargtype type;
-    const void* value;
-} FFformatarg;
-
 #define FF_VARIANT_NULL ((FFvariant){.strValue = NULL})
 
 //////////////////////
@@ -344,10 +325,6 @@ void ffListFeatures();
 
 //common/threading.c
 void ffStartDetectionThreads(FFinstance* instance);
-
-//common/format.c
-void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
-void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);

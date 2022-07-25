@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/format.h"
 
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
 {

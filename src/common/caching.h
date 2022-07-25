@@ -4,6 +4,7 @@
 #define FF_INCLUDED_common_caching
 
 #include "fastfetch.h"
+#include "common/format.h"
 
 typedef struct FFcache
 {

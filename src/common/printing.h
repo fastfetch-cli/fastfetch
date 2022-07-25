@@ -4,6 +4,7 @@
 #define FF_INCLUDED_common_printing
 
 #include "fastfetch.h"
+#include "common/format.h"
 
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat);
 void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments);
