@@ -77,6 +77,7 @@ typedef struct FFconfig
     bool escapeBedrock;
     FFGLType glType;
     bool pipe; //disables logo and all escape sequences
+    bool multithreading;
 
     FFModuleArgs os;
     FFModuleArgs host;
@@ -311,7 +312,7 @@ typedef struct FFDateTimeResult
 } FFDateTimeResult;
 
 //////////////////////
-// Common functions //
+// Init functions //
 //////////////////////
 
 //common/init.c
@@ -320,9 +321,6 @@ void ffStart(FFinstance* instance);
 void ffFinish(FFinstance* instance);
 
 void ffListFeatures();
-
-//common/threading.c
-void ffStartDetectionThreads(FFinstance* instance);
 
 ////////////////////
 // Logo functions //

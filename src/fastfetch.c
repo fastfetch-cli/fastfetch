@@ -12,7 +12,6 @@ typedef struct FFdata
 {
     FFvaluestore valuestore;
     FFstrbuf structure;
-    bool multithreading;
     bool loadUserConfig;
 } FFdata;
 
@@ -752,7 +751,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--multithreading") == 0)
-        data->multithreading = optionParseBoolean(value);
+        instance->config.multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--escape-bedrock") == 0)
@@ -1374,16 +1373,11 @@ int main(int argc, const char** argv)
     FFdata data;
     ffValuestoreInit(&data.valuestore);
     ffStrbufInitA(&data.structure, 256);
-    data.multithreading = true;
     data.loadUserConfig = true;
 
     parseConfigFileSystem(&instance, &data);
     parseConfigFileUser(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
-
-    //Start detection threads
-    if(data.multithreading)
-        ffStartDetectionThreads(&instance);
 
     //If we don't have a custom structure, use the default one
     if(data.structure.length == 0)

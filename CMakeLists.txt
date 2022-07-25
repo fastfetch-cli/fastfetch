@@ -138,7 +138,6 @@ add_library(libfastfetch OBJECT
     src/util/FFlist.c
     src/util/FFvaluestore.c
     src/common/init.c
-    src/common/threading.c
     src/common/io.c
     src/common/printing.c
     src/common/caching.c
