@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/caching.h"
 
 #include <stdlib.h>
 #include <unistd.h>
