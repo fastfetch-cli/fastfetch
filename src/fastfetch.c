@@ -1360,7 +1360,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "opencl") == 0)
         ffPrintOpenCL(instance);
     else
-        ffPrintError(instance, line, 0, NULL, NULL, 0, "<no implementation provided>");
+        ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
 
 int main(int argc, const char** argv)
