@@ -357,14 +357,6 @@ typedef union FFvariant
 
 #define FF_VARIANT_NULL ((FFvariant){.strValue = NULL})
 
-typedef struct FFfont
-{
-    FFstrbuf pretty;
-    FFstrbuf name;
-    FFstrbuf size;
-    FFlist styles;
-} FFfont;
-
 //////////////////////
 // Common functions //
 //////////////////////
@@ -378,13 +370,6 @@ void ffListFeatures();
 
 //common/threading.c
 void ffStartDetectionThreads(FFinstance* instance);
-
-//common/font.c
-void ffFontInitQt(FFfont* font, const char* data);
-void ffFontInitPango(FFfont* font, const char* data);
-void ffFontInitCopy(FFfont* font, const char* name);
-void ffFontInitValues(FFfont* font, const char* name, const char* size);
-void ffFontDestroy(FFfont* font);
 
 //common/format.c
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);

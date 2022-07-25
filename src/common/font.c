@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/font.h"
 
 #include <string.h>
 

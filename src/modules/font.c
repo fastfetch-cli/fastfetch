@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/font.h"
 #include "common/printing.h"
 
 #define FF_FONT_MODULE_NAME "Font"
