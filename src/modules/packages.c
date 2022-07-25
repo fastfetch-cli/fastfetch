@@ -130,7 +130,7 @@ static uint32_t getNixPackages(char* path)
 }
 
 #ifdef FF_HAVE_RPM
-#include <dlfcn.h>
+#include "common/library.h"
 #include <rpm/rpmlib.h>
 #include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>

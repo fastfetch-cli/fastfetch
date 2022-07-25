@@ -7,7 +7,7 @@
 #define FF_DBUS_TIMEOUT_MILLISECONDS 35
 
 #ifdef FF_HAVE_DBUS
-#include <dlfcn.h>
+#include "common/library.h"
 #include <dbus/dbus.h>
 
 #define FF_DBUS_ITER_CONTINUE(iterator) \

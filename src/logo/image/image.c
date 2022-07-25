@@ -17,8 +17,8 @@
 #include <sys/ioctl.h>
 
 #ifdef FF_HAVE_ZLIB
+#include "common/library.h"
 #include <stdlib.h>
-#include <dlfcn.h>
 #include <zlib.h>
 
 static bool compressBlob(const FFinstance* instance, void** blob, size_t* length)

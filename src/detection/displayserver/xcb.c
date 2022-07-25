@@ -1,9 +1,9 @@
 #include "displayServer.h"
 
 #ifdef FF_HAVE_XCB
+#include "common/library.h"
 #include <stdlib.h>
 #include <string.h>
-#include <dlfcn.h>
 #include <xcb/xcb.h>
 
 typedef struct XcbPropertyData

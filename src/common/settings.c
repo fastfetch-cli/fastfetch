@@ -1,8 +1,8 @@
 #include "fastfetch.h"
+#include "common/library.h"
 
 #include <pthread.h>
 #include <string.h>
-#include <dlfcn.h>
 
 #define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \

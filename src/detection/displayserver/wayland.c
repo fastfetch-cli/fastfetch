@@ -6,8 +6,8 @@
 #include <string.h>
 
 #ifdef FF_HAVE_WAYLAND
+#include "common/library.h"
 #include <pthread.h>
-#include <dlfcn.h>
 #include <wayland-client.h>
 #include <sys/socket.h>
 

@@ -385,25 +385,6 @@ typedef enum FFInitState
     FF_INITSTATE_FAILED = 2
 } FFInitState;
 
-#define FF_LIBRARY_SYMBOL(symbolName) \
-    __typeof__(&symbolName) ff ## symbolName;
-
-#define FF_LIBRARY_LOAD(libraryObjectName, userLibraryName, returnValue, ...) \
-    void* libraryObjectName =  ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL);\
-    if(libraryObjectName == NULL) \
-        return returnValue;
-
-#define FF_LIBRARY_LOAD_SYMBOL_ADRESS(library, symbolMapping, symbolName, returnValue) \
-    symbolMapping = dlsym(library, #symbolName); \
-    if(symbolMapping == NULL) \
-    { \
-        dlclose(library); \
-        return returnValue; \
-    }
-
-#define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
-    __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADRESS(library, ff ## symbolName, symbolName, returnValue);
-
 //////////////////////
 // Common functions //
 //////////////////////
@@ -486,9 +467,6 @@ int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
 
 //common/processing.c
 void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
-
-//common/libraries.c
-void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 
 //common/networking.c
 void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);

@@ -4,7 +4,7 @@
 #define FF_OPENCL_NUM_FORMAT_ARGS 3
 
 #ifdef FF_HAVE_OPENCL
-#include <dlfcn.h>
+#include "common/library.h"
 
 #define CL_TARGET_OPENCL_VERSION 100
 #include <CL/cl.h>

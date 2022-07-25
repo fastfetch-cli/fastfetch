@@ -1,7 +1,7 @@
 #include "displayServer.h"
 
 #ifdef FF_HAVE_X11
-#include <dlfcn.h>
+#include "common/library.h"
 #include <X11/Xlib.h>
 
 typedef struct X11PropertyData

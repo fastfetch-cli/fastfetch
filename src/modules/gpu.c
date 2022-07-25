@@ -61,9 +61,9 @@ static void printGPUList(FFinstance* instance, const FFlist* list)
 }
 
 #ifdef FF_HAVE_LIBPCI
+#include "common/library.h"
 #include <string.h>
 #include <unistd.h>
-#include <dlfcn.h>
 #include <pci/pci.h>
 
 //see https://github.com/pciutils/pciutils/blob/5bdf63b6b1bc35b59c4b3f47f7ca83ca1868155b/ls-kernel.c#L220
