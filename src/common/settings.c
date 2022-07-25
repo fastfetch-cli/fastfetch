@@ -4,6 +4,13 @@
 #include <pthread.h>
 #include <string.h>
 
+typedef enum FFInitState
+{
+    FF_INITSTATE_UNINITIALIZED = 0,
+    FF_INITSTATE_SUCCESSFUL = 1,
+    FF_INITSTATE_FAILED = 2
+} FFInitState;
+
 #define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \

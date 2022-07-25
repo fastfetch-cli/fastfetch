@@ -378,13 +378,6 @@ typedef struct FFpropquery
     FFstrbuf* buffer;
 } FFpropquery;
 
-typedef enum FFInitState
-{
-    FF_INITSTATE_UNINITIALIZED = 0,
-    FF_INITSTATE_SUCCESSFUL = 1,
-    FF_INITSTATE_FAILED = 2
-} FFInitState;
-
 //////////////////////
 // Common functions //
 //////////////////////
