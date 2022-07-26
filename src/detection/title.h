@@ -3,7 +3,7 @@
 #ifndef FF_INCLUDED_detection_title
 #define FF_INCLUDED_detection_title
 
-#include "util/FFstrbuf.h"
+#include "fastfetch.h"
 
 typedef struct FFTitleResult
 {

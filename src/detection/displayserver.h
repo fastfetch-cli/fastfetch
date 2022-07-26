@@ -3,6 +3,8 @@
 #ifndef FF_INCLUDED_detection_displayserver
 #define FF_INCLUDED_detection_displayserver
 
+#include "fastfetch.h"
+
 typedef struct FFResolutionResult
 {
     uint32_t width;

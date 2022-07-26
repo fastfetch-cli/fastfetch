@@ -3,7 +3,7 @@
 #ifndef FF_INCLUDED_detection_qt
 #define FF_INCLUDED_detection_qt
 
-#include "util/FFstrbuf.h"
+#include "fastfetch.h"
 
 typedef struct FFQtResult
 {

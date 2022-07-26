@@ -173,22 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFTerminalShellResult
-{
-    FFstrbuf shellProcessName;
-    FFstrbuf shellExe;
-    const char* shellExeName; //pointer to a char in shellExe
-    FFstrbuf shellVersion;
-
-    FFstrbuf terminalProcessName;
-    FFstrbuf terminalExe;
-    const char* terminalExeName; //pointer to a char in terminalExe
-
-    FFstrbuf userShellExe;
-    const char* userShellExeName; //pointer to a char in userShellExe
-    FFstrbuf userShellVersion;
-} FFTerminalShellResult;
-
 typedef struct FFGPUResult
 {
     FFstrbuf vendor;
@@ -278,9 +262,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/terminalShell.c
-const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
 
 //detection/temps.c (currently unused)
 const FFTempsResult* ffDetectTemps(const FFinstance* instance);

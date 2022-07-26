@@ -3,7 +3,7 @@
 #ifndef FF_INCLUDED_detection_os
 #define FF_INCLUDED_detection_os
 
-#include "util/FFstrbuf.h"
+#include "fastfetch.h"
 
 typedef struct FFOSResult
 {

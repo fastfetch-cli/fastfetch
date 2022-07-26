@@ -3,7 +3,7 @@
 #ifndef FF_INCLUDED_detection_gtk
 #define FF_INCLUDED_detection_gtk
 
-#include "util/FFstrbuf.h"
+#include "fastfetch.h"
 
 typedef struct FFGTKResult
 {

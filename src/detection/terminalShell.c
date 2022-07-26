@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "detection/terminalshell.h"
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
