@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "detection/datetime.h"
 
 #define FF_DATETIME_MODULE_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
