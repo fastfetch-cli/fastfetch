@@ -173,22 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFOSResult
-{
-    FFstrbuf systemName;
-    FFstrbuf name;
-    FFstrbuf prettyName;
-    FFstrbuf id;
-    FFstrbuf idLike;
-    FFstrbuf variant;
-    FFstrbuf variantID;
-    FFstrbuf version;
-    FFstrbuf versionID;
-    FFstrbuf codename;
-    FFstrbuf buildID;
-    FFstrbuf architecture;
-} FFOSResult;
-
 typedef struct FFQtResult
 {
     FFstrbuf widgetStyle;
@@ -329,8 +313,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-//detection/os.c
-const FFOSResult* ffDetectOS(const FFinstance* instance);
 
 //detection/plasma.c
 const FFQtResult* ffDetectQt(FFinstance* instance);

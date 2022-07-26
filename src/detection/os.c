@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "detection/os.h"
 #include "common/properties.h"
 #include "common/parsing.h"
 

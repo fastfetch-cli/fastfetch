@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "detection/os.h"
 
 #include <ctype.h>
 
