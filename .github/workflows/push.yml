@@ -24,7 +24,7 @@ jobs:
       - name: configure project
         # We reuse the build binary only for the releases.
         # We set tweak version to off, because it is wrong, as git tag will happen after this step. Releases don't have a tweak, so this is ok.
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . -j$(nproc) --target package
