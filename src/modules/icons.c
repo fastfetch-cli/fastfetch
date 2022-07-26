@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "common/parsing.h"
+#include "detection/qt.h"
 
 #define FF_ICONS_MODULE_NAME "Icons"
 #define FF_ICONS_NUM_FORMAT_ARGS 5

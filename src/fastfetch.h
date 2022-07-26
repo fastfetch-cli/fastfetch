@@ -173,14 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFQtResult
-{
-    FFstrbuf widgetStyle;
-    FFstrbuf colorScheme;
-    FFstrbuf icons;
-    FFstrbuf font;
-} FFQtResult;
-
 typedef struct FFGTKResult
 {
     FFstrbuf theme;
@@ -313,9 +305,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/plasma.c
-const FFQtResult* ffDetectQt(FFinstance* instance);
 
 //detection/gtk.c
 const FFGTKResult* ffDetectGTK2(FFinstance* instance);

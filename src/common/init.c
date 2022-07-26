@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/caching.h"
+#include "detection/qt.h"
 
 #include <stdlib.h>
 #include <unistd.h>
