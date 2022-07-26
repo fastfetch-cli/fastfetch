@@ -3,6 +3,7 @@
 #include "common/caching.h"
 #include "common/parsing.h"
 #include "detection/temps.h"
+#include "detection/vulkan.h"
 
 #include <stdlib.h>
 

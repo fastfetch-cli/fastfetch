@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "detection/vulkan.h"
 
 #include <pthread.h>
 

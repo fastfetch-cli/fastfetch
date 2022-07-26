@@ -173,22 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFGPUResult
-{
-    FFstrbuf vendor;
-    FFstrbuf name;
-    FFstrbuf driver;
-    double temperature;
-} FFGPUResult;
-
-typedef struct FFVulkanResult
-{
-    FFstrbuf driver;
-    FFstrbuf apiVersion;
-    FFstrbuf conformanceVersion;
-    FFlist devices; //List of FFGPUResult
-} FFVulkanResult;
-
 //////////////////////
 // Init functions //
 //////////////////////
@@ -211,13 +195,6 @@ void ffLogoPrintLine(FFinstance* instance);
 void ffLogoBuiltinPrint(FFinstance* instance);
 void ffLogoBuiltinList();
 void ffLogoBuiltinListAutocompletion();
-
-/////////////////////////
-// Detection functions //
-/////////////////////////
-
-//detection/vulkan.c
-const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);
 
 //////////////////////
 // Module functions //
