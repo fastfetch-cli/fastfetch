@@ -205,24 +205,6 @@ typedef struct FFVulkanResult
     FFlist devices; //List of FFGPUResult
 } FFVulkanResult;
 
-typedef struct FFResolutionResult
-{
-    uint32_t width;
-    uint32_t height;
-    uint32_t refreshRate;
-} FFResolutionResult;
-
-typedef struct FFDisplayServerResult
-{
-    FFstrbuf wmProcessName;
-    FFstrbuf wmPrettyName;
-    FFstrbuf wmProtocolName;
-    FFstrbuf deProcessName;
-    FFstrbuf dePrettyName;
-    FFstrbuf deVersion;
-    FFlist resolutions; //List of FFResolutionResult
-} FFDisplayServerResult;
-
 typedef struct FFTempValue
 {
     FFstrbuf name;
@@ -296,9 +278,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/displayServer.c
-const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
 
 //detection/terminalShell.c
 const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);

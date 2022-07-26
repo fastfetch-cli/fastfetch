@@ -4,6 +4,7 @@
 #include "common/parsing.h"
 #include "common/settings.h"
 #include "detection/gtk.h"
+#include "detection/displayserver.h"
 
 #include <stdlib.h>
 

@@ -2,6 +2,7 @@
 #include "common/caching.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
+#include "detection/displayserver.h"
 
 #include <stdlib.h>
 #include <unistd.h>

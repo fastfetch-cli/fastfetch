@@ -4,6 +4,7 @@
 #include "common/parsing.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
+#include "detection/displayserver.h"
 
 #define FF_FONT_MODULE_NAME "Font"
 #define FF_FONT_NUM_FORMAT_ARGS 21

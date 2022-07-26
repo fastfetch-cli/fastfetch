@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "detection/displayserver.h"
 
 #define FF_RESOLUTION_MODULE_NAME "Resolution"
 #define FF_RESOLUTION_NUM_FORMAT_ARGS 3
