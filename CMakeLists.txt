@@ -493,6 +493,10 @@ endif()
 # install target #
 ##################
 
+if(NOT CMAKE_INSTALL_SYSCONFDIR)
+    set(CMAKE_INSTALL_SYSCONFDIR "/etc")
+endif()
+
 include(GNUInstallDirs)
 
 install(
@@ -527,6 +531,8 @@ install(
 ##################
 
 set(CPACK_GENERATOR "DEB;RPM;TGZ;ZIP")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+set(CPACK_SET_DESTDIR ON)
 
 set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neofetch clone written in C")
