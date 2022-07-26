@@ -345,17 +345,17 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(rpm)
         FF_PRINT_PACKAGE(emerge)
 
-        if(nixUser > 0)
-        {
-            printf("%u (nix-user)", nixUser);
-            if((all = all - nixUser) > 0)
-                printf(", ");
-        }
-
         if(counts.nixSystem > 0)
         {
             printf("%u (nix-system)", counts.nixSystem);
             if((all = all - counts.nixSystem) > 0)
+                printf(", ");
+        }
+
+        if(nixUser > 0)
+        {
+            printf("%u (nix-user)", nixUser);
+            if((all = all - nixUser) > 0)
                 printf(", ");
         }
 
@@ -386,8 +386,8 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.rpm},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.emerge},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.xbps},
-            {FF_FORMAT_ARG_TYPE_UINT, &nixUser},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.nixSystem},
+            {FF_FORMAT_ARG_TYPE_UINT, &nixUser},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.nixDefault},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpak},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.snap}
