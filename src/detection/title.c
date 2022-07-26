@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "detection/title.h"
 
 #include <limits.h>
 #include <unistd.h>

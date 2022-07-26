@@ -173,13 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFTitleResult
-{
-    FFstrbuf userName;
-    FFstrbuf hostname;
-    FFstrbuf fqdn; //Fully qualified domain name
-} FFTitleResult;
-
 typedef struct FFOSResult
 {
     FFstrbuf systemName;
@@ -336,10 +329,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/title.c
-const FFTitleResult* ffDetectTitle(const FFinstance* instance);
-
 //detection/os.c
 const FFOSResult* ffDetectOS(const FFinstance* instance);
 
