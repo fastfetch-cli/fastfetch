@@ -3,6 +3,7 @@
 #include "common/printing.h"
 #include "common/parsing.h"
 #include "common/settings.h"
+#include "detection/gtk.h"
 
 #include <stdlib.h>
 

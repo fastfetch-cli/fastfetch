@@ -2,6 +2,7 @@
 #include "common/printing.h"
 #include "common/parsing.h"
 #include "detection/qt.h"
+#include "detection/gtk.h"
 
 #define FF_THEME_MODULE_NAME "Theme"
 #define FF_THEME_NUM_FORMAT_ARGS 7

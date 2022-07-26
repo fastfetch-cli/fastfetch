@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "detection/gtk.h"
 #include "common/properties.h"
 #include "common/settings.h"
 

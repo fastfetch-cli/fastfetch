@@ -173,15 +173,6 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 
-typedef struct FFGTKResult
-{
-    FFstrbuf theme;
-    FFstrbuf icons;
-    FFstrbuf font;
-    FFstrbuf cursor;
-    FFstrbuf cursorSize;
-} FFGTKResult;
-
 typedef struct FFTerminalShellResult
 {
     FFstrbuf shellProcessName;
@@ -305,11 +296,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/gtk.c
-const FFGTKResult* ffDetectGTK2(FFinstance* instance);
-const FFGTKResult* ffDetectGTK4(FFinstance* instance);
-const FFGTKResult* ffDetectGTK3(FFinstance* instance);
 
 //detection/displayServer.c
 const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
