@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs
 
 project(fastfetch
-    VERSION 1.5.6
+    VERSION 1.6.0
     LANGUAGES C
 )
 
