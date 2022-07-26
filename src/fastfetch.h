@@ -189,18 +189,6 @@ typedef struct FFVulkanResult
     FFlist devices; //List of FFGPUResult
 } FFVulkanResult;
 
-typedef struct FFTempValue
-{
-    FFstrbuf name;
-    FFstrbuf deviceClass;
-    double value;
-} FFTempValue;
-
-typedef struct FFTempsResult
-{
-    FFlist values; //List of FFTempValue
-} FFTempsResult;
-
 typedef struct FFMediaResult
 {
     FFstrbuf busNameShort; //e.g. plasma-browser-integration
@@ -237,9 +225,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/temps.c (currently unused)
-const FFTempsResult* ffDetectTemps(const FFinstance* instance);
 
 //detection/media.c
 const FFMediaResult* ffDetectMedia(FFinstance* instance);

@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "detection/temps.h"
 #include "common/io.h"
 
 #include <string.h>

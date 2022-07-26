@@ -2,6 +2,7 @@
 #include "common/printing.h"
 #include "common/caching.h"
 #include "common/parsing.h"
+#include "detection/temps.h"
 
 #include <stdlib.h>
 

@@ -3,6 +3,7 @@
 #include "common/properties.h"
 #include "common/printing.h"
 #include "common/caching.h"
+#include "detection/temps.h"
 
 #include <stdlib.h>
 
