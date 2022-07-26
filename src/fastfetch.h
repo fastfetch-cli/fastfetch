@@ -189,16 +189,6 @@ typedef struct FFVulkanResult
     FFlist devices; //List of FFGPUResult
 } FFVulkanResult;
 
-typedef struct FFMediaResult
-{
-    FFstrbuf busNameShort; //e.g. plasma-browser-integration
-    FFstrbuf player; // e.g. Google Chrome
-    FFstrbuf song;
-    FFstrbuf artist;
-    FFstrbuf album;
-    FFstrbuf url;
-} FFMediaResult;
-
 //////////////////////
 // Init functions //
 //////////////////////
@@ -225,9 +215,6 @@ void ffLogoBuiltinListAutocompletion();
 /////////////////////////
 // Detection functions //
 /////////////////////////
-
-//detection/media.c
-const FFMediaResult* ffDetectMedia(FFinstance* instance);
 
 //detection/vulkan.c
 const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);
