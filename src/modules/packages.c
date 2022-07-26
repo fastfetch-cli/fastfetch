@@ -119,10 +119,17 @@ static uint32_t getNixPackages(char* path)
     FFstrbuf output;
     ffStrbufInitA(&output, 128);
 
+    //https://github.com/LinusDierheimer/fastfetch/issues/195#issuecomment-1191748222
+    FFstrbuf command;
+    ffStrbufInitA(&command, 255);
+    ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
+    ffStrbufAppendS(&command, path);
+    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq");
+
     ffProcessAppendStdOut(&output, (char* const[]) {
-        "nix-store",
-        "-qR",
-        path,
+        "sh",
+        "-c",
+        command.chars,
         NULL
     });
 
@@ -222,7 +229,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
     //nix default
-    ffStrbufAppendS(baseDir, "/var/nix/profiles/default");
+    ffStrbufAppendS(baseDir, "/run/current-system");
     packageCounts->nixDefault += getNixPackages(baseDir->chars);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
@@ -242,15 +249,20 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
 
 static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
 {
+    uint32_t baseDirLength = baseDir->length;
+
     ffStrbufAppendS(baseDir, "/bedrock/strata");
 
     DIR* dir = opendir(baseDir->chars);
     if(dir == NULL)
+    {
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        getPackageCounts(instance, baseDir, packageCounts);
         return;
+    }
 
     ffStrbufAppendC(baseDir, '/');
-
-    uint32_t baseDirLength = baseDir->length;
+    baseDirLength = baseDir->length;
 
     struct dirent* entry;
     while((entry = readdir(dir)) != NULL)
