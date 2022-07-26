@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 11
+#define FF_PACKAGES_NUM_FORMAT_ARGS 12
 
 typedef struct PackageCounts
 {
@@ -21,6 +21,7 @@ typedef struct PackageCounts
     uint32_t rpm;
     uint32_t emerge;
     uint32_t xbps;
+    uint32_t nixSystem;
     uint32_t nixDefault;
     uint32_t flatpak;
     uint32_t snap;
@@ -228,8 +229,13 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     packageCounts->flatpak += getNumElements(baseDir->chars, DT_DIR);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
-    //nix default
+    //nix system
     ffStrbufAppendS(baseDir, "/run/current-system");
+    packageCounts->nixSystem += getNixPackages(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //nix default
+    ffStrbufAppendS(baseDir, "/nix/var/nix/profiles/default");
     packageCounts->nixDefault += getNixPackages(baseDir->chars);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
@@ -307,7 +313,7 @@ void ffPrintPackages(FFinstance* instance)
 
     ffStrbufDestroy(&baseDir);
 
-    uint32_t all = counts.dpkg + counts.emerge + counts.flatpak + counts.nixDefault + nixUser + counts.pacman + counts.rpm + counts.snap + counts.xbps;
+    uint32_t all = counts.dpkg + counts.emerge + counts.flatpak + counts.nixSystem + counts.nixDefault + nixUser + counts.pacman + counts.rpm + counts.snap + counts.xbps;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
@@ -346,6 +352,13 @@ void ffPrintPackages(FFinstance* instance)
                 printf(", ");
         }
 
+        if(counts.nixSystem > 0)
+        {
+            printf("%u (nix-system)", counts.nixSystem);
+            if((all = all - counts.nixSystem) > 0)
+                printf(", ");
+        }
+
         if(counts.nixDefault > 0)
         {
             printf("%u (nix-default)", counts.nixDefault);
@@ -374,6 +387,7 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.emerge},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.xbps},
             {FF_FORMAT_ARG_TYPE_UINT, &nixUser},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.nixSystem},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.nixDefault},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpak},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.snap}

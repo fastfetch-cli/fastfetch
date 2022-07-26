@@ -115,6 +115,7 @@ static inline void printCommandHelp(const char* command)
             "Number of emerge packages",
             "Number of xbps packages",
             "Number of nix-user packages",
+            "Number of nix-system packages",
             "Number of nix-default packages",
             "Number of flatpak packages",
             "Number of snap packages"
