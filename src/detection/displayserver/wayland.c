@@ -160,6 +160,8 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
     #ifdef FF_HAVE_WAYLAND
         if(detectWayland(instance, result))
             return;
+    #else
+        FF_UNUSED(instance);
     #endif
 
     const char* xdgSessionType = getenv("XDG_SESSION_TYPE");

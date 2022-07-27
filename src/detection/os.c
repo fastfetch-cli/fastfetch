@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#if !defined(__ANDROID__)
+#if __ANDROID__
+    #include "common/settings.h"
+#else
 
 static bool parseFile(const char* fileName, FFOSResult* result)
 {
