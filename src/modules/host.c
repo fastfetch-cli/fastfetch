@@ -9,7 +9,7 @@
 
 #ifndef __ANDROID__
     #include "common/io.h"
-#elif
+#else
     #include <ctype.h>
 #endif
 
