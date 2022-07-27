@@ -1,3 +1,7 @@
+# 1.6.1
+
+Fixes build on android (#205)
+
 # 1.6.0
 
 Features:
