@@ -493,37 +493,42 @@ endif()
 # install target #
 ##################
 
+#https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT.html
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${TARGET_DIR_USR}" CACHE PATH "..." FORCE)
+endif()
+
 if(NOT CMAKE_INSTALL_SYSCONFDIR)
-    set(CMAKE_INSTALL_SYSCONFDIR "/etc")
+    set(CMAKE_INSTALL_SYSCONFDIR "${TARGET_DIR_ROOT}/etc")
 endif()
 
 include(GNUInstallDirs)
 
 install(
     TARGETS fastfetch flashfetch
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
 install(
-    FILES src/data/config_system.txt
-    DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/${CMAKE_PROJECT_NAME}
+    FILES "${CMAKE_SOURCE_DIR}/src/data/config_system.txt"
+    DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/${CMAKE_PROJECT_NAME}"
     RENAME "config.conf"
 )
 
 install(
-    FILES completions/bash
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions
-    RENAME ${CMAKE_PROJECT_NAME}
+    FILES "${CMAKE_SOURCE_DIR}/completions/bash"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions"
+    RENAME "${CMAKE_PROJECT_NAME}"
 )
 
 install(
-    DIRECTORY presets
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}
+    DIRECTORY "${CMAKE_SOURCE_DIR}/presets/"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}"
 )
 
 install(
-    FILES ./LICENSE
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}
+    FILES "${CMAKE_SOURCE_DIR}/LICENSE"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}"
 )
 
 ##################
@@ -531,7 +536,6 @@ install(
 ##################
 
 set(CPACK_GENERATOR "DEB;RPM;TGZ;ZIP")
-set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
 set(CPACK_SET_DESTDIR ON)
 
 set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
