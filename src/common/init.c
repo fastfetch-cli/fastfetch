@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/caching.h"
+#include "common/parsing.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
 #include "detection/displayserver.h"
@@ -20,7 +21,7 @@ static void initConfigDirs(FFstate* state)
     ffListInit(&state->configDirs, sizeof(FFstrbuf));
 
     const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
-    if(xdgConfigHome != NULL)
+    if(ffStrSet(xdgConfigHome))
     {
         FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
         ffStrbufInitA(buffer, 64);
@@ -53,6 +54,12 @@ static void initConfigDirs(FFstate* state)
     {
         uint32_t colonIndex = ffStrbufNextIndexC(&xdgConfigDirs, startIndex, ':');
         xdgConfigDirs.chars[colonIndex] = '\0';
+
+        if(!ffStrSet(xdgConfigDirs.chars + startIndex))
+        {
+            startIndex = colonIndex + 1;
+            continue;
+        }
 
         FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
         ffStrbufInitA(buffer, 64);

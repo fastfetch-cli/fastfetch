@@ -107,11 +107,6 @@ static void detectGTKFromConfigFile(const char* filename, FFGTKResult* result)
 
 static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFGTKResult* result)
 {
-    //In case of an empty env variable
-    ffStrbufTrim(configDir, ' ');
-    if(configDir->length == 0)
-        return;
-
     uint32_t configDirLength = configDir->length;
 
     // <configdir>/gtk-<version>.0/settings.ini
