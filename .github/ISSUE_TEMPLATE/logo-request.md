@@ -8,12 +8,11 @@ assignees: ''
 ---
 
 # OS
-Content of `/etc/os-release`:
 ```
-paste here
+paste content of /etc/os-release here. If this file doesn't exist, describe a way to identify the distro.
 ```
 
 # Ascii
 ```
-paste here. If you leave this empty, i will try to find the logo myself.
+paste ascii art here. If you leave this empty, i will try to find the logo myself.
 ```
