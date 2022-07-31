@@ -1358,6 +1358,38 @@ static const FFlogo* getLogoRockyLinux()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoRosaLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("rosa", "rosa-linux", "rosalinux")
+    FF_LOGO_LINES(
+        "            ROSAROSAROSAROSAR\n"
+        "        ROSA               AROS\n"
+        "      ROS   SAROSAROSAROSAR   AROS\n"
+        "    RO   ROSAROSAROSAROSAROSAR   RO\n"
+        "  ARO  AROSAROSAROSARO      AROS  ROS\n"
+        " ARO  ROSAROS         OSAR   ROSA  ROS\n"
+        " RO  AROSA   ROSAROSAROSA    ROSAR  RO\n"
+        "RO  ROSAR  ROSAROSAROSAR  R  ROSARO  RO\n"
+        "RO  ROSA  AROSAROSAROSA  AR  ROSARO  AR\n"
+        "RO AROS  ROSAROSAROSA   ROS  AROSARO AR\n"
+        "RO AROS  ROSAROSARO   ROSARO  ROSARO AR\n"
+        "RO  ROS  AROSAROS   ROSAROSA AROSAR  AR\n"
+        "RO  ROSA  ROS     ROSAROSAR  ROSARO  RO\n"
+        " RO  ROS     AROSAROSAROSA  ROSARO  AR\n"
+        " ARO  ROSA   ROSAROSAROS   AROSAR  ARO\n"
+        "  ARO  OROSA      R      ROSAROS  ROS\n"
+        "    RO   AROSAROS   AROSAROSAR   RO\n"
+        "     AROS   AROSAROSAROSARO   AROS\n"
+        "        ROSA               SARO\n"
+        "           ROSAROSAROSAROSAR"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -1541,6 +1573,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoRedHatEnterpriseLinux,
         getLogoRedstarOS,
         getLogoRockyLinux,
+        getLogoRosaLinux,
         getLogoUbuntu,
         getLogoUbuntuSmall,
         getLogoVoid,
