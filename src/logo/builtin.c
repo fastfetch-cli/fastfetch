@@ -781,16 +781,16 @@ static const FFlogo* getLogoKISSLinux()
     FF_LOGO_NAMES("kiss", "kiss-linux", "kisslinux")
     FF_LOGO_LINES(
         "   $3 ___     \n"
-        "   ($1.· $3|     \n"
-        "   ($2<> $3|     \n"
-        "  / $1__$3  \\    \n"
+        "   ($2.· $3|     \n"
+        "   ($1<> $3|     \n"
+        "  / $2__$3  \\    \n"
         " ( $1/  \\ $3/|   \n"
-        "$2_$3/\\ $1__)$3/$2_$3)   \n"
-        "$2\\/$3-____$2\\/$1    \n"
+        "$1_$3/\\ $2__)$3/$1_$3)   \n"
+        "$1\\/$3-____$1\\/$2    \n"
     )
     FF_LOGO_COLORS(
-        "37", //white
         "35", //magenta
+        "37", //white
         "34" //blue
     )
     FF_LOGO_RETURN
