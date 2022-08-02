@@ -784,7 +784,7 @@ static const FFlogo* getLogoKISSLinux()
         "   (.· |     \n"
         "   (<> |     \n"
         "  / __  \\    \n"
-        " ( /  \ /|   \n"
+        " ( /  \\ /|   \n"
         "_/\\ __)/_)   \n"
         "\\/-____\\/    \n"
     )
