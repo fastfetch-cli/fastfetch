@@ -775,6 +775,26 @@ static const FFlogo* getLogoKDENeon()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoKISSLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("kiss", "kiss-linux", "kisslinux")
+    FF_LOGO_LINES(
+        "    ___      \n"
+        "   (.· |     \n"
+        "   (<> |     \n"
+        "  / __  \\    \n"
+        " ( /  \ /|   \n"
+        "_/\\ __)/_)   \n"
+        "\\/-____\\/    \n"
+    )
+    FF_LOGO_COLORS(
+        "35", //magenta
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoKubuntu()
 {
     FF_LOGO_INIT
@@ -1552,6 +1572,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoGentoo,
         getLogoGentooSmall,
         getLogoKDENeon,
+        getLogoKISSLinux,
         getLogoKubuntu,
         getLogoLinux,
         getLogoManjaro,
