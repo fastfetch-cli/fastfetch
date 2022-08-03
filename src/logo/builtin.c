@@ -829,6 +829,32 @@ static const FFlogo* getLogoKubuntu()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoLangitKetujuh()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("l7", "langitketujuh", "LangitKetujuh")
+    FF_LOGO_LINES(
+	"\n"
+	"\n"
+	"   $2. '7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7\n"
+	"   $2L7.   '7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7\n"
+	"   $2L7L7L      7L7L7L7L7L7L7L7L7L7L7L7L7L7\n"
+	"   $2L7L7L7                          L7L7L7\n"
+	"   $2L7L7L7           'L7L7L7L7L7L7L7L7L7L7\n"
+	"   $2L7L7L7               'L7L7L7L7L7L7L7L7\n"
+	"   $2L7L7L7                   'L7L7L7L7L7L7\n"
+	"   $2L7L7L7                          L7L7L7\n"
+	"   $2L7L7L7L7L7L7L7L7L7L7LL7L7L7.    '7L7L7\n"
+	"   $2L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L.   'L7\n"
+	"   $2L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7L7.  '\n"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoLinux()
 {
     FF_LOGO_INIT
@@ -1575,6 +1601,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoKDENeon,
         getLogoKISSLinux,
         getLogoKubuntu,
+        getLogoLangitKetujuh,
         getLogoLinux,
         getLogoManjaro,
         getLogoManjaroSmall,
