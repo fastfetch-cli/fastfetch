@@ -195,6 +195,30 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 }
 #endif
 
+static uint32_t getXBPS(FFstrbuf* baseDir)
+{
+    DIR* dir = opendir(baseDir->chars);
+    if(dir == NULL)
+        return 0;
+
+    uint32_t result = 0;
+
+    struct dirent *entry;
+    while((entry = readdir(dir)) != NULL)
+    {
+        if(entry->d_type != DT_REG || strncasecmp(entry->d_name, "pkgdb-", 6) != 0)
+            continue;
+
+        ffStrbufAppendC(baseDir, '/');
+        ffStrbufAppendS(baseDir, entry->d_name);
+        result = getNumStrings(baseDir->chars, "<string>installed</string>");
+        break;
+    }
+
+    closedir(dir);
+    return result;
+}
+
 static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
 {
     uint32_t baseDirLength = baseDir->length;
@@ -221,7 +245,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
 
     //xps
     ffStrbufAppendS(baseDir, "/var/db/xbps");
-    packageCounts->xbps += getNumElements(baseDir->chars, DT_REG);
+    packageCounts->xbps += getXBPS(baseDir);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
     //flatpak
