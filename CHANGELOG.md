@@ -1,3 +1,7 @@
+# 1.6.3
+
+Fixes installing presets in their own directory (#212)
+
 # 1.6.2
 
 Releasing this, so void linux can package fastfetch.
