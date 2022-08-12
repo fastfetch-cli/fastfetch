@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs
 
 project(fastfetch
-    VERSION 1.6.2
+    VERSION 1.6.3
     LANGUAGES C
 )
 
@@ -522,7 +522,7 @@ install(
 )
 
 install(
-    DIRECTORY "${CMAKE_SOURCE_DIR}/presets/"
+    DIRECTORY "${CMAKE_SOURCE_DIR}/presets"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}"
 )
 
