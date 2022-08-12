@@ -337,7 +337,7 @@ void ffPrintPackages(FFinstance* instance)
 
     ffStrbufDestroy(&baseDir);
 
-    uint32_t all = counts.dpkg + counts.emerge + counts.flatpak + counts.nixSystem + counts.nixDefault + nixUser + counts.pacman + counts.rpm + counts.snap + counts.xbps;
+    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.flatpak + counts.snap;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
@@ -368,6 +368,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
         FF_PRINT_PACKAGE(emerge)
+        FF_PRINT_PACKAGE(xbps)
 
         if(counts.nixSystem > 0)
         {
