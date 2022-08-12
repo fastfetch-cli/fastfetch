@@ -1,6 +1,6 @@
 # 1.6.3
 
-Fixes installing presets in their own directory (#212)
+Fixes installing presets in their own directory (@ceamac, #212)
 
 # 1.6.2
 
