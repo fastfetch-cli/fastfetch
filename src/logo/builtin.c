@@ -43,6 +43,42 @@ static const FFlogo* getLogoNone()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoAlmaLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("almalinux")
+    FF_LOGO_LINES(
+        "$1         'c:.\n"
+        "$1        lkkkx, ..       $2..   ,cc,\n"
+        "$1        okkkk:ckkx'  $2.lxkkx.okkkkd\n"
+        "$1        .:llcokkx'  $2:kkkxkko:xkkd,\n"
+        "$1      .xkkkkdood:  $2;kx,  .lkxlll;\n"
+        "$1       xkkx.       $2xk'     xkkkkk:\n"
+        "$1       'xkx.       $2xd      .....,.\n"
+        "$3      .. $1:xkl'     $2:c      ..''..\n"
+        "$3    .dkx'  $1.:ldl:'. $2'  $4':lollldkkxo;\n"
+        "$3  .''lkkko'                     $4ckkkx.\n"
+        "$3'xkkkd:kkd.       ..  $5;'        $4:kkxo.\n"
+        "$3,xkkkd;kk'      ,d;    $5ld.   $4':dkd::cc,\n"
+        "$3 .,,.;xkko'.';lxo.      $5dx,  $4:kkk'xkkkkc\n"
+        "$3     'dkkkkkxo:.        $5;kx  $4.kkk:;xkkd.\n"
+        "$3       .....   $5.;dk:.   $5lkk.  $4:;,\n"
+        "             $5:kkkkkkkdoxkkx\n"
+        "              ,c,,;;;:xkkd.\n"
+        "                ;kkkkl...\n"
+        "                ;kkkkl\n"
+        "                 ,od;";
+    )
+    FF_LOGO_COLORS(
+        "31", // red
+        "1;33", // yellow
+        "34", // blue
+        "1;32", // light green
+        "36" // cyan
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoAlpine()
 {
     FF_LOGO_INIT
@@ -1572,6 +1608,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
     static GetLogoMethod logoMethods[] = {
         ffLogoBuiltinGetUnknown,
         getLogoNone,
+        getLogoAlmaLinux,
         getLogoAlpine,
         getLogoAlpineSmall,
         getLogoAndroid,
