@@ -5,6 +5,10 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
 {
     ffLogoPrintLine(instance);
 
+    //This is used by --set-keyless, in this case we wan't neither the module name nor the separator
+    if(moduleName == NULL)
+        return;
+
     if(!instance->config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET FASTFETCH_TEXT_MODIFIER_BOLT, stdout);

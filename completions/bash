@@ -156,6 +156,7 @@ __fastfetch_completion()
         "-s"
         "--structure"
         "--set"
+        "--set-keyless"
         "--gl"
         "--os-format"
         "--os-key"

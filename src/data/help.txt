@@ -43,6 +43,7 @@ Display options:
     -c,--color <color>:          sets the color of the keys. Must be a linux console color code or the name of a color (+)
     --separator <str>:           sets the separator between key and value. Default is a colon with a space
     --set <key=value>:           hard set the value of a key
+    --set-keyless <key=value>:   hard set the value of a key, but don't print the key or the separator
     --show-errors <?value>:      print occuring errors
     --disable-linewrap <?value>: weather to disable linewrap during the run
     --hide-cursor <?value>:      weather to hide the cursor during the run
