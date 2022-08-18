@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 12
+#define FF_PACKAGES_NUM_FORMAT_ARGS 13
 
 typedef struct PackageCounts
 {
@@ -23,9 +23,9 @@ typedef struct PackageCounts
     uint32_t xbps;
     uint32_t nixSystem;
     uint32_t nixDefault;
+    uint32_t apk;
     uint32_t flatpak;
     uint32_t snap;
-    uint32_t apk;
 
     FFstrbuf pacmanBranch;
 } PackageCounts;
@@ -249,11 +249,6 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     packageCounts->xbps += getXBPS(baseDir);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
-    //flatpak
-    ffStrbufAppendS(baseDir, "/var/lib/flatpak/app");
-    packageCounts->flatpak += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
     //nix system
     ffStrbufAppendS(baseDir, "/run/current-system");
     packageCounts->nixSystem += getNixPackages(baseDir->chars);
@@ -264,16 +259,21 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     packageCounts->nixDefault += getNixPackages(baseDir->chars);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
+    //apk
+    ffStrbufAppendS(baseDir, "/lib/apk/db/installed");
+    packageCounts->apk += getNumStrings(baseDir->chars, "C:Q");
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    //flatpak
+    ffStrbufAppendS(baseDir, "/var/lib/flatpak/app");
+    packageCounts->flatpak += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
     //snap
     ffStrbufAppendS(baseDir, "/snap");
     uint32_t snap = getNumElements(baseDir->chars, DT_DIR);
     if(snap > 0)
         packageCounts->snap += (snap - 1); //Accounting for the /snap/bin folder
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //apk
-    ffStrbufAppendS(baseDir, "/lib/apk/db/installed");
-    packageCounts->apk += getNumStrings(baseDir->chars, "C:Q");
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
     //pacman branch
@@ -343,7 +343,7 @@ void ffPrintPackages(FFinstance* instance)
 
     ffStrbufDestroy(&baseDir);
 
-    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.flatpak + counts.snap + counts.apk;
+    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.apk + counts.flatpak + counts.snap;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
@@ -397,9 +397,9 @@ void ffPrintPackages(FFinstance* instance)
                 printf(", ");
         }
 
+        FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
-        FF_PRINT_PACKAGE(apk)
 
         //Fix linter warning of unused value of all
         (void) all;
@@ -421,6 +421,7 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.nixSystem},
             {FF_FORMAT_ARG_TYPE_UINT, &nixUser},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.nixDefault},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.apk},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpak},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.snap}
         });
