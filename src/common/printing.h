@@ -13,5 +13,6 @@ void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t mo
 void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...);
 void ffPrintColor(const FFstrbuf* colorValue);
 void ffPrintCharTimes(char c, uint32_t times);
+void ffPrintUserString(const char* str);
 
 #endif

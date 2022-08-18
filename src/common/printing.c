@@ -30,7 +30,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
         ffParseFormatString(&key, customKeyFormat, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
         });
-        ffStrbufWriteTo(&key, stdout);
+        ffPrintUserString(key.chars);
         ffStrbufDestroy(&key);
     }
 
@@ -53,7 +53,8 @@ void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t m
     if(buffer.length > 0)
     {
         ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
-        ffStrbufPutTo(&buffer, stdout);
+        ffPrintUserString(buffer.chars);
+        putchar('\n');
     }
 
     ffStrbufDestroy(&buffer);
@@ -128,4 +129,35 @@ void ffPrintCharTimes(char c, uint32_t times)
 {
     for(uint32_t i = 0; i < times; i++)
         putchar(c);
+}
+
+void ffPrintUserString(const char* value)
+{
+    while(*value != '\0')
+    {
+        if(*value != '\\')
+        {
+            putchar(*value);
+            ++value;
+            continue;
+        }
+
+        ++value;
+
+        if(*value == 'n')
+            putchar('\n');
+        else if(*value == 't')
+            putchar('\t');
+        else if(*value == 'e')
+            putchar('\e');
+        else if(*value == '\\')
+            putchar('\\');
+        else
+        {
+            putchar('\\');
+            putchar(*value);
+        }
+
+        ++value;
+    }
 }
