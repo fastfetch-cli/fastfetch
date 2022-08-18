@@ -60,7 +60,7 @@ AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Debian,
 
 ##### Package managers
 ```
-Pacman, dpkg, rpm, emerge, xbps, nix, Flatpak, Snap
+Pacman, dpkg, rpm, emerge, xbps, nix, Flatpak, Snap, apk
 ```
 
 ##### WM themes
