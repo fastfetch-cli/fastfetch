@@ -25,6 +25,7 @@ typedef struct PackageCounts
     uint32_t nixDefault;
     uint32_t flatpak;
     uint32_t snap;
+    uint32_t apk;
 
     FFstrbuf pacmanBranch;
 } PackageCounts;
@@ -270,6 +271,11 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
         packageCounts->snap += (snap - 1); //Accounting for the /snap/bin folder
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
+    //apk
+    ffStrbufAppendS(baseDir, "/lib/apk/db/installed");
+    packageCounts->apk += getNumStrings(baseDir->chars, "C:Q");
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
     //pacman branch
     ffStrbufAppendS(baseDir, "/etc/pacman-mirrors.conf");
     if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
@@ -337,7 +343,7 @@ void ffPrintPackages(FFinstance* instance)
 
     ffStrbufDestroy(&baseDir);
 
-    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.flatpak + counts.snap;
+    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.flatpak + counts.snap + counts.apk;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
@@ -393,6 +399,7 @@ void ffPrintPackages(FFinstance* instance)
 
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
+        FF_PRINT_PACKAGE(apk)
 
         //Fix linter warning of unused value of all
         (void) all;
