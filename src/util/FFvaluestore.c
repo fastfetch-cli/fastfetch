@@ -1,55 +1,46 @@
 #include "FFvaluestore.h"
 
 #include <string.h>
-#include <stdlib.h>
 
-void ffValuestoreInit(FFvaluestore* vs)
+typedef char KeyType[33]; //32 byte key + \0
+
+void ffValuestoreInit(FFvaluestore* vs, uint32_t valueSize)
 {
-    vs->capacity = 32;
-    vs->pairs = calloc(vs->capacity, sizeof(FFvaluestorePair));
-    vs->size = 0;
+    ffListInit(vs, sizeof(KeyType) + valueSize);
 }
 
-void ffValuestoreSet(FFvaluestore* vs, const char* name, const char* value)
+void* ffValuestoreGet(FFvaluestore* vs, const char* key)
 {
-    for(uint32_t i = 0; i < vs->size; i++)
+    for(uint32_t i = 0; i < vs->length; i++)
     {
-        if(strcasecmp(vs->pairs[i].name, name) == 0)
-        {
-            strcpy(vs->pairs[i].value, value);
-            return;
-        }
-    }
-
-    if(vs->size == vs->capacity)
-    {
-        vs->pairs = realloc(vs->pairs, vs->capacity * sizeof(FFvaluestorePair) * 2);
-        vs->capacity *= 2;
-    }
-
-    strcpy(vs->pairs[vs->size].name, name);
-    strcpy(vs->pairs[vs->size].value, value);
-
-    ++vs->size;
-}
-
-const char* ffValuestoreGet(FFvaluestore* vs, const char* name)
-{
-    for(uint32_t i = 0; i < vs->size; i++)
-    {
-        if(strcasecmp(vs->pairs[i].name, name) == 0)
-            return vs->pairs[i].value;
+        char* element = ffListGet(vs, i);
+        if(strcmp(element, key) == 0)
+            return element + sizeof(KeyType);
     }
 
     return NULL;
 }
 
-bool ffValuestoreContains(FFvaluestore* vs, const char* name)
+void* ffValuestoreSet(FFvaluestore* vs, const char* key, bool* created)
 {
-    return ffValuestoreGet(vs, name) != NULL;
+    char* element = ffValuestoreGet(vs, key);
+    if(element != NULL)
+    {
+        if(created != NULL)
+            *created = false;
+        return element;
+    }
+
+    element = ffListAdd(vs);
+    strncpy(element, key, sizeof(KeyType) - 1);
+    element[sizeof(KeyType) - 1] = '\0';
+
+    if(created != NULL)
+        *created = true;
+    return element + sizeof(KeyType);
 }
 
-void ffValuestoreDelete(FFvaluestore* vs)
+void ffValuestoreDestroy(FFvaluestore* vs)
 {
-    free(vs->pairs);
+    ffListDestroy(vs);
 }

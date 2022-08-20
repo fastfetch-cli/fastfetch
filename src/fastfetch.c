@@ -8,11 +8,16 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+typedef struct CustomValue
+{
+    bool printKey;
+    FFstrbuf value;
+} CustomValue;
+
 // Things only needed by fastfetch
 typedef struct FFdata
 {
-    FFvaluestore customWithKey; //Prints with key
-    FFvaluestore customKeyless; //Prints without
+    FFvaluestore customValues;
     FFstrbuf structure;
     bool loadUserConfig;
 } FFdata;
@@ -670,7 +675,7 @@ static uint32_t optionParseUInt32(const char* key, const char* value)
     return num;
 }
 
-static void optionParseCustom(const char* key, const char* value, FFvaluestore* valuestore)
+static void optionParseCustomValue(FFdata* data, const char* key, const char* value, bool printKey)
 {
     if(value == NULL)
     {
@@ -688,7 +693,12 @@ static void optionParseCustom(const char* key, const char* value, FFvaluestore* 
 
     *separator = '\0';
 
-    ffValuestoreSet(valuestore, value, separator + 1);
+    bool created;
+    CustomValue* customValue = ffValuestoreSet(&data->customValues, value, &created);
+    if(created)
+        ffStrbufInit(&customValue->value);
+    ffStrbufSetS(&customValue->value, separator + 1);
+    customValue->printKey = printKey;
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -902,9 +912,9 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
         optionParseColor(key, value, &instance->config.mainColor);
     else if(strcasecmp(key, "--set") == 0)
-        optionParseCustom(key, value, &data->customWithKey);
+        optionParseCustomValue(data, key, value, true);
     else if(strcasecmp(key, "--set-keyless") == 0)
-        optionParseCustom(key, value, &data->customKeyless);
+        optionParseCustomValue(data, key, value, false);
 
     ////////////////////////////////
     //Format + Key + Error options//
@@ -1286,17 +1296,10 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 
 static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
 {
-    const char* setValue = ffValuestoreGet(&data->customWithKey, line);
-    if(setValue != NULL)
+    CustomValue* customValue = ffValuestoreGet(&data->customValues, line);
+    if(customValue != NULL)
     {
-        ffPrintCustom(instance, line, setValue);
-        return;
-    }
-
-    setValue = ffValuestoreGet(&data->customKeyless, line);
-    if(setValue != NULL)
-    {
-        ffPrintCustom(instance, NULL, setValue);
+        ffPrintCustom(instance, customValue->printKey ? line : NULL, customValue->value.chars);
         return;
     }
 
@@ -1387,8 +1390,7 @@ int main(int argc, const char** argv)
 
     //Data stores things only needed for the configuration of fastfetch
     FFdata data;
-    ffValuestoreInit(&data.customWithKey);
-    ffValuestoreInit(&data.customKeyless);
+    ffValuestoreInit(&data.customValues, sizeof(CustomValue));
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
