@@ -1,3 +1,18 @@
+# 1.6.4
+
+Releasing this, so fedora can package fastfetch. Thanks to @jonathanspw for doing that!
+
+Features:
+* --set-keyless option (#215)
+* Replace `\n`, `\t`, `\e` and `\\` in user provided strings, just like c would do it (#215)
+* APK (Alpine Package Keeper) support (@mxkrsv, #216)
+
+Logos:
+* Alma Linux (@jonathanspw, #214)
+
+Bugfixes:
+* replace deprecated gethostbyname call with getaddrinfo (#217)
+
 # 1.6.3
 
 Fixes installing presets in their own directory (@ceamac, #212)
