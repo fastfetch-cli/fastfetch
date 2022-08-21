@@ -4,6 +4,7 @@
 #include "common/parsing.h"
 
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -453,58 +454,57 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
 {
-    char* lineStart = NULL;
+    char* line = NULL;
     size_t len = 0;
     ssize_t read;
 
-    FFstrbuf line;
-    ffStrbufInitA(&line, 256); //The default structure line needs this size
-
-    while ((read = getline(&lineStart, &len, file)) != -1)
+    while ((read = getline(&line, &len, file)) != -1)
     {
-        ffStrbufSetS(&line, lineStart);
-        ffStrbufTrimRight(&line, '\n');
-        ffStrbufTrim(&line, ' ');
+        char* lineStart = line;
+        char* lineEnd = line + read - 1;
 
-        if(line.length == 0 || line.chars[0] == '#')
+        //Trim line left
+        while(isspace(*lineStart))
+            ++lineStart;
+
+        //Continue if line is empty or a comment
+        if(*lineStart == '\0' || *lineStart == '#')
             continue;
 
-        uint32_t firstSpace = ffStrbufFirstIndexC(&line, ' ');
+        //Trim line right
+        while(lineEnd > lineStart && isspace(*lineEnd))
+            --lineEnd;
+        *(lineEnd + 1) = '\0';
 
-        if(firstSpace >= line.length)
+        char* valueStart = strchr(lineStart, ' ');
+
+        //If the line has no white space, it is only a key
+        if(valueStart == NULL)
         {
-            parseOption(instance, data, line.chars, NULL);
+            parseOption(instance, data, lineStart, NULL);
             continue;
         }
 
-        //Separate key and value by simply replacing the first space with a \0
-        char* valueStart = &line.chars[firstSpace];
+        //separate the key from the value
         *valueStart = '\0';
         ++valueStart;
 
-        //Trim whitespace at beginning of value
-        while(*valueStart == ' ')
+        //Trim space of value left
+        while(isspace(*valueStart))
             ++valueStart;
 
         //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
-        if(*valueStart == '"')
+        if((*valueStart == '"' || *valueStart == '\'') && *valueStart == *lineEnd && lineEnd > valueStart)
         {
-            char* last = line.chars + line.length - 1;
-            if(*last == '"')
-            {
-                ++valueStart;
-                *last = '\0';
-                --line.length;
-            }
+            ++valueStart;
+            --lineEnd;
         }
 
-        parseOption(instance, data, line.chars, valueStart);
+        parseOption(instance, data, lineStart, valueStart);
     }
 
-    ffStrbufDestroy(&line);
-
-    if(lineStart != NULL)
-        free(lineStart);
+    if(line != NULL)
+        free(line);
 }
 
 static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -1281,7 +1281,6 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
     {
         if(i == argc - 1 || (
             *argv[i + 1] == '-' &&
-            strcasecmp(argv[i], "--offsetx") != 0 && // --offsetx allows negative values
             strcasecmp(argv[i], "--separator-string") != 0 // Separator string can start with a -
         )) {
             parseOption(instance, data, argv[i], NULL);
