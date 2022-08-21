@@ -11,7 +11,6 @@ void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, F
     struct addrinfo hints = {0};
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = 0;
 
     struct addrinfo* addr;
 

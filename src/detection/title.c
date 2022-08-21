@@ -27,9 +27,25 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
     ffStrbufAppendS(&result.hostname, instance->state.utsname.nodename);
 
     ffStrbufInitA(&result.fqdn, HOST_NAME_MAX);
-    struct hostent* host = gethostbyname(result.hostname.chars);
-    if(host != NULL)
-        ffStrbufAppendS(&result.fqdn, host->h_name);
+
+    struct addrinfo hints = {0};
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_CANONNAME;
+
+    struct addrinfo* info = NULL;
+
+    if(getaddrinfo(result.hostname.chars, "80", &hints, &info) == 0)
+    {
+        struct addrinfo* current = info;
+        while(result.fqdn.length == 0 && current != NULL)
+        {
+            ffStrbufAppendS(&result.fqdn, current->ai_canonname);
+            current = current->ai_next;
+        }
+
+        freeaddrinfo(info);
+    }
+
     if(result.fqdn.length == 0)
         ffStrbufAppend(&result.fqdn, &result.hostname);
 
