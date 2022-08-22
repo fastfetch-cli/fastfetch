@@ -2,6 +2,7 @@
 #include "util/FFvaluestore.h"
 #include "common/printing.h"
 #include "common/parsing.h"
+#include "common/io.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -452,8 +453,12 @@ static inline void listAvailablePresets(FFinstance* instance)
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
 
-static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
+static bool parseConfigFile(FFinstance* instance, FFdata* data, const char* path)
 {
+    FILE* file = fopen(path, "r");
+    if(file == NULL)
+        return false;
+
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
@@ -506,6 +511,9 @@ static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
 
     if(line != NULL)
         free(line);
+
+    fclose(file);
+    return true;
 }
 
 static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -516,13 +524,12 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
         exit(413);
     }
 
-    FILE* file = fopen(value, "r");
-    if(file != NULL)
-    {
-        parseConfigFile(instance, data, file);
-        fclose(file);
+    //Try to load as an absolute path
+
+    if(parseConfigFile(instance, data, value))
         return;
-   }
+
+    //Try to load as an user preset
 
     FFstrbuf filename;
     ffStrbufInitA(&filename, 64);
@@ -531,26 +538,28 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
     ffStrbufAppendS(&filename, "/.local/share/fastfetch/presets/");
     ffStrbufAppendS(&filename, value);
 
-    file = fopen(filename.chars, "r");
-    if(file != NULL)
+    if(parseConfigFile(instance, data, filename.chars))
     {
-        parseConfigFile(instance, data, file);
-        fclose(file);
+        ffStrbufDestroy(&filename);
         return;
     }
+
+
+    //Try to load as a system preset
 
     ffStrbufSetS(&filename, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
     ffStrbufAppendS(&filename, value);
 
-    file = fopen(filename.chars, "r");
-    if(file != NULL)
+    if(parseConfigFile(instance, data, filename.chars))
     {
-        parseConfigFile(instance, data, file);
-        fclose(file);
+        ffStrbufDestroy(&filename);
         return;
     }
 
+    //File not found
+
     fprintf(stderr, "Error: couldn't find config: %s\n", value);
+    ffStrbufDestroy(&filename);
     exit(414);
 }
 
@@ -1231,12 +1240,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
 {
-    FILE* file = fopen(FASTFETCH_TARGET_DIR_ROOT"/etc/fastfetch/config.conf", "r");
-    if(file == NULL)
-        return;
-
-    parseConfigFile(instance, data, file);
-    fclose(file);
+    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_ROOT"/etc/fastfetch/config.conf");
 }
 
 static void parseConfigFileUser(FFinstance* instance, FFdata* data)
@@ -1247,28 +1251,10 @@ static void parseConfigFileUser(FFinstance* instance, FFdata* data)
     FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
     uint32_t filenameLength = filename->length;
 
-    mkdir(filename->chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a config folder, but who knows
+    ffStrbufAppendS(filename, "/fastfetch/config.conf");
 
-    ffStrbufAppendS(filename, "/fastfetch/");
-    mkdir(filename->chars, S_IRWXU | S_IRGRP | S_IROTH);
-
-    ffStrbufAppendS(filename, "config.conf");
-
-    FILE* file = fopen(filename->chars, "r");
-    if(file != NULL)
-    {
-        parseConfigFile(instance, data, file);
-        fclose(file);
-        ffStrbufSubstrBefore(filename, filenameLength);
-        return;
-    }
-
-    file = fopen(filename->chars, "w");
-    if(file != NULL)
-    {
-        fputs(FASTFETCH_DATATEXT_CONFIG_USER, file);
-        fclose(file);
-    }
+    if(!parseConfigFile(instance, data, filename->chars))
+        ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
 
     ffStrbufSubstrBefore(filename, filenameLength);
 }

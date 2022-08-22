@@ -23,7 +23,6 @@ static void createSubfolders(const char* fileName)
     ffStrbufDestroy(&path);
 }
 
-
 bool ffWriteFDBuffer(int fd, const FFstrbuf* content)
 {
     return write(fd, content->chars, content->length) != -1;
