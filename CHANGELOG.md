@@ -1,3 +1,7 @@
+# 1.6.5
+
+Fixes parsing quoted values in config files
+
 # 1.6.4
 
 Releasing this, so fedora can package fastfetch. Thanks to @jonathanspw for doing that!

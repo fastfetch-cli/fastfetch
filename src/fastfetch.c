@@ -497,6 +497,7 @@ static void parseConfigFile(FFinstance* instance, FFdata* data, FILE* file)
         if((*valueStart == '"' || *valueStart == '\'') && *valueStart == *lineEnd && lineEnd > valueStart)
         {
             ++valueStart;
+            *lineEnd = '\0';
             --lineEnd;
         }
 
