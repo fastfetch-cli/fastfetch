@@ -43,7 +43,7 @@ static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs
         else
             printf("%.1f", used);
 
-        fputs(" GB / ", stdout);
+        fputs(" GiB / ", stdout);
 
         if(total >= 100.0)
             printf("%.0f", total);

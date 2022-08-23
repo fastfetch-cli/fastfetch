@@ -284,10 +284,14 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "memory-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("memory", "{}MiB / {}MiB ({}%)", 3,
-            "Used memory",
-            "Total memory",
-            "Used memory percentage"
+        constructAndPrintCommandHelpFormat("memory", "{6}GiB / {7}GiB ({1}%)", 7,
+            "Percentage",
+            "Used KiB",
+            "Total KiB",
+            "Used MiB",
+            "Total MiB",
+            "Used GiB",
+            "Total GiB"
         );
     }
     else if(strcasecmp(command, "disk-format") == 0)
