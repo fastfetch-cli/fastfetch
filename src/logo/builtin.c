@@ -378,6 +378,27 @@ static const FFlogo* getLogoCachyOS()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoCachyOSSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("cachy_small", "cachyos_small", "cachy-linux-small", "cachyos-linux-small")
+    FF_LOGO_LINES(
+        "   /''''''''''''/\n"
+        "  /''''''''''''/\n"
+        " /''''''/\n"
+        "/''''''/\n"
+        "\\......\\\n"
+        " \\......\\\n"
+        "  \\.............../\n"
+        "   \\............./\n"
+    )
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_RETURN
+}
+
+
 static const FFlogo* getLogoCelOS()
 {
     FF_LOGO_INIT
@@ -1620,6 +1641,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoArtixSmall,
         getLogoBedrock,
         getLogoCachyOS,
+        getLogoCachyOSSmall,
         getLogoCelOS,
         getLogoCentOS,
         getLogoCentOSSmall,
