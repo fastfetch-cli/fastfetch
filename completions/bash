@@ -158,6 +158,7 @@ __fastfetch_completion()
         "--set"
         "--set-keyless"
         "--gl"
+        "--binary-prefix"
         "--os-format"
         "--os-key"
         "--host-format"

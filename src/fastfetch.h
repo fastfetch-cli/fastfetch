@@ -35,6 +35,13 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_CHAFA    //Image file, printed as ascii art using libchafa
 } FFLogoType;
 
+typedef enum FFBinaryPrefixType
+{
+    FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
+    FF_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 KB, 1000 KB = 1 MB, ...
+    FF_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 kB, 1024 K = 1 MB, ...
+} FFBinaryPrefixType;
+
 typedef enum FFGLType
 {
     FF_GL_TYPE_AUTO,
@@ -74,6 +81,7 @@ typedef struct FFconfig
     bool disableLinewrap;
     bool hideCursor;
     bool escapeBedrock;
+    FFBinaryPrefixType binaryPrefixType;
     FFGLType glType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;

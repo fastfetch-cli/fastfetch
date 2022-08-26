@@ -47,6 +47,7 @@ Display options:
     --show-errors <?value>:      print occuring errors
     --disable-linewrap <?value>: weather to disable linewrap during the run
     --hide-cursor <?value>:      weather to hide the cursor during the run
+    --binary-prefix <value>:     sets the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
 
 General module options:
     --<module>-format <format>: Sets the format string to use for each specific module.

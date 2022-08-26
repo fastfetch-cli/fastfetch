@@ -1,20 +1,11 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "common/parsing.h"
 
 #include <stdlib.h>
 
 #define FF_MEMORY_MODULE_NAME "Memory"
-#define FF_MEMORY_NUM_FORMAT_ARGS 7
-
-static void printValue(uint32_t kib, double mib, double gib)
-{
-    if(gib >= 1.0)
-        printf("%.2f GiB", gib);
-    else if(mib >= 1.0)
-        printf("%.2f MiB", mib);
-    else
-        printf("%u KiB", kib);
-}
+#define FF_MEMORY_NUM_FORMAT_ARGS 3
 
 // Impl inspired by: https://github.com/sam-barr/paleofetch/blob/b7c58a52c0de39b53c9b5f417889a5886d324bfa/paleofetch.c#L544
 void ffPrintMemory(FFinstance* instance)
@@ -52,36 +43,34 @@ void ffPrintMemory(FFinstance* instance)
     uint32_t used = total + shared - memfree - buffers - cached - reclaimable;
     uint8_t percentage = (uint8_t) ((used / (double) total) * 100);
 
-    double usedMiB = used / 1024.0;
-    double totalMiB = total / 1024.0;
-
-    double usedGiB = usedMiB / 1024.0;
-    double totalGiB = totalMiB / 1024.0;
-
     if(used == 0 && total == 0)
     {
         ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory, "/proc/meminfo could't be parsed");
         return;
     }
 
+    FFstrbuf usedPretty;
+    ffStrbufInit(&usedPretty);
+    ffParseSize(used * (uint64_t) 1024, instance->config.binaryPrefixType, &usedPretty);
+
+    FFstrbuf totalPretty;
+    ffStrbufInit(&totalPretty);
+    ffParseSize(total * (uint64_t) 1024, instance->config.binaryPrefixType, &totalPretty);
+
     if(instance->config.memory.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory.key);
-        printValue(used, usedMiB, usedGiB);
-        fputs(" / ", stdout);
-        printValue(total, totalMiB, totalGiB);
-        printf(" (%u%%)\n", percentage);
+        printf("%s / %s (%u%%)\n", usedPretty.chars, totalPretty.chars, percentage);
     }
     else
     {
         ffPrintFormat(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
-            {FF_FORMAT_ARG_TYPE_UINT, &total},
-            {FF_FORMAT_ARG_TYPE_UINT, &used},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &usedMiB},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &totalMiB},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &usedGiB},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &totalGiB}
         });
     }
+
+    ffStrbufDestroy(&usedPretty);
+    ffStrbufDestroy(&totalPretty);
 }

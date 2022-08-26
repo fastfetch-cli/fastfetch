@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "common/parsing.h"
 
 #include <sys/statvfs.h>
 
@@ -25,40 +26,31 @@ static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, 
 
 static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs)
 {
-    const double GB = 1024 * 1024 * 1024;
-
-    double total     = ((double) (fs->f_blocks * fs->f_frsize)) / GB;
-    double available = ((double) (fs->f_bfree  * fs->f_frsize)) / GB;
-    double used      = total - available;
-    uint8_t percentage = (uint8_t) ((used / total) * 100.0);
-
+    uint64_t total = fs->f_blocks * fs->f_frsize;
+    uint64_t used = total - (fs->f_bfree  * fs->f_frsize);
     uint32_t files = (uint32_t) (fs->f_files - fs->f_ffree);
+    uint8_t percentage = (uint8_t) ((used / (long double) total) * 100.0);
+
+    FFstrbuf usedPretty;
+    ffStrbufInit(&usedPretty);
+    ffParseSize(used, instance->config.binaryPrefixType, &usedPretty);
+
+    FFstrbuf totalPretty;
+    ffStrbufInit(&totalPretty);
+    ffParseSize(total, instance->config.binaryPrefixType, &totalPretty);
 
     if(instance->config.disk.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key->chars, 0, NULL);
-
-        if(used >= 100.0)
-            printf("%.0f", used);
-        else
-            printf("%.1f", used);
-
-        fputs(" GiB / ", stdout);
-
-        if(total >= 100.0)
-            printf("%.0f", total);
-        else
-            printf("%.1f", total);
-
-        printf("GiB (%u%%)\n", percentage);
+        printf("%s / %s (%u%%)\n", usedPretty.chars, totalPretty.chars, percentage);
     }
     else
     {
         ffPrintFormatString(instance, key->chars, 0, NULL, &instance->config.disk.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &used},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &total},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &files},
-            {FF_FORMAT_ARG_TYPE_UINT8, &percentage}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
+            {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
+            {FF_FORMAT_ARG_TYPE_UINT, &files},
         });
     }
 }

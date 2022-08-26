@@ -284,23 +284,19 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "memory-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("memory", "{6}GiB / {7}GiB ({1}%)", 7,
-            "Percentage",
-            "Used KiB",
-            "Total KiB",
-            "Used MiB",
-            "Total MiB",
-            "Used GiB",
-            "Total GiB"
+        constructAndPrintCommandHelpFormat("memory", "{} / {} ({}%)", 3,
+            "Used size",
+            "Total size",
+            "Percentage used"
         );
     }
     else if(strcasecmp(command, "disk-format") == 0)
     {
         constructAndPrintCommandHelpFormat("disk", "{}GiB / {}GiB ({4}%)", 4,
-            "Used disk space",
-            "Total disk space",
-            "Number of files",
-            "Used disk space percentage"
+            "Used size",
+            "Total size",
+            "Percentage used",
+            "Num files"
         );
     }
     else if(strcasecmp(command, "battery-format") == 0)
@@ -715,6 +711,39 @@ static void optionParseCustomValue(FFdata* data, const char* key, const char* va
     customValue->printKey = printKey;
 }
 
+static void optionParseEnum(const char* argumentKey, const char* requestedKey, void* result, ...)
+{
+    if(requestedKey == NULL)
+    {
+        fprintf(stderr, "Error: usage: %s <value>\n", argumentKey);
+        exit(476);
+    }
+
+    va_list args;
+    va_start(args, result);
+
+    while(true)
+    {
+        const char* key = va_arg(args, const char*);
+        if(key == NULL)
+            break;
+
+        int value = va_arg(args, int); //C standard guarantees that enumeration constants are presented as ints
+
+        if(strcasecmp(requestedKey, key) == 0)
+        {
+            *(int*)result = value;
+            va_end(args);
+            return;
+        }
+    }
+
+    va_end(args);
+
+    fprintf(stderr, "Error: unknown %s value: %s\n", argumentKey, requestedKey);
+    exit(478);
+}
+
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
     ///////////////////////
@@ -827,31 +856,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--logo-type") == 0)
     {
-        if(value == NULL)
-        {
-            fprintf(stderr, "Error: usage: %s <type>\n", key);
-            exit(476);
-        }
-
-        if(strcasecmp(value, "auto") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_AUTO;
-        else if(strcasecmp(value, "builtin") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_BUILTIN;
-        else if(strcasecmp(value, "file") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_FILE;
-        else if(strcasecmp(value, "raw") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_RAW;
-        else if(strcasecmp(value, "sixel") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_SIXEL;
-        else if(strcasecmp(value, "kitty") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_KITTY;
-        else if(strcasecmp(value, "chafa") == 0)
-            instance->config.logo.type = FF_LOGO_TYPE_CHAFA;
-        else
-        {
-            fprintf(stderr, "Error: unknown logo type: %s\n", value);
-            exit(478);
-        }
+        optionParseEnum(key, value, &instance->config.logo.type,
+            "auto", FF_LOGO_TYPE_AUTO,
+            "builtin", FF_LOGO_TYPE_BUILTIN,
+            "file", FF_LOGO_TYPE_FILE,
+            "raw", FF_LOGO_TYPE_RAW,
+            "sixel", FF_LOGO_TYPE_SIXEL,
+            "kitty", FF_LOGO_TYPE_KITTY,
+            "chafa", FF_LOGO_TYPE_CHAFA,
+            NULL
+        );
     }
     else if(strncasecmp(key, "--logo-color-", 13) == 0 && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
     {
@@ -929,6 +943,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseCustomValue(data, key, value, true);
     else if(strcasecmp(key, "--set-keyless") == 0)
         optionParseCustomValue(data, key, value, false);
+    else if(strcasecmp(key, "--binary-prefix") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.binaryPrefixType,
+            "iec", FF_BINARY_PREFIX_TYPE_IEC,
+            "si", FF_BINARY_PREFIX_TYPE_SI,
+            "jedec", FF_BINARY_PREFIX_TYPE_JEDEC,
+            NULL
+        );
+    }
 
     ////////////////////////////////
     //Format + Key + Error options//
@@ -1210,25 +1233,13 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.publicIpTimeout = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--gl") == 0)
     {
-        if(value == NULL)
-        {
-            fprintf(stderr, "Error: usage: %s <type>\n", key);
-            exit(491);
-        }
-
-        if(strcasecmp(value, "auto") == 0)
-            instance->config.glType = FF_GL_TYPE_AUTO;
-        else if(strcasecmp(value, "egl") == 0)
-            instance->config.glType = FF_GL_TYPE_EGL;
-        else if(strcasecmp(value, "glx") == 0)
-            instance->config.glType = FF_GL_TYPE_GLX;
-        else if(strcasecmp(value, "osmesa") == 0)
-            instance->config.glType = FF_GL_TYPE_OSMESA;
-        else
-        {
-            fprintf(stderr, "Error: unknown gl type: %s\n", value);
-            exit(492);
-        }
+        optionParseEnum(key, value, &instance->config.glType,
+            "auto", FF_GL_TYPE_AUTO,
+            "egl", FF_GL_TYPE_EGL,
+            "glx", FF_GL_TYPE_GLX,
+            "osmesa", FF_GL_TYPE_OSMESA,
+            NULL
+        );
     }
 
     //////////////////

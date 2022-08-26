@@ -146,6 +146,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
     instance->config.escapeBedrock = true;
+    instance->config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
     instance->config.glType = FF_GL_TYPE_AUTO;
     instance->config.pipe = false;
     instance->config.multithreading = true;
