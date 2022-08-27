@@ -1064,6 +1064,45 @@ static const FFlogo* getLogoMintOld()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoMsys2()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("msys2")
+    FF_LOGO_LINES(
+        "$2                 ...\n"
+        "              5GB###GJ.             !YPGGGG\n"
+        "              7@@@@@@@B.          :G@@@@@@@\n"
+        "              7@@@@@@@@Y         ~&@@@@@@@@$3YJYY5YY?L\n"
+        "             $2!@@@@@@@@@@^       ^&@@@@@@@$3#PP555555PBY\n"
+        "            $2~&@@@@@@@@@@?      ^&@@@@@@$3#5YY5YYYYYYYY#7\n"
+        "           $2^&@@@@@@@@@@@B     :#@@@@@@@$3G5BBYGPYYYYYY#J\n"
+        "          $2^#@@@&J#@@@@@@@~   .B@@@@@@@@@@@P $3?#YYYYYPB.\n"
+        "         $2:#@@@@7 G@@@@@@@J   P@@@#!&@@@@@@G$3.GGYYYYGB^\n"
+        "        $2:#@@@@J  Y@@@@@@@B  5@@@&:.&@@@@@@&$3BBYYY5B5.\n"
+        "       $2:#@@@@Y   !@@@@@@@@!Y@@@&~ .#@@@@@@$3GYYYYYBP  JP~\n"
+        "      $2:#@@@@P    :&@@@@@@@@@@@&~   B@@@@@$3#5YYYYYPGPGPGG\n"
+        "     $2^#@@@@G.     P@@@@@@@@@@@!    P@@@@$3GYYYYYYYYYYYYBY\n"
+        "    $2^#@@@@B:      ^@@@@@@@@@@7     !@@@$3#GGGGGGGPPPP5GB:\n"
+        "   $2!&@@@@B:        Y@@@@@@@@?       P@@@@@@@@@&?  $3^PY:\n"
+        "  $27&@@@@5.          P@@@@@@?         P@@@@@@@@@B\n"
+        " Y@@@&P!             5@@@@7           7G@@@@@&P~\n"
+        ".JJ?~:                ^JY~              ^!5J!^:\n"
+        "                             $1:@P5#B. #G  7&^ :@P5#B.\n"
+        "                             !&P^.   ?@~ #P  !&P^.  \n"
+        "                              .?BG!   #G5@~   .?BG! \n"
+        "                               :.B@.  7@@5     :.B@.\n"
+        "                             !PYY5Y   :&@^   !PYY5Y \n"
+        "                                      ~@Y\n"
+        "                                      !5:"
+    )
+    FF_LOGO_COLORS(
+        "35", //magenta
+        "37", //white
+        "31" //red
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoNixOS()
 {
     FF_LOGO_INIT
@@ -1667,6 +1706,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoMint,
         getLogoMintSmall,
         getLogoMintOld,
+        getLogoMsys2,
         getLogoNixOS,
         getLogoNixOsOld,
         getLogoNixOsSmall,
