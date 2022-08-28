@@ -122,11 +122,14 @@ static double pciGetTemperatur(const FFinstance* instance, uint16_t deviceClass)
     return 0.0 / 0.0; //NaN
 }
 
-static void getAMDfromDRM(FFGPUResult* result, struct pci_dev* dev)
+static void getAMDfromDRM(FFGPUResult* result, struct pci_dev* dev, u8(*ffpci_read_byte)(struct pci_dev*, int))
 {
+    //Older versions don't support PCI_FILL_CLASS_EXT
+    u8 revision = ffpci_read_byte(dev, PCI_REVISION_ID);
+
     FFstrbuf query;
     ffStrbufInit(&query);
-    ffStrbufAppendF(&query, "%X, %X,", dev->device_id, dev->rev_id);
+    ffStrbufAppendF(&query, "%X, %X,", dev->device_id, revision);
 
     ffParsePropFile("/usr/share/libdrm/amdgpu.ids", query.chars, &result->name);
 
@@ -151,6 +154,7 @@ static bool pciPrintGPUs(FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_fill_info, false)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_lookup_name, false)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_get_param, false)
+    FF_LIBRARY_LOAD_SYMBOL(pci, pci_read_byte, false)
     FF_LIBRARY_LOAD_SYMBOL(pci, pci_cleanup, false)
 
     FFlist results;
@@ -163,7 +167,7 @@ static bool pciPrintGPUs(FFinstance* instance)
     struct pci_dev* dev;
     for (dev=pacc->devices; dev; dev=dev->next)
     {
-        ffpci_fill_info(dev, PCI_FILL_IDENT | PCI_FILL_CLASS | PCI_FILL_CLASS_EXT);
+        ffpci_fill_info(dev, PCI_FILL_IDENT | PCI_FILL_CLASS);
         char class[1024];
         ffpci_lookup_name(pacc, class, sizeof(class), PCI_LOOKUP_CLASS, dev->device_class);
         if(
@@ -181,7 +185,7 @@ static bool pciPrintGPUs(FFinstance* instance)
             //Name
             ffStrbufInitA(&result->name, 256);
             if(ffStrbufIgnCaseCompS(&result->vendor, FF_PCI_VENDOR_AMD) == 0)
-                getAMDfromDRM(result, dev);
+                getAMDfromDRM(result, dev, ffpci_read_byte);
             if(result->name.length == 0)
             {
                 ffpci_lookup_name(pacc, result->name.chars, (int) ffStrbufGetFree(&result->name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
