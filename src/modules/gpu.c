@@ -2,6 +2,7 @@
 #include "common/printing.h"
 #include "common/caching.h"
 #include "common/parsing.h"
+#include "common/properties.h"
 #include "detection/temps.h"
 #include "detection/vulkan.h"
 
@@ -10,14 +11,18 @@
 #define FF_GPU_MODULE_NAME "GPU"
 #define FF_GPU_NUM_FORMAT_ARGS 6
 
+#define FF_PCI_VENDOR_AMD "Advanced Micro Devices, Inc. [AMD/ATI]"
+#define FF_PCI_VENDOR_NVIDIA "NVIDIA Corporation"
+#define FF_PCI_VENDOR_INTEL "Intel Corporation"
+
 static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, FFGPUResult* result)
 {
     const char* vendorPretty;
-    if(ffStrbufIgnCaseCompS(&result->vendor, "Advanced Micro Devices, Inc. [AMD/ATI]") == 0)
-        vendorPretty = "AMD ATI";
-    else if(ffStrbufIgnCaseCompS(&result->vendor, "NVIDIA Corporation") == 0)
+    if(ffStrbufIgnCaseCompS(&result->vendor, FF_PCI_VENDOR_AMD) == 0)
+        vendorPretty = "AMD/ATI";
+    else if(ffStrbufIgnCaseCompS(&result->vendor, FF_PCI_VENDOR_NVIDIA) == 0)
         vendorPretty = "Nvidia";
-    else if(ffStrbufIgnCaseCompS(&result->vendor, "Intel Corporation") == 0)
+    else if(ffStrbufIgnCaseCompS(&result->vendor, FF_PCI_VENDOR_INTEL) == 0)
         vendorPretty = "Intel";
     else
         vendorPretty = result->vendor.chars;
@@ -117,6 +122,26 @@ static double pciGetTemperatur(const FFinstance* instance, uint16_t deviceClass)
     return 0.0 / 0.0; //NaN
 }
 
+static void getAMDfromDRM(FFGPUResult* result, struct pci_dev* dev)
+{
+    FFstrbuf query;
+    ffStrbufInit(&query);
+    ffStrbufAppendF(&query, "%X, %X,", dev->device_id, dev->rev_id);
+
+    ffParsePropFile("/usr/share/libdrm/amdgpu.ids", query.chars, &result->name);
+
+    if(ffStrbufStartsWithIgnCaseS(&result->name, "AMD ") || ffStrbufStartsWithIgnCaseS(&result->name, "ATI "))
+        ffStrbufSubstrAfter(&result->name, 3);
+
+    const char* removeStrings[] = {
+        " (TM)", "(TM)",
+        " Graphics Adapter", " Graphics", " Series", " Edition"
+    };
+    ffStrbufRemoveStringsA(&result->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
+
+    ffStrbufDestroy(&query);
+}
+
 static bool pciPrintGPUs(FFinstance* instance)
 {
     FF_LIBRARY_LOAD(pci, instance->config.libPCI, false, "libpci.so", 4)
@@ -138,7 +163,7 @@ static bool pciPrintGPUs(FFinstance* instance)
     struct pci_dev* dev;
     for (dev=pacc->devices; dev; dev=dev->next)
     {
-        ffpci_fill_info(dev, PCI_FILL_IDENT | PCI_FILL_CLASS);
+        ffpci_fill_info(dev, PCI_FILL_IDENT | PCI_FILL_CLASS | PCI_FILL_CLASS_EXT);
         char class[1024];
         ffpci_lookup_name(pacc, class, sizeof(class), PCI_LOOKUP_CLASS, dev->device_class);
         if(
@@ -148,23 +173,30 @@ static bool pciPrintGPUs(FFinstance* instance)
         ) {
             FFGPUResult* result = ffListAdd(&results);
 
+            //Vendor
             ffStrbufInitA(&result->vendor, 256);
             ffpci_lookup_name(pacc, result->vendor.chars, (int) ffStrbufGetFree(&result->vendor), PCI_LOOKUP_VENDOR, dev->vendor_id, dev->device_id);
             ffStrbufRecalculateLength(&result->vendor);
 
+            //Name
             ffStrbufInitA(&result->name, 256);
-            ffpci_lookup_name(pacc, result->name.chars, (int) ffStrbufGetFree(&result->name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
-            ffStrbufRecalculateLength(&result->name);
-
-            ffStrbufInit(&result->driver);
-            result->temperature = 0;
-
-            //We only need it for the format string, so don't detect it if it isn't needed
-            if(instance->config.gpu.outputFormat.length > 0)
+            if(ffStrbufIgnCaseCompS(&result->vendor, FF_PCI_VENDOR_AMD) == 0)
+                getAMDfromDRM(result, dev);
+            if(result->name.length == 0)
             {
-                pciGetDriver(dev, &result->driver, ffpci_get_param);
-                result->temperature = pciGetTemperatur(instance, dev->device_class);
+                ffpci_lookup_name(pacc, result->name.chars, (int) ffStrbufGetFree(&result->name), PCI_LOOKUP_DEVICE, dev->vendor_id, dev->device_id);
+                ffStrbufRecalculateLength(&result->name);
             }
+
+            //Driver
+            ffStrbufInit(&result->driver);
+            if(instance->config.gpu.outputFormat.length > 0)
+                pciGetDriver(dev, &result->driver, ffpci_get_param);
+
+            //Temperature
+            result->temperature = 0;
+            if(instance->config.gpu.outputFormat.length > 0)
+                result->temperature = pciGetTemperatur(instance, dev->device_class);
         };
     }
 
