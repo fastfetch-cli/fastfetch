@@ -19,16 +19,16 @@ void ffPrintVulkan(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan.key);
 
-        if(vulkan->driver.length > 0)
+        if(vulkan->apiVersion.length > 0)
         {
-            printf("%s (driver)", vulkan->driver.chars);
+            ffStrbufWriteTo(&vulkan->apiVersion, stdout);
 
-            if(vulkan->apiVersion.length > 0)
-                fputs(", ", stdout);
+            if(vulkan->driver.length > 0)
+                fputs(" - ", stdout);
         }
 
-        if(vulkan->apiVersion.length > 0)
-            printf("%s (api version)", vulkan->apiVersion.chars);
+        if(vulkan->driver.length > 0)
+            ffStrbufWriteTo(&vulkan->driver, stdout);
 
         putchar('\n');
     }

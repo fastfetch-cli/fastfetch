@@ -1,9 +1,18 @@
-# fastfetch
+# <center> Fastfetch </center>
 
-fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in c to achieve much better performance, in return only Linux and Android are supported. It also uses mechanisms like multithreading and caching to finish as fast as possible.  
-  
-The output on my personal machine with default configurations looks like this:
-<img src="screenshots/example.png" alt="example output" width="100%"/>  
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in c to achieve much better performance, in return only Linux and Android are supported. It also uses mechanisms like multithreading and caching to finish as fast as possible.  
+
+<div style="display: flex; flex-wrap: wrap">
+    <div style="flex: 50%; max-width: 49%; margin: 4px">
+        <img src="screenshots/example1.png" style="vertical-align: middle; width: 100%; margin: 4px"/>
+        <img src="screenshots/example4.png" style="vertical-align: middle; width: 100%; margin: 4px"/>
+    </div>
+    <div style="flex: 50%; max-width: 49%; margin: 4px">    
+        <img src="screenshots/example2.png" style="vertical-align: middle; width: 100%; margin: 4px"/>
+        <img src="screenshots/example3.png" style="vertical-align: middle; width: 100%; margin: 4px"/>
+        <img src="screenshots/example5.png" style="vertical-align: middle; height: 15%; margin: 4px"/>
+    </div>
+</div>
 
 ## Customization
 
@@ -11,8 +20,8 @@ With customization and speed being two competing goals, this project actually bu
 The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
 The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
 At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.  
-  
-There are some presets defined for fastfech in [`presets`](presets), you can can load them with `--load-config`. They may also serve as a good example for format arguments.
+
+There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
 ## Dependencies
 
@@ -45,12 +54,12 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Song, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
+Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Disk, Battery, Player, Media, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
 ```
 
 ##### Logos
 ```
-AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Debian, Devuan, Deepin, Endeavour, Fedora, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, Manjaro, Mint, MSYS2 NixOS, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Ubuntu, Void, Zorin
+AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Debian, Devuan, Deepin, Endeavour, Fedora, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, Manjaro, Mint, MSYS2, NixOS, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Ubuntu, Void, Zorin
 ```
 * Most of the logos have a small variant. Access it by appending _small to the logo name.
 * Some logos have an old variant. Access it by appending _old to the logo name.

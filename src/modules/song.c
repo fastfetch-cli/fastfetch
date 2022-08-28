@@ -4,7 +4,7 @@
 
 #include <ctype.h>
 
-#define FF_SONG_MODULE_NAME "Song"
+#define FF_SONG_MODULE_NAME "Media"
 #define FF_SONG_NUM_FORMAT_ARGS 5
 
 static bool shouldIgoreChar(char c)
@@ -55,9 +55,9 @@ void ffPrintSong(FFinstance* instance)
     FFstrbuf songPretty;
     ffStrbufInitCopy(&songPretty, &media->song);
     const char* removeStrings[] = {
-        "(Official Music Video)", "(Official Video)", "(Music Video)",
-        "[Official Music Video]", "[Official Video]", "[Music Video]",
-        "| Official Music Video", "| Official Video", "| Music Video",
+        "(Official Music Video)", "(Official Video)", "(Music Video)", "(Official HD Video)",
+        "[Official Music Video]", "[Official Video]", "[Music Video]", "[Official HD Video]",
+        "| Official Music Video", "| Official Video", "| Music Video", "| Official HD Video",
         "[Official Audio]", "[Audio]", "(Audio)", "| Official Audio", "| Audio", "| OFFICIAL AUDIO",
         "(Lyric Video)", "(Official Lyric Video)", "(Lyrics)",
         "[Lyric Video]", "[Official Lyric Video]", "[Lyrics]",

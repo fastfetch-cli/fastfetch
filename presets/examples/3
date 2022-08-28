@@ -1,0 +1,7 @@
+# Load with --load-config example/3
+
+--logo debian_small
+--structure Vulkan:OpenGL:OpenCL:Memory:Disk:LocalIP
+--binary-prefix si
+--localip-show-loop false
+--disk-folders /:/home:/boot:/efi

@@ -1364,7 +1364,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintPublicIp(instance);
     else if(strcasecmp(line, "player") == 0)
         ffPrintPlayer(instance);
-    else if(strcasecmp(line, "song") == 0)
+    else if(strcasecmp(line, "media") == 0 || strcasecmp(line, "song") == 0)
         ffPrintSong(instance);
     else if(strcasecmp(line, "datetime") == 0)
         ffPrintDateTime(instance);

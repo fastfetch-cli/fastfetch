@@ -15,6 +15,7 @@ Icons
 Kernel
 Locale
 LocalIP
+Media
 Memory
 OS
 OpenCL
@@ -26,7 +27,6 @@ PublicIP
 Resolution
 Separator
 Shell
-Song
 Terminal
 TerminalFont
 Theme

@@ -7,6 +7,7 @@
 #ifdef FF_HAVE_OPENCL
 #include "common/library.h"
 #include "common/parsing.h"
+#include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100
 #include <CL/cl.h>
@@ -42,6 +43,11 @@ static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)
     if(!ffStrSet(version))
         return "clGetDeviceInfo returned NULL or empty string";
 
+    const char* versionPretty = version;
+    const char* prefix = "OpenCL ";
+    if(strncasecmp(version, prefix, sizeof(prefix) - 1) == 0)
+        versionPretty = version + sizeof(prefix) - 1;
+
     char device[128];
     data->ffclGetDeviceInfo(deviceID, CL_DEVICE_NAME, sizeof(device), device, NULL);
 
@@ -51,12 +57,12 @@ static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)
     if(instance->config.openCL.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL.key);
-        puts(version);
+        puts(versionPretty);
     }
     else
     {
         ffPrintFormat(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL, FF_OPENCL_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRING, version},
+            {FF_FORMAT_ARG_TYPE_STRING, versionPretty},
             {FF_FORMAT_ARG_TYPE_STRING, device},
             {FF_FORMAT_ARG_TYPE_STRING, vendor}
         });

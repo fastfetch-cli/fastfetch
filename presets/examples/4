@@ -1,0 +1,7 @@
+# Load with --load-config examples/4
+
+--color blue
+--logo arch_small
+--logo-padding-right 1
+--separator "  "
+--structure Date:Time:Break:Player:Media
