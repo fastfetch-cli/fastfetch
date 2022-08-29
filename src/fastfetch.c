@@ -909,7 +909,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--file") == 0)
     {
-        optionCheckString(key, value, &instance->config.logo.source);
+        optionParseString(key, value, &instance->config.logo.source);
         instance->config.logo.type = FF_LOGO_TYPE_FILE;
     }
     else if(strcasecmp(key, "--raw") == 0)
