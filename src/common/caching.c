@@ -5,6 +5,9 @@
 
 #include <stdlib.h>
 
+#define FF_CACHE_VERSION_NAME "cacheversion"
+#define FF_CACHE_VERSION_EXTENSION "ffv"
+
 #define FF_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_CACHE_SPLIT_EXTENSION "ffcs"
 
@@ -44,9 +47,11 @@ void ffCacheValidate(FFinstance* instance)
 {
     FFstrbuf content;
     ffStrbufInit(&content);
-    readCacheFile(instance, "cacheversion", "ffv", &content);
+    readCacheFile(instance, FF_CACHE_VERSION_NAME, FF_CACHE_VERSION_EXTENSION, &content);
 
-    bool isSameVersion = ffStrbufCompS(&content, FASTFETCH_PROJECT_VERSION) == 0;
+    const char exactVersion[] = FASTFETCH_PROJECT_VERSION FASTFETCH_PROJECT_VERSION_TWEAK;
+
+    bool isSameVersion = ffStrbufCompS(&content, exactVersion) == 0;
     ffStrbufDestroy(&content);
     if(isSameVersion)
         return;
@@ -54,9 +59,9 @@ void ffCacheValidate(FFinstance* instance)
     instance->config.recache = true;
 
     FFstrbuf version;
-    ffStrbufInitA(&version, sizeof(FASTFETCH_PROJECT_VERSION));
-    ffStrbufAppendS(&version, FASTFETCH_PROJECT_VERSION);
-    writeCacheFile(instance, "cacheversion", "ffv", &version);
+    ffStrbufInitA(&version, sizeof(exactVersion));
+    ffStrbufAppendS(&version, exactVersion);
+    writeCacheFile(instance, FF_CACHE_VERSION_NAME, FF_CACHE_VERSION_EXTENSION, &version);
     ffStrbufDestroy(&version);
 }
 
