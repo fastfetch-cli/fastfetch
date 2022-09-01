@@ -19,7 +19,7 @@
 --terminal-font-format "Raw: {}; Name: {}; Size: {}; Styles: {}; Pretty: {}"
 --cpu-format "Name: {}; Pretty: {}; Vendor: {}; Logical online: {}; Logical configured: {}; Physical: {}; Cores: {}; temperature: {}; bios: {}; scaling max: {}; scaling min: {}; info max: {}; info min: {}; cpuinfo: {}; frequency: {}"
 --cpu-usage-format "Percentage: {}"
---gpu-format "Vendor: {}; Vendor pretty: {}; Name: {}; Name pretty: {}; Driver: {}; Temperature: {}"
+--gpu-format "Vendor: {}; Name: {}; Driver: {}; Temperature: {}"
 --memory-format "Percentage: {}; Used KiB: {}, Total KiB: {}, Used MiB: {}, Total MiB: {}, Used GiB: {}, Total GiB: {}"
 --disk-format "Used: {}; Total: {}; Files: {}; Percentage: {}"
 --battery-format "Manufactor: {}; Model: {}; Technology: {}; Capacaty: {}; Status: {}"

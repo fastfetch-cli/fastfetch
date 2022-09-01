@@ -5,10 +5,12 @@
 
 #include "fastfetch.h"
 
+#define FF_GPU_TEMP_UNSET (0/0.0)
+
 typedef struct FFGPUResult
 {
     FFstrbuf vendor;
-    FFstrbuf name;
+    FFstrbuf device;
     FFstrbuf driver;
     double temperature;
 } FFGPUResult;

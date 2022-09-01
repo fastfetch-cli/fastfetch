@@ -31,9 +31,9 @@ static double getGhz(const char* policyFile, const char* cpuFile)
     return herz / 1000.0; //to GHz
 }
 
-static double detectCPUTemp(const FFinstance* instance)
+static double detectCPUTemp()
 {
-    const FFTempsResult *temps = ffDetectTemps(instance);
+    const FFTempsResult *temps = ffDetectTemps();
 
     for(uint32_t i = 0; i < temps->values.length; i++)
     {
@@ -166,7 +166,7 @@ void ffPrintCPU(FFinstance* instance)
 
     double cpuTemp;
     if(instance->config.cpu.outputFormat.length > 0)
-        cpuTemp = detectCPUTemp(instance);
+        cpuTemp = detectCPUTemp();
 
     FFstrbuf cpu;
     ffStrbufInitA(&cpu, 128);

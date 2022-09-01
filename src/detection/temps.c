@@ -63,10 +63,8 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     return value->name.length > 0 || value->deviceClass.length > 0;
 }
 
-const FFTempsResult* ffDetectTemps(const FFinstance* instance)
+const FFTempsResult* ffDetectTemps()
 {
-    FF_UNUSED(instance)
-
     static FFTempsResult result;
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     static bool init = false;

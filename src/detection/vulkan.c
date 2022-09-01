@@ -177,10 +177,10 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
 
         FFGPUResult* gpu = ffListAdd(&result->devices);
         ffStrbufInit(&gpu->vendor);
-        ffStrbufInit(&gpu->name);
+        ffStrbufInit(&gpu->device);
         ffStrbufInit(&gpu->driver);
         gpu->temperature = 0.0 / 0.0; //NaN, no way to detect temperature using vulkan
-        ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
+        ffStrbufAppendS(&gpu->device, physicalDeviceProperties.properties.deviceName);
     }
 
     //If the highest device version is lower than the instance version, use it as our vulkan version

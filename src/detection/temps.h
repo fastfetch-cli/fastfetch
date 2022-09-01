@@ -17,6 +17,6 @@ typedef struct FFTempsResult
     FFlist values; //List of FFTempValue
 } FFTempsResult;
 
-const FFTempsResult* ffDetectTemps(const FFinstance* instance);
+const FFTempsResult* ffDetectTemps();
 
 #endif

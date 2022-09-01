@@ -273,11 +273,9 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "gpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("gpu", "{2} {4}", 6,
+        constructAndPrintCommandHelpFormat("gpu", "{} {}", 4,
             "GPU vendor",
-            "GPU vendor pretty",
             "GPU name",
-            "GPU name pretty",
             "GPU driver",
             "GPU temperature"
         );
