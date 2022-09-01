@@ -98,11 +98,11 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
         ffStrbufSetS(&gpu->vendor, FF_PCI_VENDOR_NAME_NVIDIA);
 }
 
-static void drmDetectDeviceName(FFGPUResult* gpu, struct pci_dev* device)
+static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     FFstrbuf query;
     ffStrbufInit(&query);
-    ffStrbufAppendF(&query, "%X, %X,", device->device_id, device->rev_id);
+    ffStrbufAppendF(&query, "%X, %X,", device->device_id, pci->ffpci_read_byte(device, PCI_REVISION_ID));
 
     ffParsePropFile("/usr/share/libdrm/amdgpu.ids", query.chars, &gpu->device);
 
@@ -122,7 +122,7 @@ static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 {
     if(ffStrbufCompS(&gpu->vendor, FF_PCI_VENDOR_NAME_AMD) == 0)
     {
-        drmDetectDeviceName(gpu, device);
+        drmDetectDeviceName(gpu, pci, device);
         if(gpu->device.length > 0)
             return;
     }
@@ -189,7 +189,6 @@ static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* devic
 
     device->vendor_id = pci->ffpci_read_word(device, PCI_VENDOR_ID);
     device->device_id = pci->ffpci_read_word(device, PCI_DEVICE_ID);
-    device->rev_id    = pci->ffpci_read_byte(device, PCI_REVISION_ID);
 
     FFGPUResult* gpu = ffListAdd(results);
 
