@@ -104,14 +104,12 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufInit(&query);
     ffStrbufAppendF(&query, "%X, %X,", device->device_id, pci->ffpci_read_byte(device, PCI_REVISION_ID));
 
-    ffParsePropFile("/usr/share/libdrm/amdgpu.ids", query.chars, &gpu->device);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/libdrm/amdgpu.ids", query.chars, &gpu->device);
 
     ffStrbufDestroy(&query);
 
-    if(ffStrbufStartsWithIgnCaseS(&gpu->device, "AMD ") || ffStrbufStartsWithIgnCaseS(&gpu->device, "ATI "))
-        ffStrbufSubstrAfter(&gpu->device, 3);
-
     const char* removeStrings[] = {
+        "AMD ", "ATI ",
         " (TM)", "(TM)",
         " Graphics Adapter", " Graphics", " Series", " Edition"
     };
