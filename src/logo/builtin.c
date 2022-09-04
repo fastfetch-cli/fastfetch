@@ -938,6 +938,39 @@ static const FFlogo* getLogoLinux()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoMacOS()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("macos", "mac", "apple", "darwin", "osx")
+    FF_LOGO_LINES(
+        "                     $1c.'\n"
+        "                 ,xNMM.\n"
+        "               .OMMMMo\n"
+        "               lMM\"\n"
+        "     .;loddo:.  .olloddol;.\n"
+        "   cKMMMMMMMMMMNWMMMMMMMMMM0:\n"
+        " $2.KMMMMMMMMMMMMMMMMMMMMMMMWd.\n"
+        " XMMMMMMMMMMMMMMMMMMMMMMMX.\n"
+        "$3;MMMMMMMMMMMMMMMMMMMMMMMM:\n"
+        ":MMMMMMMMMMMMMMMMMMMMMMMM:\n"
+        ".MMMMMMMMMMMMMMMMMMMMMMMMX.\n"
+        " kMMMMMMMMMMMMMMMMMMMMMMMMWd.\n"
+        " $4'XMMMMMMMMMMMMMMMMMMMMMMMMMMk\n"
+        "  'XMMMMMMMMMMMMMMMMMMMMMMMMK.\n"
+        "    $5kMMMMMMMMMMMMMMMMMMMMMMd\n"
+        "     ;KMMMMMMMWXXWMMMMMMMk.\n"
+        "       \"cooc*\"    \"*coo'\""
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "33", //yellow
+        "31", //red
+        "35", //magenta
+        "34" //blue
+    )
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoManjaro()
 {
     FF_LOGO_INIT
@@ -1701,6 +1734,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoKubuntu,
         getLogoLangitKetujuh,
         getLogoLinux,
+        getLogoMacOS,
         getLogoManjaro,
         getLogoManjaroSmall,
         getLogoMint,
