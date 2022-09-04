@@ -43,6 +43,8 @@ find_package(Threads REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 
+include(CheckIncludeFile)
+
 ####################
 # Compiler options #
 ####################
@@ -212,6 +214,8 @@ set(LIBFASTFETCH_SRC
 
 if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
+        src/detection/host/host_apple.c
+        src/detection/os/os_apple.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -230,6 +234,12 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+
+CHECK_INCLUDE_FILE("sys/sysinfo.h" HAVE_SYSINFO_H)
+if(HAVE_SYSINFO_H)
+    # needs to be public, because changes fastfech.h ABI
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SYSINFO_H)
+endif()
 
 if(ENABLE_LIBPCI)
     pkg_check_modules(LIBPCI libpci)

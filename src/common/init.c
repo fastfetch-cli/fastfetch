@@ -110,7 +110,10 @@ static void initState(FFstate* state)
     state->keysHeight = 0;
     state->passwd = getpwuid(getuid());
     uname(&state->utsname);
-    sysinfo(&state->sysinfo);
+
+    #if FF_HAVE_SYSINFO_H
+        sysinfo(&state->sysinfo);
+    #endif
 
     initConfigDirs(state);
     initCacheDir(state);

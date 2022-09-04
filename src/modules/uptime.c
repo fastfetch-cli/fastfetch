@@ -6,10 +6,16 @@
 
 void ffPrintUptime(FFinstance* instance)
 {
-    uint32_t days    = (uint32_t)  instance->state.sysinfo.uptime / 86400;
-    uint32_t hours   = (uint32_t) (instance->state.sysinfo.uptime - (days * 86400)) / 3600;
-    uint32_t minutes = (uint32_t) (instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600)) / 60;
-    uint32_t seconds = (uint32_t)  instance->state.sysinfo.uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
+    #if FF_HAVE_SYSINFO_H
+        uint64_t uptime = (uint64_t) instance->state.sysinfo.uptime;
+    #else
+        uint64_t uptime = 0;
+    #endif
+
+    uint32_t days    = (uint32_t)  uptime / 86400;
+    uint32_t hours   = (uint32_t) (uptime - (days * 86400)) / 3600;
+    uint32_t minutes = (uint32_t) (uptime - (days * 86400) - (hours * 3600)) / 60;
+    uint32_t seconds = (uint32_t)  uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
 
     if(instance->config.uptime.outputFormat.length == 0)
     {

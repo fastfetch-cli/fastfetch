@@ -10,7 +10,10 @@
 
 #include <pwd.h>
 #include <sys/utsname.h>
-#include <sys/sysinfo.h>
+
+#if FF_HAVE_SYSINFO_H
+    #include <sys/sysinfo.h>
+#endif
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
@@ -169,7 +172,10 @@ typedef struct FFstate
 
     struct passwd* passwd;
     struct utsname utsname;
-    struct sysinfo sysinfo;
+
+    #if FF_HAVE_SYSINFO_H
+        struct sysinfo sysinfo;
+    #endif
 
     FFlist configDirs;
     FFstrbuf cacheDir;
