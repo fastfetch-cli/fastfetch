@@ -13,13 +13,11 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     if(os->name.length > 0)
         ffStrbufAppend(result, &os->name);
     else if(os->prettyName.length > 0)
-        ffStrbufAppend(result, &os->name);
+        ffStrbufAppend(result, &os->prettyName);
     else if(os->id.length > 0)
         ffStrbufAppend(result, &os->id);
-    else if(os->systemName.length > 0)
-        ffStrbufAppend(result, &os->systemName);
     else
-        ffStrbufAppendS(result, "Linux");
+        ffStrbufAppend(result, &os->systemName);
 
     //Append version if it is missing
     if(os->versionID.length > 0 && ffStrbufFirstIndex(result, &os->versionID) == result->length)
@@ -84,7 +82,7 @@ void ffPrintOS(FFinstance* instance)
 {
     const FFOSResult* os = ffDetectOS(instance);
 
-    if(os->name.length == 0 && os->prettyName.length == 0)
+    if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0 && os->systemName.length == 0)
     {
         ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, "Could not detect OS");
         return;

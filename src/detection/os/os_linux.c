@@ -128,7 +128,6 @@ static void detectOS(FFOSResult* os, const FFinstance* instance)
 
 void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
 {
-    ffStrbufInit(&os->systemName);
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->id);
@@ -139,6 +138,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->versionID);
     ffStrbufInit(&os->codename);
     ffStrbufInit(&os->buildID);
+    ffStrbufInit(&os->systemName);
     ffStrbufInit(&os->architecture);
 
     ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);

@@ -26,6 +26,12 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->buildID);
     ffSettingsGetAndroidProperty("ro.build.id", &os->buildID);
 
+    ffStrbufInit(&os->systemName);
+    ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
+
+    ffStrbufInit(&os->architecture);
+    ffStrbufSetS(&os->architecture, instance->state.utsname.machine);
+
     ffStrbufInitA(&os->idLike, 0);
     ffStrbufInitA(&os->variant, 0);
     ffStrbufInitA(&os->variantID, 0);
