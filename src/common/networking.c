@@ -28,7 +28,7 @@ void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, F
     {
         struct timeval timev;
         timev.tv_sec = 0;
-        timev.tv_usec = timeout * 1000; //milliseconds to microseconds
+        timev.tv_usec = (__typeof__(timev.tv_usec)) (timeout * 1000); //milliseconds to microseconds
         setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
 
