@@ -137,6 +137,10 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("TMUX_TMPDIR") != NULL
     )) term = "Termux";
 
+    //MacOS
+    if(!ffStrSet(term))
+        term = getenv("TERM_PROGRAM");
+
     //Normal Terminal
     if(!ffStrSet(term))
         term = getenv("TERM");

@@ -357,4 +357,21 @@ void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
     result->length += (uint32_t) __system_property_get(propName, result->chars + result->length);
     result->chars[result->length] = '\0';
 }
-#endif
+#endif //__ANDROID__
+
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+void ffSettingsGetAppleProperty(const char* propName, FFstrbuf* result)
+{
+    size_t neededLength;
+    if(sysctlbyname(propName, NULL, &neededLength, NULL, 0) != 0 || neededLength == 0)
+        return;
+
+    ffStrbufEnsureFree(result, (uint32_t) neededLength);
+
+    if(sysctlbyname(propName, result->chars + result->length, &neededLength, NULL, 0) == 0)
+        result->length += (uint32_t) neededLength;
+
+    result->chars[result->length] = '\0';
+}
+#endif //__APPLE__

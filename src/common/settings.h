@@ -36,4 +36,8 @@ int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, cons
 void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #endif
 
+#ifdef __APPLE__
+void ffSettingsGetAppleProperty(const char* propName, FFstrbuf* result);
+#endif
+
 #endif

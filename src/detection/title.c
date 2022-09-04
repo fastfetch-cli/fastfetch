@@ -32,6 +32,7 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
 
     ffStrbufInitA(&result.fqdn, HOST_NAME_MAX);
 
+    #ifndef __APPLE__
     struct addrinfo hints = {0};
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_CANONNAME;
@@ -49,6 +50,7 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
 
         freeaddrinfo(info);
     }
+    #endif
 
     if(result.fqdn.length == 0)
         ffStrbufAppend(&result.fqdn, &result.hostname);

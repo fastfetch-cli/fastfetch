@@ -1,16 +1,40 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 
+#if __APPLE__
+    #include "time.h"
+    #include "sys/sysctl.h"
+#endif
+
 #define FF_UPTIME_MODULE_NAME "Uptime"
 #define FF_UPTIME_NUM_FORMAT_ARGS 4
 
 void ffPrintUptime(FFinstance* instance)
 {
+    uint64_t uptime;
+
     #if FF_HAVE_SYSINFO_H
-        uint64_t uptime = (uint64_t) instance->state.sysinfo.uptime;
+        uptime = (uint64_t) instance->state.sysinfo.uptime;
+    #elif __APPLE__
+        struct timeval bootTime;
+        size_t bootTimeSize = sizeof(bootTime);
+        if(sysctl(
+            (int[]) {CTL_KERN, KERN_BOOTTIME}, 2,
+            &bootTime, &bootTimeSize,
+            NULL, 0
+        ) == 0)
+            uptime = (uint64_t) difftime(time(NULL), bootTime.tv_sec);
+        else
+            uptime = 0;
     #else
-        uint64_t uptime = 0;
+        uptime = 0;
     #endif
+
+    if(uptime == 0)
+    {
+        ffPrintError(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptime, "Uptime could't be detected");
+        return;
+    }
 
     uint32_t days    = (uint32_t)  uptime / 86400;
     uint32_t hours   = (uint32_t) (uptime - (days * 86400)) / 3600;
