@@ -3,10 +3,12 @@
 
 void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
 {
+    FF_UNUSED(instance);
+
     ffStrbufInit(&os->name);
     ffStrbufSetS(&os->name, "Android");
 
-    ffStbrufInit(&os->prettyName);
+    ffStrbufInit(&os->prettyName);
     ffStrbufSetS(&os->prettyName, "Android");
 
     ffStrbufInit(&os->id);
