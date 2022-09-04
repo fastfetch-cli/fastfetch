@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_os
-#define FF_INCLUDED_detection_os
+#ifndef FF_INCLUDED_detection_os_os
+#define FF_INCLUDED_detection_os_os
 
 #include "fastfetch.h"
 

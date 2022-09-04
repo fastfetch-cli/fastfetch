@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef FF_INCLUDED_DETECTION_HOST_host
-#define FF_INCLUDED_DETECTION_HOST_host
+#ifndef FF_INCLUDED_detection_host_host
+#define FF_INCLUDED_detection_host_host
 
 #include "fastfetch.h"
 

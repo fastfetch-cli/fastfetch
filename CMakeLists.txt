@@ -166,6 +166,7 @@ set(LIBFASTFETCH_SRC
     src/detection/title.c
     src/detection/host/host.c
     src/detection/os/os.c
+    src/detection/cpu/cpu.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
     src/detection/displayserver/xcb.c
@@ -216,16 +217,19 @@ if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_apple.c
         src/detection/os/os_apple.c
+        src/detection/cpu/cpu_apple.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_android.c
         src/detection/os/os_android.c
+        src/detection/cpu/cpu_linux.c
     )
 elseif(UNIX)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_linux.c
         src/detection/os/os_linux.c
+        src/detection/cpu/cpu_linux.c
     )
 else()
     message(FATAL_ERROR "Unsupported platform")

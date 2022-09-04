@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <inttypes.h>
 
 static char* CHAR_NULL_PTR = "";
 
@@ -549,6 +550,15 @@ double ffStrbufToDouble(const FFstrbuf* strbuf)
     double value;
     if(sscanf(strbuf->chars, "%lf", &value) != 1)
         return 0.0 / 0.0; //NaN
+
+    return value;
+}
+
+uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
+{
+    uint16_t value;
+    if(sscanf(strbuf->chars, "%"SCNu16, &value) != 1)
+        return defaultValue;
 
     return value;
 }

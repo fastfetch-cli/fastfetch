@@ -99,6 +99,7 @@ void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
 double ffStrbufToDouble(const FFstrbuf* strbuf);
+uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
 
