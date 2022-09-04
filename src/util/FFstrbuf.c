@@ -188,6 +188,19 @@ void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...)
     va_end(arguments);
 }
 
+void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
+{
+    ffStrbufPrependNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value)
+{
+    ffStrbufEnsureFree(strbuf, length);
+    memmove(strbuf->chars + length, strbuf->chars, strbuf->length + 1); // + 1 for the null byte
+    memcpy(strbuf->chars, value, length);
+    strbuf->length += length;
+}
+
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
 {
     ffStrbufClear(strbuf);

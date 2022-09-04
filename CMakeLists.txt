@@ -133,7 +133,7 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 # libfastfetch target #
 #######################
 
-add_library(libfastfetch OBJECT
+set(LIBFASTFETCH_SRC
     src/util/FFstrbuf.c
     src/util/FFlist.c
     src/util/FFvaluestore.c
@@ -163,6 +163,7 @@ add_library(libfastfetch OBJECT
     src/detection/datetime.c
     src/detection/temps.c
     src/detection/title.c
+    src/detection/host/host.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
     src/detection/displayserver/xcb.c
@@ -207,6 +208,25 @@ add_library(libfastfetch OBJECT
     src/modules/colors.c
     src/modules/opengl.c
     src/modules/opencl.c
+)
+
+if(APPLE)
+    list(APPEND LIBFASTFETCH_SRC
+    )
+elseif(ANDROID)
+    list(APPEND LIBFASTFETCH_SRC
+        "src/detection/host/host_android.c"
+    )
+elseif(UNIX)
+    list(APPEND LIBFASTFETCH_SRC
+        "src/detection/host/host_linux.c"
+    )
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()
+
+add_library(libfastfetch OBJECT
+    ${LIBFASTFETCH_SRC}
 )
 
 if(ENABLE_LIBPCI)

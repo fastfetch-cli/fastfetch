@@ -37,7 +37,7 @@ const FFlogo* ffLogoBuiltinGetUnknown()
 static const FFlogo* getLogoNone()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("none", "empty", "")
+    FF_LOGO_NAMES("none", "empty")
     FF_LOGO_LINES("")
     FF_LOGO_COLORS("")
     FF_LOGO_RETURN

@@ -5,6 +5,7 @@
 #include "common/properties.h"
 #include "detection/temps.h"
 #include "detection/vulkan.h"
+#include "detection/host/host.h"
 
 #include <stdlib.h>
 
@@ -266,11 +267,8 @@ void ffPrintGPU(FFinstance* instance)
     if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS))
         return;
 
-    if(
-        getenv("WSLENV") != NULL ||
-        getenv("WSL_DISTRO") != NULL ||
-        getenv("WSL_INTEROP") != NULL
-    ) {
+    if(ffStrbufCompS(&ffDetectHost()->productName, FF_HOST_PRODUCT_NAME_WSL) == 0)
+    {
         ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "WSL doesn't expose senseful GPU names");
         return;
     }

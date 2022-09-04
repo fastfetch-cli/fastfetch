@@ -23,6 +23,9 @@ int main(int argc, char** argv)
     FF_UNUSED(argc, argv)
 
     FFstrbuf strbuf;
+
+    //initA
+
     ffStrbufInitA(&strbuf, 64);
 
     if(strbuf.allocated != 64)
@@ -30,6 +33,8 @@ int main(int argc, char** argv)
 
     if(strbuf.length != 0)
         testFailed(&strbuf, "testSrbuf.length != 0");
+
+    //appendS
 
     ffStrbufAppendS(&strbuf, "123456789");
 
@@ -39,8 +44,12 @@ int main(int argc, char** argv)
     if(strcmp(strbuf.chars, "123456789") != 0)
         testFailed(&strbuf, "strbuf.data != \"123456789\"");
 
+    //startsWithS
+
     if(!ffStrbufStartsWithS(&strbuf, "123"))
         testFailed(&strbuf, "!ffStrbufStartsWithS(&strbuf, \"123\")");
+
+    //removeS
 
     ffStrbufRemoveS(&strbuf, "78");
 
@@ -50,6 +59,8 @@ int main(int argc, char** argv)
     if(strcmp(strbuf.chars, "1234569") != 0)
         testFailed(&strbuf, "strcmp(strbuf.chars, \"123469\") != 0");
 
+    //removeStrings
+
     ffStrbufRemoveStrings(&strbuf, 3, "23", "45", "9");
 
     if(strbuf.length != 2)
@@ -58,5 +69,16 @@ int main(int argc, char** argv)
     if(strcmp(strbuf.chars, "16") != 0)
         testFailed(&strbuf, "strbuf.chars != \"126\"");
 
+    //PrependS
+
+    ffStrbufPrependS(&strbuf, "123");
+
+    if(strbuf.length != 5)
+        testFailed(&strbuf, "strbuf.length != 5");
+
+    if(strcmp(strbuf.chars, "12316") != 0)
+        testFailed(&strbuf, "strbuf.chars != \"12316\"");
+
+    //Success
     puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);
 }
