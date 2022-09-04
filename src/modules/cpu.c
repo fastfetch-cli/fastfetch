@@ -110,8 +110,13 @@ void ffPrintCPU(FFinstance* instance)
     double infoMaxFreq    = getGhz("/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_max_freq", "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
     double infoMinFreq    = getGhz("/sys/devices/system/cpu/cpufreq/policy0/cpuinfo_min_freq", "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq");
 
-    int numProcsOnline = get_nprocs();
-    int numProcsAvailable = get_nprocs_conf();
+    #if FF_HAVE_SYSINFO_H
+        int numProcsOnline = get_nprocs();
+        int numProcsAvailable = get_nprocs_conf();
+    #else
+        int numProcsOnline = 0;
+        int numProcsAvailable = 0;
+    #endif
 
     int physicalCores = 1;
     sscanf(physicalCoresString.chars, "%i", &physicalCores);

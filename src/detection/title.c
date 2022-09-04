@@ -6,6 +6,10 @@
 #include <pthread.h>
 #include <netdb.h>
 
+#ifndef HOST_NAME_MAX
+    #define HOST_NAME_MAX 64
+#endif
+
 const FFTitleResult* ffDetectTitle(const FFinstance* instance)
 {
     static FFTitleResult result;
