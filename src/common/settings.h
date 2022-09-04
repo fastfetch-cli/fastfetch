@@ -38,6 +38,8 @@ void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 
 #ifdef __APPLE__
 void ffSettingsGetAppleProperty(const char* propName, FFstrbuf* result);
+int ffSettingsGetAppleInt(const char* propName, int defaultValue);
+int64_t ffSettingsGetAppleInt64(const char* propName, int64_t defaultValue);
 #endif
 
 #endif

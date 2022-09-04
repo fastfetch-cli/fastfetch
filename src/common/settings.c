@@ -374,4 +374,22 @@ void ffSettingsGetAppleProperty(const char* propName, FFstrbuf* result)
 
     result->chars[result->length] = '\0';
 }
+
+int ffSettingsGetAppleInt(const char* propName, int defaultValue)
+{
+    int result;
+    size_t neededLength = sizeof(result);
+    if(sysctlbyname(propName, &result, &neededLength, NULL, 0) != 0)
+        return defaultValue;
+    return result;
+}
+
+int64_t ffSettingsGetAppleInt64(const char* propName, int64_t defaultValue)
+{
+    int64_t result;
+    size_t neededLength = sizeof(result);
+    if(sysctlbyname(propName, &result, &neededLength, NULL, 0) != 0)
+        return defaultValue;
+    return result;
+}
 #endif //__APPLE__

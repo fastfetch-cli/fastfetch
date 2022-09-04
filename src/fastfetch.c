@@ -247,22 +247,15 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "cpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("cpu", "{2} ({7}) @ {15}GHz", 15,
-            "CPU name",
-            "Prettified CPU name",
-            "CPU Vendor name (Vendor ID)",
-            "CPU logical core count online",
-            "CPU logical core count configured",
-            "CPU physical core count",
-            "Always set core count",
-            "CPU package temperature",
-            "frequency bios limit",
-            "frequency scaling max",
-            "frequency scaling min",
-            "frequency info max",
-            "frequency info min",
-            "frequeny from /proc/cpuinfo",
-            "most accurate frequeny"
+        constructAndPrintCommandHelpFormat("cpu", "{1} ({5}) @ {7}GHz", 8,
+            "Name",
+            "Vendor",
+            "Physical core count",
+            "Logical core count",
+            "Online core count",
+            "Min frequency",
+            "Max frequency",
+            "Temperature"
         );
     }
     else if(strcasecmp(command, "cpu-usage-format") == 0)
