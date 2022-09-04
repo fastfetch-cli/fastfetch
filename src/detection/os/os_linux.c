@@ -1,21 +1,20 @@
-#include "fastfetch.h"
-#include "detection/os.h"
+#include "os.h"
 #include "common/properties.h"
 #include "common/parsing.h"
 
 #include <string.h>
 #include <stdlib.h>
-#include <pthread.h>
 
-#if __ANDROID__
-    #include "common/settings.h"
-#else
+static inline bool allRelevantValuesSet(const FFOSResult* result)
+{
+    return result->id.length > 0
+        && result->name.length > 0
+        && result->prettyName.length > 0
+    ;
+}
 
 static bool parseFile(const char* fileName, FFOSResult* result)
 {
-    if(result->id.length > 0 && result->name.length > 0 && result->prettyName.length > 0)
-        return true;
-
     return ffParsePropFileValues(fileName, 13, (FFpropquery[]) {
         {"NAME =", &result->name},
         {"DISTRIB_DESCRIPTION =", &result->prettyName},
@@ -94,73 +93,59 @@ static void getUbuntuFlavour(FFOSResult* result)
     }
 }
 
-#endif
-
-const FFOSResult* ffDetectOS(const FFinstance* instance)
+static void detectOS(FFOSResult* os, const FFinstance* instance)
 {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static FFOSResult result;
-    static bool init = false;
-    pthread_mutex_lock(&mutex);
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
-    init = true;
-
-    ffStrbufInit(&result.systemName);
-    ffStrbufInit(&result.name);
-    ffStrbufInit(&result.prettyName);
-    ffStrbufInit(&result.id);
-    ffStrbufInit(&result.idLike);
-    ffStrbufInit(&result.variant);
-    ffStrbufInit(&result.variantID);
-    ffStrbufInit(&result.version);
-    ffStrbufInit(&result.versionID);
-    ffStrbufInit(&result.codename);
-    ffStrbufInit(&result.buildID);
-    ffStrbufInit(&result.architecture);
-
-    ffStrbufSetS(&result.systemName, instance->state.utsname.sysname);
-    ffStrbufSetS(&result.architecture, instance->state.utsname.machine);
-
-#if !__ANDROID__
     if(instance->config.osFile.length > 0)
     {
-        parseFile(instance->config.osFile.chars, &result);
+        parseFile(instance->config.osFile.chars, os);
+        return;
     }
-    else if(instance->config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", &result))
+
+    if(instance->config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", os))
     {
-        if(result.id.length == 0)
-            ffStrbufAppendS(&result.id, "bedrock");
+        if(os->id.length == 0)
+            ffStrbufAppendS(&os->id, "bedrock");
 
-        if(result.name.length == 0)
-            ffStrbufAppendS(&result.name, "Bedrock");
+        if(os->name.length == 0)
+            ffStrbufAppendS(&os->name, "Bedrock");
 
-        if(result.prettyName.length == 0)
-            ffStrbufAppendS(&result.prettyName, "Bedrock Linux");
-    }
-    else
-    {
-        parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/os-release", &result);
-        parseFile(FASTFETCH_TARGET_DIR_USR"/lib/os-release", &result);
-        parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/lsb-release", &result);
+        if(os->prettyName.length == 0)
+            ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
+
+        return;
     }
 
-    if(ffStrbufIgnCaseCompS(&result.id, "ubuntu") == 0)
-        getUbuntuFlavour(&result);
+    parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/os-release", os);
+    if(allRelevantValuesSet(os))
+        return;
 
-#else
-    ffStrbufSetS(&result.name, "Android");
-    ffStrbufSetS(&result.id, "android");
-    ffSettingsGetAndroidProperty("ro.build.version.release", &result.versionID);
-    ffSettingsGetAndroidProperty("ro.build.version.release", &result.version);
-    ffSettingsGetAndroidProperty("ro.build.version.codename", &result.codename);
-    ffSettingsGetAndroidProperty("ro.build.id", &result.buildID);
-#endif
+    parseFile(FASTFETCH_TARGET_DIR_USR"/lib/os-release", os);
+    if(allRelevantValuesSet(os))
+        return;
 
-    pthread_mutex_unlock(&mutex);
+    parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/lsb-release", os);
+}
 
-    return &result;
+void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+{
+    ffStrbufInit(&os->systemName);
+    ffStrbufInit(&os->name);
+    ffStrbufInit(&os->prettyName);
+    ffStrbufInit(&os->id);
+    ffStrbufInit(&os->idLike);
+    ffStrbufInit(&os->variant);
+    ffStrbufInit(&os->variantID);
+    ffStrbufInit(&os->version);
+    ffStrbufInit(&os->versionID);
+    ffStrbufInit(&os->codename);
+    ffStrbufInit(&os->buildID);
+    ffStrbufInit(&os->architecture);
+
+    ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
+    ffStrbufSetS(&os->architecture, instance->state.utsname.machine);
+
+    detectOS(os, instance);
+
+    if(ffStrbufIgnCaseCompS(&os->id, "ubuntu") == 0)
+        getUbuntuFlavour(os);
 }

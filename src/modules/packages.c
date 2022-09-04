@@ -4,7 +4,7 @@
 #include "common/printing.h"
 #include "common/settings.h"
 #include "common/processing.h"
-#include "detection/os.h"
+#include "detection/os/os.h"
 
 #include <stdlib.h>
 #include <string.h>

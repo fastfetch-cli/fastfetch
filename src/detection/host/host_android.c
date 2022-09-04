@@ -1,5 +1,5 @@
 #include "host.h"
-
+#include "common/settings.h"
 #include <ctype.h>
 
 void ffDetectHostImpl(FFHostResult* host)

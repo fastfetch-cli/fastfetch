@@ -7,7 +7,6 @@
 
 typedef struct FFOSResult
 {
-    FFstrbuf systemName;
     FFstrbuf name;
     FFstrbuf prettyName;
     FFstrbuf id;
@@ -18,6 +17,7 @@ typedef struct FFOSResult
     FFstrbuf versionID;
     FFstrbuf codename;
     FFstrbuf buildID;
+    FFstrbuf systemName;
     FFstrbuf architecture;
 } FFOSResult;
 

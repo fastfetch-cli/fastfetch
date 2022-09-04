@@ -1,7 +1,7 @@
 #include "logo.h"
 #include "common/io.h"
 #include "common/printing.h"
-#include "detection/os.h"
+#include "detection/os/os.h"
 #include "detection/terminalshell.h"
 
 #include <ctype.h>
