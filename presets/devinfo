@@ -1,4 +1,4 @@
 --disable-linewrap false
 --multithreading false
---show-errors true
+--show-errors
 --recache
