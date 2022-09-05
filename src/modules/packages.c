@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 13
+#define FF_PACKAGES_NUM_FORMAT_ARGS 14
 
 typedef struct PackageCounts
 {
@@ -26,6 +26,7 @@ typedef struct PackageCounts
     uint32_t apk;
     uint32_t flatpak;
     uint32_t snap;
+    uint32_t brew;
 
     FFstrbuf pacmanBranch;
 } PackageCounts;
@@ -52,6 +53,8 @@ static uint32_t getNumElements(const char* dirname, unsigned char type)
     return num_elements;
 }
 
+#ifndef __APPLE__
+
 static uint32_t getNumStrings(const char* filename, const char* needle)
 {
     FILE* file = fopen(filename, "r");
@@ -76,6 +79,8 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
 
     return count;
 }
+
+#ifndef __ANDROID__
 
 static uint32_t countFilesRecursive(FFstrbuf* baseDirPath, const char* filename)
 {
@@ -144,6 +149,33 @@ static uint32_t getNixPackages(char* path)
     return result;
 }
 
+static uint32_t getXBPS(FFstrbuf* baseDir)
+{
+    DIR* dir = opendir(baseDir->chars);
+    if(dir == NULL)
+        return 0;
+
+    uint32_t result = 0;
+
+    struct dirent *entry;
+    while((entry = readdir(dir)) != NULL)
+    {
+        if(entry->d_type != DT_REG || strncasecmp(entry->d_name, "pkgdb-", 6) != 0)
+            continue;
+
+        ffStrbufAppendC(baseDir, '/');
+        ffStrbufAppendS(baseDir, entry->d_name);
+        result = getNumStrings(baseDir->chars, "<string>installed</string>");
+        break;
+    }
+
+    closedir(dir);
+    return result;
+}
+
+#endif // !__ANDROID__
+#endif // !__APPLE__
+
 #ifdef FF_HAVE_RPM
 #include "common/library.h"
 #include <rpm/rpmlib.h>
@@ -194,35 +226,18 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 
     return count > 0 ? (uint32_t) count : 0;
 }
-#endif
 
-static uint32_t getXBPS(FFstrbuf* baseDir)
-{
-    DIR* dir = opendir(baseDir->chars);
-    if(dir == NULL)
-        return 0;
-
-    uint32_t result = 0;
-
-    struct dirent *entry;
-    while((entry = readdir(dir)) != NULL)
-    {
-        if(entry->d_type != DT_REG || strncasecmp(entry->d_name, "pkgdb-", 6) != 0)
-            continue;
-
-        ffStrbufAppendC(baseDir, '/');
-        ffStrbufAppendS(baseDir, entry->d_name);
-        result = getNumStrings(baseDir->chars, "<string>installed</string>");
-        break;
-    }
-
-    closedir(dir);
-    return result;
-}
+#endif //FF_HAVE_RPM
 
 static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
 {
+    #if defined(__APPLE__) || defined(__ANDROID__)
+        FF_UNUSED(instance);
+    #endif
+
     uint32_t baseDirLength = baseDir->length;
+
+    #ifndef __APPLE__ //Linux desktop and Anrdoid
 
     //pacman
     ffStrbufAppendS(baseDir, "/var/lib/pacman/local");
@@ -233,6 +248,8 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     ffStrbufAppendS(baseDir, "/var/lib/dpkg/status");
     packageCounts->dpkg += getNumStrings(baseDir->chars, "Status: ");
     ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    #ifndef __ANDROID__ //Linux Desktop
 
     //rpm
     ffStrbufAppendS(baseDir, "/var/lib/rpm/rmpdb.sqlite");
@@ -281,6 +298,20 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
         ffStrbufAppendS(&packageCounts->pacmanBranch, "stable");
     ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    #endif // !__ANDROID__
+
+    #else // !__APPLE__
+
+    //brew
+    ffStrbufAppendS(baseDir, "/usr/local/Caskroom");
+    packageCounts->brew += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    ffStrbufAppendS(baseDir, "/usr/local/Cellar");
+    packageCounts->brew += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    #endif // __APPLE__
 }
 
 static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, PackageCounts* packageCounts)
@@ -336,14 +367,18 @@ void ffPrintPackages(FFinstance* instance)
             counts.rpm = getRpmFromLibrpm(instance);
     #endif
 
-    //nix user
-    ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&baseDir, "/.nix-profile");
-    uint32_t nixUser = getNixPackages(baseDir.chars);
+    #if !defined(__ANDROID__) && !defined(__APPLE__)
+        //nix user
+        ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&baseDir, "/.nix-profile");
+        uint32_t nixUser = getNixPackages(baseDir.chars);
+    #else
+        uint32_t nixUser = 0;
+    #endif
 
     ffStrbufDestroy(&baseDir);
 
-    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.apk + counts.flatpak + counts.snap;
+    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.apk + counts.flatpak + counts.snap + counts.brew;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
@@ -400,6 +435,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
+        FF_PRINT_PACKAGE(brew)
 
         //Fix linter warning of unused value of all
         (void) all;
@@ -423,7 +459,8 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.nixDefault},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.apk},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpak},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts.snap}
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.snap},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.brew}
         });
     }
 
