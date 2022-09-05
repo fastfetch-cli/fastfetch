@@ -5,22 +5,12 @@
 
 #include "fastfetch.h"
 
-#define FF_GPU_TEMP_UNSET (0/0.0)
-
-typedef struct FFGPUResult
-{
-    FFstrbuf vendor;
-    FFstrbuf device;
-    FFstrbuf driver;
-    double temperature;
-} FFGPUResult;
-
 typedef struct FFVulkanResult
 {
     FFstrbuf driver;
     FFstrbuf apiVersion;
     FFstrbuf conformanceVersion;
-    FFlist devices; //List of FFGPUResult
+    FFlist gpus; //List of FFGPUResult, see detection/gpu/gpu.h
 } FFVulkanResult;
 
 const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);

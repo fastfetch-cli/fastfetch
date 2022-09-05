@@ -167,6 +167,7 @@ set(LIBFASTFETCH_SRC
     src/detection/host/host.c
     src/detection/os/os.c
     src/detection/cpu/cpu.c
+    src/detection/gpu/gpu.c
     src/detection/memory/memory.c
     src/detection/displayserver/displayServer.c
     src/detection/displayserver/wayland.c
@@ -219,6 +220,7 @@ if(APPLE)
         src/detection/host/host_apple.c
         src/detection/os/os_apple.c
         src/detection/cpu/cpu_apple.c
+        src/detection/gpu/gpu_apple.c
         src/detection/memory/memory_apple.c
     )
 elseif(ANDROID)
@@ -226,6 +228,7 @@ elseif(ANDROID)
         src/detection/host/host_android.c
         src/detection/os/os_android.c
         src/detection/cpu/cpu_linux.c
+        src/detection/gpu/gpu_android.c
         src/detection/memory/memory_linux.c
     )
 elseif(UNIX)
@@ -233,6 +236,7 @@ elseif(UNIX)
         src/detection/host/host_linux.c
         src/detection/os/os_linux.c
         src/detection/cpu/cpu_linux.c
+        src/detection/gpu/gpu_linux.c
         src/detection/memory/memory_linux.c
     )
 else()

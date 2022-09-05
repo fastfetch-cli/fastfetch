@@ -7,6 +7,7 @@
 #include "common/library.h"
 #include "common/io.h"
 #include "common/parsing.h"
+#include "detection/gpu/gpu.h"
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
@@ -175,12 +176,15 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
         if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
             continue;
 
-        FFGPUResult* gpu = ffListAdd(&result->devices);
+        FFGPUResult* gpu = ffListAdd(&result->gpus);
+
+        ffStrbufInit(&gpu->name);
+        ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
+
+        //No way to detect those using vulkan
         ffStrbufInit(&gpu->vendor);
-        ffStrbufInit(&gpu->device);
         ffStrbufInit(&gpu->driver);
-        gpu->temperature = 0.0 / 0.0; //NaN, no way to detect temperature using vulkan
-        ffStrbufAppendS(&gpu->device, physicalDeviceProperties.properties.deviceName);
+        gpu->temperature = FF_GPU_TEMP_UNSET;
     }
 
     //If the highest device version is lower than the instance version, use it as our vulkan version
@@ -218,7 +222,7 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
     ffStrbufInit(&result.driver);
     ffStrbufInit(&result.apiVersion);
     ffStrbufInit(&result.conformanceVersion);
-    ffListInit(&result.devices, sizeof(FFGPUResult));
+    ffListInit(&result.gpus, sizeof(FFGPUResult));
 
     #ifdef FF_HAVE_VULKAN
         detectVulkan(instance, &result);
