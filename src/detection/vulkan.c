@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "detection/vulkan.h"
+#include "detection/gpu/gpu.h"
 
 #include <pthread.h>
 
@@ -7,7 +8,6 @@
 #include "common/library.h"
 #include "common/io.h"
 #include "common/parsing.h"
-#include "detection/gpu/gpu.h"
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 

@@ -5,31 +5,43 @@ project(fastfetch
     LANGUAGES C
 )
 
+###################
+# Target Platform #
+###################
+
+if(APPLE OR ANDROID)
+    set(LINUX FALSE CACHE BOOL "...") # Linux true means we have full linux userland, not just the kernel
+elseif(UNIX)
+    set(LINUX TRUE CACHE BOOL "...")
+else()
+    message(FATAL_ERROR "Unsupported platform")
+endif()
+
 #####################
 # Configure options #
 #####################
 
-OPTION(ENABLE_LIBPCI "Enable libpci" ON)
-OPTION(ENABLE_VULKAN "Enable vulkan" ON)
-OPTION(ENABLE_WAYLAND "Enable wayland-client" ON)
-OPTION(ENABLE_XCB_RANDR "Enable xcb-randr" ON)
-OPTION(ENABLE_XCB "Enable xcb" ON)
-OPTION(ENABLE_XRANDR "Enable xrandr" ON)
-OPTION(ENABLE_X11 "Enable x11" ON)
-OPTION(ENABLE_GIO "Enable gio-2.0" ON)
-OPTION(ENABLE_DCONF "Enable dconf" ON)
-OPTION(ENABLE_DBUS "Enable dbus-1" ON)
-OPTION(ENABLE_XFCONF "Enable libxfconf-0" ON)
-OPTION(ENABLE_SQLITE3 "Enable sqlite3" ON)
-OPTION(ENABLE_RPM "Enable rpm" ON)
-OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON)
-OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON)
-OPTION(ENABLE_ZLIB "Enable zlib" ON)
-OPTION(ENABLE_CHAFA "Enable chafa" ON)
-OPTION(ENABLE_EGL "Enable egl" ON)
-OPTION(ENABLE_GLX "Enable glx" ON)
-OPTION(ENABLE_OSMESA "Enable osmesa" ON)
-OPTION(ENABLE_OPENCL "Enable opencl" ON)
+OPTION(ENABLE_LIBPCI "Enable libpci" ${LINUX})
+OPTION(ENABLE_VULKAN "Enable vulkan" ${LINUX})
+OPTION(ENABLE_WAYLAND "Enable wayland-client" ${LINUX})
+OPTION(ENABLE_XCB_RANDR "Enable xcb-randr" ${LINUX})
+OPTION(ENABLE_XCB "Enable xcb" ${LINUX})
+OPTION(ENABLE_XRANDR "Enable xrandr" ${LINUX})
+OPTION(ENABLE_X11 "Enable x11" ${LINUX})
+OPTION(ENABLE_GIO "Enable gio-2.0" ${LINUX})
+OPTION(ENABLE_DCONF "Enable dconf" ${LINUX})
+OPTION(ENABLE_DBUS "Enable dbus-1" ${LINUX})
+OPTION(ENABLE_XFCONF "Enable libxfconf-0" ${LINUX})
+OPTION(ENABLE_SQLITE3 "Enable sqlite3" ${LINUX})
+OPTION(ENABLE_RPM "Enable rpm" ${LINUX})
+OPTION(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ${LINUX})
+OPTION(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ${LINUX})
+OPTION(ENABLE_ZLIB "Enable zlib" ${LINUX})
+OPTION(ENABLE_CHAFA "Enable chafa" ${LINUX})
+OPTION(ENABLE_EGL "Enable egl" ${LINUX})
+OPTION(ENABLE_GLX "Enable glx" ${LINUX})
+OPTION(ENABLE_OSMESA "Enable osmesa" ${LINUX})
+OPTION(ENABLE_OPENCL "Enable opencl" ${LINUX})
 
 OPTION(BUILD_TESTS "Build tests" OFF) # Also create test executables
 OPTION(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -231,7 +243,7 @@ elseif(ANDROID)
         src/detection/gpu/gpu_android.c
         src/detection/memory/memory_linux.c
     )
-elseif(UNIX)
+else()
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_linux.c
         src/detection/os/os_linux.c
@@ -239,8 +251,6 @@ elseif(UNIX)
         src/detection/gpu/gpu_linux.c
         src/detection/memory/memory_linux.c
     )
-else()
-    message(FATAL_ERROR "Unsupported platform")
 endif()
 
 add_library(libfastfetch OBJECT
