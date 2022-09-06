@@ -2,7 +2,7 @@
 #include "detection/gtk.h"
 #include "common/properties.h"
 #include "common/settings.h"
-#include "detection/displayserver.h"
+#include "detection/displayserver/displayserver.h"
 
 #include <pthread.h>
 

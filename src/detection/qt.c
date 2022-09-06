@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "detection/qt.h"
 #include "common/properties.h"
-#include "detection/displayserver.h"
+#include "detection/displayserver/displayserver.h"
 
 #include <stdlib.h>
 #include <string.h>

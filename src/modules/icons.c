@@ -3,7 +3,7 @@
 #include "common/parsing.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
-#include "detection/displayserver.h"
+#include "detection/displayserver/displayserver.h"
 
 #define FF_ICONS_MODULE_NAME "Icons"
 #define FF_ICONS_NUM_FORMAT_ARGS 5

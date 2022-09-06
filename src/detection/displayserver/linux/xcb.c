@@ -1,4 +1,4 @@
-#include "displayServer.h"
+#include "displayserver_linux.h"
 
 #ifdef FF_HAVE_XCB
 #include "common/library.h"

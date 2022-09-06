@@ -1,4 +1,4 @@
-#include "displayServer.h"
+#include "displayserver_linux.h"
 #include "common/io.h"
 #include "common/properties.h"
 #include "common/parsing.h"

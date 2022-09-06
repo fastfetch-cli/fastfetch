@@ -3,7 +3,7 @@
 #include "common/parsing.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
-#include "detection/displayserver.h"
+#include "detection/displayserver/displayserver.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -295,7 +295,7 @@ void startDetectionThreads(FFinstance* instance)
     //Android needs none of the things that are detected here
     //And using gsettings sometimes hangs the program in android for some unknown reason,
     //and since we don't need it we just never call it.
-    #ifdef __ANDROID__
+    #if defined(__ANDROID__) || defined(__APPLE__)
         return;
     #endif
 

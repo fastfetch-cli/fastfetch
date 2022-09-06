@@ -4,7 +4,7 @@
 #include "common/font.h"
 #include "common/settings.h"
 #include "common/processing.h"
-#include "detection/displayserver.h"
+#include "detection/displayserver/displayserver.h"
 #include "detection/terminalshell.h"
 
 #define FF_TERMFONT_MODULE_NAME "Terminal Font"

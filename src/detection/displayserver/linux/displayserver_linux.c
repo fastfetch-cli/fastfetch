@@ -1,6 +1,5 @@
-#include "displayServer.h"
+#include "displayserver_linux.h"
 
-#include <pthread.h>
 #include <dirent.h>
 
 uint32_t ffdsParseRefreshRate(int32_t refreshRate)
@@ -78,56 +77,41 @@ static void parseDRM(FFDisplayServerResult* result)
     ffStrbufDestroy(&drmDir);
 }
 
-const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance)
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
 {
-    static FFDisplayServerResult result;
-
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-    pthread_mutex_lock(&mutex);
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
-    init = true;
-
-    ffStrbufInit(&result.wmProcessName);
-    ffStrbufInit(&result.wmPrettyName);
-    ffStrbufInit(&result.wmProtocolName);
-    ffStrbufInit(&result.deProcessName);
-    ffStrbufInit(&result.dePrettyName);
-    ffStrbufInit(&result.deVersion);
-    ffListInitA(&result.resolutions, sizeof(FFResolutionResult), 4);
+    ffStrbufInit(&ds->wmProcessName);
+    ffStrbufInit(&ds->wmPrettyName);
+    ffStrbufInit(&ds->wmProtocolName);
+    ffStrbufInit(&ds->deProcessName);
+    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInit(&ds->deVersion);
+    ffListInitA(&ds->resolutions, sizeof(FFResolutionResult), 4);
 
     //We try wayland as our prefered display server, as it supports the most features.
     //This method can't detect the name of our WM / DE
-    ffdsConnectWayland(instance, &result);
+    ffdsConnectWayland(instance, ds);
 
     //Try the x11 libs, from most feature rich to least.
     //We use the resolution list to detect if a connection is needed.
     //They respect wmProtocolName, and only detect resolution if it is set.
 
-    if(result.resolutions.length == 0)
-        ffdsConnectXcbRandr(instance, &result);
+    if(ds->resolutions.length == 0)
+        ffdsConnectXcbRandr(instance, ds);
 
-    if(result.resolutions.length == 0)
-        ffdsConnectXrandr(instance, &result);
+    if(ds->resolutions.length == 0)
+        ffdsConnectXrandr(instance, ds);
 
-    if(result.resolutions.length == 0)
-        ffdsConnectXcb(instance, &result);
+    if(ds->resolutions.length == 0)
+        ffdsConnectXcb(instance, ds);
 
-    if(result.resolutions.length == 0)
-        ffdsConnectXlib(instance, &result);
+    if(ds->resolutions.length == 0)
+        ffdsConnectXlib(instance, ds);
 
     //This resolution detection method is display server independent.
     //Use it if all connections failed
-    if(result.resolutions.length == 0)
-        parseDRM(&result);
+    if(ds->resolutions.length == 0)
+        parseDRM(ds);
 
     //This fills in missing information about WM / DE by using env vars and iterating processes
-    ffdsDetectWMDE(instance, &result);
-
-    pthread_mutex_unlock(&mutex);
-    return &result;
+    ffdsDetectWMDE(instance, ds);
 }

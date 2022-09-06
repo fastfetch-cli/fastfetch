@@ -3,8 +3,7 @@
 #ifndef FASTFETCH_INCLUDED_DISPLAYSERVER
 #define FASTFETCH_INCLUDED_DISPLAYSERVER
 
-#include "fastfetch.h"
-#include "detection/displayserver.h"
+#include "detection/displayserver/displayserver.h"
 
 #define FF_DISPLAYSERVER_PROTOCOL_WAYLAND "Wayland"
 #define FF_DISPLAYSERVER_PROTOCOL_X11 "X11"

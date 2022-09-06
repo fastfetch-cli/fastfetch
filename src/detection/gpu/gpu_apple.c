@@ -8,7 +8,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     FF_UNUSED(instance);
 
-    void* iokit = dlopen("/System/Library/Frameworks/IOKit.framework/IOKit", RTLD_LAZY);
+    void* iokit = dlopen(FASTFETCH_TARGET_DIR_ROOT"/System/Library/Frameworks/IOKit.framework/IOKit", RTLD_LAZY);
     if(iokit == NULL)
         return;
 

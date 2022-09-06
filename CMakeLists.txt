@@ -185,11 +185,7 @@ set(LIBFASTFETCH_SRC
     src/detection/cpu/cpu.c
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
-    src/detection/displayserver/displayServer.c
-    src/detection/displayserver/wayland.c
-    src/detection/displayserver/xcb.c
-    src/detection/displayserver/xlib.c
-    src/detection/displayserver/wmde.c
+    src/detection/displayserver/displayserver.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -238,6 +234,7 @@ if(APPLE)
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
         src/detection/memory/memory_apple.c
+        src/detection/displayserver/displayserver_apple.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -246,6 +243,7 @@ elseif(ANDROID)
         src/detection/cpu/cpu_linux.c
         src/detection/gpu/gpu_android.c
         src/detection/memory/memory_linux.c
+        src/detection/displayserver/displayserver_android.c
     )
 else()
     list(APPEND LIBFASTFETCH_SRC
@@ -254,6 +252,11 @@ else()
         src/detection/cpu/cpu_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/displayserver/linux/wmde.c
     )
 endif()
 
@@ -289,7 +292,7 @@ ff_check_lib(VULKAN vulkan)
 ff_check_lib(WAYLAND wayland-client)
 ff_check_lib(XCB_RANDR xcb-randr)
 ff_check_lib(XCB xcb)
-ff_check_lib(XRAND xrandr)
+ff_check_lib(XRANDR xrandr)
 ff_check_lib(X11 x11)
 ff_check_lib(GIO gio-2.0)
 ff_check_lib(DCONF dconf)
