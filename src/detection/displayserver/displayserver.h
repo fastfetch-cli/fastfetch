@@ -25,5 +25,8 @@ typedef struct FFDisplayServerResult
 
 const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
 
-#endif
+//Used internal
+uint32_t ffdsParseRefreshRate(int32_t refreshRate);
+bool ffdsAppendResolution(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate);
 
+#endif

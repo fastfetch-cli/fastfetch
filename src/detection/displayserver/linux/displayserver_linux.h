@@ -9,9 +9,6 @@
 #define FF_DISPLAYSERVER_PROTOCOL_X11 "X11"
 #define FF_DISPLAYSERVER_PROTOCOL_TTY "TTY"
 
-uint32_t ffdsParseRefreshRate(int32_t refreshRate);
-bool ffdsAppendResolution(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate);
-
 void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result);
 
 void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* result);
