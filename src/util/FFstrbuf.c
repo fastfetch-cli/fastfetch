@@ -242,6 +242,9 @@ int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 {
+    if(strbuf->allocated == 0)
+        return;
+
     uint32_t index = 0;
     while(index < strbuf->length && strbuf->chars[index] == c)
         ++index;
@@ -256,8 +259,12 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
 {
+    if(strbuf->allocated == 0)
+        return;
+
     while(ffStrbufEndsWithC(strbuf, c))
         --strbuf->length;
+
     strbuf->chars[strbuf->length] = '\0';
 }
 

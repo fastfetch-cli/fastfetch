@@ -7,14 +7,13 @@
 #define FF_DISK_MODULE_NAME "Disk"
 #define FF_DISK_NUM_FORMAT_ARGS 4
 
-static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, bool showFolderPath)
+static void createKey(FFinstance* instance, const char* folderPath, FFstrbuf* key)
 {
     if(instance->config.disk.key.length == 0)
     {
-        if(showFolderPath)
-            ffStrbufAppendF(key, FF_DISK_MODULE_NAME" (%s)", folderPath);
-        else
-            ffStrbufSetS(key, FF_DISK_MODULE_NAME);
+        ffStrbufAppendS(key, FF_DISK_MODULE_NAME);
+        if(folderPath != NULL)
+            ffStrbufAppendF(key, " (%s)", folderPath);
     }
     else
     {
@@ -24,9 +23,16 @@ static void getKey(FFinstance* instance, FFstrbuf* key, const char* folderPath, 
     }
 }
 
-static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs)
+static void printStatvfs(FFinstance* instance, const FFstrbuf* key, const char* folderPath, struct statvfs* fs)
 {
     uint64_t total = fs->f_blocks * fs->f_frsize;
+
+    if(total == 0)
+    {
+        ffPrintErrorString(instance, key->chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs for %s returned size 0", folderPath);
+        return;
+    }
+
     uint64_t used = total - (fs->f_bfree  * fs->f_frsize);
     uint32_t files = (uint32_t) (fs->f_files - fs->f_ffree);
     uint8_t percentage = (uint8_t) ((used / (long double) total) * 100.0);
@@ -53,81 +59,82 @@ static void printStatvfs(FFinstance* instance, FFstrbuf* key, struct statvfs* fs
             {FF_FORMAT_ARG_TYPE_UINT, &files},
         });
     }
+
+    ffStrbufDestroy(&totalPretty);
+    ffStrbufDestroy(&usedPretty);
 }
 
-static void printStatvfsCreateKey(FFinstance* instance, const char* folderPath, struct statvfs* fs)
+static void printFolderAutodetection(FFinstance* instance, const char* folderPath, struct statvfs* fs)
 {
-    FF_STRBUF_CREATE(key);
-    getKey(instance, &key, folderPath, true);
-    printStatvfs(instance, &key, fs);
+    FFstrbuf key;
+    ffStrbufInit(&key);
+    createKey(instance, folderPath, &key);
+    printStatvfs(instance, &key, folderPath, fs);
     ffStrbufDestroy(&key);
 }
 
-static void printFolder(FFinstance* instance, const char* folderPath)
+static void printFoldersAutodetection(FFinstance* instance)
 {
-    FF_STRBUF_CREATE(key);
-    getKey(instance, &key, folderPath, true);
+    struct statvfs fsRoot;
+    int rootRet = statvfs("/", &fsRoot);
+
+    struct statvfs fsHome;
+    int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
+
+    if(rootRet != 0 && homeRet != 0)
+    {
+        FFstrbuf key;
+        ffStrbufInit(&key);
+        createKey(instance, NULL, &key);
+        ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs for / (%i) and %s (%i) returned not zero", rootRet, FASTFETCH_TARGET_DIR_HOME, homeRet);
+        ffStrbufDestroy(&key);
+        return;
+    }
+
+    if(rootRet == 0)
+        printFolderAutodetection(instance, "/", &fsRoot);
+
+    if(homeRet == 0 && rootRet == 0 && fsRoot.f_fsid != fsHome.f_fsid)
+        printFolderAutodetection(instance, FASTFETCH_TARGET_DIR_HOME, &fsHome);
+}
+
+static void printFolderCustom(FFinstance* instance, const char* folderPath)
+{
+    FFstrbuf key;
+    ffStrbufInit(&key);
+    createKey(instance, folderPath, &key);
 
     struct statvfs fs;
     int ret = statvfs(folderPath, &fs);
-    if(ret != 0 && instance->config.disk.outputFormat.length == 0)
+    if(ret != 0)
     {
         ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs(\"%s\", &fs) != 0 (%i)", folderPath, ret);
         ffStrbufDestroy(&key);
         return;
     }
 
-    printStatvfs(instance, &key, &fs);
+    printStatvfs(instance, &key, folderPath, &fs);
     ffStrbufDestroy(&key);
 }
 
 void ffPrintDisk(FFinstance* instance)
 {
+    ffStrbufTrim(&instance->config.diskFolders, ':');
+
     if(instance->config.diskFolders.length == 0)
     {
-        struct statvfs fsRoot;
-        int rootRet = statvfs("/", &fsRoot);
-
-        struct statvfs fsHome;
-        int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
-
-        if(rootRet != 0 && homeRet != 0)
-        {
-            FF_STRBUF_CREATE(key);
-            getKey(instance, &key, "", false);
-            ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs failed for both / and " FASTFETCH_TARGET_DIR_HOME);
-            ffStrbufDestroy(&key);
-            return;
-        }
-
-        if(rootRet == 0)
-            printStatvfsCreateKey(instance, "/", &fsRoot);
-
-        if(homeRet == 0 && (rootRet != 0 || fsRoot.f_fsid != fsHome.f_fsid))
-            printStatvfsCreateKey(instance, FASTFETCH_TARGET_DIR_HOME, &fsHome);
+        printFoldersAutodetection(instance);
+        return;
     }
-    else
+
+    uint32_t startIndex = 0;
+    while (startIndex < instance->config.diskFolders.length)
     {
-        ffStrbufTrim(&instance->config.diskFolders, ':');
+        uint32_t colonIndex = ffStrbufNextIndexC(&instance->config.diskFolders, startIndex, ':');
+        instance->config.diskFolders.chars[colonIndex] = '\0';
 
-        if(instance->config.diskFolders.length == 0)
-        {
-            FF_STRBUF_CREATE(key);
-            getKey(instance, &key, "", false);
-            ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "Custom disk folders string doesn't contain any folders");
-            ffStrbufDestroy(&key);
-            return;
-        }
+        printFolderCustom(instance, instance->config.diskFolders.chars + startIndex);
 
-        uint32_t startIndex = 0;
-        while (startIndex < instance->config.diskFolders.length)
-        {
-            uint32_t colonIndex = ffStrbufNextIndexC(&instance->config.diskFolders, startIndex, ':');
-            instance->config.diskFolders.chars[colonIndex] = '\0';
-
-            printFolder(instance, instance->config.diskFolders.chars + startIndex);
-
-            startIndex = colonIndex + 1;
-        }
+        startIndex = colonIndex + 1;
     }
 }
