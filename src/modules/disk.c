@@ -76,26 +76,34 @@ static void printFolderAutodetection(FFinstance* instance, const char* folderPat
 static void printFoldersAutodetection(FFinstance* instance)
 {
     struct statvfs fsRoot;
-    int rootRet = statvfs("/", &fsRoot);
+    int rootRet = statvfs(FASTFETCH_TARGET_DIR_ROOT"/", &fsRoot);
 
-    struct statvfs fsHome;
-    int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
-
-    if(rootRet != 0 && homeRet != 0)
+    if(rootRet != 0)
     {
         FFstrbuf key;
         ffStrbufInit(&key);
         createKey(instance, NULL, &key);
-        ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs for / (%i) and %s (%i) returned not zero", rootRet, FASTFETCH_TARGET_DIR_HOME, homeRet);
+        ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs for / returned not zero: %i", rootRet);
         ffStrbufDestroy(&key);
         return;
     }
 
-    if(rootRet == 0)
-        printFolderAutodetection(instance, "/", &fsRoot);
+    //On MacOS statvfs seems to return different f_fsid for the same filesystem.
+    //Since it isn't really possible to install /Users on a separate disk anyway, just never print it by default.
+    #ifndef __APPLE__
+        struct statvfs fsHome;
+        int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
+        bool printHome = rootRet == 0 && (fsRoot.f_fsid != fsHome.f_fsid);
+    #else
+        bool printHome = false;
+    #endif // !__APPLE__
 
-    if(homeRet == 0 && rootRet == 0 && fsRoot.f_fsid != fsHome.f_fsid)
+    printFolderAutodetection(instance, printHome ? FASTFETCH_TARGET_DIR_ROOT"/" : NULL, &fsRoot);
+
+    #ifndef __APPLE__
+    if(printHome)
         printFolderAutodetection(instance, FASTFETCH_TARGET_DIR_HOME, &fsHome);
+    #endif // !__APPLE__
 }
 
 static void printFolderCustom(FFinstance* instance, const char* folderPath)
