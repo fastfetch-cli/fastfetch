@@ -29,20 +29,20 @@ void CGSGetDisplayModeDescriptionOfLength(CGDirectDisplayID display, int idx, mo
 
 static void detectResolution(FFDisplayServerResult* ds)
 {
-    void* iokit = dlopen(FASTFETCH_TARGET_DIR_ROOT"/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics", RTLD_LAZY);
-    if(iokit == NULL)
+    void* cg = dlopen(FASTFETCH_TARGET_DIR_ROOT"/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics", RTLD_LAZY);
+    if(cg == NULL)
         return;
 
-    FF_LIBRARY_LOAD_SYMBOL(iokit, CGGetOnlineDisplayList, )
-    FF_LIBRARY_LOAD_SYMBOL(iokit, CGDisplayScreenSize, )
-    FF_LIBRARY_LOAD_SYMBOL(iokit, CGSGetCurrentDisplayMode, )
-    FF_LIBRARY_LOAD_SYMBOL(iokit, CGSGetDisplayModeDescriptionOfLength, )
+    FF_LIBRARY_LOAD_SYMBOL(cg, CGGetOnlineDisplayList, )
+    FF_LIBRARY_LOAD_SYMBOL(cg, CGDisplayScreenSize, )
+    FF_LIBRARY_LOAD_SYMBOL(cg, CGSGetCurrentDisplayMode, )
+    FF_LIBRARY_LOAD_SYMBOL(cg, CGSGetDisplayModeDescriptionOfLength, )
 
     CGDisplayCount screenCount;
     ffCGGetOnlineDisplayList(INT_MAX, NULL, &screenCount);
     if(screenCount == 0)
     {
-        dlclose(iokit);
+        dlclose(cg);
         return;
     }
 
@@ -61,7 +61,7 @@ static void detectResolution(FFDisplayServerResult* ds)
     }
 
     free(screens);
-    dlclose(iokit);
+    dlclose(cg);
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
