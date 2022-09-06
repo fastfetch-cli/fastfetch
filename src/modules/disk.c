@@ -93,7 +93,7 @@ static void printFoldersAutodetection(FFinstance* instance)
     #ifndef __APPLE__
         struct statvfs fsHome;
         int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
-        bool printHome = rootRet == 0 && (fsRoot.f_fsid != fsHome.f_fsid);
+        bool printHome = homeRet == 0 && (fsRoot.f_fsid != fsHome.f_fsid);
     #else
         bool printHome = false;
     #endif // !__APPLE__
