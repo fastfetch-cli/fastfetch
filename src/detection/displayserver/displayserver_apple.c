@@ -4,11 +4,19 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 {
     FF_UNUSED(instance);
 
-    ffStrbufInitA(&ds->wmProcessName, 0);
-    ffStrbufInitA(&ds->wmPrettyName, 0);
-    ffStrbufInitA(&ds->wmProtocolName, 0);
-    ffStrbufInitA(&ds->deProcessName, 0);
-    ffStrbufInitA(&ds->dePrettyName, 0);
+    ffStrbufInit(&ds->wmProcessName);
+    ffStrbufAppendS(&ds->wmProcessName, "quartz");
+
+    ffStrbufInit(&ds->wmPrettyName);
+    ffStrbufAppendS(&ds->wmPrettyName, "Quartz Compositor");
+
+    ffStrbufInit(&ds->deProcessName);
+    ffStrbufAppendS(&ds->deProcessName, "aqua");
+
+    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufAppendS(&ds->dePrettyName, "Aqua");
+
     ffStrbufInitA(&ds->deVersion, 0);
+    ffStrbufInitA(&ds->wmProtocolName, 0);
     ffListInitA(&ds->resolutions, sizeof(FFResolutionResult), 0);
 }
