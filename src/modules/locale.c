@@ -18,10 +18,6 @@ static void getLocaleFromEnv(FFstrbuf* locale)
     if(locale->length > 0)
         return;
 
-    ffStrbufAppendS(locale, getenv("LC_CTYPE"));
-    if(locale->length > 0)
-        return;
-
     ffStrbufAppendS(locale, getenv("LC_MESSAGES"));
 }
 
