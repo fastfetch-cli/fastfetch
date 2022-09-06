@@ -16,7 +16,15 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOServiceGetMatchingServices, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, kIOMasterPortDefault, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOIteratorNext, )
-    FF_LIBRARY_LOAD_SYMBOL(iokit, IORegistryEntryGetName, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, IORegistryEntryCreateCFProperties, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, kCFAllocatorDefault, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFDictionaryGetValue, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFGetTypeID, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFStringCreateWithCStringNoCopy, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFStringGetLength, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFStringGetCString, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFRelease, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, CFDataGetTypeID, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOObjectRelease, )
 
     CFMutableDictionaryRef matchDict = ffIOServiceMatching(kIOAcceleratorClassName);
@@ -30,21 +38,33 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
     io_registry_entry_t registryEntry;
     while((registryEntry = ffIOIteratorNext(iterator)) != 0)
     {
-        io_name_t deviceName;
-        kern_return_t ret = ffIORegistryEntryGetName(registryEntry, deviceName);
-        ffIOObjectRelease(registryEntry);
-
-        if(ret != KERN_SUCCESS)
+        CFMutableDictionaryRef properties;
+        if(ffIORegistryEntryCreateCFProperties(registryEntry, &properties, *ffkCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+        {
+            ffIOObjectRelease(registryEntry);
             continue;
+        }
+
+        CFStringRef key = ffCFStringCreateWithCStringNoCopy(NULL, "model", kCFStringEncodingUTF8, NULL);
+        CFStringRef model = ffCFDictionaryGetValue(properties, key);
+        if(model == NULL || ffCFGetTypeID(model) != ffCFDataGetTypeID())
+        {
+            ffCFRelease(properties);
+            ffIOObjectRelease(registryEntry);
+            continue;
+        }
 
         FFGPUResult* gpu = ffListAdd(gpus);
 
-        ffStrbufInit(&gpu->name);
-        ffStrbufAppendS(&gpu->name, deviceName);
+        ffStrbufInitA(&gpu->name, (uint32_t) (ffCFStringGetLength(model) + 1));
+        ffCFStringGetCString(model, gpu->name.chars, ffStrbufGetFree(&gpu->name), kCFStringEncodingUTF8);
 
         ffStrbufInitA(&gpu->vendor, 0);
         ffStrbufInitA(&gpu->driver, 0);
         gpu->temperature = FF_GPU_TEMP_UNSET;
+
+        ffCFRelease(properties);
+        ffIOObjectRelease(registryEntry);
     }
 
     ffIOObjectRelease(iterator);
