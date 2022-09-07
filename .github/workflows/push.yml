@@ -70,7 +70,7 @@ jobs:
         run: cmake -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build . -j$(sysctl -n hw.logicalcpu) --target package
+        run: cmake --build . -j$(sysctl -n hw.logicalcpu)
 
       - name: run fastfetch
         run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
