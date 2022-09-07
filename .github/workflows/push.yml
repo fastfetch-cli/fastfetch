@@ -5,8 +5,8 @@ on:
     branches: [ master ]
 
 jobs:
-  manage:
-    name: manage push
+  linux:
+    name: build, run test and release on Linux
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -58,3 +58,25 @@ jobs:
           tag: ${{ steps.get_version_fastfetch.outputs.release }}
           commit: ${{ github.sha }}
           artifacts: ./fastfetch-*.*
+
+  macos:
+    name: build and run on MacOS
+    runs-on: macos-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+
+      - name: configure project
+        run: cmake -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build . -j$(sysctl -n hw.logicalcpu) --target package
+
+      - name: run fastfetch
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
+
+      - name: run flashfetch
+        run: ./flashfetch
+
+      - name: run tests
+        run: ctest
