@@ -14,10 +14,10 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOServiceMatching, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOServiceGetMatchingServices, )
-    FF_LIBRARY_LOAD_SYMBOL(iokit, kIOMasterPortDefault, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOIteratorNext, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, IORegistryEntryCreateCFProperties, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, kCFAllocatorDefault, )
+    FF_LIBRARY_LOAD_SYMBOL(iokit, kCFAllocatorNull, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, CFDictionaryGetValue, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, CFGetTypeID, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, CFStringCreateWithCStringNoCopy, )
@@ -29,7 +29,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
     CFMutableDictionaryRef matchDict = ffIOServiceMatching(kIOAcceleratorClassName);
     io_iterator_t iterator;
-    if(ffIOServiceGetMatchingServices(*ffkIOMasterPortDefault, matchDict, &iterator) != kIOReturnSuccess)
+    if(ffIOServiceGetMatchingServices(0, matchDict, &iterator) != kIOReturnSuccess)
     {
         dlclose(iokit);
         return;
@@ -45,7 +45,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
             continue;
         }
 
-        CFStringRef key = ffCFStringCreateWithCStringNoCopy(NULL, "model", kCFStringEncodingUTF8, NULL);
+        CFStringRef key = ffCFStringCreateWithCStringNoCopy(NULL, "model", kCFStringEncodingUTF8, *ffkCFAllocatorNull);
         CFStringRef model = ffCFDictionaryGetValue(properties, key);
         if(model == NULL || ffCFGetTypeID(model) != ffCFDataGetTypeID())
         {
@@ -56,8 +56,10 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         FFGPUResult* gpu = ffListAdd(gpus);
 
-        ffStrbufInitA(&gpu->name, (uint32_t) (ffCFStringGetLength(model) + 1));
-        ffCFStringGetCString(model, gpu->name.chars, ffStrbufGetFree(&gpu->name), kCFStringEncodingUTF8);
+        uint32_t modelLength = (uint32_t) ffCFStringGetLength(model);
+        ffStrbufInitA(&gpu->name, modelLength + 1);
+        ffCFStringGetCString(model, gpu->name.chars, modelLength + 1, kCFStringEncodingUTF8);
+        gpu->name.chars[modelLength] = '\0';
 
         ffStrbufInitA(&gpu->vendor, 0);
         ffStrbufInitA(&gpu->driver, 0);
