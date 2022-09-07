@@ -40,7 +40,9 @@ Logo options:
 
 Display options:
     -s,--structure <structure>:  sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
-    -c,--color <color>:          sets the color of the keys. Must be a linux console color code or the name of a color (+)
+    --color-keys <color>:        sers the color of the keys
+    --color-title <color>:       sets the color of the title
+    -c,--color <color>:          sets the color of both the keys and the title
     --separator <str>:           sets the separator between key and value. Default is a colon with a space
     --set <key=value>:           hard set the value of a key
     --set-keyless <key=value>:   hard set the value of a key, but don't print the key or the separator

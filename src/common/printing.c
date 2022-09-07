@@ -12,7 +12,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     if(!instance->config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(&instance->config.mainColor);
+        ffPrintColor(&instance->config.colorKeys);
     }
 
     //NULL check is required for modules with custom keys, e.g. disk with the folder path

@@ -7,7 +7,7 @@ static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
     if(!instance->config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(&instance->config.mainColor);
+        ffPrintColor(&instance->config.colorTitle);
     }
 
     ffStrbufWriteTo(content, stdout);

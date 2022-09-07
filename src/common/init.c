@@ -138,7 +138,9 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
 
-    ffStrbufInit(&instance->config.mainColor);
+    ffStrbufInit(&instance->config.colorKeys);
+    ffStrbufInit(&instance->config.colorTitle);
+
     ffStrbufInit(&instance->config.separator);
     ffStrbufAppendS(&instance->config.separator, ": ");
 

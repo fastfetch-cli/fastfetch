@@ -929,8 +929,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.separator);
+    else if(strcasecmp(key, "--color-keys") == 0)
+        optionParseColor(key, value, &instance->config.colorKeys);
+    else if(strcasecmp(key, "--color-title") == 0)
+        optionParseColor(key, value, &instance->config.colorTitle);
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
-        optionParseColor(key, value, &instance->config.mainColor);
+    {
+        optionParseColor(key, value, &instance->config.colorKeys);
+        ffStrbufSet(&instance->config.colorTitle, &instance->config.colorKeys);
+    }
     else if(strcasecmp(key, "--set") == 0)
         optionParseCustomValue(data, key, value, true);
     else if(strcasecmp(key, "--set-keyless") == 0)

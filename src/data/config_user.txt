@@ -113,12 +113,19 @@
 # Default is true.
 #--logo-print-remaining true
 
-# Color option:
+# Color keys option:
 # Sets the color of the keys.
 # Must be linux console color codes or the name of a color.
-# Default is the primary color of the logo.
+# Default is the key color of the logo.
 # Use "fastfetch --help color" to learn more and see examples.
-#--color magenta
+#--color-keys magenta
+
+# Color title option:
+# Sets the color of the title.
+# Must be linux console color codes or the name of a color.
+# Default is the title color of the logo.
+# Use "fastfetch --help color" to learn more and see examples.
+#--color-title magenta
 
 # Binary prefix option:
 # Sets the binary prefix to use.

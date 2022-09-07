@@ -150,10 +150,13 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
         printf("\033[%uA", instance->state.logoHeight);
 }
 
-static void logoApplyMainColor(FFinstance* instance, const FFlogo* logo)
+static void logoApplyColors(FFinstance* instance, const FFlogo* logo)
 {
-    if(instance->config.mainColor.length == 0)
-        ffStrbufAppendS(&instance->config.mainColor, logo->builtinColors[0]);
+    if(instance->config.colorKeys.length == 0)
+        ffStrbufAppendS(&instance->config.colorKeys, logo->colorKeys);
+
+    if(instance->config.colorTitle.length == 0)
+        ffStrbufAppendS(&instance->config.colorTitle, logo->colorTitle);
 }
 
 static bool logoHasName(const FFlogo* logo, const char* name)
@@ -214,14 +217,14 @@ static const FFlogo* logoGetBuiltinDetected(FFinstance* instance)
     return ffLogoBuiltinGetUnknown();
 }
 
-static inline void logoApplyMainColorDetected(FFinstance* instance)
+static inline void logoApplyColorsDetected(FFinstance* instance)
 {
-    logoApplyMainColor(instance, logoGetBuiltinDetected(instance));
+    logoApplyColors(instance, logoGetBuiltinDetected(instance));
 }
 
 static void logoPrintStruct(FFinstance* instance, const FFlogo* logo)
 {
-    logoApplyMainColor(instance, logo);
+    logoApplyColors(instance, logo);
 
     const char** colors = logo->builtinColors;
     for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
@@ -259,7 +262,7 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement)
         return false;
     }
 
-    logoApplyMainColorDetected(instance);
+    logoApplyColorsDetected(instance);
     ffLogoPrintChars(instance, content.chars, doColorReplacement);
     ffStrbufDestroy(&content);
     return true;
@@ -270,7 +273,7 @@ static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo)
     if(!ffLogoPrintImageIfExists(instance, logo))
         return false;
 
-    logoApplyMainColorDetected(instance);
+    logoApplyColorsDetected(instance);
     return true;
 }
 

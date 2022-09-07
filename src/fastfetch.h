@@ -74,7 +74,10 @@ typedef struct FFconfig
         bool printRemaining;
     } logo;
 
-    FFstrbuf mainColor; //If this is empty, ffLogoPrint will set it to the main color of the logo
+    //If one of those is empty, ffLogoPrint will set them
+    FFstrbuf colorKeys;
+    FFstrbuf colorTitle;
+
     FFstrbuf separator;
 
     bool showErrors;

@@ -4,6 +4,8 @@
 #define FF_LOGO_NAMES(...) static const char* names[] = (const char*[]) { __VA_ARGS__, NULL }; logo.names = names;
 #define FF_LOGO_LINES(x) logo.data = x;
 #define FF_LOGO_COLORS(...) static const char* colors[] = (const char*[]) { __VA_ARGS__, NULL }; logo.builtinColors = colors;
+#define FF_LOGO_COLOR_KEYS(x) logo.colorKeys = x;
+#define FF_LOGO_COLOR_TITLE(x) logo.colorTitle = x;
 #define FF_LOGO_RETURN return &logo;
 
 const FFlogo* ffLogoBuiltinGetUnknown()
@@ -31,6 +33,8 @@ const FFlogo* ffLogoBuiltinGetUnknown()
         "         \"\""
     )
     FF_LOGO_COLORS("")
+    FF_LOGO_COLOR_KEYS("")
+    FF_LOGO_COLOR_TITLE("")
     FF_LOGO_RETURN
 }
 
@@ -40,6 +44,8 @@ static const FFlogo* getLogoNone()
     FF_LOGO_NAMES("none", "empty")
     FF_LOGO_LINES("")
     FF_LOGO_COLORS("")
+    FF_LOGO_COLOR_KEYS("")
+    FF_LOGO_COLOR_TITLE("")
     FF_LOGO_RETURN
 }
 
@@ -76,6 +82,8 @@ static const FFlogo* getLogoAlmaLinux()
         "1;32", // light green
         "36" // cyan
     )
+    FF_LOGO_COLOR_KEYS("1;33"); //yellow
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -108,6 +116,8 @@ static const FFlogo* getLogoAlpine()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -126,6 +136,8 @@ static const FFlogo* getLogoAlpineSmall()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -157,6 +169,8 @@ static const FFlogo* getLogoAndroid()
         "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -175,6 +189,8 @@ static const FFlogo* getLogoAndroidSmall()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -206,6 +222,8 @@ static const FFlogo* getLogoArch()
     FF_LOGO_COLORS(
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -225,6 +243,8 @@ static const FFlogo* getLogoArchSmall()
     FF_LOGO_COLORS(
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -257,6 +277,8 @@ static const FFlogo* getLogoArtix()
     FF_LOGO_COLORS(
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -276,6 +298,8 @@ static const FFlogo* getLogoArtixSmall()
     FF_LOGO_COLORS(
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -309,6 +333,8 @@ static const FFlogo* getLogoArcoLinux()
         "34", //blue
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("34"); //green
+    FF_LOGO_COLOR_TITLE("34"); //green
     FF_LOGO_RETURN
 }
 
@@ -339,6 +365,8 @@ static const FFlogo* getLogoBedrock()
         "90", //grey
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("90"); //grey
+    FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
 
@@ -375,6 +403,8 @@ static const FFlogo* getLogoCachyOS()
         "32", //green
         "30"  //black
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -395,6 +425,8 @@ static const FFlogo* getLogoCachyOSSmall()
     FF_LOGO_COLORS(
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -424,6 +456,8 @@ static const FFlogo* getLogoCelOS()
         "35", //magenta
         "30" //black
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -459,6 +493,8 @@ static const FFlogo* getLogoCentOS()
         "35", //magenta
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("33"); //yellow
     FF_LOGO_RETURN
 }
 
@@ -481,6 +517,8 @@ static const FFlogo* getLogoCentOSSmall()
         "34", //blue
         "35" //magenta
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("33"); //yellow
     FF_LOGO_RETURN
 }
 
@@ -511,6 +549,8 @@ static const FFlogo* getLogoDebian()
         "31", //red
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -529,6 +569,8 @@ static const FFlogo* getLogoDebianSmall()
     FF_LOGO_COLORS(
         "31" //red
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -556,6 +598,8 @@ static const FFlogo* getLogoDevuan()
     FF_LOGO_COLORS(
         "35" //magenta
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
     FF_LOGO_RETURN
 }
 
@@ -573,8 +617,10 @@ static const FFlogo* getLogoDevuanSmall()
         "#@@@#=:\n"
     )
     FF_LOGO_COLORS(
-        "34" //blue
+        "35" //magenta
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
     FF_LOGO_RETURN
 }
 
@@ -605,6 +651,8 @@ static const FFlogo* getLogoDeepin()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -634,6 +682,8 @@ static const FFlogo* getLogoEndeavour()
         "31", //red
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -666,6 +716,8 @@ static const FFlogo* getLogoFedora()
         "34", //blue
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -687,6 +739,8 @@ static const FFlogo* getLogoFedoraSmall()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -717,6 +771,8 @@ static const FFlogo* getLogoFedoraOld()
         "34", //blue
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -747,6 +803,8 @@ static const FFlogo* getLogoGaruda()
     FF_LOGO_COLORS(
         "31" //red
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -778,6 +836,8 @@ static const FFlogo* getLogoGentoo()
         "35", //magenta
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
     FF_LOGO_RETURN
 }
 
@@ -798,6 +858,8 @@ static const FFlogo* getLogoGentooSmall()
         "35", //magenta
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
     FF_LOGO_RETURN
 }
 
@@ -829,6 +891,8 @@ static const FFlogo* getLogoKDENeon()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -850,6 +914,8 @@ static const FFlogo* getLogoKISSLinux()
         "37", //white
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -883,6 +949,8 @@ static const FFlogo* getLogoKubuntu()
         "34", //blue
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -909,6 +977,8 @@ static const FFlogo* getLogoLangitKetujuh()
         "34", //blue
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -935,6 +1005,8 @@ static const FFlogo* getLogoLinux()
         "30", //black
         "33" //yellow
     )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
 
@@ -968,6 +1040,8 @@ static const FFlogo* getLogoMacOS()
         "35", //magenta
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("33"); //yellow
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -994,6 +1068,8 @@ static const FFlogo* getLogoManjaro()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1013,6 +1089,8 @@ static const FFlogo* getLogoManjaroSmall()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1045,6 +1123,8 @@ static const FFlogo* getLogoMint()
         "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1065,6 +1145,8 @@ static const FFlogo* getLogoMintSmall()
         "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1094,6 +1176,8 @@ static const FFlogo* getLogoMintOld()
         "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1133,6 +1217,8 @@ static const FFlogo* getLogoMsys2()
         "37", //white
         "31" //red
     )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1166,6 +1252,8 @@ static const FFlogo* getLogoNixOS()
         "34", //blue
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -1207,6 +1295,8 @@ static const FFlogo* getLogoNixOsOld()
         "34", //blue
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -1226,6 +1316,8 @@ static const FFlogo* getLogoNixOsSmall()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -1257,6 +1349,8 @@ static const FFlogo* getLogoOpenSuse()
         "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1276,6 +1370,8 @@ static const FFlogo* getLogoOpenSuseSmall()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1284,7 +1380,7 @@ static const FFlogo* getLogoOpenSuseLeap()
     FF_LOGO_INIT
     FF_LOGO_NAMES("opensuse_leap", "open_suse_leap", "opensuse-leap", "open-suse-leap", "suse_leap", "suse-leap", "opensuseleap")
     FF_LOGO_LINES(
-        "                 $2.-++:.\n"
+        "                 .-++:.\n"
         "               ./oooooo/-\n"
         "            `:oooooooooooo:.\n"
         "          -+oooooooooooooooo+-`\n"
@@ -1302,9 +1398,10 @@ static const FFlogo* getLogoOpenSuseLeap()
         "                  `:/."
     )
     FF_LOGO_COLORS(
-        "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1313,7 +1410,7 @@ static const FFlogo* getLogoOpenSuseTumbleweed()
     FF_LOGO_INIT
     FF_LOGO_NAMES("opensuse_tumbleweed", "open_suse_tumbleweed", "opensuse-tumbleweed", "open-suse-tumbleweed", "suse_tumbleweed", "suse-tumbleweed", "opensusetumbleweed")
     FF_LOGO_LINES(
-        "                                    $2......\n"
+        "                                    ......\n"
         "     .,cdxxxoc,.               .:kKMMMNWMMMNk:.\n"
         "    cKMMN0OOOKWMMXo. ;        ;0MWk:.      .:OMMk.\n"
         "  ;WMK;.       .lKMMNM,     :NMK,             .OMW;\n"
@@ -1328,9 +1425,10 @@ static const FFlogo* getLogoOpenSuseTumbleweed()
         "         .....                    .:dOOXXKOxl,"
     )
     FF_LOGO_COLORS(
-        "32", //green
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1364,6 +1462,8 @@ static const FFlogo* getLogoPop()
         "36", //cyan
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -1384,6 +1484,8 @@ static const FFlogo* getLogoPopSmall()
     FF_LOGO_COLORS(
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
 
@@ -1417,6 +1519,8 @@ static const FFlogo* getLogoReborn()
         "34", //blue
         "36" //cyan
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -1440,6 +1544,8 @@ static const FFlogo* getLogoRebornSmall()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -1470,6 +1576,8 @@ static const FFlogo* getLogoRedHatEnterpriseLinux()
     FF_LOGO_COLORS(
         "31" //red
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1500,6 +1608,8 @@ static const FFlogo* getLogoRedstarOS()
     FF_LOGO_COLORS(
         "31" //red
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1531,6 +1641,8 @@ static const FFlogo* getLogoRockyLinux()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1563,6 +1675,8 @@ static const FFlogo* getLogoRosaLinux()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
@@ -1596,6 +1710,8 @@ static const FFlogo* getLogoUbuntu()
         "31", //red
         "37" //white
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1614,6 +1730,8 @@ static const FFlogo* getLogoUbuntuSmall()
     FF_LOGO_COLORS(
         "31" //red
     )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1645,6 +1763,8 @@ static const FFlogo* getLogoVoid()
         "32", //green
         "30" //black
     )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1664,6 +1784,8 @@ static const FFlogo* getLogoVoidSmall()
     FF_LOGO_COLORS(
         "32" //green
     )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1693,6 +1815,8 @@ static const FFlogo* getLogoZorin()
     FF_LOGO_COLORS(
         "34" //blue
     )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
