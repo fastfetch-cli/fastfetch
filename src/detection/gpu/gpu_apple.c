@@ -59,7 +59,8 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         uint32_t modelLength = (uint32_t) ffCFStringGetLength(model);
         ffStrbufInitA(&gpu->name, modelLength + 1);
         ffCFStringGetCString(model, gpu->name.chars, modelLength + 1, kCFStringEncodingUTF8);
-        gpu->name.chars[modelLength] = '\0';
+        gpu->name.length = modelLength;
+        gpu->name.chars[gpu->name.length] = '\0';
 
         ffStrbufInitA(&gpu->vendor, 0);
         ffStrbufInitA(&gpu->driver, 0);
