@@ -27,6 +27,7 @@ PublicIP
 Resolution
 Separator
 Shell
+Swap
 Terminal
 TerminalFont
 Theme

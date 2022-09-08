@@ -1,11 +1,11 @@
 #include "memory.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void ffDetectMemoryImpl(FFMemoryResult* memory)
 {
-    memory->bytesUsed = 0;
-    memory->bytesTotal = 0;
+    memset(memory, 0, sizeof(FFMemoryResult));
 
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
@@ -19,7 +19,9 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
              memFree = 0,
              buffers = 0,
              cached = 0,
-             sReclaimable = 0;
+             sReclaimable = 0,
+             swapTotal = 0,
+             swapFree = 0;
 
     while (getline(&line, &len, meminfo) != EOF)
     {
@@ -29,6 +31,8 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
         sscanf(line, "Buffers: %u", &buffers);
         sscanf(line, "Cached: %u", &cached);
         sscanf(line, "SReclaimable: %u", &sReclaimable);
+        sscanf(line, "SwapTotal: %u", &swapTotal);
+        sscanf(line, "SwapFree: %u", &swapFree);
     }
 
     if(line != NULL)
@@ -36,6 +40,9 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
 
     fclose(meminfo);
 
-    memory->bytesTotal = memTotal * (uint64_t) 1024;
-    memory->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
+    memory->ram.bytesTotal = memTotal * (uint64_t) 1024;
+    memory->ram.bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
+
+    memory->swap.bytesTotal = swapTotal * (uint64_t) 1024;
+    memory->swap.bytesUsed = (swapTotal - swapFree) * (uint64_t) 1024;
 }

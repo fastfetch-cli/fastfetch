@@ -282,6 +282,14 @@ static inline void printCommandHelp(const char* command)
             "Percentage used"
         );
     }
+    else if(strcasecmp(command, "swap-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("swap", "{} / {} ({}%)", 3,
+            "Used size",
+            "Total size",
+            "Percentage used"
+        );
+    }
     else if(strcasecmp(command, "disk-format") == 0)
     {
         constructAndPrintCommandHelpFormat("disk", "{}GiB / {}GiB ({4}%)", 4,
@@ -1082,6 +1090,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.memory.outputFormat);
     else if(strcasecmp(key, "--memory-error") == 0)
         optionParseString(key, value, &instance->config.memory.errorFormat);
+    else if(strcasecmp(key, "--swap-key") == 0)
+        optionParseString(key, value, &instance->config.swap.key);
+    else if(strcasecmp(key, "--swap-format") == 0)
+        optionParseString(key, value, &instance->config.swap.outputFormat);
+    else if(strcasecmp(key, "--swap-error") == 0)
+        optionParseString(key, value, &instance->config.swap.errorFormat);
     else if(strcasecmp(key, "--disk-key") == 0)
         optionParseString(key, value, &instance->config.disk.key);
     else if(strcasecmp(key, "--disk-format") == 0)
@@ -1351,6 +1365,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintGPU(instance);
     else if(strcasecmp(line, "memory") == 0)
         ffPrintMemory(instance);
+    else if(strcasecmp(line, "swap") == 0)
+        ffPrintSwap(instance);
     else if(strcasecmp(line, "disk") == 0)
         ffPrintDisk(instance);
     else if(strcasecmp(line, "battery") == 0)

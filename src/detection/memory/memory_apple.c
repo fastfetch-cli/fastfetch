@@ -1,13 +1,15 @@
 #include "memory.h"
 #include "common/settings.h"
 
+
+#include <string.h>
 #include <mach/mach.h>
 
 void ffDetectMemoryImpl(FFMemoryResult* memory)
 {
-    memory->bytesTotal = (uint64_t) ffSettingsGetAppleInt64("hw.memsize", 0);
+    memset(memory, 0, sizeof(FFMemoryResult));
 
-    memory->bytesUsed = 0;
+    memory->ram.bytesTotal = (uint64_t) ffSettingsGetAppleInt64("hw.memsize", 0);
 
     uint32_t pagesize = (uint32_t) ffSettingsGetAppleInt("hw.pagesize", 0);
     if(pagesize == 0)
@@ -18,5 +20,5 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
     if(host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t) (&vmstat), &count) != KERN_SUCCESS)
         return;
 
-    memory->bytesUsed = ((uint64_t) vmstat.active_count + vmstat.wire_count) * pagesize;
+    memory->ram.bytesUsed = ((uint64_t) vmstat.active_count + vmstat.wire_count) * pagesize;
 }

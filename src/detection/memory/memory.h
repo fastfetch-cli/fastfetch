@@ -5,11 +5,17 @@
 
 #include "fastfetch.h"
 
-typedef struct FFMemoryResult
+typedef struct FFMemoryStorage
 {
     uint64_t bytesUsed;
     uint64_t bytesTotal;
     uint8_t percentage;
+} FFMemoryStorage;
+
+typedef struct FFMemoryResult
+{
+    FFMemoryStorage ram;
+    FFMemoryStorage swap;
 } FFMemoryResult;
 
 const FFMemoryResult* ffDetectMemory();

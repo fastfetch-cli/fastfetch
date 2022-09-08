@@ -113,6 +113,7 @@ typedef struct FFconfig
     FFModuleArgs cpuUsage;
     FFModuleArgs gpu;
     FFModuleArgs memory;
+    FFModuleArgs swap;
     FFModuleArgs disk;
     FFModuleArgs battery;
     FFModuleArgs locale;
@@ -248,6 +249,7 @@ void ffPrintCPU(FFinstance* instance);
 void ffPrintCPUUsage(FFinstance* instance);
 void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
+void ffPrintSwap(FFinstance* instance); //Also in modules/memory.c
 void ffPrintDisk(FFinstance* instance);
 void ffPrintBattery(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);

@@ -177,6 +177,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.cpuUsage);
     initModuleArg(&instance->config.gpu);
     initModuleArg(&instance->config.memory);
+    initModuleArg(&instance->config.swap);
     initModuleArg(&instance->config.disk);
     initModuleArg(&instance->config.battery);
     initModuleArg(&instance->config.locale);

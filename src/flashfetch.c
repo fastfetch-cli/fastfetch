@@ -37,6 +37,7 @@ int main(int argc, char** argv)
     //ffPrintCPUUsage(&instance);
     ffPrintGPU(&instance);
     ffPrintMemory(&instance);
+    //ffPrintSwap(&instance);
     ffPrintDisk(&instance);
     ffPrintBattery(&instance);
     //ffPrintPlayer(&instance);
@@ -49,6 +50,7 @@ int main(int argc, char** argv)
     //ffPrintTime(&instance);
     //ffPrintVulkan(&instance);
     //ffPrintOpenGL(&instance);
+    //ffPrintOpenCL(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 
