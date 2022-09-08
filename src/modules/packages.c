@@ -4,6 +4,7 @@
 #include "common/printing.h"
 #include "common/settings.h"
 #include "common/processing.h"
+#include "common/parsing.h"
 #include "detection/os/os.h"
 
 #include <stdlib.h>
@@ -174,7 +175,38 @@ static uint32_t getXBPS(FFstrbuf* baseDir)
 }
 
 #endif // !__ANDROID__
-#endif // !__APPLE__
+
+#else // !__APPLE__
+
+static uint32_t getNumBrewPackages(FFstrbuf* baseDir)
+{
+    uint32_t result = 0;
+    uint32_t baseDirLength = baseDir->length;
+
+    const char* prefix = getenv("HOMEBREW_PREFIX");
+    bool prefixSet = ffStrSet(prefix);
+
+    if(prefixSet)
+    {
+        ffStrbufAppendS(baseDir, prefix);
+        result += getNumElements(baseDir->chars, DT_DIR);
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+    }
+
+    #define FF_BREW_COUNT_DIR(dir) \
+        ffStrbufAppendS(baseDir, dir); \
+        if(!prefixSet || strcmp(prefix, baseDir->chars) != 0) \
+            result += getNumElements(baseDir->chars, DT_DIR); \
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    FF_BREW_COUNT_DIR("/opt/homebrew");
+    FF_BREW_COUNT_DIR("/usr/local/Caskroom");
+    FF_BREW_COUNT_DIR("/usr/local/Cellar");
+
+    return result;
+}
+
+#endif // __APPLE__
 
 #ifdef FF_HAVE_RPM
 #include "common/library.h"
@@ -304,12 +336,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
     #else // !__APPLE__
 
     //brew
-    ffStrbufAppendS(baseDir, "/usr/local/Caskroom");
-    packageCounts->brew += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-    ffStrbufAppendS(baseDir, "/usr/local/Cellar");
-    packageCounts->brew += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    packageCounts->brew += getBrewPackages(baseDir);
 
     #endif // __APPLE__
 }
