@@ -178,7 +178,7 @@ static uint32_t getXBPS(FFstrbuf* baseDir)
 
 #else // !__APPLE__
 
-static uint32_t getNumBrewPackages(FFstrbuf* baseDir)
+static uint32_t getBrewPackages(FFstrbuf* baseDir)
 {
     uint32_t result = 0;
     uint32_t baseDirLength = baseDir->length;
@@ -267,9 +267,9 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
         FF_UNUSED(instance);
     #endif
 
-    uint32_t baseDirLength = baseDir->length;
-
     #ifndef __APPLE__ //Linux desktop and Anrdoid
+
+    uint32_t baseDirLength = baseDir->length;
 
     //pacman
     ffStrbufAppendS(baseDir, "/var/lib/pacman/local");
