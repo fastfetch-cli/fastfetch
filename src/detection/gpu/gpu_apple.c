@@ -27,7 +27,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL(iokit, CFDataGetTypeID, )
     FF_LIBRARY_LOAD_SYMBOL(iokit, IOObjectRelease, )
 
-    CFMutableDictionaryRef matchDict = ffIOServiceMatching(kIOAcceleratorClassName);
+    CFMutableDictionaryRef matchDict = ffIOServiceMatching("IOPCIDevice");
     io_iterator_t iterator;
     if(ffIOServiceGetMatchingServices(0, matchDict, &iterator) != kIOReturnSuccess)
     {
