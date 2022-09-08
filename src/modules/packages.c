@@ -178,6 +178,22 @@ static uint32_t getXBPS(FFstrbuf* baseDir)
 
 #else // !__APPLE__
 
+static uint32_t countBrewPackages(FFstrbuf* baseDir)
+{
+    uint32_t result = 0;
+    uint32_t baseDirLength = baseDir->length;
+
+    ffStrbufAppendS(baseDir, "/Caskroom");
+    result += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    ffStrbufAppendS(baseDir, "/Cellar");
+    result += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    return result;
+}
+
 static uint32_t getBrewPackages(FFstrbuf* baseDir)
 {
     uint32_t result = 0;
@@ -188,20 +204,20 @@ static uint32_t getBrewPackages(FFstrbuf* baseDir)
 
     if(prefixSet)
     {
-        ffStrbufAppendS(baseDir, prefix);
-        result += getNumElements(baseDir->chars, DT_DIR);
-        ffStrbufSubstrBefore(baseDir, baseDirLength);
+      ffStrbufAppendS(baseDir, prefix);
+      result += countBrewPackages(baseDir);
+      ffStrbufSubstrBefore(baseDir, baseDirLength);
     }
 
-    #define FF_BREW_COUNT_DIR(dir) \
-        ffStrbufAppendS(baseDir, dir); \
-        if(!prefixSet || strcmp(prefix, baseDir->chars) != 0) \
-            result += getNumElements(baseDir->chars, DT_DIR); \
-        ffStrbufSubstrBefore(baseDir, baseDirLength);
+    ffStrbufAppendS(baseDir, "/opt/homebrew");
+    if(!prefixSet || strcasecmp(baseDir->chars, prefix) != 0)
+        result += countBrewPackages(baseDir);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
 
-    FF_BREW_COUNT_DIR("/opt/homebrew");
-    FF_BREW_COUNT_DIR("/usr/local/Caskroom");
-    FF_BREW_COUNT_DIR("/usr/local/Cellar");
+    ffStrbufAppendS(baseDir, "/usr/local");
+    if(!prefixSet || strcasecmp(baseDir->chars, prefix) != 0)
+        result += countBrewPackages(baseDir);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
 
     return result;
 }
