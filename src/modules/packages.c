@@ -204,9 +204,9 @@ static uint32_t getBrewPackages(FFstrbuf* baseDir)
 
     if(prefixSet)
     {
-      ffStrbufAppendS(baseDir, prefix);
-      result += countBrewPackages(baseDir);
-      ffStrbufSubstrBefore(baseDir, baseDirLength);
+        ffStrbufAppendS(baseDir, prefix);
+        result += countBrewPackages(baseDir);
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
     }
 
     ffStrbufAppendS(baseDir, "/opt/homebrew");
