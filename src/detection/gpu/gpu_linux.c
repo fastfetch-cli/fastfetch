@@ -172,20 +172,20 @@ static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* devic
     pciDetectTemperatur(gpu, device);
 }
 
-static bool pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
+static void pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 {
     PCIData pci;
 
-    FF_LIBRARY_LOAD(libpci, instance->config.libPCI, false, "libpci.so", 4)
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_alloc, false)
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_init, false)
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_scan_bus, false)
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_cleanup, false)
+    FF_LIBRARY_LOAD(libpci, instance->config.libPCI, , "libpci.so", 4)
+    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_alloc, )
+    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_init, )
+    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_scan_bus, )
+    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_cleanup, )
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_read_byte, pci_read_byte, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_read_word, pci_read_word, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_lookup_name, pci_lookup_name, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_get_param, pci_get_param, false)
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_read_byte, pci_read_byte, )
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_read_word, pci_read_word, )
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_lookup_name, pci_lookup_name, )
+    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_get_param, pci_get_param, )
 
     pci.access = ffpci_alloc();
     ffpci_init(pci.access);
@@ -200,8 +200,6 @@ static bool pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 
     ffpci_cleanup(pci.access);
     dlclose(libpci);
-
-    return gpus->length > 0;
 }
 
 #endif
@@ -209,10 +207,6 @@ static bool pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     #ifdef FF_HAVE_LIBPCI
-        if(pciDetectGPUs(instance, gpus))
-            return;
+        pciDetectGPUs(instance, gpus);
     #endif
-
-    const FFVulkanResult* vulkan = ffDetectVulkan(instance);
-    *gpus = vulkan->gpus;
 }
