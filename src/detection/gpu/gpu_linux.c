@@ -90,8 +90,8 @@ static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufRecalculateLength(&gpu->name);
 
     uint32_t openingBracket = ffStrbufFirstIndexC(&gpu->name, '[');
-    uint32_t closingBracket = ffStrbufLastIndexC(&gpu->name, ']');
-    if(openingBracket < closingBracket && closingBracket < gpu->name.length)
+    uint32_t closingBracket = ffStrbufNextIndexC(&gpu->name, openingBracket, ']');
+    if(closingBracket < gpu->name.length)
     {
         ffStrbufSubstrBefore(&gpu->name, closingBracket);
         ffStrbufSubstrAfter(&gpu->name, openingBracket);
