@@ -88,6 +88,15 @@ static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufEnsureFree(&gpu->name, 255);
     pci->ffpci_lookup_name(pci->access, gpu->name.chars, (int) gpu->name.allocated, PCI_LOOKUP_DEVICE, device->vendor_id, device->device_id);
     ffStrbufRecalculateLength(&gpu->name);
+
+    uint32_t openingBracket = ffStrbufFirstIndexC(&gpu->name, '[');
+    uint32_t closingBracket = ffStrbufFirstIndexC(&gpu->name, ']');
+
+    if(openingBracket < closingBracket && closingBracket < gpu->name.length)
+    {
+        ffStrbufSubstrBefore(&gpu->name, closingBracket);
+        ffStrbufSubstrAfter(&gpu->name, openingBracket);
+    }
 }
 
 static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
