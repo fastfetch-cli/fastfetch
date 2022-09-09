@@ -35,7 +35,7 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
 
 static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, instance->config.libVulkan, , "libvulkan.so", 2)
+    FF_LIBRARY_LOAD(vulkan, instance->config.libVulkan, , "libvulkan"FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(vulkan, vkGetInstanceProcAddr,)
     FF_LIBRARY_LOAD_SYMBOL(vulkan, vkCreateInstance,)
     FF_LIBRARY_LOAD_SYMBOL(vulkan, vkDestroyInstance,)
@@ -85,9 +85,16 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
         .pApplicationInfo = &applicationInfo,
         .enabledLayerCount = 0,
         .ppEnabledLayerNames = NULL,
-        .enabledExtensionCount = 0,
-        .ppEnabledExtensionNames = NULL,
-        .flags = 0
+
+        #if defined(__APPLE__) && defined(VK_KHR_portability_enumeration)
+            .enabledExtensionCount = 1,
+            .ppEnabledExtensionNames = (const char* const[]) { VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME },
+            .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR
+        #else
+            .enabledExtensionCount = 0,
+            .ppEnabledExtensionNames = NULL,
+            .flags = 0
+        #endif
     };
 
     VkInstance vkInstance;

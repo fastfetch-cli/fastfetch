@@ -24,7 +24,7 @@ endif()
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX" OFF)

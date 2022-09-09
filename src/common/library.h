@@ -5,6 +5,12 @@
 
 #include <dlfcn.h>
 
+#ifdef __APPLE__
+    #define FF_LIBRARY_EXTENSION ".dylib"
+#else
+    #define FF_LIBRARY_EXTENSION ".so"
+#endif
+
 #define FF_LIBRARY_SYMBOL(symbolName) \
     __typeof__(&symbolName) ff ## symbolName;
 
