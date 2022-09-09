@@ -46,7 +46,8 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     if(gpu->vendor.length > 0)
         return;
 
-    pci->ffpci_lookup_name(pci->access, gpu->vendor.chars, (int) ffStrbufGetFree(&gpu->vendor), PCI_LOOKUP_VENDOR, device->vendor_id);
+    ffStrbufEnsureFree(&gpu->vendor, 255);
+    pci->ffpci_lookup_name(pci->access, gpu->vendor.chars, (int) gpu->vendor.allocated, PCI_LOOKUP_VENDOR, device->vendor_id);
     ffStrbufRecalculateLength(&gpu->vendor);
 
     if(ffStrbufFirstIndexS(&gpu->vendor, "AMD") < gpu->vendor.length || ffStrbufFirstIndexS(&gpu->vendor, "ATI") < gpu->vendor.length)
@@ -84,7 +85,8 @@ static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
             return;
     }
 
-    pci->ffpci_lookup_name(pci->access, gpu->name.chars, (int) ffStrbufGetFree(&gpu->name), PCI_LOOKUP_DEVICE, device->vendor_id, device->device_id);
+    ffStrbufEnsureFree(&gpu->name, 255);
+    pci->ffpci_lookup_name(pci->access, gpu->name.chars, (int) gpu->name.allocated, PCI_LOOKUP_DEVICE, device->vendor_id, device->device_id);
     ffStrbufRecalculateLength(&gpu->name);
 }
 
