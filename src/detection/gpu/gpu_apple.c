@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "common/library.h"
+#include "detection/cpu/cpu.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/graphics/IOGraphicsLib.h>
@@ -7,6 +8,21 @@
 void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     FF_UNUSED(instance);
+
+    const FFCPUResult* cpu = ffDetectCPU();
+    if(ffStrbufStartsWithIgnCaseS(&cpu->name, "Apple M"))
+    {
+        FFGPUResult* gpu = ffListAdd(gpus);
+
+        ffStrbufInit(&gpu->vendor);
+        ffStrbufAppendS(&gpu->vendor, "Apple");
+
+        ffStrbufInit(&gpu->name);
+        ffStrbufAppendS(&gpu->name, cpu->name.chars + 6); //Cut "Apple "
+
+        ffStrbufInitA(&gpu->driver, 0);
+        gpu->temperature = FF_GPU_TEMP_UNSET;
+    }
 
     void* iokit = dlopen(FASTFETCH_TARGET_DIR_ROOT"/System/Library/Frameworks/IOKit.framework/IOKit", RTLD_LAZY);
     if(iokit == NULL)
