@@ -10,9 +10,9 @@ project(fastfetch
 ###################
 
 if(APPLE OR ANDROID)
-    set(LINUX FALSE CACHE BOOL "...") # Linux true means we have full linux userland, not just the kernel
+    set(LINUX FALSE CACHE BOOL "..." FORCE) # Linux true means we have full linux userland, not just the kernel
 elseif(UNIX)
-    set(LINUX TRUE CACHE BOOL "...")
+    set(LINUX TRUE CACHE BOOL "..." FORCE)
 else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
@@ -363,7 +363,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 if(NOT CMAKE_INSTALL_SYSCONFDIR)
-    set(CMAKE_INSTALL_SYSCONFDIR "${TARGET_DIR_ROOT}/etc")
+    set(CMAKE_INSTALL_SYSCONFDIR "${TARGET_DIR_ROOT}/etc" CACHE PATH "..." FORCE)
 endif()
 
 include(GNUInstallDirs)
