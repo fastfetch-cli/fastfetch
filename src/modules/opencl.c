@@ -76,9 +76,9 @@ static const char* printOpenCL(FFinstance* instance)
     OpenCLData data;
 
     FF_LIBRARY_LOAD(opencl, instance->config.libOpenCL, "dlopen libOpenCL.so failed", "libOpenCL.so", 1);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(opencl, data.ffclGetPlatformIDs, clGetPlatformIDs, "dlsym clGetPlatformIDs failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(opencl, data.ffclGetDeviceIDs, clGetDeviceIDs, "dlsym clGetDeviceIDs failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(opencl, data.ffclGetDeviceInfo, clGetDeviceInfo, "dlsym clGetDeviceInfo failed");
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
 
     const char* error = openCLHandelData(instance, &data);
     dlclose(opencl);

@@ -13,8 +13,8 @@ typedef struct X11PropertyData
 
 static bool x11InitPropertyData(void* libraryHandle, X11PropertyData* propertyData)
 {
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffXInternAtom, XInternAtom, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffXGetWindowProperty, XGetWindowProperty, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XInternAtom, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XGetWindowProperty, false)
 
     return true;
 }
@@ -266,17 +266,17 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
     XrandrData data;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetScreenInfo, XRRGetScreenInfo,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRConfigCurrentRate, XRRConfigCurrentRate,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetMonitors, XRRGetMonitors,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetScreenResources, XRRGetScreenResources,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetOutputInfo, XRRGetOutputInfo,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRGetCrtcInfo, XRRGetCrtcInfo,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeCrtcInfo, XRRFreeCrtcInfo,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeOutputInfo, XRRFreeOutputInfo,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeScreenResources, XRRFreeScreenResources,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeMonitors, XRRFreeMonitors,);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xrandr, data.ffXRRFreeScreenConfigInfo, XRRFreeScreenConfigInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenInfo,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResources,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetCrtcInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeCrtcInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeOutputInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeScreenResources,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeMonitors,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeScreenConfigInfo,);
 
     X11PropertyData propertyData;
     bool propertyDataInitialized = x11InitPropertyData(xrandr, &propertyData);

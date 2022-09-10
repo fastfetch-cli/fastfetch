@@ -18,12 +18,12 @@ typedef struct XcbPropertyData
 
 static bool xcbInitPropertyData(void* libraryHandle, XcbPropertyData* propertyData)
 {
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffxcb_intern_atom, xcb_intern_atom, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffxcb_intern_atom_reply, xcb_intern_atom_reply, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffxcb_get_property, xcb_get_property, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffxcb_get_property_reply, xcb_get_property_reply, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffxcb_get_property_value, xcb_get_property_value, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libraryHandle, propertyData->ffxcb_get_property_value_length, xcb_get_property_value_length, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_intern_atom, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_intern_atom_reply, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_reply, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value_length, false)
 
     return true;
 }
@@ -335,23 +335,23 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
 
     XcbRandrData data;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_screen_resources, xcb_randr_get_screen_resources,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_screen_resources_reply, xcb_randr_get_screen_resources_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_screen_resources_modes_iterator, xcb_randr_get_screen_resources_modes_iterator,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_screen_info, xcb_randr_get_screen_info,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_screen_info_reply, xcb_randr_get_screen_info_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_mode_info_next, xcb_randr_mode_info_next,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_monitors, xcb_randr_get_monitors,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_monitors_reply, xcb_randr_get_monitors_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_monitors_monitors_iterator, xcb_randr_get_monitors_monitors_iterator,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_monitor_info_next, xcb_randr_monitor_info_next,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_monitor_info_outputs_length, xcb_randr_monitor_info_outputs_length,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_monitor_info_outputs, xcb_randr_monitor_info_outputs,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_output_next, xcb_randr_output_next,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_output_info, xcb_randr_get_output_info,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_output_info_reply, xcb_randr_get_output_info_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_crtc_info, xcb_randr_get_crtc_info,)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(xcbRandr, data.ffxcb_randr_get_crtc_info_reply, xcb_randr_get_crtc_info_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_modes_iterator,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_info,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_info_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_mode_info_next,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_monitors,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_monitors_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_monitors_monitors_iterator,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_monitor_info_next,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_monitor_info_outputs_length,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_monitor_info_outputs,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_output_next,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_info,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_info_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_crtc_info,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_crtc_info_reply,)
 
     XcbPropertyData propertyData;
     bool propertyDataInitialized = xcbInitPropertyData(xcbRandr, &propertyData);
