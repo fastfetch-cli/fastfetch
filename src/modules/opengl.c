@@ -10,7 +10,12 @@
 #if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA)
 #define FF_HAVE_GL 1
 #include "common/library.h"
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 #define FF_OPENGL_BUFFER_WIDTH 1
 #define FF_OPENGL_BUFFER_HEIGHT 1
@@ -387,7 +392,7 @@ void ffPrintOpenGL(FFinstance* instance)
     #ifndef FF_HAVE_GL
         error = "Fastfetch was built without gl support.";
     #else
-       error = glPrint(instance);
+        error = glPrint(instance);
     #endif
 
     if(error != NULL)

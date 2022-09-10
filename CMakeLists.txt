@@ -69,6 +69,11 @@ endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
+if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
+    # Used for dlopen finding dylibs installed by homebrew, reversed for future usage
+    # `/opt/homebrew/lib` is not on dlopen search path by default
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
+endif()
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT IPO_SUPPORTED)
