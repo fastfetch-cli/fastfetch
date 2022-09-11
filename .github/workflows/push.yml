@@ -105,6 +105,9 @@ jobs:
       - name: download artifacts
         uses: actions/download-artifact@v3
 
+      - name: restore permissions
+        run: chmod +x fastfetch/fastfetch
+
       - name: get fastfetch version
         id: get_version_fastfetch
         run: echo "::set-output name=release::$(fastfetch/fastfetch --version-raw)"
