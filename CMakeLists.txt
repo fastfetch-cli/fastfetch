@@ -399,7 +399,20 @@ install(
 # package target #
 ##################
 
-set(CPACK_GENERATOR "DEB;RPM;TGZ;ZIP")
+set(CPACK_GENERATOR "TGZ;ZIP")
+
+if(LINUX)
+    set(CPACK_GENERATOR "${CPACK_GENERATOR};DEB;RPM")
+
+    set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
+
+    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+elseif(APPLE)
+    set(CPACK_GENERATOR "${CPACK_GENERATOR};DragNDrop")
+endif()
+
 set(CPACK_SET_DESTDIR ON)
 
 set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
@@ -409,11 +422,5 @@ fastfetch is a neofetch-like tool for fetching system information and displaying
 It is written in c to achieve much better performance.\
 ")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/LinusDierheimer")
-
-set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
-set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
-
-set(CPACK_RPM_PACKAGE_LICENSE "MIT")
 
 include(CPack)

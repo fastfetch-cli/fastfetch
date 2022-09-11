@@ -6,28 +6,30 @@ on:
 
 jobs:
   linux:
-    name: build, run test and release on Linux
+    name: Linux
     runs-on: ubuntu-latest
     permissions:
-      contents: write
       security-events: write
     steps:
       - name: checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: install required packages
         run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
+        uses: github/codeql-action/init@v2
+        with:
+          languages: c
 
       - name: configure project
-        # We reuse the build binary only for the releases.
-        # We set tweak version to off, because it is wrong, as git tag will happen after this step. Releases don't have a tweak, so this is ok.
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . -j$(nproc) --target package
+
+      - name: perform CodeQL analysis
+        uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
         run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
@@ -38,8 +40,70 @@ jobs:
       - name: run tests
         run: ctest
 
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastfetch-linux
+          path: ./fastfetch-*.*
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastfetch
+          path: ./fastfetch
+
+  macos:
+    name: MacOS
+    runs-on: macos-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: install required packages
+        run: brew install vulkan-loader
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: c
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build . -j$(sysctl -n hw.logicalcpu) --target package
+
       - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v1
+        uses: github/codeql-action/analyze@v2
+
+      - name: run fastfetch
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
+
+      - name: run flashfetch
+        run: ./flashfetch
+
+      - name: run tests
+        run: ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastfetch-macos
+          path: ./fastfetch-*.*
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - linux
+      - macos
+    permissions:
+      contents: write
+    steps:
+      - name: download artifacts
+        uses: actions/download-artifact@v3
 
       - name: get fastfetch version
         id: get_version_fastfetch
@@ -58,25 +122,3 @@ jobs:
           tag: ${{ steps.get_version_fastfetch.outputs.release }}
           commit: ${{ github.sha }}
           artifacts: ./fastfetch-*.*
-
-  macos:
-    name: build and run on MacOS
-    runs-on: macos-latest
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v2
-
-      - name: configure project
-        run: cmake -DBUILD_TESTS=On .
-
-      - name: build project
-        run: cmake --build . -j$(sysctl -n hw.logicalcpu)
-
-      - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
-
-      - name: run flashfetch
-        run: ./flashfetch
-
-      - name: run tests
-        run: ctest
