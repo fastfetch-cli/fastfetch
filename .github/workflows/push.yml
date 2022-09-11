@@ -107,7 +107,7 @@ jobs:
 
       - name: get fastfetch version
         id: get_version_fastfetch
-        run: echo "::set-output name=release::$(./fastfetch --version-raw)"
+        run: echo "::set-output name=release::$(fastfetch/fastfetch --version-raw)"
 
       - name: get latest release version
         id: get_version_release
@@ -121,4 +121,5 @@ jobs:
         with:
           tag: ${{ steps.get_version_fastfetch.outputs.release }}
           commit: ${{ github.sha }}
-          artifacts: ./fastfetch-*.*
+          artifactErrorsFailBuild: true
+          artifacts: fastfetch-linux/*,fastfetch-macos/*
