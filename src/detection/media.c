@@ -203,7 +203,7 @@ static bool getBusProperties(const char* busName, FFMediaResult* result, DBusDat
         else if(strcmp(key, "xesam:url") == 0)
             getValue(&dictIterator, &result->url, data);
 
-        if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0)
+        if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0 && result->url.length > 0)
             break;
 
         FF_DBUS_ITER_CONTINUE(arrayIterator)
@@ -219,12 +219,15 @@ static bool getBusProperties(const char* busName, FFMediaResult* result, DBusDat
         return false;
     }
 
+    //Set short bus name
+    ffStrbufAppendS(&result->busNameShort, busName + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
+
     //We found a song, get the player name
-
     getPropertyString(busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", "Identity", &result->player, data);
-
     if(result->player.length == 0)
         getPropertyString(busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", "DesktopEntry", &result->player, data);
+    if(result->player.length == 0)
+        ffStrbufAppend(&result->player, &result->busNameShort);
 
     return true;
 }
@@ -233,12 +236,9 @@ static void getCustomBus(FFinstance* instance, FFMediaResult* result, DBusData* 
 {
     if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
     {
-        ffStrbufAppendS(&result->busNameShort, instance->config.playerName.chars + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
         getBusProperties(instance->config.playerName.chars, result, data);
         return;
     }
-
-    ffStrbufAppend(&result->busNameShort, &instance->config.playerName);
 
     FFstrbuf busName;
     ffStrbufInit(&busName);
@@ -250,6 +250,12 @@ static void getCustomBus(FFinstance* instance, FFMediaResult* result, DBusData* 
 
 static void getBestBus(FFMediaResult* result, DBusData* data)
 {
+    if(
+        getBusProperties(FF_DBUS_MPRIS_PREFIX"spotify", result, data) ||
+        getBusProperties(FF_DBUS_MPRIS_PREFIX"vlc", result, data) ||
+        getBusProperties(FF_DBUS_MPRIS_PREFIX"plasma-browser-integration", result, data)
+    ) return;
+
     DBusMessage* message = data->ffdbus_message_new_method_call("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames");
     if(message == NULL)
         return;
@@ -277,10 +283,7 @@ static void getBestBus(FFMediaResult* result, DBusData* data)
             FF_DBUS_ITER_CONTINUE(arrayIterator)
 
         if(getBusProperties(busName, result, data))
-        {
-            ffStrbufAppendS(&result->busNameShort, busName + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
             break;
-        }
 
         FF_DBUS_ITER_CONTINUE(arrayIterator)
     }
@@ -352,18 +355,14 @@ const FFMediaResult* ffDetectMedia(FFinstance* instance)
         getMedia(instance, &result);
     #endif
 
-    //Set busNameShort if a custom player was given, but loading dbus failed
-    if(instance->config.playerName.length > 0 && result.busNameShort.length == 0)
+    //Set player if a custom player was given, but loading with dbus failed
+    if(instance->config.playerName.length > 0 && result.song.length == 0)
     {
         if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
-            ffStrbufAppendS(&result.busNameShort, instance->config.playerName.chars + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
+            ffStrbufAppendS(&result.player, instance->config.playerName.chars + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
         else
-            ffStrbufAppend(&result.busNameShort, &instance->config.playerName);
+            ffStrbufAppend(&result.player, &instance->config.playerName);
     }
-
-    //Set player to busNameShort, if detection failed
-    if(result.player.length == 0)
-        ffStrbufAppend(&result.player, &result.busNameShort);
 
     pthread_mutex_unlock(&mutex);
     return &result;

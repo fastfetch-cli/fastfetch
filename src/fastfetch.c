@@ -329,20 +329,20 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "player-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("player", "{}", 3,
+        constructAndPrintCommandHelpFormat("player", "{}", 4,
             "Pretty player name",
             "Player name",
-            "DBus bus name"
+            "DBus bus name",
+            "URL name"
         );
     }
-    else if(strcasecmp(command, "song-format") == 0)
+    else if(strcasecmp(command, "song-format") == 0 || strcasecmp(command, "media-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("song", "{3} - {4} - {1}", 5,
-            "Song name pretty",
-            "Song name",
+        constructAndPrintCommandHelpFormat("song", "{3} - {1}", 4,
+            "Pretty media name",
+            "Media name",
             "Artist name",
-            "Album name",
-            "Song url"
+            "Album name"
         );
     }
     else if(strcasecmp(command, "datetime-format") == 0 || strcasecmp(command, "date-format") == 0 || strcasecmp(command, "time-format") == 0)
@@ -1132,11 +1132,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.player.outputFormat);
     else if(strcasecmp(key, "--player-error") == 0)
         optionParseString(key, value, &instance->config.player.errorFormat);
-    else if(strcasecmp(key, "--song-key") == 0)
+    else if(strcasecmp(key, "--song-key") == 0 || strcasecmp(key, "--media-key") == 0)
         optionParseString(key, value, &instance->config.song.key);
-    else if(strcasecmp(key, "--song-format") == 0)
+    else if(strcasecmp(key, "--song-format") == 0 || strcasecmp(key, "--media-format") == 0)
         optionParseString(key, value, &instance->config.song.outputFormat);
-    else if(strcasecmp(key, "--song-error") == 0)
+    else if(strcasecmp(key, "--song-error") == 0 || strcasecmp(key, "--media-error") == 0)
         optionParseString(key, value, &instance->config.song.errorFormat);
     else if(strcasecmp(key, "--datetime-key") == 0)
         optionParseString(key, value, &instance->config.dateTime.key);

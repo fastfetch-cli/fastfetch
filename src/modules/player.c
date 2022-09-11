@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 #define FF_PLAYER_MODULE_NAME "Media Player"
-#define FF_PLAYER_NUM_FORMAT_ARGS 3
+#define FF_PLAYER_NUM_FORMAT_ARGS 4
 
 void ffPrintPlayer(FFinstance* instance)
 {
@@ -62,7 +62,8 @@ void ffPrintPlayer(FFinstance* instance)
         ffPrintFormat(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->player},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->busNameShort}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->busNameShort},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
         });
     }
 }
