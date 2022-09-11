@@ -61,7 +61,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
             continue;
         }
 
-        CFStringRef key = ffCFStringCreateWithCStringNoCopy(NULL, "model", kCFStringEncodingUTF8, *ffkCFAllocatorNull);
+        CFStringRef key = ffCFStringCreateWithCStringNoCopy(NULL, "model", kCFStringEncodingASCII, *ffkCFAllocatorNull);
         CFStringRef model = ffCFDictionaryGetValue(properties, key);
         if(model == NULL || ffCFGetTypeID(model) != ffCFDataGetTypeID())
         {
@@ -74,7 +74,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         uint32_t modelLength = (uint32_t) ffCFStringGetLength(model);
         ffStrbufInitA(&gpu->name, modelLength + 1);
-        ffCFStringGetCString(model, gpu->name.chars, modelLength + 1, kCFStringEncodingUTF8);
+        ffCFStringGetCString(model, gpu->name.chars, modelLength + 1, kCFStringEncodingASCII);
         gpu->name.length = modelLength;
         gpu->name.chars[gpu->name.length] = '\0';
 
