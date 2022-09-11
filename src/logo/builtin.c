@@ -1680,6 +1680,63 @@ static const FFlogo* getLogoRosaLinux()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoSlackware()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("slackware", "slackware-linux", "slackwarelinux")
+    FF_LOGO_LINES(
+        "                  :::::::::\n"
+        "            :::::::::::::::::::\n"
+        "         :::::::::::::::::::::::::\n"
+        "       ::::::::$2cllcccccllllllll$1::::::\n"
+        "    :::::::::$2lc               dc$1:::::::\n"
+        "   ::::::::$2cl   clllccllll    oc$1:::::::::\n"
+        "  :::::::::$2o   lc$1::::::::$2co   oc$1::::::::::\n"
+        " ::::::::::$2o    cccclc$1:::::$2clcc$1::::::::::::\n"
+        " :::::::::::$2lc        cclccclc$1:::::::::::::\n"
+        "::::::::::::::$2lcclcc          lc$1::::::::::::\n"
+        "::::::::::$2cclcc$1:::::$2lccclc     oc$1:::::::::::\n"
+        "::::::::::$2o    l$1::::::::::$2l    lc$1:::::::::::\n"
+        " :::::$2cll$1:$2o     clcllcccll     o$1:::::::::::\n"
+        " :::::$2occ$1:$2o                  clc$1:::::::::::\n"
+        "  ::::$2ocl$1:$2ccslclccclclccclclc$1:::::::::::::\n"
+        "   :::$2oclcccccccccccccllllllllllllll$1:::::\n"
+        "    ::$2lcc1lcccccccccccccccccccccccco$1::::\n"
+        "      ::::::::::::::::::::::::::::::::\n"
+        "        ::::::::::::::::::::::::::::\n"
+        "           ::::::::::::::::::::::\n"
+        "                ::::::::::::"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34") //blue
+    FF_LOGO_COLOR_TITLE("34") //blue
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoSlackwareSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("slackware-small", "slackware-linux-small", "slackware_small", "slackwarelinux_small")
+    FF_LOGO_LINES(
+        "   ________\n"
+        "  /  ______|\n"
+        "  | |______\n"
+        "  \\______  \\\n"
+        "   ______| |\n"
+        "| |________/\n"
+        "|____________"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -1880,6 +1937,8 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoRedstarOS,
         getLogoRockyLinux,
         getLogoRosaLinux,
+        getLogoSlackware,
+        getLogoSlackwareSmall,
         getLogoUbuntu,
         getLogoUbuntuSmall,
         getLogoVoid,
