@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
+    outputs:
+      ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
@@ -40,17 +42,15 @@ jobs:
       - name: run tests
         run: ctest
 
+      - name: get fastfetch version
+        id: ffversion
+        run: echo "::set-output name=ffversion::$(./fastfetch --version-raw)"
+
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-linux
           path: ./fastfetch-*.*
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: fastfetch
-          path: ./fastfetch
 
   macos:
     name: MacOS
@@ -105,13 +105,6 @@ jobs:
       - name: download artifacts
         uses: actions/download-artifact@v3
 
-      - name: restore permissions
-        run: chmod +x fastfetch/fastfetch
-
-      - name: get fastfetch version
-        id: get_version_fastfetch
-        run: echo "::set-output name=release::$(fastfetch/fastfetch --version-raw)"
-
       - name: get latest release version
         id: get_version_release
         uses: pozetroninc/github-action-get-latest-release@master
@@ -119,7 +112,7 @@ jobs:
           repository: ${{ github.repository }}
 
       - name: create release
-        if: steps.get_version_fastfetch.outputs.release != steps.get_version_release.outputs.release
+        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_version_fastfetch.outputs.release }}
