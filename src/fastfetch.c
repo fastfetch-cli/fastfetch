@@ -230,10 +230,17 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "terminal-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("terminal", "{3}", 3,
+        constructAndPrintCommandHelpFormat("terminal", "{3}", 10,
             "Terminal process name",
             "Terminal path with exe name",
-            "Terminal exe name"
+            "Terminal exe name",
+            "Shell process name",
+            "Shell path with exe name",
+            "Shell exe name",
+            "Shell version",
+            "User shell path with exe name",
+            "User shell exe name",
+            "User shell version"
         );
     }
     else if(strcasecmp(command, "terminal-font-format") == 0)
