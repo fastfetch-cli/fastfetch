@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define FF_TERMINAL_MODULE_NAME "Terminal"
-#define FF_TERMINAL_NUM_FORMAT_ARGS 3
+#define FF_TERMINAL_NUM_FORMAT_ARGS 10
 
 void ffPrintTerminal(FFinstance* instance)
 {
@@ -31,7 +31,14 @@ void ffPrintTerminal(FFinstance* instance)
         ffPrintFormat(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminal, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->terminalExeName}
+            {FF_FORMAT_ARG_TYPE_STRING, result->terminalExeName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellProcessName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
+            {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellExe},
+            {FF_FORMAT_ARG_TYPE_STRING, result->userShellExeName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellVersion}
         });
     }
 }
