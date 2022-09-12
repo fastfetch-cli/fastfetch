@@ -108,9 +108,9 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     WaylandData data;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_marshal_constructor_versioned, wl_proxy_marshal_constructor_versioned, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_proxy_add_listener, wl_proxy_add_listener, false)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(wayland, data.ffwl_output_interface, wl_output_interface, false)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_marshal_constructor_versioned, false)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_add_listener, false)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_output_interface, false)
 
     struct wl_display* display = ffwl_display_connect(NULL);
     if(display == NULL)

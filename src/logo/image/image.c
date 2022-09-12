@@ -282,9 +282,9 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
 
     ImageData imageData;
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imData->library, imageData.ffCopyMagickString, CopyMagickString, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imData->library, imageData.ffImageToBlob, ImageToBlob, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(imData->library, imageData.ffBase64Encode, Base64Encode, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, CopyMagickString, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, ImageToBlob, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, Base64Encode, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
     imageData.exceptionInfo = ffAcquireExceptionInfo();
     if(imageData.exceptionInfo == NULL)

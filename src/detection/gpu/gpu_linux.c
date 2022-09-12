@@ -182,10 +182,10 @@ static void pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     FF_LIBRARY_LOAD_SYMBOL(libpci, pci_scan_bus, )
     FF_LIBRARY_LOAD_SYMBOL(libpci, pci_cleanup, )
 
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_read_byte, pci_read_byte, )
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_read_word, pci_read_word, )
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_lookup_name, pci_lookup_name, )
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(libpci, pci.ffpci_get_param, pci_get_param, )
+    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_read_byte, )
+    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_read_word, )
+    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_lookup_name, )
+    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_get_param, )
 
     pci.access = ffpci_alloc();
     ffpci_init(pci.access);

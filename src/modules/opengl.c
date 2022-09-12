@@ -10,7 +10,12 @@
 #if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA)
 #define FF_HAVE_GL 1
 #include "common/library.h"
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 #define FF_OPENGL_BUFFER_WIDTH 1
 #define FF_OPENGL_BUFFER_HEIGHT 1
@@ -140,17 +145,17 @@ static const char* eglPrint(FFinstance* instance)
     EGLData eglData;
 
     FF_LIBRARY_LOAD(egl, instance->config.libEGL, "dlopen egl failed", "libEGL.so", 1);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglGetProcAddress, eglGetProcAddress, "dlsym eglGetProcAddress failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglGetDisplay, eglGetDisplay, "dlsym eglGetDisplay failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglInitialize, eglInitialize, "dlsym eglInitialize failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglBindAPI, eglBindAPI, "dlsym eglBindAPI failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglGetConfigs, eglGetConfigs, "dlsym eglGetConfigs failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglCreatePbufferSurface, eglCreatePbufferSurface, "dlsym eglCreatePbufferSurface failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglCreateContext, eglCreateContext, "dlsym eglCreateContext failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglMakeCurrent, eglMakeCurrent, "dlsym eglMakeCurrent failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglDestroyContext, eglDestroyContext, "dlsym eglDestroyContext failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglDestroySurface, eglDestroySurface, "dlsym eglDestroySurface failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(egl, eglData.ffeglTerminate, eglTerminate, "dlsym eglTerminate failed");
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglInitialize);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglBindAPI);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetConfigs);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglCreatePbufferSurface);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglCreateContext);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglMakeCurrent);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroyContext);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroySurface);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
 
     const char* error = eglHandleData(instance, &eglData);
     dlclose(egl);
@@ -255,17 +260,17 @@ static const char* glxPrint(FFinstance* instance)
     GLXData data;
 
     FF_LIBRARY_LOAD(glx, instance->config.libGLX, "dlopen glx failed", "libGLX.so", 1);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXGetProcAddress, glXGetProcAddress, "dlsym glXGetProcAddress failed");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffXOpenDisplay, XOpenDisplay, "dlsym XOpenDisplay returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXChooseVisual, glXChooseVisual, "dlsym glXChooseVisual returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffXCreatePixmap, XCreatePixmap, "dlsym XCreatePixmap returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXCreateGLXPixmap, glXCreateGLXPixmap, "dlsym glXCreateGLXPixmap returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXCreateContext, glXCreateContext, "dlsym glXCreateContext returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXMakeCurrent, glXMakeCurrent, "dlsym glXMakeCurrent returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXDestroyContext, glXDestroyContext, "dlsym glXDestroyContext returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffglXDestroyGLXPixmap, glXDestroyGLXPixmap, "dlsym glXDestroyGLXPixmap returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffXFreePixmap, XFreePixmap, "dlsym XFreePixmap returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(glx, data.ffXCloseDisplay, XCloseDisplay, "dlsym XCloseDisplay returned NULL");
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XOpenDisplay);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXChooseVisual);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XCreatePixmap);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXCreateGLXPixmap);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXCreateContext);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXMakeCurrent);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXDestroyContext);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXDestroyGLXPixmap);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XFreePixmap);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XCloseDisplay);
 
     const char* error = glxHandleData(instance, &data);
     dlclose(glx);
@@ -320,10 +325,10 @@ static const char* osMesaPrint(FFinstance* instance)
     OSMesaData data;
 
     FF_LIBRARY_LOAD(osmesa, instance->config.libOSMesa, "dlopen osmesa failed", "libOSMesa.so", 8);
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaGetProcAddress, OSMesaGetProcAddress, "dlsym OSMesaGetProcAddress returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaCreateContext, OSMesaCreateContext, "dlsym OSMesaCreateContext returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaMakeCurrent, OSMesaMakeCurrent, "dlsym OSMesaMakeCurrent returned NULL");
-    FF_LIBRARY_LOAD_SYMBOL_ADRESS(osmesa, data.ffOSMesaDestroyContext, OSMesaDestroyContext, "dlsym OSMesaDestroyContext returned NULL");
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaGetProcAddress);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaCreateContext);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaMakeCurrent);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaDestroyContext);
 
     const char* error = osMesaHandleData(instance, &data);
     dlclose(osmesa);
@@ -387,7 +392,7 @@ void ffPrintOpenGL(FFinstance* instance)
     #ifndef FF_HAVE_GL
         error = "Fastfetch was built without gl support.";
     #else
-       error = glPrint(instance);
+        error = glPrint(instance);
     #endif
 
     if(error != NULL)

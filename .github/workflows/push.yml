@@ -34,7 +34,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
       - name: run flashfetch
         run: ./flashfetch
@@ -79,7 +79,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
       - name: run flashfetch
         run: ./flashfetch
