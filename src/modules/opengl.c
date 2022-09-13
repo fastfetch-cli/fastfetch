@@ -343,33 +343,42 @@ static const char* osMesaPrint(FFinstance* instance)
 
 static const char* appleCglPrint(FFinstance* instance)
 {
+    const char* error = NULL;
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
         kCGLPFAAccelerated,
         0
     };
-    CGLPixelFormatObj pix;
+    CGLPixelFormatObj pix = NULL;
     GLint num;
+    CGLContextObj ctx = NULL;
+
     if (CGLChoosePixelFormat(attrs, &pix, &num) != kCGLNoError) {
-        return "CGLChoosePixelFormat() failed";
+        error = "CGLChoosePixelFormat() failed";
+        goto exit;
     }
 
-    CGLContextObj ctx;
     if (CGLCreateContext(pix, NULL, &ctx) != kCGLNoError) {
-        return "CGLCreateContext() failed";
+        error = "CGLCreateContext() failed";
+        goto exit;
     }
+
     if (CGLSetCurrentContext(ctx) != kCGLNoError) {
-        return "CGLSetCurrentContext() failed";
+        error = "CGLSetCurrentContext() failed";
+        goto exit;
     }
 
     GLData glData = {
         .ffglGetString = glGetString
     };
 
-    const char* error = glHandlePrint(instance, &glData);
+    error = glHandlePrint(instance, &glData);
 
-    CGLDestroyContext(ctx);
-    CGLDestroyPixelFormat(pix);
+exit:
+    if(ctx)
+        CGLDestroyContext(ctx);
+    if(pix)
+        CGLDestroyPixelFormat(pix);
 
     return error;
 }
