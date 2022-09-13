@@ -10,7 +10,11 @@
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100
+#ifdef __APPLE__
+#include <OpenCL/cl.h>
+#else
 #include <CL/cl.h>
+#endif
 
 typedef struct OpenCLData
 {
@@ -75,13 +79,21 @@ static const char* printOpenCL(FFinstance* instance)
 {
     OpenCLData data;
 
+    #ifdef __APPLE__
+    data.ffclGetPlatformIDs = clGetPlatformIDs;
+    data.ffclGetDeviceIDs = clGetDeviceIDs;
+    data.ffclGetDeviceInfo = clGetDeviceInfo;
+    #else
     FF_LIBRARY_LOAD(opencl, instance->config.libOpenCL, "dlopen libOpenCL.so failed", "libOpenCL.so", 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
+    #endif
 
     const char* error = openCLHandelData(instance, &data);
+    #ifndef __APPLE__
     dlclose(opencl);
+    #endif
     return error;
 }
 #endif

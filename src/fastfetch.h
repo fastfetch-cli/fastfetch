@@ -50,7 +50,8 @@ typedef enum FFGLType
     FF_GL_TYPE_AUTO,
     FF_GL_TYPE_EGL,
     FF_GL_TYPE_GLX,
-    FF_GL_TYPE_OSMESA
+    FF_GL_TYPE_OSMESA,
+    FF_GL_TYPE_APPLECGL
 } FFGLType;
 
 typedef struct FFModuleArgs

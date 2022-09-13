@@ -43,7 +43,8 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_APPLECGL "Enable apple-cgl" ON "APPLE" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR APPLE" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -309,10 +310,34 @@ ff_check_lib(IMAGEMAGICK7 MagickCore-7.Q16HDRI MagickCore-7.Q16 /usr/lib/imagema
 ff_check_lib(IMAGEMAGICK6 MagickCore-6.Q16HDRI MagickCore-6.Q16 /usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16HDRI.pc /usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16.pc)
 ff_check_lib(ZLIB zlib)
 ff_check_lib(CHAFA chafa>=1.10)
-ff_check_lib(EGL egl)
-ff_check_lib(GLX glx)
-ff_check_lib(OSMESA osmesa)
-ff_check_lib(OPENCL OpenCL)
+
+if(APPLE)
+    # Apple framework bundles can't be found by pkg-config
+    if(ENABLE_APPLECGL)
+        find_package(OpenGL)
+        if(OpenGL_FOUND)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_APPLECGL=1)
+            target_link_libraries(libfastfetch PRIVATE ${OPENGL_LIBRARIES})
+        else()
+            message(WARNING "Package Apple-CGL not found, building without support.")
+        endif()
+    endif()
+
+    if(ENABLE_OPENCL)
+        find_package(OpenCL)
+        if(OpenCL_FOUND)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_OPENCL=1)
+            target_link_libraries(libfastfetch PRIVATE ${OpenCL_LIBRARY})
+            else()
+            message(WARNING "Package OpenCL not found, building without support.")
+        endif()
+    endif()
+else()
+    ff_check_lib(EGL egl)
+    ff_check_lib(GLX glx)
+    ff_check_lib(OSMESA osmesa)
+    ff_check_lib(OPENCL OpenCL)
+endif()
 
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}

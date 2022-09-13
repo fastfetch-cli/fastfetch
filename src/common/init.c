@@ -430,6 +430,9 @@ void ffListFeatures()
         #ifdef FF_HAVE_OSMESA
             "osmesa\n"
         #endif
+        #ifdef FF_HAVE_APPLECGL
+            "apple-cgl\n"
+        #endif
         #ifdef FF_HAVE_OPENCL
             "opencl\n"
         #endif
