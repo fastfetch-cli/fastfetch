@@ -7,7 +7,7 @@
 #define FF_OPENGL_MODULE_NAME "OpenGL"
 #define FF_OPENGL_NUM_FORMAT_ARGS 4
 
-#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA)
+#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA) || defined(FF_HAVE_APPLECGL)
 #define FF_HAVE_GL 1
 #include "common/library.h"
 #ifdef __APPLE__
@@ -337,6 +337,45 @@ static const char* osMesaPrint(FFinstance* instance)
 
 #endif //FF_HAVE_OSMESA
 
+#ifdef FF_HAVE_APPLECGL
+
+#include <OpenGL/OpenGL.h>
+
+static const char* appleCglPrint(FFinstance* instance)
+{
+    CGLPixelFormatAttribute attrs[] = {
+        kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
+        kCGLPFAAccelerated,
+        0
+    };
+    CGLPixelFormatObj pix;
+    GLint num;
+    if (CGLChoosePixelFormat(attrs, &pix, &num) != kCGLNoError) {
+        return "CGLChoosePixelFormat() failed";
+    }
+
+    CGLContextObj ctx;
+    if (CGLCreateContext(pix, NULL, &ctx) != kCGLNoError) {
+        return "CGLCreateContext() failed";
+    }
+    if (CGLSetCurrentContext(ctx) != kCGLNoError) {
+        return "CGLSetCurrentContext() failed";
+    }
+
+    GLData glData = {
+        .ffglGetString = glGetString
+    };
+
+    const char* error = glHandlePrint(instance, &glData);
+
+    CGLDestroyContext(ctx);
+    CGLDestroyPixelFormat(pix);
+
+    return error;
+}
+
+#endif //FF_HAVE_APPLECGL
+
 static const char* glPrint(FFinstance* instance)
 {
     if(instance->config.glType == FF_GL_TYPE_GLX)
@@ -366,6 +405,15 @@ static const char* glPrint(FFinstance* instance)
         #endif
     }
 
+    if(instance->config.glType == FF_GL_TYPE_APPLECGL)
+    {
+        #ifdef FF_HAVE_APPLECGL
+            return appleCglPrint(instance);
+        #else
+            return "fastfetch was compiled without apple-cgl support";
+        #endif
+    }
+
     const char* error = ""; // not NULL dummy value
 
     #ifdef FF_HAVE_EGL
@@ -375,6 +423,11 @@ static const char* glPrint(FFinstance* instance)
     #ifdef FF_HAVE_GLX
         if(error != NULL)
             error = glxPrint(instance);
+    #endif
+
+    #ifdef FF_HAVE_APPLECGL
+        if(error != NULL)
+            error = appleCglPrint(instance);
     #endif
 
     //We don't use osmesa in auto mode here, because it is a software implementation,
