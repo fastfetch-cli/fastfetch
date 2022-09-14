@@ -325,10 +325,6 @@ if(APPLE)
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
     )
-
-    target_compile_definitions(libfastfetch
-        PRIVATE FF_HAVE_OPENCL=1
-    )
 endif()
 
 target_include_directories(libfastfetch

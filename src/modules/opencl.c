@@ -4,16 +4,16 @@
 #define FF_OPENCL_MODULE_NAME "OpenCL"
 #define FF_OPENCL_NUM_FORMAT_ARGS 3
 
-#ifdef FF_HAVE_OPENCL
+#if defined(FF_HAVE_OPENCL) || defined(__APPLE__)
 #include "common/library.h"
 #include "common/parsing.h"
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100
 #ifdef __APPLE__
-#include <OpenCL/cl.h>
+    #include <OpenCL/cl.h>
 #else
-#include <CL/cl.h>
+    #include <CL/cl.h>
 #endif
 
 typedef struct OpenCLData
@@ -75,36 +75,43 @@ static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)
     return NULL;
 }
 
+#endif // FF_HAVE_OPENCL || __APPLE__
+
+#ifdef FF_HAVE_OPENCL
+
 static const char* printOpenCL(FFinstance* instance)
 {
     OpenCLData data;
 
-    #ifdef __APPLE__
-        data.ffclGetPlatformIDs = clGetPlatformIDs;
-        data.ffclGetDeviceIDs = clGetDeviceIDs;
-        data.ffclGetDeviceInfo = clGetDeviceInfo;
-    #else
-        FF_LIBRARY_LOAD(opencl, instance->config.libOpenCL, "dlopen libOpenCL.so failed", "libOpenCL.so", 1);
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
-    #endif
+    FF_LIBRARY_LOAD(opencl, instance->config.libOpenCL, "dlopen libOpenCL.so failed", "libOpenCL.so", 1);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
 
     const char* error = openCLHandelData(instance, &data);
-
-    #ifndef __APPLE__
-        dlclose(opencl);
-    #endif
-
+    dlclose(opencl);
     return error;
 }
-#endif
+
+#elif __APPLE__ // FF_HAVE_OPENCL
+
+static const char* printOpenCL(FFinstance* instance)
+{
+    OpenCLData data;
+    data.ffclGetPlatformIDs = clGetPlatformIDs;
+    data.ffclGetDeviceIDs = clGetDeviceIDs;
+    data.ffclGetDeviceInfo = clGetDeviceInfo;
+
+    return openCLHandelData(instance, &data);
+}
+
+#endif // __APPLE__
 
 void ffPrintOpenCL(FFinstance* instance)
 {
     const char* error;
 
-    #ifdef FF_HAVE_OPENCL
+    #if defined(FF_HAVE_OPENCL) || defined(__APPLE__)
         error = printOpenCL(instance);
     #else
         error = "Fastfetch was build without OpenCL support";
