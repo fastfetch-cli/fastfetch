@@ -1258,7 +1258,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             "egl", FF_GL_TYPE_EGL,
             "glx", FF_GL_TYPE_GLX,
             "osmesa", FF_GL_TYPE_OSMESA,
-            "apple-cgl", FF_GL_TYPE_APPLECGL,
+            "cgl", FF_GL_TYPE_CGL,
             NULL
         );
     }

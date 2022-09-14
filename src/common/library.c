@@ -6,7 +6,7 @@
 static void* libraryLoad(const char* path, int maxVersion)
 {
     void* result = dlopen(path, RTLD_LAZY);
-    if(result != NULL)
+    if(result != NULL || maxVersion < 0)
         return result;
 
     FFstrbuf pathbuf;
