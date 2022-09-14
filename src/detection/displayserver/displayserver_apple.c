@@ -29,17 +29,8 @@ void CGSGetDisplayModeDescriptionOfLength(CGDirectDisplayID display, int idx, mo
 
 static void detectResolution(FFDisplayServerResult* ds)
 {
-    void* cg = dlopen(FASTFETCH_TARGET_DIR_ROOT"/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics", RTLD_LAZY);
-    if(cg == NULL)
-        return;
-
-    FF_LIBRARY_LOAD_SYMBOL(cg, CGGetOnlineDisplayList, )
-    FF_LIBRARY_LOAD_SYMBOL(cg, CGDisplayScreenSize, )
-    FF_LIBRARY_LOAD_SYMBOL(cg, CGSGetCurrentDisplayMode, )
-    FF_LIBRARY_LOAD_SYMBOL(cg, CGSGetDisplayModeDescriptionOfLength, )
-
     CGDisplayCount screenCount;
-    ffCGGetOnlineDisplayList(INT_MAX, NULL, &screenCount);
+    CGGetOnlineDisplayList(INT_MAX, NULL, &screenCount);
     if(screenCount == 0)
     {
         dlclose(cg);
@@ -47,21 +38,20 @@ static void detectResolution(FFDisplayServerResult* ds)
     }
 
     CGDirectDisplayID* screens = malloc(screenCount * sizeof(CGDirectDisplayID));
-    ffCGGetOnlineDisplayList(INT_MAX, screens, &screenCount);
+    CGGetOnlineDisplayList(INT_MAX, screens, &screenCount);
 
     for(uint32_t i = 0; i < screenCount; i++)
     {
         int modeID;
-        ffCGSGetCurrentDisplayMode(screens[i], &modeID);
+        CGSGetCurrentDisplayMode(screens[i], &modeID);
         modes_D4 mode;
-        ffCGSGetDisplayModeDescriptionOfLength(screens[i], modeID, &mode, 0xD4);
+        CGSGetDisplayModeDescriptionOfLength(screens[i], modeID, &mode, 0xD4);
 
         uint32_t refreshRate = ffdsParseRefreshRate(mode.derived.freq);
         ffdsAppendResolution(ds, mode.derived.width, mode.derived.height, refreshRate);
     }
 
     free(screens);
-    dlclose(cg);
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)

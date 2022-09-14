@@ -7,7 +7,7 @@
 #define FF_OPENGL_MODULE_NAME "OpenGL"
 #define FF_OPENGL_NUM_FORMAT_ARGS 4
 
-#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA) || defined(FF_HAVE_CGL)
+#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA) || defined(__APPLE__)
 #define FF_HAVE_GL 1
 
 #include "common/library.h"
@@ -339,41 +339,36 @@ static const char* osMesaPrint(FFinstance* instance)
 
 #endif //FF_HAVE_OSMESA
 
-#ifdef FF_HAVE_CGL
+#ifdef __APPLE__
 
 typedef struct CGLData
 {
-    GLData glData;
-
-    FF_LIBRARY_SYMBOL(CGLChoosePixelFormat);
-    FF_LIBRARY_SYMBOL(CGLCreateContext);
-    FF_LIBRARY_SYMBOL(CGLSetCurrentContext);
-    FF_LIBRARY_SYMBOL(CGLDestroyContext);
-    FF_LIBRARY_SYMBOL(CGLDestroyPixelFormat);
-
     CGLPixelFormatObj pixelFormat;
     CGLContextObj context;
 } CGLData;
 
 static const char* cglHandleContext(FFinstance* instance, CGLData* data)
 {
-    if(data->ffCGLSetCurrentContext(data->context) != kCGLNoError)
+    if(CGLSetCurrentContext(data->context) != kCGLNoError)
         return "CGLSetCurrentContext() failed";
 
-    return glHandlePrint(instance, &data->glData);
+    GLData glData;
+    glData.ffglGetString = glGetString;
+
+    return glHandlePrint(instance, &glData);
 }
 
 static const char* cglHandlePixelFormat(FFinstance* instance, CGLData* data)
 {
-    if(data->ffCGLCreateContext(data->pixelFormat, NULL, &data->context) != kCGLNoError)
+    if(CGLCreateContext(data->pixelFormat, NULL, &data->context) != kCGLNoError)
         return "CGLCreateContext() failed";
 
     const char* error = cglHandleContext(instance, data);
-    data->ffCGLDestroyContext(data->context);
+    CGLDestroyContext(data->context);
     return error;
 }
 
-static const char* cglHandleData(FFinstance* instance, CGLData* data)
+static const char* cglPrint(FFinstance* instance)
 {
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,
@@ -382,32 +377,15 @@ static const char* cglHandleData(FFinstance* instance, CGLData* data)
     };
 
     GLint num;
-    if (data->ffCGLChoosePixelFormat(attrs, &data->pixelFormat, &num) != kCGLNoError)
+    if (CGLChoosePixelFormat(attrs, &data->pixelFormat, &num) != kCGLNoError)
         return "CGLChoosePixelFormat() failed";
 
     const char* error = cglHandlePixelFormat(instance, data);
-    data->ffCGLDestroyPixelFormat(data->pixelFormat);
+    CGLDestroyPixelFormat(data->pixelFormat);
     return error;
 }
 
-static const char* cglPrint(FFinstance* instance)
-{
-    CGLData data;
-
-    FF_LIBRARY_LOAD(cgl, instance->config.libCGL, "dlopen cgl failed", "/System/Library/Frameworks/OpenGL.framework/OpenGL", -1);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(cgl, data, CGLChoosePixelFormat);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(cgl, data, CGLCreateContext);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(cgl, data, CGLSetCurrentContext);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(cgl, data, CGLDestroyContext);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(cgl, data, CGLDestroyPixelFormat);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(cgl, data.glData, glGetString);
-
-    const char* error = cglHandleData(instance, &data);
-    dlclose(cgl);
-    return error;
-}
-
-#endif //FF_HAVE_CGL
+#else // __APPLE__
 
 static const char* glPrint(FFinstance* instance)
 {
@@ -438,15 +416,6 @@ static const char* glPrint(FFinstance* instance)
         #endif
     }
 
-    if(instance->config.glType == FF_GL_TYPE_CGL)
-    {
-        #ifdef FF_HAVE_CGL
-            return cglPrint(instance);
-        #else
-            return "fastfetch was compiled without cgl support";
-        #endif
-    }
-
     const char* error = ""; // not NULL dummy value
 
     #ifdef FF_HAVE_EGL
@@ -458,16 +427,13 @@ static const char* glPrint(FFinstance* instance)
             error = glxPrint(instance);
     #endif
 
-    #ifdef FF_HAVE_CGL
-        if(error != NULL)
-            error = cglPrint(instance);
-    #endif
-
     //We don't use osmesa in auto mode here, because it is a software implementation,
     //that doesn't reflect the opengl supported by the hardware
 
     return error;
 }
+
+#endif // !__APPLE__
 
 #endif // FF_HAVE_GL
 
@@ -477,6 +443,8 @@ void ffPrintOpenGL(FFinstance* instance)
 
     #ifndef FF_HAVE_GL
         error = "Fastfetch was built without gl support.";
+    #elif __APPLE__
+        error = cglPrint(instance);
     #else
         error = glPrint(instance);
     #endif

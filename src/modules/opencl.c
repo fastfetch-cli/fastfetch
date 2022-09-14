@@ -80,17 +80,22 @@ static const char* printOpenCL(FFinstance* instance)
     OpenCLData data;
 
     #ifdef __APPLE__
-        FF_LIBRARY_LOAD(opencl, instance->config.libOpenCL, "dlopen OpenCL failed", "/System/Library/Frameworks/OpenCL.framework/OpenCL", -1);
+        data.ffclGetPlatformIDs = clGetPlatformIDs;
+        data.ffclGetDeviceIDs = clGetDeviceIDs;
+        data.ffclGetDeviceInfo = clGetDeviceInfo;
     #else
         FF_LIBRARY_LOAD(opencl, instance->config.libOpenCL, "dlopen libOpenCL.so failed", "libOpenCL.so", 1);
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
     #endif
 
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
-
     const char* error = openCLHandelData(instance, &data);
-    dlclose(opencl);
+
+    #ifndef __APPLE__
+        dlclose(opencl);
+    #endif
+
     return error;
 }
 #endif

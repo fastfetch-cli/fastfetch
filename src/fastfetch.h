@@ -50,8 +50,7 @@ typedef enum FFGLType
     FF_GL_TYPE_AUTO,
     FF_GL_TYPE_EGL,
     FF_GL_TYPE_GLX,
-    FF_GL_TYPE_OSMESA,
-    FF_GL_TYPE_CGL
+    FF_GL_TYPE_OSMESA
 } FFGLType;
 
 typedef struct FFModuleArgs
@@ -148,7 +147,6 @@ typedef struct FFconfig
     FFstrbuf libEGL;
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
-    FFstrbuf libCGL;
     FFstrbuf libOpenCL;
 
     bool titleFQDN;

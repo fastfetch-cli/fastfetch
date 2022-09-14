@@ -211,7 +211,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libEGL, 0);
     ffStrbufInitA(&instance->config.libGLX, 0);
     ffStrbufInitA(&instance->config.libOSMesa, 0);
-    ffStrbufInitA(&instance->config.libCGL, 0);
     ffStrbufInitA(&instance->config.libOpenCL, 0);
 
     instance->config.titleFQDN = false;
@@ -430,9 +429,6 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_OSMESA
             "osmesa\n"
-        #endif
-        #ifdef FF_HAVE_CGL
-            "cgl\n"
         #endif
         #ifdef FF_HAVE_OPENCL
             "opencl\n"

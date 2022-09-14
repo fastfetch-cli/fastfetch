@@ -43,8 +43,7 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_CGL "Enable cgl" ON "APPLE" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR APPLE" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -286,6 +285,7 @@ function(ff_lib_enable VARNAME)
         if(${VARNAME}_FOUND)
             target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
             target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
+            target_link_directories(libfastfetch PRIVATE ${${VARNAME}_LIBRARY_DIRS})
             return()
         endif()
     endforeach()
@@ -313,8 +313,24 @@ ff_lib_enable(CHAFA chafa>=1.10)
 ff_lib_enable(EGL egl)
 ff_lib_enable(GLX glx)
 ff_lib_enable(OSMESA osmesa)
-ff_lib_enable(CGL, OpenGL)
 ff_lib_enable(OPENCL OpenCL)
+
+function(ff_framwork_enable LIBNAME)
+    if(NOT APPLE)
+        return()
+    endif()
+
+    find_package(${LIBNAME} REQUIRED)
+
+    target_include_directories(libfastfetch PRIVATE ${${LIBNAME}_INCLUDE_DIRS})
+    target_link_directories(libfastfetch PRIVATE ${${LIBNAME}_LIBRARY_DIRS})
+    target_link_libraries(libfastfetch PRIVATE ${${LIBNAME}_LIBRARIES})
+endfunction()
+
+ff_framwork_enable(IOKit)
+ff_framwork_enable(CoreGraphics)
+ff_framwork_enable(OpenGL)
+ff_framwork_enable(OpenCL)
 
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
