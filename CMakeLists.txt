@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
     VERSION 1.7.0
     LANGUAGES C
+    DESCRIPTION "Fast system information tool"
+    HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
 )
 
 ###################
@@ -438,11 +440,9 @@ endif()
 set(CPACK_SET_DESTDIR ON)
 
 set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neofetch clone written in C")
 set(CPACK_PACKAGE_DESCRIPTION "\
 fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way. \
 It is written in c to achieve much better performance.\
 ")
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/LinusDierheimer")
 
 include(CPack)
