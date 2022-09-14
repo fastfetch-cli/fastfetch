@@ -55,6 +55,8 @@ static const char* glHandlePrint(FFinstance* instance, const GLData* data)
     return NULL;
 }
 
+#endif // FF_HAVE_GL
+
 #ifdef FF_HAVE_EGL
 #include <EGL/egl.h>
 
@@ -340,7 +342,6 @@ static const char* osMesaPrint(FFinstance* instance)
 #endif //FF_HAVE_OSMESA
 
 #ifdef __APPLE__
-
 #include <OpenGL/OpenGL.h> // This brings in CGL, not GL
 
 typedef struct CGLData
@@ -389,7 +390,7 @@ static const char* cglPrint(FFinstance* instance)
     return error;
 }
 
-#else // __APPLE__
+#elif FF_HAVE_GL
 
 static const char* glPrint(FFinstance* instance)
 {
@@ -437,9 +438,7 @@ static const char* glPrint(FFinstance* instance)
     return error;
 }
 
-#endif // !__APPLE__
-
-#endif // FF_HAVE_GL
+#endif // !__APPLE__ && FF_HAVE_GL
 
 void ffPrintOpenGL(FFinstance* instance)
 {
