@@ -33,7 +33,7 @@ static void printStatvfs(FFinstance* instance, const FFstrbuf* key, const char* 
         return;
     }
 
-    uint64_t used = total - (fs->f_bfree  * fs->f_frsize);
+    uint64_t used = total - (fs->f_bavail  * fs->f_frsize);
     uint32_t files = (uint32_t) (fs->f_files - fs->f_ffree);
     uint8_t percentage = (uint8_t) ((used / (long double) total) * 100.0);
 
