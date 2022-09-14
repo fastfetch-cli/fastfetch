@@ -341,6 +341,8 @@ static const char* osMesaPrint(FFinstance* instance)
 
 #ifdef __APPLE__
 
+#include <OpenGL/OpenGL.h> // This brings in CGL, not GL
+
 typedef struct CGLData
 {
     CGLPixelFormatObj pixelFormat;
@@ -370,6 +372,8 @@ static const char* cglHandlePixelFormat(FFinstance* instance, CGLData* data)
 
 static const char* cglPrint(FFinstance* instance)
 {
+    CGLData data;
+
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,
         kCGLPFAAccelerated,
@@ -377,11 +381,11 @@ static const char* cglPrint(FFinstance* instance)
     };
 
     GLint num;
-    if (CGLChoosePixelFormat(attrs, &data->pixelFormat, &num) != kCGLNoError)
+    if (CGLChoosePixelFormat(attrs, &data.pixelFormat, &num) != kCGLNoError)
         return "CGLChoosePixelFormat() failed";
 
-    const char* error = cglHandlePixelFormat(instance, data);
-    CGLDestroyPixelFormat(data->pixelFormat);
+    const char* error = cglHandlePixelFormat(instance, &data);
+    CGLDestroyPixelFormat(data.pixelFormat);
     return error;
 }
 

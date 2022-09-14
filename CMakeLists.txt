@@ -315,22 +315,19 @@ ff_lib_enable(GLX glx)
 ff_lib_enable(OSMESA osmesa)
 ff_lib_enable(OPENCL OpenCL)
 
-function(ff_framwork_enable LIBNAME)
-    if(NOT APPLE)
-        return()
-    endif()
+if(APPLE)
+    target_link_libraries(libfastfetch
+        PRIVATE "-framework CoreFoundation"
+        PRIVATE "-framework IOKit"
+        PRIVATE "-framework CoreGraphics"
+        PRIVATE "-framework OpenGL"
+        PRIVATE "-framework OpenCL"
+    )
 
-    find_package(${LIBNAME} REQUIRED)
-
-    target_include_directories(libfastfetch PRIVATE ${${LIBNAME}_INCLUDE_DIRS})
-    target_link_directories(libfastfetch PRIVATE ${${LIBNAME}_LIBRARY_DIRS})
-    target_link_libraries(libfastfetch PRIVATE ${${LIBNAME}_LIBRARIES})
-endfunction()
-
-ff_framwork_enable(IOKit)
-ff_framwork_enable(CoreGraphics)
-ff_framwork_enable(OpenGL)
-ff_framwork_enable(OpenCL)
+    target_compile_definitions(libfastfetch
+        PRIVATE FF_HAVE_OPENCL=1
+    )
+endif()
 
 target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}

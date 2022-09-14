@@ -27,10 +27,7 @@ void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
     CFMutableDictionaryRef matchDict = IOServiceMatching("IOPCIDevice");
     io_iterator_t iterator;
     if(IOServiceGetMatchingServices(0, matchDict, &iterator) != kIOReturnSuccess)
-    {
-        dlclose(iokit);
         return;
-    }
 
     io_registry_entry_t registryEntry;
     while((registryEntry = IOIteratorNext(iterator)) != 0)

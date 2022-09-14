@@ -32,10 +32,7 @@ static void detectResolution(FFDisplayServerResult* ds)
     CGDisplayCount screenCount;
     CGGetOnlineDisplayList(INT_MAX, NULL, &screenCount);
     if(screenCount == 0)
-    {
-        dlclose(cg);
         return;
-    }
 
     CGDirectDisplayID* screens = malloc(screenCount * sizeof(CGDirectDisplayID));
     CGGetOnlineDisplayList(INT_MAX, screens, &screenCount);
