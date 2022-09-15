@@ -33,14 +33,14 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
     ffStrbufAppendC(result, ']');
 }
 
-static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
+static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, instance->config.libVulkan, , "libvulkan"FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkGetInstanceProcAddr,)
-    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkCreateInstance,)
-    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkDestroyInstance,)
-    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkEnumeratePhysicalDevices,)
-    FF_LIBRARY_LOAD_SYMBOL(vulkan, vkGetPhysicalDeviceProperties,)
+    FF_LIBRARY_LOAD(vulkan, instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed", "libvulkan"FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkDestroyInstance)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkEnumeratePhysicalDevices)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetPhysicalDeviceProperties)
 
     //Some drivers (nvdc) print messages to stdout
     //and thats the best way i found to disable that
@@ -102,7 +102,7 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
     {
         dlclose(vulkan);
         ffSuppressIO(false);
-        return;
+        return "ffvkCreateInstance() failed";
     }
 
 
@@ -117,7 +117,7 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
         ffvkDestroyInstance(vkInstance, NULL);
         dlclose(vulkan);
         ffSuppressIO(false);
-        return;
+        return "ffvkEnumeratePhysicalDevices() failed";
     }
 
     VkPhysicalDevice* physicalDevices = malloc(sizeof(VkPhysicalDevice) * physicalDeviceCount);
@@ -127,7 +127,7 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
         ffvkDestroyInstance(vkInstance, NULL);
         dlclose(vulkan);
         ffSuppressIO(false);
-        return;
+        return "ffvkEnumeratePhysicalDevices() failed";
     }
 
     PFN_vkGetPhysicalDeviceProperties2 ffvkGetPhysicalDeviceProperties2 = (PFN_vkGetPhysicalDeviceProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceProperties2");
@@ -208,6 +208,7 @@ static void detectVulkan(const FFinstance* instance, FFVulkanResult* result)
     ffvkDestroyInstance(vkInstance, NULL);
     dlclose(vulkan);
     ffSuppressIO(false);
+    return NULL;
 }
 
 #endif
@@ -232,9 +233,10 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
     ffListInit(&result.gpus, sizeof(FFGPUResult));
 
     #ifdef FF_HAVE_VULKAN
-        detectVulkan(instance, &result);
+        result.error = detectVulkan(instance, &result);
     #else
         FF_UNUSED(instance);
+        result.error = "fastfetch was compiled without vulkan support";
     #endif
 
     pthread_mutex_unlock(&mutex);
