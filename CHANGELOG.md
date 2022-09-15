@@ -1,3 +1,29 @@
+# 1.7.1
+
+This release brings a lot of bug fixes and improvements for MacOS. Big thanks to @CarterLi for the help on this!
+
+Features:
+* The color of the title and the keys can now be configured individually, using `--color-keys` and `--color-title` respectively. Some distros have different defaults now, similar to neofetch
+* Swap module, similar to the Memory module, but for swap. Add `Swap` to your structure to enable it (#225)
+
+Logos:
+* Slackware (#227)
+
+Bugfixes:
+* Used disk space is now calculated much more accurately
+* On Linux, GPU names are no longer truncated, if they are longer than 32 characters (#224)
+* On Linux, NVIDIA GPUs once again have a proper name
+
+* On M1 platforms, showing the GPU name no longer crashes the program (#222)
+* Brew package count does now work on M1 platforms too
+* The Vulkan module now does work on MacOS too
+* The OpenGL and OpenCL modules now work on MacOS too (@CarterLi, #226)
+* The LocalIp module now works on MacOS too (@CarterLi, #232)
+* Detecting custom WMs on MacOS does now work
+
+Other:
+* GitHub actions now builds a dmg file for MacOS, as you can see in the release page
+
 # 1.7.0
 
 This release brings support for MacOS!  
