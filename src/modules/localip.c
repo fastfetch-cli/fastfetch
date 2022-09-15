@@ -5,6 +5,7 @@
 #define FF_LOCALIP_NUM_FORMAT_ARGS 1
 
 #include <string.h>
+#include <ctype.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -54,7 +55,7 @@ void ffPrintLocalIp(FFinstance* instance)
             continue;
 
         // loop back
-        if (strcmp(ifa->ifa_name, "lo") == 0 && !instance->config.localIpShowLoop)
+        if (strncmp(ifa->ifa_name, "lo", 2) == 0 && (ifa->ifa_name[2] == '\0' || isdigit(ifa->ifa_name[2])) && !instance->config.localIpShowLoop)
             continue;
 
         if (ifa->ifa_addr->sa_family == AF_INET) { // check it is IP4
