@@ -293,19 +293,32 @@ static inline void* startThreadsThreadMain(void* instance)
     return NULL;
 }
 
+#if !defined(__ANDROID__) && !defined(__APPLE__)
+
 void startDetectionThreads(FFinstance* instance)
 {
-    //Android needs none of the things that are detected here
-    //And using gsettings sometimes hangs the program in android for some unknown reason,
-    //and since we don't need it we just never call it.
-    #if defined(__ANDROID__) || defined(__APPLE__)
-        return;
-    #endif
-
     pthread_t startThreadsThread;
     pthread_create(&startThreadsThread, NULL, startThreadsThreadMain, instance);
     pthread_detach(startThreadsThread);
 }
+
+#elif __APPLE__
+
+void startDetectionThreads(FFinstance* instance)
+{
+    pthread_t startThreadsThread;
+    pthread_create(&startThreadsThread, NULL, connectDisplayServerThreadMain, instance);
+    pthread_detach(startThreadsThread);
+}
+
+#else // !__APPLE__
+
+void startDetectionThreads(FFinstance* instance)
+{
+    FF_UNUSED(instance);
+}
+
+#endif // __ANDROID__
 
 static volatile bool ffDisableLinewrap = true;
 static volatile bool ffHideCursor = true;
