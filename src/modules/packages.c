@@ -28,6 +28,7 @@ typedef struct PackageCounts
     uint32_t flatpak;
     uint32_t snap;
     uint32_t brew;
+    uint32_t port;
 
     FFstrbuf pacmanBranch;
 } PackageCounts;
@@ -222,6 +223,41 @@ static uint32_t getBrewPackages(FFstrbuf* baseDir)
     return result;
 }
 
+static uint32_t countMacPortsPackages(FFstrbuf* baseDir)
+{
+    uint32_t result = 0;
+    uint32_t baseDirLength = baseDir->length;
+
+    ffStrbufAppendS(baseDir, "/var/macports/software");
+    result += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    return result;
+}
+
+static uint32_t getMacPortsPackages(FFstrbuf* baseDir)
+{
+    uint32_t result = 0;
+    uint32_t baseDirLength = baseDir->length;
+
+    const char* prefix = getenv("MACPORTS_PREFIX");
+    bool prefixSet = ffStrSet(prefix);
+
+    if(prefixSet)
+    {
+        ffStrbufAppendS(baseDir, prefix);
+        result += countMacPortsPackages(baseDir);
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+    }
+
+    ffStrbufAppendS(baseDir, "/opt/local");
+    if(!prefixSet || strcasecmp(baseDir->chars, prefix) != 0)
+        result += countMacPortsPackages(baseDir);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    return result;
+}
+
 #endif // __APPLE__
 
 #ifdef FF_HAVE_RPM
@@ -353,6 +389,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, Pack
 
     //brew
     packageCounts->brew += getBrewPackages(baseDir);
+    packageCounts->port += getMacPortsPackages(baseDir);
 
     #endif // __APPLE__
 }
@@ -421,7 +458,7 @@ void ffPrintPackages(FFinstance* instance)
 
     ffStrbufDestroy(&baseDir);
 
-    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.apk + counts.flatpak + counts.snap + counts.brew;
+    uint32_t all = counts.pacman + counts.dpkg + counts.rpm + counts.emerge  + counts.xbps + counts.nixSystem + nixUser + counts.nixDefault + counts.apk + counts.flatpak + counts.snap + counts.brew + counts.port;
     if(all == 0)
     {
         ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
@@ -479,6 +516,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
         FF_PRINT_PACKAGE(brew)
+        FF_PRINT_PACKAGE(port)
 
         //Fix linter warning of unused value of all
         (void) all;
@@ -503,7 +541,8 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.apk},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpak},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.snap},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts.brew}
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.brew},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.port}
         });
     }
 
