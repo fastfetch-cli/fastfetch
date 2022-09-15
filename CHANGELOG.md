@@ -1,3 +1,7 @@
+# 1.7.2
+
+Fixes the bash completions
+
 # 1.7.1
 
 This release brings a lot of bug fixes and improvements for MacOS. Big thanks to @CarterLi for the help on this!

@@ -387,5 +387,6 @@ __fastfetch_completion()
     else
         __fastfetch_complete_option
     fi
+}
 
 complete -F __fastfetch_completion fastfetch
