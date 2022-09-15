@@ -2,6 +2,9 @@
 #include "common/library.h"
 
 #include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#include <sys/sysctl.h>
 #include <ApplicationServices/ApplicationServices.h>
 
 //Resolution code heavily inspired by displayplacer <3
@@ -51,25 +54,67 @@ static void detectResolution(FFDisplayServerResult* ds)
     free(screens);
 }
 
+static void detectWM(FFDisplayServerResult* ds)
+{
+    int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
+    u_int requestLength = sizeof(request) / sizeof(*request);
+
+    size_t length = 0;
+    if(sysctl(request, requestLength, NULL, &length, NULL, 0) != 0)
+        return;
+
+    struct kinfo_proc* processes = malloc(length);
+    if(processes == NULL)
+        return;
+
+    if(sysctl(request, requestLength, processes, &length, NULL, 0) != 0)
+    {
+        free(processes);
+        return;
+    }
+
+    for(size_t i = 0; i < length / sizeof(struct kinfo_proc); i++)
+    {
+        const char* comm = processes[i].kp_proc.p_comm;
+
+        if(
+            strcasecmp(comm, "spectacle") != 0 &&
+            strcasecmp(comm, "amethyst") != 0 &&
+            strcasecmp(comm, "kwm") != 0 &&
+            strcasecmp(comm, "chunkwm") != 0 &&
+            strcasecmp(comm, "yabai") != 0 &&
+            strcasecmp(comm, "rectangle") != 0
+        ) continue;
+
+        ffStrbufAppendS(&ds->wmProcessName, comm);
+        ffStrbufAppendS(&ds->wmPrettyName, comm);
+        ds->wmPrettyName.chars[0] = (char) toupper(ds->wmPrettyName.chars[0]);
+        break;
+    }
+
+    free(processes);
+}
+
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
 {
     FF_UNUSED(instance);
 
     ffStrbufInit(&ds->wmProcessName);
-    ffStrbufAppendS(&ds->wmProcessName, "quartz");
-
     ffStrbufInit(&ds->wmPrettyName);
-    ffStrbufAppendS(&ds->wmPrettyName, "Quartz Compositor");
+    ffStrbufInitA(&ds->wmProtocolName, 0);
+    detectWM(ds);
+    if(ds->wmProcessName.length == 0)
+    {
+        ffStrbufAppendS(&ds->wmProcessName, "quartz");
+        ffStrbufAppendS(&ds->wmPrettyName, "Quartz Compositor");
+    }
 
     ffStrbufInit(&ds->deProcessName);
-    ffStrbufAppendS(&ds->deProcessName, "aqua");
-
     ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInitA(&ds->deVersion, 0);
+    ffStrbufAppendS(&ds->deProcessName, "aqua");
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->resolutions, sizeof(FFResolutionResult), 4);
     detectResolution(ds);
-
-    ffStrbufInitA(&ds->deVersion, 0);
-    ffStrbufInitA(&ds->wmProtocolName, 0);
 }
