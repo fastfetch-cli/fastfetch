@@ -116,7 +116,7 @@ jobs:
         if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.get_version_fastfetch.outputs.release }}
+          tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
           artifacts: fastfetch-linux/*,fastfetch-macos/*
