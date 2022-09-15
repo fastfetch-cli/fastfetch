@@ -9,30 +9,38 @@ __fastfetch_complete_help()
         "os-format"
         "host-format"
         "kernel-format"
+        "uptime-format"
+        "processes-format"
         "packages-format"
         "shell-format"
         "resolution-format"
         "de-format"
         "wm-format"
+        "wm-theme-format"
         "theme-format"
         "icons-format"
         "font-format"
+        "cursor-format"
         "terminal-format"
         "terminal-font-format"
         "cpu-format"
         "cpu-usage-format"
         "gpu-format"
         "memory-format"
+        "swap-format"
         "disk-format"
         "battery-format"
         "locale-format"
         "local-ip-format"
         "public-ip-format"
+        "player-format"
+        "media-format"
         "datetime-format"
         "date-format"
         "time-format"
-        "media-format"
-        "player-format"
+        "vulkan-format"
+        "opengl-format"
+        "opencl-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -59,6 +67,41 @@ __fastfetch_complete_logo()
     COMPREPLY=($(compgen -W "$(fastfetch --list-logos-autocompletion)" -- "$CURRENT_WORD"))
 }
 
+__fastfetch_complete_logo_type()
+{
+    local __ff_logo_types=(
+        "auto"
+        "builtin"
+        "file"
+        "raw"
+        "sixel"
+        "kitty"
+        "chafa"
+    )
+    COMPREPLY=($(compgen -W "${__ff_logo_types[*]}" -- "$CURRENT_WORD"))
+}
+
+__fastfetch_complete_binary_prefix()
+{
+    local __ff_binary_prefixes=(
+        "iec"
+        "si"
+        "jedec"
+    )
+    COMPREPLY=($(compgen -W "${__ff_binary_prefixes[*]}" -- "$CURRENT_WORD"))
+}
+
+__fastfetch_complete_gl()
+{
+    local __ff_gl_types=(
+        "auto"
+        "egl"
+        "glx"
+        "osmesa"
+    )
+    COMPREPLY=($(compgen -W "${__ff_gl_types[*]}" -- "$CURRENT_WORD"))
+}
+
 __fastfetch_complete_option()
 {
     local FF_OPTIONS_ALL=(
@@ -66,6 +109,9 @@ __fastfetch_complete_option()
         "${FF_OPTIONS_STRING[@]}"
         "${FF_OPTIONS_PATH[@]}"
         "${FF_OPTIONS_LOGO[@]}"
+        "${FF_OPTIONS_LOGO_TYPE[@]}"
+        "${FF_OPTIONS_BINARY_PREFIX[@]}"
+        "${FF_OPTIONS_GL[@]}"
     )
 
     if [[ $WORD_COUND -lt 3 ]]; then
@@ -136,6 +182,7 @@ __fastfetch_completion()
         "--escape-bedrock"
         "--pipe"
         "--title-fqdn"
+        "--escape-bedrock"
     )
 
     local FF_OPTIONS_STRING=(
@@ -151,136 +198,141 @@ __fastfetch_completion()
         "--logo-color-6"
         "--logo-color-7"
         "--logo-color-8"
+        "--logo-width"
+        "--logo-height"
         "--logo-color-9"
         "-c"
         "--color"
+        "--color-keys"
+        "--color-title"
         "--separator"
         "-s"
         "--structure"
         "--set"
         "--set-keyless"
-        "--gl"
-        "--binary-prefix"
-        "--os-format"
+        "--player-name"
+        "--public-ip-timeout"
         "--os-key"
-        "--host-format"
+        "--os-format"
+        "--os-error"
         "--host-key"
-        "--kernel-format"
+        "--host-format"
+        "--host-error"
         "--kernel-key"
-        "--uptime-format"
+        "--kernel-format"
+        "--kernel-error"
         "--uptime-key"
-        "--processes-format"
+        "--uptime-format"
+        "--uptime-error"
         "--processes-key"
-        "--packages-format"
+        "--processes-format"
+        "--processes-error"
         "--packages-key"
-        "--shell-format"
+        "--packages-format"
+        "--packages-error"
         "--shell-key"
-        "--resolution-format"
+        "--shell-format"
+        "--shell-error"
         "--resolution-key"
-        "--de-format"
+        "--resolution-format"
+        "--resolution-error"
         "--de-key"
-        "--wm-format"
+        "--de-format"
+        "--de-error"
         "--wm-key"
-        "--wm-theme-format"
+        "--wm-format"
+        "--wm-error"
         "--wm-theme-key"
-        "--theme-format"
+        "--wm-theme-format"
+        "--wm-theme-error"
         "--theme-key"
-        "--icons-format"
+        "--theme-format"
+        "--theme-error"
         "--icons-key"
-        "--font-format"
+        "--icons-format"
+        "--icons-error"
         "--font-key"
-        "--cursor-format"
+        "--font-format"
+        "--font-error"
         "--cursor-key"
-        "--terminal-format"
+        "--cursor-format"
+        "--cursor-error"
         "--terminal-key"
-        "--terminal-font-format"
+        "--terminal-format"
+        "--terminal-error"
         "--terminal-font-key"
-        "--cpu-format"
+        "--terminal-font-format"
+        "--terminal-font-error"
         "--cpu-key"
-        "--cpu-usage-format"
-        "--cpu-usage-key"
-        "--gpu-format"
+        "--cpu-format"
+        "--cpu-error"
+        "--cpu-useage-key"
+        "--cpu-useage-format"
+        "--cpu-useage-error"
         "--gpu-key"
-        "--memory-format"
+        "--gpu-format"
+        "--gpu-error"
         "--memory-key"
+        "--memory-format"
+        "--memory-error"
+        "--swap-key"
+        "--swap-format"
+        "--swap-error"
+        "--disk-key"
         "--disk-format"
-        "--disk-key"
-        "--battery-format"
+        "--disk-error"
         "--battery-key"
-        "--locale-format"
+        "--battery-format"
+        "--battery-error"
         "--locale-key"
-        "--disk-folders"
-        "--disk-key"
-        "--local-ip-format"
+        "--locale-format"
+        "--locale-error"
         "--local-ip-key"
-        "--public-ip-format"
+        "--local-ip-format"
+        "--local-ip-error"
         "--public-ip-key"
-        "--player-format"
+        "--public-ip-format"
+        "--public-ip-error"
         "--player-key"
-        "--media-format"
+        "--player-format"
+        "--player-error"
         "--media-key"
+        "--media-format"
+        "--media-error"
         "--datetime-key"
         "--datetime-format"
-        "--date-format"
+        "--datetime-error"
         "--date-key"
-        "--time-format"
+        "--date-format"
+        "--date-error"
         "--time-key"
+        "--time-format"
+        "--time-error"
         "--vulkan-key"
         "--vulkan-format"
+        "--vulkan-error"
         "--opengl-key"
         "--opengl-format"
+        "--opengl-error"
         "--opencl-key"
         "--opencl-format"
-        "--os-error"
-        "--host-error"
-        "--kernel-error"
-        "--uptime-error"
-        "--processes-error"
-        "--packages-error"
-        "--shell-error"
-        "--resolution-error"
-        "--de-error"
-        "--wm-error"
-        "--wm-theme-error"
-        "--theme-error"
-        "--icons-error"
-        "--font-error"
-        "--cursor-error"
-        "--terminal-error"
-        "--terminal-font-error"
-        "--cpu-error"
-        "--cpu-usage-error"
-        "--gpu-error"
-        "--memory-error"
-        "--disk-error"
-        "--battery-error"
-        "--locale-error"
-        "--disk-error"
-        "--local-ip-error"
-        "--public-ip-error"
-        "--player-error"
-        "--media-error"
-        "--datetime-error"
-        "--date-error"
-        "--time-error"
-        "--vulkan-error"
-        "--opengl-error"
         "--opencl-error"
     )
 
     local FF_OPTIONS_PATH=(
+        "--load-config"
         "--os-file"
-        "--lib-PCI"
+        "--lib-pci"
         "--lib-vulkan"
         "--lib-wayland"
         "--lib-xcb-randr"
         "--lib-xcb"
-        "--lib-Xrandr"
+        "--lib-xrandr"
         "--lib-X11"
         "--lib-gio"
-        "--lib-DConf"
-        "--lib-DBus"
-        "--lib-XFConf"
+        "--lib-dconf"
+        "--lib-dbus"
+        "--lib-xfconf"
         "--lib-sqlite3"
         "--lib-rpm"
         "--lib-imagemagick"
@@ -291,12 +343,23 @@ __fastfetch_completion()
         "--lib-osmesa"
         "--lib-opencl"
         "--battery-dir"
-        "--load-config"
     )
 
     local FF_OPTIONS_LOGO=(
         "-l"
         "--logo"
+    )
+
+    local FF_OPTIONS_LOGO_TYPE=(
+        "--logo-type"
+    )
+
+    local FF_OPTIONS_BINARY_PREFIX=(
+        "--binary-prefix"
+    )
+
+    local FF_OPTIONS_GL=(
+        "--gl"
     )
 
     if __fastfetch_previous_matches "${FF_OPTIONS_SINGLE[@]}"; then
@@ -315,9 +378,14 @@ __fastfetch_completion()
         __fastfetch_complete_path
     elif __fastfetch_previous_matches "${FF_OPTIONS_LOGO[@]}"; then
         __fastfetch_complete_logo
+    elif __fastfetch_previous_matches "${FF_OPTIONS_LOGO_TYPE[@]}"; then
+        __fastfetch_complete_logo_type
+    elif __fastfetch_previous_matches "${FF_OPTIONS_BINARY_PREFIX[@]}"; then
+        __fastfetch_complete_binary_prefix
+    elif __fastfetch_previous_matches "${FF_OPTIONS_GL[@]}"; then
+        __fastfetch_complete_gl
     else
         __fastfetch_complete_option
     fi
-}
 
 complete -F __fastfetch_completion fastfetch
