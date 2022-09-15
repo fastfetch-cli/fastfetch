@@ -238,37 +238,41 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-static inline void* detectPlasmaThreadMain(void* instance)
-{
-    ffDetectQt((FFinstance*)instance);
-    return NULL;
-}
+#if !defined(__ANDROID__)
 
-static inline void* detectGTK2ThreadMain(void* instance)
-{
-    ffDetectGTK2((FFinstance*)instance);
-    return NULL;
-}
-
-static inline void* detectGTK3ThreadMain(void* instance)
-{
-    ffDetectGTK3((FFinstance*)instance);
-    return NULL;
-}
-
-static inline void* detectGTK4ThreadMain(void* instance)
-{
-    ffDetectGTK4((FFinstance*)instance);
-    return NULL;
-}
-
-static inline void* connectDisplayServerThreadMain(void* instance)
+static void* connectDisplayServerThreadMain(void* instance)
 {
     ffConnectDisplayServer((FFinstance*)instance);
     return NULL;
 }
 
-static inline void* startThreadsThreadMain(void* instance)
+#if !defined(__APPLE__)
+
+static void* detectPlasmaThreadMain(void* instance)
+{
+    ffDetectQt((FFinstance*)instance);
+    return NULL;
+}
+
+static void* detectGTK2ThreadMain(void* instance)
+{
+    ffDetectGTK2((FFinstance*)instance);
+    return NULL;
+}
+
+static void* detectGTK3ThreadMain(void* instance)
+{
+    ffDetectGTK3((FFinstance*)instance);
+    return NULL;
+}
+
+static void* detectGTK4ThreadMain(void* instance)
+{
+    ffDetectGTK4((FFinstance*)instance);
+    return NULL;
+}
+
+static void* startThreadsThreadMain(void* instance)
 {
     pthread_t dsThread;
     pthread_create(&dsThread, NULL, connectDisplayServerThreadMain, instance);
@@ -293,8 +297,6 @@ static inline void* startThreadsThreadMain(void* instance)
     return NULL;
 }
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
-
 void startDetectionThreads(FFinstance* instance)
 {
     pthread_t startThreadsThread;
@@ -302,22 +304,20 @@ void startDetectionThreads(FFinstance* instance)
     pthread_detach(startThreadsThread);
 }
 
-#elif __APPLE__
-
+#else // !__APPLE__
 void startDetectionThreads(FFinstance* instance)
 {
     pthread_t startThreadsThread;
     pthread_create(&startThreadsThread, NULL, connectDisplayServerThreadMain, instance);
     pthread_detach(startThreadsThread);
 }
+#endif // __APPLE__
 
-#else // !__APPLE__
-
+#else // !__ANDROID__
 void startDetectionThreads(FFinstance* instance)
 {
     FF_UNUSED(instance);
 }
-
 #endif // __ANDROID__
 
 static volatile bool ffDisableLinewrap = true;

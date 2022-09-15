@@ -6,7 +6,7 @@ typedef char KeyType[33]; //32 byte key + \0
 
 void ffValuestoreInit(FFvaluestore* vs, uint32_t valueSize)
 {
-    ffListInit(vs, sizeof(KeyType) + valueSize);
+    ffListInit(vs, (uint32_t) (sizeof(KeyType) + valueSize));
 }
 
 void* ffValuestoreGet(FFvaluestore* vs, const char* key)
