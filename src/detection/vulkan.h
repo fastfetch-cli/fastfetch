@@ -11,6 +11,7 @@ typedef struct FFVulkanResult
     FFstrbuf apiVersion;
     FFstrbuf conformanceVersion;
     FFlist gpus; //List of FFGPUResult, see detection/gpu/gpu.h
+    const char* error;
 } FFVulkanResult;
 
 const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);

@@ -9,9 +9,9 @@ void ffPrintVulkan(FFinstance* instance)
 {
     const FFVulkanResult* vulkan = ffDetectVulkan(instance);
 
-    if(vulkan->apiVersion.length == 0 && vulkan->driver.length == 0)
+    if(vulkan->error)
     {
-        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan, "Failed to detect vulkan");
+        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan, vulkan->error);
         return;
     }
 
