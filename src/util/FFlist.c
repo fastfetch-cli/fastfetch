@@ -12,7 +12,7 @@ void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
     list->elementSize = elementSize;
     list->capacity = capacity;
     list->length = 0;
-    list->data = malloc(list->capacity * list->elementSize);
+    list->data = capacity == 0 ? NULL : malloc((size_t)list->capacity * list->elementSize);
 }
 
 void* ffListGet(const FFlist* list, uint32_t index)
@@ -24,12 +24,13 @@ void* ffListAdd(FFlist* list)
 {
     if(list->length == list->capacity)
     {
-        list->capacity = list->capacity * 2 * list->elementSize;
-        list->data = realloc(list->data, list->capacity);
+        list->capacity = list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2;
+        // realloc(NULL, newSize) is same as malloc(newSize)
+        list->data = realloc(list->data, (size_t)list->capacity * list->elementSize);
     }
-    void* adress = list->data + (list->length * list->elementSize);
+    void* address = list->data + (list->length * list->elementSize);
     ++list->length;
-    return adress;
+    return address;
 }
 
 uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
@@ -45,5 +46,7 @@ uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compF
 
 void ffListDestroy(FFlist* list)
 {
+    list->length = list->capacity = 0;
     free(list->data);
+    list->data = NULL;
 }
