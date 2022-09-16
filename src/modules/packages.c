@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 14
+#define FF_PACKAGES_NUM_FORMAT_ARGS 15
 
 typedef struct PackageCounts
 {
