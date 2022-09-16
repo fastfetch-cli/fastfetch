@@ -34,8 +34,20 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         ffStrbufInit(&gpu->name);
         //IOAccelerator returns model property for Apple Silicon, but not for Intel Iris GPUs.
         //Still needs testing for AMD's
-        if(!ffCfDictGetString(properties, CFSTR("model"), &gpu->name) && gpu->driver.length > 0)
-            ffStrbufAppendS(&gpu->name, gpu->driver.chars + ffStrbufLastIndexC(&gpu->driver, '.') + 1);
+        if(!ffCfDictGetString(properties, CFSTR("model"), &gpu->name))
+        {
+            CFRelease(properties);
+
+            io_registry_entry_t parentEntry;
+            IORegistryEntryGetParentEntry(registryEntry, kIOServicePlane, &parentEntry);
+            if(IORegistryEntryCreateCFProperties(parentEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+            {
+                IOObjectRelease(parentEntry);
+                IOObjectRelease(registryEntry);
+                continue;
+            }
+            ffCfDictGetString(properties, CFSTR("model"), &gpu->name);
+        }
 
         if(!ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
