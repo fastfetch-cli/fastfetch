@@ -26,7 +26,7 @@ bool ffCfDictGetString(CFMutableDictionaryRef dict, const char* key, FFstrbuf* r
 bool ffCfDictGetBool(CFMutableDictionaryRef dict, const char* key, bool* result)
 {
     CFBooleanRef cf = (CFBooleanRef)ffCfDictGetValue(dict, key);
-    if(cf == NULL || CFGetTypeID(cf) != CFNumberGetTypeID())
+    if(cf == NULL || CFGetTypeID(cf) != CFBooleanGetTypeID())
         return false;
 
     *result = CFBooleanGetValue(cf);
@@ -36,7 +36,7 @@ bool ffCfDictGetBool(CFMutableDictionaryRef dict, const char* key, bool* result)
 bool ffCfDictGetInt(CFMutableDictionaryRef dict, const char* key, int* result)
 {
     CFNumberRef cf = (CFNumberRef)ffCfDictGetValue(dict, key);
-    if (cf == NULL || CFGetTypeID(cf) != CFStringGetTypeID())
+    if (cf == NULL || CFGetTypeID(cf) != CFNumberGetTypeID())
         return false;
 
     if(!CFNumberGetValue(cf, kCFNumberSInt32Type, result))
