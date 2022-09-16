@@ -26,13 +26,13 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             continue;
         }
 
-        int intValue;
         bool boolValue;
 
         BatteryResult* battery = ffListAdd(results);
         ffStrbufInit(&battery->capacity);
-        if(ffCfDictGetInt(properties, "CurrentCapacity", &intValue))
-            ffStrbufAppendF(&battery->capacity, "%d", intValue);
+        int currentCapacity, maxCapacity;
+        if(ffCfDictGetInt(properties, "CurrentCapacity", &currentCapacity) && ffCfDictGetInt(properties, "MaxCapacity", &maxCapacity))
+            ffStrbufAppendF(&battery->capacity, "%.0f", currentCapacity * 100.0 / maxCapacity);
 
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);
