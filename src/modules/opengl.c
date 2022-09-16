@@ -453,5 +453,5 @@ void ffPrintOpenGL(FFinstance* instance)
     #endif
 
     if(error != NULL)
-        ffPrintError(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, error);
+        ffPrintError(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, "%s", error);
 }

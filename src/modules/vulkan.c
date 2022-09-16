@@ -11,7 +11,7 @@ void ffPrintVulkan(FFinstance* instance)
 
     if(vulkan->error)
     {
-        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan, vulkan->error);
+        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &instance->config.vulkan, "%s", vulkan->error);
         return;
     }
 

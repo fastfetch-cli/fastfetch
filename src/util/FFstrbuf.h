@@ -3,6 +3,8 @@
 #ifndef FASTFETCH_INCLUDED_FFSTRBUF
 #define FASTFETCH_INCLUDED_FFSTRBUF
 
+#include "FFcheckmacros.h"
+
 #include <stdint.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -25,7 +27,7 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
-uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
+FF_C_NODISCARD uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
 
 void ffStrbufClear(FFstrbuf* strbuf);
 
@@ -37,7 +39,7 @@ void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
-void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
+FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufPrependS(FFstrbuf* strbuf, const char* value);
@@ -46,11 +48,11 @@ void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufSetS(FFstrbuf* strbuf, const char* value);
 
-int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
-int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);
+FF_C_NODISCARD int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
+FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);
 
-int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
-int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp);
+FF_C_NODISCARD int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
+FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
@@ -62,16 +64,16 @@ void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* s
 void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments);
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
 
-uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
-uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str);
+FF_C_NODISCARD uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
+FF_C_NODISCARD uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str);
 
-uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c);
-uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched);
-uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str);
+FF_C_NODISCARD uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c);
+FF_C_NODISCARD uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched);
+FF_C_NODISCARD uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str);
 
-uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
+FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
 
-uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c);
+FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c);
@@ -89,7 +91,7 @@ bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start);
 bool ffStrbufEndsWithC(const FFstrbuf* strbuf, char c);
 bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end);
 
-uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
+FF_C_NODISCARD uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
 
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
 
@@ -98,8 +100,8 @@ void ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
-double ffStrbufToDouble(const FFstrbuf* strbuf);
-uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
+FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
+FF_C_NODISCARD uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
 

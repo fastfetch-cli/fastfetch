@@ -19,6 +19,6 @@ bool ffFileExists(const char* fileName, mode_t mode);
 // Not thread safe!
 void ffSuppressIO(bool suppress);
 
-void ffGetTerminalResponse(const char* request, const char* format, ...);
+FF_C_SCANF(2, 3) void ffGetTerminalResponse(const char* request, const char* format, ...);
 
 #endif

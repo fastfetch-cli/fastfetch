@@ -240,8 +240,10 @@ if(APPLE)
         src/detection/os/os_apple.c
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
+        src/detection/battery/battery_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
+        src/util/apple/cfdict_helpers.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -249,6 +251,7 @@ elseif(ANDROID)
         src/detection/os/os_android.c
         src/detection/cpu/cpu_linux.c
         src/detection/gpu/gpu_android.c
+        src/detection/battery/battery_android.c
         src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
     )
@@ -259,6 +262,7 @@ else()
         src/detection/cpu/cpu_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/battery/battery_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/xcb.c
