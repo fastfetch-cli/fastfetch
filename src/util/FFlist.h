@@ -3,6 +3,8 @@
 #ifndef FF_INCLUDED_FFLIST
 #define FF_INCLUDED_FFLIST
 
+#include "FFcheckmacros.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -19,11 +21,11 @@ typedef struct FFlist
 void ffListInit(FFlist* list, uint32_t elementSize);
 void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity);
 
-void* ffListGet(const FFlist* list, uint32_t index);
+FF_C_NODISCARD void* ffListGet(const FFlist* list, uint32_t index);
 
 void* ffListAdd(FFlist* list);
 
-uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
+FF_C_NODISCARD uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
 
 void ffListDestroy(FFlist* list);
 
