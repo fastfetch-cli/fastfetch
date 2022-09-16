@@ -26,16 +26,19 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         FFGPUResult* gpu = ffListAdd(gpus);
 
-        ffStrbufInit(&gpu->name);
-        ffCfDictGetString(properties, "model", &gpu->name);
-
-        if (!ffCfDictGetInt(properties, "gpu-core-count", &gpu->coreCount))
-            gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
-
         ffStrbufInitA(&gpu->vendor, 0);
 
         ffStrbufInit(&gpu->driver);
         ffCfDictGetString(properties, "CFBundleIdentifier", &gpu->driver);
+
+        ffStrbufInit(&gpu->name);
+        //IOAccelerator returns model property for Apple Silicon, but not for Intel Iris GPUs.
+        //Still needs testing for AMD's
+        if(!ffCfDictGetString(properties, "model", &gpu->name) && gpu->driver.length > 0)
+            ffStrbufAppendS(&gpu->name, gpu->driver.chars + ffStrbufLastIndexC(&gpu->driver, '.') + 1);
+
+        if(!ffCfDictGetInt(properties, "gpu-core-count", &gpu->coreCount))
+            gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
         gpu->temperature = FF_GPU_TEMP_UNSET;
 
