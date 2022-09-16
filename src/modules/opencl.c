@@ -118,5 +118,5 @@ void ffPrintOpenCL(FFinstance* instance)
     #endif
 
     if(error != NULL)
-        ffPrintError(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL, error);
+        ffPrintError(instance, FF_OPENCL_MODULE_NAME, 0, &instance->config.openCL, "%s", error);
 }

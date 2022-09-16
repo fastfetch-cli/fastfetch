@@ -123,7 +123,7 @@ static void printKonsole(FFinstance* instance)
 
     if(profile.length == 0)
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Couldn't find \"DefaultProfile=%[^\\n]\" in \".config/konsolerc\"");
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "%s", "Couldn't find \"DefaultProfile=%[^\\n]\" in \".config/konsolerc\"");
         ffStrbufDestroy(&profile);
         return;
     }

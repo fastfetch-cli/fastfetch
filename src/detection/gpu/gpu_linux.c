@@ -168,24 +168,26 @@ static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* devic
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
 
+    gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+
     gpu->temperature = FF_GPU_TEMP_UNSET;
     pciDetectTemperatur(gpu, device);
 }
 
-static void pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
+static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 {
     PCIData pci;
 
-    FF_LIBRARY_LOAD(libpci, instance->config.libPCI, , "libpci.so", 4)
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_alloc, )
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_init, )
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_scan_bus, )
-    FF_LIBRARY_LOAD_SYMBOL(libpci, pci_cleanup, )
+    FF_LIBRARY_LOAD(libpci, instance->config.libPCI, "dlopen libpci.so failed", "libpci.so", 4)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_alloc)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_init)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_cleanup)
 
-    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_read_byte, )
-    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_read_word, )
-    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_lookup_name, )
-    FF_LIBRARY_LOAD_SYMBOL_VAR(libpci, pci, pci_get_param, )
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_byte)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_word)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_lookup_name)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_param)
 
     pci.access = ffpci_alloc();
     ffpci_init(pci.access);
@@ -200,13 +202,14 @@ static void pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 
     ffpci_cleanup(pci.access);
     dlclose(libpci);
+    return NULL;
 }
 
 #endif
 
-void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     #ifdef FF_HAVE_LIBPCI
-        pciDetectGPUs(instance, gpus);
+        return pciDetectGPUs(instance, gpus);
     #endif
 }
