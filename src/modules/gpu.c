@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #define FF_GPU_MODULE_NAME "GPU"
-#define FF_GPU_NUM_FORMAT_ARGS 4
+#define FF_GPU_NUM_FORMAT_ARGS 5
 
 static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, FFGPUResult* gpu)
 {
@@ -22,11 +22,15 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
 
     ffStrbufAppend(&output, &gpu->name);
 
+    if(gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
+        ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
+
     ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu, cache, &output, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
         {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
-        {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature}
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
+        {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
     });
 
     ffStrbufDestroy(&output);
