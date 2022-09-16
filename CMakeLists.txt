@@ -243,6 +243,7 @@ if(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
+        src/util/apple/cfdict_helpers.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
