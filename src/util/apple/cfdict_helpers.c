@@ -1,42 +1,53 @@
 #include "cfdict_helpers.h"
 
-const void* ffCfDictGetValue(CFMutableDictionaryRef dict, const char* key)
+bool ffCfDictGetString(CFMutableDictionaryRef dict, CFStringRef key, FFstrbuf* result)
 {
-    CFStringRef cfKey = CFStringCreateWithCStringNoCopy(NULL, key, kCFStringEncodingASCII, kCFAllocatorNull);
-    return CFDictionaryGetValue(dict, cfKey);
-}
-
-bool ffCfDictGetString(CFMutableDictionaryRef dict, const char* key, FFstrbuf* result)
-{
-    CFStringRef cf = (CFStringRef)ffCfDictGetValue(dict, key);
-    if(cf == NULL || CFGetTypeID(cf) != CFStringGetTypeID())
+    CFTypeRef cf = (CFTypeRef)CFDictionaryGetValue(dict, key);
+    if(cf == NULL)
         return false;
 
-    uint32_t length = (uint32_t)CFStringGetLength(cf);
-    ffStrbufEnsureFree(result, length + 1);
-    if(CFStringGetCString(cf, result->chars, length + 1, kCFStringEncodingASCII))
+    if(CFGetTypeID(cf) == CFStringGetTypeID())
     {
-        result->length = length;
-        // CFStringGetCString ensures the buffer is NUL terminated
-        // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
+        CFStringRef cfStr = (CFStringRef)cf;
+        uint32_t length = (uint32_t)CFStringGetLength(cfStr);
+        ffStrbufEnsureFree(result, length + 1);
+        if(CFStringGetCString(cfStr, result->chars, length + 1, kCFStringEncodingASCII))
+        {
+            result->length = length;
+            // CFStringGetCString ensures the buffer is NUL terminated
+            // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
+        }
+    }
+    else if(CFGetTypeID(cf) == CFDataGetTypeID())
+    {
+        CFDataRef cfData = (CFDataRef)cf;
+        uint32_t length = (uint32_t)CFDataGetLength(cfData);
+        ffStrbufEnsureFree(result, length + 1);
+        CFDataGetBytes(cfData, CFRangeMake(0, length), (uint8_t*)result->chars);
+        result->length = (uint32_t)strnlen(result->chars, length);
+        result->chars[result->length] = '\0';
+    }
+    else
+    {
+        return false;
     }
     return true;
 }
 
-bool ffCfDictGetBool(CFMutableDictionaryRef dict, const char* key, bool* result)
+bool ffCfDictGetBool(CFMutableDictionaryRef dict, CFStringRef key, bool* result)
 {
-    CFBooleanRef cf = (CFBooleanRef)ffCfDictGetValue(dict, key);
-    if(cf == NULL || CFGetTypeID(cf) != CFNumberGetTypeID())
+    CFBooleanRef cf = (CFBooleanRef)CFDictionaryGetValue(dict, key);
+    if(cf == NULL || CFGetTypeID(cf) != CFBooleanGetTypeID())
         return false;
 
     *result = CFBooleanGetValue(cf);
     return true;
 }
 
-bool ffCfDictGetInt(CFMutableDictionaryRef dict, const char* key, int* result)
+bool ffCfDictGetInt(CFMutableDictionaryRef dict, CFStringRef key, int* result)
 {
-    CFNumberRef cf = (CFNumberRef)ffCfDictGetValue(dict, key);
-    if (cf == NULL || CFGetTypeID(cf) != CFStringGetTypeID())
+    CFNumberRef cf = (CFNumberRef)CFDictionaryGetValue(dict, key);
+    if (cf == NULL || CFGetTypeID(cf) != CFNumberGetTypeID())
         return false;
 
     if(!CFNumberGetValue(cf, kCFNumberSInt32Type, result))

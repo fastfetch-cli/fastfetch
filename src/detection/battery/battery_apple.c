@@ -13,7 +13,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         return "IOServiceMatching(\"AppleSmartBattery\") failed";
 
     io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(0, matchDict, &iterator) != kIOReturnSuccess)
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;
@@ -26,18 +26,19 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             continue;
         }
 
-        int intValue;
         bool boolValue;
 
         BatteryResult* battery = ffListAdd(results);
         ffStrbufInit(&battery->capacity);
-        if(ffCfDictGetInt(properties, "CurrentCapacity", &intValue))
-            ffStrbufAppendF(&battery->capacity, "%d", intValue);
+        int currentCapacity, maxCapacity;
+        if(ffCfDictGetInt(properties, CFSTR("CurrentCapacity"), &currentCapacity) &&
+            ffCfDictGetInt(properties, CFSTR("MaxCapacity"), &maxCapacity))
+            ffStrbufAppendF(&battery->capacity, "%.0f", currentCapacity * 100.0 / maxCapacity);
 
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->technology);
-        if (ffCfDictGetBool(properties, "built-in", &boolValue) && boolValue)
+        if (ffCfDictGetBool(properties, CFSTR("built-in"), &boolValue) && boolValue)
         {
             ffStrbufAppendS(&battery->manufacturer, "Apple Inc.");
             ffStrbufAppendS(&battery->modelName, "Builtin");
@@ -51,9 +52,9 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         }
 
         ffStrbufInit(&battery->status);
-        if (ffCfDictGetBool(properties, "FullyCharged", &boolValue) && boolValue)
+        if (ffCfDictGetBool(properties, CFSTR("FullyCharged"), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "Fully charged");
-        else if (ffCfDictGetBool(properties, "IsCharging", &boolValue) && boolValue)
+        else if (ffCfDictGetBool(properties, CFSTR("IsCharging"), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "Charging");
         else
             ffStrbufAppendS(&battery->status, "");

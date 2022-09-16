@@ -191,6 +191,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         //No way to detect those using vulkan
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->driver);
+        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
     }
 

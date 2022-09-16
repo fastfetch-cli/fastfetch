@@ -78,10 +78,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {
     if(instance->config.batteryDir.length > 0)
     {
         ffStrbufAppend(&baseDir, &instance->config.batteryDir);
-        if (!ffStrbufEndsWithC(&baseDir, '/'))
-        {
-            ffStrbufAppendC(&baseDir, '/');
-        }
+        ffStrbufEnsureEndsWithC(&baseDir, '/');
     }
     else
     {
