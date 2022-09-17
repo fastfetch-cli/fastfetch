@@ -546,10 +546,14 @@ static const FFlogo* getLogoCrystalLinux()
 "              dysssym\n"
 "            dysssym\n"
 "          dysssym\n"
+<<<<<<< HEAD
 "        dysssym\n"
 
 
     )              
+=======
+"        dysssym\n"            
+>>>>>>> 5f8a27faa53c1beba2131d4a1638119ac478dff9
     
     FF_LOGO_COLORS(
         "35", //magenta
