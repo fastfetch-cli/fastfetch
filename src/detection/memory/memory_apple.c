@@ -1,9 +1,9 @@
 #include "memory.h"
 #include "common/settings.h"
 
-
 #include <string.h>
 #include <mach/mach.h>
+#include <sys/sysctl.h>
 
 void ffDetectMemoryImpl(FFMemoryResult* memory)
 {
@@ -21,4 +21,11 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
         return;
 
     memory->ram.bytesUsed = ((uint64_t) vmstat.active_count + vmstat.wire_count) * pagesize;
+
+    struct xsw_usage swap;
+    size_t size = sizeof(swap);
+    if (sysctlbyname("vm.swapusage", &swap, &size, 0, 0) == -1)
+        return;
+    memory->swap.bytesTotal = swap.xsu_total;
+    memory->swap.bytesUsed = swap.xsu_used;
 }

@@ -215,6 +215,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libGLX, 0);
     ffStrbufInitA(&instance->config.libOSMesa, 0);
     ffStrbufInitA(&instance->config.libOpenCL, 0);
+    ffStrbufInitA(&instance->config.libplist, 0);
 
     instance->config.titleFQDN = false;
 
