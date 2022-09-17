@@ -31,7 +31,10 @@ static void initConfigDirs(FFstate* state)
 
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
         if(ffListFirstIndexComp(&state->configDirs, element, strbufEqualsAdapter) < state->configDirs.length - 1) \
-            --state->configDirs.length;
+        { \
+            ffStrbufDestroy(ffListGet(&state->configDirs, state->configDirs.length - 1)); \
+            --state->configDirs.length; \
+        }
 
     FFstrbuf* userConfigHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(userConfigHome, 64);
