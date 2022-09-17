@@ -44,6 +44,7 @@ The following libraries are used if present at runtime:
 * [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
+* [`libplist`](https://github.com/libimobiledevice/libplist): Binary `plist` file parser. Needed for iTerm2 Terminal font.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.

@@ -204,6 +204,20 @@ void ffFontInitCopy(FFfont* font, const char* name)
     ffFontInitValues(font, name, NULL);
 }
 
+void ffFontInitWithSpace(FFfont* font, const char* rawName)
+{
+    const char* pspace = strrchr(rawName, ' ');
+    if(pspace == NULL)
+        return ffFontInitCopy(font, rawName);
+
+    fontInit(font);
+
+    ffStrbufAppendNS(&font->name, (uint32_t)(pspace - rawName), rawName);
+    ffStrbufAppendS(&font->size, pspace + 1);
+
+    fontInitPretty(font);
+}
+
 void ffFontDestroy(FFfont* font)
 {
     ffStrbufDestroy(&font->pretty);

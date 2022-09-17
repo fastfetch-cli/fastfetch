@@ -46,6 +46,7 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_LIBPLIST "Enable libplist" ON "APPLE" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -243,6 +244,7 @@ if(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
+        src/modules/terminalfont_apple.c
         src/util/apple/cfdict_helpers.c
     )
 elseif(ANDROID)
@@ -254,6 +256,7 @@ elseif(ANDROID)
         src/detection/battery/battery_android.c
         src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
+        src/modules/terminalfont_linux.c
     )
 else()
     list(APPEND LIBFASTFETCH_SRC
@@ -268,6 +271,7 @@ else()
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/displayserver/linux/wmde.c
+        src/modules/terminalfont_linux.c
     )
 endif()
 
@@ -320,6 +324,7 @@ ff_lib_enable(EGL egl)
 ff_lib_enable(GLX glx)
 ff_lib_enable(OSMESA osmesa)
 ff_lib_enable(OPENCL OpenCL)
+ff_lib_enable(LIBPLIST libplist-2.0)
 
 if(APPLE)
     target_link_libraries(libfastfetch

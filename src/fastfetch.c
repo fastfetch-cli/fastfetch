@@ -1228,6 +1228,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libOSMesa);
     else if(strcasecmp(key, "--lib-opencl") == 0)
         optionParseString(key, value, &instance->config.libOpenCL);
+    else if(strcasecmp(key, "--lib-plist") == 0)
+        optionParseString(key, value, &instance->config.libplist);
 
     //////////////////
     //Module options//

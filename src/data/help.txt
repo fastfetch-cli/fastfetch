@@ -84,6 +84,7 @@ Library options: Set the path of a library to load
     --lib-glx <path>
     --lib-osmesa <path>
     --lib-opencl <path>
+    --lib-plist <path>
 
 Module specific options:
     --title-fqdn <?value>:        sets if the title should use fully qualified domain name. Default is false.
