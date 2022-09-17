@@ -3,6 +3,7 @@
 #include "common/font.h"
 #include "common/io.h"
 #include "common/library.h"
+#include "util/apple/osascript.h"
 #include "terminalfont.h"
 
 #include <stdlib.h>
@@ -106,11 +107,36 @@ static void printIterm2(FFinstance* instance)
     #endif
 }
 
+static void printAppleTerminal(FFinstance* instance)
+{
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+    if(!ffOsascript("tell application \"Terminal\" to font name of window frontmost", &fontName))
+    {
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "osascript failed");
+        return;
+    }
+
+    FFstrbuf fontSize;
+    ffStrbufInit(&fontSize);
+    ffOsascript("tell application \"Terminal\" to font size of window frontmost", &fontSize);
+
+    FFfont font;
+    ffFontInitValues(&font, fontName.chars, fontSize.chars);
+    ffPrintTerminalFontResult(instance, fontName.chars, &font);
+    ffFontDestroy(&font);
+
+    ffStrbufDestroy(&fontName);
+    ffStrbufDestroy(&fontSize);
+}
+
 bool ffPrintTerminalFontPlatform(FFinstance* instance, const FFTerminalShellResult* shellInfo)
 {
     bool success = true;
     if(ffStrbufIgnCaseCompS(&shellInfo->terminalProcessName, "iterm.app") == 0)
         printIterm2(instance);
+    else if(ffStrbufIgnCaseCompS(&shellInfo->terminalProcessName, "Apple_Terminal") == 0)
+        printAppleTerminal(instance);
     else
         success = false;
     return success;

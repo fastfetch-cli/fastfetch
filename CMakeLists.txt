@@ -246,6 +246,7 @@ if(APPLE)
         src/detection/displayserver/displayserver_apple.c
         src/modules/terminalfont_apple.c
         src/util/apple/cfdict_helpers.c
+        src/util/apple/osascript.m
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -333,6 +334,7 @@ if(APPLE)
         PRIVATE "-framework CoreGraphics"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
+        PRIVATE "-framework Cocoa"
     )
 endif()
 
