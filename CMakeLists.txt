@@ -197,6 +197,7 @@ set(LIBFASTFETCH_SRC
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
     src/detection/displayserver/displayserver.c
+    src/detection/terminalfont/terminalfont.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -247,7 +248,7 @@ if(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
-        src/modules/terminalfont_apple.c
+        src/detection/terminalfont/terminalfont_apple.c
         src/util/apple/cfdict_helpers.c
         src/util/apple/osascript.m
     )
@@ -260,7 +261,7 @@ elseif(ANDROID)
         src/detection/battery/battery_android.c
         src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
-        src/modules/terminalfont_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
     )
 else()
     list(APPEND LIBFASTFETCH_SRC
@@ -275,7 +276,7 @@ else()
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/displayserver/linux/wmde.c
-        src/modules/terminalfont_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
     )
 endif()
 
