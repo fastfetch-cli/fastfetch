@@ -48,4 +48,6 @@ void ffPrintCPU(FFinstance* instance)
         {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu->frequencyMax},
         {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu->temperature}
     });
+
+    ffStrbufDestroy(&output);
 }
