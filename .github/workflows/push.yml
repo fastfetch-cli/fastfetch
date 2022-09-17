@@ -94,7 +94,7 @@ jobs:
           path: ./fastfetch-*.*
 
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
     name: Release
     runs-on: ubuntu-latest
     needs:
