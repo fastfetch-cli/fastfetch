@@ -546,14 +546,14 @@ static const FFlogo* getLogoCrystalLinux()
 "              dysssym\n"
 "            dysssym\n"
 "          dysssym\n"
-"        dysssym\n"
-
+"        dysssym\n";
+      )
 
     FF_LOGO_COLORS(
-        "35", //magenta
+        "35" //magenta
     )
-    FF_LOGO_COLOR_KEYS("36"); //cyan
-    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
     FF_LOGO_RETURN
 }
 
