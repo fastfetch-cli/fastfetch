@@ -56,7 +56,7 @@ Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resoluti
 
 ##### Logos
 ```
-AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Debian, Devuan, Deepin, Endeavour, Fedora, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Ubuntu, Void, Zorin
+AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Crystal, Debian, Devuan, Deepin, Endeavour, Fedora, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Ubuntu, Void, Zorin
 ```
 * Most of the logos have a small variant. Access it by appending _small to the logo name.
 * Some logos have an old variant. Access it by appending _old to the logo name.
