@@ -11,7 +11,7 @@ void ffPrintTerminalFont(FFinstance* instance)
 
     if(terminalFont->error.length > 0)
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, terminalFont->error.chars);
+        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "%s", terminalFont->error.chars);
         return;
     }
 

@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: install required packages
-        run: brew install vulkan-loader
+        run: brew install vulkan-loader libplist
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
