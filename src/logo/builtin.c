@@ -527,28 +527,27 @@ static const FFlogo* getLogoCrystalLinux()
     FF_LOGO_INIT
     FF_LOGO_NAMES("crystal", "Crystal", "crystal-linux", "Crystal-Linux")
     FF_LOGO_LINES(
-"                       mysssym\n"
-"                     mysssym\n"
-"                   mysssym\n"
-"                 mysssym\n"
-"               mysssyd\n"
-"             mysssyd    N\n"
-"           mysssyd    mysym\n"
-"         mysssyd      dysssym\n"
-"       mysssyd          dysssym\n"
-"     mysssyd              dysssym\n"
-"     mysssyd              dysssym\n"
-"       mysssyd          dysssym\n"
-"         mysssyd      dysssym\n"
-"           mysym    dysssym\n"
-"             N    dysssym\n"
-"                dysssym\n"
-"              dysssym\n"
-"            dysssym\n"
-"          dysssym\n"
-"        dysssym\n";
-      )
-
+        "                  mysssym\n"
+        "                mysssym\n"
+        "              mysssym\n"
+        "            mysssym\n"
+        "          mysssyd\n"
+        "        mysssyd    N\n"
+        "      mysssyd    mysym\n"
+        "    mysssyd      dysssym\n"
+        "  mysssyd          dysssym\n"
+        "mysssyd              dysssym\n"
+        "mysssyd              dysssym\n"
+        "  mysssyd          dysssym\n"
+        "    mysssyd      dysssym\n"
+        "      mysym    dysssym\n"
+        "        N    dysssym\n"
+        "           dysssym\n"
+        "         dysssym\n"
+        "       dysssym\n"
+        "     dysssym\n"
+        "   dysssym";
+    )
     FF_LOGO_COLORS(
         "35" //magenta
     )

@@ -263,6 +263,7 @@ elseif(ANDROID)
         src/detection/battery/battery_android.c
         src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
+        src/detection/terminalfont/terminalfont_android.c
     )
 else()
     list(APPEND LIBFASTFETCH_SRC
