@@ -21,7 +21,11 @@ void ffPrintPlayer(FFinstance* instance)
     ffStrbufInit(&playerPretty);
 
     //If we are on a website, prepend the website name
-    if(ffStrbufStartsWithS(&media->url, "https://www."))
+    if(
+        ffStrbufIgnCaseCompS(&media->busNameShort, "spotify") == 0 ||
+        ffStrbufIgnCaseCompS(&media->busNameShort, "vlc") == 0
+    ) {} // do noting, surely not a website, even if the url is set
+    else if(ffStrbufStartsWithS(&media->url, "https://www."))
         ffStrbufAppendS(&playerPretty, media->url.chars + 12);
     else if(ffStrbufStartsWithS(&media->url, "http://www."))
         ffStrbufAppendS(&playerPretty, media->url.chars + 11);
