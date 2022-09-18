@@ -1,19 +1,18 @@
-#include "fastfetch.h"
+#include "terminalfont.h"
 #include "common/printing.h"
 #include "common/font.h"
 #include "common/io.h"
 #include "common/library.h"
+#include "detection/terminalshell.h"
 #include "util/apple/osascript.h"
-#include "terminalfont.h"
 
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef FF_HAVE_LIBPLIST
-
 #include <plist/plist.h>
 
-static char* printIterm2Impl(FFinstance* instance, const char* profile, FFstrbuf* content)
+static const char* iterm2ParsePList(const FFinstance* instance, const FFstrbuf* content, const char* profile, FFTerminalFontResult* terminalFont)
 {
     FF_LIBRARY_LOAD(libplist, instance->config.libplist, "dlopen libplist failed", "libplist-2.0"FF_LIBRARY_EXTENSION, 2);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libplist, plist_is_binary);
@@ -62,23 +61,18 @@ static char* printIterm2Impl(FFinstance* instance, const char* profile, FFstrbuf
         return "find Normal Font key failed";
     }
 
-    FFfont font;
-    ffFontInitWithSpace(&font, ffplist_get_string_ptr(item, NULL));
-    ffPrintTerminalFontResult(instance, font.name.chars, &font);
-    ffFontDestroy(&font);
+    ffFontInitWithSpace(&terminalFont->font, ffplist_get_string_ptr(item, NULL));
+
     ffplist_free(root_node);
     return NULL;
 }
 
-#endif //FF_HAVE_LIBPLIST
-
-static void printIterm2(FFinstance* instance)
+static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
-    #ifdef FF_HAVE_LIBPLIST
     const char* profile = getenv("ITERM_PROFILE");
     if (profile == NULL)
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Unknown iTerm profile");
+        ffStrbufAppendS(&terminalFont->error, "environment variable ITERM_PROFILE not set");
         return;
     }
 
@@ -89,31 +83,40 @@ static void printIterm2(FFinstance* instance)
 
     FFstrbuf content;
     ffStrbufInit(&content);
-    bool success = ffAppendFileBuffer(fileName.chars, &content);
+    fAppendFileBuffer(fileName.chars, &content);
     ffStrbufDestroy(&fileName);
-
-    if(success)
+    if(content.length == 0)
     {
-        const char* error = printIterm2Impl(instance, profile, &content);
-        if (error)
-            ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "%s", error);
+        ffStrbufAppendS(&terminalFont->error, "reading iTerm preference file failed");
+        ffStrbufDestroy(&content);
+        return;
     }
-    else
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Read iTerm preference file failed");
+
+    const char* error = iterm2ParsePList(instance, &content, profile, terminalFont);
+    if(error != NULL)
+        ffStrbufAppendS(&terminalFont->error, error);
 
     ffStrbufDestroy(&content);
-    #else
-    ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "Parse iTerm preferences requires libplist to be installed");
-    #endif
 }
 
-static void printAppleTerminal(FFinstance* instance)
+#else
+static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
+    FF_UNUSED(instance);
+    ffStrbufAppendS(&terminalFont->error, "Fastfetch was compiled without libplist support");
+}
+#endif
+
+static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 {
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
-    if(!ffOsascript("tell application \"Terminal\" to font name of window frontmost", &fontName))
+    ffOsascript("tell application \"Terminal\" to font name of window frontmost", &fontName);
+
+    if(fontName.length == 0)
     {
-        ffPrintError(instance, FF_TERMFONT_MODULE_NAME, 0, &instance->config.terminalFont, "osascript failed");
+        ffStrbufAppendS(&terminalFont->error, "executing osascript failed");
+        ffStrbufDestroy(&fontName);
         return;
     }
 
@@ -121,23 +124,16 @@ static void printAppleTerminal(FFinstance* instance)
     ffStrbufInit(&fontSize);
     ffOsascript("tell application \"Terminal\" to font size of window frontmost", &fontSize);
 
-    FFfont font;
-    ffFontInitValues(&font, fontName.chars, fontSize.chars);
-    ffPrintTerminalFontResult(instance, fontName.chars, &font);
-    ffFontDestroy(&font);
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 
     ffStrbufDestroy(&fontName);
     ffStrbufDestroy(&fontSize);
 }
 
-bool ffPrintTerminalFontPlatform(FFinstance* instance, const FFTerminalShellResult* shellInfo)
+void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
-    bool success = true;
-    if(ffStrbufIgnCaseCompS(&shellInfo->terminalProcessName, "iterm.app") == 0)
-        printIterm2(instance);
-    else if(ffStrbufIgnCaseCompS(&shellInfo->terminalProcessName, "Apple_Terminal") == 0)
-        printAppleTerminal(instance);
-    else
-        success = false;
-    return success;
+    if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "iterm.app") == 0)
+        detectIterm2(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Apple_Terminal") == 0)
+        detectAppleTerminal(terminalFont);
 }

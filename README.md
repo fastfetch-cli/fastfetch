@@ -1,4 +1,4 @@
-# <center> Fastfetch </center>
+# Fastfetch
 
 Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android and MacOS are supported.
 
@@ -81,7 +81,7 @@ KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 
 ##### Terminal fonts
 ```
-konsole, gnome-terminal-server, tilix, xfce4-terminal, alacritty, lxterminal, TTY
+Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, ITerm2, Apple Terminal, TTY
 ```
 
 ## Building

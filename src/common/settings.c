@@ -89,7 +89,7 @@ typedef struct GSettingsData
     GVariantGetters variantGetters;
 } GSettingsData;
 
-static const GSettingsData* getGSettingsData(FFinstance* instance)
+static const GSettingsData* getGSettingsData(const FFinstance* instance)
 {
     FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0.so", 1);
 
@@ -114,7 +114,7 @@ static const GSettingsData* getGSettingsData(FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetGSettings(const FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
     const GSettingsData* data = getGSettingsData(instance);
     if(data == NULL)
@@ -143,7 +143,7 @@ FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, c
     return getGVariantValue(variant, type, &data->variantGetters);
 }
 #else //FF_HAVE_GIO
-FFvariant ffSettingsGetGSettings(FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetGSettings(const FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
     FF_UNUSED(instance, schemaName, path, key, type)
     return FF_VARIANT_NULL;
@@ -161,7 +161,7 @@ typedef struct DConfData
     DConfClient* client;
 } DConfData;
 
-static const DConfData* getDConfData(FFinstance* instance)
+static const DConfData* getDConfData(const FFinstance* instance)
 {
     FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf.so", 2);
 
@@ -181,7 +181,7 @@ static const DConfData* getDConfData(FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetDConf(const FFinstance* instance, const char* key, FFvarianttype type)
 {
     const DConfData* data = getDConfData(instance);
     if(data == NULL)
@@ -199,14 +199,14 @@ FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttyp
     return getGVariantValue(variant, type, &data->variantGetters);
 }
 #else //FF_HAVE_DCONF
-FFvariant ffSettingsGetDConf(FFinstance* instance, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetDConf(const FFinstance* instance, const char* key, FFvarianttype type)
 {
     FF_UNUSED(instance, key, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_DCONF
 
-FFvariant ffSettingsGet(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
+FFvariant ffSettingsGet(const FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
     FFvariant gsettings = ffSettingsGetGSettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, type);
 
@@ -231,7 +231,7 @@ typedef struct XFConfData
     FF_LIBRARY_SYMBOL(xfconf_init)
 } XFConfData;
 
-static const XFConfData* getXFConfData(FFinstance* instance)
+static const XFConfData* getXFConfData(const FFinstance* instance)
 {
     FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0.so", 4);
 
@@ -248,7 +248,7 @@ static const XFConfData* getXFConfData(FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
+FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
 {
     const XFConfData* data = getXFConfData(instance);
     if(data == NULL)
@@ -271,7 +271,7 @@ FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, con
     return FF_VARIANT_NULL;
 }
 #else //FF_HAVE_XFCONF
-FFvariant ffSettingsGetXFConf(FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
+FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
 {
     FF_UNUSED(instance, channelName, propertyName, type)
     return FF_VARIANT_NULL;

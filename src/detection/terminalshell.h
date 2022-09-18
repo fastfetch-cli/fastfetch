@@ -21,6 +21,6 @@ typedef struct FFTerminalShellResult
     FFstrbuf userShellVersion;
 } FFTerminalShellResult;
 
-const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance);
+const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance);
 
 #endif

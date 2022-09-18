@@ -246,12 +246,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "terminal-font-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("terminal-font", "{5}", 5,
-            "Terminal font raw",
+        constructAndPrintCommandHelpFormat("terminal-font", "{}", 4,
+            "Terminal font",
             "Terminal font name",
             "Termianl font size",
             "Terminal font styles"
-            "Terminal font pretty"
         );
     }
     else if(strcasecmp(command, "cpu-format") == 0)

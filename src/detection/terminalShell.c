@@ -240,7 +240,7 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
         getShellVersionGeneric(exe, exeName, version);
 }
 
-const FFTerminalShellResult* ffDetectTerminalShell(FFinstance* instance)
+const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     FF_UNUSED(instance);
 

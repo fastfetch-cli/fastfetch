@@ -72,14 +72,16 @@ endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
+
+# Used for dlopen finding dylibs installed by homebrew
+# `/opt/homebrew/lib` is not on in dlopen search path by default
 if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
-    # Used for dlopen finding dylibs installed by homebrew, reversed for future usage
-    # `/opt/homebrew/lib` is not on dlopen search path by default
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
 endif()
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
-set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -rdynamic -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
 
+set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
+set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG} -rdynamic")
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT IPO_SUPPORTED)
@@ -197,6 +199,7 @@ set(LIBFASTFETCH_SRC
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
     src/detection/displayserver/displayserver.c
+    src/detection/terminalfont/terminalfont.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -247,7 +250,7 @@ if(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
-        src/modules/terminalfont_apple.c
+        src/detection/terminalfont/terminalfont_apple.c
         src/util/apple/cfdict_helpers.c
         src/util/apple/osascript.m
     )
@@ -260,7 +263,6 @@ elseif(ANDROID)
         src/detection/battery/battery_android.c
         src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
-        src/modules/terminalfont_linux.c
     )
 else()
     list(APPEND LIBFASTFETCH_SRC
@@ -275,7 +277,7 @@ else()
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/displayserver/linux/wmde.c
-        src/modules/terminalfont_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
     )
 endif()
 
