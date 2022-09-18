@@ -551,7 +551,6 @@ static const FFlogo* getLogoCrystalLinux()
 
     FF_LOGO_COLORS(
         "35", //magenta
-        "30" //black
     )
     FF_LOGO_COLOR_KEYS("36"); //cyan
     FF_LOGO_COLOR_TITLE("34"); //blue
