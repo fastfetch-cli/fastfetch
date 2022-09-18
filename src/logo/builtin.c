@@ -522,6 +522,43 @@ static const FFlogo* getLogoCentOSSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoCrystalLinux()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("crystal", "Crystal", "crystal-linux", "Crystal-Linux")
+    FF_LOGO_LINES(
+"                       mysssym\n"
+"                     mysssym\n"
+"                   mysssym\n"
+"                 mysssym\n"
+"               mysssyd\n"
+"             mysssyd    N\n"
+"           mysssyd    mysym\n"
+"         mysssyd      dysssym\n"
+"       mysssyd          dysssym\n"
+"     mysssyd              dysssym\n"
+"     mysssyd              dysssym\n"
+"       mysssyd          dysssym\n"
+"         mysssyd      dysssym\n"
+"           mysym    dysssym\n"
+"             N    dysssym\n"
+"                dysssym\n"
+"              dysssym\n"
+"            dysssym\n"
+"          dysssym\n"
+"        dysssym\n";
+      )
+
+    FF_LOGO_COLORS(
+        "35" //magenta
+    )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
+
+
 static const FFlogo* getLogoDebian()
 {
     FF_LOGO_INIT
@@ -1898,6 +1935,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoCelOS,
         getLogoCentOS,
         getLogoCentOSSmall,
+        getLogoCrystalLinux,
         getLogoDebian,
         getLogoDevuan,
         getLogoDevuanSmall,
