@@ -83,7 +83,7 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
 
     FFstrbuf content;
     ffStrbufInit(&content);
-    fAppendFileBuffer(fileName.chars, &content);
+    ffAppendFileBuffer(fileName.chars, &content);
     ffStrbufDestroy(&fileName);
     if(content.length == 0)
     {
