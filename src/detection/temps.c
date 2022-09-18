@@ -88,6 +88,7 @@ const FFTempsResult* ffDetectTemps()
     DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
     {
+        ffStrbufDestroy(&baseDir);
         pthread_mutex_unlock(&mutex);
         return &result;
     }
@@ -113,6 +114,9 @@ const FFTempsResult* ffDetectTemps()
 
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
+
+    closedir(dirp);
+    ffStrbufDestroy(&baseDir);
 
     pthread_mutex_unlock(&mutex);
     return &result;

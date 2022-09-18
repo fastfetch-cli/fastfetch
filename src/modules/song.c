@@ -100,4 +100,6 @@ void ffPrintSong(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->album}
         });
     }
+
+    ffStrbufDestroy(&songPretty);
 }

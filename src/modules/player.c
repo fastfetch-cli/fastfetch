@@ -66,4 +66,6 @@ void ffPrintPlayer(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
         });
     }
+
+    ffStrbufDestroy(&playerPretty);
 }

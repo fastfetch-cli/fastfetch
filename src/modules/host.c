@@ -50,4 +50,6 @@ void ffPrintHost(FFinstance* instance)
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisVersion},
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->sysVendor}
     });
+
+    ffStrbufDestroy(&output);
 }
