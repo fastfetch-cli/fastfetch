@@ -4,6 +4,7 @@
 #define FF_INCLUDED_common_sysctl
 
 #include "fastfetch.h"
+#include <sys/types.h>
 #include <sys/sysctl.h>
 
 void ffSysctlGetString(const char* propName, FFstrbuf* result);

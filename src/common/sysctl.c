@@ -5,13 +5,13 @@
 void ffSysctlGetString(const char* propName, FFstrbuf* result)
 {
     size_t neededLength;
-    if(sysctlbyname(propName, NULL, &neededLength, NULL, 0) != 0 || neededLength == 0)
+    if(sysctlbyname(propName, NULL, &neededLength, NULL, 0) != 0 || neededLength == 1) //neededLength is 1 for empty strings, because of the null terminator
         return;
 
-    ffStrbufEnsureFree(result, (uint32_t) neededLength);
+    ffStrbufEnsureFree(result, (uint32_t) neededLength - 1);
 
     if(sysctlbyname(propName, result->chars + result->length, &neededLength, NULL, 0) == 0)
-        result->length += (uint32_t) neededLength;
+        result->length += (uint32_t) neededLength - 1;
 
     result->chars[result->length] = '\0';
 }

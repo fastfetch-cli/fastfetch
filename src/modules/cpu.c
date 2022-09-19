@@ -13,7 +13,7 @@ void ffPrintCPU(FFinstance* instance)
 
     const FFCPUResult* cpu = ffDetectCPU();
 
-    if(cpu->vendor.length == 0 && cpu->name.length == 0 && cpu->coresOnline == 0)
+    if(cpu->vendor.length == 0 && cpu->name.length == 0 && cpu->coresOnline <= 1)
     {
         ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &instance->config.cpu, "No CPU detected");
         return;

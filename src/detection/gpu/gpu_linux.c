@@ -234,9 +234,11 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 
 #endif
 
-const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     #ifdef FF_HAVE_LIBPCI
-        return pciDetectGPUs(instance, gpus);
+        pciDetectGPUs(instance, gpus);
+    #else
+        FF_UNUSED(gpus, instance);
     #endif
 }

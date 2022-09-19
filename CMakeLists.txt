@@ -259,7 +259,6 @@ if(LINUX OR BSD)
         src/detection/host/host_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/memory/memory_linux.c
         src/detection/battery/battery_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
