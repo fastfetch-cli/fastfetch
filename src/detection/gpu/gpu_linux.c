@@ -17,9 +17,10 @@
 typedef struct PCIData
 {
     struct pci_access* access;
+    FF_LIBRARY_SYMBOL(pci_fill_info);
     FF_LIBRARY_SYMBOL(pci_read_byte);
-    FF_LIBRARY_SYMBOL(pci_read_word);
     FF_LIBRARY_SYMBOL(pci_lookup_name);
+    FF_LIBRARY_SYMBOL(pci_get_string_property);
     FF_LIBRARY_SYMBOL(pci_get_param);
 } PCIData;
 
@@ -60,9 +61,21 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
+    #if PCI_LIB_VERSION >= 0x030800
+        pci->ffpci_fill_info(device, PCI_FILL_CLASS_EXT);
+    #endif
+
+    #ifndef __FreeBSD__
+        if((device->known_fields & PCI_FILL_CLASS_EXT) == 0)
+            device->rev_id = pci->ffpci_read_byte(device, PCI_REVISION_ID);
+    #endif
+
+    if((device->known_fields & PCI_FILL_CLASS) == 0)
+        return;
+
     FFstrbuf query;
     ffStrbufInit(&query);
-    ffStrbufAppendF(&query, "%X, %X,", device->device_id, pci->ffpci_read_byte(device, PCI_REVISION_ID));
+    ffStrbufAppendF(&query, "%X, %X,", device->device_id, device->rev_id);
 
     ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/libdrm/amdgpu.ids", query.chars, &gpu->name);
 
@@ -100,6 +113,14 @@ static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
+    #if PCI_LIB_VERSION >= 0x030800
+        pci->ffpci_fill_info(device, PCI_FILL_DRIVER);
+        ffStrbufAppendS(&gpu->driver, pci->ffpci_get_string_property(device, PCI_FILL_DRIVER));
+
+        if(gpu->driver.length > 0)
+            return;
+    #endif
+
     const char* base = pci->ffpci_get_param(pci->access, "sysfs.path");
     if(!ffStrSet(base))
         return;
@@ -143,7 +164,7 @@ static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
 
 static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* device)
 {
-    device->device_class = pci->ffpci_read_word(device, PCI_CLASS_DEVICE);
+    pci->ffpci_fill_info(device, PCI_FILL_CLASS);
 
     char class[1024];
     pci->ffpci_lookup_name(pci->access, class, sizeof(class) - 1, PCI_LOOKUP_CLASS, device->device_class);
@@ -154,8 +175,7 @@ static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* devic
         strcasecmp("Display controller", class)        != 0
     ) return;
 
-    device->vendor_id = pci->ffpci_read_word(device, PCI_VENDOR_ID);
-    device->device_id = pci->ffpci_read_word(device, PCI_DEVICE_ID);
+    pci->ffpci_fill_info(device, PCI_FILL_IDENT);
 
     FFGPUResult* gpu = ffListAdd(results);
 
@@ -184,10 +204,11 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_cleanup)
 
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_byte)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_word)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_fill_info)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_lookup_name)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_byte)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_param)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_string_property)
 
     pci.access = ffpci_alloc();
     ffpci_init(pci.access);
