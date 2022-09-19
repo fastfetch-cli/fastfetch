@@ -89,8 +89,14 @@ void ffDetectCPUImpl(FFCPUResult* cpu)
     parseCpuInfo(cpu, &physicalCoresBuffer);
 
     cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
-    cpu->coresLogical = (uint16_t) get_nprocs_conf();
-    cpu->coresOnline = (uint16_t) get_nprocs();
+
+    #ifdef FF_HAVE_SYSINFO_H
+        cpu->coresLogical = (uint16_t) get_nprocs_conf();
+        cpu->coresOnline = (uint16_t) get_nprocs();
+    #else
+        cpu->coresLogical = 1;
+        cpu->coresOnline = 1;
+    #endif
 
     #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
     cpu->frequencyMin = getFrequency(BP"cpuinfo_min_freq", BP"scaling_min_freq");
