@@ -1,6 +1,6 @@
 #include "cfdict_helpers.h"
 
-bool ffCfDictGetString(CFMutableDictionaryRef dict, CFStringRef key, FFstrbuf* result)
+bool ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result)
 {
     CFTypeRef cf = (CFTypeRef)CFDictionaryGetValue(dict, key);
     if(cf == NULL)
@@ -10,12 +10,13 @@ bool ffCfDictGetString(CFMutableDictionaryRef dict, CFStringRef key, FFstrbuf* r
     {
         CFStringRef cfStr = (CFStringRef)cf;
         uint32_t length = (uint32_t)CFStringGetLength(cfStr);
-        ffStrbufEnsureFree(result, length + 1);
-        if(CFStringGetCString(cfStr, result->chars, length + 1, kCFStringEncodingASCII))
+        //CFString stores UTF16 characters, therefore may require larger buffer to convert to UTF8 string
+        ffStrbufEnsureFree(result, length * 2);
+        if(CFStringGetCString(cfStr, result->chars, result->allocated, kCFStringEncodingUTF8))
         {
-            result->length = length;
             // CFStringGetCString ensures the buffer is NUL terminated
             // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
+            result->length = strnlen(result->chars, (uint32_t)result->allocated);
         }
     }
     else if(CFGetTypeID(cf) == CFDataGetTypeID())
@@ -34,7 +35,7 @@ bool ffCfDictGetString(CFMutableDictionaryRef dict, CFStringRef key, FFstrbuf* r
     return true;
 }
 
-bool ffCfDictGetBool(CFMutableDictionaryRef dict, CFStringRef key, bool* result)
+bool ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result)
 {
     CFBooleanRef cf = (CFBooleanRef)CFDictionaryGetValue(dict, key);
     if(cf == NULL || CFGetTypeID(cf) != CFBooleanGetTypeID())
@@ -44,7 +45,7 @@ bool ffCfDictGetBool(CFMutableDictionaryRef dict, CFStringRef key, bool* result)
     return true;
 }
 
-bool ffCfDictGetInt(CFMutableDictionaryRef dict, CFStringRef key, int* result)
+bool ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result)
 {
     CFNumberRef cf = (CFNumberRef)CFDictionaryGetValue(dict, key);
     if (cf == NULL || CFGetTypeID(cf) != CFNumberGetTypeID())

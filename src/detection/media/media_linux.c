@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "detection/media.h"
+#include "detection/media/media.h"
 
 #include <string.h>
 #include <pthread.h>
