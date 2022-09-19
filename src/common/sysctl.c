@@ -1,5 +1,6 @@
 #include "sysctl.h"
 
+#include <stdlib.h>
 #include <sys/sysctl.h>
 
 void ffSysctlGetString(const char* propName, FFstrbuf* result)
@@ -36,14 +37,14 @@ int64_t ffSysctlGetInt64(const char* propName, int64_t defaultValue)
 
 void* ffSysctlGetData(int* request, int requestLength, size_t* resultLength)
 {
-    if(sysctl(request, requestLength, NULL, &length, NULL, 0) != 0)
+    if(sysctl(request, requestLength, NULL, resultLength, NULL, 0) != 0)
         return NULL;
 
-    void* data = malloc(*length);
+    void* data = malloc(*resultLength);
     if(data == NULL)
         return NULL;
 
-    if(sysctl(request, requestLength, data, length, NULL, 0) != 0)
+    if(sysctl(request, requestLength, data, resultLength, NULL, 0) != 0)
     {
         free(data);
         return NULL;
