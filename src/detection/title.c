@@ -10,6 +10,29 @@
     #define HOST_NAME_MAX 64
 #endif
 
+#ifdef __linux__
+static void detectFQDN(FFTitleResult* title)
+{
+    struct addrinfo hints = {0};
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_CANONNAME;
+
+    struct addrinfo* info = NULL;
+
+    if(getaddrinfo(title->hostname.chars, "80", &hints, &info) == 0)
+    {
+        struct addrinfo* current = info;
+        while(title->fqdn.length == 0 && current != NULL)
+        {
+            ffStrbufAppendS(&title->fqdn, current->ai_canonname);
+            current = current->ai_next;
+        }
+
+        freeaddrinfo(info);
+    }
+}
+#endif
+
 const FFTitleResult* ffDetectTitle(const FFinstance* instance)
 {
     static FFTitleResult result;
@@ -31,27 +54,9 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
     ffStrbufAppendS(&result.hostname, instance->state.utsname.nodename);
 
     ffStrbufInitA(&result.fqdn, HOST_NAME_MAX);
-
-    #ifndef __APPLE__
-    struct addrinfo hints = {0};
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_CANONNAME;
-
-    struct addrinfo* info = NULL;
-
-    if(getaddrinfo(result.hostname.chars, "80", &hints, &info) == 0)
-    {
-        struct addrinfo* current = info;
-        while(result.fqdn.length == 0 && current != NULL)
-        {
-            ffStrbufAppendS(&result.fqdn, current->ai_canonname);
-            current = current->ai_next;
-        }
-
-        freeaddrinfo(info);
-    }
+    #ifdef __linux
+        detectFQDN(&result);
     #endif
-
     if(result.fqdn.length == 0)
         ffStrbufAppend(&result.fqdn, &result.hostname);
 
