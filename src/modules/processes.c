@@ -10,9 +10,7 @@
 
 void ffPrintProcesses(FFinstance* instance)
 {
-    #if FF_HAVE_SYSINFO_H
-        uint16_t numProcesses = instance->state.sysinfo.procs;
-    #else
+    #if __APPLE__
         int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
         size_t length;
 
@@ -22,7 +20,17 @@ void ffPrintProcesses(FFinstance* instance)
             return;
         }
         uint16_t numProcesses = (uint16_t)(length / sizeof(struct kinfo_proc));
+    #elif FF_HAVE_SYSINFO_H
+        uint16_t numProcesses = (uint16_t) instance->state.sysinfo.procs;
+    #else
+        uint16_t numProcesses = 0;
     #endif
+
+    if(numProcesses == 0)
+    {
+        ffPrintError(instance, FF_PROCESSES_MODULE_NAME, 0, &instance->config.processes, "Could not get number of processes");
+        return;
+    }
 
     if(instance->config.processes.outputFormat.length == 0)
     {
