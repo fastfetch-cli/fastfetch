@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "common/systcl.h"
+#include "common/sysctl.h"
 
 #include <string.h>
 #include <mach/mach.h>

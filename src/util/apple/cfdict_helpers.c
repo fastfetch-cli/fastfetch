@@ -16,7 +16,7 @@ bool ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result)
         {
             // CFStringGetCString ensures the buffer is NUL terminated
             // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
-            result->length = strnlen(result->chars, (uint32_t)result->allocated);
+            result->length = (uint32_t) strnlen(result->chars, (uint32_t)result->allocated);
         }
     }
     else if(CFGetTypeID(cf) == CFDataGetTypeID())
