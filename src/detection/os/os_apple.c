@@ -1,9 +1,8 @@
 #include "os.h"
 #include "common/properties.h"
-#include "common/settings.h"
+#include "common/sysctl.h"
 
 #include <stdlib.h>
-#include <sys/sysctl.h>
 
 typedef enum PListKey
 {
@@ -83,11 +82,11 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         ffStrbufAppendS(&os->id, "macos");
 
     if(os->version.length == 0)
-        ffSettingsGetAppleProperty("kern.osproductversion", &os->version);
+        ffSysctlGetString("kern.osproductversion", &os->version);
 
     //TODO map version to pretty name
     ffStrbufAppend(&os->prettyName, &os->name);
     ffStrbufAppend(&os->versionID, &os->version);
-    ffSettingsGetAppleProperty("kern.ostype", &os->systemName);
-    ffSettingsGetAppleProperty("hw.machine", &os->architecture);
+    ffSysctlGetString("kern.ostype", &os->systemName);
+    ffSysctlGetString("hw.machine", &os->architecture);
 }

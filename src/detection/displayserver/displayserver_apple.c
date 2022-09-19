@@ -1,10 +1,9 @@
 #include "displayserver.h"
-#include "common/library.h"
+#include "common/sysctl.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <sys/sysctl.h>
 #include <ApplicationServices/ApplicationServices.h>
 
 //Resolution code heavily inspired by displayplacer <3
@@ -60,18 +59,9 @@ static void detectWM(FFDisplayServerResult* ds)
     u_int requestLength = sizeof(request) / sizeof(*request);
 
     size_t length = 0;
-    if(sysctl(request, requestLength, NULL, &length, NULL, 0) != 0)
-        return;
-
-    struct kinfo_proc* processes = malloc(length);
+    struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
     if(processes == NULL)
         return;
-
-    if(sysctl(request, requestLength, processes, &length, NULL, 0) != 0)
-    {
-        free(processes);
-        return;
-    }
 
     for(size_t i = 0; i < length / sizeof(struct kinfo_proc); i++)
     {

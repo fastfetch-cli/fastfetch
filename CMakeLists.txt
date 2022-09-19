@@ -243,6 +243,7 @@ set(LIBFASTFETCH_SRC
 
 if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/sysctl.c
         src/util/apple/cfdict_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c

@@ -1,17 +1,16 @@
 #include "memory.h"
-#include "common/settings.h"
+#include "common/systcl.h"
 
 #include <string.h>
 #include <mach/mach.h>
-#include <sys/sysctl.h>
 
 void ffDetectMemoryImpl(FFMemoryResult* memory)
 {
     memset(memory, 0, sizeof(FFMemoryResult));
 
-    memory->ram.bytesTotal = (uint64_t) ffSettingsGetAppleInt64("hw.memsize", 0);
+    memory->ram.bytesTotal = (uint64_t) ffSysctlGetInt64("hw.memsize", 0);
 
-    uint32_t pagesize = (uint32_t) ffSettingsGetAppleInt("hw.pagesize", 0);
+    uint32_t pagesize = (uint32_t) ffSysctlGetInt("hw.pagesize", 0);
     if(pagesize == 0)
         return;
 

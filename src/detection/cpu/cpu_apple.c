@@ -1,9 +1,9 @@
 #include "cpu.h"
-#include "common/settings.h"
+#include "common/sysctl.h"
 
 static double getFrequency(const char* propName)
 {
-    double herz = (double) ffSettingsGetAppleInt64(propName, 0);
+    double herz = (double) ffSysctlGetInt64(propName, 0);
     if(herz <= 0.0)
         return herz;
 
@@ -15,22 +15,22 @@ static double getFrequency(const char* propName)
 void ffDetectCPUImpl(FFCPUResult* cpu)
 {
     ffStrbufInit(&cpu->name);
-    ffSettingsGetAppleProperty("machdep.cpu.brand_string", &cpu->name);
+    ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
 
     ffStrbufInit(&cpu->vendor);
-    ffSettingsGetAppleProperty("machdep.cpu.vendor", &cpu->vendor);
+    ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
 
-    cpu->coresPhysical = (uint16_t) ffSettingsGetAppleInt("hw.physicalcpu_max", 1);
+    cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
     if(cpu->coresPhysical == 1)
-        cpu->coresPhysical = (uint16_t) ffSettingsGetAppleInt("hw.physicalcpu", 1);
+        cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu", 1);
 
-    cpu->coresLogical = (uint16_t) ffSettingsGetAppleInt("hw.logicalcpu_max", 1);
+    cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.logicalcpu_max", 1);
     if(cpu->coresLogical == 1)
-        cpu->coresLogical = (uint16_t) ffSettingsGetAppleInt("hw.ncpu", 1);
+        cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
 
-    cpu->coresOnline = (uint16_t) ffSettingsGetAppleInt("hw.logicalcpu", 1);
+    cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.logicalcpu", 1);
     if(cpu->coresOnline == 1)
-        cpu->coresOnline = (uint16_t) ffSettingsGetAppleInt("hw.activecpu", 1);
+        cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
     cpu->frequencyMin = getFrequency("hw.cpufrequency_min");
     cpu->frequencyMax = getFrequency("hw.cpufrequency_max");

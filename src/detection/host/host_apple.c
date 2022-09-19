@@ -1,5 +1,5 @@
 #include "host.h"
-#include "common/settings.h"
+#include "common/sysctl.h"
 
 void ffDetectHostImpl(FFHostResult* host)
 {
@@ -20,5 +20,5 @@ void ffDetectHostImpl(FFHostResult* host)
     ffStrbufInitA(&host->chassisVendor, 0);
     ffStrbufInitA(&host->chassisVersion, 0);
 
-    ffSettingsGetAppleProperty("hw.model", &host->productName);
+    ffSysctlGetString("hw.model", &host->productName);
 }
