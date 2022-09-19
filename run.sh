@@ -7,5 +7,12 @@ set -e
 mkdir -p build/
 cd build/
 cmake ..
-cmake --build . --target fastfetch -j$(nproc)
+
+if [ "$OSTYPE" == "linux-gnu" ]; then
+    cmake_build_extra_args="-j$(nproc)"
+else
+    cmake_build_extra_args=""
+fi
+cmake --build . --target fastfetch ${cmake_build_extra_args}
+
 ./fastfetch "$@"
