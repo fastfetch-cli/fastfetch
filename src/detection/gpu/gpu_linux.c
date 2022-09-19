@@ -61,20 +61,27 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
-    bool revIdSet = false;
+    u8 revId;
+    bool revIdSet = false;;
 
     #if PCI_LIB_VERSION >= 0x030800
         revIdSet = pci->ffpci_fill_info(device, PCI_FILL_CLASS_EXT) & PCI_FILL_CLASS_EXT;
-    #elif __FreeBSD__
-        return;
+        if(revIdSet)
+            revId = device->rev_id;
     #endif
 
     if(!revIdSet)
-        device->rev_id = pci->ffpci_read_byte(device, PCI_REVISION_ID);
+    {
+        #ifdef __FreeBSD__
+            return;
+        #else
+            revId = pci->ffpci_read_byte(device, PCI_REVISION_ID);
+        #endif
+    }
 
     FFstrbuf query;
     ffStrbufInit(&query);
-    ffStrbufAppendF(&query, "%X, %X,", device->device_id, device->rev_id);
+    ffStrbufAppendF(&query, "%X, %X,", device->device_id, revId);
 
     ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/libdrm/amdgpu.ids", query.chars, &gpu->name);
 
