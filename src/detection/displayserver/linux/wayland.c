@@ -20,6 +20,7 @@ typedef struct WaylandData
     const struct wl_interface* ffwl_output_interface;
 } WaylandData;
 
+#ifndef __FreeBSD__
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     struct ucred ucred;
@@ -35,6 +36,12 @@ static void waylandDetectWM(int fd, FFDisplayServerResult* result)
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
     ffStrbufDestroy(&procPath);
 }
+#else
+static void waylandDetectWM(int fd, FFDisplayServerResult* result)
+{
+    FF_UNUSED(fd, result);
+}
+#endif
 
 static void stubListener(void* data, ...)
 {
