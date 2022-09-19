@@ -14,7 +14,7 @@ static void* logoResize(const void* image, size_t width, size_t height, void* ex
 
 FFLogoImageResult ffLogoPrintImageIM6(FFinstance* instance, FFLogoRequestData* requestData)
 {
-    FF_LIBRARY_LOAD(imageMagick, instance->config.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR, "libMagickCore-6.Q16HDRI.so", 8, "libMagickCore-6.Q16.so", 8)
+    FF_LIBRARY_LOAD(imageMagick, &instance->config.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR, "libMagickCore-6.Q16HDRI.so", 8, "libMagickCore-6.Q16.so", 8)
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
 
     FFIMData imData;

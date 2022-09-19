@@ -148,7 +148,7 @@ static const char* eglPrint(FFinstance* instance)
 {
     EGLData eglData;
 
-    FF_LIBRARY_LOAD(egl, instance->config.libEGL, "dlopen egl failed", "libEGL.so", 1);
+    FF_LIBRARY_LOAD(egl, &instance->config.libEGL, "dlopen egl failed", "libEGL.so", 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglInitialize);
@@ -263,7 +263,7 @@ static const char* glxPrint(FFinstance* instance)
 {
     GLXData data;
 
-    FF_LIBRARY_LOAD(glx, instance->config.libGLX, "dlopen glx failed", "libGLX.so", 1);
+    FF_LIBRARY_LOAD(glx, &instance->config.libGLX, "dlopen glx failed", "libGLX.so", 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XOpenDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXChooseVisual);
@@ -328,7 +328,7 @@ static const char* osMesaPrint(FFinstance* instance)
 {
     OSMesaData data;
 
-    FF_LIBRARY_LOAD(osmesa, instance->config.libOSMesa, "dlopen osmesa failed", "libOSMesa.so", 8);
+    FF_LIBRARY_LOAD(osmesa, &instance->config.libOSMesa, "dlopen osmesa failed", "libOSMesa.so", 8);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaCreateContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaMakeCurrent);

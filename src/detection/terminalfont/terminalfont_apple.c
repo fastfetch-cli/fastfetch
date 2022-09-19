@@ -14,7 +14,7 @@
 
 static const char* iterm2ParsePList(const FFinstance* instance, const FFstrbuf* content, const char* profile, FFTerminalFontResult* terminalFont)
 {
-    FF_LIBRARY_LOAD(libplist, instance->config.libplist, "dlopen libplist failed", "libplist-2.0"FF_LIBRARY_EXTENSION, 2);
+    FF_LIBRARY_LOAD(libplist, &instance->config.libplist, "dlopen libplist failed", "libplist-2.0"FF_LIBRARY_EXTENSION, 2);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libplist, plist_is_binary);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libplist, plist_from_bin);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libplist, plist_from_xml);

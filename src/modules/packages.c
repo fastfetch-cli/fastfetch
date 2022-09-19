@@ -269,7 +269,7 @@ static uint32_t getMacPortsPackages(FFstrbuf* baseDir)
 
 static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 {
-    FF_LIBRARY_LOAD(rpm, instance->config.librpm, 0, "librpm.so", 12)
+    FF_LIBRARY_LOAD(rpm, &instance->config.librpm, 0, "librpm.so", 12)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)

@@ -15,7 +15,7 @@
     __typeof__(&symbolName) ff ## symbolName;
 
 #define FF_LIBRARY_LOAD(libraryObjectName, userLibraryName, returnValue, ...) \
-    void* libraryObjectName = ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL);\
+    void* libraryObjectName = ffLibraryLoad(userLibraryName, __VA_ARGS__, NULL);\
     if(libraryObjectName == NULL) \
         return returnValue;
 
