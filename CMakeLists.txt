@@ -11,11 +11,11 @@ project(fastfetch
 # Target Platform #
 ###################
 
-if(APPLE OR ANDROID)
-    set(LINUX FALSE CACHE BOOL "..." FORCE) # Linux true means we have full linux userland, not just the kernel
-elseif(UNIX)
-    set(LINUX TRUE CACHE BOOL "..." FORCE)
-else()
+if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
+    set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
+    set(BSD TRUE CACHE BOOL "..." FORCE)
+elseif(NOT APPLE AND NOT ANDROID)
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
@@ -241,9 +241,38 @@ set(LIBFASTFETCH_SRC
     src/modules/opencl.c
 )
 
-if(APPLE)
+if(BSD OR APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/sysctl.c
+    )
+endif()
+
+if(LINUX OR ANDROID)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/cpu/cpu_linux.c
+        src/detection/memory/memory_linux.c
+    )
+endif()
+
+if(LINUX OR BSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/host/host_linux.c
+        src/detection/os/os_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/memory/memory_linux.c
+        src/detection/battery/battery_linux.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/media/media_linux.c
+    )
+endif()
+
+if(APPLE)
+    list(APPEND LIBFASTFETCH_SRC
         src/util/apple/cfdict_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
@@ -256,33 +285,24 @@ if(APPLE)
         src/detection/terminalfont/terminalfont_apple.c
         src/detection/media/media_apple.m
     )
-elseif(ANDROID)
+endif()
+
+if(BSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/cpu/cpu_bsd.c
+        src/detection/memory/memory_bsd.c
+    )
+endif()
+
+if(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_android.c
         src/detection/os/os_android.c
-        src/detection/cpu/cpu_linux.c
         src/detection/gpu/gpu_android.c
         src/detection/battery/battery_android.c
-        src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/media/media_android.c
-    )
-else()
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_linux.c
-        src/detection/os/os_linux.c
-        src/detection/cpu/cpu_linux.c
-        src/detection/gpu/gpu_linux.c
-        src/detection/memory/memory_linux.c
-        src/detection/battery/battery_linux.c
-        src/detection/displayserver/linux/displayserver_linux.c
-        src/detection/displayserver/linux/wayland.c
-        src/detection/displayserver/linux/xcb.c
-        src/detection/displayserver/linux/xlib.c
-        src/detection/displayserver/linux/wmde.c
-        src/detection/terminalfont/terminalfont_linux.c
-        src/detection/media/media_linux.c
     )
 endif()
 
