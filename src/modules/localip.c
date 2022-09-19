@@ -10,6 +10,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifdef __FreeBSD__
+    #include <sys/socket.h> // FreeBSD needs this for AF_INET
+#endif
+
 static void printValue(FFinstance* instance, const char* ifaName, const char* addressBuffer)
 {
     FFstrbuf key;
