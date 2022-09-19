@@ -232,7 +232,7 @@ static bool getBusProperties(const char* busName, FFMediaResult* result, DBusDat
     return true;
 }
 
-static void getCustomBus(FFinstance* instance, FFMediaResult* result, DBusData* data)
+static void getCustomBus(const FFinstance* instance, FFMediaResult* result, DBusData* data)
 {
     if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
     {
@@ -291,33 +291,33 @@ static void getBestBus(FFMediaResult* result, DBusData* data)
     data->ffdbus_message_unref(reply);
 }
 
-static void getMedia(FFinstance* instance, FFMediaResult* result)
+static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
 {
     DBusData data;
 
-    FF_LIBRARY_LOAD(dbus, instance->config.libDBus, , "libdbus-1.so", 4);
-    FF_LIBRARY_LOAD_SYMBOL(dbus, dbus_bus_get,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_new_method_call,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_init,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_init_append,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_append_basic,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_get_arg_type,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_get_basic,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_recurse,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_has_next,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_iter_next,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_message_unref,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_connection_send_with_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_connection_flush,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_pending_call_block,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_pending_call_steal_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(dbus, data, dbus_pending_call_unref,)
+    FF_LIBRARY_LOAD(dbus, instance->config.libDBus, "dlopen dbus failed", "libdbus-1.so", 4);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dbus, dbus_bus_get)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_new_method_call)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_init)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_init_append)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_append_basic)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_get_arg_type)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_get_basic)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_recurse)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_has_next)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_next)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_unref)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_connection_send_with_reply)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_connection_flush)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_pending_call_block)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_pending_call_steal_reply)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_pending_call_unref)
 
     data.connection = ffdbus_bus_get(DBUS_BUS_SESSION, NULL);
     if(data.connection == NULL)
     {
         dlclose(dbus);
-        return;
+        return "Failed to connect to session dbus";
     }
 
     if(instance->config.playerName.length > 0)
@@ -326,44 +326,18 @@ static void getMedia(FFinstance* instance, FFMediaResult* result)
         getBestBus(result, &data);
 
     dlclose(dbus);
+    return NULL;
 }
 
 #endif
 
-const FFMediaResult* ffDetectMedia(FFinstance* instance)
+void ffDetectMediaImpl(const FFinstance* instance, FFMediaResult* media)
 {
-    static FFMediaResult result;
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    static bool init = false;
-
-    pthread_mutex_lock(&mutex);
-    if(init)
-    {
-        pthread_mutex_unlock(&mutex);
-        return &result;
-    }
-    init = true;
-
-    ffStrbufInit(&result.busNameShort);
-    ffStrbufInit(&result.player);
-    ffStrbufInit(&result.song);
-    ffStrbufInit(&result.artist);
-    ffStrbufInit(&result.album);
-    ffStrbufInit(&result.url);
-
     #ifdef FF_HAVE_DBUS
-        getMedia(instance, &result);
+        const char* error = getMedia(instance, media);
+        ffStrbufAppendS(&media->error, error);
+    #else
+        FF_UNUSED(instance);
+        ffStrbufAppendS(&media->error, "Fastfetch was compiled without DBus support");
     #endif
-
-    //Set player if a custom player was given, but loading with dbus failed
-    if(instance->config.playerName.length > 0 && result.song.length == 0)
-    {
-        if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
-            ffStrbufAppendS(&result.player, instance->config.playerName.chars + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
-        else
-            ffStrbufAppend(&result.player, &instance->config.playerName);
-    }
-
-    pthread_mutex_unlock(&mutex);
-    return &result;
 }

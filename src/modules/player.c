@@ -11,9 +11,9 @@ void ffPrintPlayer(FFinstance* instance)
 {
     const FFMediaResult* media = ffDetectMedia(instance);
 
-    if(media->player.length == 0)
+    if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player, "No media player found");
+        ffPrintError(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player, "%s", media->error.chars);
         return;
     }
 

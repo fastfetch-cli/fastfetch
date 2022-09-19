@@ -7,15 +7,15 @@
 
 typedef struct FFMediaResult
 {
+    FFstrbuf error;
     FFstrbuf busNameShort; //e.g. plasma-browser-integration
     FFstrbuf player; // e.g. Google Chrome
     FFstrbuf song;
     FFstrbuf artist;
     FFstrbuf album;
     FFstrbuf url;
-    const char* error;
 } FFMediaResult;
 
-const FFMediaResult* ffDetectMedia(FFinstance* instance);
+const FFMediaResult* ffDetectMedia(const FFinstance* instance);
 
 #endif

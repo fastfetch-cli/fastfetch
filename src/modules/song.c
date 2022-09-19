@@ -46,9 +46,9 @@ void ffPrintSong(FFinstance* instance)
 {
     const FFMediaResult* media = ffDetectMedia(instance);
 
-    if(media->song.length == 0)
+    if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song, "No song detected");
+        ffPrintError(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song, "%s", media->error.chars);
         return;
     }
 

@@ -32,7 +32,7 @@ static void* libraryLoad(const char* path, int maxVersion)
 
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
 {
-    if(userProvidedName->length > 0)
+    if(userProvidedName != NULL && userProvidedName->length > 0)
         return dlopen(userProvidedName->chars, RTLD_LAZY);
 
     va_list defaultNames;

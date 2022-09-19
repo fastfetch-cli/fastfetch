@@ -199,6 +199,7 @@ set(LIBFASTFETCH_SRC
     src/detection/memory/memory.c
     src/detection/displayserver/displayserver.c
     src/detection/terminalfont/terminalfont.c
+    src/detection/media/media.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -242,6 +243,8 @@ set(LIBFASTFETCH_SRC
 
 if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
+        src/util/apple/cfdict_helpers.c
+        src/util/apple/osascript.m
         src/detection/host/host_apple.c
         src/detection/os/os_apple.c
         src/detection/cpu/cpu_apple.c
@@ -250,8 +253,6 @@ if(APPLE)
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/terminalfont/terminalfont_apple.c
-        src/util/apple/cfdict_helpers.c
-        src/util/apple/osascript.m
         src/detection/media/media_apple.m
     )
 elseif(ANDROID)
@@ -264,7 +265,7 @@ elseif(ANDROID)
         src/detection/memory/memory_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/terminalfont/terminalfont_android.c
-        src/detection/media/media_linux.c
+        src/detection/media/media_android.c
     )
 else()
     list(APPEND LIBFASTFETCH_SRC
