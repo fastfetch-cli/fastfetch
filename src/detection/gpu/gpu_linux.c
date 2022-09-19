@@ -61,17 +61,16 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
+    bool revIdSet = false;
+
     #if PCI_LIB_VERSION >= 0x030800
-        pci->ffpci_fill_info(device, PCI_FILL_CLASS_EXT);
-    #endif
-
-    #ifndef __FreeBSD__
-        if((device->known_fields & PCI_FILL_CLASS_EXT) == 0)
-            device->rev_id = pci->ffpci_read_byte(device, PCI_REVISION_ID);
-    #endif
-
-    if((device->known_fields & PCI_FILL_CLASS) == 0)
+        revIdSet = pci->ffpci_fill_info(device, PCI_FILL_CLASS_EXT) & PCI_FILL_CLASS_EXT;
+    #elif __FreeBSD__
         return;
+    #endif
+
+    if(!revIdSet)
+        device->rev_id = pci->ffpci_read_byte(device, PCI_REVISION_ID);
 
     FFstrbuf query;
     ffStrbufInit(&query);
