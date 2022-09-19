@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/media.h"
+#include "detection/media/media.h"
 
 #include <ctype.h>
 
