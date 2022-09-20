@@ -5,11 +5,13 @@
 
 void ffDetectMemoryImpl(FFMemoryResult* memory)
 {
-    memset(memory, 0, sizeof(FFMemoryResult));
-
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
+    {
+        ffStrbufAppendS(&memory->ram.error, "Failed to open /proc/meminfo");
+        ffStrbufAppendS(&memory->swap.error, "Failed to open /proc/meminfo");
         return;
+    }
 
     char* line = NULL;
     size_t len = 0;
@@ -41,7 +43,10 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
     fclose(meminfo);
 
     memory->ram.bytesTotal = memTotal * (uint64_t) 1024;
-    memory->ram.bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
+    if(memory->ram.bytesTotal == 0)
+        ffStrbufAppendS(&memory->ram.error, "Failed to read MemTotal");
+    else
+        memory->ram.bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
 
     memory->swap.bytesTotal = swapTotal * (uint64_t) 1024;
     memory->swap.bytesUsed = (swapTotal - swapFree) * (uint64_t) 1024;

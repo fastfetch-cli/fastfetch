@@ -7,6 +7,7 @@
 
 typedef struct FFMemoryStorage
 {
+    FFstrbuf error;
     uint64_t bytesUsed;
     uint64_t bytesTotal;
     uint8_t percentage;

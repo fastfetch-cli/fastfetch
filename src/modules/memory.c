@@ -10,9 +10,9 @@
 
 static void printMemory(FFinstance* instance, const char* name, const FFModuleArgs* moduleArgs, const FFMemoryStorage* storage)
 {
-    if(storage->bytesUsed == 0 && storage->bytesTotal == 0)
+    if(storage->error.length > 0)
     {
-        ffPrintError(instance, name, 0, moduleArgs, "Failed to detect memory");
+        ffPrintError(instance, name, 0, moduleArgs, "%s", storage->error.chars);
         return;
     }
 
