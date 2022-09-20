@@ -129,6 +129,10 @@ static void getKDE(FFDisplayServerResult* result)
         ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
         ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    if(result->deVersion.length == 0)
+        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/local/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    if(result->deVersion.length == 0)
+        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/local/share/wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
 
     applyBetterWM(result, getenv("KDEWM"));
 }
