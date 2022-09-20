@@ -812,6 +812,36 @@ static const FFlogo* getLogoFedoraOld()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoFreeBSD()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("freebsd")
+    FF_LOGO_LINES(
+        "$1```                        $2`       \n"
+        "  $1` `.....---...$2....--.```   -/    \n"
+        "  $1+o   .--`         $2/y:`      +.   \n"
+        "   $1yo`:.            $2:o      `+-    \n"
+        "    $1y/               $2-/`   -o/     \n"
+        "   $1.-                  $2::/sy+:.    \n"
+        "   $1/                     $2`--  /    \n"
+        "  $1`:                          $2:`   \n"
+        "  $1`:                          $2:`   \n"
+        "   $1/                          $2/    \n"
+        "   $1.-                        $2-.    \n"
+        "    $1--                      $2-.     \n"
+        "     $1`:`                  $2`:`      \n"
+        "       .--             `--.        \n"
+        "          .---.....----.           \n"
+    )
+    FF_LOGO_COLORS(
+        "37", //white
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31") //red
+    FF_LOGO_COLOR_TITLE("31") //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoGaruda()
 {
     FF_LOGO_INIT
@@ -1944,6 +1974,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoFedora,
         getLogoFedoraSmall,
         getLogoFedoraOld,
+        getLogoFreeBSD,
         getLogoGaruda,
         getLogoGentoo,
         getLogoGentooSmall,
