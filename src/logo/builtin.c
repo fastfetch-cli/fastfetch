@@ -1974,6 +1974,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoFedora,
         getLogoFedoraSmall,
         getLogoFedoraOld,
+        getLogoFreeBSD,
         getLogoGaruda,
         getLogoGentoo,
         getLogoGentooSmall,
