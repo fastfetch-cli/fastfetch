@@ -29,6 +29,12 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
     ffStrbufAppend(strbuf, src);
 }
 
+void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
+{
+    ffStrbufInitA(strbuf, 0);
+    ffStrbufAppendS(strbuf, str);
+}
+
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
 {
     if(strbuf->allocated == 0)
@@ -94,14 +100,7 @@ void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
     if(value == NULL)
         return;
 
-    for(uint32_t i = 0; value[i] != '\0'; i++)
-    {
-        if(i % 16 == 0)
-            ffStrbufEnsureFree(strbuf, 16);
-        strbuf->chars[strbuf->length++] = value[i];
-    }
-
-    strbuf->chars[strbuf->length] = '\0';
+    ffStrbufAppendNS(strbuf, (uint32_t)strlen(value), value);
 }
 
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
@@ -110,15 +109,8 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
         return;
 
     ffStrbufEnsureFree(strbuf, length);
-
-    for(uint32_t i = 0; i < length; i++)
-    {
-        if(value[i] == '\0')
-            break;
-
-        strbuf->chars[strbuf->length++] = value[i];
-    }
-
+    memcpy(&strbuf->chars[strbuf->length], value, length);
+    strbuf->length += length;
     strbuf->chars[strbuf->length] = '\0';
 }
 
@@ -572,5 +564,8 @@ uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
 
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
+    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
+    strbuf->allocated = strbuf->length = 0;
     free(strbuf->chars);
+    strbuf->chars = NULL;
 }
