@@ -46,6 +46,8 @@ uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compF
 
 void ffListDestroy(FFlist* list)
 {
-    if(list->data != NULL)
-        free(list->data);
+    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
+    list->capacity = list->length = 0;
+    free(list->data);
+    list->data = NULL;
 }
