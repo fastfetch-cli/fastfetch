@@ -29,6 +29,14 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
     ffStrbufAppend(strbuf, src);
 }
 
+void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
+{
+    uint32_t bufSize = (uint32_t)strlen(str) + 1;
+    ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC > bufSize ? FASTFETCH_STRBUF_DEFAULT_ALLOC : bufSize);
+    memcpy(strbuf->chars, str, bufSize);
+    strbuf->length = bufSize - 1;
+}
+
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
 {
     if(strbuf->allocated == 0)

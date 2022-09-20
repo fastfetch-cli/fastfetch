@@ -24,6 +24,7 @@ typedef struct FFstrbuf
 void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
+void ffStrbufInitS(FFstrbuf* strbuf, const char* str);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
