@@ -14,6 +14,7 @@ typedef struct FFMediaResult
     FFstrbuf artist;
     FFstrbuf album;
     FFstrbuf url;
+    FFstrbuf status;
 } FFMediaResult;
 
 const FFMediaResult* ffDetectMedia(const FFinstance* instance);

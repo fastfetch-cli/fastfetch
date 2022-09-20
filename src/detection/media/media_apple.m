@@ -11,6 +11,7 @@ extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void(^ca
 extern void MRMediaRemoteGetNowPlayingClient(dispatch_queue_t dispatcher, void (^callback)(_Nullable id clientObj)) __attribute__((weak_import));
 extern CFStringRef MRNowPlayingClientGetBundleIdentifier(id clientObj) __attribute__((weak_import));
 extern CFStringRef MRNowPlayingClientGetParentAppBundleIdentifier(id clientObj) __attribute__((weak_import));
+void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing));
 
 static const char* getMedia(FFMediaResult* result)
 {
@@ -23,6 +24,12 @@ static const char* getMedia(FFMediaResult* result)
 
     dispatch_group_t group = dispatch_group_create();
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+
+    dispatch_group_enter(group);
+    MRMediaRemoteGetNowPlayingApplicationIsPlaying(queue, ^(BOOL playing) {
+        ffStrbufAppendS(&result->status, playing ? "Playing" : "Paused");
+        dispatch_group_leave(group);
+    });
 
     dispatch_group_enter(group);
     MRMediaRemoteGetNowPlayingInfo(queue, ^(_Nullable CFDictionaryRef info) {
