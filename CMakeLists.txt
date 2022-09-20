@@ -369,6 +369,7 @@ if(APPLE)
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
+        PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
 endif()
 
