@@ -13,6 +13,7 @@ const FFMediaResult* ffDetectMedia(const FFinstance* instance)
         ffStrbufInit(&result.artist);
         ffStrbufInit(&result.album);
         ffStrbufInit(&result.url);
+        ffStrbufInit(&result.status);
 
         ffDetectMediaImpl(instance, &result);
 

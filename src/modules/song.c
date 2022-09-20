@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 #define FF_SONG_MODULE_NAME "Media"
-#define FF_SONG_NUM_FORMAT_ARGS 4
+#define FF_SONG_NUM_FORMAT_ARGS 5
 
 static bool shouldIgoreChar(char c)
 {
@@ -89,6 +89,9 @@ void ffPrintSong(FFinstance* instance)
             fputs(" - ", stdout);
         }
 
+        if (media->status.length > 0)
+            ffStrbufAppendF(&songPretty, " (%s)", media->status.chars);
+
         ffStrbufPutTo(&songPretty, stdout);
     }
     else
@@ -97,7 +100,8 @@ void ffPrintSong(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->status}
         });
     }
 
