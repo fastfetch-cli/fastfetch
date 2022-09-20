@@ -834,7 +834,7 @@ static const FFlogo* getLogoFreeBSD()
         "          .---.....----.           \n"
     )
     FF_LOGO_COLORS(
-        "37" //white
+        "37", //white
         "31" //red
     )
     FF_LOGO_COLOR_KEYS("31") //red
