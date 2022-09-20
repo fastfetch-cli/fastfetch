@@ -272,7 +272,7 @@ endif()
 
 if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
-        src/util/apple/cfdict_helpers.c
+        src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
         src/detection/os/os_apple.c

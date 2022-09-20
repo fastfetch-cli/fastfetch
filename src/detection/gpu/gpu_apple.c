@@ -1,7 +1,7 @@
 #include "gpu.h"
 #include "common/library.h"
 #include "detection/cpu/cpu.h"
-#include "util/apple/cfdict_helpers.h"
+#include "util/apple/cf_helpers.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
 
@@ -34,7 +34,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         ffStrbufInit(&gpu->name);
         //IOAccelerator returns model property for Apple Silicon, but not for Intel Iris GPUs.
         //Still needs testing for AMD's
-        if(!ffCfDictGetString(properties, CFSTR("model"), &gpu->name))
+        if(ffCfDictGetString(properties, CFSTR("model"), &gpu->name))
         {
             CFRelease(properties);
 
@@ -49,7 +49,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
             ffCfDictGetString(properties, CFSTR("model"), &gpu->name);
         }
 
-        if(!ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
+        if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
         gpu->temperature = FF_GPU_TEMP_UNSET;

@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
 #include "common/library.h"
-#include "util/apple/cfdict_helpers.h"
+#include "util/apple/cf_helpers.h"
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
