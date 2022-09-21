@@ -6,16 +6,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
+const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
 {
     int pipes[2];
 
     if(pipe(pipes) == -1)
-        return;
+        return "pipe() failed";
 
     pid_t childPid = fork();
     if(childPid == -1)
-        return;
+        return "fork() failed";
 
     //Child
     if(childPid == 0)
@@ -33,4 +33,6 @@ void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     waitpid(childPid, NULL, 0);
     ffAppendFDBuffer(pipes[0], buffer);
     close(pipes[0]);
+
+    return NULL;
 }

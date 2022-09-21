@@ -2,6 +2,8 @@
 #include "common/properties.h"
 #include "common/printing.h"
 #include "common/caching.h"
+#include "common/processing.h"
+#include "common/parsing.h"
 
 #include <stdlib.h>
 
@@ -19,6 +21,31 @@ static void getLocaleFromEnv(FFstrbuf* locale)
         return;
 
     ffStrbufAppendS(locale, getenv("LC_MESSAGES"));
+}
+
+static void getLocaleFromCmd(FFstrbuf* locale)
+{
+    FFstrbuf buffer;
+    ffStrbufInitA(&buffer, 0);
+    char* args[] = { "locale", NULL };
+    if(ffProcessAppendStdOut(&buffer, args) == NULL)
+    {
+        ffParsePropLines(buffer.chars, "LANG=\"", locale);
+        ffStrbufTrimRight(locale, '"');
+
+        if(locale->length == 0)
+        {
+            ffParsePropLines(buffer.chars, "LC_ALL=\"", locale);
+            ffStrbufTrimRight(locale, '"');
+
+            if(locale->length == 0)
+            {
+                ffParsePropLines(buffer.chars, "LC_MESSAGES=\"", locale);
+                ffStrbufTrimRight(locale, '"');
+            }
+        }
+    }
+    ffStrbufDestroy(&buffer);
 }
 
 void ffPrintLocale(FFinstance* instance)
@@ -42,6 +69,11 @@ void ffPrintLocale(FFinstance* instance)
 	if(locale.length == 0)
     {
         getLocaleFromEnv(&locale);
+    }
+
+    if(locale.length == 0)
+    {
+        getLocaleFromCmd(&locale);
     }
 
     if(locale.length == 0)
