@@ -5,7 +5,7 @@ void ffDetectMemoryImpl(FFMemoryResult* memory);
 
 static void calculatePercentage(FFMemoryStorage* storage)
 {
-    if(storage->error.length == 0)
+    if(storage->error.length != 0)
         return;
 
     if(storage->bytesTotal == 0)
