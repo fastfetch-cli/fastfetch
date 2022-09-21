@@ -19,6 +19,14 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     else
         ffStrbufAppend(result, &os->systemName);
 
+    #ifdef __APPLE__
+    if(os->codename.length > 0)
+    {
+        ffStrbufAppendC(result, ' ');
+        ffStrbufAppend(result, &os->codename);
+    }
+    #endif
+
     //Append version if it is missing
     if(os->versionID.length > 0 && ffStrbufFirstIndex(result, &os->versionID) == result->length)
     {

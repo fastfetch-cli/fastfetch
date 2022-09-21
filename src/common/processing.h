@@ -5,6 +5,6 @@
 
 #include "util/FFstrbuf.h"
 
-void ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
+const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
 
 #endif
