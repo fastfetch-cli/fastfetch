@@ -71,7 +71,7 @@ Pacman, dpkg, rpm, emerge, xbps, nix, Flatpak, Snap, apk, pkg, brew, MacPorts
 
 ##### WM themes
 ```
-KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE)
+KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS)
 ```
 
 ##### DE versions
@@ -81,7 +81,7 @@ KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 
 ##### Terminal fonts
 ```
-Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, ITerm2, Apple Terminal, TTY
+Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, iTerm2, Apple Terminal, TTY
 ```
 
 ## Building

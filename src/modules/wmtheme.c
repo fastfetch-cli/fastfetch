@@ -259,14 +259,15 @@ static const char* quartzCompositorParsePlist(FFinstance* instance, const FFstrb
         ffplist_get_uint_val(pWmThemeColor, &wmThemeColor);
     switch (wmThemeColor)
     {
-        case (uint64_t)-1: ffStrbufAppendS(theme, " (Graphite)");
+        case (uint64_t)-1: ffStrbufAppendS(theme, "Graphite"); break;
         case 0: ffStrbufAppendS(theme, "Red"); break;
         case 1: ffStrbufAppendS(theme, "Orange"); break;
         case 2: ffStrbufAppendS(theme, "Yellow"); break;
         case 3: ffStrbufAppendS(theme, "Green"); break;
+        case 4: ffStrbufAppendS(theme, "Blue"); break;
         case 5: ffStrbufAppendS(theme, "Purple"); break;
         case 6: ffStrbufAppendS(theme, "Pink"); break;
-        default: ffStrbufAppendS(theme, "Blue"); break;
+        default: ffStrbufAppendS(theme, "Multicolor"); break;
     }
 
     plist_t pWmTheme = ffplist_dict_get_item(root_node, "AppleInterfaceStyle");
