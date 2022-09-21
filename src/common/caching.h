@@ -21,7 +21,13 @@ bool ffPrintFromCache(FFinstance* instance, const char* moduleName, const FFModu
 void ffPrintAndAppendToCache(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFcache* cache, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments);
 void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs, const FFstrbuf* value, uint32_t numArgs, const FFformatarg* arguments);
 
-void ffCachingWriteData(const FFinstance* instance, const char* moduleName, size_t dataSize, const void* data);
-bool ffCachingReadData(const FFinstance* instance, const char* moduleName, size_t dataSize, void* data);
+typedef void FFCache;
+
+typedef bool(*FFCacheMethodStrbuf)(FFCache* cache, FFstrbuf* strbuf);
+typedef bool(*FFCacheMethodData)(FFCache* cache, size_t dataSize, void* data);
+typedef bool(*FFCacheMethodCallback)(void* data, FFCache* cache, FFCacheMethodStrbuf strbufMethod, FFCacheMethodData dataMethod);
+
+bool ffCacheRead(const FFinstance* instance, void* obj, const char* cacheName, FFCacheMethodCallback callback);
+void ffCacheWrite(const FFinstance* instance, void* obj, const char* cacheName, FFCacheMethodCallback callback);
 
 #endif

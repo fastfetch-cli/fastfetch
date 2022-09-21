@@ -4,6 +4,7 @@
 #include "common/printing.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #define FF_CACHE_VERSION_NAME "cacheversion"
 #define FF_CACHE_VERSION_EXTENSION "ffv"
@@ -11,7 +12,7 @@
 #define FF_CACHE_VALUE_EXTENSION "ffcv"
 #define FF_CACHE_SPLIT_EXTENSION "ffcs"
 
-#define FF_CACHE_EXTENSION_DATA "ffcd"
+#define FF_CACHE_EXTENSION_V1 "ffc1"
 
 static void getCacheFilePath(const FFinstance* instance, const char* moduleName, const char* extension, FFstrbuf* buffer)
 {
@@ -211,24 +212,113 @@ void ffPrintAndWriteToCache(FFinstance* instance, const char* moduleName, const 
     ffCacheClose(&cache);
 }
 
-void ffCachingWriteData(const FFinstance* instance, const char* moduleName, size_t dataSize, const void* data)
+typedef struct FFCacheRead
 {
-    FFstrbuf path;
-    ffStrbufInitA(&path, 128);
-    getCacheFilePath(instance, moduleName, FF_CACHE_EXTENSION_DATA, &path);
-    ffWriteFileData(path.chars, dataSize, data);
-    ffStrbufDestroy(&path);
+    FFstrbuf data;
+    uint32_t position;
+} FFCacheRead;
+
+static bool cacheReadStrbuf(FFCacheRead* cacheRead, FFstrbuf* strbuf)
+{
+    if(cacheRead->position >= cacheRead->data.length)
+        return false;
+
+    ffStrbufAppendS(strbuf, cacheRead->data.chars + cacheRead->position);
+    cacheRead->position += strbuf->length + 1; // skip the null byte too
+    return true;
 }
 
-bool ffCachingReadData(const FFinstance* instance, const char* moduleName, size_t dataSize, void* data)
+static bool cacheReadData(FFCacheRead* cacheRead, size_t dataSize, void* data)
+{
+    if(cacheRead->position + dataSize > cacheRead->data.length)
+        return false;
+
+    memcpy(data, cacheRead->data.chars + cacheRead->position, dataSize);
+    cacheRead->position += (uint32_t) dataSize;
+    return true;
+}
+
+static bool cacheResetStrbuf(FFCache* cache, FFstrbuf* strbuf)
+{
+    FF_UNUSED(cache);
+    ffStrbufClear(strbuf);
+    return true;
+}
+
+static bool cacheResetData(FFCache* cacheRead, size_t dataSize, void* data)
+{
+    FF_UNUSED(cacheRead, dataSize, data);
+    return true;
+}
+
+bool ffCacheRead(const FFinstance* instance, void* obj, const char* cacheName, FFCacheMethodCallback callback)
 {
     if(instance->config.recache)
         return false;
 
+    FFCacheRead cache;
+    bool result;
+
     FFstrbuf path;
     ffStrbufInitA(&path, 128);
-    getCacheFilePath(instance, moduleName, FF_CACHE_EXTENSION_DATA, &path);
-    ssize_t result = ffReadFileData(path.chars, dataSize, data);
+    getCacheFilePath(instance, cacheName, FF_CACHE_EXTENSION_V1, &path);
+
+    cache.position = 0;
+
+    ffStrbufInitA(&cache.data, 256);
+    result = ffAppendFileBuffer(path.chars, &cache.data);
+
+    if(result)
+        result = callback(obj, &cache, (FFCacheMethodStrbuf) cacheReadStrbuf, (FFCacheMethodData) cacheReadData);
+
+    if(result)
+        result = cache.position == cache.data.length;
+
+    if(!result)
+        callback(obj, NULL, (FFCacheMethodStrbuf) cacheResetStrbuf, (FFCacheMethodData) cacheResetData);
+
+    ffStrbufDestroy(&cache.data);
     ffStrbufDestroy(&path);
-    return result > 0 && (size_t) result == dataSize;
+
+    return result;
+}
+
+typedef struct FFCacheWrite
+{
+    FFstrbuf data;
+} FFCacheWrite;
+
+static bool cacheWriteStrbuf(FFCacheWrite* cacheWrite, FFstrbuf* strbuf)
+{
+    ffStrbufEnsureFree(&cacheWrite->data, strbuf->length);
+    memcpy(cacheWrite->data.chars + cacheWrite->data.length, strbuf->chars, strbuf->length +1); //Copy the nullbyte too
+    cacheWrite->data.length += strbuf->length + 1;
+    return true;
+}
+
+static bool cacheWriteData(FFCacheWrite* cacheWrite, size_t dataSize, const void* data)
+{
+    ffStrbufEnsureFree(&cacheWrite->data, (uint32_t) dataSize);
+    memcpy(cacheWrite->data.chars + cacheWrite->data.length, data, dataSize);
+    cacheWrite->data.length += (uint32_t) dataSize;
+    return true;
+}
+
+void ffCacheWrite(const FFinstance* instance, void* obj, const char* cacheName, FFCacheMethodCallback callback)
+{
+    if(!instance->config.cacheSave)
+        return;
+
+    FFCacheWrite cache;
+
+    FFstrbuf path;
+    ffStrbufInitA(&path, 128);
+    getCacheFilePath(instance, cacheName, FF_CACHE_EXTENSION_V1, &path);
+
+    ffStrbufInitA(&cache.data, 256);
+    callback(obj, &cache, (FFCacheMethodStrbuf) cacheWriteStrbuf, (FFCacheMethodData) cacheWriteData);
+    ffWriteFileBuffer(path.chars, &cache.data);
+
+    ffStrbufDestroy(&cache.data);
+    ffStrbufDestroy(&path);
 }

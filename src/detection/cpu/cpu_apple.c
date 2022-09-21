@@ -12,12 +12,14 @@ static double getFrequency(const char* propName)
     return herz / 1000.0; //to GHz
 }
 
-void ffDetectCPUImpl(FFCPUResult* cpu)
+void ffDetectCPUImpl(FFCPUResult* cpu, bool cached)
 {
-    ffStrbufInit(&cpu->name);
-    ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
+    //TODO find a way to detect this
+    cpu->temperature = FF_CPU_TEMP_UNSET;
+    if(cached)
+        return;
 
-    ffStrbufInit(&cpu->vendor);
+    ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
     ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
@@ -36,7 +38,4 @@ void ffDetectCPUImpl(FFCPUResult* cpu)
     cpu->frequencyMax = getFrequency("hw.cpufrequency_max");
     if(cpu->frequencyMax == 0.0)
         cpu->frequencyMax = getFrequency("hw.cpufrequency");
-
-    //TODO find a way to detect this
-    cpu->temperature = FF_CPU_TEMP_UNSET;
 }

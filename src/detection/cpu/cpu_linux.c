@@ -62,7 +62,7 @@ static double getFrequency(const char* info, const char* scaling)
 
 static double detectCPUTemp()
 {
-    const FFTempsResult *temps = ffDetectTemps();
+    const FFTempsResult* temps = ffDetectTemps();
 
     for(uint32_t i = 0; i < temps->values.length; i++)
     {
@@ -78,10 +78,11 @@ static double detectCPUTemp()
     return FF_CPU_TEMP_UNSET;
 }
 
-void ffDetectCPUImpl(FFCPUResult* cpu)
+void ffDetectCPUImpl(FFCPUResult* cpu, bool cached)
 {
-    ffStrbufInit(&cpu->name);
-    ffStrbufInit(&cpu->vendor);
+    cpu->temperature = detectCPUTemp();
+    if(cached)
+        return;
 
     FFstrbuf physicalCoresBuffer;
     ffStrbufInit(&physicalCoresBuffer);
@@ -101,8 +102,6 @@ void ffDetectCPUImpl(FFCPUResult* cpu)
     #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
     cpu->frequencyMin = getFrequency(BP"cpuinfo_min_freq", BP"scaling_min_freq");
     cpu->frequencyMax = getFrequency(BP"cpuinfo_max_freq", BP"scaling_max_freq");
-
-    cpu->temperature = detectCPUTemp();
 
     ffStrbufDestroy(&physicalCoresBuffer);
 }
