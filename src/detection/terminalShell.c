@@ -130,6 +130,13 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("WT_PROFILE_ID") != NULL
     )) term = "Windows Terminal";
 
+    //Alacritty
+    if(!ffStrSet(term) && (
+        getenv("ALACRITTY_SOCKET") != NULL ||
+        getenv("ALACRITTY_LOG") != NULL ||
+        getenv("ALACRITTY_WINDOW_ID") != NULL
+    )) term = "Alacritty";
+
     //Termux
     if(!ffStrSet(term) && (
         getenv("TERMUX_VERSION") != NULL ||
