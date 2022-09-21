@@ -256,6 +256,7 @@ endif()
 
 if(LINUX OR BSD)
     list(APPEND LIBFASTFETCH_SRC
+        src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/host/host_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
@@ -272,6 +273,7 @@ endif()
 
 if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
+        src/detection/cpuUsage/cpuUsage_apple.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
@@ -295,6 +297,7 @@ endif()
 
 if(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/host/host_android.c
         src/detection/os/os_android.c
         src/detection/gpu/gpu_android.c
