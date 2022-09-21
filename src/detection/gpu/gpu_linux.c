@@ -20,8 +20,11 @@ typedef struct PCIData
     FF_LIBRARY_SYMBOL(pci_fill_info);
     FF_LIBRARY_SYMBOL(pci_read_byte);
     FF_LIBRARY_SYMBOL(pci_lookup_name);
-    FF_LIBRARY_SYMBOL(pci_get_string_property);
     FF_LIBRARY_SYMBOL(pci_get_param);
+
+    #if PCI_LIB_VERSION >= 0x030800
+        FF_LIBRARY_SYMBOL(pci_get_string_property);
+    #endif
 } PCIData;
 
 static bool pciIDsContains(u16 searched, const u16* ids)
@@ -204,17 +207,20 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 {
     PCIData pci;
 
-    FF_LIBRARY_LOAD(libpci, &instance->config.libPCI, "dlopen libpci.so failed", "libpci.so", 4)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_alloc)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_init)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_cleanup)
+    FF_LIBRARY_LOAD(libpci, &instance->config.libPCI, "dlopen libpci.so failed", "libpci.so", 4);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_alloc);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_init);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_cleanup);
 
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_fill_info)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_lookup_name)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_byte)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_param)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_string_property)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_fill_info);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_lookup_name);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_read_byte);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_param);
+
+    #if PCI_LIB_VERSION >= 0x030800
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_string_property);
+    #endif
 
     pci.access = ffpci_alloc();
     ffpci_init(pci.access);
