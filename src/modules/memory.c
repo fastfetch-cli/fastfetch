@@ -27,7 +27,10 @@ static void printMemory(FFinstance* instance, const char* name, const FFModuleAr
     if(moduleArgs->outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, name, 0, &moduleArgs->key);
-        printf("%s / %s (%u%%)\n", usedPretty.chars, totalPretty.chars, storage->percentage);
+        if (storage->bytesTotal == 0)
+            puts("Disabled");
+        else
+            printf("%s / %s (%u%%)\n", usedPretty.chars, totalPretty.chars, storage->percentage);
     }
     else
     {
