@@ -6,6 +6,7 @@
 #include "common/parsing.h"
 
 #include <stdlib.h>
+#include <locale.h>
 
 #define FF_LOCALE_MODULE_NAME "Locale"
 #define FF_LOCALE_NUM_FORMAT_ARGS 1
@@ -25,27 +26,11 @@ static void getLocaleFromEnv(FFstrbuf* locale)
 
 static void getLocaleFromCmd(FFstrbuf* locale)
 {
-    FFstrbuf buffer;
-    ffStrbufInitA(&buffer, 0);
-    char* args[] = { "locale", NULL };
-    if(ffProcessAppendStdOut(&buffer, args) == NULL)
-    {
-        ffParsePropLines(buffer.chars, "LANG=\"", locale);
-        ffStrbufTrimRight(locale, '"');
+    ffStrbufAppendS(locale, setlocale(LC_ALL, NULL));
+    if(locale->length > 0)
+        return;
 
-        if(locale->length == 0)
-        {
-            ffParsePropLines(buffer.chars, "LC_ALL=\"", locale);
-            ffStrbufTrimRight(locale, '"');
-
-            if(locale->length == 0)
-            {
-                ffParsePropLines(buffer.chars, "LC_MESSAGES=\"", locale);
-                ffStrbufTrimRight(locale, '"');
-            }
-        }
-    }
-    ffStrbufDestroy(&buffer);
+    ffStrbufAppendS(locale, setlocale(LC_MESSAGES, NULL));
 }
 
 void ffPrintLocale(FFinstance* instance)
