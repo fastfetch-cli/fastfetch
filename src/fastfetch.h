@@ -116,6 +116,7 @@ typedef struct FFconfig
     FFModuleArgs swap;
     FFModuleArgs disk;
     FFModuleArgs battery;
+    FFModuleArgs powerAdapter;
     FFModuleArgs locale;
     FFModuleArgs localIP;
     FFModuleArgs publicIP;

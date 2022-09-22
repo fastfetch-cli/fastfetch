@@ -5,6 +5,9 @@
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
+#define FF_POWER_ADAPTER_MODULE_NAME "Power Adapter"
+#define FF_POWER_ADAPTER_MODULE_ARGS 2
+
 static void printBattery(FFinstance* instance, const BatteryResult* result, uint8_t index)
 {
     if(instance->config.battery.outputFormat.length == 0)
@@ -43,6 +46,26 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->capacity},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->status}
         });
+    }
+
+    if(result->adapterWatts != -1)
+    {
+        if(instance->config.powerAdapter.outputFormat.length == 0)
+        {
+            ffPrintLogoAndKey(instance, FF_POWER_ADAPTER_MODULE_NAME, index, &instance->config.powerAdapter.key);
+
+            if(result->adapterName.length > 0)
+                puts(result->adapterName.chars);
+            else
+                printf("%dW\n", result->adapterWatts);
+        }
+        else
+        {
+            ffPrintFormat(instance, FF_POWER_ADAPTER_MODULE_NAME, index, &instance->config.powerAdapter, FF_POWER_ADAPTER_MODULE_ARGS, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_INT, &result->adapterWatts},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result->adapterName},
+            });
+        }
     }
 }
 

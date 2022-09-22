@@ -72,6 +72,7 @@ static void initConfigDirs(FFstate* state)
 
         startIndex = colonIndex + 1;
     }
+    ffStrbufDestroy(&xdgConfigDirs);
 
     FFstrbuf* systemConfigHome = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfigHome, 64);
@@ -183,6 +184,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.swap);
     initModuleArg(&instance->config.disk);
     initModuleArg(&instance->config.battery);
+    initModuleArg(&instance->config.powerAdapter);
     initModuleArg(&instance->config.locale);
     initModuleArg(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
@@ -381,6 +383,17 @@ void ffFinish(FFinstance* instance)
         ffLogoPrintRemaining(instance);
 
     resetConsole();
+
+    for(uint32_t i = 0; i < instance->state.configDirs.length; ++i)
+        ffStrbufDestroy((FFstrbuf*)ffListGet(&instance->state.configDirs, i));
+    ffListDestroy(&instance->state.configDirs);
+    ffStrbufDestroy(&instance->state.cacheDir);
+    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
+        ffStrbufDestroy(&instance->config.logo.colors[i]);
+    ffStrbufDestroy(&instance->config.colorKeys);
+    ffStrbufDestroy(&instance->config.colorTitle);
+    ffStrbufDestroy(&instance->config.separator);
+    ffStrbufDestroy(&instance->config.logo.source);
 }
 
 //Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
