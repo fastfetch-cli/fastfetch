@@ -3,9 +3,22 @@
 
 #include <stdarg.h>
 
+//Clang doesn't define __SANITIZE_ADDRESS__ but defines __has_feature(address_sanitizer)
+#if defined(__has_feature)
+    #if __has_feature(address_sanitizer)
+        #define __SANITIZE_ADDRESS__
+    #endif
+#endif
+
+#ifdef __SANITIZE_ADDRESS__
+    #define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
+#else
+    #define FF_DLOPEN_FLAGS RTLD_LAZY
+#endif
+
 static void* libraryLoad(const char* path, int maxVersion)
 {
-    void* result = dlopen(path, RTLD_LAZY);
+    void* result = dlopen(path, FF_DLOPEN_FLAGS);
     if(result != NULL || maxVersion < 0)
         return result;
 
@@ -19,7 +32,7 @@ static void* libraryLoad(const char* path, int maxVersion)
         uint32_t originalLength = pathbuf.length;
         ffStrbufAppendF(&pathbuf, "%i", i);
 
-        result = dlopen(pathbuf.chars, RTLD_LAZY);
+        result = dlopen(pathbuf.chars, FF_DLOPEN_FLAGS);
         if(result != NULL)
             break;
 
@@ -33,7 +46,7 @@ static void* libraryLoad(const char* path, int maxVersion)
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
 {
     if(userProvidedName != NULL && userProvidedName->length > 0)
-        return dlopen(userProvidedName->chars, RTLD_LAZY);
+        return dlopen(userProvidedName->chars, FF_DLOPEN_FLAGS);
 
     va_list defaultNames;
     va_start(defaultNames, userProvidedName);

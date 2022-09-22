@@ -1448,8 +1448,11 @@ int main(int argc, const char** argv)
 
         startIndex = colonIndex + 1;
     }
+
+    ffFinish(&instance);
+
     ffStrbufDestroy(&data.structure);
     ffValuestoreDestroy(&data.customValues);
 
-    ffFinish(&instance);
+    ffDestroyInstance(&instance);
 }

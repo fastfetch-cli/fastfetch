@@ -93,6 +93,8 @@ void ffPrintSong(FFinstance* instance)
             ffStrbufAppendF(&songPretty, " (%s)", media->status.chars);
 
         ffStrbufPutTo(&songPretty, stdout);
+
+        ffStrbufDestroy(&artistPretty);
     }
     else
     {

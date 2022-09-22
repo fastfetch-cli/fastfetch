@@ -132,7 +132,7 @@ static void initModuleArg(FFModuleArgs* args)
 
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInit(&instance->config.logo.source);
+    ffStrbufInitA(&instance->config.logo.source, 0);
     instance->config.logo.type = FF_LOGO_TYPE_AUTO;
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufInit(&instance->config.logo.colors[i]);
@@ -383,17 +383,22 @@ void ffFinish(FFinstance* instance)
         ffLogoPrintRemaining(instance);
 
     resetConsole();
+}
 
+void ffDestroyInstance(FFinstance* instance)
+{
     for(uint32_t i = 0; i < instance->state.configDirs.length; ++i)
         ffStrbufDestroy((FFstrbuf*)ffListGet(&instance->state.configDirs, i));
     ffListDestroy(&instance->state.configDirs);
+
     ffStrbufDestroy(&instance->state.cacheDir);
+
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufDestroy(&instance->config.logo.colors[i]);
+
     ffStrbufDestroy(&instance->config.colorKeys);
     ffStrbufDestroy(&instance->config.colorTitle);
     ffStrbufDestroy(&instance->config.separator);
-    ffStrbufDestroy(&instance->config.logo.source);
 }
 
 //Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets

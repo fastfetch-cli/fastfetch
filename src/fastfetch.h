@@ -201,6 +201,7 @@ typedef struct FFinstance
 void ffInitInstance(FFinstance* instance);
 void ffStart(FFinstance* instance);
 void ffFinish(FFinstance* instance);
+void ffDestroyInstance(FFinstance* instance);
 
 void ffListFeatures();
 
