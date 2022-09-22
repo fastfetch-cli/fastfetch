@@ -1117,6 +1117,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.battery.outputFormat);
     else if(strcasecmp(key, "--battery-error") == 0)
         optionParseString(key, value, &instance->config.battery.errorFormat);
+    else if(strcasecmp(key, "--power-adapter-key") == 0)
+        optionParseString(key, value, &instance->config.powerAdapter.key);
+    else if(strcasecmp(key, "--power-adapter-format") == 0)
+        optionParseString(key, value, &instance->config.powerAdapter.outputFormat);
+    else if(strcasecmp(key, "--power-adapter-error") == 0)
+        optionParseString(key, value, &instance->config.powerAdapter.errorFormat);
     else if(strcasecmp(key, "--locale-key") == 0)
         optionParseString(key, value, &instance->config.locale.key);
     else if(strcasecmp(key, "--locale-format") == 0)

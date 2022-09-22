@@ -183,6 +183,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.swap);
     initModuleArg(&instance->config.disk);
     initModuleArg(&instance->config.battery);
+    initModuleArg(&instance->config.powerAdapter);
     initModuleArg(&instance->config.locale);
     initModuleArg(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);

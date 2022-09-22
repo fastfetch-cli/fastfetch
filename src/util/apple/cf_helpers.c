@@ -57,3 +57,13 @@ const char* ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result)
         return "Number type is not SInt32";
     return NULL;
 }
+
+const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryRef* result)
+{
+    CFDictionaryRef cf = (CFDictionaryRef)CFDictionaryGetValue(dict, key);
+    if (cf == NULL || CFGetTypeID(cf) != CFDictionaryGetTypeID())
+        return "TypeID is not 'CFDictionary'";
+
+    *result = cf;
+    return NULL;
+}
