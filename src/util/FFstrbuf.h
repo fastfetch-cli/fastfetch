@@ -26,13 +26,6 @@ void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
 
-static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
-static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
-{
-    ffStrbufInitA(strbuf, 0);
-    ffStrbufAppendS(strbuf, str);
-}
-
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
 FF_C_NODISCARD uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
@@ -46,13 +39,6 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c);
 
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
-static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
-{
-    if(value == NULL)
-        return;
-    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
-}
-
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
@@ -63,12 +49,6 @@ void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
-
-static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
-}
 
 FF_C_NODISCARD int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
 FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);
@@ -126,5 +106,24 @@ FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
 FF_C_NODISCARD uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
+
+static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
+{
+    if(value == NULL)
+        return;
+    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
+{
+    ffStrbufClear(strbuf);
+    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
+{
+    ffStrbufInitA(strbuf, 0);
+    ffStrbufAppendS(strbuf, str);
+}
 
 #endif
