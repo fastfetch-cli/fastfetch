@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
@@ -24,7 +25,13 @@ typedef struct FFstrbuf
 void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
-void ffStrbufInitS(FFstrbuf* strbuf, const char* str);
+
+FF_C_INLINE void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
+FF_C_INLINE void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
+{
+    ffStrbufInitA(strbuf, 0);
+    ffStrbufAppendS(strbuf, str);
+}
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
@@ -36,8 +43,16 @@ void ffStrbufRecalculateLength(FFstrbuf* strbuf);
 
 void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufAppendC(FFstrbuf* strbuf, char c);
-void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
+
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
+
+FF_C_INLINE void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
+{
+    if(value == NULL)
+        return;
+    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
+
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
@@ -46,8 +61,14 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 void ffStrbufPrependS(FFstrbuf* strbuf, const char* value);
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
+void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
-void ffStrbufSetS(FFstrbuf* strbuf, const char* value);
+
+FF_C_INLINE void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
+{
+    ffStrbufClear(strbuf);
+    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
 
 FF_C_NODISCARD int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
 FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);

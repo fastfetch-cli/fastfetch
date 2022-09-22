@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #include <inttypes.h>
 
 static char* CHAR_NULL_PTR = "";
@@ -29,12 +28,6 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
     ffStrbufAppend(strbuf, src);
 }
 
-void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
-{
-    ffStrbufInitA(strbuf, 0);
-    ffStrbufAppendS(strbuf, str);
-}
-
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
 {
     if(strbuf->allocated == 0)
@@ -50,7 +43,7 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 
     uint32_t allocate = strbuf->allocated;
     if(allocate < 2)
-        allocate = 2;
+        allocate = FASTFETCH_STRBUF_DEFAULT_ALLOC;
 
     while((strbuf->length + free + 1) > allocate) // + 1 for the null byte
         allocate *= 2;
@@ -93,14 +86,6 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c)
     ffStrbufEnsureFree(strbuf, 1);
     strbuf->chars[strbuf->length++] = c;
     strbuf->chars[strbuf->length] = '\0';
-}
-
-void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
-{
-    if(value == NULL)
-        return;
-
-    ffStrbufAppendNS(strbuf, (uint32_t)strlen(value), value);
 }
 
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
@@ -194,16 +179,16 @@ void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     strbuf->length += length;
 }
 
+void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
+{
+    ffStrbufClear(strbuf);
+    ffStrbufAppendNS(strbuf, length, value);
+}
+
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
 {
     ffStrbufClear(strbuf);
     ffStrbufAppendNS(strbuf, value->length, value->chars);
-}
-
-void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendS(strbuf, value);
 }
 
 int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
