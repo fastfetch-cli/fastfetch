@@ -15,6 +15,7 @@ void ffPrintPublicIp(FFinstance* instance)
     if(result.length == 0)
     {
         ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, "Failed to connect to an IP detection server");
+        ffStrbufDestroy(&result);
         return;
     }
 
@@ -29,4 +30,6 @@ void ffPrintPublicIp(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
         });
     }
+
+    ffStrbufDestroy(&result);
 }
