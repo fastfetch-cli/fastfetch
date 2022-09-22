@@ -10,8 +10,10 @@ if [ -z "${CMAKE_BUILD_TYPE}" ]; then
 fi
 cmake "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" ..
 
-if [ -z "$OSTYPE" ] || [ "$OSTYPE" = "linux-gnu" ]; then
+if [ -z "$OSTYPE" ] || [ "$OSTYPE" = "linux-gnu"* ]; then
     cmake_build_args="-j$(nproc)"
+elif [ "$OSTYPE" = "darwin"* ]; then
+    cmake_build_args="-j$(sysctl -n hw.ncpu)"
 else
     cmake_build_args=""
 fi

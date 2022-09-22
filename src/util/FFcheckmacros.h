@@ -21,10 +21,4 @@
     #define FF_C_SCANF(formatStrIndex, argsStartIndex)
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
-    #define FF_C_INLINE __attribute__((always_inline)) static inline
-#else
-    #define FF_C_INLINE static inline
-#endif
-
 #endif
