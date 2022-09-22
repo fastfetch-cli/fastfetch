@@ -55,5 +55,6 @@ int main(int argc, char** argv)
     ffPrintColors(&instance);
 
     ffFinish(&instance);
+    ffDestroyInstance(&instance);
     return 0;
 }
