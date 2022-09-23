@@ -24,7 +24,7 @@
 
 typedef struct GLData
 {
-    FF_LIBRARY_SYMBOL(glGetString);
+    FF_LIBRARY_SYMBOL(glGetString)
 } GLData;
 
 static const char* glHandlePrint(FFinstance* instance, const GLData* data)
@@ -64,17 +64,17 @@ typedef struct EGLData
 {
     GLData glData;
 
-    FF_LIBRARY_SYMBOL(eglGetProcAddress);
-    FF_LIBRARY_SYMBOL(eglGetDisplay);
-    FF_LIBRARY_SYMBOL(eglInitialize);
-    FF_LIBRARY_SYMBOL(eglBindAPI);
-    FF_LIBRARY_SYMBOL(eglGetConfigs);
-    FF_LIBRARY_SYMBOL(eglCreatePbufferSurface);
-    FF_LIBRARY_SYMBOL(eglCreateContext);
-    FF_LIBRARY_SYMBOL(eglMakeCurrent);
-    FF_LIBRARY_SYMBOL(eglDestroyContext);
-    FF_LIBRARY_SYMBOL(eglDestroySurface);
-    FF_LIBRARY_SYMBOL(eglTerminate);
+    FF_LIBRARY_SYMBOL(eglGetProcAddress)
+    FF_LIBRARY_SYMBOL(eglGetDisplay)
+    FF_LIBRARY_SYMBOL(eglInitialize)
+    FF_LIBRARY_SYMBOL(eglBindAPI)
+    FF_LIBRARY_SYMBOL(eglGetConfigs)
+    FF_LIBRARY_SYMBOL(eglCreatePbufferSurface)
+    FF_LIBRARY_SYMBOL(eglCreateContext)
+    FF_LIBRARY_SYMBOL(eglMakeCurrent)
+    FF_LIBRARY_SYMBOL(eglDestroyContext)
+    FF_LIBRARY_SYMBOL(eglDestroySurface)
+    FF_LIBRARY_SYMBOL(eglTerminate)
 
     EGLDisplay display;
     EGLConfig config;
@@ -175,17 +175,17 @@ typedef struct GLXData
 {
     GLData glData;
 
-    FF_LIBRARY_SYMBOL(glXGetProcAddress);
-    FF_LIBRARY_SYMBOL(XOpenDisplay);
-    FF_LIBRARY_SYMBOL(glXChooseVisual);
+    FF_LIBRARY_SYMBOL(glXGetProcAddress)
+    FF_LIBRARY_SYMBOL(XOpenDisplay)
+    FF_LIBRARY_SYMBOL(glXChooseVisual)
     FF_LIBRARY_SYMBOL(XCreatePixmap);
-    FF_LIBRARY_SYMBOL(glXCreateGLXPixmap);
-    FF_LIBRARY_SYMBOL(glXCreateContext);
-    FF_LIBRARY_SYMBOL(glXMakeCurrent);
-    FF_LIBRARY_SYMBOL(glXDestroyContext);
-    FF_LIBRARY_SYMBOL(glXDestroyGLXPixmap);
-    FF_LIBRARY_SYMBOL(XFreePixmap);
-    FF_LIBRARY_SYMBOL(XCloseDisplay);
+    FF_LIBRARY_SYMBOL(glXCreateGLXPixmap)
+    FF_LIBRARY_SYMBOL(glXCreateContext)
+    FF_LIBRARY_SYMBOL(glXMakeCurrent)
+    FF_LIBRARY_SYMBOL(glXDestroyContext)
+    FF_LIBRARY_SYMBOL(glXDestroyGLXPixmap)
+    FF_LIBRARY_SYMBOL(XFreePixmap)
+    FF_LIBRARY_SYMBOL(XCloseDisplay)
 
     Display* display;
     XVisualInfo* visualInfo;
@@ -290,10 +290,10 @@ typedef struct OSMesaData
 {
     GLData glData;
 
-    FF_LIBRARY_SYMBOL(OSMesaGetProcAddress);
-    FF_LIBRARY_SYMBOL(OSMesaCreateContext);
-    FF_LIBRARY_SYMBOL(OSMesaMakeCurrent);
-    FF_LIBRARY_SYMBOL(OSMesaDestroyContext);
+    FF_LIBRARY_SYMBOL(OSMesaGetProcAddress)
+    FF_LIBRARY_SYMBOL(OSMesaCreateContext)
+    FF_LIBRARY_SYMBOL(OSMesaMakeCurrent)
+    FF_LIBRARY_SYMBOL(OSMesaDestroyContext)
 
     OSMesaContext context;
 } OSMesaData;

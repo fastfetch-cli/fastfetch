@@ -34,7 +34,7 @@ static void parseDRM(FFDisplayServerResult* result)
         resolution->height = 0;
         resolution->refreshRate = 0;
 
-        int scanned = fscanf(modeFile, "%ix%i", &resolution->width, &resolution->height);
+        int scanned = fscanf(modeFile, "%ux%u", &resolution->width, &resolution->height);
         if(scanned < 2 || resolution->width == 0 || resolution->height == 0)
             --result->resolutions.length;
 

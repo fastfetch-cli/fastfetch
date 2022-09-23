@@ -208,7 +208,10 @@ void ffFontInitWithSpace(FFfont* font, const char* rawName)
 {
     const char* pspace = strrchr(rawName, ' ');
     if(pspace == NULL)
-        return ffFontInitCopy(font, rawName);
+    {
+        ffFontInitCopy(font, rawName);
+        return;
+    }
 
     fontInit(font);
 

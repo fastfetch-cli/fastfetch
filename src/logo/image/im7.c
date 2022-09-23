@@ -5,7 +5,7 @@
 
 #include <MagickCore/MagickCore.h>
 
-static FF_LIBRARY_SYMBOL(ResizeImage);
+static FF_LIBRARY_SYMBOL(ResizeImage)
 
 static void* logoResize(const void* image, size_t width, size_t height, void* exceptionInfo)
 {

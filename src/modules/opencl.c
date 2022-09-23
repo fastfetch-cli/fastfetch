@@ -18,9 +18,9 @@
 
 typedef struct OpenCLData
 {
-    FF_LIBRARY_SYMBOL(clGetPlatformIDs);
-    FF_LIBRARY_SYMBOL(clGetDeviceIDs);
-    FF_LIBRARY_SYMBOL(clGetDeviceInfo);
+    FF_LIBRARY_SYMBOL(clGetPlatformIDs)
+    FF_LIBRARY_SYMBOL(clGetDeviceIDs)
+    FF_LIBRARY_SYMBOL(clGetDeviceInfo)
 } OpenCLData;
 
 static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)

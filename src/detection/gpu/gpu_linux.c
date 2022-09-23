@@ -17,13 +17,13 @@
 typedef struct PCIData
 {
     struct pci_access* access;
-    FF_LIBRARY_SYMBOL(pci_fill_info);
-    FF_LIBRARY_SYMBOL(pci_read_byte);
-    FF_LIBRARY_SYMBOL(pci_lookup_name);
-    FF_LIBRARY_SYMBOL(pci_get_param);
+    FF_LIBRARY_SYMBOL(pci_fill_info)
+    FF_LIBRARY_SYMBOL(pci_read_byte)
+    FF_LIBRARY_SYMBOL(pci_lookup_name)
+    FF_LIBRARY_SYMBOL(pci_get_param)
 
     #if PCI_LIB_VERSION >= 0x030800
-        FF_LIBRARY_SYMBOL(pci_get_string_property);
+        FF_LIBRARY_SYMBOL(pci_get_string_property)
     #endif
 } PCIData;
 
