@@ -70,9 +70,6 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     ffStrbufAppendS(dir, "/status");
     ffReadFileBuffer(dir->chars, &result->status);
     ffStrbufSubstrBefore(dir, dirLength);
-
-    ffStrbufInitA(&result->adapterName, 0);
-    result->adapterWatts = -1;
 }
 
 const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {

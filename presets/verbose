@@ -21,6 +21,7 @@
 --memory-format Used: {}; Total: {}; Percentage: {}
 --disk-format Used: {}; Total: {}; Files: {}; Percentage: {}
 --battery-format Manufactor: {}; Model: {}; Technology: {}; Capacity: {}; Status: {}
+--poweradapter-format Watts: {}; Name: {}; Manufactor: {}; Model: {}; Description: {}
 --player-format Pretty: {}; Name: {}; Bus: {}; Url: {}
 --media-format Pretty: {}; Name: {};  Artist: {}; Album: {}
 --datetime-format year: {}; yearShort: {}; month: {}; monthPretty: {}; monthName: {}; monthNameShort: {}; weekNumber: {}; weekday: {}; weekdayShort: {}; dayInYear: {}; dayInMonth: {}; dayInWeek: {}; hour: {}; hourPretty: {}; hour12: {}; hour12Pretty: {}; minute: {}; minutePretty: {}; second: {}; secondPretty: {}

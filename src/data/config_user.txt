@@ -209,6 +209,7 @@
 #--swap-key Swap
 #--disk-key Disk ({1})
 #--battery-key Battery {1}
+#--poweradapter-key Power Adapter {1}
 #--locale-key Locale
 #--local-ip-key Local IP ({1})
 #--public-ip-key Public IP
@@ -248,6 +249,7 @@
 #--swap-format
 #--disk-format
 #--battery-format
+#--poweradapter-format
 #--locale-format
 #--local-ip-format
 #--public-ip-format
@@ -287,6 +289,7 @@
 #--swap-error
 #--disk-error
 #--battery-error
+#--poweradapter-error
 #--locale-error
 #--local-ip-error
 #--public-ip-error

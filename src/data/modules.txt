@@ -24,6 +24,7 @@ Packages
 Player
 Processes
 PublicIP
+PowerAdapter
 Resolution
 Separator
 Shell
