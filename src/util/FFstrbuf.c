@@ -556,3 +556,26 @@ void ffStrbufDestroy(FFstrbuf* strbuf)
     free(strbuf->chars);
     strbuf->chars = NULL;
 }
+
+#ifdef __APPLE__
+
+void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
+{
+    if(value == NULL)
+        return;
+    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
+{
+    ffStrbufClear(strbuf);
+    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
+{
+    ffStrbufInitA(strbuf, 0);
+    ffStrbufAppendS(strbuf, str);
+}
+
+#endif
