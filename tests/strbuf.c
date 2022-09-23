@@ -24,6 +24,10 @@ int main(int argc, char** argv)
 
     FFstrbuf strbuf;
 
+    //destroy 0
+    ffStrbufInitA(&strbuf, 0);
+    ffStrbufDestroy(&strbuf);
+
     //initA
 
     ffStrbufInitA(&strbuf, 0);

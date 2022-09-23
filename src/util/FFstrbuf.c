@@ -549,6 +549,8 @@ uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
 
 void ffStrbufDestroy(FFstrbuf* strbuf)
 {
+    if(strbuf->allocated == 0) return;
+
     //Avoid free-after-use. These 3 assignments are cheap so don't remove them
     strbuf->allocated = strbuf->length = 0;
     free(strbuf->chars);
