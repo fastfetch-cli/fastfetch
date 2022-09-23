@@ -1445,7 +1445,7 @@ int main(int argc, const char** argv)
 
     //If we don't have a custom structure, use the default one
     if(data.structure.length == 0)
-        ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
+        ffStrbufSetS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
 
     ffStart(&instance);
 

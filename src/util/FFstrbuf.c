@@ -43,7 +43,7 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 
     uint32_t allocate = strbuf->allocated;
     if(allocate < 2)
-        allocate = FASTFETCH_STRBUF_DEFAULT_ALLOC;
+        allocate = 2;
 
     while((strbuf->length + free + 1) > allocate) // + 1 for the null byte
         allocate *= 2;
