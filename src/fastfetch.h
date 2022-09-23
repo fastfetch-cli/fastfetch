@@ -255,6 +255,7 @@ void ffPrintMemory(FFinstance* instance);
 void ffPrintSwap(FFinstance* instance); //Also in modules/memory.c
 void ffPrintDisk(FFinstance* instance);
 void ffPrintBattery(FFinstance* instance);
+void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintSong(FFinstance* instance);

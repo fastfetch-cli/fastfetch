@@ -40,6 +40,7 @@ int main(int argc, char** argv)
     //ffPrintSwap(&instance);
     ffPrintDisk(&instance);
     ffPrintBattery(&instance);
+    ffPrintPowerAdapter(&instance);
     //ffPrintPlayer(&instance);
     //ffPrintSong(&instance);
     //ffPrintLocalIp(&instance);

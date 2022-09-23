@@ -12,8 +12,6 @@ typedef struct BatteryResult
     FFstrbuf technology;
     FFstrbuf capacity;
     FFstrbuf status;
-    FFstrbuf adapterName;
-    int adapterWatts;
 } BatteryResult;
 
 const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results);

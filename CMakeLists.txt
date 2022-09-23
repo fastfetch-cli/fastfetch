@@ -229,6 +229,7 @@ set(LIBFASTFETCH_SRC
     src/modules/memory.c
     src/modules/disk.c
     src/modules/battery.c
+    src/modules/poweradapter.c
     src/modules/locale.c
     src/modules/vulkan.c
     src/modules/localip.c
@@ -259,6 +260,7 @@ endif()
 if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/battery/battery_linux.c
     )
 endif()
 
@@ -268,6 +270,7 @@ if(LINUX OR BSD)
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
+        src/detection/poweradapter/poweradapter_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/xcb.c
@@ -288,6 +291,7 @@ if(APPLE)
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
         src/detection/battery/battery_apple.c
+        src/detection/poweradapter/poweradapter_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/terminalfont/terminalfont_apple.c

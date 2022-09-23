@@ -318,6 +318,16 @@ static inline void printCommandHelp(const char* command)
             "Battery status"
         );
     }
+    else if(strcasecmp(command, "poweradapter-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("poweradapter", "{}%, {}", 5,
+            "PowerAdapter watts",
+            "PowerAdapter name",
+            "PowerAdapter manufacturer",
+            "PowerAdapter model",
+            "PowerAdapter description"
+        );
+    }
     else if(strcasecmp(command, "locale-format") == 0)
     {
         constructAndPrintCommandHelpFormat("locale", "{}", 1,
@@ -1117,11 +1127,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.battery.outputFormat);
     else if(strcasecmp(key, "--battery-error") == 0)
         optionParseString(key, value, &instance->config.battery.errorFormat);
-    else if(strcasecmp(key, "--power-adapter-key") == 0)
+    else if(strcasecmp(key, "--poweradapter-key") == 0)
         optionParseString(key, value, &instance->config.powerAdapter.key);
-    else if(strcasecmp(key, "--power-adapter-format") == 0)
+    else if(strcasecmp(key, "--poweradapter-format") == 0)
         optionParseString(key, value, &instance->config.powerAdapter.outputFormat);
-    else if(strcasecmp(key, "--power-adapter-error") == 0)
+    else if(strcasecmp(key, "--poweradapter-error") == 0)
         optionParseString(key, value, &instance->config.powerAdapter.errorFormat);
     else if(strcasecmp(key, "--locale-key") == 0)
         optionParseString(key, value, &instance->config.locale.key);
@@ -1388,6 +1398,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintDisk(instance);
     else if(strcasecmp(line, "battery") == 0)
         ffPrintBattery(instance);
+    else if(strcasecmp(line, "poweradapter") == 0)
+        ffPrintPowerAdapter(instance);
     else if(strcasecmp(line, "locale") == 0)
         ffPrintLocale(instance);
     else if(strcasecmp(line, "localip") == 0)

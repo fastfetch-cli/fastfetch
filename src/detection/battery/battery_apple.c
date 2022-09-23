@@ -69,16 +69,6 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         else
             ffStrbufAppendS(&battery->status, "");
 
-        ffStrbufInit(&battery->adapterName);
-        battery->adapterWatts = -1;
-
-        CFDictionaryRef adapter;
-        if(!ffCfDictGetDict(properties, CFSTR("AdapterDetails"), &adapter))
-        {
-            ffCfDictGetInt(adapter, CFSTR("Watts"), &battery->adapterWatts);
-            ffCfDictGetString(adapter, CFSTR("Name"), &battery->adapterName);
-        }
-
         CFRelease(properties);
         IOObjectRelease(registryEntry);
     }
