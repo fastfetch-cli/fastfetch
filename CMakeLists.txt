@@ -261,6 +261,7 @@ if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/battery/battery_linux.c
+        src/detection/disk/disk_linux.c
     )
 endif()
 
@@ -296,6 +297,7 @@ if(APPLE)
         src/detection/displayserver/displayserver_apple.c
         src/detection/terminalfont/terminalfont_apple.c
         src/detection/media/media_apple.m
+        src/detection/disk/disk_apple.m
     )
 endif()
 
