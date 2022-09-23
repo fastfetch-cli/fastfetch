@@ -153,6 +153,14 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
 
+    //We are in WSL but not in Windows Terminal
+    if(!ffStrSet(term) && (
+        getenv("WSLENV") != NULL ||
+        getenv("WSL_DISTRO") != NULL ||
+        getenv("WSL_INTEROP") != NULL
+    ))
+        term = "conhost";
+
     //Normal Terminal
     if(!ffStrSet(term))
         term = getenv("TERM");

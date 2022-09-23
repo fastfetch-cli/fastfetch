@@ -32,8 +32,13 @@ static const char* iterm2ParsePList(const FFinstance* instance, const FFstrbuf* 
     else
         ffplist_from_xml(content->chars, content->length, &root_node);
 
+    const char* error = NULL;
+
     if(root_node == NULL)
-        return "parsing iTerm preference file failed";
+    {
+        error = "parsing iTerm preference file failed";
+        goto exit;
+    }
 
     plist_t bookmarks = ffplist_access_path(root_node, 1, "New Bookmarks");
 
@@ -50,20 +55,22 @@ static const char* iterm2ParsePList(const FFinstance* instance, const FFstrbuf* 
 
     if(item == NULL)
     {
-        ffplist_free(root_node);
-        return "find profile bookmark failed";
+        error = "find profile bookmark failed";
+        goto exit;
     }
 
     item = ffplist_dict_get_item(item, "Normal Font");
     if (item == NULL)
     {
-        ffplist_free(root_node);
-        return "find Normal Font key failed";
+        error = "find Normal Font key failed";
+        goto exit;
     }
 
     ffFontInitWithSpace(&terminalFont->font, ffplist_get_string_ptr(item, NULL));
 
+exit:
     ffplist_free(root_node);
+    dlclose(libplist);
     return NULL;
 }
 

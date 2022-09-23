@@ -45,6 +45,7 @@ The following libraries are used if present at runtime:
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libplist`](https://github.com/libimobiledevice/libplist): Binary `plist` file parser ( macOS ). Needed for iTerm2 Terminal font and WM Theme.
+* [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
@@ -81,7 +82,7 @@ KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 
 ##### Terminal fonts
 ```
-Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, iTerm2, Apple Terminal, TTY
+Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, iTerm2, Apple Terminal, TTY, Windows Terminal
 ```
 
 ## Building

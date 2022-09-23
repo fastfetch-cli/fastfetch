@@ -150,6 +150,7 @@ typedef struct FFconfig
     FFstrbuf libOSMesa;
     FFstrbuf libOpenCL;
     FFstrbuf libplist;
+    FFstrbuf libcJSON;
 
     bool titleFQDN;
 
