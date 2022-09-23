@@ -117,7 +117,9 @@ static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
 static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
 {
     ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+
+    if(value != NULL)
+        ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
 }
 
 static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
