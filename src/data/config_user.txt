@@ -324,3 +324,4 @@
 #--lib-osmesa /usr/lib/libOSMesa.so
 #--lib-opencl /usr/lib/libOpenCL.so
 #--lib-plist /usr/local/bin/libplist-2.0.dylib
+#--lib-cjson /usr/lib/libcjson.so
