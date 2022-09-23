@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
+      contents: read
     outputs:
       ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
@@ -57,6 +58,7 @@ jobs:
     runs-on: macos-latest
     permissions:
       security-events: write
+      contents: read
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
