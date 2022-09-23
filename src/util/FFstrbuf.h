@@ -107,15 +107,6 @@ FF_C_NODISCARD uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaul
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
 
-//Github actions on macos fails for whatever reason when inlining, so just don't do it.
-#ifdef __APPLE__
-
-void ffStrbufAppendS(FFstrbuf* strbuf, const char* value);
-void ffStrbufSetS(FFstrbuf* strbuf, const char* value);
-void ffStrbufInitS(FFstrbuf* strbuf, const char* str);
-
-#else
-
 static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
 {
     if(value == NULL)
@@ -134,7 +125,5 @@ static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
     ffStrbufInitA(strbuf, 0);
     ffStrbufAppendS(strbuf, str);
 }
-
-#endif
 
 #endif
