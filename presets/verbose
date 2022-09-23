@@ -14,7 +14,7 @@
 --font-format Plasma raw: {}; Plasma name: {}; Plasma size: {}; Plasma styles: {}; Plasma pretty: {}; GTK2 raw: {}; GTK2 name: {}; GTK2 size: {}; GTK2 styles: {}; GTK2 pretty: {}; GTK3 raw: {}; GTK3 name: {}; GTK3 size: {}; GTK3 styles: {}; GTK3 pretty: {}; GTK4 raw: {}; GTK4 name: {}; GTK4 size: {}; GTK4 styles: {}; GTK4 pretty: {}; GTK: {}
 --cursor-format Theme: {}; Size: {}
 --terminal-format Process: {}; Path: {}; Exe: {}
---terminal-font-format Raw: {}; Name: {}; Size: {}; Styles: {}; Pretty: {}
+--terminal-font-format Pretty: {}; Name: {}; Size: {}; Styles: {}
 --cpu-format Name: {}, Vendor: {}, CoresPhysical: {}, CoresLogical: {}, CoresOnline: {}, FrequencyMin: {}, FrequencyMax: {}, Temperature: {}
 --cpu-usage-format Percentage: {}
 --gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}

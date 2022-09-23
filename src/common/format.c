@@ -55,10 +55,12 @@ static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start,
 
 static inline void appendEmptyPlaceholder(FFstrbuf* buffer, const char* placeholder, uint32_t* argCounter, uint32_t numArgs, const FFformatarg* arguments)
 {
-    if(*argCounter > numArgs)
+    if(*argCounter >= numArgs)
         ffStrbufAppendS(buffer, placeholder);
     else
-        ffFormatAppendFormatArg(buffer, &arguments[(*argCounter)++]);
+        ffFormatAppendFormatArg(buffer, arguments + *argCounter);
+
+    (*argCounter)++;
 }
 
 static inline bool formatArgSet(const FFformatarg* arg)
