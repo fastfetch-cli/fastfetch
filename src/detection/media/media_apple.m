@@ -32,18 +32,27 @@ static const char* getMedia(FFMediaResult* result)
     });
 
     dispatch_group_enter(group);
+    __block const char* error = NULL;
     MRMediaRemoteGetNowPlayingInfo(queue, ^(_Nullable CFDictionaryRef info) {
-        if(info != nil) {
-            ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
-            ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
-            ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
+        if(info != nil)
+        {
+            error = ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
+            if(!error)
+            {
+                ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
+                ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
+            }
         }
+        else
+            error = "MRMediaRemoteGetNowPlayingInfo() failed";
+
         dispatch_group_leave(group);
     });
 
     dispatch_group_enter(group);
     MRMediaRemoteGetNowPlayingClient(queue, ^(_Nullable id clientObj) {
-        if (clientObj != nil) {
+        if (clientObj != nil)
+        {
             CFStringRef identifier = MRNowPlayingClientGetBundleIdentifier(clientObj);
             if (identifier == nil)
                 identifier = MRNowPlayingClientGetParentAppBundleIdentifier(clientObj);
@@ -65,7 +74,7 @@ static const char* getMedia(FFMediaResult* result)
     if(result->song.length > 0)
         return NULL;
 
-    return "MediaRemote failed";
+    return error;
 }
 
 void ffDetectMediaImpl(const FFinstance* instance, FFMediaResult* media)

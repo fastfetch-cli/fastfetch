@@ -6,7 +6,11 @@ const char* ffCfStrGetString(CFStringRef str, FFstrbuf* result)
     //CFString stores UTF16 characters, therefore may require larger buffer to convert to UTF8 string
     ffStrbufEnsureFree(result, length * 2);
     if(!CFStringGetCString(str, result->chars, result->allocated, kCFStringEncodingUTF8))
-        return "CFStringGetCString() failed";
+    {
+        ffStrbufEnsureFree(result, length * 4);
+        if(!CFStringGetCString(str, result->chars, result->allocated, kCFStringEncodingUTF8))
+            return "CFStringGetCString() failed";
+    }
     // CFStringGetCString ensures the buffer is NUL terminated
     // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
     result->length = (uint32_t) strnlen(result->chars, (uint32_t)result->allocated);
