@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "common/parsing.h"
+#include "detection/disk/disk.h"
 
 #include <sys/statvfs.h>
 
@@ -64,49 +65,7 @@ static void printStatvfs(FFinstance* instance, const FFstrbuf* key, const char* 
     ffStrbufDestroy(&usedPretty);
 }
 
-static void printFolderAutodetection(FFinstance* instance, const char* folderPath, struct statvfs* fs)
-{
-    FFstrbuf key;
-    ffStrbufInit(&key);
-    createKey(instance, folderPath, &key);
-    printStatvfs(instance, &key, folderPath, fs);
-    ffStrbufDestroy(&key);
-}
-
-static void printFoldersAutodetection(FFinstance* instance)
-{
-    struct statvfs fsRoot;
-    int rootRet = statvfs(FASTFETCH_TARGET_DIR_ROOT"/", &fsRoot);
-
-    if(rootRet != 0)
-    {
-        FFstrbuf key;
-        ffStrbufInit(&key);
-        createKey(instance, NULL, &key);
-        ffPrintErrorString(instance, key.chars, 0, NULL, &instance->config.disk.errorFormat, "statvfs for / returned not zero: %i", rootRet);
-        ffStrbufDestroy(&key);
-        return;
-    }
-
-    //On MacOS statvfs seems to return different f_fsid for the same filesystem.
-    //Since it isn't really possible to install /Users on a separate disk anyway, just never print it by default.
-    #ifndef __APPLE__
-        struct statvfs fsHome;
-        int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
-        bool printHome = homeRet == 0 && (fsRoot.f_fsid != fsHome.f_fsid);
-    #else
-        bool printHome = false;
-    #endif // !__APPLE__
-
-    printFolderAutodetection(instance, printHome ? FASTFETCH_TARGET_DIR_ROOT"/" : NULL, &fsRoot);
-
-    #ifndef __APPLE__
-    if(printHome)
-        printFolderAutodetection(instance, FASTFETCH_TARGET_DIR_HOME, &fsHome);
-    #endif // !__APPLE__
-}
-
-static void printFolderCustom(FFinstance* instance, const char* folderPath)
+static void printFolder(FFinstance* instance, const char* folderPath)
 {
     FFstrbuf key;
     ffStrbufInit(&key);
@@ -131,17 +90,28 @@ void ffPrintDisk(FFinstance* instance)
 
     if(instance->config.diskFolders.length == 0)
     {
-        printFoldersAutodetection(instance);
+        FFlist folders;
+        ffListInit(&folders, sizeof(FFstrbuf));
+        const char* error = ffDiskAutodetectFolders(instance, &folders);
+        if(error)
+            ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &instance->config.disk, "%s", error);
+        for(uint32_t i = 0; i < folders.length; ++i)
+        {
+            FFstrbuf* folder = (FFstrbuf*)ffListGet(&folders, i);
+            printFolder(instance, folder->chars);
+            ffStrbufDestroy(folder);
+        }
+        ffListDestroy(&folders);
         return;
     }
 
     uint32_t startIndex = 0;
-    while (startIndex < instance->config.diskFolders.length)
+    while(startIndex < instance->config.diskFolders.length)
     {
         uint32_t colonIndex = ffStrbufNextIndexC(&instance->config.diskFolders, startIndex, ':');
         instance->config.diskFolders.chars[colonIndex] = '\0';
 
-        printFolderCustom(instance, instance->config.diskFolders.chars + startIndex);
+        printFolder(instance, instance->config.diskFolders.chars + startIndex);
 
         startIndex = colonIndex + 1;
     }

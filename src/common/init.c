@@ -222,6 +222,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
+    instance->config.diskRemovable = false;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
