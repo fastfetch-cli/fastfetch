@@ -363,42 +363,6 @@ void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
         ffStrbufSubstrAfter(strbuf, index);
 }
 
-bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start)
-{
-    for(uint32_t i = 0; start[i] != '\0'; i++)
-    {
-        if(i >= strbuf->length)
-            return false;
-
-        if(tolower(strbuf->chars[i]) != tolower(start[i]))
-            return false;
-    }
-    return true;
-}
-
-bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start)
-{
-    if (start->length > strbuf->length)
-        return false;
-    return ffStrbufStartsWithIgnCaseS(strbuf, start->chars);
-}
-
-bool ffStrbufEndsWithC(const FFstrbuf* strbuf, char c)
-{
-    return strbuf->length == 0 ? false :
-        strbuf->chars[strbuf->length - 1] == c;
-}
-
-bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
-{
-    uint32_t endLength = (uint32_t) strlen(end);
-
-    if(endLength > strbuf->length)
-        return false;
-
-    return memcmp(strbuf->chars + strbuf->length - endLength, end, endLength) == 0;
-}
-
 uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
 {
     uint32_t result = 0;
@@ -411,26 +375,11 @@ uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
     return result;
 }
 
-static bool testEndsWithIgnCaseS(const FFstrbuf* strbuf, const char* end, uint32_t* endLength)
-{
-    *endLength = (uint32_t) strlen(end);
-
-    if(*endLength > strbuf->length)
-        return false;
-
-    for(uint32_t i = 0; i < *endLength; ++i)
-    {
-        if(tolower(strbuf->chars[strbuf->length - *endLength + i]) != tolower(end[i]))
-            return false;
-    }
-
-    return true;
-}
 
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
 {
-    uint32_t endLength;
-    if(testEndsWithIgnCaseS(strbuf, end, &endLength))
+    uint32_t endLength = (uint32_t) strlen(end);
+    if(ffStrbufEndsWithIgnCaseNS(strbuf, endLength, end))
     {
         ffStrbufSubstrBefore(strbuf, strbuf->length - endLength);
         return true;
