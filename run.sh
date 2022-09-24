@@ -19,5 +19,4 @@ else
 fi
 cmake --build . --target fastfetch ${cmake_build_args}
 
-export LSAN_OPTIONS=suppressions=../tests/lsan.supp
 ./fastfetch "$@"
