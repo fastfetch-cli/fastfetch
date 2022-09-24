@@ -262,6 +262,7 @@ if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/poweradapter/poweradapter_linux.c
     )
 endif()
 
@@ -271,7 +272,6 @@ if(LINUX OR BSD)
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
-        src/detection/poweradapter/poweradapter_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/xcb.c
