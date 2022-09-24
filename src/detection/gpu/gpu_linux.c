@@ -150,9 +150,9 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufDestroy(&path);
 }
 
-static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
+static void pciDetectTemperatur(const FFinstance* instance, FFGPUResult* gpu, struct pci_dev* device)
 {
-    const FFTempsResult* tempsResult = ffDetectTemps();
+    const FFTempsResult* tempsResult = ffDetectTemps(instance);
 
     for(uint32_t i = 0; i < tempsResult->values.length; i++)
     {
@@ -171,7 +171,7 @@ static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
     }
 }
 
-static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* device)
+static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData* pci, struct pci_dev* device)
 {
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
 
@@ -200,7 +200,7 @@ static void pciHandleDevice(FFlist* results, PCIData* pci, struct pci_dev* devic
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
-    pciDetectTemperatur(gpu, device);
+    pciDetectTemperatur(instance, gpu, device);
 }
 
 static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
@@ -229,7 +229,7 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     struct pci_dev* device = pci.access->devices;
     while(device != NULL)
     {
-        pciHandleDevice(gpus, &pci, device);
+        pciHandleDevice(instance, gpus, &pci, device);
         device = device->next;
     }
 

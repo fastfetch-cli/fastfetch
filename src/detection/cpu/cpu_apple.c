@@ -12,10 +12,13 @@ static double getFrequency(const char* propName)
     return herz / 1000.0; //to GHz
 }
 
-void ffDetectCPUImpl(FFCPUResult* cpu, bool cached)
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
 {
+    FF_UNUSED(instance);
+
     //TODO find a way to detect this
     cpu->temperature = FF_CPU_TEMP_UNSET;
+
     if(cached)
         return;
 

@@ -60,9 +60,9 @@ static double getFrequency(const char* info, const char* scaling)
     return getGHz(scaling);
 }
 
-static double detectCPUTemp()
+static double detectCPUTemp(const FFinstance* instance)
 {
-    const FFTempsResult* temps = ffDetectTemps();
+    const FFTempsResult* temps = ffDetectTemps(instance);
 
     for(uint32_t i = 0; i < temps->values.length; i++)
     {
@@ -78,9 +78,10 @@ static double detectCPUTemp()
     return FF_CPU_TEMP_UNSET;
 }
 
-void ffDetectCPUImpl(FFCPUResult* cpu, bool cached)
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
 {
-    cpu->temperature = detectCPUTemp();
+    cpu->temperature = detectCPUTemp(instance);
+
     if(cached)
         return;
 

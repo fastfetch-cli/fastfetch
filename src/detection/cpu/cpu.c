@@ -4,7 +4,7 @@
 
 #define FF_CPU_CACHE_NAME "cpu"
 
-void ffDetectCPUImpl(FFCPUResult* cpu, bool cached);
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached);
 
 static bool cacheCallback(FFCPUResult* cpu, FFCache* cache, FFCacheMethodStrbuf strbufMethod, FFCacheMethodData dataMethod)
 {
@@ -25,7 +25,7 @@ static void detectCPU(const FFinstance* instance, FFCPUResult* cpu)
 
     bool cached = ffCacheRead(instance, cpu, FF_CPU_CACHE_NAME, (FFCacheMethodCallback) cacheCallback);
 
-    ffDetectCPUImpl(cpu, cached);
+    ffDetectCPUImpl(instance, cpu, cached);
 
     if(cached)
         return;

@@ -1,9 +1,12 @@
 #include "cpu.h"
 #include "common/sysctl.h"
 
-void ffDetectCPUImpl(FFCPUResult* cpu, bool cached)
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
 {
+    FF_UNUSED(instance);
+
     cpu->temperature = FF_CPU_TEMP_UNSET;
+
     if(cached)
         return;
 

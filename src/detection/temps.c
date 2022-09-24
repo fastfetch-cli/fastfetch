@@ -6,48 +6,20 @@
 #include <pthread.h>
 #include <dirent.h>
 
-static bool isTempFile(const char* name)
-{
-    return
-        strncmp(name, "temp", 4) == 0 &&
-        name[4] >= '0' &&
-        name[4] <= '9' &&
-        strncmp(name + 5, "_input", 6) == 0;
-}
-
 static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
 {
-    DIR* dirp = opendir(dir->chars);
-    if(dirp == NULL)
-        return false;
-
     uint32_t dirLength = dir->length;
-    value->value = 0.0 / 0.0; //use NaN as error value
 
-    FFstrbuf valueString;
-    ffStrbufInit(&valueString);
+    FFstrbuf valueBuffer;
+    ffStrbufInit(&valueBuffer);
 
-    struct dirent* dirent;
-    while((dirent = readdir(dirp)) != NULL)
-    {
-        if(!isTempFile(dirent->d_name))
-            continue;
+    ffStrbufAppendS(dir, "temp1_input");
+    ffReadFileBuffer(dir->chars, &valueBuffer);
+    ffStrbufSubstrBefore(dir, dirLength);
 
-        ffStrbufAppendS(dir, dirent->d_name);
-        ffReadFileBuffer(dir->chars, &valueString);
-        ffStrbufSubstrBefore(dir, dirLength);
+    value->value = ffStrbufToDouble(&valueBuffer);
 
-        //ffStrbufToDouble() returns NaN if the string couldn't be parsed
-        value->value = ffStrbufToDouble(&valueString);
-        if(value->value != value->value)
-            continue;
-
-        value->value /= 1000.0; //millidegrees to degrees
-        break;
-    }
-
-    closedir(dirp);
-    ffStrbufDestroy(&valueString);
+    ffStrbufDestroy(&valueBuffer);
 
     if(value->value != value->value)
         return false;
@@ -63,7 +35,7 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     return value->name.length > 0 || value->deviceClass.length > 0;
 }
 
-const FFTempsResult* ffDetectTemps()
+const FFTempsResult* ffDetectTemps(const FFinstance* instance)
 {
     static FFTempsResult result;
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -76,6 +48,13 @@ const FFTempsResult* ffDetectTemps()
         return &result;
     }
     init = true;
+
+    if(!instance->config.allowSlowOperations)
+    {
+        ffListInitA(&result.values, sizeof(FFTempValue), 0);
+        pthread_mutex_unlock(&mutex);
+        return &result;
+    }
 
     ffListInitA(&result.values, sizeof(FFTempValue), 16);
 
