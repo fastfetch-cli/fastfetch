@@ -71,7 +71,7 @@ static const char* iterm2ParsePList(const FFinstance* instance, const FFstrbuf* 
 exit:
     ffplist_free(root_node);
     dlclose(libplist);
-    return NULL;
+    return error;
 }
 
 static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* terminalFont)

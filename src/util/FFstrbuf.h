@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
@@ -22,9 +24,9 @@ typedef struct FFstrbuf
 
 #define FF_STRBUF_CREATE(name) FFstrbuf name; ffStrbufInit(&name);
 
-void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
+void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
@@ -32,29 +34,18 @@ FF_C_NODISCARD uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
 
 void ffStrbufClear(FFstrbuf* strbuf);
 
-void ffStrbufRecalculateLength(FFstrbuf* strbuf);
-
-void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufAppendC(FFstrbuf* strbuf, char c);
-
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
-
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
-void ffStrbufPrependS(FFstrbuf* strbuf, const char* value);
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
-
-FF_C_NODISCARD int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
-FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp);
-
-FF_C_NODISCARD int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp);
-FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp);
+void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
@@ -69,13 +60,7 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
 FF_C_NODISCARD uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
 FF_C_NODISCARD uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str);
 
-FF_C_NODISCARD uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c);
-FF_C_NODISCARD uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched);
-FF_C_NODISCARD uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str);
-
 FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
-
-FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c);
@@ -84,8 +69,6 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
 void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
 void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c);
-
-bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start);
 
 bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start);
 bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start);
@@ -106,6 +89,11 @@ FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
 FF_C_NODISCARD uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
 
 void ffStrbufDestroy(FFstrbuf* strbuf);
+
+static inline void ffStrbufRecalculateLength(FFstrbuf* strbuf)
+{
+    strbuf->length = (uint32_t) strlen(strbuf->chars);
+}
 
 static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
 {
@@ -128,4 +116,87 @@ static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
     ffStrbufAppendS(strbuf, str);
 }
 
+static inline void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
+{
+    assert(value != strbuf);
+    if(value == NULL)
+        return;
+    ffStrbufAppendNS(strbuf, value->length, value->chars);
+}
+
+static inline void ffStrbufInit(FFstrbuf* strbuf)
+{
+    ffStrbufInitA(strbuf, 0);
+}
+
+static inline void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
+{
+    if(value == NULL)
+        return;
+    ffStrbufPrependNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    uint32_t length = strbuf->length > comp->length ? comp->length : strbuf->length;
+    return memcmp(strbuf->chars, comp->chars, length + 1);
+}
+
+static inline FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
+{
+    return strcmp(strbuf->chars, comp);
+}
+
+static inline FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
+{
+    return strcasecmp(strbuf->chars, comp);
+}
+
+static inline FF_C_NODISCARD int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return ffStrbufIgnCaseCompS(strbuf, comp->chars);
+}
+
+static inline FF_C_NODISCARD uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
+{
+    return ffStrbufNextIndexC(strbuf, 0, c);
+}
+
+static inline FF_C_NODISCARD uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched)
+{
+    return ffStrbufNextIndexS(strbuf, 0, searched->chars);
+}
+
+static inline FF_C_NODISCARD uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str)
+{
+    return ffStrbufNextIndexS(strbuf, 0, str);
+}
+
+static inline FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c)
+{
+    return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
+}
+
+static inline FF_C_NODISCARD bool ffStrbufStartsWithC(const FFstrbuf* strbuf, char c)
+{
+    return strbuf->chars[0] == c;
+}
+
+static inline FF_C_NODISCARD bool ffStrbufStartsWithSN(const FFstrbuf* strbuf, const char* start, uint32_t length)
+{
+    if (length > strbuf->length)
+        return false;
+
+    return memcmp(strbuf->chars, start, length) == 0;
+}
+
+static inline FF_C_NODISCARD bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start)
+{
+    return ffStrbufStartsWithSN(strbuf, start, (uint32_t) strlen(start));
+}
+
+static inline FF_C_NODISCARD bool ffStrbufStartsWith(const FFstrbuf* strbuf, const FFstrbuf* start)
+{
+    return ffStrbufStartsWithSN(strbuf, start->chars, start->length);
+}
 #endif

@@ -1,15 +1,9 @@
 #include "FFstrbuf.h"
 
-#include <stdlib.h>
 #include <ctype.h>
 #include <inttypes.h>
 
 static char* CHAR_NULL_PTR = "";
-
-void ffStrbufInit(FFstrbuf* strbuf)
-{
-    ffStrbufInitA(strbuf, FASTFETCH_STRBUF_DEFAULT_ALLOC);
-}
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
 {
@@ -28,8 +22,21 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
     ffStrbufAppend(strbuf, src);
 }
 
+void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
+{
+    assert(format != NULL);
+
+    ffStrbufInit(strbuf);
+
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufAppendVF(strbuf, format, arguments);
+    va_end(arguments);
+}
+
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
 {
+    assert(strbuf != NULL);
     if(strbuf->allocated == 0)
         return 0;
 
@@ -61,24 +68,14 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 
 void ffStrbufClear(FFstrbuf* strbuf)
 {
+    assert(strbuf != NULL);
+
     if(strbuf->allocated == 0)
         strbuf->chars = CHAR_NULL_PTR;
     else
         strbuf->chars[0] = '\0';
 
     strbuf->length = 0;
-}
-
-void ffStrbufRecalculateLength(FFstrbuf* strbuf)
-{
-    for(strbuf->length = 0; strbuf->chars[strbuf->length] != '\0'; ++strbuf->length);
-}
-
-void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
-{
-    if(value == NULL)
-        return;
-    ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
 void ffStrbufAppendC(FFstrbuf* strbuf, char c)
@@ -90,7 +87,7 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c)
 
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 {
-    if(value == NULL)
+    if(value == NULL || length == 0)
         return;
 
     ffStrbufEnsureFree(strbuf, length);
@@ -101,7 +98,7 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude)
 {
-    if(value == NULL)
+    if(value == NULL || length == 0)
         return;
 
     ffStrbufEnsureFree(strbuf, length);
@@ -120,10 +117,14 @@ void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transfor
     if(value == NULL)
         return;
 
+    //Ensure capacity > 0 or the modification below will fail
+    uint32_t length = (uint32_t) strlen(value);
+    if(length == 0)
+        return;
+
+    ffStrbufEnsureFree(strbuf, length);
     for(uint32_t i = 0; value[i] != '\0'; i++)
     {
-        if(i % 16 == 0)
-            ffStrbufEnsureFree(strbuf, 16);
         strbuf->chars[strbuf->length++] = (char) transformFunc(value[i]);
     }
     strbuf->chars[strbuf->length] = '\0';
@@ -131,8 +132,7 @@ void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transfor
 
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 {
-    if(format == NULL)
-        return;
+    assert(format != NULL);
 
     va_list copy;
     va_copy(copy, arguments);
@@ -155,10 +155,11 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...)
+void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
 {
-    if(format == NULL)
-        return;
+    assert(format != NULL);
+
+    ffStrbufClear(strbuf);
 
     va_list arguments;
     va_start(arguments, format);
@@ -166,13 +167,21 @@ void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...)
     va_end(arguments);
 }
 
-void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
+void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...)
 {
-    ffStrbufPrependNS(strbuf, (uint32_t) strlen(value), value);
+    assert(format != NULL);
+
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufAppendVF(strbuf, format, arguments);
+    va_end(arguments);
 }
 
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 {
+    if(value == NULL || length == 0)
+        return;
+
     ffStrbufEnsureFree(strbuf, length);
     memmove(strbuf->chars + length, strbuf->chars, strbuf->length + 1); // + 1 for the null byte
     memcpy(strbuf->chars, value, length);
@@ -191,35 +200,9 @@ void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
-int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
-{
-    if(strbuf->length != comp->length)
-        return (int) strbuf->length - (int) comp->length;
-
-    return ffStrbufCompS(strbuf, comp->chars);
-}
-
-int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
-{
-    return strcmp(strbuf->chars, comp);
-}
-
-int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
-{
-    if(strbuf->length != comp->length)
-        return (int) strbuf->length - (int) comp->length;
-
-    return ffStrbufIgnCaseCompS(strbuf, comp->chars);
-}
-
-int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
-{
-    return strcasecmp(strbuf->chars, comp);
-}
-
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 {
-    if(strbuf->allocated == 0)
+    if(strbuf->length == 0) //`allocated == 0` implies `length == 0`
         return;
 
     uint32_t index = 0;
@@ -236,7 +219,7 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
 {
-    if(strbuf->allocated == 0)
+    if(strbuf->length == 0)
         return;
 
     while(ffStrbufEndsWithC(strbuf, c))
@@ -297,58 +280,23 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
 
 uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 {
-    for(uint32_t i = start; i < strbuf->length; i++)
-    {
-        if(strbuf->chars[i] == c)
-            return i;
-    }
-    return strbuf->length;
+    assert(start <= strbuf->length);
+
+    const char* ptr = (const char*)memchr(strbuf->chars + start, c, strbuf->length - start);
+    return ptr ? (uint32_t)(ptr - strbuf->chars) : strbuf->length;
 }
 
 uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str)
 {
-    for(uint32_t i = start; i < strbuf->length; i++)
-    {
-        bool found = true;
+    assert(start <= strbuf->length);
 
-        for(uint32_t k = 0; str[k] != '\0'; k++)
-        {
-            if(i + k == strbuf->length)
-                return strbuf->length;
-
-            if(strbuf->chars[i + k] != str[k])
-            {
-                found = false;
-                break;
-            }
-        }
-
-        if(found)
-            return i;
-    }
-
-    return strbuf->length;
-}
-
-uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)
-{
-    return ffStrbufNextIndexC(strbuf, 0, c);
-}
-
-uint32_t ffStrbufFirstIndex(const FFstrbuf* strbuf, const FFstrbuf* searched)
-{
-    return ffStrbufNextIndexS(strbuf, 0, searched->chars);
-}
-
-uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf, const char* str)
-{
-    return ffStrbufNextIndexS(strbuf, 0, str);
+    const char* ptr = strstr(strbuf->chars + start, str);
+    return ptr ? (uint32_t)(ptr - strbuf->chars) : strbuf->length;
 }
 
 uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 {
-    if(start >= strbuf->length)
-        return strbuf->length;
+    assert(start <= strbuf->length);
 
     //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true
     for(uint32_t i = start + 1; i > 0; i--)
@@ -357,11 +305,6 @@ uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
             return i - 1;
     }
     return strbuf->length;
-}
-
-uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c)
-{
-    return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
 }
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
@@ -420,24 +363,6 @@ void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
         ffStrbufSubstrAfter(strbuf, index);
 }
 
-bool ffStrbufStartsWithS(const FFstrbuf* strbuf, const char* start)
-{
-    for(uint32_t i = 0; start[i] != '\0'; i++)
-    {
-        if(i >= strbuf->length)
-            return false;
-
-        if(strbuf->chars[i] != start[i])
-            return false;
-    }
-    return true;
-}
-
-bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start)
-{
-    return ffStrbufStartsWithS(strbuf, start->chars);
-}
-
 bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start)
 {
     for(uint32_t i = 0; start[i] != '\0'; i++)
@@ -449,6 +374,13 @@ bool ffStrbufStartsWithIgnCaseS(const FFstrbuf* strbuf, const char* start)
             return false;
     }
     return true;
+}
+
+bool ffStrbufStartsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* start)
+{
+    if (start->length > strbuf->length)
+        return false;
+    return ffStrbufStartsWithIgnCaseS(strbuf, start->chars);
 }
 
 bool ffStrbufEndsWithC(const FFstrbuf* strbuf, char c)
@@ -464,13 +396,7 @@ bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
     if(endLength > strbuf->length)
         return false;
 
-    for(uint32_t i = endLength; i > 0; i--)
-    {
-        if(strbuf->chars[strbuf->length - endLength + i - 1] != end[i - 1])
-            return false;
-    }
-
-    return true;
+    return memcmp(strbuf->chars + strbuf->length - endLength, end, endLength) == 0;
 }
 
 uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
@@ -481,6 +407,7 @@ uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
         if(strbuf->chars[i] == c)
             result++;
     }
+
     return result;
 }
 
@@ -531,20 +458,16 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
 
 double ffStrbufToDouble(const FFstrbuf* strbuf)
 {
-    double value;
-    if(sscanf(strbuf->chars, "%lf", &value) != 1)
-        return 0.0 / 0.0; //NaN
-
-    return value;
+    char* str_end;
+    double result = strtod(strbuf->chars, &str_end);
+    return str_end == strbuf->chars ? 0.0/0.0 : result;
 }
 
 uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
 {
-    uint16_t value;
-    if(sscanf(strbuf->chars, "%"SCNu16, &value) != 1)
-        return defaultValue;
-
-    return value;
+    char* str_end;
+    unsigned long result = strtoul(strbuf->chars, &str_end, 10);
+    return str_end == strbuf->chars || result > UINT16_MAX ? defaultValue : (uint16_t)result;
 }
 
 void ffStrbufDestroy(FFstrbuf* strbuf)

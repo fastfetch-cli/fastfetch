@@ -261,7 +261,6 @@ endif()
 if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
-        src/detection/battery/battery_linux.c
         src/detection/disk/disk_linux.c
     )
 endif()
@@ -280,6 +279,7 @@ if(LINUX OR BSD)
         src/detection/displayserver/linux/wmde.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/media/media_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
     )
 endif()
 
@@ -299,6 +299,7 @@ if(APPLE)
         src/detection/terminalfont/terminalfont_apple.c
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
+        src/detection/wmtheme/wmtheme_apple.c
     )
 endif()
 
@@ -318,6 +319,7 @@ if(ANDROID)
         src/detection/displayserver/displayserver_android.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/media/media_android.c
+        src/detection/wmtheme/wmtheme_android.c
     )
 endif()
 

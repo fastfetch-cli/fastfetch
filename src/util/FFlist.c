@@ -2,22 +2,12 @@
 
 #include <stdlib.h>
 
-void ffListInit(FFlist* list, uint32_t elementSize)
-{
-    ffListInitA(list, elementSize, FF_LIST_DEFAULT_ALLOC);
-}
-
 void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
 {
     list->elementSize = elementSize;
     list->capacity = capacity;
     list->length = 0;
     list->data = capacity == 0 ? NULL : malloc((size_t)list->capacity * list->elementSize);
-}
-
-void* ffListGet(const FFlist* list, uint32_t index)
-{
-    return list->data + (index * list->elementSize);
 }
 
 void* ffListAdd(FFlist* list)
