@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #define FF_LIST_DEFAULT_ALLOC 16
 
@@ -18,15 +19,23 @@ typedef struct FFlist
     uint32_t capacity;
 } FFlist;
 
-void ffListInit(FFlist* list, uint32_t elementSize);
 void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity);
-
-FF_C_NODISCARD void* ffListGet(const FFlist* list, uint32_t index);
 
 void* ffListAdd(FFlist* list);
 
 FF_C_NODISCARD uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
 
 void ffListDestroy(FFlist* list);
+
+static inline void ffListInit(FFlist* list, uint32_t elementSize)
+{
+    ffListInitA(list, elementSize, 0);
+}
+
+static inline void* ffListGet(const FFlist* list, uint32_t index)
+{
+    assert(list->capacity > 0);
+    return list->data + (index * list->elementSize);
+}
 
 #endif
