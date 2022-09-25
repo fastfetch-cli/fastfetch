@@ -1841,6 +1841,41 @@ static const FFlogo* getLogoUbuntu()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoUbuntuOld()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu_old", "ubuntu-linux_old")
+    FF_LOGO_LINES(
+        "             .-/+oossssoo+/-.\n"
+        "         `:+ssssssssssssssssss+:`\n"
+        "       -+ssssssssssssssssssyyssss+-\n"
+        "     .ossssssssssssssssssd$2MMMNy$1sssso.\n"
+        "   /sssssssssss$2hdmmNNmmyNMMMMh$1ssssss/\n"
+        "  +sssssssss$2hmydMMMMMMMNddddy$1ssssssss+\n"
+        " /ssssssss$2hNMMMyhhyyyyhmNMMMNh$1ssssssss/\n"
+        ".ssssssss$2dMMMNh$1ssssssssss$2hNMMMd$1ssssssss.\n"
+        "+ssss$2hhhyNMMNy$1ssssssssssss$2yNMMMy$1sssssss+\n"
+        "oss$2yNMMMNyMMh$1ssssssssssssss$2hmmmh$1ssssssso\n"
+        "oss$2yNMMMNyMMh$1ssssssssssssss$2hmmmh$1ssssssso\n"
+        "+ssss$2hhhyNMMNy$1ssssssssssss$2yNMMMy$1sssssss+\n"
+        ".ssssssss$2dMMMNh$1ssssssssss$2hNMMMd$1ssssssss.\n"
+        " /ssssssss$2hNMMMyhhyyyyhdNMMMNh$1ssssssss/\n"
+        "  +sssssssss$2dmydMMMMMMMMddddy$1ssssssss+\n"
+        "   /sssssssssss$2hdmNNNNmyNMMMMh$1ssssss/\n"
+        "    .ossssssssssssssssss$2dMMMNy$1sssso.\n"
+        "     -+sssssssssssssssss$2yyy$1ssss+-\n"
+        "       `:+ssssssssssssssssss+:`\n"
+        "           .-/+oossssoo+/-."
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntuSmall()
 {
     FF_LOGO_INIT
@@ -2011,6 +2046,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoSlackware,
         getLogoSlackwareSmall,
         getLogoUbuntu,
+        getLogoUbuntuOld,
         getLogoUbuntuSmall,
         getLogoVoid,
         getLogoVoidSmall,
