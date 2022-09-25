@@ -1,21 +1,13 @@
 #include "fastfetch.h"
-#include "common/font.h"
 #include "common/printing.h"
-#include "common/parsing.h"
-#include "detection/qt.h"
-#include "detection/gtk.h"
+#include "detection/font/font.h"
 #include "detection/displayserver/displayserver.h"
 
 #define FF_FONT_MODULE_NAME "Font"
-#define FF_FONT_NUM_FORMAT_ARGS 21
+#define FF_FONT_NUM_FORMAT_ARGS 2
 
 void ffPrintFont(FFinstance* instance)
 {
-    #ifdef __ANDROID__
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "Font detection is not supported on Android");
-        return;
-    #endif
-
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
@@ -24,76 +16,35 @@ void ffPrintFont(FFinstance* instance)
         return;
     }
 
-    const FFstrbuf* plasmaRaw = &ffDetectQt(instance)->font;
-    const FFstrbuf* gtk2Raw = &ffDetectGTK2(instance)->font;
-    const FFstrbuf* gtk3Raw = &ffDetectGTK3(instance)->font;
-    const FFstrbuf* gtk4Raw = &ffDetectGTK4(instance)->font;
-
-    if(plasmaRaw->length == 0 && gtk2Raw->length == 0 && gtk3Raw->length == 0 && gtk4Raw->length == 0)
+    FFlist list;
+    ffListInit(&list, sizeof(FFFontResult));
+    const char* error = ffDetectFontImpl(instance, &list);
+    if(error)
     {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "No fonts found");
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "%s", error);
         return;
     }
 
-    FFfont plasma;
-    ffFontInitQt(&plasma, plasmaRaw->chars);
-
-    FFfont gtk2;
-    ffFontInitPango(&gtk2, gtk2Raw->chars);
-
-    FFfont gtk3;
-    ffFontInitPango(&gtk3, gtk3Raw->chars);
-
-    FFfont gtk4;
-    ffFontInitPango(&gtk4, gtk4Raw->chars);
-
-    FFstrbuf gtk;
-    ffStrbufInitA(&gtk, 64);
-    ffParseGTK(&gtk, &gtk2.pretty, &gtk3.pretty, &gtk4.pretty);
-
-    if(instance->config.font.outputFormat.length == 0)
+    for(uint32_t i = 0; i < list.length; ++i)
     {
-        ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font.key);
-        if(plasma.pretty.length > 0)
+        FFFontResult* font = (FFFontResult*)ffListGet(&list, i);
+        if(instance->config.font.outputFormat.length == 0)
         {
-            ffStrbufWriteTo(&plasma.pretty, stdout);
-            fputs(" [QT]", stdout);
-
-            if(gtk.length > 0)
-                fputs(", ", stdout);
+            FFstrbuf key;
+            ffStrbufInitF(&key, "%s (%s)", FF_FONT_MODULE_NAME, font->type);
+            ffPrintLogoAndKey(instance, key.chars, 0, &instance->config.font.key);
+            puts(font->fontPretty.chars);
+            ffStrbufDestroy(&key);
         }
-        ffStrbufPutTo(&gtk, stdout);
-    }
-    else
-    {
-        ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, plasmaRaw},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &plasma.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &plasma.size},
-            {FF_FORMAT_ARG_TYPE_LIST,   &plasma.styles},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &plasma.pretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, gtk2Raw},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk2.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk2.size},
-            {FF_FORMAT_ARG_TYPE_LIST,   &gtk2.styles},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk2.pretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, gtk3Raw},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk3.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk3.size},
-            {FF_FORMAT_ARG_TYPE_LIST,   &gtk3.styles},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk3.pretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, gtk4Raw},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk4.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk4.size},
-            {FF_FORMAT_ARG_TYPE_LIST,   &gtk4.styles},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk4.pretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gtk}
-        });
+        else
+        {
+            ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_STRING, font->type},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font->fontPretty}
+            });
+        }
+        ffStrbufDestroy(&font->fontPretty);
     }
 
-    ffFontDestroy(&plasma);
-    ffFontDestroy(&gtk2);
-    ffFontDestroy(&gtk3);
-    ffFontDestroy(&gtk4);
-    ffStrbufDestroy(&gtk);
+    ffListDestroy(&list);
 }

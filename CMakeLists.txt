@@ -280,6 +280,7 @@ if(LINUX OR BSD)
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/detection/font/font_linux.c
     )
 endif()
 
@@ -301,6 +302,7 @@ if(APPLE)
         src/detection/disk/disk_apple.m
         src/detection/wmtheme/wmtheme_apple.c
         src/detection/temps/temps_apple.c
+        src/detection/font/font_apple.m
     )
 endif()
 
@@ -321,6 +323,7 @@ if(ANDROID)
         src/detection/terminalfont/terminalfont_android.c
         src/detection/media/media_android.c
         src/detection/wmtheme/wmtheme_android.c
+        src/detection/font/font_android.c
     )
 endif()
 
