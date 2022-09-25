@@ -186,13 +186,7 @@ static const char *smcOpen(io_connect_t *conn)
     IOObjectRelease(device);
     if (result != kIOReturnSuccess)
         return "IOServiceOpen() failed";
-    return NULL;
-}
 
-static const char *smcClose(io_connect_t conn)
-{
-    if (IOServiceClose(conn) != kIOReturnSuccess)
-        return "IOServiceClose() failed";
     return NULL;
 }
 
@@ -331,10 +325,11 @@ static void detectTemp(io_connect_t conn, const char *sensor, const char *name, 
 
 const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
 {
-    io_connect_t conn;
-    const char* error = smcOpen(&conn);
-    if(error)
-        return error;
+    static io_connect_t conn;
+    static dispatch_once_t once_control;
+    dispatch_once_f(&once_control, &conn, (dispatch_function_t) smcOpen);
+    if(!conn)
+        return "smcOpen() failed";
 
     // https://github.com/exelban/stats/blob/master/Modules/Sensors/values.swift
     switch (type)
@@ -406,8 +401,5 @@ const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
         break;
     }
 
-    error = smcClose(conn);
-    if(error)
-        return error;
     return NULL;
 }
