@@ -1808,6 +1808,44 @@ static const FFlogo* getLogoUbuntu()
     FF_LOGO_INIT
     FF_LOGO_NAMES("ubuntu", "ubuntu-linux")
     FF_LOGO_LINES(
+ "                            ....\n"
+ "             .',:clooo:  .:looooo:.\n"
+ "          .;looooooooc  .oooooooooo'\n"
+ "       .;looooool:,''.  :ooooooooooc\n"
+ "      ;looool;.         'oooooooooo,\n"
+ "     ;clool'             .cooooooc.  ,,\n"
+ "        ...                ......  .:oo,\n"
+ "  .;clol:,.                        .loooo'\n"
+ ":ooooooooo,                        'ooool\n"
+ "'ooooooooooo.                        loooo.\n"
+ "'ooooooooool                         coooo.\n"
+ " ,loooooooc.                        .loooo.\n"
+ "   .,;;;'.                          ;ooooc\n"
+ "      ...                         ,ooool.\n"
+ "   .cooooc.              ..',,'.  .cooo.\n"
+ "     ;ooooo:.           ;oooooooc.  :l.\n"
+ "      .coooooc,..      coooooooooo.\n"
+ "        .:ooooooolc:. .ooooooooooo'\n"
+ "         .':loooooo;  ,oooooooooc\n"
+ "             ..';::c'  .;loooo:'\n"
+ "                            ."
+
+
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoUbuntuOld()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu_old", "ubuntu-linux_old")
+    FF_LOGO_LINES(
         "             .-/+oossssoo+/-.\n"
         "         `:+ssssssssssssssssss+:`\n"
         "       -+ssssssssssssssssssyyssss+-\n"
@@ -2008,6 +2046,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoSlackware,
         getLogoSlackwareSmall,
         getLogoUbuntu,
+        getLogoUbuntuOld,
         getLogoUbuntuSmall,
         getLogoVoid,
         getLogoVoidSmall,
