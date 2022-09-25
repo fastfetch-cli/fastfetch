@@ -1,6 +1,6 @@
 #include "fastfetch.h"
-#include "detection/temps.h"
 #include "common/io.h"
+#include "temps_linux.h"
 
 #include <string.h>
 #include <pthread.h>

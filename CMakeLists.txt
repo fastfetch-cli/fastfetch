@@ -193,7 +193,6 @@ set(LIBFASTFETCH_SRC
     src/detection/terminalShell.c
     src/detection/vulkan.c
     src/detection/datetime.c
-    src/detection/temps.c
     src/detection/title.c
     src/detection/host/host.c
     src/detection/os/os.c
@@ -263,6 +262,7 @@ if(LINUX OR ANDROID OR BSD)
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/poweradapter/poweradapter_linux.c
+        src/detection/temps/temps_linux.c
     )
 endif()
 
@@ -300,6 +300,7 @@ if(APPLE)
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
         src/detection/wmtheme/wmtheme_apple.c
+        src/detection/temps/temps_apple.c
     )
 endif()
 

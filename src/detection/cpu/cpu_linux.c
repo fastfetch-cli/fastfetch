@@ -1,7 +1,7 @@
 #include "cpu.h"
 #include "common/io.h"
 #include "common/properties.h"
-#include "detection/temps.h"
+#include "detection/temps/temps_linux.h"
 
 #include <stdlib.h>
 #include <unistd.h>

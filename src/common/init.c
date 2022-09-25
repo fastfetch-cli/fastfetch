@@ -220,6 +220,10 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libplist, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
 
+    instance->config.cpuTemp = false;
+    instance->config.gpuTemp = false;
+    instance->config.batteryTemp = false;
+
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);

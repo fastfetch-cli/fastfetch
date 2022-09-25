@@ -9,7 +9,7 @@
 #include "common/library.h"
 #include "common/properties.h"
 #include "common/parsing.h"
-#include "detection/temps.h"
+#include "detection/temps/temps_linux.h"
 #include <string.h>
 #include <unistd.h>
 #include <pci/pci.h>

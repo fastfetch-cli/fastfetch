@@ -25,11 +25,14 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
     if(gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
         ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
 
+    if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
+        ffStrbufAppendF(&output, " - %.1f°C", gpu->temperature);
+
     ffPrintAndAppendToCache(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu, cache, &output, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
         {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
         {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
         {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
-        {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
+        {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature}, //FIXME: temperature shouldn't be cached
         {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
     });
 

@@ -5,7 +5,7 @@
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFinstance* instance, const BatteryResult* result, uint8_t index)
+static void printBattery(FFinstance* instance,  BatteryResult* result, uint8_t index)
 {
     if(instance->config.battery.outputFormat.length == 0)
     {
@@ -32,6 +32,9 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
                 putchar(']');
         }
 
+        if(result->temperature == result->temperature) //FF_BATTERY_TEMP_UNSET
+            printf(" - %.1f°C", result->temperature);
+
         putchar('\n');
     }
     else
@@ -41,7 +44,8 @@ static void printBattery(FFinstance* instance, const BatteryResult* result, uint
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->capacity},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->status}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
         });
     }
 }
