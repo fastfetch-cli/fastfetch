@@ -1,7 +1,15 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 
-#include <utmpx.h>
+#if FF_HAVE_UTMPX_H
+    #include <utmpx.h>
+#else
+    //for Android compatibility
+    #include <utmp.h>
+    #define utmpx utmp
+    #define setutxent setutent
+    #define getutxent getutent
+#endif
 
 #define FF_USERS_MODULE_NAME "Users"
 #define FF_USERS_NUM_FORMAT_ARGS 1

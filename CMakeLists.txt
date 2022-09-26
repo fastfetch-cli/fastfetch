@@ -338,6 +338,11 @@ if(HAVE_SYSINFO_H)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SYSINFO_H)
 endif()
 
+CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
+if(HAVE_UTMPX_H)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
+endif()
+
 function(ff_lib_enable VARNAME)
     if(NOT ENABLE_${VARNAME})
         return()
