@@ -325,3 +325,4 @@
 #--lib-opencl /usr/lib/libOpenCL.so
 #--lib-plist /usr/local/bin/libplist-2.0.dylib
 #--lib-cjson /usr/lib/libcjson.so
+#--lib-freetype /data/data/com.termux/files/usr/lib

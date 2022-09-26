@@ -219,6 +219,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libOpenCL, 0);
     ffStrbufInitA(&instance->config.libplist, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
+    ffStrbufInitA(&instance->config.libfreetype, 0);
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
