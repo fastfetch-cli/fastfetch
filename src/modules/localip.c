@@ -62,6 +62,9 @@ void ffPrintLocalIp(FFinstance* instance)
         if (strncmp(ifa->ifa_name, "lo", 2) == 0 && (ifa->ifa_name[2] == '\0' || isdigit(ifa->ifa_name[2])) && !instance->config.localIpShowLoop)
             continue;
 
+        if (instance->config.localIpNamePrefix.length && strncmp(ifa->ifa_name, instance->config.localIpNamePrefix.chars, instance->config.localIpNamePrefix.length) != 0)
+            continue;
+
         if (ifa->ifa_addr->sa_family == AF_INET) { // check it is IP4
             // is a valid IP4 Address
             if (!instance->config.localIpShowIpV4)

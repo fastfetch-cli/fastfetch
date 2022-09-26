@@ -10,10 +10,13 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
-    #ifdef __ANDROID__
-        ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.icons, "Icons detection is not supported on Android");
-        return;
-    #endif
+    #if defined(__ANDROID__) || defined(__APPLE__)
+
+    FF_UNUSED(instance);
+    ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.icons, "Icons detection is not supported");
+    return;
+
+    #else
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
@@ -64,4 +67,6 @@ void ffPrintIcons(FFinstance* instance)
     }
 
     ffStrbufDestroy(&gtkPretty);
+
+    #endif
 }

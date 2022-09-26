@@ -29,12 +29,13 @@ void ffListDestroy(FFlist* list);
 
 static inline void ffListInit(FFlist* list, uint32_t elementSize)
 {
+    assert(elementSize > 0);
     ffListInitA(list, elementSize, 0);
 }
 
 static inline void* ffListGet(const FFlist* list, uint32_t index)
 {
-    assert(list->capacity > 0);
+    assert(list->capacity > index);
     return list->data + (index * list->elementSize);
 }
 

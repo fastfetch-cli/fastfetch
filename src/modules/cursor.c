@@ -11,6 +11,8 @@
 #define FF_CURSOR_MODULE_NAME "Cursor"
 #define FF_CURSOR_NUM_FORMAT_ARGS 2
 
+#if !(defined(__ANDROID__) || defined(__APPLE__))
+
 static void printCursor(FFinstance* instance, FFstrbuf* cursorTheme, const FFstrbuf* cursorSize)
 {
     ffStrbufRemoveIgnCaseEndS(cursorTheme, "cursors");
@@ -190,12 +192,17 @@ static bool printCursorFromEnv(FFinstance* instance)
     return true;
 }
 
+#endif
+
 void ffPrintCursor(FFinstance* instance)
 {
-    #ifdef __ANDROID__
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Cursor detection is not supported on Android");
-        return;
-    #endif
+    #if defined(__ANDROID__) || defined(__APPLE__)
+
+    FF_UNUSED(instance);
+    ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &instance->config.cursor, "Cursor detection is not supported");
+    return;
+
+    #else
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
@@ -243,4 +250,6 @@ void ffPrintCursor(FFinstance* instance)
     ) return;
 
     printCursorGTK(instance);
+
+    #endif
 }

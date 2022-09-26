@@ -9,7 +9,7 @@
 #include "common/library.h"
 #include "common/properties.h"
 #include "common/parsing.h"
-#include "detection/temps.h"
+#include "detection/temps/temps_linux.h"
 #include <string.h>
 #include <unistd.h>
 #include <pci/pci.h>
@@ -200,7 +200,8 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
-    pciDetectTemperatur(instance, gpu, device);
+    if(instance->config.gpuTemp)
+        pciDetectTemperatur(instance, gpu, device);
 }
 
 static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)

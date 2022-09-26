@@ -1,9 +1,41 @@
 #include "gpu.h"
 #include "common/library.h"
 #include "detection/cpu/cpu.h"
+#include "detection/temps/temps_apple.h"
 #include "util/apple/cf_helpers.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
+
+static double detectGpuTemp(const FFstrbuf* gpuName)
+{
+    FFlist temps;
+    ffListInit(&temps, sizeof(FFTempValue));
+
+    if(ffStrbufStartsWithS(gpuName, "Apple M1"))
+        ffDetectCoreTemps(FF_TEMP_GPU_M1X, &temps);
+    else if(ffStrbufStartsWithS(gpuName, "Apple M2"))
+        ffDetectCoreTemps(FF_TEMP_GPU_M2X, &temps);
+    else if(ffStrbufStartsWithS(gpuName, "Radeon") || ffStrbufStartsWithS(gpuName, "AMD"))
+        ffDetectCoreTemps(FF_TEMP_GPU_AMD, &temps);
+    else
+        ffDetectCoreTemps(FF_TEMP_GPU_UNKNOWN, &temps);
+
+    if(temps.length == 0)
+        return FF_GPU_TEMP_UNSET;
+
+    double result = 0;
+    for(uint32_t i = 0; i < temps.length; ++i)
+    {
+        FFTempValue* tempValue = (FFTempValue*)ffListGet(&temps, i);
+        result += tempValue->value;
+        //TODO: do we really need this?
+        ffStrbufDestroy(&tempValue->name);
+        ffStrbufDestroy(&tempValue->deviceClass);
+    }
+    result /= temps.length;
+    ffListDestroy(&temps);
+    return result;
+}
 
 const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
@@ -52,7 +84,10 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
-        gpu->temperature = FF_GPU_TEMP_UNSET;
+        if(instance->config.gpuTemp)
+            gpu->temperature = detectGpuTemp(&gpu->name);
+        else
+            gpu->temperature = FF_GPU_TEMP_UNSET;
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);

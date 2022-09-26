@@ -5,6 +5,8 @@
 
 #include "fastfetch.h"
 
+#define FF_BATTERY_TEMP_UNSET (0/0.0)
+
 typedef struct BatteryResult
 {
     FFstrbuf manufacturer;
@@ -12,6 +14,7 @@ typedef struct BatteryResult
     FFstrbuf technology;
     FFstrbuf capacity;
     FFstrbuf status;
+    double temperature;
 } BatteryResult;
 
 const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results);

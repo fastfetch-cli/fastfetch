@@ -52,6 +52,7 @@ int main(int argc, char** argv)
     //ffPrintVulkan(&instance);
     //ffPrintOpenGL(&instance);
     //ffPrintOpenCL(&instance);
+    //ffPrintUsers(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 

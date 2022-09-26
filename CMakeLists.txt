@@ -193,7 +193,6 @@ set(LIBFASTFETCH_SRC
     src/detection/terminalShell.c
     src/detection/vulkan.c
     src/detection/datetime.c
-    src/detection/temps.c
     src/detection/title.c
     src/detection/host/host.c
     src/detection/os/os.c
@@ -243,6 +242,7 @@ set(LIBFASTFETCH_SRC
     src/modules/colors.c
     src/modules/opengl.c
     src/modules/opencl.c
+    src/modules/users.c
 )
 
 if(BSD OR APPLE)
@@ -262,6 +262,8 @@ if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/poweradapter/poweradapter_linux.c
+        src/detection/temps/temps_linux.c
     )
 endif()
 
@@ -271,7 +273,6 @@ if(LINUX OR BSD)
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
-        src/detection/poweradapter/poweradapter_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/xcb.c
@@ -280,6 +281,7 @@ if(LINUX OR BSD)
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/detection/font/font_linux.c
     )
 endif()
 
@@ -300,6 +302,8 @@ if(APPLE)
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
         src/detection/wmtheme/wmtheme_apple.c
+        src/detection/temps/temps_apple.c
+        src/detection/font/font_apple.m
     )
 endif()
 
@@ -320,6 +324,7 @@ if(ANDROID)
         src/detection/terminalfont/terminalfont_android.c
         src/detection/media/media_android.c
         src/detection/wmtheme/wmtheme_android.c
+        src/detection/font/font_android.c
     )
 endif()
 

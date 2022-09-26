@@ -10,10 +10,13 @@
 
 void ffPrintTheme(FFinstance* instance)
 {
-    #ifdef __ANDROID__
-        ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, "Theme detection is not supported on Android");
-        return;
-    #endif
+    #if defined(__ANDROID__) || defined(__APPLE__)
+
+    FF_UNUSED(instance);
+    ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, "Theme detection is not supported");
+    return;
+
+    #else
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
@@ -98,4 +101,6 @@ void ffPrintTheme(FFinstance* instance)
 
     ffStrbufDestroy(&plasmaColorPretty);
     ffStrbufDestroy(&gtkPretty);
+
+    #endif
 }
