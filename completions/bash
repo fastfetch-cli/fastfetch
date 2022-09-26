@@ -184,6 +184,7 @@ __fastfetch_completion()
         "--localip-show-ipv4"
         "--localip-show-ipv6"
         "--localip-show-loop"
+        "--localip-name-prefix"
         "--escape-bedrock"
         "--pipe"
         "--title-fqdn"

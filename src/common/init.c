@@ -238,6 +238,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
+    ffStrbufInit(&instance->config.localIpNamePrefix);
 
     instance->config.publicIpTimeout = 0;
 

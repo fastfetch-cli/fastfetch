@@ -170,6 +170,7 @@ typedef struct FFconfig
     bool localIpShowLoop;
     bool localIpShowIpV4;
     bool localIpShowIpV6;
+    FFstrbuf localIpNamePrefix;
 
     uint32_t publicIpTimeout;
 

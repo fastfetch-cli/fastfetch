@@ -1277,6 +1277,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowIpV6 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-loop") == 0)
         instance->config.localIpShowLoop = optionParseBoolean(value);
+    else if(strcasecmp(key, "--localip-name-prefix") == 0)
+        optionParseString(key, value, &instance->config.localIpNamePrefix);
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
