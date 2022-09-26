@@ -276,5 +276,6 @@ void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
+void ffPrintUsers(FFinstance* instance);
 
 #endif

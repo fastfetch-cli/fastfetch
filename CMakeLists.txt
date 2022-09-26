@@ -242,6 +242,7 @@ set(LIBFASTFETCH_SRC
     src/modules/colors.c
     src/modules/opengl.c
     src/modules/opencl.c
+    src/modules/users.c
 )
 
 if(BSD OR APPLE)

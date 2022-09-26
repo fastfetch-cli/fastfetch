@@ -1436,6 +1436,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOpenGL(instance);
     else if(strcasecmp(line, "opencl") == 0)
         ffPrintOpenCL(instance);
+    else if(strcasecmp(line, "users") == 0)
+        ffPrintUsers(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
