@@ -152,6 +152,10 @@ typedef struct FFconfig
     FFstrbuf libplist;
     FFstrbuf libcJSON;
 
+    bool cpuTemp;
+    bool gpuTemp;
+    bool batteryTemp;
+
     bool titleFQDN;
 
     FFstrbuf diskFolders;

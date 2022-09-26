@@ -94,7 +94,10 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         else
             ffStrbufAppendS(&battery->status, "");
 
-        battery->temperature = detectBatteryTemp();
+        if(instance->config.batteryTemp)
+            battery->temperature = detectBatteryTemp();
+        else
+            battery->temperature = FF_BATTERY_TEMP_UNSET;
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);

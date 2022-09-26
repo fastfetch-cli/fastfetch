@@ -69,5 +69,8 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
             cpu->frequencyMax = getFrequency("hw.cpufrequency");
     }
 
-    cpu->temperature = detectCpuTemp(&cpu->name);
+    if (instance->config.cpuTemp)
+        cpu->temperature = detectCpuTemp(&cpu->name);
+    else
+        cpu->temperature = FF_CPU_TEMP_UNSET;
 }

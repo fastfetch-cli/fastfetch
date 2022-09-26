@@ -80,7 +80,10 @@ static double detectCPUTemp(const FFinstance* instance)
 
 void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
 {
-    cpu->temperature = detectCPUTemp(instance);
+    if(instance->config.cpuTemp)
+        cpu->temperature = detectCPUTemp(instance);
+    else
+        cpu->temperature = FF_CPU_TEMP_UNSET;
 
     if(cached)
         return;
