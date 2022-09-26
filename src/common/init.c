@@ -233,6 +233,8 @@ static void defaultConfig(FFinstance* instance)
 
     ffStrbufInitA(&instance->config.separatorString, 0);
 
+    instance->config.fontInline = true;
+
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;

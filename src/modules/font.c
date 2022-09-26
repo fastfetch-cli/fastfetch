@@ -25,26 +25,38 @@ void ffPrintFont(FFinstance* instance)
         return;
     }
 
-    for(uint32_t i = 0; i < list.length; ++i)
+    if (instance->config.font.outputFormat.length == 0 && instance->config.fontInline)
     {
-        FFFontResult* font = (FFFontResult*)ffListGet(&list, i);
-        if(instance->config.font.outputFormat.length == 0)
+        ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font.key);
+        for(uint32_t i = 0; i < list.length; ++i)
         {
-            FFstrbuf key;
-            ffStrbufInitF(&key, "%s (%s)", FF_FONT_MODULE_NAME, font->type);
-            ffPrintLogoAndKey(instance, key.chars, 0, &instance->config.font.key);
-            puts(font->fontPretty.chars);
-            ffStrbufDestroy(&key);
+            FFFontResult* font = (FFFontResult*)ffListGet(&list, i);
+            printf("[%s] %*s%s", font->type, font->fontPretty.length, font->fontPretty.chars, i < list.length - 1 ? ", " : "");
+            ffStrbufDestroy(&font->fontPretty);
         }
-        else
-        {
-            ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRING, font->type},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font->fontPretty}
-            });
-        }
-        ffStrbufDestroy(&font->fontPretty);
+        putchar('\n');
     }
-
+    else
+    {
+        for(uint32_t i = 0; i < list.length; ++i)
+        {
+            FFFontResult* font = (FFFontResult*)ffListGet(&list, i);
+            if(instance->config.font.outputFormat.length == 0)
+            {
+                char keyChars[32];
+                snprintf(keyChars, sizeof(keyChars), "%s (%s)", FF_FONT_MODULE_NAME, font->type);
+                ffPrintLogoAndKey(instance, keyChars, 0, &instance->config.font.key);
+                puts(font->fontPretty.chars);
+            }
+            else
+            {
+                ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+                    {FF_FORMAT_ARG_TYPE_STRING, font->type},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &font->fontPretty}
+                });
+            }
+            ffStrbufDestroy(&font->fontPretty);
+        }
+    }
     ffListDestroy(&list);
 }

@@ -97,6 +97,7 @@ Module specific options:
     --cpu-temp  <?value>:         Detect and display CPU temperature if supported. Default is false
     --gpu-temp  <?value>:         Detect and display GPU temperature if supported. Default is false
     --battery-temp  <?value>:     Detect and display Battery temperature if supported. Default is false
+    --font-inline <?value>:       Display fonts of different DE in one line
     --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false
     --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false

@@ -1269,6 +1269,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
+    else if(strcasecmp(key, "--font-inline") == 0)
+        instance->config.fontInline = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         instance->config.localIpShowIpV4 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)

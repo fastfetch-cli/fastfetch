@@ -180,6 +180,7 @@ __fastfetch_completion()
         "--cpu-temp"
         "--gpu-temp"
         "--battery-temp"
+        "--font-inline"
         "--localip-show-ipv4"
         "--localip-show-ipv6"
         "--localip-show-loop"
