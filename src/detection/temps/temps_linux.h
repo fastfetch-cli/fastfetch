@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_temps
-#define FF_INCLUDED_detection_temps
+#ifndef FF_INCLUDED_detection_temps_linux
+#define FF_INCLUDED_detection_temps_linux
 
 #include "fastfetch.h"
 

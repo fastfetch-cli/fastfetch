@@ -27,21 +27,21 @@ const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
     result.yearShort = (uint8_t) (result.year % 100);
     result.month = (uint8_t) (tm->tm_mon + 1);
 
-    ffStrbufInit(&result.monthPretty);
+    ffStrbufInitA(&result.monthPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.monthPretty.length = (uint32_t) strftime(result.monthPretty.chars, ffStrbufGetFree(&result.monthPretty), "%m", tm);
 
-    ffStrbufInit(&result.monthName);
+    ffStrbufInitA(&result.monthName, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.monthName.length = (uint32_t) strftime(result.monthName.chars, ffStrbufGetFree(&result.monthName), "%B", tm);
 
-    ffStrbufInit(&result.monthNameShort);
+    ffStrbufInitA(&result.monthNameShort, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.monthNameShort.length = (uint32_t) strftime(result.monthNameShort.chars, ffStrbufGetFree(&result.monthNameShort), "%b", tm);
 
     result.week = (uint8_t) (tm->tm_yday / 7 + 1);
 
-    ffStrbufInit(&result.weekday);
+    ffStrbufInitA(&result.weekday, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.weekday.length = (uint32_t) strftime(result.weekday.chars, ffStrbufGetFree(&result.weekday), "%A", tm);
 
-    ffStrbufInit(&result.weekdayShort);
+    ffStrbufInitA(&result.weekdayShort, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.weekdayShort.length = (uint32_t) strftime(result.weekdayShort.chars, ffStrbufGetFree(&result.weekdayShort), "%a", tm);
 
     result.dayInYear = (uint8_t) (tm->tm_yday + 1);
@@ -50,22 +50,22 @@ const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
 
     result.hour = (uint8_t) tm->tm_hour;
 
-    ffStrbufInit(&result.hourPretty);
+    ffStrbufInitA(&result.hourPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.hourPretty.length = (uint32_t) strftime(result.hourPretty.chars, ffStrbufGetFree(&result.hourPretty), "%H", tm);
 
     result.hour12 = (uint8_t) (result.hour % 12);
 
-    ffStrbufInit(&result.hour12Pretty);
+    ffStrbufInitA(&result.hour12Pretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.hour12Pretty.length = (uint32_t) strftime(result.hour12Pretty.chars, ffStrbufGetFree(&result.hour12Pretty), "%I", tm);
 
     result.minute = (uint8_t) tm->tm_min;
 
-    ffStrbufInit(&result.minutePretty);
+    ffStrbufInitA(&result.minutePretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.minutePretty.length = (uint32_t) strftime(result.minutePretty.chars, ffStrbufGetFree(&result.minutePretty), "%M", tm);
 
     result.second = (uint8_t) tm->tm_sec;
 
-    ffStrbufInit(&result.secondPretty);
+    ffStrbufInitA(&result.secondPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.secondPretty.length = (uint32_t) strftime(result.secondPretty.chars, ffStrbufGetFree(&result.secondPretty), "%S", tm);
 
     pthread_mutex_unlock(&mutex);

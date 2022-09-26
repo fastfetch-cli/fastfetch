@@ -220,6 +220,10 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libplist, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
 
+    instance->config.cpuTemp = false;
+    instance->config.gpuTemp = false;
+    instance->config.batteryTemp = false;
+
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
@@ -229,9 +233,12 @@ static void defaultConfig(FFinstance* instance)
 
     ffStrbufInitA(&instance->config.separatorString, 0);
 
+    instance->config.fontInline = true;
+
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
+    ffStrbufInit(&instance->config.localIpNamePrefix);
 
     instance->config.publicIpTimeout = 0;
 

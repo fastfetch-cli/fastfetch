@@ -156,6 +156,21 @@ int main(int argc, char** argv)
     VERIFY(ffStrbufNextIndexS(&strbuf, 1, "1") == 3);
     VERIFY(ffStrbufNextIndexS(&strbuf, 4, "1") == 5);
 
+    //ignCase
+    ffStrbufSetS(&strbuf, "AbCdEfG");
+
+    VERIFY(ffStrbufIgnCaseCompS(&strbuf, "aBcDeFg") == 0);
+    VERIFY(ffStrbufStartsWithIgnCaseS(&strbuf, "ABCD"));
+    VERIFY(ffStrbufEndsWithIgnCaseS(&strbuf, "defg"));
+    VERIFY(!ffStrbufStartsWithIgnCaseS(&strbuf, "aBcDeFgH"));
+    VERIFY(!ffStrbufEndsWithIgnCaseS(&strbuf, "0aBcDeFg"));
+
+    //ensure
+    ffStrbufEnsureEndsWithC(&strbuf, '^');
+    VERIFY(ffStrbufCompS(&strbuf, "^aBcDeFg"));
+    ffStrbufEnsureEndsWithC(&strbuf, '$');
+    VERIFY(ffStrbufCompS(&strbuf, "^aBcDeFg$"));
+
     //Destroy
 
     ffStrbufDestroy(&strbuf);

@@ -36,6 +36,9 @@ void ffPrintCPU(FFinstance* instance)
         if(cpu->frequencyMax > 0.0)
             printf(" @ %.9g GHz", cpu->frequencyMax);
 
+        if(cpu->temperature == cpu->temperature) //FF_CPU_TEMP_UNSET
+            printf(" - %.1f°C", cpu->temperature);
+
         putchar('\n');
     }
     else

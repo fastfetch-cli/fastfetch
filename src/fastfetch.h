@@ -152,6 +152,10 @@ typedef struct FFconfig
     FFstrbuf libplist;
     FFstrbuf libcJSON;
 
+    bool cpuTemp;
+    bool gpuTemp;
+    bool batteryTemp;
+
     bool titleFQDN;
 
     FFstrbuf diskFolders;
@@ -161,9 +165,12 @@ typedef struct FFconfig
 
     FFstrbuf separatorString;
 
+    bool fontInline;
+
     bool localIpShowLoop;
     bool localIpShowIpV4;
     bool localIpShowIpV6;
+    FFstrbuf localIpNamePrefix;
 
     uint32_t publicIpTimeout;
 
@@ -270,5 +277,6 @@ void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
+void ffPrintUsers(FFinstance* instance);
 
 #endif

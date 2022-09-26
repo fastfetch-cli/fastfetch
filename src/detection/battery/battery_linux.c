@@ -70,6 +70,8 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     ffStrbufAppendS(dir, "/status");
     ffReadFileBuffer(dir->chars, &result->status);
     ffStrbufSubstrBefore(dir, dirLength);
+
+    result->temperature = FF_BATTERY_TEMP_UNSET;
 }
 
 const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {

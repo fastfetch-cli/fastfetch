@@ -1253,6 +1253,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
+    else if(strcasecmp(key, "--cpu-temp") == 0)
+        instance->config.cpuTemp = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-temp") == 0)
+        instance->config.gpuTemp = optionParseBoolean(value);
+    else if(strcasecmp(key, "--battery-temp") == 0)
+        instance->config.batteryTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--title-fqdn") == 0)
         instance->config.titleFQDN = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)
@@ -1263,12 +1269,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
+    else if(strcasecmp(key, "--font-inline") == 0)
+        instance->config.fontInline = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         instance->config.localIpShowIpV4 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)
         instance->config.localIpShowIpV6 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-loop") == 0)
         instance->config.localIpShowLoop = optionParseBoolean(value);
+    else if(strcasecmp(key, "--localip-name-prefix") == 0)
+        optionParseString(key, value, &instance->config.localIpNamePrefix);
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
@@ -1428,6 +1438,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOpenGL(instance);
     else if(strcasecmp(line, "opencl") == 0)
         ffPrintOpenCL(instance);
+    else if(strcasecmp(line, "users") == 0)
+        ffPrintUsers(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
