@@ -196,6 +196,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.vulkan);
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
+    initModuleArg(&instance->config.users);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);

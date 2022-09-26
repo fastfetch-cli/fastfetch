@@ -128,6 +128,7 @@ typedef struct FFconfig
     FFModuleArgs vulkan;
     FFModuleArgs openGL;
     FFModuleArgs openCL;
+    FFModuleArgs users;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;

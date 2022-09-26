@@ -36,6 +36,13 @@ next:
         }
     }
 
+    if(users.length == 0)
+    {
+        ffListDestroy(&users);
+        ffPrintError(instance, FF_USERS_MODULE_NAME, 0, &instance->config.users, "Unable to detect users");
+        return;
+    }
+
     FFstrbuf result;
     ffStrbufInit(&result);
     for(uint32_t i = 0; i < users.length; ++i)
@@ -46,14 +53,14 @@ next:
     }
     ffListDestroy(&users);
 
-    if(instance->config.uptime.outputFormat.length == 0)
+    if(instance->config.users.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_USERS_MODULE_NAME, 0, &instance->config.uptime.key);
+        ffPrintLogoAndKey(instance, FF_USERS_MODULE_NAME, 0, &instance->config.users.key);
         puts(result.chars);
     }
     else
     {
-        ffPrintFormat(instance, FF_USERS_MODULE_NAME, 0, &instance->config.uptime, FF_USERS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_USERS_MODULE_NAME, 0, &instance->config.users, FF_USERS_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result},
         });
     }
