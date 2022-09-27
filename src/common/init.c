@@ -479,6 +479,15 @@ void ffListFeatures()
         #ifdef FF_HAVE_OPENCL
             "opencl\n"
         #endif
+        #ifdef FF_HAVE_LIBPLIST
+            "libplist\n"
+        #endif
+        #ifdef FF_HAVE_LIBCJSON
+            "libcjson\n"
+        #endif
+        #ifdef FF_HAVE_FREETYPE
+            "freetype"
+        #endif
         ""
     , stdout);
 }
