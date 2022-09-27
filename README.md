@@ -61,9 +61,9 @@ AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Crystal
 ```
 * Most of the logos have a small variant. Access it by appending _small to the logo name.
 * Some logos have an old variant. Access it by appending _old to the logo name.
-* Unknown/unsupported logos will be replaced with a generic linux logo when running fastfetch.
+* To disable the logo, use `--logo none`.
 * Get a list of all available logos with `fastfetch --print-logos`.
-* Printing images as logo is supported using Sixel or Kitty graphics protocol.
+* Printing images as logo is supported using Sixel / Kitty graphics protocol or chafas image to text conversion.
 
 ##### Package managers
 ```
