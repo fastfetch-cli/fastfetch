@@ -196,6 +196,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.vulkan);
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
+    initModuleArg(&instance->config.users);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -219,6 +220,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libOpenCL, 0);
     ffStrbufInitA(&instance->config.libplist, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
+    ffStrbufInitA(&instance->config.libfreetype, 0);
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
@@ -356,6 +358,8 @@ static void exitSignalHandler(int signal)
 
 void ffStart(FFinstance* instance)
 {
+    ffPrepareCPUUsage();
+
     if(instance->config.multithreading)
         startDetectionThreads(instance);
 
@@ -476,6 +480,15 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_OPENCL
             "opencl\n"
+        #endif
+        #ifdef FF_HAVE_LIBPLIST
+            "libplist\n"
+        #endif
+        #ifdef FF_HAVE_LIBCJSON
+            "libcjson\n"
+        #endif
+        #ifdef FF_HAVE_FREETYPE
+            "freetype"
         #endif
         ""
     , stdout);

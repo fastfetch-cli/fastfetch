@@ -219,6 +219,7 @@
 #--vulkan-key Vulkan
 #--opengl-key OpenGL
 #--opencl-key OpenCL
+#--users-key Users
 
 # Format options:
 # Sets the format string for module values.
@@ -259,6 +260,7 @@
 #--vulkan-format
 #--opengl-format
 #--opencl-format
+#--users-format
 
 # Error options:
 # Sets the format string to use if an error occured
@@ -299,6 +301,7 @@
 #--vulkan-error
 #--opengl-error
 #--opencl-error
+#--users-error
 
 # Library options:
 # Sets an user specific path to a library to load.
@@ -325,3 +328,4 @@
 #--lib-opencl /usr/lib/libOpenCL.so
 #--lib-plist /usr/local/bin/libplist-2.0.dylib
 #--lib-cjson /usr/lib/libcjson.so
+#--lib-freetype /data/data/com.termux/files/usr/lib

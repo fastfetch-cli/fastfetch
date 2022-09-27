@@ -3,6 +3,6 @@
 #ifndef FF_INCLUDED_detection_cpu_cpuUsage
 #define FF_INCLUDED_detection_cpu_cpuUsage
 
-const char* ffGetCpuUsagePercent(double* result);
+const char* ffGetCpuUsageInfo(long* inUseAll, long* totalAll);
 
 #endif

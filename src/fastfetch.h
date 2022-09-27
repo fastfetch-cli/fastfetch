@@ -128,6 +128,7 @@ typedef struct FFconfig
     FFModuleArgs vulkan;
     FFModuleArgs openGL;
     FFModuleArgs openCL;
+    FFModuleArgs users;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -151,6 +152,7 @@ typedef struct FFconfig
     FFstrbuf libOpenCL;
     FFstrbuf libplist;
     FFstrbuf libcJSON;
+    FFstrbuf libfreetype;
 
     bool cpuTemp;
     bool gpuTemp;
@@ -233,6 +235,7 @@ void ffLogoBuiltinListAutocompletion();
 //Common
 
 void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs);
+void ffPrepareCPUUsage();
 
 //Printing
 

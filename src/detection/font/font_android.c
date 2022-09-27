@@ -1,3 +1,4 @@
+#include "fastfetch.h"
 #include "common/font.h"
 
 const char* ffDetectFontImpl(FFinstance* instance, FFlist* result)

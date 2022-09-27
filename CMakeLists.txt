@@ -48,6 +48,7 @@ cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_LIBPLIST "Enable libplist" ON "APPLE" OFF)
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -338,6 +339,11 @@ if(HAVE_SYSINFO_H)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SYSINFO_H)
 endif()
 
+CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
+if(HAVE_UTMPX_H)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
+endif()
+
 function(ff_lib_enable VARNAME)
     if(NOT ENABLE_${VARNAME})
         return()
@@ -384,6 +390,7 @@ ff_lib_enable(OSMESA osmesa)
 ff_lib_enable(OPENCL OpenCL)
 ff_lib_enable(LIBPLIST libplist-2.0)
 ff_lib_enable(LIBCJSON libcjson)
+ff_lib_enable(FREETYPE freetype2)
 
 if(APPLE)
     target_link_libraries(libfastfetch

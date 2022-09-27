@@ -34,7 +34,6 @@ int main(int argc, char** argv)
     ffPrintTerminal(&instance);
     ffPrintTerminalFont(&instance);
     ffPrintCPU(&instance);
-    //ffPrintCPUUsage(&instance);
     ffPrintGPU(&instance);
     ffPrintMemory(&instance);
     //ffPrintSwap(&instance);
@@ -45,6 +44,7 @@ int main(int argc, char** argv)
     //ffPrintSong(&instance);
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
+    //ffPrintCPUUsage(&instance);
     ffPrintLocale(&instance);
     //ffPrintDateTime(&instance);
     //ffPrintDate(&instance);

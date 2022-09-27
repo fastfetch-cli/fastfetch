@@ -326,6 +326,9 @@ __fastfetch_completion()
         "--opencl-key"
         "--opencl-format"
         "--opencl-error"
+        "--users-key"
+        "--users-format"
+        "--users-error"
     )
 
     local FF_OPTIONS_PATH=(
