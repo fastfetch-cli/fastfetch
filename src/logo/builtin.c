@@ -38,17 +38,6 @@ const FFlogo* ffLogoBuiltinGetUnknown()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoNone()
-{
-    FF_LOGO_INIT
-    FF_LOGO_NAMES("none", "empty")
-    FF_LOGO_LINES("")
-    FF_LOGO_COLORS("")
-    FF_LOGO_COLOR_KEYS("")
-    FF_LOGO_COLOR_TITLE("")
-    FF_LOGO_RETURN
-}
-
 static const FFlogo* getLogoAlmaLinux()
 {
     FF_LOGO_INIT
@@ -1985,7 +1974,6 @@ GetLogoMethod* ffLogoBuiltinGetAll()
 {
     static GetLogoMethod logoMethods[] = {
         ffLogoBuiltinGetUnknown,
-        getLogoNone,
         getLogoAlmaLinux,
         getLogoAlpine,
         getLogoAlpineSmall,

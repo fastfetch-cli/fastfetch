@@ -236,13 +236,27 @@ static void logoPrintStruct(FFinstance* instance, const FFlogo* logo)
     ffLogoPrintChars(instance, logo->data, true);
 }
 
+static void logoPrintNone(FFinstance* instance)
+{
+    logoApplyColorsDetected(instance);
+    instance->state.logoHeight = 0;
+    instance->state.logoWidth = 0;
+}
+
 static bool logoPrintBuiltinIfExists(FFinstance* instance, const char* name)
 {
+    if(strcasecmp(name, "none") == 0)
+    {
+        logoPrintNone(instance);
+        return true;
+    }
+
     const FFlogo* logo = logoGetBuiltin(name);
     if(logo == NULL)
         return false;
 
     logoPrintStruct(instance, logo);
+
     return true;
 }
 
