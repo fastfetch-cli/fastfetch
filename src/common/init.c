@@ -359,6 +359,7 @@ static void exitSignalHandler(int signal)
 void ffStart(FFinstance* instance)
 {
     ffPrepareCPUUsage();
+    ffPreparePublicIp(instance);
 
     if(instance->config.multithreading)
         startDetectionThreads(instance);

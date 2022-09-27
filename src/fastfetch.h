@@ -236,6 +236,7 @@ void ffLogoBuiltinListAutocompletion();
 
 void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs);
 void ffPrepareCPUUsage();
+void ffPreparePublicIp(FFinstance* instance);
 
 //Printing
 

@@ -6,22 +6,23 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer)
+int ffNetworkingSendHttpRequest(const char* host, const char* path, uint32_t timeout)
 {
-    struct addrinfo hints = {0};
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
+    struct addrinfo hints = {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+    };
 
     struct addrinfo* addr;
 
     if(getaddrinfo(host, "80", &hints, &addr) != 0)
-        return;
+        return -1;
 
-    int sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-    if(sock == -1)
+    int sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+    if(sockfd == -1)
     {
         freeaddrinfo(addr);
-        return;
+        return -1;
     }
 
     if(timeout > 0)
@@ -29,14 +30,14 @@ void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, F
         struct timeval timev;
         timev.tv_sec = 0;
         timev.tv_usec = (__typeof__(timev.tv_usec)) (timeout * 1000); //milliseconds to microseconds
-        setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
+        setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
 
-    if(connect(sock, addr->ai_addr, addr->ai_addrlen) == -1)
+    if(connect(sockfd, addr->ai_addr, addr->ai_addrlen) == -1)
     {
-        close(sock);
+        close(sockfd);
         freeaddrinfo(addr);
-        return;
+        return -1;
     }
 
     freeaddrinfo(addr);
@@ -49,14 +50,19 @@ void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, F
     ffStrbufAppendS(&command, host);
     ffStrbufAppendS(&command, "\r\n\r\n");
 
-    if(send(sock, command.chars, command.length, 0) == -1)
+    if(send(sockfd, command.chars, command.length, 0) == -1)
     {
         ffStrbufDestroy(&command);
-        close(sock);
-        return;
+        close(sockfd);
+        return -1;
     }
+    ffStrbufDestroy(&command);
+    return sockfd;
+}
 
-    ssize_t received = recv(sock, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
+void ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
+{
+    ssize_t received = recv(sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
 
     if(received > 0)
     {
@@ -64,6 +70,12 @@ void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, F
         buffer->chars[buffer->length] = '\0';
     }
 
-    ffStrbufDestroy(&command);
-    close(sock);
+    close(sockfd);
+}
+
+void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer)
+{
+    int sockfd = ffNetworkingSendHttpRequest(host, path, timeout);
+    if(sockfd > 0)
+        ffNetworkingRecvHttpResponse(sockfd, buffer);
 }

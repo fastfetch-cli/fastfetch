@@ -5,6 +5,8 @@
 
 #include "util/FFstrbuf.h"
 
+int ffNetworkingSendHttpRequest(const char* host, const char* path, uint32_t timeout);
+void ffNetworkingRecvHttpResponse(int sock, FFstrbuf* buffer);
 void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer);
 
 #endif
