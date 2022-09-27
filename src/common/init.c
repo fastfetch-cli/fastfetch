@@ -358,6 +358,8 @@ static void exitSignalHandler(int signal)
 
 void ffStart(FFinstance* instance)
 {
+    ffPrepareCPUUsage();
+
     if(instance->config.multithreading)
         startDetectionThreads(instance);
 
