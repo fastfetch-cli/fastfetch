@@ -235,6 +235,7 @@ set(LIBFASTFETCH_SRC
     src/modules/vulkan.c
     src/modules/localip.c
     src/modules/publicip.c
+    src/modules/weather.c
     src/modules/player.c
     src/modules/song.c
     src/modules/datetime.c

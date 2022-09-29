@@ -188,6 +188,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.locale);
     initModuleArg(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
+    initModuleArg(&instance->config.weather);
     initModuleArg(&instance->config.player);
     initModuleArg(&instance->config.song);
     initModuleArg(&instance->config.dateTime);
@@ -244,6 +245,9 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.publicIpTimeout = 0;
     ffStrbufInit(&instance->config.publicIpUrl);
+
+    instance->config.weatherTimeout = 0;
+    ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
 
     ffStrbufInitA(&instance->config.osFile, 0);
 
@@ -361,6 +365,7 @@ void ffStart(FFinstance* instance)
 {
     ffPrepareCPUUsage();
     ffPreparePublicIp(instance);
+    ffPrepareWeather(instance);
 
     if(instance->config.multithreading)
         startDetectionThreads(instance);

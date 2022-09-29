@@ -53,6 +53,7 @@ int main(int argc, char** argv)
     //ffPrintOpenGL(&instance);
     //ffPrintOpenCL(&instance);
     //ffPrintUsers(&instance);
+    //ffPrintWeather(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 

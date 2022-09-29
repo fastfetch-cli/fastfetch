@@ -120,6 +120,7 @@ typedef struct FFconfig
     FFModuleArgs locale;
     FFModuleArgs localIP;
     FFModuleArgs publicIP;
+    FFModuleArgs weather;
     FFModuleArgs player;
     FFModuleArgs song;
     FFModuleArgs dateTime;
@@ -176,6 +177,9 @@ typedef struct FFconfig
 
     FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;
+
+    FFstrbuf weatherOutputFormat;
+    uint32_t weatherTimeout;
 
     FFstrbuf osFile;
 
@@ -238,6 +242,7 @@ void ffLogoBuiltinListAutocompletion();
 void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs);
 void ffPrepareCPUUsage();
 void ffPreparePublicIp(FFinstance* instance);
+void ffPrepareWeather(FFinstance* instance);
 
 //Printing
 
@@ -278,6 +283,7 @@ void ffPrintDate(FFinstance* instance);
 void ffPrintTime(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
+void ffPrintWeather(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);

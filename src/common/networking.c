@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-int ffNetworkingSendHttpRequest(const char* host, const char* path, uint32_t timeout)
+int ffNetworkingSendHttpRequest(const char* host, const char* path, const char* headers, uint32_t timeout)
 {
     struct addrinfo hints = {
         .ai_family = AF_INET,
@@ -48,7 +48,9 @@ int ffNetworkingSendHttpRequest(const char* host, const char* path, uint32_t tim
     ffStrbufAppendS(&command, path);
     ffStrbufAppendS(&command, " HTTP/1.1\nHost: ");
     ffStrbufAppendS(&command, host);
-    ffStrbufAppendS(&command, "\r\n\r\n");
+    ffStrbufAppendS(&command, "\r\n");
+    ffStrbufAppendS(&command, headers);
+    ffStrbufAppendS(&command, "\r\n");
 
     if(send(sockfd, command.chars, command.length, 0) == -1)
     {
@@ -73,9 +75,9 @@ void ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
     close(sockfd);
 }
 
-void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, FFstrbuf* buffer)
+void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, const char* headers, FFstrbuf* buffer)
 {
-    int sockfd = ffNetworkingSendHttpRequest(host, path, timeout);
+    int sockfd = ffNetworkingSendHttpRequest(host, path, headers, timeout);
     if(sockfd > 0)
         ffNetworkingRecvHttpResponse(sockfd, buffer);
 }

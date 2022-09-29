@@ -163,6 +163,18 @@
 # Default is 0 (disabled).
 #--public-ip-timeout 0
 
+# Weather output format option:
+# Sets the weather format to be used. It must be URI encoded.
+# See: https://github.com/chubin/wttr.in#one-line-output
+# Default is "%t+-+%C+(%l)".
+#--weather-output-format "%t+-+%C+(%l)"
+
+# Weather timeout option:
+# Sets the time to wait for the weather server (wttr.in) to respond.
+# Must be a positive integer.
+# Default is 0 (disabled).
+#--weather-timeout 0
+
 # OS file option
 # Sets the path to the file containing the operating system information.
 # Should be a valid path to an existing file.
@@ -219,6 +231,7 @@
 #--locale-key Locale
 #--local-ip-key Local IP ({1})
 #--public-ip-key Public IP
+#--weather-key Weather
 #--player-key Media Player
 #--song-key Song
 #--datetime-key Date Time
@@ -260,6 +273,7 @@
 #--locale-format
 #--local-ip-format
 #--public-ip-format
+#--weather-format
 #--player-format
 #--song-format
 #--datetime-format
@@ -301,6 +315,7 @@
 #--locale-error
 #--local-ip-error
 #--public-ip-error
+#--weather-error
 #--player-error
 #--song-error
 #--datetime-error

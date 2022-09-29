@@ -10,7 +10,7 @@ static int sockfd;
 void ffPreparePublicIp(FFinstance* instance)
 {
     if(instance->config.publicIpUrl.length == 0)
-        sockfd = ffNetworkingSendHttpRequest("ipinfo.io", "/ip", instance->config.publicIpTimeout);
+        sockfd = ffNetworkingSendHttpRequest("ipinfo.io", "/ip", NULL, instance->config.publicIpTimeout);
     else
     {
         FFstrbuf host;
@@ -27,7 +27,7 @@ void ffPreparePublicIp(FFinstance* instance)
             host.chars[pathStartIndex] = '\0';
         }
 
-        sockfd = ffNetworkingSendHttpRequest(host.chars, path.length == 0 ? "/" : path.chars, instance->config.publicIpTimeout);
+        sockfd = ffNetworkingSendHttpRequest(host.chars, path.length == 0 ? "/" : path.chars, NULL, instance->config.publicIpTimeout);
 
         ffStrbufDestroy(&path);
         ffStrbufDestroy(&host);
