@@ -1485,6 +1485,19 @@ int main(int argc, const char** argv)
     if(data.structure.length == 0)
         ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
 
+    #define FF_CONTAINS_MODULE_NAME(moduleName)\
+        ffStrbufContainIgnCaseS(&data.structure, ":" #moduleName ":") ||\
+        ffStrbufStartsWithIgnCaseS(&data.structure, #moduleName ":") ||\
+        ffStrbufEndsWithIgnCaseS(&data.structure, ":" #moduleName)
+
+    if(FF_CONTAINS_MODULE_NAME(CPUUsage))
+        ffPrepareCPUUsage();
+    if(FF_CONTAINS_MODULE_NAME(PublicIp))
+        ffPreparePublicIp(&instance);
+    if(FF_CONTAINS_MODULE_NAME(Weather))
+        ffPrepareWeather(&instance);
+    #undef FF_CONTAINS_MODULE_NAME
+
     ffStart(&instance);
 
     //Parse the structure and call the modules

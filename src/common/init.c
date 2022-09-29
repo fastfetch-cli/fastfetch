@@ -363,10 +363,6 @@ static void exitSignalHandler(int signal)
 
 void ffStart(FFinstance* instance)
 {
-    ffPrepareCPUUsage();
-    ffPreparePublicIp(instance);
-    ffPrepareWeather(instance);
-
     if(instance->config.multithreading)
         startDetectionThreads(instance);
 
