@@ -17,7 +17,7 @@ static void detectRam(FFMemoryStorage* ram)
         return;
     }
 
-    memory->ram.bytesUsed = memory->ram.bytesTotal
+    ram->bytesUsed = ram->bytesTotal
         - (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_free_count", 0) * pageSize
         - (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_inactive_count", 0) * pageSize
     ;
