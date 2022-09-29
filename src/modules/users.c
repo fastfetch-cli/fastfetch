@@ -20,7 +20,7 @@ void ffPrintUsers(FFinstance* instance)
     setutxent();
 
     FFlist users;
-    ffListInit(&users, sizeof(n->ut_user));
+    ffListInit(&users, sizeof(n->ut_user) + 1);
 
 next:
     while((n = getutxent()))
@@ -32,7 +32,10 @@ next:
                 if(strcmp((const char*)ffListGet(&users, i), n->ut_user) == 0)
                     goto next;
             }
-            strcpy((char*)ffListAdd(&users), n->ut_user);
+
+            char* dest = ffListAdd(&users);
+            strncpy(dest, n->ut_user, sizeof(n->ut_user));
+            dest[sizeof(n->ut_user)] = '\0';
         }
     }
 
