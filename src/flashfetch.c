@@ -10,6 +10,10 @@ int main(int argc, char** argv)
 
     //Modify instance.config here
 
+    // ffPrepareCPUUsage();
+    // ffPreparePublicIp(&instance);
+    // ffPrepareWeather(&instance);
+
     //Does things like starting detection threads, disabling line wrap, etc
     ffStart(&instance);
 
@@ -53,6 +57,7 @@ int main(int argc, char** argv)
     //ffPrintOpenGL(&instance);
     //ffPrintOpenCL(&instance);
     //ffPrintUsers(&instance);
+    //ffPrintWeather(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 

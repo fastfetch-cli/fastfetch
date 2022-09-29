@@ -1,5 +1,3 @@
-#define _GNU_SOURCE //required for struct ucred
-
 #include "displayserver_linux.h"
 
 #include <stdlib.h>

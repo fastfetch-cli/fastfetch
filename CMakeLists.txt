@@ -235,6 +235,7 @@ set(LIBFASTFETCH_SRC
     src/modules/vulkan.c
     src/modules/localip.c
     src/modules/publicip.c
+    src/modules/weather.c
     src/modules/player.c
     src/modules/song.c
     src/modules/datetime.c
@@ -332,6 +333,8 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 
 CHECK_INCLUDE_FILE("sys/sysinfo.h" HAVE_SYSINFO_H)
 if(HAVE_SYSINFO_H)

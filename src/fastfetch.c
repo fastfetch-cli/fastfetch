@@ -1151,6 +1151,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.publicIP.outputFormat);
     else if(strcasecmp(key, "--public-ip-error") == 0)
         optionParseString(key, value, &instance->config.publicIP.errorFormat);
+    else if(strcasecmp(key, "--weather-key") == 0)
+        optionParseString(key, value, &instance->config.weather.key);
+    else if(strcasecmp(key, "--weather-format") == 0)
+        optionParseString(key, value, &instance->config.weather.outputFormat);
+    else if(strcasecmp(key, "--weather-error") == 0)
+        optionParseString(key, value, &instance->config.weather.errorFormat);
     else if(strcasecmp(key, "--player-key") == 0)
         optionParseString(key, value, &instance->config.player.key);
     else if(strcasecmp(key, "--player-format") == 0)
@@ -1291,8 +1297,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
+    else if(strcasecmp(key, "--public-ip-url") == 0)
+        optionParseString(key, value, &instance->config.publicIpUrl);
     else if(strcasecmp(key, "--public-ip-timeout") == 0)
         instance->config.publicIpTimeout = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--weather-output-format") == 0)
+        optionParseString(key, value, &instance->config.weatherOutputFormat);
+    else if(strcasecmp(key, "--weather-timeout") == 0)
+        instance->config.weatherTimeout = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--gl") == 0)
     {
         optionParseEnum(key, value, &instance->config.glType,
@@ -1428,6 +1440,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintLocalIp(instance);
     else if(strcasecmp(line, "publicip") == 0)
         ffPrintPublicIp(instance);
+    else if(strcasecmp(line, "weather") == 0)
+        ffPrintWeather(instance);
     else if(strcasecmp(line, "player") == 0)
         ffPrintPlayer(instance);
     else if(strcasecmp(line, "media") == 0 || strcasecmp(line, "song") == 0)
@@ -1470,6 +1484,19 @@ int main(int argc, const char** argv)
     //If we don't have a custom structure, use the default one
     if(data.structure.length == 0)
         ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
+
+    #define FF_CONTAINS_MODULE_NAME(moduleName)\
+        ffStrbufContainIgnCaseS(&data.structure, ":" #moduleName ":") ||\
+        ffStrbufStartsWithIgnCaseS(&data.structure, #moduleName ":") ||\
+        ffStrbufEndsWithIgnCaseS(&data.structure, ":" #moduleName)
+
+    if(FF_CONTAINS_MODULE_NAME(CPUUsage))
+        ffPrepareCPUUsage();
+    if(FF_CONTAINS_MODULE_NAME(PublicIp))
+        ffPreparePublicIp(&instance);
+    if(FF_CONTAINS_MODULE_NAME(Weather))
+        ffPrepareWeather(&instance);
+    #undef FF_CONTAINS_MODULE_NAME
 
     ffStart(&instance);
 

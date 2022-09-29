@@ -159,7 +159,7 @@ static inline FF_C_NODISCARD int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, con
 
 static inline FF_C_NODISCARD bool ffStrbufContainS(const FFstrbuf* strbuf, const char* str)
 {
-    return strnstr(strbuf->chars, str, strbuf->length) != NULL;
+    return strstr(strbuf->chars, str) != NULL;
 }
 
 static inline FF_C_NODISCARD bool ffStrbufContainIgnCaseS(const FFstrbuf* strbuf, const char* str)
