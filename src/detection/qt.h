@@ -13,6 +13,6 @@ typedef struct FFQtResult
     FFstrbuf font;
 } FFQtResult;
 
-const FFQtResult* ffDetectQt(FFinstance* instance);
+const FFQtResult* ffDetectQt(const FFinstance* instance);
 
 #endif

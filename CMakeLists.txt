@@ -200,6 +200,7 @@ set(LIBFASTFETCH_SRC
     src/detection/cpu/cpu.c
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
+    src/detection/font/font.c
     src/detection/displayserver/displayserver.c
     src/detection/terminalfont/terminalfont.c
     src/detection/media/media.c

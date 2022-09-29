@@ -14,8 +14,8 @@ typedef struct FFGTKResult
     FFstrbuf cursorSize;
 } FFGTKResult;
 
-const FFGTKResult* ffDetectGTK2(FFinstance* instance);
-const FFGTKResult* ffDetectGTK4(FFinstance* instance);
-const FFGTKResult* ffDetectGTK3(FFinstance* instance);
+const FFGTKResult* ffDetectGTK2(const FFinstance* instance);
+const FFGTKResult* ffDetectGTK4(const FFinstance* instance);
+const FFGTKResult* ffDetectGTK3(const FFinstance* instance);
 
 #endif

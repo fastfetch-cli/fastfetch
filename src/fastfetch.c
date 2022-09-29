@@ -199,28 +199,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "font-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("font", "{5} [Plasma], {21}", 21,
-            "Plasma raw",
-            "Plasma name",
-            "Plasma size",
-            "Plasma styles",
-            "Plasma pretty",
-            "GTK2 raw",
-            "GTK2 name",
-            "GTK2 size",
-            "GTK2 styles",
-            "GTK2 pretty",
-            "GTK3 raw",
-            "GTK3 name",
-            "GTK3 size",
-            "GTK3 styles",
-            "GTK3 pretty",
-            "GTK4 raw",
-            "GTK4 name",
-            "GTK4 size",
-            "GTK4 styles",
-            "GTK4 pretty",
-            "GTK2/3/4 pretty"
+        constructAndPrintCommandHelpFormat("font", "{} [QT], {} [GTK2], {} [GTK3], {} [GTK4]", 4,
+            "Font 1",
+            "Font 2",
+            "Font 3",
+            "Font 4"
         );
     }
     else if(strcasecmp(command, "cursor-format") == 0)
@@ -1283,8 +1266,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
-    else if(strcasecmp(key, "--font-inline") == 0)
-        instance->config.fontInline = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         instance->config.localIpShowIpV4 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)

@@ -168,8 +168,6 @@ typedef struct FFconfig
 
     FFstrbuf separatorString;
 
-    bool fontInline;
-
     bool localIpShowLoop;
     bool localIpShowIpV4;
     bool localIpShowIpV6;

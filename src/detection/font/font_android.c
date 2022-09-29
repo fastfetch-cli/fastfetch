@@ -1,8 +1,7 @@
 #include "fastfetch.h"
-#include "common/font.h"
 
-const char* ffDetectFontImpl(FFinstance* instance, FFlist* result)
+void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
-    FF_UNUSED(instance, result);
-    return "Font detection is not supported on Android";
+    FF_UNUSED(instance);
+    ffStrbufAppendS(&result->error, "Not implemented");
 }

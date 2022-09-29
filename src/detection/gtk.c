@@ -32,7 +32,7 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
         ffStrbufAppendF(&result->cursorSize, "%i", cursorSize);
 }
 
-static void detectGTKFromSettings(FFinstance* instance, FFGTKResult* result)
+static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* result)
 {
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -144,7 +144,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
     ffStrbufSubstrBefore(configDir, configDirLength);
 }
 
-static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* result)
+static void detectGTK(const FFinstance* instance, const char* version, FFGTKResult* result)
 {
     //Mate, Cinnamon and Gnome use dconf to save theme config
     //On other DEs, this will do nothing
@@ -186,17 +186,17 @@ static void detectGTK(FFinstance* instance, const char* version, FFGTKResult* re
     pthread_mutex_unlock(&mutex); \
     return &result;
 
-const FFGTKResult* ffDetectGTK2(FFinstance* instance)
+const FFGTKResult* ffDetectGTK2(const FFinstance* instance)
 {
     FF_DETECT_GTK_IMPL(2)
 }
 
-const FFGTKResult* ffDetectGTK3(FFinstance* instance)
+const FFGTKResult* ffDetectGTK3(const FFinstance* instance)
 {
     FF_DETECT_GTK_IMPL(3)
 }
 
-const FFGTKResult* ffDetectGTK4(FFinstance* instance)
+const FFGTKResult* ffDetectGTK4(const FFinstance* instance)
 {
     FF_DETECT_GTK_IMPL(4)
 }

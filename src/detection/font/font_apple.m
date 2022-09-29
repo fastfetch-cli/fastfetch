@@ -4,38 +4,27 @@
 
 #import <AppKit/AppKit.h>
 
-#define FF_FONT_MODULE_NAME "Font"
-
-static void detectFontForType(CTFontUIFontType uiType, FFFontResult* result)
+static void detectFontForType(CTFontUIFontType uiType, FFstrbuf* font)
 {
     CTFontRef ctFont = CTFontCreateUIFontForLanguage(uiType, 12, NULL);
+    ffCfStrGetString(CTFontCopyFullName(ctFont), font);
 
-    ffStrbufInit(&result->fontPretty);
-    ffCfStrGetString(CTFontCopyFullName(ctFont), &result->fontPretty);
+    if(font->length == 0)
+        return;
 
     FFstrbuf familyName;
     ffStrbufInit(&familyName);
     ffCfStrGetString(CTFontCopyFamilyName(ctFont), &familyName);
 
-    if (ffStrbufComp(&familyName, &result->fontPretty) != 0)
-    {
-        ffStrbufAppendF(&result->fontPretty, " (%*s)", familyName.length, familyName.chars);
-    }
+    if (ffStrbufComp(&familyName, font) != 0)
+        ffStrbufAppendF(font, " (%*s)", familyName.length, familyName.chars);
 
     ffStrbufDestroy(&familyName);
 }
 
-const char* ffDetectFontImpl(FFinstance* instance, FFlist* result)
+void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
     FF_UNUSED(instance);
-
-    FFFontResult* resultSystem = (FFFontResult*)ffListAdd(result);
-    resultSystem->type = "SYS";
-    detectFontForType(kCTFontUIFontSystem, resultSystem);
-
-    FFFontResult* resultUser = (FFFontResult*)ffListAdd(result);
-    resultUser->type = "USER";
-    detectFontForType(kCTFontUIFontUser, resultUser);
-
-    return NULL;
+    detectFontForType(kCTFontUIFontSystem, &result->fonts[0]);
+    detectFontForType(kCTFontUIFontUser, &result->fonts[1]);
 }

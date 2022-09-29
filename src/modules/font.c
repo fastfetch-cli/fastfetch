@@ -4,10 +4,55 @@
 #include "detection/displayserver/displayserver.h"
 
 #define FF_FONT_MODULE_NAME "Font"
-#define FF_FONT_NUM_FORMAT_ARGS 2
+#define FF_FONT_NUM_FORMAT_ARGS 4
+
+#if defined(__linux__) || defined(__FreeBSD__)
+#include "common/parsing.h"
+
+static void printFont(const FFFontResult* font)
+{
+    FFstrbuf gtk;
+    ffStrbufInit(&gtk);
+    ffParseGTK(&gtk, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
+
+    if(font->fonts[0].length > 0)
+    {
+        printf("%s [QT]", font->fonts[0].chars);
+        if(gtk.length > 0)
+            fputs(", ", stdout);
+    }
+
+    ffStrbufWriteTo(&gtk, stdout);
+}
+
+#elif defined(__APPLE__)
+
+static void printFont(const FFFontResult* font)
+{
+    if(font->fonts[0].length > 0)
+    {
+        printf("%s [System]", font->fonts[0].chars);
+        if(font->fonts[1].length > 0)
+            fputs(", ", stdout);
+    }
+
+    if(font->fonts[1].length > 0)
+        printf("%s [User]", font->fonts[1].chars);
+}
+
+#else
+
+static void printFont(const FFFontResult* font)
+{
+    FF_UNUSED(font);
+}
+
+#endif
 
 void ffPrintFont(FFinstance* instance)
 {
+    assert(FF_DETECT_FONT_NUM_FONTS == FF_FONT_NUM_FORMAT_ARGS);
+
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
@@ -16,47 +61,27 @@ void ffPrintFont(FFinstance* instance)
         return;
     }
 
-    FFlist list;
-    ffListInit(&list, sizeof(FFFontResult));
-    const char* error = ffDetectFontImpl(instance, &list);
-    if(error)
+    const FFFontResult* font = ffDetectFont(instance);
+
+    if(font->error.length > 0)
     {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "%s", error);
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "%s", font->error.chars);
         return;
     }
 
-    if (instance->config.font.outputFormat.length == 0 && instance->config.fontInline)
+    if(instance->config.font.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font.key);
-        for(uint32_t i = 0; i < list.length; ++i)
-        {
-            FFFontResult* font = (FFFontResult*)ffListGet(&list, i);
-            printf("[%s] %*s%s", font->type, font->fontPretty.length, font->fontPretty.chars, i < list.length - 1 ? ", " : "");
-            ffStrbufDestroy(&font->fontPretty);
-        }
+        printFont(font);
         putchar('\n');
     }
     else
     {
-        for(uint32_t i = 0; i < list.length; ++i)
-        {
-            FFFontResult* font = (FFFontResult*)ffListGet(&list, i);
-            if(instance->config.font.outputFormat.length == 0)
-            {
-                char keyChars[32];
-                snprintf(keyChars, sizeof(keyChars), "%s (%s)", FF_FONT_MODULE_NAME, font->type);
-                ffPrintLogoAndKey(instance, keyChars, 0, &instance->config.font.key);
-                puts(font->fontPretty.chars);
-            }
-            else
-            {
-                ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]){
-                    {FF_FORMAT_ARG_TYPE_STRING, font->type},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &font->fontPretty}
-                });
-            }
-            ffStrbufDestroy(&font->fontPretty);
-        }
+        ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[0]},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[1]},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[2]},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[3]}
+        });
     }
-    ffListDestroy(&list);
 }

@@ -11,7 +11,7 @@
 --wm-theme-format Name: {}
 --theme-format Plasma: {}; Plasma colors: {}; Plasma colors pretty: {}; GTK2: {}; GTK3: {}; GTK4: {}; GTK: {}
 --icons-format Plasma: {}; GTK2: {}; GTK3: {}; GTK4: {}; GTK: {}
---font-format Type: {}; Font: {}
+--font-format Font1: {}; Font2: {}; Font3: {}; Font4: {}
 --cursor-format Theme: {}; Size: {}
 --terminal-format Process: {}; Path: {}; Exe: {}
 --terminal-font-format Pretty: {}; Name: {}; Size: {}; Styles: {}

@@ -4,15 +4,21 @@
 #define FF_INCLUDED_detection_font_font
 
 #include "fastfetch.h"
-#include "util/FFstrbuf.h"
-#include "util/FFlist.h"
+
+#define FF_DETECT_FONT_NUM_FONTS 4
 
 typedef struct FFFontResult
 {
-    const char* type;
-    FFstrbuf fontPretty;
+    FFstrbuf error;
+
+    /**
+     * Linux / BSD: QT,     GTK2,  GTK3,  GTK4
+     * MacOS:       System, User,  Unset, Unset
+     * Other:       Unset,  Unset, Unset, Unset
+     */
+    FFstrbuf fonts[FF_DETECT_FONT_NUM_FONTS];
 } FFFontResult;
 
-const char* ffDetectFontImpl(FFinstance* instance, FFlist* result);
+const FFFontResult* ffDetectFont(const FFinstance* instance);
 
 #endif

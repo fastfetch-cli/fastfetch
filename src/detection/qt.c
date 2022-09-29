@@ -131,7 +131,7 @@ static void detectLXQt(const FFinstance* instance, FFQtResult* result)
     });
 }
 
-const FFQtResult* ffDetectQt(FFinstance* instance)
+const FFQtResult* ffDetectQt(const FFinstance* instance)
 {
     static FFQtResult result;
 
