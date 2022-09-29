@@ -333,6 +333,8 @@ add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
 
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+
 CHECK_INCLUDE_FILE("sys/sysinfo.h" HAVE_SYSINFO_H)
 if(HAVE_SYSINFO_H)
     # needs to be public, because changes fastfech.h ABI
