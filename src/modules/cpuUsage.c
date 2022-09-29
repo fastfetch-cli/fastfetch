@@ -1,7 +1,8 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "detection/cpuUsage/cpuUsage.h"
-#include "sys/time.h"
+#include <sys/time.h>
+#include <time.h>
 
 #define FF_CPU_USAGE_MODULE_NAME "CPU Usage"
 #define FF_CPU_USAGE_NUM_FORMAT_ARGS 1
