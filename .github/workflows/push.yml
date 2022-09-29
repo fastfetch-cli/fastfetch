@@ -29,7 +29,7 @@ jobs:
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
-        run: cmake --build . -j$(nproc) --target package
+        run: cmake --build . --target package
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -75,7 +75,7 @@ jobs:
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build . -j$(sysctl -n hw.logicalcpu) --target package
+        run: cmake --build . --target package
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -112,7 +112,7 @@ jobs:
             pkg install -y cmake git pkgconf
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-            cmake --build . -j$(sysctl -n hw.ncpu) --target package
+            cmake --build . --target package
             ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
             ./flashfetch
             ctest
