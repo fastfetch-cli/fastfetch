@@ -9,7 +9,29 @@ static int sockfd;
 
 void ffPreparePublicIp(FFinstance* instance)
 {
-    sockfd = ffNetworkingSendHttpRequest("ipinfo.io", "/ip", instance->config.publicIpTimeout);
+    if(instance->config.publicIpUrl.length == 0)
+        sockfd = ffNetworkingSendHttpRequest("ipinfo.io", "/ip", instance->config.publicIpTimeout);
+    else
+    {
+        FFstrbuf host;
+        ffStrbufInitCopy(&host, &instance->config.publicIpUrl);
+        ffStrbufSubstrAfterFirstS(&host, "://");
+        uint32_t pathStartIndex = ffStrbufFirstIndexC(&host, '/');
+
+        FFstrbuf path;
+        ffStrbufInit(&path);
+        if(pathStartIndex != host.length)
+        {
+            ffStrbufAppendNS(&path, pathStartIndex, host.chars + (host.length - pathStartIndex));
+            host.length = pathStartIndex;
+            host.chars[pathStartIndex] = '\0';
+        }
+
+        sockfd = ffNetworkingSendHttpRequest(host.chars, path.length == 0 ? "/" : path.chars, instance->config.publicIpTimeout);
+
+        ffStrbufDestroy(&path);
+        ffStrbufDestroy(&host);
+    }
 }
 
 void ffPrintPublicIp(FFinstance* instance)

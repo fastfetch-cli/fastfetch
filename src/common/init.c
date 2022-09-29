@@ -243,6 +243,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.localIpNamePrefix);
 
     instance->config.publicIpTimeout = 0;
+    ffStrbufInit(&instance->config.publicIpUrl);
 
     ffStrbufInitA(&instance->config.osFile, 0);
 

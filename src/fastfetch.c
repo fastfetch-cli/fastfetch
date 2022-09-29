@@ -1291,6 +1291,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
+    else if(strcasecmp(key, "--public-ip-url") == 0)
+        optionParseString(key, value, &instance->config.publicIpUrl);
     else if(strcasecmp(key, "--public-ip-timeout") == 0)
         instance->config.publicIpTimeout = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--gl") == 0)

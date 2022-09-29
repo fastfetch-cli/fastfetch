@@ -217,6 +217,7 @@ __fastfetch_completion()
         "--set"
         "--set-keyless"
         "--player-name"
+        "--public-ip-url"
         "--public-ip-timeout"
         "--os-key"
         "--os-format"

@@ -151,6 +151,12 @@
 # Default is "-"
 #--separator-string -
 
+# Public IP URL option:
+# Sets the URL of public IP detection server to be used.
+# Only HTTP protocol is supported, and the value should not contain "http://" prefix.
+# Default is "ipinfo.io/ip".
+#--public-ip-url "ipinfo.io/ip"
+
 # Public IP timeout option:
 # Sets the time to wait for the public ip server to respond.
 # Must be a positive integer.

@@ -174,6 +174,7 @@ typedef struct FFconfig
     bool localIpShowIpV6;
     FFstrbuf localIpNamePrefix;
 
+    FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;
 
     FFstrbuf osFile;
