@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "font.h"
 
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {

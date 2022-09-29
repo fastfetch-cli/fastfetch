@@ -7,19 +7,7 @@
 static void detectFontForType(CTFontUIFontType uiType, FFstrbuf* font)
 {
     CTFontRef ctFont = CTFontCreateUIFontForLanguage(uiType, 12, NULL);
-    ffCfStrGetString(CTFontCopyFullName(ctFont), font);
-
-    if(font->length == 0)
-        return;
-
-    FFstrbuf familyName;
-    ffStrbufInit(&familyName);
-    ffCfStrGetString(CTFontCopyFamilyName(ctFont), &familyName);
-
-    if (ffStrbufComp(&familyName, font) != 0)
-        ffStrbufAppendF(font, " (%*s)", familyName.length, familyName.chars);
-
-    ffStrbufDestroy(&familyName);
+    ffCfStrGetString(CTFontCopyFamilyName(ctFont), font);
 }
 
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
@@ -27,4 +15,6 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
     FF_UNUSED(instance);
     detectFontForType(kCTFontUIFontSystem, &result->fonts[0]);
     detectFontForType(kCTFontUIFontUser, &result->fonts[1]);
+    detectFontForType(kCTFontUIFontUserFixedPitch, &result->fonts[2]);
+    detectFontForType(kCTFontUIFontApplication, &result->fonts[3]);
 }
