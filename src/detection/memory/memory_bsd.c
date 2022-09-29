@@ -10,7 +10,7 @@ static void detectRam(FFMemoryStorage* ram)
         return;
     }
 
-    memory->ram.bytesTotal = (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_page_count", 0) * pageSize;
+    ram->bytesTotal = (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_page_count", 0) * pageSize;
     if(ram->bytesTotal == 0)
     {
         ffStrbufAppendS(&ram->error, "Failed to read vm.stats.vm.v_page_count");
