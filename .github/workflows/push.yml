@@ -95,6 +95,34 @@ jobs:
           name: fastfetch-macos
           path: ./fastfetch-*.*
 
+  bsd:
+    name: BSD
+    runs-on: macos-12
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: run VM
+        uses: vmactions/freebsd-vm@v0
+        with:
+          prepare: |
+            pkg install -y cmake git pkgconf
+          run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake --build . -j$(sysctl -n hw.logicalcpu) --target package
+            ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+            ./flashfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastfetch-bsd
+          path: ./fastfetch-*.*
+
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
     name: Release
@@ -102,6 +130,7 @@ jobs:
     needs:
       - linux
       - macos
+      - bsd
     permissions:
       contents: write
     steps:
@@ -121,4 +150,4 @@ jobs:
           tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-linux/*,fastfetch-macos/*
+          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-bsd/*
