@@ -47,10 +47,10 @@ void ffPrintPublicIp(FFinstance* instance)
 
     FFstrbuf result;
     ffStrbufInitA(&result, 4096);
-    ffNetworkingRecvHttpResponse(sockfd, &result);
-    ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
+    bool success = ffNetworkingRecvHttpResponse(sockfd, &result);
+    if(success) ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
 
-    if(result.length == 0)
+    if(!success || result.length == 0)
     {
         ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, "Failed to receive the server response");
         ffStrbufDestroy(&result);
