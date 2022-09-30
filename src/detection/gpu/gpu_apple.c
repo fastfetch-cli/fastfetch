@@ -15,6 +15,8 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
         ffDetectCoreTemps(FF_TEMP_GPU_M1X, &temps);
     else if(ffStrbufStartsWithS(gpuName, "Apple M2"))
         ffDetectCoreTemps(FF_TEMP_GPU_M2X, &temps);
+    else if(ffStrbufStartsWithS(gpuName, "Intel"))
+        ffDetectCoreTemps(FF_TEMP_GPU_INTEL, &temps);
     else if(ffStrbufStartsWithS(gpuName, "Radeon") || ffStrbufStartsWithS(gpuName, "AMD"))
         ffDetectCoreTemps(FF_TEMP_GPU_AMD, &temps);
     else
