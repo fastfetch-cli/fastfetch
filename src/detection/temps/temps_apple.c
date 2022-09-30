@@ -196,6 +196,8 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
     const char* error = smcReadSmcVal(conn, key, &val);
     if (error != NULL)
         return error;
+    if (val.dataSize == 0)
+        return "Empty SMC result";
 
     if (strcmp(val.dataType, kDataTypeUi8) == 0 ||
         strcmp(val.dataType, kDataTypeUi16) == 0 ||
@@ -211,11 +213,11 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
     {
         *value = *(float *)(val.bytes);
     }
-    else if (strcmp(val.dataType, kDataTypeFp1f) && val.dataSize == 2)
+    else if (strcmp(val.dataType, kDataTypeFp1f) == 0 && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 32768.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFp4c) && val.dataSize == 2)
+    else if (strcmp(val.dataType, kDataTypeFp4c) == 0 && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 4096.0;
     }
@@ -337,7 +339,7 @@ const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
     case FF_TEMP_CPU_X64:
         detectTemp(conn, "TC0D", "CPU diode", result);
         detectTemp(conn, "TC0E", "CPU diode virtual", result);
-        detectTemp(conn, "TC0E", "CPU diode filtered", result);
+        detectTemp(conn, "TC0F", "CPU diode filtered", result);
         detectTemp(conn, "TC0P", "CPU proximity", result);
         break;
 
@@ -369,17 +371,14 @@ const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
 
     case FF_TEMP_GPU_INTEL:
         detectTemp(conn, "TCGC", "GPU Intel Graphics", result);
-        detectTemp(conn, "TG0D", "GPU diode", result);
-        detectTemp(conn, "TG0P", "GPU proximity", result);
-        break;
+        goto gpu_unknown;
 
     case FF_TEMP_GPU_AMD:
         detectTemp(conn, "TGDD", "GPU AMD Radeon", result);
-        detectTemp(conn, "TG0D", "GPU diode", result);
-        detectTemp(conn, "TG0P", "GPU proximity", result);
-        break;
+        goto gpu_unknown;
 
     case FF_TEMP_GPU_UNKNOWN: // Nvidia?
+    gpu_unknown:
         detectTemp(conn, "TG0D", "GPU diode", result);
         detectTemp(conn, "TG0P", "GPU proximity", result);
         break;
