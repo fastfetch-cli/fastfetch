@@ -62,7 +62,7 @@ int ffNetworkingSendHttpRequest(const char* host, const char* path, const char* 
     return sockfd;
 }
 
-void ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
+bool ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
 {
     ssize_t received = recv(sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
 
@@ -73,11 +73,13 @@ void ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
     }
 
     close(sockfd);
+    return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n");
 }
 
-void ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, const char* headers, FFstrbuf* buffer)
+bool ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, const char* headers, FFstrbuf* buffer)
 {
     int sockfd = ffNetworkingSendHttpRequest(host, path, headers, timeout);
     if(sockfd > 0)
-        ffNetworkingRecvHttpResponse(sockfd, buffer);
+        return ffNetworkingRecvHttpResponse(sockfd, buffer);
+    return false;
 }
