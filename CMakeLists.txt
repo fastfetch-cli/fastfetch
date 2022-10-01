@@ -305,7 +305,7 @@ if(APPLE)
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
-        src/detection/terminalfont/terminalfont_apple.c
+        src/detection/terminalfont/terminalfont_apple.m
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
         src/detection/wmtheme/wmtheme_apple.c
