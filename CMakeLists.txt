@@ -297,7 +297,7 @@ if(APPLE)
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
-        src/detection/os/os_apple.c
+        src/detection/os/os_apple.m
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
         src/detection/battery/battery_apple.c
