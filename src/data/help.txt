@@ -84,7 +84,6 @@ Library options: Set the path of a library to load
     --lib-glx <path>
     --lib-osmesa <path>
     --lib-opencl <path>
-    --lib-plist <path>
     --lib-cjson <path>
 
 Module specific options:
