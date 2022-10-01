@@ -1310,7 +1310,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
 {
-    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_ROOT"/etc/fastfetch/config.conf");
+    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_ETC"/fastfetch/config.conf");
 }
 
 static void parseConfigFileUser(FFinstance* instance, FFdata* data)

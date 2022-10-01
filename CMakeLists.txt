@@ -123,6 +123,10 @@ if(NOT TARGET_DIR_HOME)
     endif()
 endif()
 
+if(NOT TARGET_DIR_ETC)
+    set(TARGET_DIR_ETC "${CMAKE_INSTALL_SYSCONFDIR}")
+endif()
+
 #################
 # Tweak version #
 #################
