@@ -308,7 +308,7 @@ if(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
-        src/detection/wmtheme/wmtheme_apple.c
+        src/detection/wmtheme/wmtheme_apple.m
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
     )
