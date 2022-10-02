@@ -5,7 +5,7 @@
 
 const char* ffGetCpuUsageInfo(long* inUseAll, long* totalAll)
 {
-    long user, nice, system, idle, iowait, irq, softirq;
+    long user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
 
     FILE* procStat = fopen("/proc/stat", "r");
     if(procStat == NULL)
