@@ -109,10 +109,12 @@ void ffDetectHostImpl(FFHostResult* host)
     if(ffStrbufStartsWithS(&host->productName, "Standard PC"))
         ffStrbufPrependS(&host->productName, "KVM/QEMU ");
 
-    //On WSL, the real host can't be detected. Instead use WSL as host.
-    if(host->productFamily.length == 0 && host->productName.length == 0 && (
-        getenv("WSLENV") != NULL ||
-        getenv("WSL_DISTRO") != NULL ||
-        getenv("WSL_INTEROP") != NULL
-    )) ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_WSL);
+    if(host->productFamily.length == 0 && host->productName.length == 0)
+    {
+        //On WSL, the real host can't be detected. Instead use WSL as host.
+        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
+            ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_WSL);
+        else if(getenv("MSYSTEM") != NULL && strcmp(getenv("MSYSTEM"), "MSYS") == 0)
+            ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS);
+    }
 }

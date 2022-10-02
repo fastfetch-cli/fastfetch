@@ -257,7 +257,7 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(__CYGWIN__)
 
 static void* connectDisplayServerThreadMain(void* instance)
 {

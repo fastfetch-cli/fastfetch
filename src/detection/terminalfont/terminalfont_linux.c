@@ -312,6 +312,29 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFon
 
 #endif
 
+static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+
+    FFstrbuf fontSize;
+    ffStrbufInit(&fontSize);
+
+    ffParsePropFileHomeValues(instance, ".minttyrc", 2, (FFpropquery[]) {
+        {"Font=", &fontName},
+        {"FontHeight=", &fontSize}
+    });
+    if(fontName.length == 0)
+        ffStrbufAppendS(&fontName, "Lucida Console");
+    if(fontSize.length == 0)
+        ffStrbufAppendC(&fontSize, '9');
+
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+
+    ffStrbufDestroy(&fontName);
+    ffStrbufDestroy(&fontSize);
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0)
@@ -326,4 +349,6 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0)
         detectFromWindowsTeriminal(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "mintty") == 0)
+        detectMintty(instance, terminalFont);
 }

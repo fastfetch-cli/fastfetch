@@ -11,12 +11,12 @@ project(fastfetch
 # Target Platform #
 ###################
 
-if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
+if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*|MSYS")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT ANDROID)
-    message(FATAL_ERROR "Unsupported platform")
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
 #####################
@@ -82,7 +82,10 @@ if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
 endif()
 
-set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
+set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
+if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "MSYS")
+    set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
+endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
 set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG} -rdynamic")
 
