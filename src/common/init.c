@@ -123,29 +123,33 @@ static void initState(FFstate* state)
     initCacheDir(state);
 }
 
-static void initModuleArg(FFModuleArgs* args)
+#define FF_INIT_STRBUF_CONFIG(field) ffStrbufInit(*(FFstrbuf**)ffListAdd(&instance->config.bufsToFree) = &field)
+
+static void initModuleArg(FFinstance* instance, FFModuleArgs* args)
 {
-    ffStrbufInitA(&args->key, 0);
-    ffStrbufInitA(&args->outputFormat, 0);
-    ffStrbufInitA(&args->errorFormat, 0);
+    FF_INIT_STRBUF_CONFIG(args->key);
+    FF_INIT_STRBUF_CONFIG(args->outputFormat);
+    FF_INIT_STRBUF_CONFIG(args->errorFormat);
 }
 
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInitA(&instance->config.logo.source, 0);
+    ffListInitA(&instance->config.bufsToFree, sizeof(FFstrbuf*), 150);
+
+    FF_INIT_STRBUF_CONFIG(instance->config.logo.source);
     instance->config.logo.type = FF_LOGO_TYPE_AUTO;
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufInit(&instance->config.logo.colors[i]);
+        FF_INIT_STRBUF_CONFIG(instance->config.logo.colors[i]);
     instance->config.logo.width = 0;
     instance->config.logo.height = 0; //preserve aspect ratio
     instance->config.logo.paddingLeft = 0;
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
 
-    ffStrbufInit(&instance->config.colorKeys);
-    ffStrbufInit(&instance->config.colorTitle);
+    FF_INIT_STRBUF_CONFIG(instance->config.colorKeys);
+    FF_INIT_STRBUF_CONFIG(instance->config.colorTitle);
 
-    ffStrbufInit(&instance->config.separator);
+    FF_INIT_STRBUF_CONFIG(instance->config.separator);
     ffStrbufAppendS(&instance->config.separator, ": ");
 
     instance->config.showErrors = false;
@@ -160,68 +164,68 @@ static void defaultConfig(FFinstance* instance)
     instance->config.pipe = false;
     instance->config.multithreading = true;
 
-    initModuleArg(&instance->config.os);
-    initModuleArg(&instance->config.host);
-    initModuleArg(&instance->config.kernel);
-    initModuleArg(&instance->config.uptime);
-    initModuleArg(&instance->config.processes);
-    initModuleArg(&instance->config.packages);
-    initModuleArg(&instance->config.shell);
-    initModuleArg(&instance->config.resolution);
-    initModuleArg(&instance->config.de);
-    initModuleArg(&instance->config.wm);
-    initModuleArg(&instance->config.wmTheme);
-    initModuleArg(&instance->config.theme);
-    initModuleArg(&instance->config.icons);
-    initModuleArg(&instance->config.font);
-    initModuleArg(&instance->config.cursor);
-    initModuleArg(&instance->config.terminal);
-    initModuleArg(&instance->config.terminalFont);
-    initModuleArg(&instance->config.cpu);
-    initModuleArg(&instance->config.cpuUsage);
-    initModuleArg(&instance->config.gpu);
-    initModuleArg(&instance->config.memory);
-    initModuleArg(&instance->config.swap);
-    initModuleArg(&instance->config.disk);
-    initModuleArg(&instance->config.battery);
-    initModuleArg(&instance->config.powerAdapter);
-    initModuleArg(&instance->config.locale);
-    initModuleArg(&instance->config.localIP);
-    initModuleArg(&instance->config.publicIP);
-    initModuleArg(&instance->config.weather);
-    initModuleArg(&instance->config.player);
-    initModuleArg(&instance->config.song);
-    initModuleArg(&instance->config.dateTime);
-    initModuleArg(&instance->config.date);
-    initModuleArg(&instance->config.time);
-    initModuleArg(&instance->config.vulkan);
-    initModuleArg(&instance->config.openGL);
-    initModuleArg(&instance->config.openCL);
-    initModuleArg(&instance->config.users);
+    initModuleArg(instance, &instance->config.os);
+    initModuleArg(instance, &instance->config.host);
+    initModuleArg(instance, &instance->config.kernel);
+    initModuleArg(instance, &instance->config.uptime);
+    initModuleArg(instance, &instance->config.processes);
+    initModuleArg(instance, &instance->config.packages);
+    initModuleArg(instance, &instance->config.shell);
+    initModuleArg(instance, &instance->config.resolution);
+    initModuleArg(instance, &instance->config.de);
+    initModuleArg(instance, &instance->config.wm);
+    initModuleArg(instance, &instance->config.wmTheme);
+    initModuleArg(instance, &instance->config.theme);
+    initModuleArg(instance, &instance->config.icons);
+    initModuleArg(instance, &instance->config.font);
+    initModuleArg(instance, &instance->config.cursor);
+    initModuleArg(instance, &instance->config.terminal);
+    initModuleArg(instance, &instance->config.terminalFont);
+    initModuleArg(instance, &instance->config.cpu);
+    initModuleArg(instance, &instance->config.cpuUsage);
+    initModuleArg(instance, &instance->config.gpu);
+    initModuleArg(instance, &instance->config.memory);
+    initModuleArg(instance, &instance->config.swap);
+    initModuleArg(instance, &instance->config.disk);
+    initModuleArg(instance, &instance->config.battery);
+    initModuleArg(instance, &instance->config.powerAdapter);
+    initModuleArg(instance, &instance->config.locale);
+    initModuleArg(instance, &instance->config.localIP);
+    initModuleArg(instance, &instance->config.publicIP);
+    initModuleArg(instance, &instance->config.weather);
+    initModuleArg(instance, &instance->config.player);
+    initModuleArg(instance, &instance->config.song);
+    initModuleArg(instance, &instance->config.dateTime);
+    initModuleArg(instance, &instance->config.date);
+    initModuleArg(instance, &instance->config.time);
+    initModuleArg(instance, &instance->config.vulkan);
+    initModuleArg(instance, &instance->config.openGL);
+    initModuleArg(instance, &instance->config.openCL);
+    initModuleArg(instance, &instance->config.users);
 
-    ffStrbufInitA(&instance->config.libPCI, 0);
-    ffStrbufInitA(&instance->config.libVulkan, 0);
-    ffStrbufInitA(&instance->config.libWayland, 0);
-    ffStrbufInitA(&instance->config.libXcbRandr, 0);
-    ffStrbufInitA(&instance->config.libXcb, 0);
-    ffStrbufInitA(&instance->config.libXrandr, 0);
-    ffStrbufInitA(&instance->config.libX11, 0);
-    ffStrbufInitA(&instance->config.libGIO, 0);
-    ffStrbufInitA(&instance->config.libDConf, 0);
-    ffStrbufInitA(&instance->config.libDBus, 0);
-    ffStrbufInitA(&instance->config.libXFConf, 0);
-    ffStrbufInitA(&instance->config.libSQLite3, 0);
-    ffStrbufInitA(&instance->config.librpm, 0);
-    ffStrbufInitA(&instance->config.libImageMagick, 0);
-    ffStrbufInitA(&instance->config.libZ, 0);
-    ffStrbufInitA(&instance->config.libChafa, 0);
-    ffStrbufInitA(&instance->config.libEGL, 0);
-    ffStrbufInitA(&instance->config.libGLX, 0);
-    ffStrbufInitA(&instance->config.libOSMesa, 0);
-    ffStrbufInitA(&instance->config.libOpenCL, 0);
-    ffStrbufInitA(&instance->config.libplist, 0);
-    ffStrbufInitA(&instance->config.libcJSON, 0);
-    ffStrbufInitA(&instance->config.libfreetype, 0);
+    FF_INIT_STRBUF_CONFIG(instance->config.libPCI);
+    FF_INIT_STRBUF_CONFIG(instance->config.libVulkan);
+    FF_INIT_STRBUF_CONFIG(instance->config.libWayland);
+    FF_INIT_STRBUF_CONFIG(instance->config.libXcbRandr);
+    FF_INIT_STRBUF_CONFIG(instance->config.libXcb);
+    FF_INIT_STRBUF_CONFIG(instance->config.libXrandr);
+    FF_INIT_STRBUF_CONFIG(instance->config.libX11);
+    FF_INIT_STRBUF_CONFIG(instance->config.libGIO);
+    FF_INIT_STRBUF_CONFIG(instance->config.libDConf);
+    FF_INIT_STRBUF_CONFIG(instance->config.libDBus);
+    FF_INIT_STRBUF_CONFIG(instance->config.libXFConf);
+    FF_INIT_STRBUF_CONFIG(instance->config.libSQLite3);
+    FF_INIT_STRBUF_CONFIG(instance->config.librpm);
+    FF_INIT_STRBUF_CONFIG(instance->config.libImageMagick);
+    FF_INIT_STRBUF_CONFIG(instance->config.libZ);
+    FF_INIT_STRBUF_CONFIG(instance->config.libChafa);
+    FF_INIT_STRBUF_CONFIG(instance->config.libEGL);
+    FF_INIT_STRBUF_CONFIG(instance->config.libGLX);
+    FF_INIT_STRBUF_CONFIG(instance->config.libOSMesa);
+    FF_INIT_STRBUF_CONFIG(instance->config.libOpenCL);
+    FF_INIT_STRBUF_CONFIG(instance->config.libplist);
+    FF_INIT_STRBUF_CONFIG(instance->config.libcJSON);
+    FF_INIT_STRBUF_CONFIG(instance->config.libfreetype);
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
@@ -229,28 +233,31 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.titleFQDN = false;
 
-    ffStrbufInitA(&instance->config.diskFolders, 0);
+    FF_INIT_STRBUF_CONFIG(instance->config.diskFolders);
     instance->config.diskRemovable = false;
 
-    ffStrbufInitA(&instance->config.batteryDir, 0);
+    FF_INIT_STRBUF_CONFIG(instance->config.batteryDir);
 
-    ffStrbufInitA(&instance->config.separatorString, 0);
+    FF_INIT_STRBUF_CONFIG(instance->config.separatorString);
 
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
-    ffStrbufInit(&instance->config.localIpNamePrefix);
+    FF_INIT_STRBUF_CONFIG(instance->config.localIpNamePrefix);
 
     instance->config.publicIpTimeout = 0;
-    ffStrbufInit(&instance->config.publicIpUrl);
+    FF_INIT_STRBUF_CONFIG(instance->config.publicIpUrl);
 
     instance->config.weatherTimeout = 0;
-    ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
+    FF_INIT_STRBUF_CONFIG(instance->config.weatherOutputFormat);
+    ffStrbufAppendS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
 
-    ffStrbufInitA(&instance->config.osFile, 0);
+    FF_INIT_STRBUF_CONFIG(instance->config.osFile);
 
-    ffStrbufInitA(&instance->config.playerName, 0);
+    FF_INIT_STRBUF_CONFIG(instance->config.playerName);
 }
+
+#undef FF_INIT_STRBUF_CONFIG
 
 void ffInitInstance(FFinstance* instance)
 {
@@ -407,12 +414,9 @@ void ffDestroyInstance(FFinstance* instance)
 
     ffStrbufDestroy(&instance->state.cacheDir);
 
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufDestroy(&instance->config.logo.colors[i]);
-
-    ffStrbufDestroy(&instance->config.colorKeys);
-    ffStrbufDestroy(&instance->config.colorTitle);
-    ffStrbufDestroy(&instance->config.separator);
+    for(uint32_t i = 0; i < instance->config.bufsToFree.length; ++i)
+        ffStrbufDestroy(*(FFstrbuf**)ffListGet(&instance->config.bufsToFree, i));
+    ffListDestroy(&instance->config.bufsToFree);
 }
 
 //Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets

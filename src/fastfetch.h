@@ -182,6 +182,8 @@ typedef struct FFconfig
     FFstrbuf osFile;
 
     FFstrbuf playerName;
+
+    FFlist bufsToFree; //List of FFstrbuf*
 } FFconfig;
 
 typedef struct FFstate
