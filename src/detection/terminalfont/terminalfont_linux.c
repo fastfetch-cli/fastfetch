@@ -292,12 +292,17 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFon
     FFstrbuf name;
     ffStrbufInit(&name);
     int size = -1;
-    detectFromWTImpl(instance, &json, &name, &size);
+    error = detectFromWTImpl(instance, &json, &name, &size);
     ffStrbufDestroy(&json);
 
-    char sizeStr[16];
-    snprintf(sizeStr, sizeof(sizeStr), "%d", size);
-    ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
+    if(error)
+        ffStrbufAppendS(&terminalFont->error, error);
+    else
+    {
+        char sizeStr[16];
+        snprintf(sizeStr, sizeof(sizeStr), "%d", size);
+        ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
+    }
 
     ffStrbufDestroy(&name);
 }
