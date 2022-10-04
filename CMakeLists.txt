@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs 
 
 project(fastfetch
     VERSION 1.7.2
-    LANGUAGES C
+    LANGUAGES C CXX # Windows part requires C++ compiler
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
 )
@@ -11,8 +11,10 @@ project(fastfetch
 # Target Platform #
 ###################
 
-if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*|MSYS")
+if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES "MSYS")
+    set(WIN_MSYS TRUE CACHE BOOL "..." FORCE) # Windows on msys2
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT ANDROID)
@@ -26,7 +28,7 @@ endif()
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR WIN_MSYS" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
@@ -47,7 +49,7 @@ cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_LIBPLIST "Enable libplist" ON "APPLE" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN_MSYS" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
@@ -77,6 +79,11 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 
+if(WIN_MSYS)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion")
+endif()
+
 # Used for dlopen finding dylibs installed by homebrew
 # `/opt/homebrew/lib` is not on in dlopen search path by default
 if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
@@ -84,7 +91,7 @@ if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
 endif()
 
 set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
-if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "MSYS")
+if(NOT WIN_MSYS)
     set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
 endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
@@ -213,6 +220,7 @@ set(LIBFASTFETCH_SRC
     src/modules/separator.c
     src/modules/os.c
     src/modules/host.c
+    src/modules/bios.c
     src/modules/kernel.c
     src/modules/uptime.c
     src/modules/processes.c
@@ -257,14 +265,14 @@ if(BSD OR APPLE)
     )
 endif()
 
-if(LINUX OR ANDROID)
+if(LINUX OR ANDROID OR WIN_MSYS)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_linux.c
         src/detection/memory/memory_linux.c
     )
 endif()
 
-if(LINUX OR ANDROID OR BSD)
+if(LINUX OR ANDROID OR BSD OR WIN_MSYS)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
@@ -276,6 +284,7 @@ endif()
 if(LINUX OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_linux.c
+        src/detection/bios/bios_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
@@ -291,12 +300,29 @@ if(LINUX OR BSD)
     )
 endif()
 
+if(WIN_MSYS)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/host/host_windows.cpp
+        src/detection/bios/bios_windows.cpp
+        src/detection/os/os_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/battery/battery_linux.c
+        src/detection/displayserver/displayserver_windows.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/media/media_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
+        src/detection/font/font_linux.c
+        src/util/windows/wmi.cpp
+    )
+endif()
+
 if(APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_apple.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
+        src/detection/bios/bios_apple.c
         src/detection/os/os_apple.c
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
@@ -323,6 +349,7 @@ endif()
 if(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_android.c
+        src/detection/bios/bios_android.c
         src/detection/os/os_android.c
         src/detection/gpu/gpu_android.c
         src/detection/battery/battery_android.c
@@ -408,6 +435,12 @@ if(APPLE)
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
+    )
+elseif(WIN_MSYS)
+    target_link_libraries(libfastfetch
+        PRIVATE "-lwbemuuid"
+        PRIVATE "-lole32"
+        PRIVATE "-loleaut32"
     )
 endif()
 

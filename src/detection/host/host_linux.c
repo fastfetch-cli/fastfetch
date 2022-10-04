@@ -60,6 +60,8 @@ static void getHostProductName(FFstrbuf* name)
 
 void ffDetectHostImpl(FFHostResult* host)
 {
+    ffStrbufInit(&host->error);
+
     ffStrbufInit(&host->productFamily);
     getHostValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->productFamily);
 
@@ -71,18 +73,6 @@ void ffDetectHostImpl(FFHostResult* host)
 
     ffStrbufInit(&host->productSku);
     getHostValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->productSku);
-
-    ffStrbufInit(&host->biosDate);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_date", "/sys/class/dmi/id/bios_date", &host->biosDate);
-
-    ffStrbufInit(&host->biosRelease);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_release", "/sys/class/dmi/id/bios_release", &host->biosRelease);
-
-    ffStrbufInit(&host->biosVendor);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_vendor", "/sys/class/dmi/id/bios_vendor", &host->biosVendor);
-
-    ffStrbufInit(&host->biosVersion);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_version", "/sys/class/dmi/id/bios_version", &host->biosVersion);
 
     ffStrbufInit(&host->boardName);
     getHostValue("/sys/devices/virtual/dmi/id/board_name", "/sys/class/dmi/id/board_name", &host->boardName);

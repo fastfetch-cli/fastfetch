@@ -71,15 +71,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "host-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("host", "{2} {3}", 15,
+        constructAndPrintCommandHelpFormat("host", "{2} {3}", 11,
             "product family",
             "product name",
             "product version",
             "product sku",
-            "bios date",
-            "bios release",
-            "bios vendor",
-            "bios version",
             "board name",
             "board vendor",
             "board version",
@@ -87,6 +83,15 @@ static inline void printCommandHelp(const char* command)
             "chassis vendor",
             "chassis version",
             "sys vendor"
+        );
+    }
+    else if(strcasecmp(command, "bios-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("bios", "{2} {3}", 4,
+            "bios date",
+            "bios release",
+            "bios vendor",
+            "bios version"
         );
     }
     else if(strcasecmp(command, "kernel-format") == 0)
@@ -978,6 +983,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.host.outputFormat);
     else if(strcasecmp(key, "--host-error") == 0)
         optionParseString(key, value, &instance->config.host.errorFormat);
+    else if(strcasecmp(key, "--bios-key") == 0)
+        optionParseString(key, value, &instance->config.bios.key);
+    else if(strcasecmp(key, "--bios-format") == 0)
+        optionParseString(key, value, &instance->config.bios.outputFormat);
+    else if(strcasecmp(key, "--bios-error") == 0)
+        optionParseString(key, value, &instance->config.bios.errorFormat);
     else if(strcasecmp(key, "--kernel-key") == 0)
         optionParseString(key, value, &instance->config.kernel.key);
     else if(strcasecmp(key, "--kernel-format") == 0)
@@ -1369,6 +1380,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOS(instance);
     else if(strcasecmp(line, "host") == 0)
         ffPrintHost(instance);
+    else if(strcasecmp(line, "bios") == 0)
+        ffPrintBios(instance);
     else if(strcasecmp(line, "kernel") == 0)
         ffPrintKernel(instance);
     else if(strcasecmp(line, "uptime") == 0)

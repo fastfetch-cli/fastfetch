@@ -159,7 +159,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     {
         const FFHostResult* host = ffDetectHost();
         if(ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_WSL) == 0 ||
-            ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS) == 0)
+            ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS) == 0) //TODO better WSL or MSYS detection
         term = "conhost";
     }
 

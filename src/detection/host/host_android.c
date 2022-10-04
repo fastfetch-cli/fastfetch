@@ -4,6 +4,8 @@
 
 void ffDetectHostImpl(FFHostResult* host)
 {
+    ffStrbufInit(&host->error);
+
     //Family
 
     ffStrbufInit(&host->productFamily);
@@ -32,10 +34,6 @@ void ffDetectHostImpl(FFHostResult* host)
 
     ffStrbufInitA(&host->productVersion, 0);
     ffStrbufInitA(&host->productSku, 0);
-    ffStrbufInitA(&host->biosDate, 0);
-    ffStrbufInitA(&host->biosRelease, 0);
-    ffStrbufInitA(&host->biosVendor, 0);
-    ffStrbufInitA(&host->biosVersion, 0);
     ffStrbufInitA(&host->boardName, 0);
     ffStrbufInitA(&host->boardVendor, 0);
     ffStrbufInitA(&host->boardVersion, 0);

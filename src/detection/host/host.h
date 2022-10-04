@@ -14,10 +14,6 @@ typedef struct FFHostResult
     FFstrbuf productName;
     FFstrbuf productVersion;
     FFstrbuf productSku;
-    FFstrbuf biosDate;
-    FFstrbuf biosRelease;
-    FFstrbuf biosVendor;
-    FFstrbuf biosVersion;
     FFstrbuf boardName;
     FFstrbuf boardVendor;
     FFstrbuf boardVersion;
@@ -25,6 +21,7 @@ typedef struct FFHostResult
     FFstrbuf chassisVendor;
     FFstrbuf chassisVersion;
     FFstrbuf sysVendor;
+    FFstrbuf error;
 } FFHostResult;
 
 const FFHostResult* ffDetectHost();
