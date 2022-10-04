@@ -82,7 +82,7 @@ static bool detectQuartzCompositor(FFinstance* instance, FFstrbuf* themeOrError)
 static bool detectQuartzCompositor(FFinstance* instance, FFstrbuf* theme)
 {
     FF_UNUSED(instance);
-    ffStrbufSetS("Fastfetch was compiled without libplist support");
+    ffStrbufSetS(theme, "Fastfetch was compiled without libplist support");
     return false;
 }
 #endif
