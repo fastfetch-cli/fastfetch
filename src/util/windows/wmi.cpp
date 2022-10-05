@@ -197,3 +197,34 @@ bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbu
     VariantClear(&vtProp);
     return result;
 }
+
+bool ffGetWmiObjInteger(IWbemClassObject* obj, const wchar_t* key, int64_t* integer)
+{
+    bool result = true;
+
+    VARIANT vtProp;
+    VariantInit(&vtProp);
+
+    CIMTYPE type;
+    if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)))
+    {
+        result = false;
+    }
+    else
+    {
+        switch(type)
+        {
+            case CIM_SINT8: *integer = vtProp.cVal; break;
+            case CIM_SINT16: *integer = vtProp.iVal; break;
+            case CIM_SINT32: *integer = vtProp.intVal; break;
+            case CIM_SINT64: *integer = vtProp.llVal; break;
+            case CIM_UINT8: *integer = (int64_t)vtProp.bVal; break;
+            case CIM_UINT16: *integer = (int64_t)vtProp.uiVal; break;
+            case CIM_UINT32: *integer = (int64_t)vtProp.uintVal; break;
+            case CIM_UINT64: *integer = (int64_t)vtProp.ullVal; break;
+            default: result = false;
+        }
+    }
+    VariantClear(&vtProp);
+    return result;
+}
