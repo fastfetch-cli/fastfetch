@@ -34,6 +34,7 @@ void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf);
 
 IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error);
 bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf);
+bool ffGetWmiObjInteger(IWbemClassObject* obj, const wchar_t* key, int64_t* result);
 
 #else
     // Win32 COM headers requires C++ compiler

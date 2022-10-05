@@ -313,7 +313,7 @@ if(WIN_MSYS)
         src/detection/board/board_windows.cpp
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_windows.cpp
-        src/detection/battery/battery_linux.c
+        src/detection/battery/battery_windows.cpp
         src/detection/displayserver/displayserver_windows.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/media/media_linux.c
