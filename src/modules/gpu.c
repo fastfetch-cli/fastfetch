@@ -14,7 +14,7 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFcache* cache, 
     FFstrbuf output;
     ffStrbufInitA(&output, gpu->vendor.length + 1 + gpu->name.length);
 
-    if(gpu->vendor.length > 0)
+    if(gpu->vendor.length > 0 && !ffStrbufStartsWith(&gpu->name, &gpu->vendor))
     {
         ffStrbufAppend(&output, &gpu->vendor);
         ffStrbufAppendC(&output, ' ');
