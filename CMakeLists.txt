@@ -308,7 +308,7 @@ if(WIN_MSYS)
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
         src/detection/os/os_linux.c
-        src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_windows.cpp
         src/detection/battery/battery_linux.c
         src/detection/displayserver/displayserver_windows.c
         src/detection/terminalfont/terminalfont_linux.c
@@ -446,6 +446,7 @@ elseif(WIN_MSYS)
         PRIVATE "-lwbemuuid"
         PRIVATE "-lole32"
         PRIVATE "-loleaut32"
+        PRIVATE "-ldwmapi"
     )
 endif()
 
