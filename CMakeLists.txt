@@ -302,6 +302,7 @@ if(LINUX OR BSD)
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/font/font_linux.c
+        src/detection/opengl/opengl_linux.c
     )
 endif()
 
@@ -318,6 +319,7 @@ if(WIN_MSYS)
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/font/font_linux.c
+        src/detection/opengl/opengl_windows.c
         src/util/windows/wmi.cpp
     )
 endif()
@@ -343,6 +345,7 @@ if(APPLE)
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
+        src/detection/opengl/opengl_apple.c
     )
 endif()
 
@@ -366,6 +369,7 @@ if(ANDROID)
         src/detection/media/media_android.c
         src/detection/wmtheme/wmtheme_android.c
         src/detection/font/font_android.c
+        src/detection/opengl/opengl_linux.c
     )
 endif()
 
@@ -449,6 +453,8 @@ elseif(WIN_MSYS)
         PRIVATE "-lole32"
         PRIVATE "-loleaut32"
         PRIVATE "-ldwmapi"
+        PRIVATE "-lopengl32"
+        PRIVATE "-lgdi32"
     )
 endif()
 
