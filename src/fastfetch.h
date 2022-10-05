@@ -95,6 +95,7 @@ typedef struct FFconfig
     FFModuleArgs os;
     FFModuleArgs host;
     FFModuleArgs bios;
+    FFModuleArgs board;
     FFModuleArgs kernel;
     FFModuleArgs uptime;
     FFModuleArgs processes;
@@ -252,6 +253,7 @@ void ffPrintSeparator(FFinstance* instance);
 void ffPrintOS(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
 void ffPrintBios(FFinstance* instance);
+void ffPrintBoard(FFinstance* instance);
 void ffPrintKernel(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);

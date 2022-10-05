@@ -71,14 +71,11 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "host-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("host", "{2} {3}", 11,
+        constructAndPrintCommandHelpFormat("host", "{2} {3}", 8,
             "product family",
             "product name",
             "product version",
             "product sku",
-            "board name",
-            "board vendor",
-            "board version",
             "chassis type",
             "chassis vendor",
             "chassis version",
@@ -92,6 +89,14 @@ static inline void printCommandHelp(const char* command)
             "bios release",
             "bios vendor",
             "bios version"
+        );
+    }
+    else if(strcasecmp(command, "board-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("board", "{2} {3}", 3,
+            "board name",
+            "board vendor",
+            "board version"
         );
     }
     else if(strcasecmp(command, "kernel-format") == 0)
@@ -1382,6 +1387,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintHost(instance);
     else if(strcasecmp(line, "bios") == 0)
         ffPrintBios(instance);
+    else if(strcasecmp(line, "board") == 0)
+        ffPrintBoard(instance);
     else if(strcasecmp(line, "kernel") == 0)
         ffPrintKernel(instance);
     else if(strcasecmp(line, "uptime") == 0)
