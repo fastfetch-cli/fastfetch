@@ -224,6 +224,7 @@ set(LIBFASTFETCH_SRC
     src/modules/os.c
     src/modules/host.c
     src/modules/bios.c
+    src/modules/board.c
     src/modules/kernel.c
     src/modules/uptime.c
     src/modules/processes.c
@@ -288,6 +289,7 @@ if(LINUX OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_linux.c
         src/detection/bios/bios_linux.c
+        src/detection/board/board_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
@@ -307,6 +309,7 @@ if(WIN_MSYS)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
+        src/detection/board/board_windows.cpp
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
@@ -326,6 +329,7 @@ if(APPLE)
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
         src/detection/bios/bios_apple.c
+        src/detection/board/board_apple.c
         src/detection/os/os_apple.m
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
@@ -353,6 +357,7 @@ if(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_android.c
         src/detection/bios/bios_android.c
+        src/detection/board/board_android.c
         src/detection/os/os_android.c
         src/detection/gpu/gpu_android.c
         src/detection/battery/battery_android.c

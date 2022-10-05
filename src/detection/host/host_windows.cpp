@@ -12,9 +12,6 @@ extern "C" void ffDetectHostImpl(FFHostResult* host)
     ffStrbufInit(&host->productVersion);
     ffStrbufInit(&host->productSku);
     ffStrbufInit(&host->sysVendor);
-    ffStrbufInit(&host->boardName);
-    ffStrbufInit(&host->boardVendor);
-    ffStrbufInit(&host->boardVersion);
     ffStrbufInit(&host->chassisType);
     ffStrbufInit(&host->chassisVendor);
     ffStrbufInit(&host->chassisVersion);

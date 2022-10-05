@@ -14,9 +14,6 @@ typedef struct FFHostResult
     FFstrbuf productName;
     FFstrbuf productVersion;
     FFstrbuf productSku;
-    FFstrbuf boardName;
-    FFstrbuf boardVendor;
-    FFstrbuf boardVersion;
     FFstrbuf chassisType;
     FFstrbuf chassisVendor;
     FFstrbuf chassisVersion;
