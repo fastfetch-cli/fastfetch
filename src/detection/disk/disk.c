@@ -32,6 +32,7 @@ void ffDetectDiskWithStatvfs(const char* folderPath, struct statvfs* fs, FFDiskR
 
     result->used = result->total - (fs->f_bavail * fs->f_frsize);
     result->files = (uint32_t) (fs->f_files - fs->f_ffree);
+    result->removable = false; //To be set at other place
 }
 
 bool ffDiskDetectDiskFolders(FFinstance* instance, FFlist* folders)

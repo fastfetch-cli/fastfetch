@@ -37,7 +37,7 @@ static void printFolder(FFinstance* instance, FFDiskResult* folder)
     if(instance->config.disk.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key.chars, 0, NULL);
-        printf("%s / %s (%u%%)\n", usedPretty.chars, totalPretty.chars, percentage);
+        printf("%s / %s (%u%%)%s\n", usedPretty.chars, totalPretty.chars, percentage, folder->removable ? " [Removable]" : "");
     }
     else
     {

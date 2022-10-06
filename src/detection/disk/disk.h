@@ -11,6 +11,7 @@ typedef struct FFDiskResult
     uint64_t used;
     uint64_t total;
     uint32_t files;
+    bool removable;
     FFstrbuf error;
 } FFDiskResult;
 

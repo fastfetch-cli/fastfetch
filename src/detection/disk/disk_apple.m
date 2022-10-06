@@ -20,7 +20,9 @@ const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
         if(removable.boolValue && !instance->config.diskRemovable)
             continue;
 
-        ffDetectDiskWithStatvfs([url.relativePath cStringUsingEncoding:NSUTF8StringEncoding], NULL, (FFDiskResult*)ffListAdd(folders));
+        FFDiskResult* folder = (FFDiskResult*)ffListAdd(folders);
+        ffDetectDiskWithStatvfs([url.relativePath cStringUsingEncoding:NSUTF8StringEncoding], NULL, folder);
+        folder->removable = removable.boolValue;
     }
 
     return NULL;

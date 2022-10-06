@@ -7,7 +7,10 @@ const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
 {
     FF_UNUSED(instance);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Name, DriveType, FreeSpace, Size FROM Win32_LogicalDisk", nullptr);
+    const wchar_t* query = instance->config.diskRemovable
+        ? L"SELECT Name, DriveType, FreeSpace, Size FROM Win32_LogicalDisk"
+        : L"SELECT Name, FreeSpace, Size FROM Win32_LogicalDisk WHERE DriveType != 2";
+    IEnumWbemClassObject* pEnumerator = ffQueryWmi(query, nullptr);
 
     if(!pEnumerator)
         return "Query WMI service failed";
@@ -17,11 +20,6 @@ const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
 
     while(SUCCEEDED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) && uReturn != 0)
     {
-        uint64_t driveType;
-        ffGetWmiObjUnsigned(pclsObj, L"DriveType", &driveType);
-        if(driveType == 2 && !instance->config.diskRemovable)
-            continue;
-
         FFDiskResult* folder = (FFDiskResult*)ffListAdd(folders);
 
         ffStrbufInit(&folder->path);
@@ -31,6 +29,15 @@ const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
         ffGetWmiObjUnsigned(pclsObj, L"Size", &folder->total);
         ffGetWmiObjUnsigned(pclsObj, L"FreeSpace", &free);
         folder->used = folder->total - free;
+
+        if(instance->config.diskRemovable)
+        {
+            uint64_t driveType;
+            ffGetWmiObjUnsigned(pclsObj, L"DriveType", &driveType);
+            folder->removable = driveType == 2;
+        }
+        else
+            folder->removable = false;
 
         folder->files = 0; //Unsupported
 
