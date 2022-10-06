@@ -145,6 +145,7 @@ void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf) {
     ffStrbufEnsureFree(strbuf, (uint32_t)size_needed);
     WideCharToMultiByte(CP_UTF8, 0, bstr, len, strbuf->chars, size_needed, nullptr, nullptr);
     strbuf->length = (uint32_t)size_needed;
+    strbuf->chars[size_needed] = '\0';
 }
 
 bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf)
@@ -176,7 +177,6 @@ bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbu
             case CIM_REAL32: ffStrbufAppendF(strbuf, "%f", vtProp.fltVal); break;
             case CIM_REAL64: ffStrbufAppendF(strbuf, "%f", vtProp.dblVal); break;
             case CIM_BOOLEAN: ffStrbufAppendF(strbuf, "%s", vtProp.boolVal ? "True" : "False"); break;
-            case CIM_STRING: ffBstrToStrbuf(vtProp.bstrVal, strbuf); break;
             case CIM_DATETIME: {
                 ISWbemDateTime *pDateTime;
                 BSTR dateStr;
@@ -190,8 +190,8 @@ bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbu
                     ffBstrToStrbuf(dateStr, strbuf);
                 break;
             };
-
-            default: result = false; break;
+            case CIM_STRING:
+            default: ffBstrToStrbuf(vtProp.bstrVal, strbuf); break;
         }
     }
     VariantClear(&vtProp);

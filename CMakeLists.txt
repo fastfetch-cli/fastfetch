@@ -266,19 +266,21 @@ if(BSD OR APPLE)
     )
 endif()
 
-if(LINUX OR ANDROID OR WIN_MSYS)
+if(LINUX OR ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_linux.c
         src/detection/memory/memory_linux.c
     )
 endif()
 
-if(LINUX OR ANDROID OR BSD OR WIN_MSYS)
+if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/poweradapter/poweradapter_linux.c
         src/detection/temps/temps_linux.c
+        src/detection/users/users_linux.c
+        src/detection/opengl/opengl_linux.c
     )
 endif()
 
@@ -299,7 +301,6 @@ if(LINUX OR BSD)
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/font/font_linux.c
-        src/detection/opengl/opengl_linux.c
     )
 endif()
 
@@ -308,16 +309,27 @@ if(WIN_MSYS)
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
-        src/detection/os/os_linux.c
         src/detection/gpu/gpu_windows.cpp
         src/detection/battery/battery_windows.cpp
         src/detection/displayserver/displayserver_windows.c
-        src/detection/terminalfont/terminalfont_linux.c
-        src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_windows.c
-        src/detection/font/font_linux.c
         src/detection/opengl/opengl_windows.c
+        src/detection/users/users_windows.cpp
         src/util/windows/wmi.cpp
+
+        # Shared
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/poweradapter/poweradapter_linux.c
+
+        # TODO
+        src/detection/os/os_linux.c
+        src/detection/media/media_linux.c
+        src/detection/font/font_linux.c
+        src/detection/cpu/cpu_linux.c
+        src/detection/memory/memory_linux.c
+        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/disk/disk_linux.c
+        src/detection/temps/temps_linux.c
     )
 endif()
 
@@ -342,6 +354,7 @@ if(APPLE)
         src/detection/wmtheme/wmtheme_apple.c
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
+        src/detection/users/users_linux.c
         src/detection/opengl/opengl_apple.c
     )
 endif()
@@ -366,7 +379,6 @@ if(ANDROID)
         src/detection/media/media_android.c
         src/detection/wmtheme/wmtheme_android.c
         src/detection/font/font_android.c
-        src/detection/opengl/opengl_linux.c
     )
 endif()
 
