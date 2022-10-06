@@ -32,10 +32,10 @@ extern "C" void ffDetectHostImpl(FFHostResult* host)
         return;
     }
 
-    ffGetWmiObjValue(pclsObj, L"Name", &host->productName);
-    ffGetWmiObjValue(pclsObj, L"Version", &host->productVersion);
-    ffGetWmiObjValue(pclsObj, L"SKUNumber", &host->productSku);
-    ffGetWmiObjValue(pclsObj, L"Vendor", &host->sysVendor);
+    ffGetWmiObjString(pclsObj, L"Name", &host->productName);
+    ffGetWmiObjString(pclsObj, L"Version", &host->productVersion);
+    ffGetWmiObjString(pclsObj, L"SKUNumber", &host->productSku);
+    ffGetWmiObjString(pclsObj, L"Vendor", &host->sysVendor);
 
     pclsObj->Release();
     pEnumerator->Release();

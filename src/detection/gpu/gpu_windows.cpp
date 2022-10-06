@@ -21,7 +21,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
 
         ffStrbufInit(&gpu->vendor);
-        ffGetWmiObjValue(pclsObj, L"AdapterCompatibility", &gpu->vendor);
+        ffGetWmiObjString(pclsObj, L"AdapterCompatibility", &gpu->vendor);
         if(ffStrbufStartsWithS(&gpu->vendor, "Intel "))
         {
             //Intel returns "Intel Corporation", not sure about AMD
@@ -29,10 +29,10 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         }
 
         ffStrbufInit(&gpu->name);
-        ffGetWmiObjValue(pclsObj, L"Name", &gpu->name);
+        ffGetWmiObjString(pclsObj, L"Name", &gpu->name);
 
         ffStrbufInit(&gpu->driver);
-        ffGetWmiObjValue(pclsObj, L"DriverVersion", &gpu->driver);
+        ffGetWmiObjString(pclsObj, L"DriverVersion", &gpu->driver);
 
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;

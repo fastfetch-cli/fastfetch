@@ -22,8 +22,8 @@ uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
         return 0;
     }
 
-    int64_t result = 0;
-    ffGetWmiObjInteger(pclsObj, L"NumberOfProcesses", &result);
+    uint64_t result = 0;
+    ffGetWmiObjUnsigned(pclsObj, L"NumberOfProcesses", &result);
     pclsObj->Release();
     pEnumerator->Release();
     return (uint32_t)result;

@@ -21,13 +21,13 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         BatteryResult* battery = (BatteryResult*)ffListAdd(results);
 
         ffStrbufInit(&battery->manufacturer);
-        ffGetWmiObjValue(pclsObj, L"SystemName", &battery->manufacturer);
+        ffGetWmiObjString(pclsObj, L"SystemName", &battery->manufacturer);
 
         ffStrbufInit(&battery->modelName);
-        ffGetWmiObjValue(pclsObj, L"Name", &battery->modelName);
+        ffGetWmiObjString(pclsObj, L"Name", &battery->modelName);
 
-        int64_t chemistry;
-        ffGetWmiObjInteger(pclsObj, L"Chemistry", &chemistry);
+        uint64_t chemistry;
+        ffGetWmiObjUnsigned(pclsObj, L"Chemistry", &chemistry);
         switch(chemistry)
         {
             case 1: ffStrbufInitS(&battery->technology, "Other"); break;
@@ -40,12 +40,12 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             case 8: ffStrbufInitS(&battery->technology, "Lithium Polymer"); break;
         }
 
-        int64_t capacity;
-        ffGetWmiObjInteger(pclsObj, L"EstimatedChargeRemaining", &capacity);
+        uint64_t capacity;
+        ffGetWmiObjUnsigned(pclsObj, L"EstimatedChargeRemaining", &capacity);
         ffStrbufInitF(&battery->capacity, "%d", (int)capacity);
 
-        int64_t batteryStatus;
-        ffGetWmiObjInteger(pclsObj, L"BatteryStatus", &batteryStatus);
+        uint64_t batteryStatus;
+        ffGetWmiObjUnsigned(pclsObj, L"BatteryStatus", &batteryStatus);
         switch(batteryStatus)
         {
             case 1: ffStrbufInitS(&battery->status, "Discharging"); break;

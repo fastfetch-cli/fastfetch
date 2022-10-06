@@ -1,6 +1,7 @@
 #include "wmi.hpp"
 
 #include <synchapi.h>
+#include <wchar.h>
 
 //https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
 //https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes
@@ -148,7 +149,7 @@ void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf) {
     strbuf->chars[size_needed] = '\0';
 }
 
-bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf)
+bool ffGetWmiObjString(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf)
 {
     bool result = true;
 
@@ -156,49 +157,49 @@ bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbu
     VariantInit(&vtProp);
 
     CIMTYPE type;
-    if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)) || vtProp.vt == VT_EMPTY || vtProp.vt == VT_NULL)
+    if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)) || vtProp.vt != VT_BSTR)
     {
         result = false;
     }
     else
     {
-        switch(type)
+        switch(vtProp.vt)
         {
-            case CIM_ILLEGAL:
-            case CIM_EMPTY: result = false; break;
-            case CIM_SINT8: ffStrbufAppendF(strbuf, "%d", (int)vtProp.cVal); break;
-            case CIM_SINT16: ffStrbufAppendF(strbuf, "%d", (int)vtProp.iVal); break;
-            case CIM_SINT32: ffStrbufAppendF(strbuf, "%d", (int)vtProp.intVal); break;
-            case CIM_SINT64: ffStrbufAppendF(strbuf, "%lld", vtProp.llVal); break;
-            case CIM_UINT8: ffStrbufAppendF(strbuf, "%u", (unsigned)vtProp.bVal); break;
-            case CIM_UINT16: ffStrbufAppendF(strbuf, "%u", (unsigned)vtProp.uiVal); break;
-            case CIM_UINT32: ffStrbufAppendF(strbuf, "%u", (unsigned)vtProp.uintVal); break;
-            case CIM_UINT64: ffStrbufAppendF(strbuf, "%llu", vtProp.ullVal); break;
-            case CIM_REAL32: ffStrbufAppendF(strbuf, "%f", vtProp.fltVal); break;
-            case CIM_REAL64: ffStrbufAppendF(strbuf, "%f", vtProp.dblVal); break;
-            case CIM_BOOLEAN: ffStrbufAppendF(strbuf, "%s", vtProp.boolVal ? "True" : "False"); break;
-            case CIM_DATETIME: {
-                ISWbemDateTime *pDateTime;
-                BSTR dateStr;
-                if(FAILED(CoCreateInstance(__uuidof(SWbemDateTime), 0, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDateTime))))
-                    result = false;
-                else if(FAILED(pDateTime->put_Value(vtProp.bstrVal)))
-                    result = false;
-                else if(FAILED(pDateTime->GetFileTime(VARIANT_TRUE, &dateStr)))
-                    result = false;
+            case VT_BSTR:
+                if(type == CIM_DATETIME)
+                {
+                    ISWbemDateTime *pDateTime;
+                    BSTR dateStr;
+                    if(FAILED(CoCreateInstance(__uuidof(SWbemDateTime), 0, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDateTime))))
+                        result = false;
+                    else if(FAILED(pDateTime->put_Value(vtProp.bstrVal)))
+                        result = false;
+                    else if(FAILED(pDateTime->GetFileTime(VARIANT_TRUE, &dateStr)))
+                        result = false;
+                    else
+                        ffBstrToStrbuf(dateStr, strbuf);
+                }
                 else
-                    ffBstrToStrbuf(dateStr, strbuf);
+                {
+                    ffBstrToStrbuf(vtProp.bstrVal, strbuf);
+                }
                 break;
-            };
-            case CIM_STRING:
-            default: ffBstrToStrbuf(vtProp.bstrVal, strbuf); break;
+
+            case VT_LPSTR:
+                ffStrbufAppendS(strbuf, vtProp.pcVal);
+                break;
+
+            case VT_LPWSTR: // TODO
+            default:
+                result = false;
+                break;
         }
     }
     VariantClear(&vtProp);
     return result;
 }
 
-bool ffGetWmiObjInteger(IWbemClassObject* obj, const wchar_t* key, int64_t* integer)
+bool ffGetWmiObjSigned(IWbemClassObject* obj, const wchar_t* key, int64_t* integer)
 {
     bool result = true;
 
@@ -212,16 +213,90 @@ bool ffGetWmiObjInteger(IWbemClassObject* obj, const wchar_t* key, int64_t* inte
     }
     else
     {
-        switch(type)
+        switch(vtProp.vt)
         {
-            case CIM_SINT8: *integer = vtProp.cVal; break;
-            case CIM_SINT16: *integer = vtProp.iVal; break;
-            case CIM_SINT32: *integer = vtProp.intVal; break;
-            case CIM_SINT64: *integer = vtProp.llVal; break;
-            case CIM_UINT8: *integer = (int64_t)vtProp.bVal; break;
-            case CIM_UINT16: *integer = (int64_t)vtProp.uiVal; break;
-            case CIM_UINT32: *integer = (int64_t)vtProp.uintVal; break;
-            case CIM_UINT64: *integer = (int64_t)vtProp.ullVal; break;
+            case VT_BSTR: *integer = wcstoll(vtProp.bstrVal, nullptr, 10); break;
+            case VT_I1: *integer = vtProp.cVal; break;
+            case VT_I2: *integer = vtProp.iVal; break;
+            case VT_INT:
+            case VT_I4: *integer = vtProp.intVal; break;
+            case VT_I8: *integer = vtProp.llVal; break;
+            case VT_UI1: *integer = (int64_t)vtProp.bVal; break;
+            case VT_UI2: *integer = (int64_t)vtProp.uiVal; break;
+            case VT_UINT:
+            case VT_UI4: *integer = (int64_t)vtProp.uintVal; break;
+            case VT_UI8: *integer = (int64_t)vtProp.ullVal; break;
+            case VT_BOOL: *integer = vtProp.boolVal != VARIANT_FALSE; break;
+            default: result = false;
+        }
+    }
+    VariantClear(&vtProp);
+    return result;
+}
+
+bool ffGetWmiObjUnsigned(IWbemClassObject* obj, const wchar_t* key, uint64_t* integer)
+{
+    bool result = true;
+
+    VARIANT vtProp;
+    VariantInit(&vtProp);
+
+    if(FAILED(obj->Get(key, 0, &vtProp, nullptr, nullptr)))
+    {
+        result = false;
+    }
+    else
+    {
+        switch(vtProp.vt)
+        {
+            case VT_BSTR: *integer = wcstoull(vtProp.bstrVal, nullptr, 10); break;
+            case VT_I1: *integer = (uint64_t)vtProp.cVal; break;
+            case VT_I2: *integer = (uint64_t)vtProp.iVal; break;
+            case VT_INT:
+            case VT_I4: *integer = (uint64_t)vtProp.intVal; break;
+            case VT_I8: *integer = (uint64_t)vtProp.llVal; break;
+            case VT_UI1: *integer = vtProp.bVal; break;
+            case VT_UI2: *integer = vtProp.uiVal; break;
+            case VT_UINT:
+            case VT_UI4: *integer = vtProp.uintVal; break;
+            case VT_UI8: *integer = vtProp.ullVal; break;
+            case VT_BOOL: *integer = vtProp.boolVal != VARIANT_FALSE; break;
+            default: result = false;
+        }
+    }
+    VariantClear(&vtProp);
+    return result;
+}
+
+bool ffGetWmiObjReal(IWbemClassObject* obj, const wchar_t* key, double* real)
+{
+    bool result = true;
+
+    VARIANT vtProp;
+    VariantInit(&vtProp);
+
+    if(FAILED(obj->Get(key, 0, &vtProp, nullptr, nullptr)))
+    {
+        result = false;
+    }
+    else
+    {
+        switch(vtProp.vt)
+        {
+            case VT_BSTR: *real = wcstod(vtProp.bstrVal, nullptr); break;
+            case VT_I1: *real = vtProp.cVal; break;
+            case VT_I2: *real = vtProp.iVal; break;
+            case VT_INT:
+            case VT_I4: *real = vtProp.intVal; break;
+            case VT_I8: *real = (double)vtProp.llVal; break;
+            case VT_UI1: *real = vtProp.bVal; break;
+            case VT_UI2: *real = vtProp.uiVal; break;
+            case VT_UINT:
+            case VT_UI4: *real = vtProp.uintVal; break;
+            case VT_UI8: *real = (double)vtProp.ullVal; break;
+            case VT_R4: *real = vtProp.fltVal; break;
+            case VT_R8: *real = vtProp.dblVal; break;
+            case VT_BOOL: *real = vtProp.boolVal != VARIANT_FALSE; break;
             default: result = false;
         }
     }

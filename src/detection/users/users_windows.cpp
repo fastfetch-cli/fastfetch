@@ -18,7 +18,7 @@ next:
     {
         FFstrbuf antecedent;
         ffStrbufInit(&antecedent);
-        ffGetWmiObjValue(pclsObj, L"Antecedent", &antecedent); // \\.\root\cimv2:Win32_Account.Domain="DOMAIN",Name="NAME"
+        ffGetWmiObjString(pclsObj, L"Antecedent", &antecedent); // \\.\root\cimv2:Win32_Account.Domain="DOMAIN",Name="NAME"
         ffStrbufTrimRight(&antecedent, '"'); // \\.\root\cimv2:Win32_Account.Domain="DOMAIN",Name="NAME
         ffStrbufSubstrAfterFirstC(&antecedent, '"'); // DOMAIN",Name="NAME
         uint32_t index = ffStrbufFirstIndexC(&antecedent, '"');

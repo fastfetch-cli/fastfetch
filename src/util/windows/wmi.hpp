@@ -33,8 +33,10 @@ private:
 void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf);
 
 IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error);
-bool ffGetWmiObjValue(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf);
-bool ffGetWmiObjInteger(IWbemClassObject* obj, const wchar_t* key, int64_t* result);
+bool ffGetWmiObjString(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf);
+bool ffGetWmiObjSigned(IWbemClassObject* obj, const wchar_t* key, int64_t* integer);
+bool ffGetWmiObjUnsigned(IWbemClassObject* obj, const wchar_t* key, uint64_t* integer);
+bool ffGetWmiObjReal(IWbemClassObject* obj, const wchar_t* key, double* real);
 
 #else
     // Win32 COM headers requires C++ compiler

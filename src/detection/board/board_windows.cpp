@@ -27,9 +27,9 @@ extern "C" void ffDetectBoard(FFBoardResult* board)
         return;
     }
 
-    ffGetWmiObjValue(pclsObj, L"Product", &board->boardName);
-    ffGetWmiObjValue(pclsObj, L"Manufacturer", &board->boardVendor);
-    ffGetWmiObjValue(pclsObj, L"Version", &board->boardVersion);
+    ffGetWmiObjString(pclsObj, L"Product", &board->boardName);
+    ffGetWmiObjString(pclsObj, L"Manufacturer", &board->boardVendor);
+    ffGetWmiObjString(pclsObj, L"Version", &board->boardVersion);
 
     pclsObj->Release();
     pEnumerator->Release();

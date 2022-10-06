@@ -33,7 +33,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         return;
     }
 
-    ffGetWmiObjValue(pclsObj, L"Caption", &os->variant); // Microsoft Windows 11 家庭中文版
+    ffGetWmiObjString(pclsObj, L"Caption", &os->variant); // Microsoft Windows 11 家庭中文版
     if(ffStrbufStartsWithS(&os->variant, "Microsoft Windows "))
     {
         ffStrbufAppendS(&os->name, "Microsoft Windows");
@@ -58,8 +58,8 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         ffStrbufAppendF(&os->id, "Windows %*s", &os->version.length, &os->version.chars);
     #endif
 
-    ffGetWmiObjValue(pclsObj, L"BuildNumber", &os->buildID);
-    ffGetWmiObjValue(pclsObj, L"OSArchitecture", &os->architecture);
+    ffGetWmiObjString(pclsObj, L"BuildNumber", &os->buildID);
+    ffGetWmiObjString(pclsObj, L"OSArchitecture", &os->architecture);
 
     #ifdef __CYGWIN__
         ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);

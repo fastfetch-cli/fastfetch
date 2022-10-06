@@ -28,10 +28,10 @@ extern "C" void ffDetectBios(FFBiosResult* bios)
         return;
     }
 
-    ffGetWmiObjValue(pclsObj, L"Name", &bios->biosRelease);
-    ffGetWmiObjValue(pclsObj, L"ReleaseDate", &bios->biosDate);
-    ffGetWmiObjValue(pclsObj, L"Version", &bios->biosVersion);
-    ffGetWmiObjValue(pclsObj, L"Manufacturer", &bios->biosVendor);
+    ffGetWmiObjString(pclsObj, L"Name", &bios->biosRelease);
+    ffGetWmiObjString(pclsObj, L"ReleaseDate", &bios->biosDate);
+    ffGetWmiObjString(pclsObj, L"Version", &bios->biosVersion);
+    ffGetWmiObjString(pclsObj, L"Manufacturer", &bios->biosVendor);
 
     pclsObj->Release();
     pEnumerator->Release();

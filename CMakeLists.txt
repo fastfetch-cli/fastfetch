@@ -280,6 +280,7 @@ if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/disk/disk.c
         src/detection/poweradapter/poweradapter_linux.c
         src/detection/temps/temps_linux.c
         src/detection/users/users_linux.c
@@ -321,6 +322,7 @@ if(WIN_MSYS)
         src/detection/users/users_windows.cpp
         src/detection/os/os_windows.cpp
         src/detection/processes/processes_windows.cpp
+        src/detection/disk/disk_windows.cpp
         src/util/windows/wmi.cpp
 
         # Shared
@@ -333,7 +335,6 @@ if(WIN_MSYS)
         src/detection/cpu/cpu_linux.c
         src/detection/memory/memory_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
-        src/detection/disk/disk_linux.c
         src/detection/temps/temps_linux.c
     )
 endif()
@@ -356,6 +357,7 @@ if(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
+        src/detection/disk/disk.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
