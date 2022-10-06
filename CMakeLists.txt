@@ -314,7 +314,7 @@ if(WIN_MSYS)
         src/detection/displayserver/displayserver_windows.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/media/media_linux.c
-        src/detection/wmtheme/wmtheme_linux.c
+        src/detection/wmtheme/wmtheme_windows.c
         src/detection/font/font_linux.c
         src/detection/opengl/opengl_windows.c
         src/util/windows/wmi.cpp
