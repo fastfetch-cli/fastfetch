@@ -318,6 +318,7 @@ if(WIN_MSYS)
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/users/users_windows.cpp
+        src/detection/os/os_windows.cpp
         src/util/windows/wmi.cpp
 
         # Shared
@@ -325,7 +326,6 @@ if(WIN_MSYS)
         src/detection/poweradapter/poweradapter_linux.c
 
         # TODO
-        src/detection/os/os_linux.c
         src/detection/media/media_linux.c
         src/detection/font/font_linux.c
         src/detection/cpu/cpu_linux.c
