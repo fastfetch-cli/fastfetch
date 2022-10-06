@@ -99,7 +99,10 @@ static bool printCachedValue(FFinstance* instance, const char* moduleName, const
     ffStrbufTrimRight(&content, '\0'); //Strbuf always appends a '\0' at the end. We want the last null byte to be at the position of the length
 
     if(content.length == 0)
+    {
+        ffStrbufDestroy(&content);
         return false;
+    }
 
     uint8_t moduleCounter = 1;
 
