@@ -284,6 +284,7 @@ if(LINUX OR ANDROID OR BSD)
         src/detection/temps/temps_linux.c
         src/detection/users/users_linux.c
         src/detection/opengl/opengl_linux.c
+        src/detection/processes/processes_linux.c
     )
 endif()
 
@@ -319,6 +320,7 @@ if(WIN_MSYS)
         src/detection/opengl/opengl_windows.c
         src/detection/users/users_windows.cpp
         src/detection/os/os_windows.cpp
+        src/detection/processes/processes_windows.cpp
         src/util/windows/wmi.cpp
 
         # Shared
@@ -359,6 +361,7 @@ if(APPLE)
         src/detection/font/font_apple.m
         src/detection/users/users_linux.c
         src/detection/opengl/opengl_apple.c
+        src/detection/processes/processes_apple.c
     )
 endif()
 
