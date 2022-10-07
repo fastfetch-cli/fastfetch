@@ -2,16 +2,17 @@
 #include "cpuUsage.h"
 
 #include <stdio.h>
+#include <inttypes.h>
 
-const char* ffGetCpuUsageInfo(long* inUseAll, long* totalAll)
+const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
 {
-    long user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
+    uint64_t user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
 
     FILE* procStat = fopen("/proc/stat", "r");
     if(procStat == NULL)
         return "fopen(\"""/proc/stat\", \"r\") == NULL";
 
-    if (fscanf(procStat, "cpu%ld%ld%ld%ld%ld%ld%ld", &user, &nice, &system, &idle, &iowait, &irq, &softirq) < 0)
+    if (fscanf(procStat, "cpu%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64, &user, &nice, &system, &idle, &iowait, &irq, &softirq) < 0)
     {
         fclose(procStat);
         return "fscanf() failed";

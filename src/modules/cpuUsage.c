@@ -1,20 +1,39 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "detection/cpuUsage/cpuUsage.h"
-#include <sys/time.h>
-#include <time.h>
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+    #include <synchapi.h>
+    #include <sysinfoapi.h>
+#else
+    #include <sys/time.h>
+    #include <time.h>
+#endif
 
 #define FF_CPU_USAGE_MODULE_NAME "CPU Usage"
 #define FF_CPU_USAGE_NUM_FORMAT_ARGS 1
 
-time_t getTimeInMs()
+static inline uint64_t getTimeInMs()
 {
-    struct timeval timeNow;
-    gettimeofday(&timeNow, NULL);
-    return (timeNow.tv_sec * 1000) + (timeNow.tv_usec / 1000);
+    #if defined(_WIN32) || defined(__CYGWIN__)
+        return GetTickCount64();
+    #else
+        struct timeval timeNow;
+        gettimeofday(&timeNow, NULL);
+        return (uint64_t)((timeNow.tv_sec * 1000) + (timeNow.tv_usec / 1000));
+    #endif
 }
 
-static long inUseAll1, totalAll1, startTime;
+static inline void sleepInMs(uint32_t msec)
+{
+    #if defined(_WIN32) || defined(__CYGWIN__)
+        SleepEx(msec, TRUE);
+    #else
+        nanosleep(&(struct timespec){ msec / 1000, (msec % 1000) * 1000000 }, NULL);
+    #endif
+}
+
+static uint64_t inUseAll1, totalAll1, startTime;
 
 void ffPrepareCPUUsage()
 {
@@ -30,16 +49,16 @@ void ffPrintCPUUsage(FFinstance* instance)
         error = ffGetCpuUsageInfo(&inUseAll1, &totalAll1);
         if(error)
             goto error;
-        nanosleep(&(struct timespec){ 1, 0 }, NULL);
+        sleepInMs(1000);
     }
     else
     {
-        time_t duration = getTimeInMs() - startTime;
+        uint64_t duration = getTimeInMs() - startTime;
         if(duration < 1000)
-            nanosleep(&(struct timespec){ 0, (1000 - duration) * 1000000L }, NULL);
+            sleepInMs(1000 - (uint32_t) duration);
     }
 
-    long inUseAll2, totalAll2;
+    uint64_t inUseAll2, totalAll2;
     error = ffGetCpuUsageInfo(&inUseAll2, &totalAll2);
 
     if(error)

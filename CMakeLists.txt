@@ -324,6 +324,7 @@ if(WIN_MSYS)
         src/detection/os/os_windows.cpp
         src/detection/processes/processes_windows.cpp
         src/detection/disk/disk_windows.cpp
+        src/detection/cpuUsage/cpuUsage_windows.c
         src/util/windows/wmi.cpp
 
         # Shared
@@ -334,7 +335,6 @@ if(WIN_MSYS)
         src/detection/media/media_linux.c
         src/detection/font/font_linux.c
         src/detection/memory/memory_linux.c
-        src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/temps/temps_linux.c
     )
 endif()
