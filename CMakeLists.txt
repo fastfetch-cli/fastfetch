@@ -211,6 +211,7 @@ set(LIBFASTFETCH_SRC
     src/detection/host/host.c
     src/detection/os/os.c
     src/detection/cpu/cpu.c
+    src/detection/cpuUsage/cpuUsage.c
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
     src/detection/font/font.c
@@ -325,6 +326,7 @@ if(WIN_MSYS)
         src/detection/processes/processes_windows.cpp
         src/detection/disk/disk_windows.cpp
         src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/util/windows/wmi.cpp
 
         # Shared

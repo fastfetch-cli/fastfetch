@@ -3,9 +3,10 @@
 #ifndef FF_INCLUDED_detection_cpu_cpuUsage
 #define FF_INCLUDED_detection_cpu_cpuUsage
 
-#include <stdint.h>
+#if defined(_WIN32) || defined(__CYGWIN__)
+    #define FF_DETECTION_CPUUSAGE_NOWAIT 1
+#endif
 
-// We need to use uint64_t because sizeof(long) == 4 on Windows
-const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll);
+const char* ffGetCpuUsageResult(double* result);
 
 #endif
