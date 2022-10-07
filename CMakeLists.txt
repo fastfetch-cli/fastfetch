@@ -314,6 +314,7 @@ if(WIN_MSYS)
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
+        src/detection/cpu/cpu_windows.cpp
         src/detection/gpu/gpu_windows.cpp
         src/detection/battery/battery_windows.cpp
         src/detection/displayserver/displayserver_windows.c
@@ -332,7 +333,6 @@ if(WIN_MSYS)
         # TODO
         src/detection/media/media_linux.c
         src/detection/font/font_linux.c
-        src/detection/cpu/cpu_linux.c
         src/detection/memory/memory_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/temps/temps_linux.c
