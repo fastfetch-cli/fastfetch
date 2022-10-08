@@ -268,6 +268,7 @@ if(LINUX OR APPLE OR ANDROID OR BSD)
         src/common/processing_linux.c
         src/detection/disk/disk.c
         src/detection/terminalShell/terminalShell_linux.c
+        src/detection/packages/packages_linux.c
     )
 endif()
 
@@ -337,6 +338,8 @@ if(WIN_MSYS)
         src/detection/font/font_windows.cpp
         src/detection/terminalShell/terminalShell_linux.c
         src/detection/terminalShell/terminalShell_windows.cpp
+        src/detection/packages/packages_linux.c
+        src/detection/packages/packages_windows.c
         src/util/windows/wmi.cpp
 
         # Shared

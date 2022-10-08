@@ -3,6 +3,8 @@
 #ifndef FF_INCLUDED_common_io
 #define FF_INCLUDED_common_io
 
+#include "fastfetch.h"
+
 #include <sys/types.h> //mode_t
 
 bool ffWriteFDBuffer(int fd, const FFstrbuf* content);
