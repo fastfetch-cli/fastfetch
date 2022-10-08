@@ -99,14 +99,14 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
     return ppid;
 }
 
-#ifdef __CYGWIN__
+#ifdef __MSYS__
     extern "C"
     const FFTerminalShellResult* ffDetectTerminalShellPosix(const FFinstance* instance);
 #endif
 
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
-    #ifdef __CYGWIN__
+    #ifdef __MSYS__
         // This is hacky.
         // When running inside MSYS2, the real Windows parent process doesn't exist and we must find it in Linux way ( /proc/self/xxx )
         // When running outside of MSYS2, /proc/self/xxx doesn't exist and we must find it in Windows way

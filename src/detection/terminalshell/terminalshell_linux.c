@@ -264,7 +264,7 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
 }
 
 const FFTerminalShellResult*
-#if defined(__CYGWIN__) || defined(_WIN32)
+#if defined(__MSYS__) || defined(_WIN32)
     ffDetectTerminalShellPosix
 #else
     ffDetectTerminalShell

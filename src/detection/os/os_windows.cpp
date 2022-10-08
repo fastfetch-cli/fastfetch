@@ -51,7 +51,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         ffStrbufClear(&os->variant);
     }
 
-    #ifdef __CYGWIN__
+    #ifdef __MSYS__
         ffStrbufAppendS(&os->id, "MSYS2");
     #else
         // Enable this after we have Windows logo support
@@ -61,7 +61,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffGetWmiObjString(pclsObj, L"BuildNumber", &os->buildID);
     ffGetWmiObjString(pclsObj, L"OSArchitecture", &os->architecture);
 
-    #ifdef __CYGWIN__
+    #ifdef __MSYS__
         ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
     #else
         ffStrbufSetS(&os->systemName, "Windows");
