@@ -201,8 +201,6 @@ set(LIBFASTFETCH_SRC
     src/logo/image/image.c
     src/logo/image/im7.c
     src/logo/image/im6.c
-    src/detection/qt.c
-    src/detection/gtk.c
     src/detection/vulkan.c
     src/detection/datetime.c
     src/detection/title.c
@@ -315,6 +313,8 @@ if(LINUX OR BSD)
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/font/font_linux.c
+        src/detection/qt.c
+        src/detection/gtk.c
     )
 endif()
 
