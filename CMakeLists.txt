@@ -270,6 +270,7 @@ if(LINUX OR APPLE OR ANDROID OR BSD)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/packages/packages_linux.c
         src/detection/kernel/kernel_linux.c
+        src/detection/localip/localip_linux.c
     )
 endif()
 
@@ -342,6 +343,7 @@ if(WIN_MSYS)
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
+        src/detection/localip/localip_windows.c
         src/util/windows/wmi.cpp
 
         # Shared
@@ -483,6 +485,7 @@ elseif(WIN_MSYS)
         PRIVATE "-ldwmapi"
         PRIVATE "-lopengl32"
         PRIVATE "-lgdi32"
+        PRIVATE "-liphlpapi"
     )
 endif()
 
