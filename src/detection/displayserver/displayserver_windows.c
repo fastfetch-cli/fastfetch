@@ -1,4 +1,5 @@
 #include "displayserver.h"
+#include "detection/os/os.h"
 
 #include <dwmapi.h>
 #include <WinUser.h>
@@ -35,4 +36,13 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 
         ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency);
     }
+
+    //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
+    const FFOSResult* os = ffDetectOS(instance);
+    if(ffStrbufCompS(&os->version, "11") == 0 || ffStrbufCompS(&os->version, "10") == 0)
+        ffStrbufSetS(&ds->dePrettyName, "Fluent");
+    else if(ffStrbufCompS(&os->version, "8") == 0 || ffStrbufStartsWithS(&os->version, "8."))
+        ffStrbufSetS(&ds->dePrettyName, "Metro");
+    else
+        ffStrbufSetS(&ds->dePrettyName, "Aero");
 }
