@@ -13,6 +13,7 @@
 
 static void setExeName(FFstrbuf* exe, const char** exeName)
 {
+    assert(exe->length > 0);
     uint32_t lastSlashIndex = ffStrbufLastIndexC(exe, '/');
     if(lastSlashIndex < exe->length)
         *exeName = exe->chars + lastSlashIndex + 1;
@@ -20,15 +21,20 @@ static void setExeName(FFstrbuf* exe, const char** exeName)
 
 static void getProcessInformation(const char* pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName)
 {
+    assert(processName->length > 0);
+
     FFstrbuf cmdlineFilePath;
     ffStrbufInit(&cmdlineFilePath);
     ffStrbufAppendS(&cmdlineFilePath, "/proc/");
     ffStrbufAppendS(&cmdlineFilePath, pid);
     ffStrbufAppendS(&cmdlineFilePath, "/cmdline");
 
-    ffReadFileBuffer(cmdlineFilePath.chars, exe);
-    ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
-    ffStrbufTrimLeft(exe, '-'); //Happens in TTY
+    ffStrbufClear(exe);
+    if(ffAppendFileBuffer(cmdlineFilePath.chars, exe))
+    {
+        ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
+        ffStrbufTrimLeft(exe, '-'); //Happens in TTY
+    }
 
     if(exe->length == 0)
         ffStrbufSet(exe, processName);
@@ -97,14 +103,14 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
         strcasecmp(name, "pwsh")      == 0 ||
         strcasecmp(name, "git-shell") == 0
     ) {
-        ffStrbufAppendS(&result->shellProcessName, name);
+        ffStrbufSetS(&result->shellProcessName, name); // prevent from `fishbash`
         getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
 
         getTerminalShell(result, ppid);
         return;
     }
 
-    ffStrbufAppendS(&result->terminalProcessName, name);
+    ffStrbufSetS(&result->terminalProcessName, name);
     getProcessInformation(pid, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);
 }
 
@@ -172,14 +178,19 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(!ffStrSet(term) || strcasecmp(term, "linux") == 0)
         term = ttyname(STDIN_FILENO);
 
-    ffStrbufSetS(&result->terminalProcessName, term);
-    ffStrbufSetS(&result->terminalExe, term);
-    setExeName(&result->terminalExe, &result->terminalExeName);
+    if(ffStrSet(term))
+    {
+        ffStrbufSetS(&result->terminalProcessName, term);
+        ffStrbufSetS(&result->terminalExe, term);
+        setExeName(&result->terminalExe, &result->terminalExeName);
+    }
 }
 
 static void getUserShellFromEnv(FFTerminalShellResult* result)
 {
     ffStrbufAppendS(&result->userShellExe, getenv("SHELL"));
+    if(result->userShellExe.length == 0)
+        return;
     setExeName(&result->userShellExe, &result->userShellExeName);
 
     //If shell detection via processes failed
@@ -253,6 +264,7 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
 
 static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
+    ffStrbufClear(version);
     if(strcasecmp(exeName, "bash") == 0)
         getShellVersionBash(exe, version);
     else if(strcasecmp(exeName, "zsh") == 0)
