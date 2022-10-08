@@ -2,7 +2,7 @@
 #include "common/settings.h"
 #include "common/properties.h"
 #include "common/parsing.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"
 
 static const char* getSystemMonospaceFont(const FFinstance* instance)

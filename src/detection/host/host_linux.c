@@ -95,7 +95,5 @@ void ffDetectHostImpl(FFHostResult* host)
         //On WSL, the real host can't be detected. Instead use WSL as host.
         if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
             ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_WSL);
-        else if(getenv("MSYSTEM") != NULL && strcmp(getenv("MSYSTEM"), "MSYS") == 0)
-            ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS);
     }
 }

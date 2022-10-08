@@ -191,7 +191,6 @@ set(LIBFASTFETCH_SRC
     src/common/caching.c
     src/common/properties.c
     src/common/font.c
-    src/common/processing.c
     src/common/format.c
     src/common/parsing.c
     src/common/settings.c
@@ -204,7 +203,6 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im6.c
     src/detection/qt.c
     src/detection/gtk.c
-    src/detection/terminalShell.c
     src/detection/vulkan.c
     src/detection/datetime.c
     src/detection/title.c
@@ -264,6 +262,15 @@ set(LIBFASTFETCH_SRC
     src/modules/users.c
 )
 
+if(LINUX OR APPLE OR ANDROID OR BSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/users/users_linux.c
+        src/common/processing_linux.c
+        src/detection/disk/disk.c
+        src/detection/terminalShell/terminalShell_linux.c
+    )
+endif()
+
 if(BSD OR APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/sysctl.c
@@ -281,10 +288,8 @@ if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
-        src/detection/disk/disk.c
         src/detection/poweradapter/poweradapter_linux.c
         src/detection/temps/temps_linux.c
-        src/detection/users/users_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/processes/processes_linux.c
     )
@@ -312,6 +317,7 @@ endif()
 
 if(WIN_MSYS)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/processing_linux.c
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
@@ -329,13 +335,13 @@ if(WIN_MSYS)
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/memory/memory_windows.cpp
         src/detection/font/font_windows.cpp
+        src/detection/terminalShell/terminalShell_linux.c
+        src/detection/terminalShell/terminalShell_windows.cpp
         src/util/windows/wmi.cpp
 
         # Shared
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/poweradapter/poweradapter_linux.c
-
-        # TODO
         src/detection/media/media_linux.c
         src/detection/temps/temps_linux.c
     )
@@ -359,11 +365,9 @@ if(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
-        src/detection/disk/disk.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
-        src/detection/users/users_linux.c
         src/detection/opengl/opengl_apple.c
         src/detection/processes/processes_apple.c
     )

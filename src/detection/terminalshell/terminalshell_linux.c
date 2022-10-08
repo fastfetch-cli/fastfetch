@@ -1,9 +1,9 @@
 #include "fastfetch.h"
 #include "detection/host/host.h"
-#include "detection/terminalshell.h"
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
+#include "terminalshell.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -94,6 +94,7 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
         strcasecmp(name, "ksh")       == 0 ||
         strcasecmp(name, "fish")      == 0 ||
         strcasecmp(name, "dash")      == 0 ||
+        strcasecmp(name, "pwsh")      == 0 ||
         strcasecmp(name, "git-shell") == 0
     ) {
         ffStrbufAppendS(&result->shellProcessName, name);
@@ -256,13 +257,19 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
         getShellVersionBash(exe, version);
     else if(strcasecmp(exeName, "zsh") == 0)
         getShellVersionZsh(exe, version);
-    else if(strcasecmp(exeName, "fish") == 0)
+    else if(strcasecmp(exeName, "fish") == 0 || strcasecmp(exeName, "pwsh") == 0)
         getShellVersionFish(exe, version);
     else
         getShellVersionGeneric(exe, exeName, version);
 }
 
-const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
+const FFTerminalShellResult*
+#if defined(__CYGWIN__) || defined(_WIN32)
+    ffDetectTerminalShellPosix
+#else
+    ffDetectTerminalShell
+#endif
+(const FFinstance* instance)
 {
     FF_UNUSED(instance);
 
