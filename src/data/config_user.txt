@@ -5,7 +5,7 @@
 # Whitespaces are trimmed at the beginning and the end.
 # Empty lines or lines starting with # are ignored.
 
-# This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
+# This file was shipped with $" FASTFETCH_PROJECT_VERSION $".
 # Use fastfetch --print-config-user > ~/.config/fastfetch/config.conf to overwrite this file with the current defaults
 
 # Below some often usefull options are listed. Uncomment and modify them so they take affect.
@@ -25,7 +25,7 @@
 # Must be a list of module names, separated by colons.
 # List available modules with "fastfetch --list-modules".
 # Get the default structure with "fastfetch --print-structure".
-#--structure $"FASTFETCH_DATATEXT_STRUCTURE$"
+#--structure $" FASTFETCH_DATATEXT_STRUCTURE $"
 
 # Multithreading option:
 # Sets if fastfetch should use multiple threads to detect the values.
