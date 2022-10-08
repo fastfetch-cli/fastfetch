@@ -267,7 +267,7 @@ if(LINUX OR APPLE OR ANDROID OR BSD)
         src/detection/users/users_linux.c
         src/common/processing_linux.c
         src/detection/disk/disk.c
-        src/detection/terminalShell/terminalShell_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
         src/detection/packages/packages_linux.c
         src/detection/kernel/kernel_linux.c
     )
@@ -337,8 +337,8 @@ if(WIN_MSYS)
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/memory/memory_windows.cpp
         src/detection/font/font_windows.cpp
-        src/detection/terminalShell/terminalShell_linux.c
-        src/detection/terminalShell/terminalShell_windows.cpp
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
