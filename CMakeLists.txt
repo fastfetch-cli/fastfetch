@@ -13,7 +13,7 @@ project(fastfetch
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
-elseif("${CMAKE_SYSTEM_NAME}" MATCHES "MSYS")
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES "MSYS|Windows")
     set(WIN_MSYS TRUE CACHE BOOL "..." FORCE) # Windows on msys2
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
@@ -47,7 +47,7 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN_MSYS" OFF)
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN_MSYS" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 

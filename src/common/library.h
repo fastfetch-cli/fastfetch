@@ -5,7 +5,9 @@
 
 #include <dlfcn.h>
 
-#ifdef __APPLE__
+#if defined(_WIN32) || defined(__MSYS__)
+    #define FF_LIBRARY_EXTENSION ".dll"
+#elif defined(__APPLE__)
     #define FF_LIBRARY_EXTENSION ".dylib"
 #else
     #define FF_LIBRARY_EXTENSION ".so"

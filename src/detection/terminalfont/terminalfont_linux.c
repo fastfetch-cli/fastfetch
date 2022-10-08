@@ -189,7 +189,7 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
 {
     CJSONData cjsonData;
 
-    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson"FF_LIBRARY_EXTENSION" failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Parse)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsObject)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive)

@@ -35,7 +35,7 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
 
 static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed", "libvulkan"FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed", "libvulkan"FF_LIBRARY_EXTENSION, 2, "vulkan-1"FF_LIBRARY_EXTENSION, -1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkDestroyInstance)
