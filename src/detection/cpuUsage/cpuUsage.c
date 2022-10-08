@@ -1,7 +1,17 @@
 #include "fastfetch.h"
 #include "cpuUsage.h"
 
-#ifndef FF_DETECTION_CPUUSAGE_NOWAIT
+#if FF_DETECTION_CPUUSAGE_NOWAIT
+
+const char* ffGetCpuUsageResultNoWait(double* result);
+
+void ffPrepareCPUUsage() {}
+
+const char* ffGetCpuUsageResult(double* result) {
+    return ffGetCpuUsageResultNoWait(result);
+}
+
+#else //FF_DETECTION_CPUUSAGE_NOWAIT
 
 #include "common/time.h"
 
@@ -43,16 +53,6 @@ const char* ffGetCpuUsageResult(double* result)
     *result = (double)(inUseAll2 - inUseAll1) / (double)(totalAll2 - totalAll1) * 100;
 
     return NULL;
-}
-
-#else //FF_DETECTION_CPUUSAGE_NOWAIT
-
-const char* ffGetCpuUsageResultNoWait(double* result);
-
-void ffPrepareCPUUsage() {}
-
-const char* ffGetCpuUsageResult(double* result) {
-    return ffGetCpuUsageResultNoWait(result);
 }
 
 #endif //FF_DETECTION_CPUUSAGE_NOWAIT
