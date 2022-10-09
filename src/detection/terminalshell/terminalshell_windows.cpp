@@ -66,15 +66,16 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         return 0;
     result->shellExeName = result->shellExe.chars + ffStrbufLastIndexC(&result->shellExe, '\\') + 1;
 
-    if(ffStrbufEndsWithIgnCaseS(&result->shellProcessName, ".exe"))
-        ffStrbufSubstrBefore(&result->shellProcessName, result->shellProcessName.length - 4);
+    ffStrbufSet(&result->shellPrettyName, &result->shellProcessName);
+    if(ffStrbufEndsWithIgnCaseS(&result->shellPrettyName, ".exe"))
+        ffStrbufSubstrBefore(&result->shellPrettyName, result->shellPrettyName.length - 4);
 
-    if(ffStrbufIgnCaseCompS(&result->shellProcessName, "pwsh") == 0)
+    if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "pwsh") == 0)
     {
-        ffStrbufSetS(&result->shellProcessName, "PowerShell");
+        ffStrbufSetS(&result->shellPrettyName, "PowerShell");
         getShellVersion(&result->shellExe, &result->shellVersion);
     }
-    else if(ffStrbufIgnCaseCompS(&result->shellProcessName, "powershell") == 0)
+    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell") == 0)
         ffStrbufSetS(&result->shellProcessName, "Windows PowerShell");
 
     return ppid;
@@ -88,13 +89,14 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         return 0;
     result->terminalExeName = result->terminalExe.chars + ffStrbufLastIndexC(&result->terminalExe, '\\');
 
-    if(ffStrbufEndsWithIgnCaseS(&result->terminalProcessName, ".exe"))
+    ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
+    if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
         result->terminalProcessName.length -= 4;
 
-    if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "WindowsTerminal"))
-        ffStrbufSetS(&result->terminalProcessName, "Windows Terminal");
-    else if(ffStrbufIgnCaseCompS(&result->terminalProcessName, "conhost"))
-        ffStrbufSetS(&result->terminalProcessName, "Console Window Host");
+    if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "WindowsTerminal"))
+        ffStrbufSetS(&result->terminalPrettyName, "Windows Terminal");
+    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "conhost"))
+        ffStrbufSetS(&result->terminalPrettyName, "Console Window Host");
 
     return ppid;
 }
@@ -108,7 +110,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     #ifdef __MSYS__
         // This is hacky.
-        // When running inside MSYS2, the real Windows parent process doesn't exist and we must find it in Linux way ( /proc/self/xxx )
+        // When running inside of MSYS2, the real Windows parent process doesn't exist and we must find it in Linux way ( /proc/self/xxx )
         // When running outside of MSYS2, /proc/self/xxx doesn't exist and we must find it in Windows way
         if(getenv("MSYSTEM"))
             return ffDetectTerminalShellPosix(instance);
@@ -123,11 +125,13 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     ffStrbufInit(&result.shellProcessName);
     ffStrbufInitA(&result.shellExe, 128);
     result.shellExeName = result.shellExe.chars;
+    ffStrbufInit(&result.shellPrettyName);
     ffStrbufInit(&result.shellVersion);
 
     ffStrbufInit(&result.terminalProcessName);
     ffStrbufInitA(&result.terminalExe, 128);
     result.terminalExeName = result.terminalExe.chars;
+    ffStrbufInit(&result.terminalPrettyName);
 
     ffStrbufInit(&result.userShellExe);
     result.userShellExeName = result.userShellExe.chars;
@@ -140,6 +144,9 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     ppid = getShellInfo(&result, ppid);
     if(ppid == 0)
         return &result;
+
+    // TODO: handle nested shells
+    // TODO: handle running without shells ( dblclick exe in Windows Explorer )
 
     ppid = getTerminalInfo(&result, ppid);
     if(ppid == 0)

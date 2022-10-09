@@ -18,7 +18,7 @@ void ffPrintShell(FFinstance* instance)
     if(instance->config.shell.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shell.key);
-        ffStrbufWriteTo(&result->shellProcessName, stdout);
+        ffStrbufWriteTo(&result->shellPrettyName, stdout);
 
         if(result->shellVersion.length > 0)
         {

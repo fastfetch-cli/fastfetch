@@ -10,10 +10,12 @@ typedef struct FFTerminalShellResult
     FFstrbuf shellProcessName;
     FFstrbuf shellExe;
     const char* shellExeName; //pointer to a char in shellExe
+    FFstrbuf shellPrettyName;
     FFstrbuf shellVersion;
 
     FFstrbuf terminalProcessName;
     FFstrbuf terminalExe;
+    FFstrbuf terminalPrettyName;
     const char* terminalExeName; //pointer to a char in terminalExe
 
     FFstrbuf userShellExe;
