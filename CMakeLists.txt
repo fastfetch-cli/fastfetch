@@ -342,7 +342,7 @@ if(WIN_MSYS)
         src/detection/users/users_windows.cpp
         src/detection/os/os_windows.cpp
         src/detection/processes/processes_windows.cpp
-        src/detection/disk/disk_windows.cpp
+        src/detection/disk/disk_windows.c
         src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/memory/memory_windows.cpp
