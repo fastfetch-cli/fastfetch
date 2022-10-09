@@ -43,12 +43,12 @@ void ffPrintLocale(FFinstance* instance)
 
     //Ubuntu (and deriviates) use a non standard locale file.
     //Parse it first, because on distributions where it exists, it takes precedence.
-    //Otherwise use the standard /etc/locale.conf file.
-    ffParsePropFile(FASTFETCH_TARGET_DIR_ROOT"/etc/default/locale", "LANG =", &locale);
+    //Otherwise use the standard etc/locale.conf file.
+    ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/default/locale", "LANG =", &locale);
 
     if(locale.length == 0)
     {
-        ffParsePropFile(FASTFETCH_TARGET_DIR_ROOT"/etc/locale.conf", "LANG =", &locale);
+        ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/locale.conf", "LANG =", &locale);
     }
 
 	if(locale.length == 0)
