@@ -4,7 +4,7 @@
 #include "detection/host/host.h"
 
 #define FF_HOST_MODULE_NAME "Host"
-#define FF_HOST_NUM_FORMAT_ARGS 15
+#define FF_HOST_NUM_FORMAT_ARGS 8
 
 void ffPrintHost(FFinstance* instance)
 {
@@ -12,6 +12,12 @@ void ffPrintHost(FFinstance* instance)
         return;
 
     const FFHostResult* host = ffDetectHost();
+
+    if(host->error.length > 0)
+    {
+        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &instance->config.host, "%*s", host->error.length, host->error.chars);
+        return;
+    }
 
     if(host->productFamily.length == 0 && host->productName.length == 0)
     {
@@ -38,13 +44,6 @@ void ffPrintHost(FFinstance* instance)
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->productName},
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->productVersion},
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->productSku},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->biosDate},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->biosRelease},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->biosVendor},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->biosVersion},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->boardName},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->boardVendor},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &host->boardVersion},
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisType},
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisVendor},
         {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisVersion},

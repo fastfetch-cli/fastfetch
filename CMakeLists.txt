@@ -15,8 +15,12 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
-elseif(NOT APPLE AND NOT ANDROID)
-    message(FATAL_ERROR "Unsupported platform")
+elseif(NOT APPLE AND NOT ANDROID AND NOT MSYS)
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+if(MSYS)
+    enable_language(CXX)
 endif()
 
 #####################
@@ -26,7 +30,7 @@ endif()
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR MSYS" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
@@ -45,8 +49,8 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR MSYS" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR MSYS" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
@@ -76,13 +80,21 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 
+if(MSYS)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
+endif()
+
 # Used for dlopen finding dylibs installed by homebrew
 # `/opt/homebrew/lib` is not on in dlopen search path by default
 if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
 endif()
 
-set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
+set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
+if(NOT MSYS)
+    set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
+endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
 set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG} -rdynamic")
 
@@ -190,7 +202,6 @@ set(LIBFASTFETCH_SRC
     src/common/caching.c
     src/common/properties.c
     src/common/font.c
-    src/common/processing.c
     src/common/format.c
     src/common/parsing.c
     src/common/settings.c
@@ -201,15 +212,13 @@ set(LIBFASTFETCH_SRC
     src/logo/image/image.c
     src/logo/image/im7.c
     src/logo/image/im6.c
-    src/detection/qt.c
-    src/detection/gtk.c
-    src/detection/terminalShell.c
     src/detection/vulkan.c
     src/detection/datetime.c
     src/detection/title.c
     src/detection/host/host.c
     src/detection/os/os.c
     src/detection/cpu/cpu.c
+    src/detection/cpuUsage/cpuUsage.c
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
     src/detection/font/font.c
@@ -222,6 +231,8 @@ set(LIBFASTFETCH_SRC
     src/modules/separator.c
     src/modules/os.c
     src/modules/host.c
+    src/modules/bios.c
+    src/modules/board.c
     src/modules/kernel.c
     src/modules/uptime.c
     src/modules/processes.c
@@ -260,6 +271,18 @@ set(LIBFASTFETCH_SRC
     src/modules/users.c
 )
 
+if(LINUX OR APPLE OR ANDROID OR BSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/users/users_linux.c
+        src/common/processing_linux.c
+        src/detection/disk/disk.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/kernel/kernel_linux.c
+        src/detection/localip/localip_linux.c
+    )
+endif()
+
 if(BSD OR APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/sysctl.c
@@ -277,14 +300,19 @@ if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
-        src/detection/poweradapter/poweradapter_linux.c
         src/detection/temps/temps_linux.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/processes/processes_linux.c
+
+        src/detection/poweradapter/poweradapter_nosupport.c
     )
 endif()
 
 if(LINUX OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_linux.c
+        src/detection/bios/bios_linux.c
+        src/detection/board/board_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
         src/detection/battery/battery_linux.c
@@ -297,6 +325,42 @@ if(LINUX OR BSD)
         src/detection/media/media_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/font/font_linux.c
+        src/detection/qt.c
+        src/detection/gtk.c
+    )
+endif()
+
+if(MSYS)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/processing_linux.c
+        src/detection/host/host_windows.cpp
+        src/detection/bios/bios_windows.cpp
+        src/detection/board/board_windows.cpp
+        src/detection/cpu/cpu_windows.cpp
+        src/detection/gpu/gpu_windows.cpp
+        src/detection/battery/battery_windows.cpp
+        src/detection/displayserver/displayserver_windows.c
+        src/detection/wmtheme/wmtheme_windows.c
+        src/detection/opengl/opengl_windows.c
+        src/detection/users/users_windows.cpp
+        src/detection/os/os_windows.cpp
+        src/detection/processes/processes_windows.cpp
+        src/detection/disk/disk_windows.c
+        src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
+        src/detection/memory/memory_windows.cpp
+        src/detection/font/font_windows.cpp
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalshell/terminalshell_windows.cpp
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/packages/packages_windows.c
+        src/detection/kernel/kernel_windows.cpp
+        src/detection/localip/localip_windows.c
+        src/util/windows/wmi.cpp
+
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/media/media_nosupport.c
     )
 endif()
 
@@ -319,6 +383,11 @@ if(APPLE)
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
+        src/detection/opengl/opengl_apple.c
+        src/detection/processes/processes_apple.c
+
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
     )
 endif()
 
@@ -333,13 +402,16 @@ if(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/host/host_android.c
         src/detection/os/os_android.c
-        src/detection/gpu/gpu_android.c
-        src/detection/battery/battery_android.c
-        src/detection/displayserver/displayserver_android.c
         src/detection/terminalfont/terminalfont_android.c
-        src/detection/media/media_android.c
-        src/detection/wmtheme/wmtheme_android.c
-        src/detection/font/font_android.c
+
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/displayserver/displayserver_nosupport.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/font/font_nosupport.c
+        src/detection/media/media_nosupport.c
+        src/detection/wmtheme/wmtheme_nosupport.c
     )
 endif()
 
@@ -416,6 +488,16 @@ if(APPLE)
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
+    )
+elseif(MSYS)
+    target_link_libraries(libfastfetch
+        PRIVATE "wbemuuid"
+        PRIVATE "ole32"
+        PRIVATE "oleaut32"
+        PRIVATE "dwmapi"
+        PRIVATE "opengl32"
+        PRIVATE "gdi32"
+        PRIVATE "iphlpapi"
     )
 endif()
 

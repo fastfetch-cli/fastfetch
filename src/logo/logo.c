@@ -2,7 +2,7 @@
 #include "common/io.h"
 #include "common/printing.h"
 #include "detection/os/os.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 
 #include <ctype.h>
 #include <string.h>

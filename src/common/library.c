@@ -19,6 +19,14 @@
 static void* libraryLoad(const char* path, int maxVersion)
 {
     void* result = dlopen(path, FF_DLOPEN_FLAGS);
+
+    #if defined(_WIN32) || defined(__MSYS__)
+
+    // libX.dll.1 never exists on Windows, while libX-1.dll may exist
+    FF_UNUSED(maxVersion)
+
+    #else
+
     if(result != NULL || maxVersion < 0)
         return result;
 
@@ -40,6 +48,9 @@ static void* libraryLoad(const char* path, int maxVersion)
     }
 
     ffStrbufDestroy(&pathbuf);
+
+    #endif
+
     return result;
 }
 

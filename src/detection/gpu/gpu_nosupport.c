@@ -3,5 +3,5 @@
 const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     FF_UNUSED(gpus, instance);
-    return "Unimplemented";
+    return "Not supported on this platform";
 }

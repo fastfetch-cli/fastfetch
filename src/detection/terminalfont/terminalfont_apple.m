@@ -1,6 +1,6 @@
 #include "terminalfont.h"
 #include "common/font.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 #include "util/apple/osascript.h"
 
 #include <stdlib.h>

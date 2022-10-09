@@ -4,7 +4,7 @@
 #include <mach/processor_info.h>
 #include <mach/mach_host.h>
 
-const char* ffGetCpuUsageInfo(long* inUseAll, long* totalAll)
+const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
 {
     natural_t numCPUs = 0U;
     processor_info_array_t cpuInfo;
@@ -21,8 +21,8 @@ const char* ffGetCpuUsageInfo(long* inUseAll, long* totalAll)
             + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_SYSTEM]
             + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_NICE];
         integer_t total = inUse + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_IDLE];
-        *inUseAll += inUse;
-        *totalAll += total;
+        *inUseAll += (uint64_t)inUse;
+        *totalAll += (uint64_t)total;
     }
     return NULL;
 }

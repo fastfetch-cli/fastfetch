@@ -83,7 +83,7 @@ static const char* printOpenCL(FFinstance* instance)
 {
     OpenCLData data;
 
-    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL.so failed", "libOpenCL.so", 1);
+    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed", "libOpenCL"FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);

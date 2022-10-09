@@ -162,6 +162,8 @@ static void defaultConfig(FFinstance* instance)
 
     initModuleArg(&instance->config.os);
     initModuleArg(&instance->config.host);
+    initModuleArg(&instance->config.bios);
+    initModuleArg(&instance->config.board);
     initModuleArg(&instance->config.kernel);
     initModuleArg(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
@@ -257,7 +259,7 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-#if !defined(__ANDROID__)
+#if !defined(__ANDROID__) && !defined(_WIN32) && !defined(__MSYS__)
 
 static void* connectDisplayServerThreadMain(void* instance)
 {
@@ -416,6 +418,8 @@ static void destroyConfig(FFinstance* instance)
 
     destroyModuleArg(&instance->config.os);
     destroyModuleArg(&instance->config.host);
+    destroyModuleArg(&instance->config.bios);
+    destroyModuleArg(&instance->config.board);
     destroyModuleArg(&instance->config.kernel);
     destroyModuleArg(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);

@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "terminalfont.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 #include "common/io.h"
 
 #include <sys/stat.h>

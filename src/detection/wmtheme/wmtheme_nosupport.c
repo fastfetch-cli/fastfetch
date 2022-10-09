@@ -5,6 +5,6 @@
 bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
 {
     FF_UNUSED(instance);
-    ffStrbufAppendS(themeOrError, "WM theme detection is not supported on Android");
+    ffStrbufAppendS(themeOrError, "Not supported on this platform");
     return false;
 }

@@ -40,6 +40,16 @@ static void printFont(const FFFontResult* font)
         printf("%s [User]", font->fonts[1].chars);
 }
 
+#elif defined(_WIN32) || defined(__MSYS__)
+
+static void printFont(const FFFontResult* font)
+{
+    if(font->fonts[0].length > 0)
+    {
+        printf("%s [Desktop]", font->fonts[0].chars);
+    }
+}
+
 #else
 
 static void printFont(const FFFontResult* font)

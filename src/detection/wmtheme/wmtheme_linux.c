@@ -224,6 +224,6 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
         return detectOpenbox(instance, &wm->dePrettyName, themeOrError);
 
     ffStrbufAppendS(themeOrError, "Unknown WM: ");
-    ffStrbufAppend(themeOrError, &wm->dePrettyName);
+    ffStrbufAppend(themeOrError, &wm->wmPrettyName);
     return false;
 }

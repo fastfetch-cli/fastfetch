@@ -2,6 +2,8 @@
 
 #include <sys/statvfs.h>
 
+void ffDetectDiskWithStatvfs(const char* folderPath, struct statvfs* fs, FFDiskResult* result);
+
 const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
 {
     FF_UNUSED(instance);
@@ -11,12 +13,12 @@ const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
     if(rootRet != 0)
         return "statvfs(\"/\") failed";
 
-    ffStrbufInitS((FFstrbuf *)ffListAdd(folders), FASTFETCH_TARGET_DIR_ROOT"/");
+    ffDetectDiskWithStatvfs(FASTFETCH_TARGET_DIR_ROOT"/", &fsRoot, (FFDiskResult*)ffListAdd(folders));
 
     struct statvfs fsHome;
     int homeRet = statvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome);
     if(homeRet == 0 && (fsRoot.f_fsid != fsHome.f_fsid))
-        ffStrbufInitS((FFstrbuf *)ffListAdd(folders), FASTFETCH_TARGET_DIR_HOME);
+        ffDetectDiskWithStatvfs(FASTFETCH_TARGET_DIR_HOME, &fsHome, (FFDiskResult*)ffListAdd(folders));
 
     return NULL;
 }

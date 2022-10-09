@@ -71,22 +71,32 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "host-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("host", "{2} {3}", 15,
+        constructAndPrintCommandHelpFormat("host", "{2} {3}", 8,
             "product family",
             "product name",
             "product version",
             "product sku",
-            "bios date",
-            "bios release",
-            "bios vendor",
-            "bios version",
-            "board name",
-            "board vendor",
-            "board version",
             "chassis type",
             "chassis vendor",
             "chassis version",
             "sys vendor"
+        );
+    }
+    else if(strcasecmp(command, "bios-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("bios", "{2} {3}", 4,
+            "bios date",
+            "bios release",
+            "bios vendor",
+            "bios version"
+        );
+    }
+    else if(strcasecmp(command, "board-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("board", "{2} {3}", 3,
+            "board name",
+            "board vendor",
+            "board version"
         );
     }
     else if(strcasecmp(command, "kernel-format") == 0)
@@ -114,7 +124,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (xbps), {8} (nix-system), {9} (nix-user), {10} (nix-default), {11} (apk), {12} (pkg), {13} (flatpak), {14} (snap), {15} (brew), {16} (port)", 16,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (xbps), {8} (nix-system), {9} (nix-user), {10} (nix-default), {11} (apk), {12} (pkg), {13} (flatpak), {14} (snap), {15} (brew), {16} (port), {17} (scoop)", 17,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
@@ -131,6 +141,7 @@ static inline void printCommandHelp(const char* command)
             "Number of snap packages",
             "Number of brew packages",
             "Number of macports packages"
+            "Number of scoop packages"
         );
     }
     else if(strcasecmp(command, "shell-format") == 0)
@@ -978,6 +989,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.host.outputFormat);
     else if(strcasecmp(key, "--host-error") == 0)
         optionParseString(key, value, &instance->config.host.errorFormat);
+    else if(strcasecmp(key, "--bios-key") == 0)
+        optionParseString(key, value, &instance->config.bios.key);
+    else if(strcasecmp(key, "--bios-format") == 0)
+        optionParseString(key, value, &instance->config.bios.outputFormat);
+    else if(strcasecmp(key, "--bios-error") == 0)
+        optionParseString(key, value, &instance->config.bios.errorFormat);
     else if(strcasecmp(key, "--kernel-key") == 0)
         optionParseString(key, value, &instance->config.kernel.key);
     else if(strcasecmp(key, "--kernel-format") == 0)
@@ -1367,6 +1384,10 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOS(instance);
     else if(strcasecmp(line, "host") == 0)
         ffPrintHost(instance);
+    else if(strcasecmp(line, "bios") == 0)
+        ffPrintBios(instance);
+    else if(strcasecmp(line, "board") == 0)
+        ffPrintBoard(instance);
     else if(strcasecmp(line, "kernel") == 0)
         ffPrintKernel(instance);
     else if(strcasecmp(line, "uptime") == 0)

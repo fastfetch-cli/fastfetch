@@ -60,6 +60,8 @@ static void getHostProductName(FFstrbuf* name)
 
 void ffDetectHostImpl(FFHostResult* host)
 {
+    ffStrbufInit(&host->error);
+
     ffStrbufInit(&host->productFamily);
     getHostValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->productFamily);
 
@@ -71,27 +73,6 @@ void ffDetectHostImpl(FFHostResult* host)
 
     ffStrbufInit(&host->productSku);
     getHostValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->productSku);
-
-    ffStrbufInit(&host->biosDate);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_date", "/sys/class/dmi/id/bios_date", &host->biosDate);
-
-    ffStrbufInit(&host->biosRelease);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_release", "/sys/class/dmi/id/bios_release", &host->biosRelease);
-
-    ffStrbufInit(&host->biosVendor);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_vendor", "/sys/class/dmi/id/bios_vendor", &host->biosVendor);
-
-    ffStrbufInit(&host->biosVersion);
-    getHostValue("/sys/devices/virtual/dmi/id/bios_version", "/sys/class/dmi/id/bios_version", &host->biosVersion);
-
-    ffStrbufInit(&host->boardName);
-    getHostValue("/sys/devices/virtual/dmi/id/board_name", "/sys/class/dmi/id/board_name", &host->boardName);
-
-    ffStrbufInit(&host->boardVendor);
-    getHostValue("/sys/devices/virtual/dmi/id/board_vendor", "/sys/class/dmi/id/board_vendor", &host->boardVendor);
-
-    ffStrbufInit(&host->boardVersion);
-    getHostValue("/sys/devices/virtual/dmi/id/board_version", "/sys/class/dmi/id/board_version", &host->boardVersion);
 
     ffStrbufInit(&host->chassisType);
     getHostValue("/sys/devices/virtual/dmi/id/chassis_type", "/sys/class/dmi/id/chassis_type", &host->chassisType);
@@ -109,10 +90,10 @@ void ffDetectHostImpl(FFHostResult* host)
     if(ffStrbufStartsWithS(&host->productName, "Standard PC"))
         ffStrbufPrependS(&host->productName, "KVM/QEMU ");
 
-    //On WSL, the real host can't be detected. Instead use WSL as host.
-    if(host->productFamily.length == 0 && host->productName.length == 0 && (
-        getenv("WSLENV") != NULL ||
-        getenv("WSL_DISTRO") != NULL ||
-        getenv("WSL_INTEROP") != NULL
-    )) ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_WSL);
+    if(host->productFamily.length == 0 && host->productName.length == 0)
+    {
+        //On WSL, the real host can't be detected. Instead use WSL as host.
+        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
+            ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_WSL);
+    }
 }

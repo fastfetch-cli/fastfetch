@@ -2,6 +2,8 @@
 
 #import <Foundation/Foundation.h>
 
+void ffDetectDiskWithStatvfs(const char* folderPath, struct statvfs* fs, FFDiskResult* result);
+
 const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
 {
     NSArray *keys = [NSArray arrayWithObjects:NSURLVolumeNameKey, nil];
@@ -18,7 +20,9 @@ const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
         if(removable.boolValue && !instance->config.diskRemovable)
             continue;
 
-        ffStrbufInitS((FFstrbuf *)ffListAdd(folders), [url.relativePath cStringUsingEncoding:NSUTF8StringEncoding]);
+        FFDiskResult* folder = (FFDiskResult*)ffListAdd(folders);
+        ffDetectDiskWithStatvfs([url.relativePath cStringUsingEncoding:NSUTF8StringEncoding], NULL, folder);
+        folder->removable = removable.boolValue;
     }
 
     return NULL;
