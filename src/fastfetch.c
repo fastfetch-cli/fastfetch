@@ -1241,8 +1241,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.libOSMesa);
     else if(strcasecmp(key, "--lib-opencl") == 0)
         optionParseString(key, value, &instance->config.libOpenCL);
-    else if(strcasecmp(key, "--lib-plist") == 0)
-        optionParseString(key, value, &instance->config.libplist);
     else if(strcasecmp(key, "--lib-cjson") == 0)
         optionParseString(key, value, &instance->config.libcJSON);
 
@@ -1310,7 +1308,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
 {
-    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_ROOT"/etc/fastfetch/config.conf");
+    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_ETC"/fastfetch/config.conf");
 }
 
 static void parseConfigFileUser(FFinstance* instance, FFdata* data)

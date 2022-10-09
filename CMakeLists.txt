@@ -46,7 +46,6 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_LIBPLIST "Enable libplist" ON "APPLE" OFF)
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 
@@ -121,6 +120,10 @@ if(NOT TARGET_DIR_HOME)
     else()
         set(TARGET_DIR_HOME "${TARGET_DIR_ROOT}/home")
     endif()
+endif()
+
+if(NOT TARGET_DIR_ETC)
+    set(TARGET_DIR_ETC "${CMAKE_INSTALL_SYSCONFDIR}")
 endif()
 
 #################
@@ -294,17 +297,17 @@ if(APPLE)
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/detection/host/host_apple.c
-        src/detection/os/os_apple.c
+        src/detection/os/os_apple.m
         src/detection/cpu/cpu_apple.c
         src/detection/gpu/gpu_apple.c
         src/detection/battery/battery_apple.c
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/memory/memory_apple.c
         src/detection/displayserver/displayserver_apple.c
-        src/detection/terminalfont/terminalfont_apple.c
+        src/detection/terminalfont/terminalfont_apple.m
         src/detection/media/media_apple.m
         src/detection/disk/disk_apple.m
-        src/detection/wmtheme/wmtheme_apple.c
+        src/detection/wmtheme/wmtheme_apple.m
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
     )
@@ -392,7 +395,6 @@ ff_lib_enable(EGL egl)
 ff_lib_enable(GLX glx)
 ff_lib_enable(OSMESA osmesa)
 ff_lib_enable(OPENCL OpenCL)
-ff_lib_enable(LIBPLIST libplist-2.0)
 ff_lib_enable(LIBCJSON libcjson)
 ff_lib_enable(FREETYPE freetype2)
 

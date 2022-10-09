@@ -1,62 +1,27 @@
 #include "os.h"
-#include "common/properties.h"
 #include "common/sysctl.h"
 
 #include <stdlib.h>
 #include <string.h>
-
-typedef enum PListKey
-{
-    PLIST_KEY_NAME,
-    PLIST_KEY_VERSION,
-    PLIST_KEY_BUILD,
-    PLIST_KEY_OTHER
-} PListKey;
+#import <Foundation/Foundation.h>
 
 static void parseSystemVersion(FFOSResult* os)
 {
-    FILE* plist = fopen("/System/Library/CoreServices/SystemVersion.plist", "r");
-    if(plist == NULL)
-    return;
+    NSError* error;
+    NSString* fileName = @"file:///System/Library/CoreServices/SystemVersion.plist";
+    NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
+                                       error:&error];
+    if(error)
+        return;
 
-    char* line = NULL;
-    size_t len = 0;
-    PListKey key = PLIST_KEY_OTHER;
+    NSString* value;
 
-    FFstrbuf keyBuffer;
-    ffStrbufInit(&keyBuffer);
-
-    while(getline(&line, &len, plist) != EOF)
-    {
-        if(ffParsePropLine(line, "<key>", &keyBuffer))
-        {
-            if(ffStrbufIgnCaseCompS(&keyBuffer, "ProductName") == 0)
-                key = PLIST_KEY_NAME;
-            else if(ffStrbufIgnCaseCompS(&keyBuffer, "ProductUserVisibleVersion") == 0)
-                key = PLIST_KEY_VERSION;
-            else if(ffStrbufIgnCaseCompS(&keyBuffer, "ProductBuildVersion") == 0)
-                key = PLIST_KEY_BUILD;
-            else
-                key = PLIST_KEY_OTHER;
-
-            ffStrbufClear(&keyBuffer);
-            continue;
-        }
-
-        if(key == PLIST_KEY_NAME)
-            ffParsePropLine(line, "<string>", &os->name);
-        else if(key == PLIST_KEY_VERSION)
-            ffParsePropLine(line, "<string>", &os->version);
-        else if(key == PLIST_KEY_BUILD)
-            ffParsePropLine(line, "<string>", &os->buildID);
-    }
-
-    ffStrbufDestroy(&keyBuffer);
-
-    if(line != NULL)
-        free(line);
-
-    fclose(plist);
+    if((value = [dict valueForKey:@"ProductName"]))
+        ffStrbufInitS(&os->name, value.UTF8String);
+    if((value = [dict valueForKey:@"ProductUserVisibleVersion"]))
+        ffStrbufInitS(&os->version, value.UTF8String);
+    if((value = [dict valueForKey:@"ProductBuildVersion"]))
+        ffStrbufInitS(&os->buildID, value.UTF8String);
 }
 
 void parseOSXSoftwareLicense(FFOSResult* os)
