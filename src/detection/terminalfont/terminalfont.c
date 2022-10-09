@@ -42,7 +42,7 @@ static void detectTTY(FFTerminalFontResult* terminalFont)
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
 
-    ffParsePropFile(FASTFETCH_TARGET_DIR_ROOT"/etc/vconsole.conf", "Font =", &fontName);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/vconsole.conf", "Font =", &fontName);
 
     if(fontName.length == 0)
     {
@@ -59,7 +59,7 @@ static void detectTTY(FFTerminalFontResult* terminalFont)
     if(fontName.length > 0)
         ffFontInitCopy(&terminalFont->font, fontName.chars);
     else
-        ffStrbufAppendS(&terminalFont->error, "Couldn't find Font in /etc/vconsole.conf");
+        ffStrbufAppendS(&terminalFont->error, "Couldn't find Font in "FASTFETCH_TARGET_DIR_ETC"/vconsole.conf");
 
     ffStrbufDestroy(&fontName);
 }

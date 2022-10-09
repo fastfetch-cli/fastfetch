@@ -101,7 +101,7 @@ static void detectOS(FFOSResult* os, const FFinstance* instance)
         return;
     }
 
-    if(instance->config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock/etc/bedrock-release", os))
+    if(instance->config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
     {
         if(os->id.length == 0)
             ffStrbufAppendS(&os->id, "bedrock");
@@ -115,7 +115,7 @@ static void detectOS(FFOSResult* os, const FFinstance* instance)
         return;
     }
 
-    parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/os-release", os);
+    parseFile(FASTFETCH_TARGET_DIR_ETC"/os-release", os);
     if(allRelevantValuesSet(os))
         return;
 
@@ -123,7 +123,7 @@ static void detectOS(FFOSResult* os, const FFinstance* instance)
     if(allRelevantValuesSet(os))
         return;
 
-    parseFile(FASTFETCH_TARGET_DIR_ROOT"/etc/lsb-release", os);
+    parseFile(FASTFETCH_TARGET_DIR_ETC"/lsb-release", os);
 }
 
 void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)

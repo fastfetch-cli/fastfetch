@@ -5,7 +5,6 @@
 #define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 17
 
-
 void ffPrintPackages(FFinstance* instance)
 {
     FFPackageCounts counts = {0};

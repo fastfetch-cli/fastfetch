@@ -133,7 +133,16 @@ if(NOT TARGET_DIR_HOME)
 endif()
 
 if(NOT TARGET_DIR_ETC)
-    set(TARGET_DIR_ETC "${CMAKE_INSTALL_SYSCONFDIR}")
+    set(TARGET_DIR_ETC "${TARGET_DIR_ROOT}/etc")
+endif()
+
+#https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT.html
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${TARGET_DIR_USR}" CACHE PATH "..." FORCE)
+endif()
+
+if(NOT CMAKE_INSTALL_SYSCONFDIR)
+    set(CMAKE_INSTALL_SYSCONFDIR "${TARGET_DIR_ETC}" CACHE PATH "..." FORCE)
 endif()
 
 #################
@@ -544,15 +553,6 @@ endif()
 ##################
 # install target #
 ##################
-
-#https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT.html
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "${TARGET_DIR_USR}" CACHE PATH "..." FORCE)
-endif()
-
-if(NOT CMAKE_INSTALL_SYSCONFDIR)
-    set(CMAKE_INSTALL_SYSCONFDIR "${TARGET_DIR_ROOT}/etc" CACHE PATH "..." FORCE)
-endif()
 
 include(GNUInstallDirs)
 

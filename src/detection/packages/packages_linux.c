@@ -357,7 +357,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 
     //pacman branch
-    ffStrbufAppendS(baseDir, "/etc/pacman-mirrors.conf");
+    ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ETC"/pacman-mirrors.conf");
     if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
         ffStrbufAppendS(&packageCounts->pacmanBranch, "stable");
     ffStrbufSubstrBefore(baseDir, baseDirLength);
