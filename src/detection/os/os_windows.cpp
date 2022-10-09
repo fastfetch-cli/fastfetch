@@ -51,12 +51,10 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         ffStrbufClear(&os->variant);
     }
 
-    #ifdef __MSYS__
+    if(getenv("MSYSTEM"))
         ffStrbufAppendS(&os->id, "MSYS2");
-    #else
-        // Enable this after we have Windows logo support
-        ffStrbufAppendF(&os->id, "Windows %*s", &os->version.length, &os->version.chars);
-    #endif
+    else
+        ffStrbufAppendF(&os->id, "Windows %*s", os->version.length, os->version.chars);
 
     ffGetWmiObjString(pclsObj, L"BuildNumber", &os->buildID);
     ffGetWmiObjString(pclsObj, L"OSArchitecture", &os->architecture);

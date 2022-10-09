@@ -1277,6 +1277,102 @@ static const FFlogo* getLogoMsys2()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoWindows11()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Windows 11")
+    FF_LOGO_LINES(
+        "$1\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################\n"
+        "################  ################"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoWindows8()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Windows 8", "Windows 8.1", "Windows 10")
+    FF_LOGO_LINES(
+        "$1                                ..,\n"
+        "                    ....,,:;+ccllll\n"
+        "      ...,,+:;  cllllllllllllllllll\n"
+        ",cclllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "llllllllllllll  lllllllllllllllllll\n"
+        "`'ccllllllllll  lllllllllllllllllll\n"
+        "       `' \\*::  :ccllllllllllllllll\n"
+        "                       ````''*::cll\n"
+        "                                 ``"
+    )
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoWindows()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Windows")
+    FF_LOGO_LINES(
+        "$1        ,.=:!!t3Z3z.,\n"
+        "       :tt:::tt333EE3\n"
+        "$1       Et:::ztt33EEEL$2 @Ee.,      ..,\n"
+        "$1      ;tt:::tt333EE7$2 ;EEEEEEttttt33#\n"
+        "$1     :Et:::zt333EEQ.$2 $EEEEEttttt33QL\n"
+        "$1     it::::tt333EEF$2 @EEEEEEttttt33F\n"
+        "$1    ;3=*^```\"*4EEV$2 :EEEEEEttttt33@.\n"
+        "$3    ,.=::::!t=., $1`$2 @EEEEEEtttz33QF\n"
+        "$3   ;::::::::zt33)$2   \"4EEEtttji3P*\n"
+        "$3  :t::::::::tt33.$4:Z3z..$2  ``$4 ,..g.\n"
+        "$3  i::::::::zt33F$4 AEEEtttt::::ztF\n"
+        "$3 ;:::::::::t33V$4 ;EEEttttt::::t3\n"
+        "$3 E::::::::zt33L$4 @EEEtttt::::z3F\n"
+        "$3{3=*^```\"*4E3)$4 ;EEEtttt:::::tZ`\n"
+        "$3             `$4 :EEEEtttt::::z7\n"
+        "                 \"VEzjt:;;z>*`"
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "32", //green
+        "34", //blue
+        "33" //yellow
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoNixOS()
 {
     FF_LOGO_INIT
@@ -2016,6 +2112,9 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoMintSmall,
         getLogoMintOld,
         getLogoMsys2,
+        getLogoWindows11,
+        getLogoWindows8,
+        getLogoWindows,
         getLogoNixOS,
         getLogoNixOsOld,
         getLogoNixOsSmall,
