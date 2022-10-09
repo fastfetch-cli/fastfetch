@@ -91,11 +91,11 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
 
     ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
     if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
-        result->terminalProcessName.length -= 4;
+        ffStrbufSubstrBefore(&result->terminalPrettyName, result->terminalPrettyName.length - 4);
 
-    if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "WindowsTerminal"))
+    if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "WindowsTerminal") == 0)
         ffStrbufSetS(&result->terminalPrettyName, "Windows Terminal");
-    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "conhost"))
+    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "conhost") == 0)
         ffStrbufSetS(&result->terminalPrettyName, "Console Window Host");
 
     return ppid;

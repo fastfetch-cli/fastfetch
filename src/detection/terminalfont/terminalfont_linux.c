@@ -352,7 +352,8 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "gnome-terminal-") == 0)
         detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0)
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0 ||
+        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WindowsTerminal.exe") == 0)
         detectFromWindowsTeriminal(instance, terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "mintty") == 0)
         detectMintty(instance, terminalFont);
