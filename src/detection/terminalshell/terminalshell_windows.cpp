@@ -76,7 +76,9 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         getShellVersion(&result->shellExe, &result->shellVersion);
     }
     else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell") == 0)
-        ffStrbufSetS(&result->shellProcessName, "Windows PowerShell");
+        ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell");
+    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "cmd") == 0)
+        ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
 
     return ppid;
 }
