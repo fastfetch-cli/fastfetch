@@ -398,20 +398,107 @@ void ffFinish(FFinstance* instance)
     resetConsole();
 }
 
-void ffDestroyInstance(FFinstance* instance)
+static void destroyModuleArg(FFModuleArgs* args)
+{
+    ffStrbufDestroy(&args->key);
+    ffStrbufDestroy(&args->outputFormat);
+    ffStrbufDestroy(&args->errorFormat);
+}
+
+static void destroyConfig(FFinstance* instance)
+{
+    ffStrbufDestroy(&instance->config.logo.source);
+    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
+        ffStrbufDestroy(&instance->config.logo.colors[i]);
+    ffStrbufDestroy(&instance->config.colorKeys);
+    ffStrbufDestroy(&instance->config.colorTitle);
+    ffStrbufDestroy(&instance->config.separator);
+
+    destroyModuleArg(&instance->config.os);
+    destroyModuleArg(&instance->config.host);
+    destroyModuleArg(&instance->config.kernel);
+    destroyModuleArg(&instance->config.uptime);
+    destroyModuleArg(&instance->config.processes);
+    destroyModuleArg(&instance->config.packages);
+    destroyModuleArg(&instance->config.shell);
+    destroyModuleArg(&instance->config.resolution);
+    destroyModuleArg(&instance->config.de);
+    destroyModuleArg(&instance->config.wm);
+    destroyModuleArg(&instance->config.wmTheme);
+    destroyModuleArg(&instance->config.theme);
+    destroyModuleArg(&instance->config.icons);
+    destroyModuleArg(&instance->config.font);
+    destroyModuleArg(&instance->config.cursor);
+    destroyModuleArg(&instance->config.terminal);
+    destroyModuleArg(&instance->config.terminalFont);
+    destroyModuleArg(&instance->config.cpu);
+    destroyModuleArg(&instance->config.cpuUsage);
+    destroyModuleArg(&instance->config.gpu);
+    destroyModuleArg(&instance->config.memory);
+    destroyModuleArg(&instance->config.swap);
+    destroyModuleArg(&instance->config.disk);
+    destroyModuleArg(&instance->config.battery);
+    destroyModuleArg(&instance->config.powerAdapter);
+    destroyModuleArg(&instance->config.locale);
+    destroyModuleArg(&instance->config.localIP);
+    destroyModuleArg(&instance->config.publicIP);
+    destroyModuleArg(&instance->config.weather);
+    destroyModuleArg(&instance->config.player);
+    destroyModuleArg(&instance->config.song);
+    destroyModuleArg(&instance->config.dateTime);
+    destroyModuleArg(&instance->config.date);
+    destroyModuleArg(&instance->config.time);
+    destroyModuleArg(&instance->config.vulkan);
+    destroyModuleArg(&instance->config.openGL);
+    destroyModuleArg(&instance->config.openCL);
+    destroyModuleArg(&instance->config.users);
+
+    ffStrbufDestroy(&instance->config.libPCI);
+    ffStrbufDestroy(&instance->config.libVulkan);
+    ffStrbufDestroy(&instance->config.libWayland);
+    ffStrbufDestroy(&instance->config.libXcbRandr);
+    ffStrbufDestroy(&instance->config.libXcb);
+    ffStrbufDestroy(&instance->config.libXrandr);
+    ffStrbufDestroy(&instance->config.libX11);
+    ffStrbufDestroy(&instance->config.libGIO);
+    ffStrbufDestroy(&instance->config.libDConf);
+    ffStrbufDestroy(&instance->config.libDBus);
+    ffStrbufDestroy(&instance->config.libXFConf);
+    ffStrbufDestroy(&instance->config.libSQLite3);
+    ffStrbufDestroy(&instance->config.librpm);
+    ffStrbufDestroy(&instance->config.libImageMagick);
+    ffStrbufDestroy(&instance->config.libZ);
+    ffStrbufDestroy(&instance->config.libChafa);
+    ffStrbufDestroy(&instance->config.libEGL);
+    ffStrbufDestroy(&instance->config.libGLX);
+    ffStrbufDestroy(&instance->config.libOSMesa);
+    ffStrbufDestroy(&instance->config.libOpenCL);
+    ffStrbufDestroy(&instance->config.libcJSON);
+    ffStrbufDestroy(&instance->config.libfreetype);
+
+    ffStrbufDestroy(&instance->config.diskFolders);
+    ffStrbufDestroy(&instance->config.batteryDir);
+    ffStrbufDestroy(&instance->config.separatorString);
+    ffStrbufDestroy(&instance->config.localIpNamePrefix);
+    ffStrbufDestroy(&instance->config.publicIpUrl);
+    ffStrbufDestroy(&instance->config.weatherOutputFormat);
+    ffStrbufDestroy(&instance->config.osFile);
+    ffStrbufDestroy(&instance->config.playerName);
+}
+
+static void destroyState(FFinstance* instance)
 {
     for(uint32_t i = 0; i < instance->state.configDirs.length; ++i)
         ffStrbufDestroy((FFstrbuf*)ffListGet(&instance->state.configDirs, i));
     ffListDestroy(&instance->state.configDirs);
 
     ffStrbufDestroy(&instance->state.cacheDir);
+}
 
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufDestroy(&instance->config.logo.colors[i]);
-
-    ffStrbufDestroy(&instance->config.colorKeys);
-    ffStrbufDestroy(&instance->config.colorTitle);
-    ffStrbufDestroy(&instance->config.separator);
+void ffDestroyInstance(FFinstance* instance)
+{
+    destroyConfig(instance);
+    destroyState(instance);
 }
 
 //Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
