@@ -1,3 +1,33 @@
+# 1.7.3
+
+A lot of small improvements for MacOS & BSD platforms.
+
+Features:
+* BSD is now officially supported (#228)
+* MacPorts package manager support (@SladeGetz, #234)
+* Battery support for MacOS (@CarterLi, #235)
+* Processes, swap & terminal font support for MacOS(@CarterLi, #237)
+* Song support for MacOS (@CarterLi, #242)
+* Player support for MacOS (@CarterLi, #245)
+* WM theme support for MacOS (@CarterLi, #246)
+* CPU usage support for MacOS (@CarterLi, #247)
+* Power Adapter module (@CarterLi, #249)
+* Windows terminal font for WSL (@CarterLi, #254)
+* Temps & Font support for MacOS (@CarterLi, #258)
+* Terminal font support for Termux (@CarterLi, #263)
+* Weather module (@CarterLi, #266)
+
+Logos
+* Crystal linux (@AloneER0, #239)
+* FreeBSD (@draumaz, #244)
+* New Ubuntu (@AloneER0, #259)
+
+Bugfixes:
+* Don't segfault in GPU code on Intel Macs (@CarterLi, #236)
+* Don't use hardcoded size units in presets (@dr460nf1r3, #255)
+* Don't crash with some format strings (#252)
+* --logo-none keeps key color now (#264)
+
 # 1.7.2
 
 Fixes the bash completions
