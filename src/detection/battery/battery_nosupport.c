@@ -4,5 +4,5 @@
 const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
 {
     FF_UNUSED(instance, results)
-    return "Unimplemented";
+    return "Not supported on this platform";
 }

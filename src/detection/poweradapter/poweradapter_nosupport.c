@@ -3,5 +3,5 @@
 const char* ffDetectPowerAdapterImpl(FFinstance* instance, FFlist* results)
 {
     FF_UNUSED(instance, results);
-    return "Unimplemented";
+    return "Not supported on this platform";
 }
