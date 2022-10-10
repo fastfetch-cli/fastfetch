@@ -36,6 +36,10 @@ void ffDetectPackages(FFinstance* instance, FFPackageCounts* counts)
 
     FFstrbuf scoopPath;
     ffStrbufInitF(&scoopPath, "%s/scoop/apps/*", getenv("USERPROFILE"));
-    counts->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY) - 3; // . .. scoop
+    counts->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY);
+    if(counts->scoop >= 3)
+        counts->scoop -= 3; // . .. scoop
+    else
+        counts->scoop = 0;
     ffStrbufDestroy(&scoopPath);
 }
