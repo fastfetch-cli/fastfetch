@@ -1,3 +1,7 @@
+# 1.7.4
+
+The last element in the default structure (currently the color blocks) is now printed again (#283)
+
 # 1.7.3
 
 A lot of small improvements for MacOS & BSD platforms.

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.7.3
+    VERSION 1.7.4
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -155,9 +155,10 @@ endif()
 
 function(fastfetch_load_text FILENAME OUTVAR)
     file(READ "${FILENAME}" TEMP)
-    string(REPLACE "\n" "\\n" TEMP "${TEMP}")
-    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")
-    string(REPLACE "$\\" "" TEMP "${TEMP}")
+    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
+    string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
+    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
+    string(REPLACE "$\\" "" TEMP "${TEMP}")       # Remove $\, so we can unescape some things
     set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
 endfunction(fastfetch_load_text)
 

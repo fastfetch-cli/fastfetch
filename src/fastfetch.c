@@ -769,12 +769,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--print-config-system") == 0)
     {
-        fputs(FASTFETCH_DATATEXT_CONFIG_SYSTEM, stdout);
+        puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
         exit(0);
     }
     else if(strcasecmp(key, "--print-config-user") == 0)
     {
-        fputs(FASTFETCH_DATATEXT_CONFIG_USER, stdout);
+        puts(FASTFETCH_DATATEXT_CONFIG_USER);
         exit(0);
     }
     else if(strcasecmp(key, "--print-structure") == 0)
@@ -784,7 +784,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--list-modules") == 0)
     {
-        fputs(FASTFETCH_DATATEXT_MODULES, stdout);
+        puts(FASTFETCH_DATATEXT_MODULES);
         exit(0);
     }
     else if(strcasecmp(key, "--list-presets") == 0)
@@ -1464,18 +1464,14 @@ int main(int argc, const char** argv)
     if(data.structure.length == 0)
         ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
 
-    #define FF_CONTAINS_MODULE_NAME(moduleName)\
-        ffStrbufContainIgnCaseS(&data.structure, ":" #moduleName ":") ||\
-        ffStrbufStartsWithIgnCaseS(&data.structure, #moduleName ":") ||\
-        ffStrbufEndsWithIgnCaseS(&data.structure, ":" #moduleName)
-
-    if(FF_CONTAINS_MODULE_NAME(CPUUsage))
+    if(ffStrbufContainIgnCaseS(&data.structure, "CPUUsage"))
         ffPrepareCPUUsage();
-    if(FF_CONTAINS_MODULE_NAME(PublicIp))
+
+    if(ffStrbufContainIgnCaseS(&data.structure, "PublicIp"))
         ffPreparePublicIp(&instance);
-    if(FF_CONTAINS_MODULE_NAME(Weather))
+
+    if(ffStrbufContainIgnCaseS(&data.structure, "Weather"))
         ffPrepareWeather(&instance);
-    #undef FF_CONTAINS_MODULE_NAME
 
     ffStart(&instance);
 
