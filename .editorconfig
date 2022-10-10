@@ -10,7 +10,7 @@ trim_trailing_whitespace = true
 [*.{md,fflogo}]
 trim_trailing_whitespace = false
 
-[*.{txt,fflogo}]
+[*.{fflogo}]
 insert_final_newline = false
 
 [*.yml]
