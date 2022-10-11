@@ -171,14 +171,13 @@ jobs:
         run: cmake --build . --target fastfetch --target flashfetch # Makes no sense to install exes to /usr/bin for Windows
 
       - name: copy necessary dlls
-        run: cp /usr/bin/msys-2.0.dll /clang64/bin/*.dll .
+        run: cp /usr/bin/msys-2.0.dll /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
 
-      # Crashes on start for some reason, but it provides binaries at least. Needs investigation.
-      # - name: run fastfetch
-      #   run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+      - name: run fastfetch
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
-      # - name: run flashfetch
-      #   run: ./flashfetch
+      - name: run flashfetch
+        run: ./flashfetch
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
