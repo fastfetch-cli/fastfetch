@@ -23,9 +23,7 @@ extern "C" void ffDetectHostImpl(FFHostResult* host)
     IWbemClassObject *pclsObj = NULL;
     ULONG uReturn = 0;
 
-    pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-
-    if(uReturn == 0)
+    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
     {
         ffStrbufInitS(&host->error, "No Wmi result returned");
         pEnumerator->Release();

@@ -10,11 +10,18 @@ static void addNewIp(FFlist* list, const wchar_t* name, const char* addr, bool i
     FFLocalIpResult* ip = (FFLocalIpResult*) ffListAdd(list);
 
     int len = (int)wcslen(name);
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, name, len, NULL, 0, NULL, NULL);
-    ffStrbufInitA(&ip->name, (uint32_t)size_needed + 1);
-    WideCharToMultiByte(CP_UTF8, 0, name, len, ip->name.chars, size_needed, NULL, NULL);
-    ip->name.length = (uint32_t)size_needed;
-    ip->name.chars[size_needed] = '\0';
+    if(len > 0)
+    {
+        int size_needed = WideCharToMultiByte(CP_UTF8, 0, name, len, NULL, 0, NULL, NULL);
+        ffStrbufInitA(&ip->name, (uint32_t)size_needed + 1);
+        WideCharToMultiByte(CP_UTF8, 0, name, len, ip->name.chars, size_needed, NULL, NULL);
+        ip->name.length = (uint32_t)size_needed;
+        ip->name.chars[size_needed] = '\0';
+    }
+    else
+    {
+        ffStrbufInitS(&ip->name, "*");
+    }
 
     ffStrbufInitS(&ip->addr, addr);
     ip->ipv6 = ipv6;

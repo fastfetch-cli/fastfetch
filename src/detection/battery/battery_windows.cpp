@@ -26,7 +26,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         ffStrbufInit(&battery->modelName);
         ffGetWmiObjString(pclsObj, L"Name", &battery->modelName);
 
-        uint64_t chemistry;
+        uint64_t chemistry = 0;
         ffGetWmiObjUnsigned(pclsObj, L"Chemistry", &chemistry);
         switch(chemistry)
         {
@@ -38,6 +38,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             case 6: ffStrbufInitS(&battery->technology, "Lithium-ion"); break;
             case 7: ffStrbufInitS(&battery->technology, "Zinc air"); break;
             case 8: ffStrbufInitS(&battery->technology, "Lithium Polymer"); break;
+            default: ffStrbufInit(&battery->technology); break;
         }
 
         uint64_t capacity;
@@ -59,12 +60,13 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             case 9: ffStrbufInitS(&battery->status, "Charging and Critical"); break;
             case 10: ffStrbufInitS(&battery->status, "Undefined"); break;
             case 11: ffStrbufInitS(&battery->status, "Partially Charged"); break;
+            default: ffStrbufInit(&battery->status); break;
         }
 
         battery->temperature = FF_BATTERY_TEMP_UNSET;
     }
 
-    pclsObj->Release();
+    if(pclsObj) pclsObj->Release();
     pEnumerator->Release();
     return nullptr;
 }

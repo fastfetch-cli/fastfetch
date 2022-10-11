@@ -33,13 +33,21 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         return;
     }
 
-    ffGetWmiObjString(pclsObj, L"Caption", &os->variant); // Microsoft Windows 11 家庭中文版
+    ffGetWmiObjString(pclsObj, L"Caption", &os->variant);
     if(ffStrbufStartsWithS(&os->variant, "Microsoft Windows "))
     {
         ffStrbufAppendS(&os->name, "Microsoft Windows");
         ffStrbufAppendS(&os->prettyName, "Windows");
 
-        ffStrbufSubstrAfter(&os->variant, strlen("Microsoft Windows ") - 1); // 11 家庭中文版
+        ffStrbufSubstrAfter(&os->variant, strlen("Microsoft Windows ") - 1);
+
+        if(ffStrbufStartsWithS(&os->variant, "Server "))
+        {
+            ffStrbufAppendS(&os->name, " Server");
+            ffStrbufAppendS(&os->prettyName, " Server");
+            ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
+        }
+
         uint32_t index = ffStrbufFirstIndexC(&os->variant, ' ');
         ffStrbufAppendNS(&os->version, index, os->variant.chars);
         ffStrbufSubstrAfter(&os->variant, index);

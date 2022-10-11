@@ -19,9 +19,7 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
     IWbemClassObject *pclsObj = NULL;
     ULONG uReturn = 0;
 
-    pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-
-    if(uReturn == 0)
+    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
     {
         ffStrbufInitS(&result->error, "No WMI result returned");
         pEnumerator->Release();

@@ -77,8 +77,15 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     }
     else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell") == 0)
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell");
+    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell_ise") == 0)
+        ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell ISE");
     else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "cmd") == 0)
         ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
+    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "explorer") == 0)
+    {
+        ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer"); // Started without shell
+        return 0;
+    }
 
     return ppid;
 }
@@ -99,6 +106,8 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetS(&result->terminalPrettyName, "Windows Terminal");
     else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "conhost") == 0)
         ffStrbufSetS(&result->terminalPrettyName, "Console Window Host");
+    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "explorer") == 0)
+        ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
 
     return ppid;
 }
@@ -148,7 +157,6 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         return &result;
 
     // TODO: handle nested shells
-    // TODO: handle running without shells ( dblclick exe in Windows Explorer )
 
     ppid = getTerminalInfo(&result, ppid);
     if(ppid == 0)
