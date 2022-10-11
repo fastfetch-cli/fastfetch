@@ -95,7 +95,7 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
         strcasecmp(name, "dash")      == 0 ||
         strcasecmp(name, "git-shell") == 0
     ) {
-        ffStrbufAppendS(&result->shellProcessName, name);
+        ffStrbufSetS(&result->shellProcessName, name); // prevent from `fishbash`
         getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
 
         getTerminalShell(result, ppid);
