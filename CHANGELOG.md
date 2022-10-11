@@ -1,3 +1,7 @@
+# 1.7.5
+
+Fixes a crash on linux that could happen when getting zsh version (#285)
+
 # 1.7.4
 
 The last element in the default structure (currently the color blocks) is now printed again (#283)
