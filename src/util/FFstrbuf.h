@@ -184,6 +184,9 @@ static inline FF_C_NODISCARD uint32_t ffStrbufFirstIndexS(const FFstrbuf* strbuf
 
 static inline FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf, char c)
 {
+    if(strbuf->length == 0)
+        return strbuf->length;
+
     return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
 }
 
