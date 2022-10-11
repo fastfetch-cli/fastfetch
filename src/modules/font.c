@@ -23,6 +23,7 @@ static void printFont(const FFFontResult* font)
     }
 
     ffStrbufWriteTo(&gtk, stdout);
+    ffStrbufDestroy(&gtk);
 }
 
 #elif defined(__APPLE__)
