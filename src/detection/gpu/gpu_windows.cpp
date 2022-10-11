@@ -38,7 +38,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     }
 
-    pclsObj->Release();
+    if(pclsObj) pclsObj->Release();
     pEnumerator->Release();
     return nullptr;
 }

@@ -2,6 +2,7 @@
 
 #include <synchapi.h>
 #include <wchar.h>
+#include <math.h>
 
 //https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
 //https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes
@@ -232,7 +233,7 @@ bool ffGetWmiObjSigned(IWbemClassObject* obj, const wchar_t* key, int64_t* integ
             case VT_UI4: *integer = (int64_t)vtProp.uintVal; break;
             case VT_UI8: *integer = (int64_t)vtProp.ullVal; break;
             case VT_BOOL: *integer = vtProp.boolVal != VARIANT_FALSE; break;
-            default: result = false;
+            default: *integer = 0; result = false;
         }
     }
     VariantClear(&vtProp);
@@ -266,7 +267,7 @@ bool ffGetWmiObjUnsigned(IWbemClassObject* obj, const wchar_t* key, uint64_t* in
             case VT_UI4: *integer = vtProp.uintVal; break;
             case VT_UI8: *integer = vtProp.ullVal; break;
             case VT_BOOL: *integer = vtProp.boolVal != VARIANT_FALSE; break;
-            default: result = false;
+            default: *integer = 0; result = false;
         }
     }
     VariantClear(&vtProp);
@@ -302,7 +303,7 @@ bool ffGetWmiObjReal(IWbemClassObject* obj, const wchar_t* key, double* real)
             case VT_R4: *real = vtProp.fltVal; break;
             case VT_R8: *real = vtProp.dblVal; break;
             case VT_BOOL: *real = vtProp.boolVal != VARIANT_FALSE; break;
-            default: result = false;
+            default: *real = NAN; result = false;
         }
     }
     VariantClear(&vtProp);

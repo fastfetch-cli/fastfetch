@@ -37,6 +37,6 @@ next:
     if(users->length == 0)
         ffStrbufAppendS(error, "Unable to detect users");
 
-    pclsObj->Release();
+    if(pclsObj) pclsObj->Release();
     pEnumerator->Release();
 }
