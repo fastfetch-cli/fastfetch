@@ -11,6 +11,10 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#ifdef __APPLE__
+    #include <libproc.h>
+#endif
+
 static void setExeName(FFstrbuf* exe, const char** exeName)
 {
     assert(exe->length > 0);
@@ -19,64 +23,92 @@ static void setExeName(FFstrbuf* exe, const char** exeName)
         *exeName = exe->chars + lastSlashIndex + 1;
 }
 
-static void getProcessInformation(const char* pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName)
+static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName)
 {
     assert(processName->length > 0);
-
-    FFstrbuf cmdlineFilePath;
-    ffStrbufInit(&cmdlineFilePath);
-    ffStrbufAppendS(&cmdlineFilePath, "/proc/");
-    ffStrbufAppendS(&cmdlineFilePath, pid);
-    ffStrbufAppendS(&cmdlineFilePath, "/cmdline");
-
     ffStrbufClear(exe);
-    if(ffAppendFileBuffer(cmdlineFilePath.chars, exe))
+
+    #if defined(__linux__) || defined(__MSYS__)
+
+    char cmdlineFilePath[64];
+    snprintf(cmdlineFilePath, sizeof(cmdlineFilePath), "/proc/%d/cmdline", (int)pid);
+
+    if(ffAppendFileBuffer(cmdlineFilePath, exe))
     {
         ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
         ffStrbufTrimLeft(exe, '-'); //Happens in TTY
     }
 
+    #elif defined(__APPLE__)
+
+    int length = proc_pidpath((int)pid, exe->chars, exe->allocated);
+    if(length > 0)
+        exe->length = (uint32_t)length;
+
+    #else
+
+    //TODO: support bsd (https://www.freebsd.org/cgi/man.cgi?query=kinfo_getproc)
+
+    #endif
+
     if(exe->length == 0)
         ffStrbufSet(exe, processName);
 
     setExeName(exe, exeName);
-
-    ffStrbufDestroy(&cmdlineFilePath);
 }
 
-static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
+static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 {
-    FFstrbuf statFilePath;
-    ffStrbufInit(&statFilePath);
-    ffStrbufAppendS(&statFilePath, "/proc/");
-    ffStrbufAppendS(&statFilePath, pid);
-    ffStrbufAppendS(&statFilePath, "/stat");
+    const char* error = NULL;
 
-    FILE* stat = fopen(statFilePath.chars, "r");
+    #if defined(__linux__) || defined(__MSYS__)
 
-    ffStrbufDestroy(&statFilePath);
-
+    char statFilePath[64];
+    snprintf(statFilePath, sizeof(statFilePath), "/proc/%d/stat", (int)pid);
+    FILE* stat = fopen(statFilePath, "r");
     if(stat == NULL)
-        return;
+        return "fopen(statFilePath, \"r\") failed";
 
+    *ppid = 0;
+    if(
+        fscanf(stat, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
+        !ffStrSet(name) ||
+        *ppid == 0
+    )
+        error = "fscanf(stat) failed";
+
+    fclose(stat);
+
+    #elif defined(__APPLE__)
+
+    struct proc_bsdshortinfo proc;
+    if(proc_pidinfo(pid, PROC_PIDT_SHORTBSDINFO, 0, &proc, PROC_PIDT_SHORTBSDINFO_SIZE) <= 0)
+        error = "proc_pidinfo(pid) failed";
+    else
+    {
+        *ppid = (pid_t)proc.pbsi_ppid;
+        strncpy(name, proc.pbsi_comm, 16); //trancated to 16 chars
+    }
+
+    #else
+
+    //TODO: support bsd (https://www.freebsd.org/cgi/man.cgi?query=kinfo_getproc)
+    error = "unimplemented";
+
+    #endif
+
+    return error;
+}
+
+static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
+{
     char name[256];
     name[0] = '\0';
 
-    char ppid[256];
-    ppid[0] = '\0';
+    pid_t ppid = 0;
 
-    if(
-        fscanf(stat, "%*s (%255[^)]) %*c %255s", name, ppid) != 2 || //stat (comm) state ppid
-        !ffStrSet(name) ||
-        !ffStrSet(ppid) ||
-        *ppid == '-' ||
-        strcasecmp(ppid, "0") == 0
-    ) {
-        fclose(stat);
+    if(getProcessNameAndPpid(pid, name, &ppid))
         return;
-    }
-
-    fclose(stat);
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
@@ -86,7 +118,9 @@ static void getTerminalShell(FFTerminalShellResult* result, const char* pid)
         strcasecmp(name, "strace")        == 0 ||
         strcasecmp(name, "sshd")          == 0 ||
         strcasecmp(name, "gdb")           == 0 ||
-        strcasecmp(name, "guake-wrapped") == 0
+        strcasecmp(name, "lldb")          == 0 ||
+        strcasecmp(name, "guake-wrapped") == 0 ||
+        strcasestr(name, "debug")         != NULL
     ) {
         getTerminalShell(result, ppid);
         return;
@@ -308,9 +342,7 @@ const FFTerminalShellResult*
     result.userShellExeName = result.userShellExe.chars;
     ffStrbufInit(&result.userShellVersion);
 
-    char ppid[32];
-    snprintf(ppid, sizeof(ppid) - 1, "%i", getppid());
-    getTerminalShell(&result, ppid);
+    getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
     getUserShellFromEnv(&result);
