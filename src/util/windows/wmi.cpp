@@ -142,6 +142,11 @@ IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error)
 
 void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf) {
     int len = (int)SysStringLen(bstr);
+    if(len <= 0)
+    {
+        ffStrbufClear(strbuf);
+        return;
+    }
     int size_needed = WideCharToMultiByte(CP_UTF8, 0, bstr, len, nullptr, 0, nullptr, nullptr);
     ffStrbufEnsureFree(strbuf, (uint32_t)size_needed);
     WideCharToMultiByte(CP_UTF8, 0, bstr, len, strbuf->chars, size_needed, nullptr, nullptr);

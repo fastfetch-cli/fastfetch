@@ -207,7 +207,7 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
         uint64_t tmp = 0;
         for (uint32_t i = 0; i < val.dataSize; i++)
             tmp += (uint64_t)((uint8_t)(val.bytes[i]) * pow(256, val.dataSize - 1 - i));
-        *value = tmp;
+        *value = (double)tmp;
     }
     else if (strcmp(val.dataType, kDataTypeFlt) == 0)
     {

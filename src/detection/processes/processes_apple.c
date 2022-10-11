@@ -11,7 +11,7 @@ uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
 
     if(sysctl(request, sizeof(request) / sizeof(*request), NULL, &length, NULL, 0) != 0)
     {
-        ffStrbufAppend(error, "sysctl() failed");
+        ffStrbufAppendS(error, "sysctl() failed");
         return 0;
     }
     return (uint32_t)(length / sizeof(struct kinfo_proc));

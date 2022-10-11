@@ -11,7 +11,7 @@ static void calculatePercentage(FFMemoryStorage* storage)
     if(storage->bytesTotal == 0)
         storage->percentage = 0;
     else
-        storage->percentage = (uint8_t) ((storage->bytesUsed / (long double) storage->bytesTotal) * 100.0);
+        storage->percentage = (uint8_t) (((long double) storage->bytesUsed / (long double) storage->bytesTotal) * 100.0);
 }
 
 const FFMemoryResult* ffDetectMemory()

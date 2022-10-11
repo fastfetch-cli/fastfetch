@@ -24,7 +24,7 @@ static void printFolder(FFinstance* instance, FFDiskResult* folder)
         });
     }
 
-    uint8_t percentage = (uint8_t) ((folder->used / (long double) folder->total) * 100.0);
+    uint8_t percentage = (uint8_t) (((long double) folder->used / (long double) folder->total) * 100.0);
 
     FFstrbuf usedPretty;
     ffStrbufInit(&usedPretty);
