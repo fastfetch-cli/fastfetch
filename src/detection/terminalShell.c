@@ -210,7 +210,6 @@ static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
         "--version",
         NULL
     });
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrBeforeLastC(version, ' ');
     ffStrbufSubstrAfterFirstC(version, ' ');
 }
