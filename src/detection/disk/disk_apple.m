@@ -1,5 +1,6 @@
 #include "disk.h"
 
+#include <sys/statvfs.h>
 #import <Foundation/Foundation.h>
 
 void ffDetectDiskWithStatvfs(const char* folderPath, struct statvfs* fs, FFDiskResult* result);
