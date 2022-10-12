@@ -365,8 +365,8 @@ if(MSYS)
         src/detection/font/font_windows.cpp
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalshell/terminalshell_windows.cpp
-        src/detection/terminalfont/terminalfont_linux.c
         src/detection/packages/packages_linux.c
+        src/detection/terminalfont/terminalfont_windows.c
         src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
         src/detection/localip/localip_windows.c
