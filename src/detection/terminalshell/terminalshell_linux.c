@@ -3,13 +3,13 @@
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
+#include "common/thread.h"
 #include "terminalshell.h"
 
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
 
 #ifdef __APPLE__
     #include <libproc.h>
@@ -318,13 +318,13 @@ const FFTerminalShellResult*
 {
     FF_UNUSED(instance);
 
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -361,6 +361,6 @@ const FFTerminalShellResult*
     else
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

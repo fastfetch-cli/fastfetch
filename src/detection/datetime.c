@@ -1,21 +1,21 @@
 #include "fastfetch.h"
 #include "detection/datetime.h"
+#include "common/thread.h"
 
 #include <time.h>
-#include <pthread.h>
 
 const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
 {
     FF_UNUSED(instance); //We may need it later for additional configuration
 
     static FFDateTimeResult result;
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if (init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -68,6 +68,6 @@ const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
     ffStrbufInitA(&result.secondPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
     result.secondPretty.length = (uint32_t) strftime(result.secondPretty.chars, ffStrbufGetFree(&result.secondPretty), "%S", tm);
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

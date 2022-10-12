@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/caching.h"
 #include "common/parsing.h"
+#include "common/thread.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
@@ -9,7 +10,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <signal.h>
-#include <pthread.h>
 
 static bool strbufEqualsAdapter(const void* first, const void* second)
 {
@@ -259,87 +259,39 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-#if !defined(__ANDROID__) && !defined(_WIN32) && !defined(__MSYS__)
+#ifdef FF_HAVE_THREADS
 
-static void* connectDisplayServerThreadMain(void* instance)
-{
-    ffConnectDisplayServer((FFinstance*)instance);
-    return NULL;
-}
+FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
 
-#if !defined(__APPLE__)
+#if !(defined(__APPLE__) || defined(__MSYS__) || defined(_WIN32))
 
-static void* detectPlasmaThreadMain(void* instance)
-{
-    ffDetectQt((FFinstance*)instance);
-    return NULL;
-}
+#define FF_DETECT_QT_GTK 1
 
-static void* detectGTK2ThreadMain(void* instance)
-{
-    ffDetectGTK2((FFinstance*)instance);
-    return NULL;
-}
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectQt, FFinstance*)
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK2, FFinstance*)
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK3, FFinstance*)
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK4, FFinstance*)
 
-static void* detectGTK3ThreadMain(void* instance)
-{
-    ffDetectGTK3((FFinstance*)instance);
-    return NULL;
-}
+#endif //!(defined(__APPLE__) || defined(__MSYS__) || defined(_WIN32))
 
-static void* detectGTK4ThreadMain(void* instance)
-{
-    ffDetectGTK4((FFinstance*)instance);
-    return NULL;
-}
-
-static void* startThreadsThreadMain(void* instance)
-{
-    pthread_t dsThread;
-    pthread_create(&dsThread, NULL, connectDisplayServerThreadMain, instance);
-    pthread_detach(dsThread);
-
-    pthread_t gtk2Thread;
-    pthread_create(&gtk2Thread, NULL, detectGTK2ThreadMain, instance);
-    pthread_detach(gtk2Thread);
-
-    pthread_t gtk3Thread;
-    pthread_create(&gtk3Thread, NULL, detectGTK3ThreadMain, instance);
-    pthread_detach(gtk3Thread);
-
-    pthread_t gtk4Thread;
-    pthread_create(&gtk4Thread, NULL, detectGTK4ThreadMain, instance);
-    pthread_detach(gtk4Thread);
-
-    pthread_t plasmaThread;
-    pthread_create(&plasmaThread, NULL, detectPlasmaThreadMain, instance);
-    pthread_detach(plasmaThread);
-
-    return NULL;
-}
+#endif //FF_HAVE_THREADS
 
 void startDetectionThreads(FFinstance* instance)
 {
-    pthread_t startThreadsThread;
-    pthread_create(&startThreadsThread, NULL, startThreadsThreadMain, instance);
-    pthread_detach(startThreadsThread);
-}
+    #ifdef FF_HAVE_THREADS
+    ffThreadCreateAndDetach(ffConnectDisplayServerThreadMain, instance);
 
-#else // !__APPLE__
-void startDetectionThreads(FFinstance* instance)
-{
-    pthread_t startThreadsThread;
-    pthread_create(&startThreadsThread, NULL, connectDisplayServerThreadMain, instance);
-    pthread_detach(startThreadsThread);
-}
-#endif // __APPLE__
+    #ifdef FF_DETECT_QT_GTK
+    ffThreadCreateAndDetach(ffDetectQtThreadMain, instance);
+    ffThreadCreateAndDetach(ffDetectGTK2ThreadMain, instance);
+    ffThreadCreateAndDetach(ffDetectGTK3ThreadMain, instance);
+    ffThreadCreateAndDetach(ffDetectGTK4ThreadMain, instance);
+    #endif
 
-#else // !__ANDROID__
-void startDetectionThreads(FFinstance* instance)
-{
+    #else
     FF_UNUSED(instance);
+    #endif
 }
-#endif // __ANDROID__
 
 static volatile bool ffDisableLinewrap = true;
 static volatile bool ffHideCursor = true;
