@@ -1,11 +1,11 @@
 #include "fastfetch.h"
 #include "detection/qt.h"
 #include "common/properties.h"
+#include "common/thread.h"
 #include "detection/displayserver/displayserver.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 
 static inline bool allValuesSet(const FFQtResult* result)
 {
@@ -135,12 +135,12 @@ const FFQtResult* ffDetectQt(const FFinstance* instance)
 {
     static FFQtResult result;
 
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -157,6 +157,6 @@ const FFQtResult* ffDetectQt(const FFinstance* instance)
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "LXQt") == 0)
         detectLXQt(instance, &result);
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

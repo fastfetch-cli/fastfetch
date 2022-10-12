@@ -3,21 +3,21 @@
 #ifndef FF_INCLUDED_detection_internal
 #define FF_INCLUDED_detection_internal
 
-#include "pthread.h"
+#include "common/thread.h"
 
 #define FF_DETECTION_INTERNAL_GUARD(ResultType, ...) \
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER; \
     static ResultType result; \
     static bool init = false; \
-    pthread_mutex_lock(&mutex); \
+    ffThreadMutexLock(&mutex); \
     if(init) \
     { \
-        pthread_mutex_unlock(&mutex); \
+        ffThreadMutexUnlock(&mutex); \
         return &result; \
     } \
     init = true; \
     __VA_ARGS__; \
-    pthread_mutex_unlock(&mutex); \
+    ffThreadMutexUnlock(&mutex); \
     return &result; \
 
 #endif
