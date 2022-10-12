@@ -4,13 +4,14 @@
 
 #include <limits.h>
 #include <unistd.h>
-#include <netdb.h>
 
 #ifndef HOST_NAME_MAX
     #define HOST_NAME_MAX 64
 #endif
 
 #ifdef __linux__
+#include <netdb.h>
+
 static void detectFQDN(FFTitleResult* title)
 {
     struct addrinfo hints = {0};
@@ -54,7 +55,7 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
     ffStrbufAppendS(&result.hostname, instance->state.utsname.nodename);
 
     ffStrbufInitA(&result.fqdn, HOST_NAME_MAX);
-    #ifdef __linux
+    #ifdef __linux__
         detectFQDN(&result);
     #endif
     if(result.fqdn.length == 0)
