@@ -1,16 +1,17 @@
 #include "fastfetch.h"
 #include "detection/title.h"
+#include "common/thread.h"
 
 #include <limits.h>
 #include <unistd.h>
-#include <pthread.h>
-#include <netdb.h>
 
 #ifndef HOST_NAME_MAX
     #define HOST_NAME_MAX 64
 #endif
 
 #ifdef __linux__
+#include <netdb.h>
+
 static void detectFQDN(FFTitleResult* title)
 {
     struct addrinfo hints = {0};
@@ -37,12 +38,12 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
 {
     static FFTitleResult result;
 
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -54,12 +55,12 @@ const FFTitleResult* ffDetectTitle(const FFinstance* instance)
     ffStrbufAppendS(&result.hostname, instance->state.utsname.nodename);
 
     ffStrbufInitA(&result.fqdn, HOST_NAME_MAX);
-    #ifdef __linux
+    #ifdef __linux__
         detectFQDN(&result);
     #endif
     if(result.fqdn.length == 0)
         ffStrbufAppend(&result.fqdn, &result.hostname);
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

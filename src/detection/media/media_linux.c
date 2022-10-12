@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
+#include "common/thread.h"
 
 #include <string.h>
-#include <pthread.h>
 
 #define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
 #define FF_DBUS_TIMEOUT_MILLISECONDS 35

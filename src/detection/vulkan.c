@@ -1,8 +1,7 @@
 #include "fastfetch.h"
+#include "common/thread.h"
 #include "detection/vulkan.h"
 #include "detection/gpu/gpu.h"
-
-#include <pthread.h>
 
 #ifdef FF_HAVE_VULKAN
 #include "common/library.h"
@@ -217,13 +216,13 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
 {
     static FFVulkanResult result;
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -240,6 +239,6 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
         result.error = "fastfetch was compiled without vulkan support";
     #endif
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

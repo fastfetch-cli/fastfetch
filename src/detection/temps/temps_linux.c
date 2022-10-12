@@ -1,9 +1,9 @@
 #include "fastfetch.h"
 #include "common/io.h"
+#include "common/thread.h"
 #include "temps_linux.h"
 
 #include <string.h>
-#include <pthread.h>
 #include <dirent.h>
 
 static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
@@ -38,13 +38,13 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
 const FFTempsResult* ffDetectTemps(const FFinstance* instance)
 {
     static FFTempsResult result;
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -52,7 +52,7 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance)
     if(!instance->config.allowSlowOperations)
     {
         ffListInitA(&result.values, sizeof(FFTempValue), 0);
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
 
@@ -68,7 +68,7 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance)
     if(dirp == NULL)
     {
         ffStrbufDestroy(&baseDir);
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
 
@@ -97,6 +97,6 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance)
     closedir(dirp);
     ffStrbufDestroy(&baseDir);
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

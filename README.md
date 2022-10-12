@@ -21,9 +21,10 @@ There are some premade config files in [`presets`](presets), including the ones 
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and `libpthread`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
+Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
 
 The following libraries are used if present at runtime:
+* [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html): For multithreading support, which may improve performance
 * [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
 * [`libxcb-randr`](https://xcb.freedesktop.org/),

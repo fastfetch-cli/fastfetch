@@ -23,6 +23,17 @@ if(MSYS)
     enable_language(CXX)
 endif()
 
+#############################
+# Compile time dependencies #
+#############################
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads)
+
+find_package(PkgConfig REQUIRED)
+
+include(CheckIncludeFile)
+
 #####################
 # Configure options #
 #####################
@@ -52,20 +63,10 @@ cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR MSYS" OFF)
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR MSYS" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
+cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
-
-#############################
-# Compile time dependencies #
-#############################
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-find_package(PkgConfig REQUIRED)
-
-include(CheckIncludeFile)
 
 ####################
 # Compiler options #
@@ -76,6 +77,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+if(ENABLE_THREADS)
+    if(CMAKE_USE_PTHREADS_INIT)
+        message(STATUS "Threads type: pthread")
+    else()
+        message(STATUS "Threads type: Win32 thread")
+    endif()
+else()
+    message(STATUS "Threads type: disabled")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
@@ -355,8 +365,8 @@ if(MSYS)
         src/detection/font/font_windows.cpp
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalshell/terminalshell_windows.cpp
-        src/detection/terminalfont/terminalfont_linux.c
         src/detection/packages/packages_linux.c
+        src/detection/terminalfont/terminalfont_windows.c
         src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
         src/detection/localip/localip_windows.c
@@ -482,6 +492,11 @@ ff_lib_enable(OPENCL OpenCL)
 ff_lib_enable(LIBCJSON libcjson)
 ff_lib_enable(FREETYPE freetype2)
 
+if(ENABLE_THREADS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
+    target_link_libraries(libfastfetch PRIVATE Threads::Threads)
+endif()
+
 if(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework CoreFoundation"
@@ -501,6 +516,7 @@ elseif(MSYS)
         PRIVATE "opengl32"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
+        PRIVATE "ws2_32"
     )
 endif()
 
@@ -511,7 +527,6 @@ target_include_directories(libfastfetch
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
-    PRIVATE Threads::Threads
 )
 
 ######################

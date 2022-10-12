@@ -2,8 +2,8 @@
 #include "common/settings.h"
 #include "common/library.h"
 #include "common/io.h"
+#include "common/thread.h"
 
-#include <pthread.h>
 #include <string.h>
 
 typedef enum FFInitState
@@ -15,18 +15,18 @@ typedef enum FFInitState
 
 #define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER; \
     static FFInitState initState = FF_INITSTATE_UNINITIALIZED; \
-    pthread_mutex_lock(&mutex); \
+    ffThreadMutexLock(&mutex); \
     if(initState != FF_INITSTATE_UNINITIALIZED) {\
-        pthread_mutex_unlock(&mutex); \
+        ffThreadMutexUnlock(&mutex); \
         return initState == FF_INITSTATE_SUCCESSFUL ? &data : NULL; \
     } \
     initState = FF_INITSTATE_SUCCESSFUL; \
     void* libraryHandle = ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL); \
     if(libraryHandle == NULL) { \
         initState = FF_INITSTATE_FAILED; \
-        pthread_mutex_unlock(&mutex); \
+        ffThreadMutexUnlock(&mutex); \
         return NULL; \
     } \
 
@@ -35,20 +35,20 @@ typedef enum FFInitState
     if(data.ff ## symbolName == NULL) { \
         dlclose(libraryHandle); \
         initState = FF_INITSTATE_FAILED; \
-        pthread_mutex_unlock(&mutex); \
+        ffThreadMutexUnlock(&mutex); \
         return NULL; \
     }
 
 #define FF_LIBRARY_DATA_LOAD_RETURN \
     initState = FF_INITSTATE_SUCCESSFUL; \
-    pthread_mutex_unlock(&mutex); \
+    ffThreadMutexUnlock(&mutex); \
     return &data;
 
 #define FF_LIBRARY_DATA_LOAD_ERROR \
     { \
         dlclose(libraryHandle); \
         initState = FF_INITSTATE_FAILED; \
-        pthread_mutex_unlock(&mutex); \
+        ffThreadMutexUnlock(&mutex); \
         return NULL; \
     }
 

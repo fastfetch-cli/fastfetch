@@ -1,10 +1,9 @@
 #include "fastfetch.h"
 #include "detection/gtk.h"
 #include "common/properties.h"
+#include "common/thread.h"
 #include "common/settings.h"
 #include "detection/displayserver/displayserver.h"
-
-#include <pthread.h>
 
 static inline bool allPropertiesSet(FFGTKResult* result)
 {
@@ -34,7 +33,7 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
 
 static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* result)
 {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
 
     static const char* themeName = NULL;
     static const char* iconsName = NULL;
@@ -44,11 +43,11 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
 
     static bool init = false;
 
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
 
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize);
         return;
     }
@@ -90,7 +89,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorSize = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
     }
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize);
 }
 
@@ -168,12 +167,12 @@ static void detectGTK(const FFinstance* instance, const char* version, FFGTKResu
 }
 
 #define FF_DETECT_GTK_IMPL(version) \
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; \
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER; \
     static FFGTKResult result; \
     static bool init = false; \
-    pthread_mutex_lock(&mutex); \
+    ffThreadMutexLock(&mutex); \
     if(init){ \
-        pthread_mutex_unlock(&mutex);\
+        ffThreadMutexUnlock(&mutex);\
         return &result; \
     } \
     init = true; \
@@ -183,7 +182,7 @@ static void detectGTK(const FFinstance* instance, const char* version, FFGTKResu
     ffStrbufInit(&result.cursor); \
     ffStrbufInit(&result.cursorSize); \
     detectGTK(instance, #version, &result); \
-    pthread_mutex_unlock(&mutex); \
+    ffThreadMutexUnlock(&mutex); \
     return &result;
 
 const FFGTKResult* ffDetectGTK2(const FFinstance* instance)
