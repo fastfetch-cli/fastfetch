@@ -1,13 +1,43 @@
+#if defined(_WIN32) || defined(__MSYS__)
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #include <synchapi.h>
+
+    static BOOL WINAPI initWsaData(PINIT_ONCE once, PVOID param, PVOID* context)
+    {
+        (void)once;
+        (void)param;
+        static WSADATA wsaData;
+        *context = &wsaData;
+        return WSAStartup(MAKEWORD(2, 2), &wsaData) == 0;
+    }
+
+    //Types of winsock2 are full of mess. Disable warnings for them and keep clean for posix
+    #pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
+    #pragma GCC diagnostic ignored "-Wconversion"
+    #pragma GCC diagnostic ignored "-Wsign-conversion"
+#else
+    #include <unistd.h>
+    #include <sys/time.h>
+    #include <sys/socket.h>
+    #include <netdb.h>
+
+    #define closesocket close
+#endif
+
+//Must be included after <winsock2.h>
 #include "fastfetch.h"
 #include "common/networking.h"
 
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <netdb.h>
-
-int ffNetworkingSendHttpRequest(const char* host, const char* path, const char* headers, uint32_t timeout)
+FFSockType ffNetworkingSendHttpRequest(const char* host, const char* path, const char* headers, uint32_t timeout)
 {
+    #if defined(_WIN32) || defined(__MSYS__)
+    static INIT_ONCE once = INIT_ONCE_STATIC_INIT;
+    WSADATA* pData;
+    if(!InitOnceExecuteOnce(&once, initWsaData, NULL, (LPVOID*) &pData))
+        return INVALID_SOCKET;
+    #endif
+
     struct addrinfo hints = {
         .ai_family = AF_INET,
         .ai_socktype = SOCK_STREAM,
@@ -16,13 +46,13 @@ int ffNetworkingSendHttpRequest(const char* host, const char* path, const char* 
     struct addrinfo* addr;
 
     if(getaddrinfo(host, "80", &hints, &addr) != 0)
-        return -1;
+        return INVALID_SOCKET;
 
-    int sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-    if(sockfd == -1)
+    FFSockType sockfd = (FFSockType)socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+    if(sockfd == INVALID_SOCKET)
     {
         freeaddrinfo(addr);
-        return -1;
+        return INVALID_SOCKET;
     }
 
     if(timeout > 0)
@@ -35,9 +65,9 @@ int ffNetworkingSendHttpRequest(const char* host, const char* path, const char* 
 
     if(connect(sockfd, addr->ai_addr, addr->ai_addrlen) == -1)
     {
-        close(sockfd);
+        closesocket(sockfd);
         freeaddrinfo(addr);
-        return -1;
+        return INVALID_SOCKET;
     }
 
     freeaddrinfo(addr);
@@ -55,14 +85,14 @@ int ffNetworkingSendHttpRequest(const char* host, const char* path, const char* 
     if(send(sockfd, command.chars, command.length, 0) == -1)
     {
         ffStrbufDestroy(&command);
-        close(sockfd);
-        return -1;
+        closesocket(sockfd);
+        return INVALID_SOCKET;
     }
     ffStrbufDestroy(&command);
     return sockfd;
 }
 
-bool ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
+bool ffNetworkingRecvHttpResponse(FFSockType sockfd, FFstrbuf* buffer)
 {
     ssize_t received = recv(sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
 
@@ -72,14 +102,14 @@ bool ffNetworkingRecvHttpResponse(int sockfd, FFstrbuf* buffer)
         buffer->chars[buffer->length] = '\0';
     }
 
-    close(sockfd);
+    closesocket(sockfd);
     return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n");
 }
 
 bool ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, const char* headers, FFstrbuf* buffer)
 {
-    int sockfd = ffNetworkingSendHttpRequest(host, path, headers, timeout);
-    if(sockfd > 0)
+    FFSockType sockfd = ffNetworkingSendHttpRequest(host, path, headers, timeout);
+    if(sockfd != INVALID_SOCKET)
         return ffNetworkingRecvHttpResponse(sockfd, buffer);
     return false;
 }

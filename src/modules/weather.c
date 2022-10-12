@@ -5,7 +5,7 @@
 #define FF_WEATHER_MODULE_NAME "Weather"
 #define FF_WEATHER_NUM_FORMAT_ARGS 1
 
-static int sockfd;
+static FFSockType sockfd;
 
 void ffPrepareWeather(FFinstance* instance)
 {
@@ -21,7 +21,7 @@ void ffPrintWeather(FFinstance* instance)
     if(sockfd == 0)
         ffPrepareWeather(instance);
 
-    if(sockfd < 0)
+    if(sockfd == INVALID_SOCKET)
     {
         ffPrintError(instance, FF_WEATHER_MODULE_NAME, 0, &instance->config.weather, "Failed to connect to 'wttr.in'");
         return;
