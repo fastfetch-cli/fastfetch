@@ -5,7 +5,7 @@
 #define FF_PUBLICIP_MODULE_NAME "Public IP"
 #define FF_PUBLICIP_NUM_FORMAT_ARGS 1
 
-static int sockfd;
+static FFSockType sockfd;
 
 void ffPreparePublicIp(FFinstance* instance)
 {
@@ -39,7 +39,7 @@ void ffPrintPublicIp(FFinstance* instance)
     if(sockfd == 0)
         ffPreparePublicIp(instance);
 
-    if(sockfd < 0)
+    if(sockfd == INVALID_SOCKET)
     {
         ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, "Failed to connect to an IP detection server");
         return;

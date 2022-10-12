@@ -516,6 +516,7 @@ elseif(MSYS)
         PRIVATE "opengl32"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
+        PRIVATE "ws2_32"
     )
 endif()
 
