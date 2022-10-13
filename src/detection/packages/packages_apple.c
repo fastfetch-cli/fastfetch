@@ -1,4 +1,7 @@
 #include "packages.h"
+#include "common/parsing.h"
+
+#include <dirent.h>
 
 static uint32_t getNumElements(const char* dirname, unsigned char type)
 {
@@ -28,17 +31,17 @@ static uint32_t countBrewPackages(const char* dirname)
     ffStrbufInitS(&baseDir, dirname);
 
     uint32_t result = 0;
-    uint32_t baseDirLength = baseDir->length;
+    uint32_t baseDirLength = baseDir.length;
 
-    ffStrbufAppendS(baseDir, "/Caskroom");
-    result += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    ffStrbufAppendS(&baseDir, "/Caskroom");
+    result += getNumElements(baseDir.chars, DT_DIR);
+    ffStrbufSubstrBefore(&baseDir, baseDirLength);
 
-    ffStrbufAppendS(baseDir, "/Cellar");
-    result += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    ffStrbufAppendS(&baseDir, "/Cellar");
+    result += getNumElements(baseDir.chars, DT_DIR);
+    ffStrbufSubstrBefore(&baseDir, baseDirLength);
 
-    ffStrbufDestroy(baseDir);
+    ffStrbufDestroy(&baseDir);
     return result;
 }
 

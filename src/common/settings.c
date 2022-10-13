@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 #include "common/settings.h"
 #include "common/library.h"
-#include "common/io.h"
 #include "common/thread.h"
+#include "common/io.h"
 
 #include <string.h>
 
@@ -280,7 +280,6 @@ FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelNam
 
 #ifdef FF_HAVE_SQLITE3
 #include <sqlite3.h>
-#include <sys/stat.h>
 
 typedef struct SQLiteData
 {

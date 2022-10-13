@@ -9,7 +9,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <sys/stat.h>
 
 static const char* parseEnv()
 {

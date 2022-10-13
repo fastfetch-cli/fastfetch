@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <sys/stat.h>
 
 #ifdef WIN32
     #include "util/windows/getline.h"

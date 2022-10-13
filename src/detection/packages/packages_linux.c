@@ -1,15 +1,12 @@
 #include "packages.h"
 #include "common/io.h"
+#include "common/parsing.h"
+#include "common/processing.h"
 #include "common/properties.h"
 #include "common/settings.h"
-#include "common/processing.h"
-#include "common/parsing.h"
 #include "detection/os/os.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <dirent.h>
-#include <sys/stat.h>
 
 static uint32_t getNumElementsImpl(const char* dirname, unsigned char type)
 {

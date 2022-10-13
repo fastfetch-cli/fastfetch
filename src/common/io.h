@@ -5,7 +5,7 @@
 
 #include "fastfetch.h"
 
-#include <sys/types.h> //mode_t
+#include <sys/stat.h> //mode_t
 
 bool ffWriteFDBuffer(int fd, const FFstrbuf* content);
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);

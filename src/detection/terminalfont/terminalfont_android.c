@@ -3,8 +3,6 @@
 #include "detection/terminalshell/terminalshell.h"
 #include "common/io.h"
 
-#include <sys/stat.h>
-
 #ifdef FF_HAVE_FREETYPE
     #include "common/library.h"
     #include <ft2build.h>
