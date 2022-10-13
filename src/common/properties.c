@@ -2,6 +2,9 @@
 #include "common/properties.h"
 
 #include <stdlib.h>
+#ifdef _WIN32
+    #include "util/windows/getline.h"
+#endif
 
 static bool parsePropLinePointer(const char** line, const char* start, FFstrbuf* buffer)
 {

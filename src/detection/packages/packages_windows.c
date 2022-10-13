@@ -15,7 +15,7 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
         {
             if(wfd.dwFileAttributes & type)
                 counter++;
-        } while (FindNextFileA(hFind, &wfd) == TRUE);
+        } while (FindNextFileA(hFind, &wfd));
         FindClose(hFind);
     }
 
@@ -32,6 +32,8 @@ void ffDetectPackages(FFinstance* instance, FFPackageCounts* counts)
         //We have pacman and maybe others in MSYS, but not package managers for Windows
         if(getenv("MSYSTEM"))
             return ffDetectPackagesPosix(instance, counts);
+    #else
+        FF_UNUSED(instance);
     #endif
 
     FFstrbuf scoopPath;

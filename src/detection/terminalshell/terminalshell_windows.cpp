@@ -125,6 +125,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         // When running outside of MSYS2, /proc/self/xxx doesn't exist and we must find it in Windows way
         if(getenv("MSYSTEM"))
             return ffDetectTerminalShellPosix(instance);
+    #else
+        FF_UNUSED(instance);
     #endif
 
     static FFTerminalShellResult result;

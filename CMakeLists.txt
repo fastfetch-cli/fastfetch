@@ -15,11 +15,11 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
-elseif(NOT APPLE AND NOT ANDROID AND NOT MSYS)
+elseif(NOT APPLE AND NOT ANDROID AND NOT MSYS AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(MSYS)
+if(MSYS OR WIN32)
     enable_language(CXX)
 endif()
 
@@ -27,7 +27,7 @@ endif()
 # Compile time dependencies #
 #############################
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
+set(THREADS_PREFER_PTHREAD_FLAG NOT WIN32)
 find_package(Threads)
 
 find_package(PkgConfig REQUIRED)
@@ -41,7 +41,7 @@ include(CheckIncludeFile)
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR MSYS" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR MSYS OR WIN32" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
@@ -60,8 +60,8 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR MSYS" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR MSYS" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR MSYS OR WIN32" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR MSYS OR WIN32" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
 
@@ -78,10 +78,10 @@ endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 if(ENABLE_THREADS)
-    if(CMAKE_USE_PTHREADS_INIT)
-        message(STATUS "Threads type: pthread")
-    else()
+    if(CMAKE_USE_WIN32_THREADS_INIT)
         message(STATUS "Threads type: Win32 thread")
+    elseif(CMAKE_USE_PTHREADS_INIT)
+        message(STATUS "Threads type: pthread")
     endif()
 else()
     message(STATUS "Threads type: disabled")
@@ -90,7 +90,7 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 
-if(MSYS)
+if(MSYS OR WIN32)
     set(CMAKE_CXX_STANDARD 11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
 endif()
@@ -102,7 +102,7 @@ if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
 endif()
 
 set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
-if(NOT MSYS)
+if(NOT MSYS AND NOT WIN32)
     set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
 endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
@@ -316,6 +316,7 @@ if(LINUX OR ANDROID OR BSD)
         src/detection/temps/temps_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/processes/processes_linux.c
+        src/detection/uptime/uptime_linux.c
 
         src/detection/poweradapter/poweradapter_nosupport.c
     )
@@ -343,9 +344,8 @@ if(LINUX OR BSD)
     )
 endif()
 
-if(MSYS)
+if(MSYS OR WIN32)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/processing_linux.c
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
@@ -363,17 +363,33 @@ if(MSYS)
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/memory/memory_windows.cpp
         src/detection/font/font_windows.cpp
-        src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalshell/terminalshell_windows.cpp
-        src/detection/packages/packages_linux.c
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
         src/detection/localip/localip_windows.c
+        src/detection/uptime/uptime_windows.c
         src/util/windows/wmi.cpp
 
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/media/media_nosupport.c
+    )
+endif()
+
+if(MSYS)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/processing_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/packages/packages_linux.c
+    )
+endif()
+
+if(WIN32)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/processing_windows.c
+        src/util/windows/getline.c
+        src/util/windows/pwd.c
+        src/util/windows/utsname.c
     )
 endif()
 
@@ -398,6 +414,7 @@ if(APPLE)
         src/detection/font/font_apple.m
         src/detection/opengl/opengl_apple.c
         src/detection/processes/processes_apple.c
+        src/detection/uptime/uptime_apple.c
 
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
@@ -494,7 +511,9 @@ ff_lib_enable(FREETYPE freetype2)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
-    target_link_libraries(libfastfetch PRIVATE Threads::Threads)
+    if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
+        target_link_libraries(libfastfetch PRIVATE Threads::Threads)
+    endif()
 endif()
 
 if(APPLE)
@@ -507,7 +526,7 @@ if(APPLE)
         PRIVATE "-framework Cocoa"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
-elseif(MSYS)
+elseif(MSYS OR WIN32)
     target_link_libraries(libfastfetch
         PRIVATE "wbemuuid"
         PRIVATE "ole32"

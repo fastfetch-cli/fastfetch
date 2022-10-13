@@ -10,10 +10,12 @@
     #endif
 #endif
 
-#ifdef __SANITIZE_ADDRESS__
-    #define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
-#else
-    #define FF_DLOPEN_FLAGS RTLD_LAZY
+#ifndef FF_DLOPEN_FLAGS
+    #ifdef __SANITIZE_ADDRESS__
+        #define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
+    #else
+        #define FF_DLOPEN_FLAGS RTLD_LAZY
+    #endif
 #endif
 
 static void* libraryLoad(const char* path, int maxVersion)

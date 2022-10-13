@@ -13,9 +13,6 @@ static void CoUninitializeWrap()
 
 static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
 {
-    static char error[128];
-    *((char**)lpContext) = error;
-
     HRESULT hres;
 
     // Initialize COM
@@ -37,7 +34,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     if (FAILED(hres))
     {
         CoUninitialize();
-        snprintf(error, sizeof(error), "Failed to initialize security. Error code = 0x%X", hres);
+        *((const char**)lpContext) = "Failed to initialize security";
         return FALSE;
     }
 
@@ -53,7 +50,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     if (FAILED(hres))
     {
         CoUninitialize();
-        snprintf(error, sizeof(error), "Failed to create IWbemLocator object. Error code = 0x%X", hres);
+        *((const char**)lpContext) = "Failed to create IWbemLocator object";
         return FALSE;
     }
 
@@ -79,7 +76,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     if (FAILED(hres))
     {
         CoUninitialize();
-        snprintf(error, sizeof(error), "Could not connect WMI server. Error code = 0x%X", hres);
+        *((const char**)lpContext) = "Could not connect WMI server";
         return FALSE;
     }
 
@@ -99,7 +96,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     {
         pSvc->Release();
         CoUninitialize();
-        snprintf(error, sizeof(error), "Could not set proxy blanket. Error code = 0x%X", hres);
+        *((const char**)lpContext) = "Could not set proxy blanket";
         return FALSE;
     }
 
@@ -134,7 +131,7 @@ IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error)
     if (FAILED(hres))
     {
         if(error)
-            ffStrbufAppendF(error, "Query for '%ls' failed. Error code = 0x%X", queryStr, hres);
+            ffStrbufAppendF(error, "Query for '%ls' failed. Error code = 0x%lX", queryStr, hres);
         return nullptr;
     }
 

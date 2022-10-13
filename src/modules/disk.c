@@ -3,8 +3,6 @@
 #include "common/parsing.h"
 #include "detection/disk/disk.h"
 
-#include <sys/statvfs.h>
-
 #define FF_DISK_MODULE_NAME "Disk"
 #define FF_DISK_NUM_FORMAT_ARGS 4
 

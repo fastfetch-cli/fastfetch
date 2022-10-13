@@ -28,12 +28,11 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     };
 
     FFstrbuf cmdline;
-    ffStrbufInit(&cmdline);
-    for(char* const* parg = argv; *parg; ++parg)
+    ffStrbufInitS(&cmdline, argv[0]);
+    for(char* const* parg = &argv[1]; *parg; ++parg)
     {
-        if(cmdline.length > 0)
-            ffStrbufAppendC(&cmdline, ' ');
-        ffStrbufAppendF(&cmdline, "\"%s\"", * parg);
+        ffStrbufAppendC(&cmdline, ' ');
+        ffStrbufAppendS(&cmdline, *parg);
     }
 
     BOOL success = CreateProcessA(
@@ -48,6 +47,8 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
         &siStartInfo,  // STARTUPINFO pointer
         &piProcInfo);  // receives PROCESS_INFORMATION
 
+    ffStrbufDestroy(&cmdline);
+
     CloseHandle(hChildStdoutWrite);
     if(!success)
     {
@@ -55,14 +56,10 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
         return "CreateProcessA() failed";
     }
 
-    char str[128];
+    char str[1024];
     DWORD nRead;
     while(ReadFile(hChildStdoutRead, str, sizeof(str), &nRead, NULL) && nRead > 0)
-    {
         ffStrbufAppendNS(buffer, nRead, str);
-        if(nRead < sizeof(str))
-            break;
-    }
 
     CloseHandle(hChildStdoutRead);
     return NULL;

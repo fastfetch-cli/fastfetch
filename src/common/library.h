@@ -3,7 +3,18 @@
 #ifndef FF_INCLUDED_common_library
 #define FF_INCLUDED_common_library
 
-#include <dlfcn.h>
+#include "fastfetch.h"
+#include "util/FFcheckmacros.h"
+
+#if defined(_WIN32) //We don't force MSYS using LoadLibrary because dlopen also searches $LD_LIBRARY_PATH
+    #include <libloaderapi.h>
+    #define FF_DLOPEN_FLAGS 0
+    FF_C_NODISCARD static inline void* dlopen(const char* path, int mode) { FF_UNUSED(mode); return LoadLibraryA(path); }
+    FF_C_NODISCARD static inline void* dlsym(void* handle, const char* symbol) { return GetProcAddress((HMODULE)handle, symbol); }
+    static inline int dlclose(void* handle) { return !FreeLibrary((HMODULE)handle); }
+#else
+    #include <dlfcn.h>
+#endif
 
 #if defined(_WIN32) || defined(__MSYS__)
     #define FF_LIBRARY_EXTENSION ".dll"

@@ -13,6 +13,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#ifdef _WIN32
+    #include <shlwapi.h>
+    #define strcasestr StrStrIA
+#endif
+
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
 typedef struct FFstrbuf

@@ -8,8 +8,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <pwd.h>
-#include <sys/utsname.h>
+#ifndef _WIN32
+    #include <pwd.h>
+    #include <sys/utsname.h>
+#else
+    #include "util/windows/pwd.h"
+    #include "util/windows/utsname.h"
+#endif
 
 #if FF_HAVE_SYSINFO_H
     #include <sys/sysinfo.h>
