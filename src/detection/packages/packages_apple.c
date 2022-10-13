@@ -61,11 +61,11 @@ static uint32_t countMacPortsPackages(const char* dirname)
 {
     FFstrbuf baseDir;
     ffStrbufInitS(&baseDir, dirname);
-    ffStrbufAppendS(baseDir, "/var/macports/software");
+    ffStrbufAppendS(&baseDir, "/var/macports/software");
 
-    uint32_t result += getNumElements(baseDir->chars, DT_DIR);
+    uint32_t result = getNumElements(baseDir.chars, DT_DIR);
 
-    ffStrbufDestroy(baseDir);
+    ffStrbufDestroy(&baseDir);
     return result;
 }
 
@@ -73,7 +73,7 @@ static uint32_t getMacPortsPackages()
 {
     const char* prefix = getenv("MACPORTS_PREFIX");
     if(ffStrSet(prefix))
-        return countMacPortsPackages(baseDir);
+        return countMacPortsPackages(prefix);
 
     return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/local");
 }
