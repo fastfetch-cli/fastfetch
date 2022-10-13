@@ -87,7 +87,7 @@ static const FFlogo* getLogoAlpine()
         "    +dddddddddddddddddddddddddddddd+\n"
         "  `sdddddddddddddddddddddddddddddddds`\n"
         " `ydddddddddddd++hdddddddddddddddddddy`\n"
-        ".hddddddddddd+`  `+ddddh:-sdddddddddddh.   \n"
+        ".hddddddddddd+`  `+ddddh:-sdddddddddddh.\n"
         "hdddddddddd+`      `+y:    .sddddddddddh\n"
         "ddddddddh+`   `//`   `.`     -sddddddddd\n"
         "ddddddh+`   `/hddh/`   `:s-    -sddddddd\n"
@@ -699,8 +699,8 @@ static const FFlogo* getLogoEndeavour()
         "  $2`:////$1ssssssssssssssssssssssssssso$3+++.\n"
         "$2`-////+$1ssssssssssssssssssssssssssso$3++++-\n"
         " $2`..-+$1oosssssssssssssssssssssssso$3+++++/`\n"
-        "$3./++++++++++++++++++++++++++++++/:.\n"
-        "`:::::::::::::::::::::::::------``"
+        "   $3./++++++++++++++++++++++++++++++/:.\n"
+        "    `:::::::::::::::::::::::::------``"
     )
     FF_LOGO_COLORS(
         "35", //magenta
@@ -1779,7 +1779,7 @@ static const FFlogo* getLogoRockyLinux()
         "jliililiiilililiiili@`  ~ililiiiiiL\n"
         "iiiliiiiliiiiiiili>`      ~liililii\n"
         "liliiiliiilililii`         -9liiiil\n"
-        "iiiiiliiliiiiii~             ''4lili\n"
+        "iiiiiliiliiiiii~             \"4lili\n"
         "4ililiiiiilil~|      -w,       )4lf\n"
         "-liiiiililiF'       _liig,       )'\n"
         " )iiiliii@`       _QIililig,\n"
@@ -1802,7 +1802,7 @@ static const FFlogo* getLogoRosaLinux()
     FF_LOGO_INIT
     FF_LOGO_NAMES("rosa", "rosa-linux", "rosalinux")
     FF_LOGO_LINES(
-        "            ROSAROSAROSAROSAR\n"
+        "           ROSAROSAROSAROSAR\n"
         "        ROSA               AROS\n"
         "      ROS   SAROSAROSAROSAR   AROS\n"
         "    RO   ROSAROSAROSAROSAROSAR   RO\n"
