@@ -2,16 +2,18 @@
 #include "common/format.h"
 #include "common/parsing.h"
 
+#include <inttypes.h>
+
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
 {
     if(formatarg->type == FF_FORMAT_ARG_TYPE_INT)
         ffStrbufAppendF(buffer, "%i", *(int*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT)
-        ffStrbufAppendF(buffer, "%u", *(uint32_t*)formatarg->value);
+        ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT16)
-        ffStrbufAppendF(buffer, "%hu", *(uint16_t*)formatarg->value);
+        ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
-        ffStrbufAppendF(buffer, "%hhu", *(uint8_t*)formatarg->value);
+        ffStrbufAppendF(buffer, "%" PRIu8, *(uint8_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRING)
         ffStrbufAppendS(buffer, (const char*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRBUF)

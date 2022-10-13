@@ -3,6 +3,7 @@
 **/.cache/
 **/.kdev4/
 **/.DS_Store
+/.vs
 cscope.*
 tags
 fastfetch.kdev4

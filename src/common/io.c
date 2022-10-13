@@ -4,8 +4,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>
-#include <poll.h>
+
+#ifndef WIN32
+    #include <termios.h>
+    #include <poll.h>
+#endif
 
 static void createSubfolders(const char* fileName)
 {
@@ -16,7 +19,13 @@ static void createSubfolders(const char* fileName)
     {
         ffStrbufAppendC(&path, *fileName);
         if(*fileName == '/')
-            mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
+        {
+            mkdir(path.chars
+                #ifndef WIN32
+                , S_IRWXU | S_IRGRP | S_IROTH
+                #endif
+            );
+        }
         ++fileName;
     }
 
@@ -151,6 +160,7 @@ bool ffFileExists(const char* fileName, mode_t mode)
 
 void ffGetTerminalResponse(const char* request, const char* format, ...)
 {
+    #ifndef WIN32
     struct termios oldTerm, newTerm;
     if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
         return;
@@ -189,4 +199,8 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     va_start(args, format);
     vsscanf(buffer, format, args);
     va_end(args);
+    #else
+    //Unimplemented
+    FF_UNUSED(request, format);
+    #endif
 }

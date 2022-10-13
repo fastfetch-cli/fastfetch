@@ -10,6 +10,10 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#ifdef WIN32
+    #include "util/windows/getline.h"
+#endif
+
 typedef struct CustomValue
 {
     bool printKey;
@@ -414,6 +418,7 @@ static inline void printCommandHelp(const char* command)
 
 static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t indentation, const char* folderName)
 {
+    #ifndef _WIN32
     DIR* dir = opendir(folder->chars);
     if(dir == NULL)
         return;
@@ -447,6 +452,9 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
     }
 
     closedir(dir);
+    #else
+    FF_UNUSED(folder, indentation, folderName);
+    #endif
 }
 
 static inline void listAvailablePresets(FFinstance* instance)

@@ -26,10 +26,13 @@ static void getLocaleFromEnv(FFstrbuf* locale)
 static void getLocaleFromCmd(FFstrbuf* locale)
 {
     ffStrbufAppendS(locale, setlocale(LC_ALL, NULL));
+
+    #ifdef LC_MESSAGES
     if(locale->length > 0)
         return;
 
     ffStrbufAppendS(locale, setlocale(LC_MESSAGES, NULL));
+    #endif
 }
 
 void ffPrintLocale(FFinstance* instance)

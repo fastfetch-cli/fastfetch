@@ -9,7 +9,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <signal.h>
+#ifdef _WIN32
+    #include <wincon.h>
+    #include <locale.h>
+#else
+    #include <signal.h>
+#endif
 
 static bool strbufEqualsAdapter(const void* first, const void* second)
 {
@@ -101,18 +106,35 @@ static void initCacheDir(FFstate* state)
     else
         ffStrbufEnsureEndsWithC(&state->cacheDir, '/');
 
-    mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder, but who knows
+    mkdir(state->cacheDir.chars
+        #ifndef WIN32
+            , S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH
+        #endif
+    ); //I hope everybody has a cache folder, but who knows
 
     ffStrbufAppendS(&state->cacheDir, "fastfetch/");
-    mkdir(state->cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
+    mkdir(state->cacheDir.chars
+        #ifndef WIN32
+            , S_IRWXU | S_IRGRP | S_IROTH
+        #endif
+    );
 }
 
 static void initState(FFstate* state)
 {
+    #ifdef WIN32
+    //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
+    setlocale(LC_ALL, ".UTF8");
+    #endif
+
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
-    state->passwd = getpwuid(getuid());
+    #ifndef WIN32
+        state->passwd = getpwuid(getuid());
+    #else
+        state->passwd = ffGetPasswd();
+    #endif
     uname(&state->utsname);
 
     #if FF_HAVE_SYSINFO_H
@@ -305,12 +327,24 @@ static void resetConsole()
         fputs("\033[?25h", stdout);
 }
 
+#ifdef _WIN32
+BOOL WINAPI consoleHandler(DWORD signal)
+{
+    if(signal == CTRL_C_EVENT)
+    {
+        resetConsole();
+        return TRUE;
+    }
+    return false;
+}
+#else
 static void exitSignalHandler(int signal)
 {
     FF_UNUSED(signal);
     resetConsole();
     exit(0);
 }
+#endif
 
 void ffStart(FFinstance* instance)
 {
@@ -320,12 +354,14 @@ void ffStart(FFinstance* instance)
     ffDisableLinewrap = instance->config.disableLinewrap && !instance->config.pipe;
     ffHideCursor = instance->config.hideCursor && !instance->config.pipe;
 
-    struct sigaction action = {};
-    action.sa_handler = exitSignalHandler;
-
+    #ifdef _WIN32
+    SetConsoleCtrlHandler(consoleHandler, TRUE);
+    #else
+    struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
+    #endif
 
     //We do the cache validation here, so we can skip it if --recache is given
     if(!instance->config.recache)
