@@ -316,6 +316,7 @@ if(LINUX OR ANDROID OR BSD)
         src/detection/temps/temps_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/processes/processes_linux.c
+        src/detection/uptime/uptime_linux.c
 
         src/detection/poweradapter/poweradapter_nosupport.c
     )
@@ -370,6 +371,7 @@ if(MSYS)
         src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
         src/detection/localip/localip_windows.c
+        src/detection/uptime/uptime_windows.c
         src/util/windows/wmi.cpp
 
         src/detection/poweradapter/poweradapter_nosupport.c
@@ -398,6 +400,7 @@ if(APPLE)
         src/detection/font/font_apple.m
         src/detection/opengl/opengl_apple.c
         src/detection/processes/processes_apple.c
+        src/detection/uptime/uptime_apple.c
 
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
