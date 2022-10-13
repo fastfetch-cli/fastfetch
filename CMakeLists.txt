@@ -238,6 +238,7 @@ set(LIBFASTFETCH_SRC
     src/detection/displayserver/displayserver.c
     src/detection/terminalfont/terminalfont.c
     src/detection/media/media.c
+    src/detection/packages/packages.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -290,7 +291,6 @@ if(LINUX OR APPLE OR ANDROID OR BSD)
         src/common/processing_linux.c
         src/detection/disk/disk.c
         src/detection/terminalshell/terminalshell_linux.c
-        src/detection/packages/packages_linux.c
         src/detection/kernel/kernel_linux.c
         src/detection/localip/localip_linux.c
     )
@@ -317,6 +317,7 @@ if(LINUX OR ANDROID OR BSD)
         src/detection/opengl/opengl_linux.c
         src/detection/processes/processes_linux.c
         src/detection/uptime/uptime_linux.c
+        src/detection/packages/packages_linux.c
 
         src/detection/poweradapter/poweradapter_nosupport.c
     )
@@ -365,7 +366,6 @@ if(MSYS OR WIN32)
         src/detection/font/font_windows.cpp
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
-        src/detection/packages/packages_windows.c
         src/detection/kernel/kernel_windows.cpp
         src/detection/localip/localip_windows.c
         src/detection/uptime/uptime_windows.c
@@ -387,6 +387,7 @@ endif()
 if(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/processing_windows.c
+        src/detection/packages/packages_windows.c
         src/util/windows/getline.c
         src/util/windows/pwd.c
         src/util/windows/utsname.c
@@ -415,6 +416,7 @@ if(APPLE)
         src/detection/opengl/opengl_apple.c
         src/detection/processes/processes_apple.c
         src/detection/uptime/uptime_apple.c
+        src/detection/packages/packages_apple.c
 
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c

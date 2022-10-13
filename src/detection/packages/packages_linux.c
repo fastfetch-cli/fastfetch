@@ -1,3 +1,4 @@
+#include "packages.h"
 #include "common/io.h"
 #include "common/properties.h"
 #include "common/settings.h"
@@ -5,14 +6,12 @@
 #include "common/parsing.h"
 #include "detection/os/os.h"
 
-#include "packages.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
 
-static uint32_t getNumElements(const char* dirname, unsigned char type)
+static uint32_t getNumElementsImpl(const char* dirname, unsigned char type)
 {
     DIR* dirp = opendir(dirname);
     if(dirp == NULL)
@@ -26,7 +25,7 @@ static uint32_t getNumElements(const char* dirname, unsigned char type)
             ++num_elements;
     }
 
-    if(type == DT_DIR)
+    if(type == DT_DIR && num_elements >= 2)
         num_elements -= 2; // accounting for . and ..
 
     closedir(dirp);
@@ -34,9 +33,16 @@ static uint32_t getNumElements(const char* dirname, unsigned char type)
     return num_elements;
 }
 
-#ifndef __APPLE__
+static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, unsigned char type)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    uint32_t num_elements = getNumElementsImpl(baseDir->chars, type);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return num_elements;
+}
 
-static uint32_t getNumStrings(const char* filename, const char* needle)
+static uint32_t getNumStringsImpl(const char* filename, const char* needle)
 {
     FILE* file = fopen(filename, "r");
     if(file == NULL)
@@ -61,9 +67,25 @@ static uint32_t getNumStrings(const char* filename, const char* needle)
     return count;
 }
 
-#ifndef __ANDROID__
+static uint32_t getNumStrings(FFstrbuf* baseDir, const char* filename, const char* needle)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, filename);
+    uint32_t num_elements = getNumStringsImpl(baseDir->chars, needle);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return num_elements;
+}
 
-static uint32_t countFilesRecursive(FFstrbuf* baseDirPath, const char* filename)
+static uint32_t getSQLite3Int(const FFinstance* instance, FFstrbuf* baseDir, const char* dbPath, const char* query)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dbPath);
+    uint32_t num_elements = (uint32_t) ffSettingsGetSQLite3Int(instance, baseDir->chars, query);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return num_elements;
+}
+
+static uint32_t countFilesRecursiveImpl(FFstrbuf* baseDirPath, const char* filename)
 {
     uint32_t baseDirPathLength = baseDirPath->length;
 
@@ -90,7 +112,7 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDirPath, const char* filename)
             continue;
 
         ffStrbufAppendS(baseDirPath, entry->d_name);
-        sum += countFilesRecursive(baseDirPath, filename);
+        sum += countFilesRecursiveImpl(baseDirPath, filename);
         ffStrbufSubstrBefore(baseDirPath, baseDirPathLength);
     }
 
@@ -98,7 +120,16 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDirPath, const char* filename)
     return sum;
 }
 
-static uint32_t getNixPackages(char* path)
+static uint32_t countFilesRecursive(FFstrbuf* baseDir, const char* dirname, const char* filename)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    uint32_t sum = countFilesRecursiveImpl(baseDir, filename);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return sum;
+}
+
+static uint32_t getNixPackagesImpl(char* path)
 {
     //Nix detection is kinda slow, so we only do it if the dir exists
     if(!ffFileExists(path, S_IFDIR))
@@ -130,7 +161,16 @@ static uint32_t getNixPackages(char* path)
     return result;
 }
 
-static uint32_t getXBPS(FFstrbuf* baseDir)
+static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    uint32_t num_elements = getNixPackagesImpl(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return num_elements;
+}
+
+static uint32_t getXBPSImpl(FFstrbuf* baseDir)
 {
     DIR* dir = opendir(baseDir->chars);
     if(dir == NULL)
@@ -146,7 +186,7 @@ static uint32_t getXBPS(FFstrbuf* baseDir)
 
         ffStrbufAppendC(baseDir, '/');
         ffStrbufAppendS(baseDir, entry->d_name);
-        result = getNumStrings(baseDir->chars, "<string>installed</string>");
+        result = getNumStringsImpl(baseDir->chars, "<string>installed</string>");
         break;
     }
 
@@ -154,90 +194,22 @@ static uint32_t getXBPS(FFstrbuf* baseDir)
     return result;
 }
 
-#endif // !__ANDROID__
-
-#else // !__APPLE__
-
-static uint32_t countBrewPackages(FFstrbuf* baseDir)
+static uint32_t getXBPS(FFstrbuf* baseDir, const char* dirname)
 {
-    uint32_t result = 0;
     uint32_t baseDirLength = baseDir->length;
-
-    ffStrbufAppendS(baseDir, "/Caskroom");
-    result += getNumElements(baseDir->chars, DT_DIR);
+    ffStrbufAppendS(baseDir, dirname);
+    uint32_t result = getXBPSImpl(baseDir);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    ffStrbufAppendS(baseDir, "/Cellar");
-    result += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
     return result;
 }
 
-static uint32_t getBrewPackages(FFstrbuf* baseDir)
+static uint32_t getSnap(FFstrbuf* baseDir)
 {
-    uint32_t result = 0;
-    uint32_t baseDirLength = baseDir->length;
+    uint32_t result = getNumElements(baseDir, "/snap", DT_DIR);
 
-    const char* prefix = getenv("HOMEBREW_PREFIX");
-    bool prefixSet = ffStrSet(prefix);
-
-    if(prefixSet)
-    {
-        ffStrbufAppendS(baseDir, prefix);
-        result += countBrewPackages(baseDir);
-        ffStrbufSubstrBefore(baseDir, baseDirLength);
-    }
-
-    ffStrbufAppendS(baseDir, "/opt/homebrew");
-    if(!prefixSet || strcasecmp(baseDir->chars, prefix) != 0)
-        result += countBrewPackages(baseDir);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    ffStrbufAppendS(baseDir, "/usr/local");
-    if(!prefixSet || strcasecmp(baseDir->chars, prefix) != 0)
-        result += countBrewPackages(baseDir);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    return result;
+    //Accounting for the /snap/bin folder
+    return result > 0 ? result - 1 : 0;
 }
-
-static uint32_t countMacPortsPackages(FFstrbuf* baseDir)
-{
-    uint32_t result = 0;
-    uint32_t baseDirLength = baseDir->length;
-
-    ffStrbufAppendS(baseDir, "/var/macports/software");
-    result += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    return result;
-}
-
-static uint32_t getMacPortsPackages(FFstrbuf* baseDir)
-{
-    uint32_t result = 0;
-    uint32_t baseDirLength = baseDir->length;
-
-    const char* prefix = getenv("MACPORTS_PREFIX");
-    bool prefixSet = ffStrSet(prefix);
-
-    if(prefixSet)
-    {
-        ffStrbufAppendS(baseDir, prefix);
-        result += countMacPortsPackages(baseDir);
-        ffStrbufSubstrBefore(baseDir, baseDirLength);
-    }
-
-    ffStrbufAppendS(baseDir, "/opt/local");
-    if(!prefixSet || strcasecmp(baseDir->chars, prefix) != 0)
-        result += countMacPortsPackages(baseDir);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    return result;
-}
-
-#endif // __APPLE__
 
 #ifdef FF_HAVE_RPM
 #include "common/library.h"
@@ -292,96 +264,33 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 
 #endif //FF_HAVE_RPM
 
-static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPackageCounts* packageCounts)
+static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
-    #if defined(__APPLE__) || defined(__ANDROID__)
-        FF_UNUSED(instance);
-    #endif
+    packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
+    packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: ");
+    packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    packageCounts->flatpak += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
+    packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
+    packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
+    packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
+    packageCounts->pkg += getSQLite3Int(instance, baseDir, "/var/db/pkg/local.sqlite", "SELECT count(id) FROM packages");
+    packageCounts->rpm += getSQLite3Int(instance, baseDir, "/var/lib/rpm/rmpdb.sqlite", "SELECT count(blob) FROM Packages");
+    packageCounts->snap += getSnap(baseDir);
+    packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
+}
 
-    #ifndef __APPLE__ //Linux desktop and Android
+static void getPackageCountsRegular(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+{
+    getPackageCounts(instance, baseDir, packageCounts);
 
     uint32_t baseDirLength = baseDir->length;
-
-    //pacman
-    ffStrbufAppendS(baseDir, "/var/lib/pacman/local");
-    packageCounts->pacman += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //dpkg
-    ffStrbufAppendS(baseDir, "/var/lib/dpkg/status");
-    packageCounts->dpkg += getNumStrings(baseDir->chars, "Status: ");
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    #ifndef __ANDROID__ //Linux Desktop
-
-    //rpm
-    ffStrbufAppendS(baseDir, "/var/lib/rpm/rmpdb.sqlite");
-    packageCounts->rpm += (uint32_t) ffSettingsGetSQLite3Int(instance, baseDir->chars, "SELECT count(blob) FROM Packages");
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //emerge
-    ffStrbufAppendS(baseDir, "/var/db/pkg");
-    packageCounts->emerge += countFilesRecursive(baseDir, "SIZE");
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //xps
-    ffStrbufAppendS(baseDir, "/var/db/xbps");
-    packageCounts->xbps += getXBPS(baseDir);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //nix system
-    ffStrbufAppendS(baseDir, "/run/current-system");
-    packageCounts->nixSystem += getNixPackages(baseDir->chars);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //nix default
-    ffStrbufAppendS(baseDir, "/nix/var/nix/profiles/default");
-    packageCounts->nixDefault += getNixPackages(baseDir->chars);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //apk
-    ffStrbufAppendS(baseDir, "/lib/apk/db/installed");
-    packageCounts->apk += getNumStrings(baseDir->chars, "C:Q");
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //flatpak
-    ffStrbufAppendS(baseDir, "/var/lib/flatpak/app");
-    packageCounts->flatpak += getNumElements(baseDir->chars, DT_DIR);
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //snap
-    ffStrbufAppendS(baseDir, "/snap");
-    uint32_t snap = getNumElements(baseDir->chars, DT_DIR);
-    if(snap > 0)
-        packageCounts->snap += (snap - 1); //Accounting for the /snap/bin folder
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    //pacman branch
     ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ETC"/pacman-mirrors.conf");
     if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
         ffStrbufAppendS(&packageCounts->pacmanBranch, "stable");
     ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    #endif // !__ANDROID__
-
-    #else // !__APPLE__
-
-    //brew
-    packageCounts->brew += getBrewPackages(baseDir);
-    packageCounts->port += getMacPortsPackages(baseDir);
-
-    #endif // __APPLE__
-
-    #ifdef __FreeBSD__
-
-    ffStrbufAppendS(baseDir, "/var/db/pkg/local.sqlite");
-    packageCounts->pkg += (uint32_t) ffSettingsGetSQLite3Int(instance, baseDir->chars, "SELECT count(id) FROM packages");
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-
-    #endif // __FreeBSD__
 }
 
-static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, FFPackageCounts* packageCounts)
+static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
     uint32_t baseDirLength = baseDir->length;
 
@@ -391,12 +300,11 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
     if(dir == NULL)
     {
         ffStrbufSubstrBefore(baseDir, baseDirLength);
-        getPackageCounts(instance, baseDir, packageCounts);
         return;
     }
 
     ffStrbufAppendC(baseDir, '/');
-    baseDirLength = baseDir->length;
+    uint32_t baseDirLength2 = baseDir->length;
 
     struct dirent* entry;
     while((entry = readdir(dir)) != NULL)
@@ -406,43 +314,34 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
 
         ffStrbufAppendS(baseDir, entry->d_name);
         getPackageCounts(instance, baseDir, packageCounts);
-        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        ffStrbufSubstrBefore(baseDir, baseDirLength2);
     }
 
     closedir(dir);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
-void
-#ifdef __MSYS__
-ffDetectPackagesPosix
-#else
-ffDetectPackages
-#endif
-(FFinstance* instance, FFPackageCounts* counts)
+void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 {
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
-    if(ffStrbufIgnCaseCompS(&ffDetectOS(instance)->id, "bedrock") == 0)
-        getPackageCountsBedrock(instance, &baseDir, counts);
+    if(ffStrbufIgnCaseCompS(&(ffDetectOS(instance)->id), "bedrock") == 0)
+        getPackageCountsBedrock(instance, &baseDir, result);
     else
-        getPackageCounts(instance, &baseDir, counts);
+        getPackageCountsRegular(instance, &baseDir, result);
 
     // If SQL failed, we can still try with librpm.
     // This is needed on openSUSE, which seems to use a proprietary database file
     // This method doesn't work on bedrock, so we do it here.
     #ifdef FF_HAVE_RPM
-        if(counts->rpm == 0)
-            counts->rpm = getRpmFromLibrpm(instance);
+        if(result->rpm == 0)
+            result->rpm = getRpmFromLibrpm(instance);
     #endif
 
-    #if !defined(__ANDROID__) && !defined(__APPLE__)
-        //nix user
-        ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&baseDir, "/.nix-profile");
-        counts->nixUser = getNixPackages(baseDir.chars);
-    #endif
+    ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
+    result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
 
     ffStrbufDestroy(&baseDir);
 }

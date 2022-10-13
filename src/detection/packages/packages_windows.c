@@ -19,29 +19,20 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
         FindClose(hFind);
     }
 
+    if(type == FILE_ATTRIBUTE_DIRECTORY && counter >= 2)
+        counter -= 2; // accounting for . and ..
+
     return counter;
 }
 
-#ifdef __MSYS__
-    void ffDetectPackagesPosix(const FFinstance* instance, FFPackageCounts* counts);
-#endif
-
-void ffDetectPackages(FFinstance* instance, FFPackageCounts* counts)
+void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 {
-    #ifdef __MSYS__
-        //We have pacman and maybe others in MSYS, but not package managers for Windows
-        if(getenv("MSYSTEM"))
-            return ffDetectPackagesPosix(instance, counts);
-    #else
-        FF_UNUSED(instance);
-    #endif
+    FF_UNUSED(instance);
 
     FFstrbuf scoopPath;
     ffStrbufInitF(&scoopPath, "%s/scoop/apps/*", getenv("USERPROFILE"));
     counts->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY);
-    if(counts->scoop >= 3)
-        counts->scoop -= 3; // . .. scoop
-    else
-        counts->scoop = 0;
+    if(counts->scoop > 0)
+        counts->scoop-- // scoop
     ffStrbufDestroy(&scoopPath);
 }
