@@ -15,7 +15,7 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
         {
             if(wfd.dwFileAttributes & type)
                 counter++;
-        } while (FindNextFileA(hFind, &wfd) == TRUE);
+        } while (FindNextFileA(hFind, &wfd));
         FindClose(hFind);
     }
 

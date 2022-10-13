@@ -7,11 +7,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <dirent.h>
 #include <sys/stat.h>
 
 #ifdef WIN32
     #include "util/windows/getline.h"
+    #include <fileapi.h>
+#else
+    #include <dirent.h>
 #endif
 
 typedef struct CustomValue
@@ -434,7 +436,6 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
     {
         if(entry->d_type == DT_DIR)
         {
-
             if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
                 continue;
 
@@ -453,7 +454,38 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
 
     closedir(dir);
     #else
-    FF_UNUSED(folder, indentation, folderName);
+    uint32_t folderLength = folder->length;
+
+    if(folderName != NULL)
+        printf("%s/\n", folderName);
+
+    ffStrbufAppendC(folder, '*');
+    WIN32_FIND_DATAA entry;
+    HANDLE hFind = FindFirstFileA(folder->chars, &entry);
+    if(hFind == INVALID_HANDLE_VALUE)
+        return;
+
+    do
+    {
+        if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            if(strcmp(entry.cFileName, ".") == 0 || strcmp(entry.cFileName, "..") == 0)
+                continue;
+
+            ffStrbufSubstrBefore(folder, folderLength);
+            ffStrbufAppendS(folder, entry.cFileName);
+            ffStrbufAppendC(folder, '/');
+            listAvailablePresetsFromFolder(folder, (uint8_t) (indentation + 1), entry.cFileName);
+            ffStrbufSubstrBefore(folder, folderLength);
+            continue;
+        }
+
+        for(uint8_t i = 0; i < indentation; i++)
+            fputs("  | ", stdout);
+
+        puts(entry.cFileName);
+    } while (FindNextFileA(hFind, &entry));
+    FindClose(hFind);
     #endif
 }
 
