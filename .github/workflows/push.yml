@@ -259,6 +259,8 @@ jobs:
       - linux
       - macos
       - bsd
+      - msys
+      - windows
     permissions:
       contents: write
     steps:
