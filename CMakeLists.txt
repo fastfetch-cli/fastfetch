@@ -15,11 +15,11 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
-elseif(NOT APPLE AND NOT ANDROID AND NOT MSYS AND NOT WIN32)
+elseif(NOT APPLE AND NOT ANDROID AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(MSYS OR WIN32)
+if(WIN32)
     enable_language(CXX)
 endif()
 
@@ -41,7 +41,7 @@ include(CheckIncludeFile)
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR MSYS OR WIN32" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR WIN32" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
@@ -60,8 +60,8 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR MSYS OR WIN32" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR MSYS OR WIN32" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
 
@@ -90,7 +90,7 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 
-if(MSYS OR WIN32)
+if(WIN32)
     set(CMAKE_CXX_STANDARD 11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
 endif()
@@ -102,7 +102,7 @@ if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
 endif()
 
 set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
-if(NOT MSYS AND NOT WIN32)
+if(NOT WIN32)
     set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
 endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
@@ -288,8 +288,8 @@ set(LIBFASTFETCH_SRC
 
 if(LINUX OR APPLE OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/users/users_linux.c
         src/common/processing_linux.c
+        src/detection/users/users_linux.c
         src/detection/disk/disk.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/localip/localip_linux.c
@@ -345,8 +345,9 @@ if(LINUX OR BSD)
     )
 endif()
 
-if(MSYS OR WIN32)
+if(WIN32)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/processing_windows.c
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
@@ -367,29 +368,15 @@ if(MSYS OR WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/localip/localip_windows.c
         src/detection/uptime/uptime_windows.c
-        src/util/windows/wmi.cpp
-
-        src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/media/media_nosupport.c
-    )
-endif()
-
-if(MSYS)
-    list(APPEND LIBFASTFETCH_SRC
-        src/common/processing_linux.c
-        src/detection/terminalshell/terminalshell_linux.c
-        src/detection/packages/packages_linux.c
-    )
-endif()
-
-if(WIN32)
-    list(APPEND LIBFASTFETCH_SRC
-        src/common/processing_windows.c
         src/detection/packages/packages_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
+        src/util/windows/wmi.cpp
         src/util/windows/getline.c
         src/util/windows/pwd.c
         src/util/windows/utsname.c
+
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/media/media_nosupport.c
     )
 endif()
 
@@ -527,15 +514,15 @@ if(APPLE)
         PRIVATE "-framework Cocoa"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
-elseif(MSYS OR WIN32)
+elseif(WIN32)
     target_link_libraries(libfastfetch
-        PRIVATE "wbemuuid"
-        PRIVATE "ole32"
-        PRIVATE "oleaut32"
         PRIVATE "dwmapi"
-        PRIVATE "opengl32"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
+        PRIVATE "ole32"
+        PRIVATE "oleaut32"
+        PRIVATE "opengl32"
+        PRIVATE "wbemuuid"
         PRIVATE "ws2_32"
     )
 endif()

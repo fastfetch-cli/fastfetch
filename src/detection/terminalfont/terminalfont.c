@@ -64,7 +64,7 @@ static void detectTTY(FFTerminalFontResult* terminalFont)
     ffStrbufDestroy(&fontName);
 }
 
-#if defined(_WIN32) || defined(__MSYS__) || defined(__linux__)
+#if defined(_WIN32) || defined(__linux__)
 #ifdef FF_HAVE_LIBCJSON
 
 #include "common/library.h"
@@ -241,7 +241,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFon
 }
 
 #endif
-#endif //defined(_WIN32) || defined(__MSYS__) || defined(__linux__)
+#endif //defined(_WIN32) || defined(__linux__)
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
@@ -259,7 +259,7 @@ const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
         else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
             detectTTY(&result);
 
-        #if defined(_WIN32) || defined(__MSYS__) || defined(__linux__)
+        #if defined(_WIN32) || defined(__linux__)
         //Used by both Linux (WSL) and Windows
         else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0 ||
             ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WindowsTerminal.exe") == 0)

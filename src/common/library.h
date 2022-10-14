@@ -16,7 +16,7 @@
     #include <dlfcn.h>
 #endif
 
-#if defined(_WIN32) || defined(__MSYS__)
+#ifdef _WIN32
     #define FF_LIBRARY_EXTENSION ".dll"
 #elif defined(__APPLE__)
     #define FF_LIBRARY_EXTENSION ".dylib"

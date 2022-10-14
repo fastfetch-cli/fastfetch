@@ -28,7 +28,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     assert(processName->length > 0);
     ffStrbufClear(exe);
 
-    #if defined(__linux__) || defined(__MSYS__)
+    #ifdef __linux__
 
     char cmdlineFilePath[64];
     snprintf(cmdlineFilePath, sizeof(cmdlineFilePath), "/proc/%d/cmdline", (int)pid);
@@ -61,7 +61,7 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 {
     const char* error = NULL;
 
-    #if defined(__linux__) || defined(__MSYS__)
+    #ifdef __linux__
 
     char statFilePath[64];
     snprintf(statFilePath, sizeof(statFilePath), "/proc/%d/stat", (int)pid);

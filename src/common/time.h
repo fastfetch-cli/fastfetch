@@ -4,7 +4,7 @@
 #define FF_INCLUDED_common_time
 
 #include <stdint.h>
-#if defined(_WIN32) || defined(__MSYS__)
+#ifdef _WIN32
     #include <synchapi.h>
     #include <sysinfoapi.h>
 #else
@@ -14,7 +14,7 @@
 
 static inline uint64_t ffTimeGetTick() //In msec
 {
-    #if defined(_WIN32) || defined(__MSYS__)
+    #ifdef _WIN32
         return GetTickCount64();
     #else
         struct timeval timeNow;
@@ -25,7 +25,7 @@ static inline uint64_t ffTimeGetTick() //In msec
 
 static inline void ffTimeSleep(uint32_t msec)
 {
-    #if defined(_WIN32) || defined(__MSYS__)
+    #ifdef _WIN32
         SleepEx(msec, TRUE);
     #else
         nanosleep(&(struct timespec){ msec / 1000, (msec % 1000) * 1000000 }, NULL);

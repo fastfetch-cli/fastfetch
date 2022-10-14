@@ -41,7 +41,7 @@ static void printFont(const FFFontResult* font)
         printf("%s [User]", font->fonts[1].chars);
 }
 
-#elif defined(_WIN32) || defined(__MSYS__)
+#elif defined(_WIN32)
 
 static void printFont(const FFFontResult* font)
 {
