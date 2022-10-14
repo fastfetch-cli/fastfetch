@@ -183,30 +183,36 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("ALACRITTY_WINDOW_ID") != NULL
     )) term = "Alacritty";
 
+    #ifdef __ANDROID__
     //Termux
     if(!ffStrSet(term) && (
         getenv("TERMUX_VERSION") != NULL ||
         getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
         getenv("TMUX_TMPDIR") != NULL
     )) term = "Termux";
+    #endif
 
+    #ifdef __linux__
     //Konsole
     if(!ffStrSet(term) && (
         getenv("KONSOLE_VERSION") != NULL
     )) term = "konsole";
+    #endif
 
     //MacOS, mintty
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
 
-    //We are in WSL but not in Windows Terminal
+    #ifdef __linux__
     if(!ffStrSet(term))
     {
+        //We are in WSL but not in Windows Terminal
         const FFHostResult* host = ffDetectHost();
         if(ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_WSL) == 0 ||
             ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS) == 0) //TODO better WSL or MSYS detection
         term = "conhost";
     }
+    #endif
 
     //Normal Terminal
     if(!ffStrSet(term))
