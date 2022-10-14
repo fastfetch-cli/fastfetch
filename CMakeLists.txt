@@ -508,7 +508,6 @@ if(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework CoreFoundation"
         PRIVATE "-framework IOKit"
-        PRIVATE "-framework CoreGraphics"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
