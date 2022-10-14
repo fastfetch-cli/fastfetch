@@ -45,7 +45,7 @@ jobs:
 
       - name: get fastfetch version
         id: ffversion
-        run: echo "::set-output name=ffversion::$(./fastfetch --version-raw)"
+        run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
@@ -129,8 +129,6 @@ jobs:
     permissions:
       security-events: write
       contents: read
-    outputs:
-      ffversion: ${{ steps.ffversion.outputs.ffversion }}
     defaults:
       run:
         shell: msys2 {0}
@@ -164,11 +162,19 @@ jobs:
           Cflags: -I${includedir}
           EOF
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: c, cpp
+
       - name: configure project
         run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --target fastfetch --target flashfetch # Makes no sense to install exes to /usr/bin for Windows
+
+      - name: perform CodeQL analysis
+        uses: github/codeql-action/analyze@v2
 
       - name: copy necessary dlls
         run: cp /usr/bin/msys-2.0.dll /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
@@ -193,8 +199,6 @@ jobs:
     permissions:
       security-events: write
       contents: read
-    outputs:
-      ffversion: ${{ steps.ffversion.outputs.ffversion }}
     defaults:
       run:
         shell: msys2 {0}
@@ -228,11 +232,19 @@ jobs:
           Cflags: -I${includedir}
           EOF
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: c, cpp
+
       - name: configure project
         run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --target fastfetch --target flashfetch
+
+      - name: perform CodeQL analysis
+        uses: github/codeql-action/analyze@v2
 
       - name: copy necessary dlls
         run: cp /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
