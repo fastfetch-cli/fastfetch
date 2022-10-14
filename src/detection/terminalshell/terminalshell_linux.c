@@ -316,10 +316,21 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     else
         ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
-    // https://github.com/LinusDierheimer/fastfetch/discussions/280#discussioncomment-3831734
-    ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
+    if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
+        ffStrbufInitS(&result.shellPrettyName, "PowerShell");
+    else if(ffStrbufEqualS(&result.shellProcessName, "nu"))
+        ffStrbufInitS(&result.shellPrettyName, "nushell");
+    else
+    {
+        // https://github.com/LinusDierheimer/fastfetch/discussions/280#discussioncomment-3831734
+        ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
+    }
 
-    if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
+    if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app"))
+        ffStrbufInitS(&result.terminalPrettyName, "iTerm");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
+        ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
+    else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);

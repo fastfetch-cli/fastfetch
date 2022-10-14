@@ -147,9 +147,19 @@ static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
     return memcmp(strbuf->chars, comp->chars, length + 1);
 }
 
+static inline FF_C_NODISCARD int ffStrbufEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return ffStrbufComp(strbuf, comp) == 0;
+}
+
 static inline FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
 {
     return strcmp(strbuf->chars, comp);
+}
+
+static inline FF_C_NODISCARD int ffStrbufEqualS(const FFstrbuf* strbuf, const char* comp)
+{
+    return ffStrbufCompS(strbuf, comp) == 0;
 }
 
 static inline FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
