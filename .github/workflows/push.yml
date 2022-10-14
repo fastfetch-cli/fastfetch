@@ -171,7 +171,7 @@ jobs:
         run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build . --target fastfetch --target flashfetch
+        run: cmake --build .
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -194,7 +194,8 @@ jobs:
           name: fastfetch-windows
           path: |
             ./*.dll
-            ./*.exe
+            ./fastfetch.exe
+            ./flashfetch.exe
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
