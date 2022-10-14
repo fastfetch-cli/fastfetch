@@ -57,7 +57,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    if(!getProcessInfo(pid, &ppid, &result->shellProcessName, &result->shellExe))
+    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->shellProcessName, &result->shellExe))
         return 0;
     result->shellExeName = result->shellExe.chars + ffStrbufLastIndexC(&result->shellExe, '\\') + 1;
 
@@ -76,6 +76,8 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell ISE");
     else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "cmd") == 0)
         ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
+    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "nu") == 0)
+        ffStrbufSetS(&result->shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "explorer") == 0)
     {
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer"); // Started without shell
@@ -89,13 +91,31 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    if(!getProcessInfo(pid, &ppid, &result->terminalProcessName, &result->terminalExe))
+    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->terminalProcessName, &result->terminalExe))
         return 0;
     result->terminalExeName = result->terminalExe.chars + ffStrbufLastIndexC(&result->terminalExe, '\\');
 
     ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
     if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
         ffStrbufSubstrBefore(&result->terminalPrettyName, result->terminalPrettyName.length - 4);
+
+    if(
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "pwsh") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "cmd") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "bash") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "zsh") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "fish") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "nu") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "powershell") == 0 ||
+        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "powershell_ise") == 0
+    ) {
+        //We are nested shell
+        ffStrbufClear(&result->terminalProcessName);
+        ffStrbufClear(&result->terminalPrettyName);
+        ffStrbufClear(&result->terminalExe);
+        result->terminalExeName = NULL;
+        return getTerminalInfo(result, ppid);
+    }
 
     if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "WindowsTerminal") == 0)
         ffStrbufSetS(&result->terminalPrettyName, "Windows Terminal");
@@ -105,6 +125,50 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
 
     return ppid;
+}
+
+static void getTerminalFromEnv(FFTerminalShellResult* result)
+{
+    if(
+        result->terminalProcessName.length > 0 &&
+        !ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "login") &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(login)") != 0 &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "systemd") != 0 &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "init") != 0 &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(init)") != 0 &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
+    ) return;
+
+    const char* term = NULL;
+
+    //SSH
+    if(getenv("SSH_CONNECTION") != NULL)
+        term = getenv("SSH_TTY");
+
+    //Windows Terminal
+    if(!term && (
+        getenv("WT_SESSION") != NULL ||
+        getenv("WT_PROFILE_ID") != NULL
+    )) term = "Windows Terminal";
+
+    //Alacritty
+    if(!term && (
+        getenv("ALACRITTY_SOCKET") != NULL ||
+        getenv("ALACRITTY_LOG") != NULL ||
+        getenv("ALACRITTY_WINDOW_ID") != NULL
+    )) term = "Alacritty";
+
+    //Normal Terminal
+    if(!term)
+        term = getenv("TERM");
+
+    if(term)
+    {
+        ffStrbufSetS(&result->terminalProcessName, term);
+        ffStrbufSetS(&result->terminalPrettyName, term);
+        ffStrbufSetS(&result->terminalExe, term);
+        result->terminalExeName = "";
+    }
 }
 
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
@@ -142,12 +206,9 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         goto exit;
 
     ppid = getShellInfo(&result, ppid);
-    if(ppid == 0)
-        goto exit;
-
-    // TODO: handle nested shells
-
     getTerminalInfo(&result, ppid);
+    if(result.terminalProcessName.length == 0)
+        getTerminalFromEnv(&result);
 
 exit:
     ffThreadMutexUnlock(&mutex);

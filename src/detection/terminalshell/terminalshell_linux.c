@@ -164,7 +164,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
     ) return;
 
-    char* term = NULL;
+    const char* term = NULL;
 
     //SSH
     if(getenv("SSH_CONNECTION") != NULL)
