@@ -185,6 +185,9 @@ jobs:
       - name: run flashfetch
         run: ./flashfetch
 
+      - name: run tests
+        run: ctest
+
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -221,4 +224,4 @@ jobs:
           tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-bsd/*
+          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-bsd/*,fastfetch-windows/*
