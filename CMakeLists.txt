@@ -291,7 +291,6 @@ if(LINUX OR APPLE OR ANDROID OR BSD)
         src/common/processing_linux.c
         src/detection/disk/disk.c
         src/detection/terminalshell/terminalshell_linux.c
-        src/detection/kernel/kernel_linux.c
         src/detection/localip/localip_linux.c
     )
 endif()
@@ -366,7 +365,6 @@ if(MSYS OR WIN32)
         src/detection/font/font_windows.cpp
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
-        src/detection/kernel/kernel_windows.cpp
         src/detection/localip/localip_windows.c
         src/detection/uptime/uptime_windows.c
         src/util/windows/wmi.cpp
