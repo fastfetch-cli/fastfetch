@@ -4,16 +4,14 @@
 static void getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
 {
     ffProcessAppendStdOut(version, (char* const[]) {
-        "env",
-        "-i",
         exe->chars,
-        "--norc",
-        "--noprofile",
-        "-c",
-        "printf \"%s\" \"$BASH_VERSION\"",
+        "--version",
         NULL
-    });
-    ffStrbufSubstrBeforeFirstC(version, '(');
+    }); // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)\nCopyright...
+    ffStrbufSubstrBeforeFirstC(version, '\n'); // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)
+    ffStrbufSubstrBeforeLastC(version, ' '); // GNU bash, version 5.1.16(1)-release
+    ffStrbufSubstrAfterLastC(version, ' '); // 5.1.16(1)-release
+    ffStrbufSubstrBeforeFirstC(version, '('); // 5.1.16
 }
 
 static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
