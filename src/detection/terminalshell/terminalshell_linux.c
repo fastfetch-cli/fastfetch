@@ -135,6 +135,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "fish")      == 0 ||
         strcasecmp(name, "dash")      == 0 ||
         strcasecmp(name, "pwsh")      == 0 ||
+        strcasecmp(name, "nu")        == 0 ||
         strcasecmp(name, "git-shell") == 0
     ) {
         ffStrbufSetS(&result->shellProcessName, name); // prevent from `fishbash`
@@ -236,43 +237,6 @@ static void getUserShellFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        "env",
-        "-i",
-        exe->chars,
-        "--norc",
-        "--noprofile",
-        "-c",
-        "printf \"%s\" \"$BASH_VERSION\"",
-        NULL
-    });
-    ffStrbufSubstrBeforeFirstC(version, '(');
-}
-
-static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
-    ffStrbufSubstrBeforeLastC(version, ' ');
-    ffStrbufSubstrAfterFirstC(version, ' ');
-}
-
-static void getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
-    ffStrbufTrimRight(version, '\n');
-    ffStrbufSubstrAfterLastC(version, ' ');
-}
-
 static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
     FFstrbuf command;
@@ -295,26 +259,16 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
     ffStrbufDestroy(&command);
 }
 
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
+
 static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
     ffStrbufClear(version);
-    if(strcasecmp(exeName, "bash") == 0)
-        getShellVersionBash(exe, version);
-    else if(strcasecmp(exeName, "zsh") == 0)
-        getShellVersionZsh(exe, version);
-    else if(strcasecmp(exeName, "fish") == 0 || strcasecmp(exeName, "pwsh") == 0)
-        getShellVersionFish(exe, version);
-    else
+    if(!fftsGetShellVersion(exe, exeName, version))
         getShellVersionGeneric(exe, exeName, version);
 }
 
-const FFTerminalShellResult*
-#if defined(__MSYS__) || defined(_WIN32)
-    ffDetectTerminalShellPosix
-#else
-    ffDetectTerminalShell
-#endif
-(const FFinstance* instance)
+const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     FF_UNUSED(instance);
 

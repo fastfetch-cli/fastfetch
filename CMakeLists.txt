@@ -237,6 +237,7 @@ set(LIBFASTFETCH_SRC
     src/detection/font/font.c
     src/detection/displayserver/displayserver.c
     src/detection/terminalfont/terminalfont.c
+    src/detection/terminalshell/terminalshell.c
     src/detection/media/media.c
     src/detection/packages/packages.c
     src/modules/break.c
@@ -363,7 +364,6 @@ if(MSYS OR WIN32)
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/memory/memory_windows.cpp
         src/detection/font/font_windows.cpp
-        src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/localip/localip_windows.c
         src/detection/uptime/uptime_windows.c
@@ -386,6 +386,7 @@ if(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/processing_windows.c
         src/detection/packages/packages_windows.c
+        src/detection/terminalshell/terminalshell_windows.cpp
         src/util/windows/getline.c
         src/util/windows/pwd.c
         src/util/windows/utsname.c

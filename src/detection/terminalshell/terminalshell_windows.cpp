@@ -50,13 +50,7 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
     return true;
 }
 
-static void getShellVersion(FFstrbuf* exe, FFstrbuf* version)
-{
-    char* const argv[] = { exe->chars, (char*)"--version", NULL };
-    ffProcessAppendStdOut(version, argv);
-    ffStrbufTrimRight(version, '\n');
-    ffStrbufSubstrAfterLastC(version, ' ');
-}
+extern "C" bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
 {
@@ -70,11 +64,11 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     if(ffStrbufEndsWithIgnCaseS(&result->shellPrettyName, ".exe"))
         ffStrbufSubstrBefore(&result->shellPrettyName, result->shellPrettyName.length - 4);
 
+    ffStrbufClear(&result->shellVersion);
+    fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
+
     if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "pwsh") == 0)
-    {
         ffStrbufSetS(&result->shellPrettyName, "PowerShell");
-        getShellVersion(&result->shellExe, &result->shellVersion);
-    }
     else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell") == 0)
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell");
     else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell_ise") == 0)
@@ -112,23 +106,8 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
     return ppid;
 }
 
-#ifdef __MSYS__
-    extern "C"
-    const FFTerminalShellResult* ffDetectTerminalShellPosix(const FFinstance* instance);
-#endif
-
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
-    #ifdef __MSYS__
-        // This is hacky.
-        // When running inside of MSYS2, the real Windows parent process doesn't exist and we must find it in Linux way ( /proc/self/xxx )
-        // When running outside of MSYS2, /proc/self/xxx doesn't exist and we must find it in Windows way
-        if(getenv("MSYSTEM"))
-            return ffDetectTerminalShellPosix(instance);
-    #else
-        FF_UNUSED(instance);
-    #endif
-
     static FFTerminalShellResult result;
     static bool init = false;
     if(init)
