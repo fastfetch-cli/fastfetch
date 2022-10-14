@@ -1,6 +1,7 @@
 extern "C" {
 #include "terminalshell.h"
 #include "common/processing.h"
+#include "common/thread.h"
 }
 #include "util/windows/wmi.hpp"
 
@@ -108,10 +109,17 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
 
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
+    FF_UNUSED(instance);
+
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
+    ffThreadMutexLock(&mutex);
     if(init)
+    {
+        ffThreadMutexUnlock(&mutex);
         return &result;
+    }
     init = true;
 
     ffStrbufInit(&result.shellProcessName);
@@ -131,17 +139,17 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 
     uint32_t ppid = GetCurrentProcessId();
     if(!getProcessInfo(ppid, &ppid, nullptr, nullptr))
-        return &result;
+        goto exit;
 
     ppid = getShellInfo(&result, ppid);
     if(ppid == 0)
-        return &result;
+        goto exit;
 
     // TODO: handle nested shells
 
-    ppid = getTerminalInfo(&result, ppid);
-    if(ppid == 0)
-        return &result;
+    getTerminalInfo(&result, ppid);
 
+exit:
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }
