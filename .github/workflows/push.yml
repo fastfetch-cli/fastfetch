@@ -123,76 +123,6 @@ jobs:
           name: fastfetch-bsd
           path: ./fastfetch-*.*
 
-  msys:
-    name: MSYS
-    runs-on: windows-latest
-    permissions:
-      security-events: write
-      contents: read
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v3
-
-      - name: setup-msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MSYS
-          update: true
-          install: git base-devel cmake gcc mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
-
-      - name: print msys version
-        run: uname -a
-
-      # https://github.com/msys2/MINGW-packages/issues/13524#event-7555720785
-      - name: create OpenCL.pc
-        run: |
-          cat > /clang64/lib/pkgconfig/OpenCL.pc << EOF
-          prefix=/clang64
-          exec_prefix=${prefix}
-          libdir=${exec_prefix}/lib
-          includedir=${prefix}/include
-
-          Name: OpenCL
-          Description: Open Computing Language generic Installable Client Driver Loader
-          Version: 2022.09.30-1
-          Libs: -L${libdir} -lOpenCL.dll
-          Cflags: -I${includedir}
-          EOF
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: c, cpp
-
-      - name: configure project
-        run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-
-      - name: build project
-        run: cmake --build . --target fastfetch --target flashfetch # Makes no sense to install exes to /usr/bin for Windows
-
-      - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v2
-
-      - name: copy necessary dlls
-        run: cp /usr/bin/msys-2.0.dll /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
-
-      - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
-
-      - name: run flashfetch
-        run: ./flashfetch
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: fastfetch-msys
-          path: |
-            ./*.dll
-            ./*.exe
-
   windows:
     name: Windows
     runs-on: windows-latest
@@ -241,7 +171,7 @@ jobs:
         run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build . --target fastfetch --target flashfetch
+        run: cmake --build .
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -255,13 +185,17 @@ jobs:
       - name: run flashfetch
         run: ./flashfetch
 
+      - name: run tests
+        run: ctest
+
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-windows
           path: |
             ./*.dll
-            ./*.exe
+            ./fastfetch.exe
+            ./flashfetch.exe
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
@@ -271,7 +205,6 @@ jobs:
       - linux
       - macos
       - bsd
-      - msys
       - windows
     permissions:
       contents: write
@@ -292,4 +225,4 @@ jobs:
           tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-bsd/*
+          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-bsd/*,fastfetch-windows/*

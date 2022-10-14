@@ -28,7 +28,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     assert(processName->length > 0);
     ffStrbufClear(exe);
 
-    #if defined(__linux__) || defined(__MSYS__)
+    #ifdef __linux__
 
     char cmdlineFilePath[64];
     snprintf(cmdlineFilePath, sizeof(cmdlineFilePath), "/proc/%d/cmdline", (int)pid);
@@ -61,7 +61,7 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 {
     const char* error = NULL;
 
-    #if defined(__linux__) || defined(__MSYS__)
+    #ifdef __linux__
 
     char statFilePath[64];
     snprintf(statFilePath, sizeof(statFilePath), "/proc/%d/stat", (int)pid);
@@ -135,10 +135,14 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "fish")      == 0 ||
         strcasecmp(name, "dash")      == 0 ||
         strcasecmp(name, "pwsh")      == 0 ||
+        strcasecmp(name, "nu")        == 0 ||
         strcasecmp(name, "git-shell") == 0
     ) {
-        ffStrbufSetS(&result->shellProcessName, name); // prevent from `fishbash`
-        getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
+        if (result->shellProcessName.length == 0)
+        {
+            ffStrbufSetS(&result->shellProcessName, name);
+            getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
+        }
 
         getTerminalShell(result, ppid);
         return;
@@ -160,7 +164,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
     ) return;
 
-    char* term = NULL;
+    const char* term = NULL;
 
     //SSH
     if(getenv("SSH_CONNECTION") != NULL)
@@ -179,30 +183,36 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("ALACRITTY_WINDOW_ID") != NULL
     )) term = "Alacritty";
 
+    #ifdef __ANDROID__
     //Termux
     if(!ffStrSet(term) && (
         getenv("TERMUX_VERSION") != NULL ||
         getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
         getenv("TMUX_TMPDIR") != NULL
     )) term = "Termux";
+    #endif
 
+    #ifdef __linux__
     //Konsole
     if(!ffStrSet(term) && (
         getenv("KONSOLE_VERSION") != NULL
     )) term = "konsole";
+    #endif
 
     //MacOS, mintty
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
 
-    //We are in WSL but not in Windows Terminal
+    #ifdef __linux__
     if(!ffStrSet(term))
     {
+        //We are in WSL but not in Windows Terminal
         const FFHostResult* host = ffDetectHost();
         if(ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_WSL) == 0 ||
             ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS) == 0) //TODO better WSL or MSYS detection
         term = "conhost";
     }
+    #endif
 
     //Normal Terminal
     if(!ffStrSet(term))
@@ -236,43 +246,6 @@ static void getUserShellFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        "env",
-        "-i",
-        exe->chars,
-        "--norc",
-        "--noprofile",
-        "-c",
-        "printf \"%s\" \"$BASH_VERSION\"",
-        NULL
-    });
-    ffStrbufSubstrBeforeFirstC(version, '(');
-}
-
-static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
-    ffStrbufSubstrBeforeLastC(version, ' ');
-    ffStrbufSubstrAfterFirstC(version, ' ');
-}
-
-static void getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
-    ffStrbufTrimRight(version, '\n');
-    ffStrbufSubstrAfterLastC(version, ' ');
-}
-
 static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
     FFstrbuf command;
@@ -295,26 +268,16 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
     ffStrbufDestroy(&command);
 }
 
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
+
 static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
     ffStrbufClear(version);
-    if(strcasecmp(exeName, "bash") == 0)
-        getShellVersionBash(exe, version);
-    else if(strcasecmp(exeName, "zsh") == 0)
-        getShellVersionZsh(exe, version);
-    else if(strcasecmp(exeName, "fish") == 0 || strcasecmp(exeName, "pwsh") == 0)
-        getShellVersionFish(exe, version);
-    else
+    if(!fftsGetShellVersion(exe, exeName, version))
         getShellVersionGeneric(exe, exeName, version);
 }
 
-const FFTerminalShellResult*
-#if defined(__MSYS__) || defined(_WIN32)
-    ffDetectTerminalShellPosix
-#else
-    ffDetectTerminalShell
-#endif
-(const FFinstance* instance)
+const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     FF_UNUSED(instance);
 
@@ -353,10 +316,21 @@ const FFTerminalShellResult*
     else
         ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
-    // https://github.com/LinusDierheimer/fastfetch/discussions/280#discussioncomment-3831734
-    ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
+    if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
+        ffStrbufInitS(&result.shellPrettyName, "PowerShell");
+    else if(ffStrbufEqualS(&result.shellProcessName, "nu"))
+        ffStrbufInitS(&result.shellPrettyName, "nushell");
+    else
+    {
+        // https://github.com/LinusDierheimer/fastfetch/discussions/280#discussioncomment-3831734
+        ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
+    }
 
-    if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
+    if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app"))
+        ffStrbufInitS(&result.terminalPrettyName, "iTerm");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
+        ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
+    else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);

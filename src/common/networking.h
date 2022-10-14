@@ -5,7 +5,7 @@
 
 #include "util/FFstrbuf.h"
 
-#if defined(_WIN32) || defined(__MSYS__)
+#ifdef _WIN32
     typedef uintptr_t FFSockType; //SOCKET, unsigned
     #ifndef INVALID_SOCKET //Don't conflict with <winsock2.h>
         #define INVALID_SOCKET ((uintptr_t)~0)

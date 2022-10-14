@@ -30,7 +30,8 @@ void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
     FF_UNUSED(instance);
 
     FFstrbuf scoopPath;
-    ffStrbufInitF(&scoopPath, "%s/scoop/apps/*", getenv("USERPROFILE"));
+    ffStrbufInitS(&scoopPath, instance->state.passwd->pw_dir);
+    ffStrbufAppendS(&scoopPath, "/scoop/apps/*");
     result->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY);
     if(result->scoop > 0)
         result->scoop--; // scoop

@@ -285,7 +285,7 @@ void ffInitInstance(FFinstance* instance)
 
 FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
 
-#if !(defined(__APPLE__) || defined(__MSYS__) || defined(_WIN32))
+#if !(defined(__APPLE__) || defined(_WIN32))
 
 #define FF_DETECT_QT_GTK 1
 
@@ -294,7 +294,7 @@ FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK2, FFinstance*)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK3, FFinstance*)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK4, FFinstance*)
 
-#endif //!(defined(__APPLE__) || defined(__MSYS__) || defined(_WIN32))
+#endif //!(defined(__APPLE__) || defined(_WIN32))
 
 #endif //FF_HAVE_THREADS
 

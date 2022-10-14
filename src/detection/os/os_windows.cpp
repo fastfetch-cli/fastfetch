@@ -59,10 +59,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         ffStrbufClear(&os->variant);
     }
 
-    if(getenv("MSYSTEM"))
-        ffStrbufAppendS(&os->id, "MSYS2");
-    else
-        ffStrbufAppendF(&os->id, "Windows %*s", os->version.length, os->version.chars);
+    ffStrbufAppendF(&os->id, "Windows %*s", os->version.length, os->version.chars);
 
     ffGetWmiObjString(pclsObj, L"BuildNumber", &os->buildID);
     ffGetWmiObjString(pclsObj, L"OSArchitecture", &os->architecture);

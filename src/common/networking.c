@@ -1,4 +1,4 @@
-#if defined(_WIN32) || defined(__MSYS__)
+#ifdef _WIN32
     #include <winsock2.h>
     #include <ws2tcpip.h>
     #include <synchapi.h>
@@ -31,7 +31,7 @@
 
 FFSockType ffNetworkingSendHttpRequest(const char* host, const char* path, const char* headers, uint32_t timeout)
 {
-    #if defined(_WIN32) || defined(__MSYS__)
+    #ifdef _WIN32
     static INIT_ONCE once = INIT_ONCE_STATIC_INIT;
     WSADATA* pData;
     if(!InitOnceExecuteOnce(&once, initWsaData, NULL, (LPVOID*) &pData))
