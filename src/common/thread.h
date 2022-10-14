@@ -14,9 +14,9 @@
         typedef SRWLOCK FFThreadMutex;
         static inline void ffThreadMutexLock(FFThreadMutex* mutex) { AcquireSRWLockExclusive(mutex); }
         static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) { ReleaseSRWLockExclusive(mutex); }
-        static inline void ffThreadCreateAndDetach(__stdcall unsigned (* func)(void*), void* data) {
-            uintptr_t newThread = _beginthreadex(func, 0, data, NULL, 0, NULL);
-            if(newThread != 0)
+        static inline void ffThreadCreateAndDetach(unsigned (__stdcall* func)(void*), void* data) {
+            uintptr_t newThread = _beginthreadex(NULL, 0, func, data, 0, NULL);
+            if(newThread)
                 CloseHandle((HANDLE)newThread);
         }
         #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType) static __stdcall unsigned fn ## ThreadMain (void* data) { fn((paramType)data); return 0; }
