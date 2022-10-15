@@ -18,13 +18,16 @@ struct ProcessInfo
 static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe)
 {
     wchar_t query[256] = {};
-    swprintf(query, 256, L"SELECT Name, ParentProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = %" PRIu32, pid);
+    swprintf(query, 256, L"SELECT %ls %ls ParentProcessId FROM Win32_Process WHERE ProcessId = %" PRIu32,
+        pname ? L"Name," : L"",
+        pname ? L"ExecutablePath," : L"",
+    pid);
 
     IEnumWbemClassObject* pEnumerator = ffQueryWmi(query, nullptr);
     if(!pEnumerator)
         return false;
 
-    IWbemClassObject *pclsObj = NULL;
+    IWbemClassObject *pclsObj = nullptr;
     ULONG uReturn = 0;
 
     if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
@@ -65,20 +68,39 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     if(ffStrbufEndsWithIgnCaseS(&result->shellPrettyName, ".exe"))
         ffStrbufSubstrBefore(&result->shellPrettyName, result->shellPrettyName.length - 4);
 
+    //Common programs that are between terminal and own process, but are not the shell
+    if(
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "sudo")          ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "su")            ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "doas")          ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "strace")        ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "sshd")          ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "gdb")           ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "lldb")          ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "guake-wrapped") ||
+        ffStrbufContainIgnCaseS(&result->shellPrettyName, "debug")
+    ) {
+        ffStrbufClear(&result->shellProcessName);
+        ffStrbufClear(&result->shellPrettyName);
+        ffStrbufClear(&result->shellExe);
+        result->shellExeName = nullptr;
+        return getShellInfo(result, ppid);
+    }
+
     ffStrbufClear(&result->shellVersion);
     fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
 
-    if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "pwsh") == 0)
+    if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "pwsh"))
         ffStrbufSetS(&result->shellPrettyName, "PowerShell");
-    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "powershell"))
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell");
-    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "powershell_ise") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "powershell_ise"))
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell ISE");
-    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "cmd") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "cmd"))
         ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
-    else if(ffStrbufIgnCaseCompS(&result->shellPrettyName, "nu") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "nu"))
         ffStrbufSetS(&result->shellPrettyName, "nushell");
-    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "explorer") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
     {
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer"); // Started without shell
         return 0;
@@ -100,28 +122,30 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSubstrBefore(&result->terminalPrettyName, result->terminalPrettyName.length - 4);
 
     if(
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "pwsh") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "cmd") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "bash") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "zsh") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "fish") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "nu") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "powershell") == 0 ||
-        ffStrbufIgnCaseCompS(&result->terminalPrettyName, "powershell_ise") == 0
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "pwsh")           ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "cmd")            ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "bash")           ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "zsh")            ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "fish")           ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "nu")             ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell")     ||
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell_ise")
     ) {
         //We are nested shell
         ffStrbufClear(&result->terminalProcessName);
         ffStrbufClear(&result->terminalPrettyName);
         ffStrbufClear(&result->terminalExe);
-        result->terminalExeName = NULL;
+        result->terminalExeName = nullptr;
         return getTerminalInfo(result, ppid);
     }
 
-    if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "WindowsTerminal") == 0)
+    if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "WindowsTerminal"))
         ffStrbufSetS(&result->terminalPrettyName, "Windows Terminal");
-    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "conhost") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "conhost"))
         ffStrbufSetS(&result->terminalPrettyName, "Console Window Host");
-    else if(ffStrbufIgnCaseCompS(&result->terminalPrettyName, "explorer") == 0)
+    else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "Code"))
+        ffStrbufSetS(&result->terminalPrettyName, "Visual Studio Code");
+    else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
 
     return ppid;
@@ -139,23 +163,23 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
     ) return;
 
-    const char* term = NULL;
+    const char* term = nullptr;
 
     //SSH
-    if(getenv("SSH_CONNECTION") != NULL)
+    if(getenv("SSH_CONNECTION") != nullptr)
         term = getenv("SSH_TTY");
 
     //Windows Terminal
     if(!term && (
-        getenv("WT_SESSION") != NULL ||
-        getenv("WT_PROFILE_ID") != NULL
+        getenv("WT_SESSION") != nullptr ||
+        getenv("WT_PROFILE_ID") != nullptr
     )) term = "Windows Terminal";
 
     //Alacritty
     if(!term && (
-        getenv("ALACRITTY_SOCKET") != NULL ||
-        getenv("ALACRITTY_LOG") != NULL ||
-        getenv("ALACRITTY_WINDOW_ID") != NULL
+        getenv("ALACRITTY_SOCKET") != nullptr ||
+        getenv("ALACRITTY_LOG") != nullptr ||
+        getenv("ALACRITTY_WINDOW_ID") != nullptr
     )) term = "Alacritty";
 
     //Normal Terminal

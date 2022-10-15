@@ -1,6 +1,6 @@
 # Fastfetch
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, BSD, MacOS and Windows on [MSYS2](https://www.msys2.org/) are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, BSD, MacOS and Windows are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -21,10 +21,13 @@ There are some premade config files in [`presets`](presets), including the ones 
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
+Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.  
+
 
 The following libraries are used if present at runtime:
-* [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html): For multithreading support, which may improve performance
+
+### Linux and BSD
+
 * [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
 * [`libxcb-randr`](https://xcb.freedesktop.org/),
@@ -46,7 +49,21 @@ The following libraries are used if present at runtime:
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( Windows, WSL ).
-* [`freetype`](https://www.freetype.org/): Needed for Termux font detection ( Android ).
+
+### macOS
+
+* [`MediaRemote`](https://iphonedev.wiki/index.php/MediaRemote.framework): Need for Media detection. It's a private framework provided by newer macOS system.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module. To get it actually working, both loader (`vulkan-loader`) and driver (molten-vk) need to be installed.
+
+### Windows
+
+* [`libcJSON`](https://github.com/DaveGamble/cJSON): Used for Windows Terminal font detection.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
+* [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
+
+### Android
+
+* [`freetype`](https://www.freetype.org/): Used for Termux font detection.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
@@ -100,9 +117,7 @@ If pkg-config fails to find the headers for a library listed in [dependencies](#
 
 ### Building on Windows
 
-Currently [MSYS2](https://www.msys2.org/) is required to build fastfetch. Running fastfetch requires msys2 runtime library (`msys-2.0.dll`) but not full MSYS2 environment.
-
-Full native Windows executable is planned.
+Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 sub system is suggested (and tested) to build fastfetch.
 
 ## Packaging
 

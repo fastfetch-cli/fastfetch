@@ -147,7 +147,7 @@ static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
     return memcmp(strbuf->chars, comp->chars, length + 1);
 }
 
-static inline FF_C_NODISCARD int ffStrbufEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
+static inline FF_C_NODISCARD bool ffStrbufEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufComp(strbuf, comp) == 0;
 }
@@ -157,7 +157,7 @@ static inline FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const cha
     return strcmp(strbuf->chars, comp);
 }
 
-static inline FF_C_NODISCARD int ffStrbufEqualS(const FFstrbuf* strbuf, const char* comp)
+static inline FF_C_NODISCARD bool ffStrbufEqualS(const FFstrbuf* strbuf, const char* comp)
 {
     return ffStrbufCompS(strbuf, comp) == 0;
 }
@@ -167,9 +167,19 @@ static inline FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, co
     return strcasecmp(strbuf->chars, comp);
 }
 
+static inline FF_C_NODISCARD bool ffStrbufIgnCaseEqualS(const FFstrbuf* strbuf, const char* comp)
+{
+    return ffStrbufIgnCaseCompS(strbuf, comp) == 0;
+}
+
 static inline FF_C_NODISCARD int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufIgnCaseCompS(strbuf, comp->chars);
+}
+
+static inline FF_C_NODISCARD bool ffStrbufIgnCaseEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return ffStrbufIgnCaseComp(strbuf, comp) == 0;
 }
 
 static inline FF_C_NODISCARD bool ffStrbufContainS(const FFstrbuf* strbuf, const char* str)
