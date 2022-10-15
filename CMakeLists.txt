@@ -525,6 +525,7 @@ elseif(WIN32)
         PRIVATE "wbemuuid"
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
+        PRIVATE "version"
     )
     if(USE_WIN_FAST_PPID_DETECTION)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_FAST_PPID_DETECTION)

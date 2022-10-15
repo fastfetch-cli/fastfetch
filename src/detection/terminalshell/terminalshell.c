@@ -1,6 +1,41 @@
 #include "fastfetch.h"
 #include "common/processing.h"
 
+#ifdef _WIN32
+
+#include <winver.h>
+
+static bool getFileVersion(const char* exePath, FFstrbuf* version)
+{
+    DWORD handle;
+    DWORD size = GetFileVersionInfoSizeA(exePath, &handle);
+    if(size > 0)
+    {
+        void* versionData = malloc(size);
+        if(GetFileVersionInfoA(exePath, handle, size, versionData))
+        {
+            VS_FIXEDFILEINFO* verInfo;
+            UINT len;
+            if(VerQueryValueW(versionData, L"\\", (void**)&verInfo, &len) && len && verInfo->dwSignature == 0xFEEF04BD)
+            {
+                ffStrbufAppendF(version, "%u.%u.%u.%u",
+                    (unsigned)(( verInfo->dwFileVersionMS >> 16 ) & 0xffff),
+                    (unsigned)(( verInfo->dwFileVersionMS >>  0 ) & 0xffff),
+                    (unsigned)(( verInfo->dwFileVersionLS >> 16 ) & 0xffff),
+                    (unsigned)(( verInfo->dwFileVersionLS >>  0 ) & 0xffff)
+                );
+                free(versionData);
+                return true;
+            }
+        }
+        free(versionData);
+    }
+
+    return false;
+}
+
+#endif
+
 static void getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
 {
     ffProcessAppendStdOut(version, (char* const[]) {
@@ -25,8 +60,24 @@ static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
     ffStrbufSubstrAfterFirstC(version, ' ');
 }
 
-static void getShellVersionFishPwsh(FFstrbuf* exe, FFstrbuf* version)
+static void getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
 {
+    ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    });
+    ffStrbufTrimRight(version, '\n');
+    ffStrbufSubstrAfterLastC(version, ' ');
+}
+
+static void getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
+{
+    #ifdef _WIN32
+    if(getFileVersion(exe->chars, version))
+        return;
+    #endif
+
     ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "--version",
@@ -50,6 +101,11 @@ static void getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
     ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
 }
+
+static void getShellVersionCmd(FFstrbuf* exe, FFstrbuf* version)
+{
+    getFileVersion(exe->chars, version);
+}
 #endif
 
 static void getShellVersionNu(FFstrbuf* exe, FFstrbuf* version)
@@ -68,14 +124,18 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         getShellVersionBash(exe, version);
     else if(strcasecmp(exeName, "zsh") == 0)
         getShellVersionZsh(exe, version);
-    else if(strcasecmp(exeName, "fish") == 0 || strcasecmp(exeName, "pwsh") == 0)
-        getShellVersionFishPwsh(exe, version);
+    else if(strcasecmp(exeName, "fish") == 0)
+        getShellVersionFish(exe, version);
+    else if(strcasecmp(exeName, "pwsh") == 0)
+        getShellVersionPwsh(exe, version);
     else if(strcasecmp(exeName, "nu") == 0)
         getShellVersionNu(exe, version);
 
     #ifdef _WIN32
     else if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
         getShellVersionWinPowerShell(exe, version);
+    else if(strcasecmp(exeName, "cmd") == 0)
+        getShellVersionCmd(exe, version);
     #endif
 
     else
