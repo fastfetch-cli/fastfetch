@@ -51,6 +51,18 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         uint32_t index = ffStrbufFirstIndexC(&os->variant, ' ');
         ffStrbufAppendNS(&os->version, index, os->variant.chars);
         ffStrbufSubstrAfter(&os->variant, index);
+
+        // Windows Server 20xx Rx
+        if(ffStrbufEndsWithC(&os->prettyName, 'r'))
+        {
+            if(os->variant.chars[0] == 'R' &&
+               isdigit(os->variant.chars[1]) &&
+               (os->variant.chars[2] == '\0' || os->variant.chars[2] == ' '))
+            {
+                ffStrbufAppendF(&os->version, " R%c", os->variant.chars[1]);
+                ffStrbufSubstrAfter(&os->variant, strlen("Rx ") - 1);
+            }
+        }
     }
     else
     {
@@ -59,7 +71,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
         ffStrbufClear(&os->variant);
     }
 
-    ffStrbufAppendF(&os->id, "Windows %*s", os->version.length, os->version.chars);
+    ffStrbufAppendF(&os->id, "%*s %*s", os->prettyName.length, os->prettyName.chars, os->version.length, os->version.chars);
 
     ffGetWmiObjString(pclsObj, L"BuildNumber", &os->buildID);
     ffGetWmiObjString(pclsObj, L"OSArchitecture", &os->architecture);

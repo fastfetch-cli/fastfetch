@@ -1280,7 +1280,7 @@ static const FFlogo* getLogoMsys2()
 static const FFlogo* getLogoWindows11()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("Windows 11")
+    FF_LOGO_NAMES("Windows 11", "Windows Server 2022")
     FF_LOGO_LINES(
         "$1\n"
         "################  ################\n"
@@ -1310,7 +1310,7 @@ static const FFlogo* getLogoWindows11()
 static const FFlogo* getLogoWindows8()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("Windows 8", "Windows 8.1", "Windows 10")
+    FF_LOGO_NAMES("Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019")
     FF_LOGO_LINES(
         "$1                                ..,\n"
         "                    ....,,:;+ccllll\n"
@@ -1343,7 +1343,7 @@ static const FFlogo* getLogoWindows8()
 static const FFlogo* getLogoWindows()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("Windows")
+    FF_LOGO_NAMES("Windows", "Windows 7", "Windows Server 2008", "Windows Server 2008 R2")
     FF_LOGO_LINES(
         "$1        ,.=:!!t3Z3z.,\n"
         "       :tt:::tt333EE3\n"
