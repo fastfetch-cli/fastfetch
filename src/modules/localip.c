@@ -33,7 +33,10 @@ void ffPrintLocalIp(FFinstance* instance)
 
         if(instance->config.localIP.key.length == 0)
         {
-            ffStrbufSetF(&key, FF_LOCALIP_MODULE_NAME " (%*s)", ip->name.length, ip->name.chars);
+            if(ip->name.length)
+                ffStrbufSetF(&key, FF_LOCALIP_MODULE_NAME " (%*s)", ip->name.length, ip->name.chars);
+            else
+                ffStrbufSetS(&key, FF_LOCALIP_MODULE_NAME);
         }
         else
         {

@@ -5,24 +5,10 @@
 
 #include "localip.h"
 
-static void addNewIp(FFlist* list, const wchar_t* name, const char* addr, bool ipv6)
+static void addNewIp(FFlist* list, const char* name, const char* addr, bool ipv6)
 {
     FFLocalIpResult* ip = (FFLocalIpResult*) ffListAdd(list);
-
-    int len = (int)wcslen(name);
-    if(len > 0)
-    {
-        int size_needed = WideCharToMultiByte(CP_UTF8, 0, name, len, NULL, 0, NULL, NULL);
-        ffStrbufInitA(&ip->name, (uint32_t)size_needed + 1);
-        WideCharToMultiByte(CP_UTF8, 0, name, len, ip->name.chars, size_needed, NULL, NULL);
-        ip->name.length = (uint32_t)size_needed;
-        ip->name.chars[size_needed] = '\0';
-    }
-    else
-    {
-        ffStrbufInitS(&ip->name, "*");
-    }
-
+    ffStrbufInitS(&ip->name, name);
     ffStrbufInitS(&ip->addr, addr);
     ip->ipv6 = ipv6;
 }
@@ -64,6 +50,11 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         if (adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK && !instance->config.localIpShowLoop)
             continue;
 
+        char name[128];
+        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, sizeof(name), NULL, NULL);
+        if (instance->config.localIpNamePrefix.length && strncmp(name, instance->config.localIpNamePrefix.chars, instance->config.localIpNamePrefix.length) != 0)
+            continue;
+
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
         {
             if (ifa->Address.lpSockaddr->sa_family == AF_INET)
@@ -75,7 +66,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
-                addNewIp(results, adapter->FriendlyName, addressBuffer, false);
+                addNewIp(results, name, addressBuffer, false);
             }
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
             {
@@ -86,7 +77,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-                addNewIp(results, adapter->FriendlyName, addressBuffer, false);
+                addNewIp(results, name, addressBuffer, false);
             }
         }
     }
