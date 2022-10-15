@@ -28,7 +28,7 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     };
 
     FFstrbuf cmdline;
-    ffStrbufInitS(&cmdline, argv[0]);
+    ffStrbufInitF(&cmdline, "\"%s\"", argv[0]);
     for(char* const* parg = &argv[1]; *parg; ++parg)
     {
         ffStrbufAppendC(&cmdline, ' ');
