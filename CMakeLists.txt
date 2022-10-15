@@ -64,6 +64,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
+cmake_dependent_option(USE_WIN_FAST_PPID_DETECTION "Use internal NTAPI instead of querying WMI to get PPID" ON "WIN32" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -523,7 +524,11 @@ elseif(WIN32)
         PRIVATE "opengl32"
         PRIVATE "wbemuuid"
         PRIVATE "ws2_32"
+        PRIVATE "ntdll"
     )
+    if(USE_WIN_FAST_PPID_DETECTION)
+        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_FAST_PPID_DETECTION)
+    endif()
 endif()
 
 target_include_directories(libfastfetch

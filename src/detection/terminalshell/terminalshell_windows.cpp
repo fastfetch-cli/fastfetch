@@ -3,20 +3,68 @@ extern "C" {
 #include "common/processing.h"
 #include "common/thread.h"
 }
-#include "util/windows/wmi.hpp"
 
 #include <inttypes.h>
 #include <processthreadsapi.h>
 #include <wchar.h>
 
-struct ProcessInfo
-{
-    uint32_t pid;
-    FFstrbuf psName;
-};
+#include <chrono>
 
-static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe)
+#ifdef FF_USE_WIN_FAST_PPID_DETECTION
+
+#include <winternl.h>
+
+static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName)
 {
+    HANDLE hProcess = pid == 0
+        ? GetCurrentProcess()
+        : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, TRUE, pid);
+
+    if(ppid)
+    {
+        PROCESS_BASIC_INFORMATION info;
+        ULONG size;
+        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
+        {
+            assert(size == sizeof(info));
+            *ppid = (uint32_t)info.InheritedFromUniqueProcessId;
+        }
+        else
+        {
+            CloseHandle(hProcess);
+            return false;
+        }
+    }
+    if(exe)
+    {
+        DWORD bufSize = exe->allocated;
+        if(QueryFullProcessImageNameA(hProcess, 0, exe->chars, &bufSize))
+            exe->length = bufSize;
+        else
+        {
+            CloseHandle(hProcess);
+            return false;
+        }
+    }
+    if(pname && exeName)
+    {
+        *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
+        ffStrbufSetS(pname, *exeName);
+    }
+
+    CloseHandle(hProcess);
+    return true;
+}
+
+#else
+
+#include "util/windows/wmi.hpp"
+
+static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName)
+{
+    if(pid == 0)
+        pid = GetCurrentProcessId();
+
     wchar_t query[256] = {};
     swprintf(query, 256, L"SELECT %ls %ls ParentProcessId FROM Win32_Process WHERE ProcessId = %" PRIu32,
         pname ? L"Name," : L"",
@@ -49,10 +97,17 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
     if(exe)
         ffGetWmiObjString(pclsObj, L"ExecutablePath", exe);
 
+    if(exeName)
+    {
+        *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
+    }
+
     pclsObj->Release();
     pEnumerator->Release();
     return true;
 }
+
+#endif
 
 extern "C" bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
@@ -60,9 +115,8 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->shellProcessName, &result->shellExe))
+    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->shellProcessName, &result->shellExe, &result->shellExeName))
         return 0;
-    result->shellExeName = result->shellExe.chars + ffStrbufLastIndexC(&result->shellExe, '\\') + 1;
 
     ffStrbufSet(&result->shellPrettyName, &result->shellProcessName);
     if(ffStrbufEndsWithIgnCaseS(&result->shellPrettyName, ".exe"))
@@ -113,9 +167,8 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->terminalProcessName, &result->terminalExe))
+    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName))
         return 0;
-    result->terminalExeName = result->terminalExe.chars + ffStrbufLastIndexC(&result->terminalExe, '\\');
 
     ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
     if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
@@ -135,7 +188,7 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufClear(&result->terminalProcessName);
         ffStrbufClear(&result->terminalPrettyName);
         ffStrbufClear(&result->terminalExe);
-        result->terminalExeName = nullptr;
+        result->terminalExeName = "";
         return getTerminalInfo(result, ppid);
     }
 
@@ -212,21 +265,21 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 
     ffStrbufInit(&result.shellProcessName);
     ffStrbufInitA(&result.shellExe, 128);
-    result.shellExeName = result.shellExe.chars;
+    result.shellExeName = "";
     ffStrbufInit(&result.shellPrettyName);
     ffStrbufInit(&result.shellVersion);
 
     ffStrbufInit(&result.terminalProcessName);
     ffStrbufInitA(&result.terminalExe, 128);
-    result.terminalExeName = result.terminalExe.chars;
+    result.terminalExeName = "";
     ffStrbufInit(&result.terminalPrettyName);
 
     ffStrbufInit(&result.userShellExe);
-    result.userShellExeName = result.userShellExe.chars;
+    result.userShellExeName = "";
     ffStrbufInit(&result.userShellVersion);
 
-    uint32_t ppid = GetCurrentProcessId();
-    if(!getProcessInfo(ppid, &ppid, nullptr, nullptr))
+    uint32_t ppid;
+    if(!getProcessInfo(0, &ppid, nullptr, nullptr, nullptr))
         goto exit;
 
     ppid = getShellInfo(&result, ppid);
