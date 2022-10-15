@@ -36,6 +36,22 @@ static void getShellVersionFishPwsh(FFstrbuf* exe, FFstrbuf* version)
     ffStrbufSubstrAfterLastC(version, ' ');
 }
 
+#ifdef _WIN32
+static void getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "-NoLogo",
+        "-NoProfile",
+        "-Command",
+        "$PSVersionTable.PSVersion.ToString()",
+        NULL
+    });
+    ffStrbufTrimRight(version, '\n');
+    ffStrbufSubstrAfterLastC(version, ' ');
+}
+#endif
+
 static void getShellVersionNu(FFstrbuf* exe, FFstrbuf* version)
 {
     ffProcessAppendStdOut(version, (char* const[]) {
@@ -56,6 +72,12 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         getShellVersionFishPwsh(exe, version);
     else if(strcasecmp(exeName, "nu") == 0)
         getShellVersionNu(exe, version);
+
+    #ifdef _WIN32
+    else if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
+        getShellVersionWinPowerShell(exe, version);
+    #endif
+
     else
         ok = false;
     return ok;
