@@ -5,58 +5,40 @@ extern "C" {
 
 void detectRam(FFMemoryStorage* ram)
 {
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem", &ram->error);
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem", &ram->error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        ffStrbufInitS(&ram->error, "No WMI result returned");
-        pEnumerator->Release();
-        return;
+        //KB
+        record.getUnsigned(L"TotalVisibleMemorySize", &ram->bytesTotal);
+        uint64_t bytesFree;
+        record.getUnsigned(L"FreePhysicalMemory", &bytesFree);
+        ram->bytesUsed = ram->bytesTotal - bytesFree;
+        ram->bytesTotal *= 1024;
+        ram->bytesUsed *= 1024;
     }
-
-    //KB
-    ffGetWmiObjUnsigned(pclsObj, L"TotalVisibleMemorySize", &ram->bytesTotal);
-    uint64_t bytesFree;
-    ffGetWmiObjUnsigned(pclsObj, L"FreePhysicalMemory", &bytesFree);
-    ram->bytesUsed = ram->bytesTotal - bytesFree;
-
-    pclsObj->Release();
-    pEnumerator->Release();
-
-    ram->bytesTotal *= 1024;
-    ram->bytesUsed *= 1024;
+    else
+        ffStrbufInitS(&ram->error, "No Wmi result returned");
 }
 
 void detectSwap(FFMemoryStorage* swap)
 {
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT AllocatedBaseSize, CurrentUsage FROM Win32_PageFileUsage", &swap->error);
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT AllocatedBaseSize, CurrentUsage FROM Win32_PageFileUsage", &swap->error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        ffStrbufInitS(&swap->error, "No WMI result returned");
-        pEnumerator->Release();
-        return;
+        //MB
+        record.getUnsigned(L"AllocatedBaseSize", &swap->bytesTotal);
+        record.getUnsigned(L"CurrentUsage", &swap->bytesUsed);
+        swap->bytesTotal *= 1024 * 1024;
+        swap->bytesUsed *= 1024 * 1024;
     }
-
-    //MB
-    ffGetWmiObjUnsigned(pclsObj, L"AllocatedBaseSize", &swap->bytesTotal);
-    ffGetWmiObjUnsigned(pclsObj, L"CurrentUsage", &swap->bytesUsed);
-
-    pclsObj->Release();
-    pEnumerator->Release();
-
-    swap->bytesTotal *= 1024 * 1024;
-    swap->bytesUsed *= 1024 * 1024;
+    else
+        ffStrbufInitS(&swap->error, "No Wmi result returned");
 }
 
 extern "C"

@@ -12,27 +12,17 @@ extern "C" void ffDetectBios(FFBiosResult* bios)
     ffStrbufInit(&bios->biosVendor);
     ffStrbufInit(&bios->biosVersion);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Name, ReleaseDate, Version, Manufacturer FROM Win32_BIOS", &bios->error);
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT Name, ReleaseDate, Version, Manufacturer FROM Win32_BIOS", &bios->error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-
-    if(uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        ffStrbufInitS(&bios->error, "No Wmi result returned");
-        pEnumerator->Release();
-        return;
+        record.getString(L"Name", &bios->biosRelease);
+        record.getString(L"ReleaseDate", &bios->biosDate);
+        record.getString(L"Version", &bios->biosVersion);
+        record.getString(L"Manufacturer", &bios->biosVendor);
     }
-
-    ffGetWmiObjString(pclsObj, L"Name", &bios->biosRelease);
-    ffGetWmiObjString(pclsObj, L"ReleaseDate", &bios->biosDate);
-    ffGetWmiObjString(pclsObj, L"Version", &bios->biosVersion);
-    ffGetWmiObjString(pclsObj, L"Manufacturer", &bios->biosVendor);
-
-    pclsObj->Release();
-    pEnumerator->Release();
+    else
+        ffStrbufInitS(&bios->error, "No Wmi result returned");
 }

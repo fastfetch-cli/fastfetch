@@ -8,26 +8,23 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
     FF_UNUSED(instance);
 
     //https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-battery
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT SystemName, Name, Chemistry, EstimatedChargeRemaining, BatteryStatus FROM Win32_Battery", nullptr);
+    FFWmiQuery query(L"SELECT SystemName, Name, Chemistry, EstimatedChargeRemaining, BatteryStatus FROM Win32_Battery");
 
-    if(!pEnumerator)
+    if(!query)
         return "Query WMI service failed";
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    while(SUCCEEDED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) && uReturn != 0)
+    while(FFWmiRecord record = query.next())
     {
         BatteryResult* battery = (BatteryResult*)ffListAdd(results);
 
         ffStrbufInit(&battery->manufacturer);
-        ffGetWmiObjString(pclsObj, L"SystemName", &battery->manufacturer);
+        record.getString(L"SystemName", &battery->manufacturer);
 
         ffStrbufInit(&battery->modelName);
-        ffGetWmiObjString(pclsObj, L"Name", &battery->modelName);
+        record.getString(L"Name", &battery->modelName);
 
         uint64_t chemistry = 0;
-        ffGetWmiObjUnsigned(pclsObj, L"Chemistry", &chemistry);
+        record.getUnsigned(L"Chemistry", &chemistry);
         switch(chemistry)
         {
             case 1: ffStrbufInitS(&battery->technology, "Other"); break;
@@ -42,11 +39,11 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         }
 
         uint64_t capacity;
-        ffGetWmiObjUnsigned(pclsObj, L"EstimatedChargeRemaining", &capacity);
+        record.getUnsigned(L"EstimatedChargeRemaining", &capacity);
         ffStrbufInitF(&battery->capacity, "%d", (int)capacity);
 
         uint64_t batteryStatus;
-        ffGetWmiObjUnsigned(pclsObj, L"BatteryStatus", &batteryStatus);
+        record.getUnsigned(L"BatteryStatus", &batteryStatus);
         switch(batteryStatus)
         {
             case 1: ffStrbufInitS(&battery->status, "Discharging"); break;
@@ -66,7 +63,5 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         battery->temperature = FF_BATTERY_TEMP_UNSET;
     }
 
-    if(pclsObj) pclsObj->Release();
-    pEnumerator->Release();
     return nullptr;
 }

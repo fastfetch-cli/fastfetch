@@ -9,35 +9,27 @@ int uname(struct utsname *name)
 
     strncpy(name->sysname, "Windows_NT", UTSNAME_MAXLENGTH);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Version, CSName, OSArchitecture FROM Win32_OperatingSystem", nullptr);
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT Version, CSName, OSArchitecture FROM Win32_OperatingSystem");
+    if(!query)
         return -1;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        pEnumerator->Release();
-        return -1;
+        FFstrbuf value;
+        ffStrbufInit(&value);
+        record.getString(L"Version", &value);
+        strncpy(name->release, value.chars, UTSNAME_MAXLENGTH);
+
+        ffStrbufClear(&value);
+        record.getString(L"CSName", &value);
+        strncpy(name->nodename, value.chars, UTSNAME_MAXLENGTH);
+
+        ffStrbufClear(&value);
+        record.getString(L"OSArchitecture", &value);
+        strncpy(name->machine, value.chars, UTSNAME_MAXLENGTH);
+
+        ffStrbufDestroy(&value);
     }
-
-    FFstrbuf value;
-    ffStrbufInit(&value);
-    ffGetWmiObjString(pclsObj, L"Version", &value);
-    strncpy(name->release, value.chars, UTSNAME_MAXLENGTH);
-
-    ffStrbufClear(&value);
-    ffGetWmiObjString(pclsObj, L"CSName", &value);
-    strncpy(name->nodename, value.chars, UTSNAME_MAXLENGTH);
-
-    ffStrbufClear(&value);
-    ffGetWmiObjString(pclsObj, L"OSArchitecture", &value);
-    strncpy(name->machine, value.chars, UTSNAME_MAXLENGTH);
-
-    ffStrbufDestroy(&value);
-    pclsObj->Release();
-    pEnumerator->Release();
 
     return 0;
 }

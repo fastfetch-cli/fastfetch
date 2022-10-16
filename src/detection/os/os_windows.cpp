@@ -19,65 +19,55 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->systemName);
     ffStrbufInit(&os->architecture);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Caption, Version, BuildNumber, OSArchitecture FROM Win32_OperatingSystem", nullptr);
-
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT Caption, Version, BuildNumber, OSArchitecture FROM Win32_OperatingSystem");
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        pEnumerator->Release();
-        return;
-    }
-
-    ffGetWmiObjString(pclsObj, L"Caption", &os->variant);
-    if(ffStrbufStartsWithS(&os->variant, "Microsoft Windows "))
-    {
-        ffStrbufAppendS(&os->name, "Microsoft Windows");
-        ffStrbufAppendS(&os->prettyName, "Windows");
-
-        ffStrbufSubstrAfter(&os->variant, strlen("Microsoft Windows ") - 1);
-
-        if(ffStrbufStartsWithS(&os->variant, "Server "))
+        record.getString(L"Caption", &os->variant);
+        if(ffStrbufStartsWithS(&os->variant, "Microsoft Windows "))
         {
-            ffStrbufAppendS(&os->name, " Server");
-            ffStrbufAppendS(&os->prettyName, " Server");
-            ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
-        }
+            ffStrbufAppendS(&os->name, "Microsoft Windows");
+            ffStrbufAppendS(&os->prettyName, "Windows");
 
-        uint32_t index = ffStrbufFirstIndexC(&os->variant, ' ');
-        ffStrbufAppendNS(&os->version, index, os->variant.chars);
-        ffStrbufSubstrAfter(&os->variant, index);
+            ffStrbufSubstrAfter(&os->variant, strlen("Microsoft Windows ") - 1);
 
-        // Windows Server 20xx Rx
-        if(ffStrbufEndsWithC(&os->prettyName, 'r'))
-        {
-            if(os->variant.chars[0] == 'R' &&
-               isdigit(os->variant.chars[1]) &&
-               (os->variant.chars[2] == '\0' || os->variant.chars[2] == ' '))
+            if(ffStrbufStartsWithS(&os->variant, "Server "))
             {
-                ffStrbufAppendF(&os->version, " R%c", os->variant.chars[1]);
-                ffStrbufSubstrAfter(&os->variant, strlen("Rx ") - 1);
+                ffStrbufAppendS(&os->name, " Server");
+                ffStrbufAppendS(&os->prettyName, " Server");
+                ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
+            }
+
+            uint32_t index = ffStrbufFirstIndexC(&os->variant, ' ');
+            ffStrbufAppendNS(&os->version, index, os->variant.chars);
+            ffStrbufSubstrAfter(&os->variant, index);
+
+            // Windows Server 20xx Rx
+            if(ffStrbufEndsWithC(&os->prettyName, 'r'))
+            {
+                if(os->variant.chars[0] == 'R' &&
+                isdigit(os->variant.chars[1]) &&
+                (os->variant.chars[2] == '\0' || os->variant.chars[2] == ' '))
+                {
+                    ffStrbufAppendF(&os->version, " R%c", os->variant.chars[1]);
+                    ffStrbufSubstrAfter(&os->variant, strlen("Rx ") - 1);
+                }
             }
         }
+        else
+        {
+            // Unknown Windows name, please report this
+            ffStrbufAppend(&os->name, &os->variant);
+            ffStrbufClear(&os->variant);
+        }
+
+        ffStrbufAppendF(&os->id, "%*s %*s", os->prettyName.length, os->prettyName.chars, os->version.length, os->version.chars);
+
+        record.getString(L"BuildNumber", &os->buildID);
+        record.getString(L"OSArchitecture", &os->architecture);
+
+        ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
     }
-    else
-    {
-        // Unknown Windows name, please report this
-        ffStrbufAppend(&os->name, &os->variant);
-        ffStrbufClear(&os->variant);
-    }
-
-    ffStrbufAppendF(&os->id, "%*s %*s", os->prettyName.length, os->prettyName.chars, os->version.length, os->version.chars);
-
-    ffGetWmiObjString(pclsObj, L"BuildNumber", &os->buildID);
-    ffGetWmiObjString(pclsObj, L"OSArchitecture", &os->architecture);
-
-    ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
-
-    pclsObj->Release();
-    pEnumerator->Release();
 }
