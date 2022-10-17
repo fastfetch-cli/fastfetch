@@ -45,12 +45,12 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             disk->type = FF_DISK_TYPE_HIDDEN;
 
         ffStrbufInitA(&disk->filesystem, MAX_PATH + 1);
-        GetVolumeInformationA(mountpoint
+        GetVolumeInformationA(mountpoint,
             NULL, 0, //Volume name
             NULL, //Serial number
             NULL, //Max component length
             NULL, //File system flags
-            disk->filesystem.chars, ffStrbufGetFree(&disk->filesystem)
+            disk->filesystem.chars, disk->filesystem.allocated
         );
         ffStrbufRecalculateLength(&disk->filesystem);
 
@@ -61,5 +61,5 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         i += disk->mountpoint.length;
     }
 
-    free(buff);
+    free(buf);
 }
