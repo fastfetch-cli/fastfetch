@@ -9,34 +9,26 @@ extern "C" {
 extern "C"
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
-    wchar_t query[256] = {};
-    swprintf(query, 256, L"SELECT IconTitleFaceName, IconTitleSize FROM Win32_Desktop WHERE Name LIKE '%%\\\\%s'", instance->state.passwd->pw_name);
+    wchar_t sql[256] = {};
+    swprintf(sql, 256, L"SELECT IconTitleFaceName, IconTitleSize FROM Win32_Desktop WHERE Name LIKE '%%\\\\%s'", instance->state.passwd->pw_name);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(query, &result->error);
-    if(!pEnumerator)
+    FFWmiQuery query(sql, &result->error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        ffStrbufInitS(&result->error, "No WMI result returned");
-        pEnumerator->Release();
-        return;
+        FFstrbuf fontName;
+        ffStrbufInit(&fontName);
+        record.getString(L"IconTitleFaceName", &fontName);
+
+        uint64_t fontSize;
+        record.getUnsigned(L"IconTitleSize", &fontSize);
+
+        ffStrbufAppendF(&result->fonts[0], "%*s (%upt)", fontName.length, fontName.chars, (unsigned)fontSize);
+
+        ffStrbufDestroy(&fontName);
     }
-
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
-    ffGetWmiObjString(pclsObj, L"IconTitleFaceName", &fontName);
-
-    uint64_t fontSize;
-    ffGetWmiObjUnsigned(pclsObj, L"IconTitleSize", &fontSize);
-
-    ffStrbufAppendF(&result->fonts[0], "%*s (%upt)", fontName.length, fontName.chars, (unsigned)fontSize);
-
-    ffStrbufDestroy(&fontName);
-
-    pclsObj->Release();
-    pEnumerator->Release();
+    else
+        ffStrbufInitS(&result->error, "No WMI result returned");
 }

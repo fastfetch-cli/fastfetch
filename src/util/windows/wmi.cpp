@@ -4,6 +4,21 @@
 #include <wchar.h>
 #include <math.h>
 
+namespace
+{
+    // Provide our bstr_t to avoid libstdc++ dependency
+    struct bstr_t
+    {
+        explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
+        ~bstr_t() noexcept { SysFreeString(_bstr); }
+        explicit operator const wchar_t*() const noexcept { return _bstr; }
+        operator BSTR() const noexcept { return _bstr; }
+
+        private:
+            BSTR _bstr;
+    };
+}
+
 //https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
 //https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes
 static void CoUninitializeWrap()
@@ -105,8 +120,8 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     return TRUE;
 }
 
-
-IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error)
+FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error)
+    : pEnumerator(nullptr)
 {
     static INIT_ONCE s_InitOnce = INIT_ONCE_STATIC_INIT;
     const char* context;
@@ -114,11 +129,10 @@ IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error)
     {
         if(error)
             ffStrbufInitS(error, context);
-        return nullptr;
+        return;
     }
 
     // Use the IWbemServices pointer to make requests of WMI
-    IEnumWbemClassObject* pEnumerator = nullptr;
     HRESULT hres;
 
     hres = ((IWbemServices*)context)->ExecQuery(
@@ -132,13 +146,11 @@ IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error)
     {
         if(error)
             ffStrbufAppendF(error, "Query for '%ls' failed. Error code = 0x%lX", queryStr, hres);
-        return nullptr;
     }
-
-    return pEnumerator;
 }
 
-void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf) {
+static void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf)
+{
     int len = (int)SysStringLen(bstr);
     if(len <= 0)
     {
@@ -152,7 +164,7 @@ void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf) {
     strbuf->chars[size_needed] = '\0';
 }
 
-bool ffGetWmiObjString(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf)
+bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
 {
     bool result = true;
 
@@ -202,7 +214,7 @@ bool ffGetWmiObjString(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strb
     return result;
 }
 
-bool ffGetWmiObjSigned(IWbemClassObject* obj, const wchar_t* key, int64_t* integer)
+bool FFWmiRecord::getSigned(const wchar_t* key, int64_t* integer)
 {
     bool result = true;
 
@@ -237,7 +249,7 @@ bool ffGetWmiObjSigned(IWbemClassObject* obj, const wchar_t* key, int64_t* integ
     return result;
 }
 
-bool ffGetWmiObjUnsigned(IWbemClassObject* obj, const wchar_t* key, uint64_t* integer)
+bool FFWmiRecord::getUnsigned(const wchar_t* key, uint64_t* integer)
 {
     bool result = true;
 
@@ -271,7 +283,7 @@ bool ffGetWmiObjUnsigned(IWbemClassObject* obj, const wchar_t* key, uint64_t* in
     return result;
 }
 
-bool ffGetWmiObjReal(IWbemClassObject* obj, const wchar_t* key, double* real)
+bool FFWmiRecord::getReal(const wchar_t* key, double* real)
 {
     bool result = true;
 

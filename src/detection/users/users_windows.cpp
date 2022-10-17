@@ -5,20 +5,16 @@ extern "C" {
 
 void ffDetectUsers(FFlist* users, FFstrbuf* error)
 {
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Antecedent FROM Win32_LoggedOnUser", error);
-
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT Antecedent FROM Win32_LoggedOnUser", error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
 next:
-    while(SUCCEEDED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) && uReturn != 0)
+    while(FFWmiRecord record = query.next())
     {
         FFstrbuf antecedent;
         ffStrbufInit(&antecedent);
-        ffGetWmiObjString(pclsObj, L"Antecedent", &antecedent); // \\.\root\cimv2:Win32_Account.Domain="DOMAIN",Name="NAME"
+        record.getString(L"Antecedent", &antecedent); // \\.\root\cimv2:Win32_Account.Domain="DOMAIN",Name="NAME"
         ffStrbufTrimRight(&antecedent, '"'); // \\.\root\cimv2:Win32_Account.Domain="DOMAIN",Name="NAME
         ffStrbufSubstrAfterFirstC(&antecedent, '"'); // DOMAIN",Name="NAME
         uint32_t index = ffStrbufFirstIndexC(&antecedent, '"');
@@ -36,7 +32,4 @@ next:
 
     if(users->length == 0)
         ffStrbufAppendS(error, "Unable to detect users");
-
-    if(pclsObj) pclsObj->Release();
-    pEnumerator->Release();
 }

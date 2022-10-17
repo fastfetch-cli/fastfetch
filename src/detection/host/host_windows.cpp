@@ -16,25 +16,17 @@ extern "C" void ffDetectHostImpl(FFHostResult* host)
     ffStrbufInit(&host->chassisVendor);
     ffStrbufInit(&host->chassisVersion);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Name, Version, SKUNumber, Vendor FROM Win32_ComputerSystemProduct", &host->error);
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT Name, Version, SKUNumber, Vendor FROM Win32_ComputerSystemProduct", &host->error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        ffStrbufInitS(&host->error, "No Wmi result returned");
-        pEnumerator->Release();
-        return;
+        record.getString(L"Name", &host->productName);
+        record.getString(L"Version", &host->productVersion);
+        record.getString(L"SKUNumber", &host->productSku);
+        record.getString(L"Vendor", &host->sysVendor);
     }
-
-    ffGetWmiObjString(pclsObj, L"Name", &host->productName);
-    ffGetWmiObjString(pclsObj, L"Version", &host->productVersion);
-    ffGetWmiObjString(pclsObj, L"SKUNumber", &host->productSku);
-    ffGetWmiObjString(pclsObj, L"Vendor", &host->sysVendor);
-
-    pclsObj->Release();
-    pEnumerator->Release();
+    else
+        ffStrbufInitS(&host->error, "No Wmi result returned");
 }

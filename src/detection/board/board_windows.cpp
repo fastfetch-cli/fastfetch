@@ -11,26 +11,16 @@ extern "C" void ffDetectBoard(FFBoardResult* board)
     ffStrbufInit(&board->boardVendor);
     ffStrbufInit(&board->boardVersion);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(L"SELECT Product, Version, Manufacturer FROM Win32_BaseBoard", &board->error);
-    if(!pEnumerator)
+    FFWmiQuery query(L"SELECT Product, Version, Manufacturer FROM Win32_BaseBoard", &board->error);
+    if(!query)
         return;
 
-    IWbemClassObject *pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
-
-    if(uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        ffStrbufInitS(&board->error, "No Wmi result returned");
-        pEnumerator->Release();
-        return;
+        record.getString(L"Product", &board->boardName);
+        record.getString(L"Manufacturer", &board->boardVendor);
+        record.getString(L"Version", &board->boardVersion);
     }
-
-    ffGetWmiObjString(pclsObj, L"Product", &board->boardName);
-    ffGetWmiObjString(pclsObj, L"Manufacturer", &board->boardVendor);
-    ffGetWmiObjString(pclsObj, L"Version", &board->boardVersion);
-
-    pclsObj->Release();
-    pEnumerator->Release();
+    else
+        ffStrbufInitS(&board->error, "No Wmi result returned");
 }

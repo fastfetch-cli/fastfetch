@@ -65,45 +65,34 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
     if(pid == 0)
         pid = GetCurrentProcessId();
 
-    wchar_t query[256] = {};
-    swprintf(query, 256, L"SELECT %ls %ls ParentProcessId FROM Win32_Process WHERE ProcessId = %" PRIu32,
+    wchar_t sql[256] = {};
+    swprintf(sql, 256, L"SELECT %ls %ls ParentProcessId FROM Win32_Process WHERE ProcessId = %" PRIu32,
         pname ? L"Name," : L"",
         pname ? L"ExecutablePath," : L"",
     pid);
 
-    IEnumWbemClassObject* pEnumerator = ffQueryWmi(query, nullptr);
-    if(!pEnumerator)
+    FFWmiQuery query(sql);
+    if(!query)
         return false;
 
-    IWbemClassObject *pclsObj = nullptr;
-    ULONG uReturn = 0;
-
-    if(FAILED(pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn)) || uReturn == 0)
+    if(FFWmiRecord record = query.next())
     {
-        pEnumerator->Release();
-        return false;
+        if(ppid)
+        {
+            uint64_t value;
+            record.getUnsigned(L"ParentProcessId", &value);
+            *ppid = (uint32_t) value;
+        }
+
+        if(pname)
+            record.getString(L"Name", pname);
+
+        if(exe)
+            record.getString(L"ExecutablePath", exe);
+
+        if(exeName)
+            *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
     }
-
-    if(ppid)
-    {
-        uint64_t value;
-        ffGetWmiObjUnsigned(pclsObj, L"ParentProcessId", &value);
-        *ppid = (uint32_t) value;
-    }
-
-    if(pname)
-        ffGetWmiObjString(pclsObj, L"Name", pname);
-
-    if(exe)
-        ffGetWmiObjString(pclsObj, L"ExecutablePath", exe);
-
-    if(exeName)
-    {
-        *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
-    }
-
-    pclsObj->Release();
-    pEnumerator->Release();
     return true;
 }
 

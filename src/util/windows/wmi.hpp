@@ -11,32 +11,51 @@ extern "C" {
 
 #include <Wbemidl.h>
 
-//<comdef.h> is not usable in MSYS, so provide our simple bstr_t implementation
-struct bstr_t
+struct FFWmiRecord
 {
-    explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
+    IWbemClassObject* obj;
 
-    ~bstr_t() noexcept { SysFreeString(_bstr); }
+    explicit FFWmiRecord(IEnumWbemClassObject* pEnumerator): obj(nullptr) {
+        if(!pEnumerator) return;
 
-    explicit operator const wchar_t*() const noexcept {
-        return _bstr;
+        ULONG ret;
+        bool ok = SUCCEEDED(pEnumerator->Next(WBEM_INFINITE, 1, &obj, &ret)) && ret;
+        if(!ok) obj = nullptr;
     }
-
-    operator BSTR() const noexcept {
-        return _bstr;
+    FFWmiRecord(const FFWmiRecord&) = delete;
+    FFWmiRecord(FFWmiRecord&& other) {
+        obj = other.obj;
+        other.obj = nullptr;
     }
+    ~FFWmiRecord() { if(obj) obj->Release(); }
+    explicit operator bool() { return !!obj; }
 
-private:
-    BSTR _bstr;
+    bool getString(const wchar_t* key, FFstrbuf* strbuf);
+    bool getSigned(const wchar_t* key, int64_t* integer);
+    bool getUnsigned(const wchar_t* key, uint64_t* integer);
+    bool getReal(const wchar_t* key, double* real);
 };
 
-void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf);
+struct FFWmiQuery
+{
+    IEnumWbemClassObject* pEnumerator = nullptr;
 
-IEnumWbemClassObject* ffQueryWmi(const wchar_t* queryStr, FFstrbuf* error);
-bool ffGetWmiObjString(IWbemClassObject* obj, const wchar_t* key, FFstrbuf* strbuf);
-bool ffGetWmiObjSigned(IWbemClassObject* obj, const wchar_t* key, int64_t* integer);
-bool ffGetWmiObjUnsigned(IWbemClassObject* obj, const wchar_t* key, uint64_t* integer);
-bool ffGetWmiObjReal(IWbemClassObject* obj, const wchar_t* key, double* real);
+    FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error = nullptr);
+    explicit FFWmiQuery(IEnumWbemClassObject* pEnumerator): pEnumerator(pEnumerator) {}
+    FFWmiQuery(const FFWmiQuery& other) = delete;
+    FFWmiQuery(FFWmiQuery&& other) {
+        pEnumerator = other.pEnumerator;
+        other.pEnumerator = nullptr;
+    }
+    ~FFWmiQuery() { if(pEnumerator) pEnumerator->Release(); }
+
+    explicit operator bool() { return !!pEnumerator; }
+
+    FFWmiRecord next() {
+        FFWmiRecord result(pEnumerator);
+        return result;
+    }
+};
 
 #else
     // Win32 COM headers requires C++ compiler
