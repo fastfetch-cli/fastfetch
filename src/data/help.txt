@@ -87,25 +87,26 @@ Library options: Set the path of a library to load
     --lib-cjson <path>
 
 Module specific options:
-    --title-fqdn <?value>:        Sets if the title should use fully qualified domain name. Default is false.
-    --separator-string <str>:     Set the string printed by the separator module
-    --os-file <path>:             Set the path to the file containing OS informations
-    --disk-folders <folders>:     A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
-    --disk-removable <?value>:    Sets if removable volume should be printed. Default is false
-    --battery-dir <folder>:       The directory where the battery folders are. Standard: /sys/class/power_supply/
-    --cpu-temp  <?value>:         Detect and display CPU temperature if supported. Default is false
-    --gpu-temp  <?value>:         Detect and display GPU temperature if supported. Default is false
-    --battery-temp  <?value>:     Detect and display Battery temperature if supported. Default is false
-    --localip-show-ipv4 <?value>: Show ipv4 addresses in local ip module. Default is true
-    --localip-show-ipv6 <?value>: Show ipv6 addresses in local ip module. Default is false
-    --localip-show-loop <?value>: Show loop back addresses (127.0.0.1) in local ip module. Default is false
-    --localip-name-prefix <str>:  Show ips with given name prefix only. Default is empty
-    --public-ip-timeout:          Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
-    --public-ip-url:              The URL of public IP detection server to be used.
-    --weather-timeout:            Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
-    --weather-output-format:      The output weather format to be used. It must be URI encoded.
-    --player-name:                The name of the player to use
-    --gl <value>:                 Sets the opengl context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
+    --title-fqdn <?value>:          Sets if the title should use fully qualified domain name. Default is false.
+    --separator-string <str>:       Set the string printed by the separator module
+    --os-file <path>:               Set the path to the file containing OS informations
+    --disk-folders <folders>:       A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
+    --disk-show-removable <?value>: Sets if removable volume should be printed. Default is true.
+    --disk-show-hidden <?value>:    Sets if hidden volumes should be printed. Default is false
+    --battery-dir <folder>:         The directory where the battery folders are. Standard: /sys/class/power_supply/
+    --cpu-temp  <?value>:           Detect and display CPU temperature if supported. Default is false
+    --gpu-temp  <?value>:           Detect and display GPU temperature if supported. Default is false
+    --battery-temp  <?value>:       Detect and display Battery temperature if supported. Default is false
+    --localip-show-ipv4 <?value>:   Show ipv4 addresses in local ip module. Default is true
+    --localip-show-ipv6 <?value>:   Show ipv6 addresses in local ip module. Default is false
+    --localip-show-loop <?value>:   Show loop back addresses (127.0.0.1) in local ip module. Default is false
+    --localip-name-prefix <str>:    Show ips with given name prefix only. Default is empty
+    --public-ip-timeout:            Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
+    --public-ip-url:                The URL of public IP detection server to be used.
+    --weather-timeout:              Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
+    --weather-output-format:        The output weather format to be used. It must be URI encoded.
+    --player-name:                  The name of the player to use
+    --gl <value>:                   Sets the opengl context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

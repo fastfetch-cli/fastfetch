@@ -1,56 +1,35 @@
-#include "fastfetch.h"
 #include "disk.h"
+#include "detection/internal.h"
 
-#include <sys/statvfs.h>
+void ffDetectDisksImpl(FFDiskResult* disks);
 
-void ffDetectDiskWithStatvfs(const char* folderPath, struct statvfs* fs, FFDiskResult* result)
+static int compareDisks(const void* disk1, const void* disk2)
 {
-    ffStrbufInitS(&result->path, folderPath);
-    result->used = result->total = 0;
-    ffStrbufInit(&result->error);
-
-    struct statvfs newFs;
-
-    if(fs == NULL)
-    {
-        fs = &newFs;
-        int ret = statvfs(folderPath, fs);
-        if(ret != 0)
-        {
-            ffStrbufAppendF(&result->error, "statvfs(\"%s\", &fs) != 0 (%i)", folderPath, ret);
-            return;
-        }
-    }
-
-    result->total = fs->f_blocks * fs->f_frsize;
-
-    if(result->total == 0)
-    {
-        ffStrbufAppendF(&result->error, "statvfs for %s returned size 0", folderPath);
-        return;
-    }
-
-    result->used = result->total - (fs->f_bavail * fs->f_frsize);
-    result->files = (uint32_t) (fs->f_files - fs->f_ffree);
-    result->removable = false; //To be set at other place
+    return ffStrbufCompAlphabetically(&((const FFDisk*) disk1)->mountpoint, &((const FFDisk*) disk2)->mountpoint);
 }
 
-bool ffDiskDetectDiskFolders(FFinstance* instance, FFlist* folders)
+const FFDiskResult* ffDetectDisks()
 {
-    ffStrbufTrim(&instance->config.diskFolders, ':');
-    if(instance->config.diskFolders.length == 0)
-        return false;
+    FF_DETECTION_INTERNAL_GUARD(FFDiskResult,
+        ffStrbufInit(&result.error);
+        ffListInitA(&result.disks, sizeof(FFDisk), 4);
 
-    uint32_t startIndex = 0;
-    while(startIndex < instance->config.diskFolders.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&instance->config.diskFolders, startIndex, ':');
-        instance->config.diskFolders.chars[colonIndex] = '\0';
+        ffDetectDisksImpl(&result);
 
-        ffDetectDiskWithStatvfs(instance->config.diskFolders.chars + startIndex, NULL, (FFDiskResult*)ffListAdd(folders));
+        if(result.disks.length == 0 && result.error.length == 0)
+            ffStrbufAppendS(&result.error, "No disks found");
 
-        startIndex = colonIndex + 1;
-    }
+        for(uint32_t i = 0; i < result.disks.length; ++i)
+        {
+            FFDisk* disk = ffListGet(&result.disks, i);
+            disk->bytesPercentage = (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0);
+            disk->filesPercentage = (uint8_t) (((long double) disk->filesUsed / (long double) disk->filesTotal) * 100.0);
+        }
 
-    return true;
+        //We need to sort the disks, so that we can detect, which disk a path resides on
+        // For example for /boot/efi/bootmgr we need to check /boot/efi before /boot
+        //Note that we sort alphabetically here for a better ordering when printing the list,
+        // so the check must be done in reverse order
+        ffListSort(&result.disks, compareDisks);
+    );
 }

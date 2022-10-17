@@ -155,6 +155,18 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     strbuf->chars[strbuf->length] = '\0';
 }
 
+void ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until)
+{
+    if(value == NULL)
+        return;
+
+    char* end = strchr(value, until);
+    if(end == NULL)
+        ffStrbufAppendS(strbuf, value);
+    else
+        ffStrbufAppendNS(strbuf, (uint32_t) (end - value), value);
+}
+
 void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
 {
     assert(format != NULL);

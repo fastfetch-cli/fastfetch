@@ -300,11 +300,16 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "disk-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("disk", "{}GiB / {}GiB ({4}%)", 4,
-            "Used size",
-            "Total size",
-            "Percentage used",
-            "Num files"
+        constructAndPrintCommandHelpFormat("disk", "{1} / {2} ({3}%)", 9,
+            "Size used",
+            "Size total",
+            "Size percentage",
+            "Files used",
+            "Files total",
+            "Files percentage",
+            "True if removable volume",
+            "True if hidden volume",
+            "Filesystem"
         );
     }
     else if(strcasecmp(command, "battery-format") == 0)
@@ -1314,8 +1319,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.titleFQDN = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
-    else if(strcasecmp(key, "--disk-removable") == 0)
-        instance->config.diskRemovable = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disk-show-removable") == 0)
+        instance->config.diskShowRemovable = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disk-show-hidden") == 0)
+        instance->config.diskShowHidden = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)

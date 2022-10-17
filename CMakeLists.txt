@@ -241,6 +241,7 @@ set(LIBFASTFETCH_SRC
     src/detection/terminalshell/terminalshell.c
     src/detection/media/media.c
     src/detection/packages/packages.c
+    src/detection/disk/disk.c
     src/modules/break.c
     src/modules/custom.c
     src/modules/title.c
@@ -291,7 +292,6 @@ if(LINUX OR APPLE OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/processing_linux.c
         src/detection/users/users_linux.c
-        src/detection/disk/disk.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/localip/localip_linux.c
     )

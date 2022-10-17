@@ -1,66 +1,65 @@
 #include "disk.h"
 
 #define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
+#include <windows.h>
 
-static void detectDrive(const char* folderPath, uint32_t pathLen, FFDiskResult* result)
+void ffDetectDisksImpl(FFDiskResult* disks)
 {
-    ffStrbufInitNS(&result->path, pathLen, folderPath);
-    result->removable = false; //To be set at other place
-    result->files = 0; //Unsupported
-
-    //According to https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getdiskfreespaceexa
-    //GetDiskFreeSpaceExA does not have to specify the root directory on a disk. The function accepts any directory on a disk.
-    uint64_t freeBytes;
-    if(GetDiskFreeSpaceExA(folderPath, NULL, (PULARGE_INTEGER)&result->total, (PULARGE_INTEGER)&freeBytes)) {
-        result->used = result->total - freeBytes;
-        ffStrbufInit(&result->error);
-    }
-    else
-        ffStrbufInitS(&result->error, "GetDiskFreeSpaceExA() failed");
-}
-
-const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
-{
-    FF_UNUSED(instance);
-
-    char buf[128]; // "C:\\\0D:\\\0"
-    uint32_t length = GetLogicalDriveStringsA(sizeof(buf) / sizeof(*buf), buf);
-
-    for(size_t i = 0; i < length;)
+    uint32_t length = GetLogicalDriveStringsA(0, NULL);
+    if(length == 0)
     {
-        const char* drive = buf + i;
-        uint32_t driveLen = (uint32_t) strlen(drive);
-        i += driveLen + 1;
+        ffStrbufAppendS(&disks->error, "GetLogicalDriveStringsA failed");
+        return;
+    }
 
-        bool removable = GetDriveTypeA(drive) == DRIVE_REMOVABLE;
-        if(removable && !instance->config.diskRemovable)
+    char* buf = malloc(length + 1);
+    GetLogicalDriveStringsA(length, buf);
+
+    for(uint32_t i = 0; i < length; i++)
+    {
+        const char* mountpoint = buf + i;
+
+        UINT driveType = GetDriveTypeA(mountpoint);
+        if(driveType == DRIVE_NO_ROOT_DIR)
+        {
+            i += strlen(mountpoint);
             continue;
+        }
 
-        FFDiskResult* folder = (FFDiskResult*)ffListAdd(folders);
-        detectDrive(drive, driveLen, folder);
-        folder->removable = removable;
+        FFDisk* disk = ffListAdd(&disks->disks);
+        ffStrbufInitS(&disk->mountpoint, mountpoint);
+
+        uint64_t bytesFree;
+        if(!GetDiskFreeSpaceExA(mountpoint, NULL, (PULARGE_INTEGER)&disk->bytesTotal, (PULARGE_INTEGER)&bytesFree))
+        {
+            disk->bytesTotal = 0;
+            bytesFree = 0;
+        }
+        disk->bytesUsed = disk->bytesTotal - bytesFree;
+
+        if(driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM)
+            disk->type = FF_DISK_TYPE_EXTERNAL;
+        else if(driveType == DRIVE_FIXED)
+            disk->type = FF_DISK_TYPE_REGULAR;
+        else
+            disk->type = FF_DISK_TYPE_HIDDEN;
+
+        ffStrbufInitA(&disk->filesystem, MAX_PATH + 1);
+        GetVolumeInformationA(mountpoint,
+            NULL, 0, //Volume name
+            NULL, //Serial number
+            NULL, //Max component length
+            NULL, //File system flags
+            disk->filesystem.chars, disk->filesystem.allocated
+        );
+        ffStrbufRecalculateLength(&disk->filesystem);
+
+        //TODO: implement
+        disk->filesUsed = 0;
+        disk->filesTotal = 0;
+
+        i += disk->mountpoint.length;
     }
 
-    return NULL;
-}
-
-bool ffDiskDetectDiskFolders(FFinstance* instance, FFlist* folders)
-{
-    ffStrbufTrim(&instance->config.diskFolders, ';');
-    if(instance->config.diskFolders.length == 0)
-        return false;
-
-    uint32_t startIndex = 0;
-    while(startIndex < instance->config.diskFolders.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&instance->config.diskFolders, startIndex, ';');
-        instance->config.diskFolders.chars[colonIndex] = '\0';
-
-        detectDrive(instance->config.diskFolders.chars + startIndex, colonIndex - startIndex, (FFDiskResult*)ffListAdd(folders));
-
-        startIndex = colonIndex + 1;
-    }
-
-    return true;
+    free(buf);
 }

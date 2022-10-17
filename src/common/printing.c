@@ -93,7 +93,9 @@ static void printError(FFinstance* instance, const char* moduleName, uint8_t mod
         vprintf(message, arguments);
 
         if(!instance->config.pipe)
-            puts(FASTFETCH_TEXT_MODIFIER_RESET);
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
+        putchar('\n');
     }
 }
 

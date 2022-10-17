@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #define FF_LIST_DEFAULT_ALLOC 16
 
@@ -37,6 +38,11 @@ static inline void* ffListGet(const FFlist* list, uint32_t index)
 {
     assert(list->capacity > index);
     return list->data + (index * list->elementSize);
+}
+
+static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void*))
+{
+    qsort(list->data, list->length, list->elementSize, compar);
 }
 
 #endif
