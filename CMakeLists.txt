@@ -286,7 +286,6 @@ set(LIBFASTFETCH_SRC
     src/modules/opengl.c
     src/modules/opencl.c
     src/modules/users.c
-    src/detection/disk/disk_apple.m
 )
 
 if(LINUX OR APPLE OR ANDROID OR BSD)
