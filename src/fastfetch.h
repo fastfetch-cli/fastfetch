@@ -168,7 +168,8 @@ typedef struct FFconfig
     bool titleFQDN;
 
     FFstrbuf diskFolders;
-    bool diskRemovable;
+    bool diskShowRemovable;
+    bool diskShowHidden;
 
     FFstrbuf batteryDir;
 

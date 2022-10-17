@@ -5,17 +5,40 @@
 
 #include "fastfetch.h"
 
+typedef enum FFDiskType
+{
+    FF_DISK_TYPE_REGULAR,
+    FF_DISK_TYPE_HIDDEN,
+    FF_DISK_TYPE_EXTERNAL
+} FFDiskType;
+
+typedef struct FFDisk
+{
+    FFstrbuf mountpoint;
+    FFstrbuf filesystem;
+    FFDiskType type;
+
+    uint64_t bytesUsed;
+    uint64_t bytesTotal;
+    uint8_t bytesPercentage;
+
+    uint32_t filesUsed;
+    uint32_t filesTotal;
+    uint8_t filesPercentage;
+} FFDisk;
+
 typedef struct FFDiskResult
 {
-    FFstrbuf path;
-    uint64_t used;
-    uint64_t total;
-    uint32_t files;
-    bool removable;
     FFstrbuf error;
+    FFlist disks; //List of FFDisk
 } FFDiskResult;
 
-const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders);
-bool ffDiskDetectDiskFolders(FFinstance* instance, FFlist* folders);
+/**
+ * Returns a List of FFDisk, sorted alphabetically by mountpoint.
+ * If error is not set, disks contains at least one disk.
+ *
+ * @return const FFDiskResult*
+ */
+const FFDiskResult* ffDetectDisks();
 
 #endif

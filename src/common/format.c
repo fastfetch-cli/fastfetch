@@ -20,6 +20,8 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
         ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
         ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_BOOL)
+        ffStrbufAppendS(buffer, formatarg->value != NULL ? "true" : "false");
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_LIST)
     {
         const FFlist* list = formatarg->value;
@@ -74,7 +76,8 @@ static inline bool formatArgSet(const FFformatarg* arg)
         (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet(arg->value)) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT16 && *(uint16_t*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0)
+        (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_BOOL && arg->value != NULL)
     );
 }
 

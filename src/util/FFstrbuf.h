@@ -45,6 +45,7 @@ void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* va
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
+void ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until);
 
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
@@ -145,6 +146,11 @@ static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     uint32_t length = strbuf->length > comp->length ? comp->length : strbuf->length;
     return memcmp(strbuf->chars, comp->chars, length + 1);
+}
+
+static inline int ffStrbufCompAlphabetically(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return strcmp(strbuf->chars, comp->chars);
 }
 
 static inline FF_C_NODISCARD bool ffStrbufEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)

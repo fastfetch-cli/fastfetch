@@ -3,15 +3,17 @@
 #include <sys/statvfs.h>
 #import <Foundation/Foundation.h>
 
-void ffDetectDiskWithStatvfs(const char* folderPath, struct statvfs* fs, FFDiskResult* result);
-
-const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
+void ffDetectDisksImpl(FFDiskResult* disks)
 {
     NSArray *keys = [NSArray arrayWithObjects:NSURLVolumeNameKey, nil];
     NSArray *urls = [NSFileManager.defaultManager mountedVolumeURLsIncludingResourceValuesForKeys:keys
                                                   options:NSVolumeEnumerationSkipHiddenVolumes];
+
     if(urls == nil)
-        return "[NSFileManager.defaultManager mountedVolumeURLsIncludingResourceValuesForKeys] failed";
+    {
+        ffStrbufAppendS(&disks->error, "[NSFileManager.defaultManager mountedVolumeURLsIncludingResourceValuesForKeys] failed");
+        return;
+    }
 
     for (NSURL *url in urls) {
         NSError *error;

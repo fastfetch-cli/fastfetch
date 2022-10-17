@@ -1314,8 +1314,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.titleFQDN = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
-    else if(strcasecmp(key, "--disk-removable") == 0)
-        instance->config.diskRemovable = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
