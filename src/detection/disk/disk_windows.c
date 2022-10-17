@@ -12,7 +12,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         return;
     }
 
-    char* buff = malloc(length + 1);
+    char* buf = malloc(length + 1);
     GetLogicalDriveStringsA(length, buf);
 
     for(uint32_t i = 0; i < length; i++)

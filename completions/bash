@@ -188,6 +188,8 @@ __fastfetch_completion()
         "--pipe"
         "--title-fqdn"
         "--escape-bedrock"
+        "--disk-show-removable"
+        "--disk-show-hidden"
     )
 
     local FF_OPTIONS_STRING=(
