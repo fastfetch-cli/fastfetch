@@ -22,7 +22,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         UINT driveType = GetDriveTypeA(mountpoint);
         if(driveType == DRIVE_NO_ROOT_DIR)
         {
-            i += strlen(mountpoint);
+            i += (uint32_t)strlen(mountpoint);
             continue;
         }
 
@@ -45,13 +45,18 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             disk->type = FF_DISK_TYPE_HIDDEN;
 
         ffStrbufInitA(&disk->filesystem, MAX_PATH + 1);
+        ffStrbufInitA(&disk->name, MAX_PATH + 1);
+        //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationa#remarks
+        UINT errorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
         GetVolumeInformationA(mountpoint,
-            NULL, 0, //Volume name
+            disk->name.chars, disk->name.allocated, //Volume name
             NULL, //Serial number
             NULL, //Max component length
             NULL, //File system flags
             disk->filesystem.chars, disk->filesystem.allocated
         );
+        SetErrorMode(errorMode);
+        ffStrbufRecalculateLength(&disk->name);
         ffStrbufRecalculateLength(&disk->filesystem);
 
         //TODO: implement

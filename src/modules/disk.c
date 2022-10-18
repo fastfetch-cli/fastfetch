@@ -4,7 +4,7 @@
 #include "detection/disk/disk.h"
 
 #define FF_DISK_MODULE_NAME "Disk"
-#define FF_DISK_NUM_FORMAT_ARGS 9
+#define FF_DISK_NUM_FORMAT_ARGS 10
 
 static void printDisk(FFinstance* instance, const FFDisk* disk)
 {
@@ -49,7 +49,8 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
             {FF_FORMAT_ARG_TYPE_UINT8, &disk->filesPercentage},
             {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type == FF_DISK_TYPE_EXTERNAL)},
             {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type == FF_DISK_TYPE_HIDDEN)},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name}
         });
     }
 

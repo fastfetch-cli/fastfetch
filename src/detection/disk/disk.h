@@ -16,6 +16,7 @@ typedef struct FFDisk
 {
     FFstrbuf mountpoint;
     FFstrbuf filesystem;
+    FFstrbuf name;
     FFDiskType type;
 
     uint64_t bytesUsed;
