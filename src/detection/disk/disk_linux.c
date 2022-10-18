@@ -72,6 +72,8 @@ void ffDetectDisksImpl(FFDiskResult* disks)
 
         disk->filesTotal = (uint32_t) fs.f_files;
         disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
+
+        ffStrbufInit(&disk->name); //TODO: implement this
     }
 
     if(line != NULL)

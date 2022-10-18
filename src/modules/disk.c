@@ -4,7 +4,7 @@
 #include "detection/disk/disk.h"
 
 #define FF_DISK_MODULE_NAME "Disk"
-#define FF_DISK_NUM_FORMAT_ARGS 9
+#define FF_DISK_NUM_FORMAT_ARGS 10
 
 static void printDisk(FFinstance* instance, const FFDisk* disk)
 {
@@ -30,26 +30,35 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
     ffStrbufInit(&totalPretty);
     ffParseSize(disk->bytesTotal, instance->config.binaryPrefixType, &totalPretty);
 
+    uint8_t bytesPercentage = disk->bytesTotal > 0 ? (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0) : 0;
+
     if(instance->config.disk.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key.chars, 0, NULL);
-        printf("%s / %s (%u%%)", usedPretty.chars, totalPretty.chars, disk->bytesPercentage);
+        if(disk->bytesTotal > 0)
+            printf("%s / %s (%u%%)", usedPretty.chars, totalPretty.chars, bytesPercentage);
+        else
+            fputs("unknown", stdout);
+
         if(disk->type == FF_DISK_TYPE_EXTERNAL)
             printf(" [Removable]");
         putchar('\n');
     }
     else
     {
+        uint8_t filesPercentage = disk->filesTotal > 0 ? (uint8_t) (((double) disk->filesUsed / (double) disk->filesTotal) * 100.0) : 0;
+
         ffPrintFormatString(instance, key.chars, 0, NULL, &instance->config.disk.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
-            {FF_FORMAT_ARG_TYPE_UINT8, &disk->bytesPercentage},
+            {FF_FORMAT_ARG_TYPE_UINT8, &bytesPercentage},
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed},
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal},
-            {FF_FORMAT_ARG_TYPE_UINT8, &disk->filesPercentage},
+            {FF_FORMAT_ARG_TYPE_UINT8, &filesPercentage},
             {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type == FF_DISK_TYPE_EXTERNAL)},
             {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type == FF_DISK_TYPE_HIDDEN)},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name}
         });
     }
 

@@ -4,16 +4,6 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
-static bool getBool(NSURL* url, NSURLResourceKey key)
-{
-    NSError *error;
-    NSNumber* result;
-    if([url getResourceValue:&result forKey:key error:&error] == NO)
-        return false;
-
-    return result.boolValue;
-}
-
 void ffDetectDisksImpl(FFDiskResult* disks)
 {
     NSArray *keys = [NSArray arrayWithObjects:NSURLVolumeNameKey, nil];
@@ -32,8 +22,9 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ffStrbufInitS(&disk->mountpoint, [url.relativePath cStringUsingEncoding:NSUTF8StringEncoding]);
 
         NSString* filesystem;
-        [[NSWorkspace sharedWorkspace] getFileSystemInfoForPath:url.relativePath
-            isRemovable:nil
+        BOOL removable;
+        [NSWorkspace.sharedWorkspace getFileSystemInfoForPath:url.relativePath
+            isRemovable:&removable
             isWritable:nil
             isUnmountable:nil
             description:nil
@@ -41,12 +32,21 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ];
         ffStrbufInitS(&disk->filesystem, [filesystem cStringUsingEncoding:NSUTF8StringEncoding]);
 
-        if(getBool(url, NSURLVolumeIsRemovableKey))
+        NSError* error;
+
+        NSNumber* isBrowsable;
+        if(removable)
             disk->type = FF_DISK_TYPE_EXTERNAL;
-        else if(getBool(url, NSURLVolumeIsBrowsableKey))
+        else if([url getResourceValue:&isBrowsable forKey:NSURLVolumeIsBrowsableKey error:&error] == YES && isBrowsable.boolValue)
             disk->type = FF_DISK_TYPE_REGULAR;
         else
             disk->type = FF_DISK_TYPE_HIDDEN;
+
+        NSString* volumeName;
+        if([url getResourceValue:&volumeName forKey:NSURLVolumeNameKey error:&error] == YES)
+            ffStrbufInitS(&disk->name, [volumeName cStringUsingEncoding:NSUTF8StringEncoding]);
+        else
+            ffStrbufInit(&disk->name);
 
         struct statvfs fs;
         if(statvfs(disk->mountpoint.chars, &fs) != 0)
