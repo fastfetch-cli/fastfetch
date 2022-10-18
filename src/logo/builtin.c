@@ -2000,6 +2000,35 @@ static const FFlogo* getLogoUbuntuSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoUnivalent()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("univalent", "univalent-linux")
+    FF_LOGO_LINES(
+        "UUUUU$2\VVVVVVVVVVVVVVVVVVVVV/$1UUUUU\n"
+        "UUUUUU$2\VVVVVVVVVVVVVVVVVVV/$1UUUUUU\n"
+        "UUUUUUU$2\VVVVVVVVVVVVVVVVV/$1UUUUUUU\n"
+        "UUUUUUU $2\VVVVVVVVVVVVVVV/$1 UUUUUUU\n"
+        "UUUUUUUEE$2\VVVVVVVVVVVVV/$1  UUUUUUU\n"
+        "UUUUUUUEEE$2\VVVVVVVVVVV/$1   UUUUUUU\n"
+        "UUUUUUU    $2\VVVVVVVVV/$1    UUUUUUU\n"
+        "UUUUUUUEEEEE$2\VVVVVVV/$1     UUUUUUU\n"
+        "UUUUUUUEEEEEE$2\VVVVV/$1      UUUUUUU\n"
+        "UUUUUUU       $2\VVV/$1       UUUUUUU\n"
+        " UUUUUUU       $2\V/$1       UUUUUUU\n"
+        "    UUUUUUU     $2V$1     UUUUUUU\n"
+        "       UUUUUUUUUUUUUUUUUUU\n"
+        "          UUUUUUUUUUUUU\n"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("32"); //blue
+    FF_LOGO_COLOR_TITLE("32"); //blue
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoVoid()
 {
     FF_LOGO_INIT
@@ -2155,6 +2184,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoUbuntu,
         getLogoUbuntuOld,
         getLogoUbuntuSmall,
+        getlogoUnivalent,
         getLogoVoid,
         getLogoVoidSmall,
         getLogoZorin,
