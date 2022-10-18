@@ -235,6 +235,7 @@ set(LIBFASTFETCH_SRC
     src/detection/cpuUsage/cpuUsage.c
     src/detection/gpu/gpu.c
     src/detection/memory/memory.c
+    src/detection/swap/swap.c
     src/detection/font/font.c
     src/detection/displayserver/displayserver.c
     src/detection/terminalfont/terminalfont.c
@@ -307,6 +308,7 @@ if(LINUX OR ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/swap/swap_linux.c
     )
 endif()
 
@@ -365,6 +367,7 @@ if(WIN32)
         src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/memory/memory_windows.cpp
+        src/detection/swap/swap_windows.cpp
         src/detection/font/font_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/localip/localip_windows.c
@@ -393,6 +396,7 @@ if(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/memory/memory_apple.c
+        src/detection/swap/swap_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/media/media_apple.m
@@ -414,6 +418,7 @@ if(BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_bsd.c
         src/detection/memory/memory_bsd.c
+        src/detection/swap/swap_bsd.c
     )
 endif()
 
