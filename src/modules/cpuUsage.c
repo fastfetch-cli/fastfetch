@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "common/bar.h"
 #include "detection/cpuUsage/cpuUsage.h"
 
 #define FF_CPU_USAGE_MODULE_NAME "CPU Usage"
@@ -7,8 +8,8 @@
 
 void ffPrintCPUUsage(FFinstance* instance)
 {
-    double cpuPercent = 0.0/0.0;
-    const char* error = ffGetCpuUsageResult(&cpuPercent);
+    double percentage = 0.0/0.0;
+    const char* error = ffGetCpuUsageResult(&percentage);
 
     if(error)
     {
@@ -20,12 +21,23 @@ void ffPrintCPUUsage(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsage.key);
 
-        printf("%.2lf%%\n", cpuPercent);
+        FFstrbuf str;
+        ffStrbufInit(&str);
+        if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffAppendPercentBar(instance, &str, (uint8_t)percentage, 0, 5, 8);
+        if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+        {
+            if(str.length > 0)
+                ffStrbufAppendC(&str, ' ');
+            ffStrbufAppendF(&str, "%.2lf%%", percentage);
+        }
+        ffStrbufPutTo(&str, stdout);
+        ffStrbufDestroy(&str);
     }
     else
     {
         ffPrintFormat(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsage, FF_CPU_USAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &cpuPercent}
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &percentage}
         });
     }
 }

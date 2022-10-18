@@ -221,6 +221,7 @@ set(LIBFASTFETCH_SRC
     src/common/settings.c
     src/common/library.c
     src/common/networking.c
+    src/common/bar.c
     src/logo/logo.c
     src/logo/builtin.c
     src/logo/image/image.c

@@ -274,6 +274,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.osFile, 0);
 
     ffStrbufInitA(&instance->config.playerName, 0);
+
+    instance->config.percentType = 1;
 }
 
 void ffInitInstance(FFinstance* instance)

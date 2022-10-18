@@ -38,9 +38,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             default: ffStrbufInit(&battery->technology); break;
         }
 
-        uint64_t capacity;
-        record.getUnsigned(L"EstimatedChargeRemaining", &capacity);
-        ffStrbufInitF(&battery->capacity, "%d", (int)capacity);
+        record.getReal(L"EstimatedChargeRemaining", &battery->capacity);
 
         uint64_t batteryStatus;
         record.getUnsigned(L"BatteryStatus", &batteryStatus);

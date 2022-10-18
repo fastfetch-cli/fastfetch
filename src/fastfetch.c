@@ -1357,6 +1357,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             NULL
         );
     }
+    else if(strcasecmp(key, "--percent-type") == 0)
+        instance->config.percentType = optionParseUInt32(key, value);
 
     //////////////////
     //Unknown option//

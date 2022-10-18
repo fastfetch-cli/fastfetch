@@ -12,7 +12,7 @@ typedef struct BatteryResult
     FFstrbuf manufacturer;
     FFstrbuf modelName;
     FFstrbuf technology;
-    FFstrbuf capacity;
+    double capacity;
     FFstrbuf status;
     double temperature;
 } BatteryResult;

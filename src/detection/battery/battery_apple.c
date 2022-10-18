@@ -55,7 +55,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         const char* error;
 
         BatteryResult* battery = ffListAdd(results);
-        ffStrbufInit(&battery->capacity);
+        battery->capacity = 0.0/0.0;
         int currentCapacity, maxCapacity;
 
         if ((error = ffCfDictGetInt(properties, CFSTR("MaxCapacity"), &maxCapacity)))
@@ -68,7 +68,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         if(currentCapacity <= 0)
             return "Querying CurrentCapacity failed";
 
-        ffStrbufAppendF(&battery->capacity, "%.0f", currentCapacity * 100.0 / maxCapacity);
+        battery->capacity = currentCapacity * 100.0 / maxCapacity;
 
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);
