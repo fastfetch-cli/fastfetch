@@ -21,11 +21,9 @@ typedef struct FFDisk
 
     uint64_t bytesUsed;
     uint64_t bytesTotal;
-    uint8_t bytesPercentage;
 
     uint32_t filesUsed;
     uint32_t filesTotal;
-    uint8_t filesPercentage;
 } FFDisk;
 
 typedef struct FFDiskResult
