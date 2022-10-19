@@ -2021,11 +2021,11 @@ static const FFlogo* getLogoUnivalent()
         "          UUUUUUUUUUUUU\n"
     )
     FF_LOGO_COLORS(
-        "34" //blue
+        "34", //blue
         "32" //green
     )
-    FF_LOGO_COLOR_KEYS("32"); //blue
-    FF_LOGO_COLOR_TITLE("32"); //blue
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
 
