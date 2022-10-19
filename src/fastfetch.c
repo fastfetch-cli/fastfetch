@@ -801,6 +801,40 @@ static void optionParseEnum(const char* argumentKey, const char* requestedKey, v
     exit(478);
 }
 
+static bool optionParseModuleArgs(const char* argumentKey, const char* value, const char* moduleName, struct FFModuleArgs* result)
+{
+    const char* pkey = argumentKey;
+    if(!(pkey[0] == '-' && pkey[1] == '-'))
+        return false;
+
+    pkey += 2;
+    uint32_t moduleNameLen = (uint32_t)strlen(moduleName);
+    if(strncasecmp(pkey, moduleName, moduleNameLen) != 0)
+        return false;
+
+    pkey += moduleNameLen;
+    if(pkey[0] != '-')
+        return false;
+
+    pkey += 1;
+    if(strcasecmp(pkey, "key") == 0)
+    {
+        optionParseString(argumentKey, value, &result->key);
+        return true;
+    }
+    else if(strcasecmp(pkey, "format") == 0)
+    {
+        optionParseString(argumentKey, value, &result->outputFormat);
+        return true;
+    }
+    else if(strcasecmp(pkey, "error") == 0)
+    {
+        optionParseString(argumentKey, value, &result->errorFormat);
+        return true;
+    }
+    return false;
+}
+
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
     ///////////////////////
@@ -1017,244 +1051,50 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         );
     }
 
-    ////////////////////////////////
-    //Format + Key + Error options//
-    ////////////////////////////////
+    ///////////////////////
+    //Module args options//
+    ///////////////////////
 
-    else if(strcasecmp(key, "--os-key") == 0)
-        optionParseString(key, value, &instance->config.os.key);
-    else if(strcasecmp(key, "--os-format") == 0)
-        optionParseString(key, value, &instance->config.os.outputFormat);
-    else if(strcasecmp(key, "--os-error") == 0)
-        optionParseString(key, value, &instance->config.os.errorFormat);
-    else if(strcasecmp(key, "--host-key") == 0)
-        optionParseString(key, value, &instance->config.host.key);
-    else if(strcasecmp(key, "--host-format") == 0)
-        optionParseString(key, value, &instance->config.host.outputFormat);
-    else if(strcasecmp(key, "--host-error") == 0)
-        optionParseString(key, value, &instance->config.host.errorFormat);
-    else if(strcasecmp(key, "--bios-key") == 0)
-        optionParseString(key, value, &instance->config.bios.key);
-    else if(strcasecmp(key, "--bios-format") == 0)
-        optionParseString(key, value, &instance->config.bios.outputFormat);
-    else if(strcasecmp(key, "--bios-error") == 0)
-        optionParseString(key, value, &instance->config.bios.errorFormat);
-    else if(strcasecmp(key, "--kernel-key") == 0)
-        optionParseString(key, value, &instance->config.kernel.key);
-    else if(strcasecmp(key, "--kernel-format") == 0)
-        optionParseString(key, value, &instance->config.kernel.outputFormat);
-    else if(strcasecmp(key, "--kernel-error") == 0)
-        optionParseString(key, value, &instance->config.kernel.errorFormat);
-    else if(strcasecmp(key, "--uptime-key") == 0)
-        optionParseString(key, value, &instance->config.uptime.key);
-    else if(strcasecmp(key, "--uptime-format") == 0)
-        optionParseString(key, value, &instance->config.uptime.outputFormat);
-    else if(strcasecmp(key, "--uptime-error") == 0)
-        optionParseString(key, value, &instance->config.uptime.errorFormat);
-    else if(strcasecmp(key, "--processes-key") == 0)
-        optionParseString(key, value, &instance->config.processes.key);
-    else if(strcasecmp(key, "--processes-format") == 0)
-        optionParseString(key, value, &instance->config.processes.outputFormat);
-    else if(strcasecmp(key, "--processes-error") == 0)
-        optionParseString(key, value, &instance->config.processes.errorFormat);
-    else if(strcasecmp(key, "--packages-key") == 0)
-        optionParseString(key, value, &instance->config.packages.key);
-    else if(strcasecmp(key, "--packages-format") == 0)
-        optionParseString(key, value, &instance->config.packages.outputFormat);
-    else if(strcasecmp(key, "--packages-error") == 0)
-        optionParseString(key, value, &instance->config.packages.errorFormat);
-    else if(strcasecmp(key, "--shell-key") == 0)
-        optionParseString(key, value, &instance->config.shell.key);
-    else if(strcasecmp(key, "--shell-format") == 0)
-        optionParseString(key, value, &instance->config.shell.outputFormat);
-    else if(strcasecmp(key, "--shell-error") == 0)
-        optionParseString(key, value, &instance->config.shell.errorFormat);
-    else if(strcasecmp(key, "--resolution-key") == 0)
-        optionParseString(key, value, &instance->config.resolution.key);
-    else if(strcasecmp(key, "--resolution-format") == 0)
-        optionParseString(key, value, &instance->config.resolution.outputFormat);
-    else if(strcasecmp(key, "--resolution-error") == 0)
-        optionParseString(key, value, &instance->config.resolution.errorFormat);
-    else if(strcasecmp(key, "--de-key") == 0)
-        optionParseString(key, value, &instance->config.de.key);
-    else if(strcasecmp(key, "--de-format") == 0)
-        optionParseString(key, value, &instance->config.de.outputFormat);
-    else if(strcasecmp(key, "--de-error") == 0)
-        optionParseString(key, value, &instance->config.de.errorFormat);
-    else if(strcasecmp(key, "--wm-key") == 0)
-        optionParseString(key, value, &instance->config.wm.key);
-    else if(strcasecmp(key, "--wm-format") == 0)
-        optionParseString(key, value, &instance->config.wm.outputFormat);
-    else if(strcasecmp(key, "--wm-error") == 0)
-        optionParseString(key, value, &instance->config.wm.errorFormat);
-    else if(strcasecmp(key, "--wm-theme-key") == 0)
-        optionParseString(key, value, &instance->config.wmTheme.key);
-    else if(strcasecmp(key, "--wm-theme-format") == 0)
-        optionParseString(key, value, &instance->config.wmTheme.outputFormat);
-    else if(strcasecmp(key, "--wm-theme-error") == 0)
-        optionParseString(key, value, &instance->config.wmTheme.errorFormat);
-    else if(strcasecmp(key, "--theme-key") == 0)
-        optionParseString(key, value, &instance->config.theme.key);
-    else if(strcasecmp(key, "--theme-format") == 0)
-        optionParseString(key, value, &instance->config.theme.outputFormat);
-    else if(strcasecmp(key, "--theme-error") == 0)
-        optionParseString(key, value, &instance->config.theme.errorFormat);
-    else if(strcasecmp(key, "--icons-key") == 0)
-        optionParseString(key, value, &instance->config.icons.key);
-    else if(strcasecmp(key, "--icons-format") == 0)
-        optionParseString(key, value, &instance->config.icons.outputFormat);
-    else if(strcasecmp(key, "--icons-error") == 0)
-        optionParseString(key, value, &instance->config.icons.errorFormat);
-    else if(strcasecmp(key, "--font-key") == 0)
-        optionParseString(key, value, &instance->config.font.key);
-    else if(strcasecmp(key, "--font-format") == 0)
-        optionParseString(key, value, &instance->config.font.outputFormat);
-    else if(strcasecmp(key, "--font-error") == 0)
-        optionParseString(key, value, &instance->config.font.errorFormat);
-    else if(strcasecmp(key, "--cursor-key") == 0)
-        optionParseString(key, value, &instance->config.cursor.key);
-    else if(strcasecmp(key, "--cursor-format") == 0)
-        optionParseString(key, value, &instance->config.cursor.outputFormat);
-    else if(strcasecmp(key, "--cursor-error") == 0)
-        optionParseString(key, value, &instance->config.cursor.errorFormat);
-    else if(strcasecmp(key, "--terminal-key") == 0)
-        optionParseString(key, value, &instance->config.terminal.key);
-    else if(strcasecmp(key, "--terminal-format") == 0)
-        optionParseString(key, value, &instance->config.terminal.outputFormat);
-    else if(strcasecmp(key, "--terminal-error") == 0)
-        optionParseString(key, value, &instance->config.terminal.errorFormat);
-    else if(strcasecmp(key, "--terminal-font-key") == 0)
-        optionParseString(key, value, &instance->config.terminalFont.key);
-    else if(strcasecmp(key, "--terminal-font-format") == 0)
-        optionParseString(key, value, &instance->config.terminalFont.outputFormat);
-    else if(strcasecmp(key, "--terminal-font-error") == 0)
-        optionParseString(key, value, &instance->config.terminalFont.errorFormat);
-    else if(strcasecmp(key, "--cpu-key") == 0)
-        optionParseString(key, value, &instance->config.cpu.key);
-    else if(strcasecmp(key, "--cpu-format") == 0)
-        optionParseString(key, value, &instance->config.cpu.outputFormat);
-    else if(strcasecmp(key, "--cpu-error") == 0)
-        optionParseString(key, value, &instance->config.cpu.errorFormat);
-    else if(strcasecmp(key, "--cpu-usage-key") == 0)
-        optionParseString(key, value, &instance->config.cpuUsage.key);
-    else if(strcasecmp(key, "--cpu-usage-format") == 0)
-        optionParseString(key, value, &instance->config.cpuUsage.outputFormat);
-    else if(strcasecmp(key, "--cpu-usage-error") == 0)
-        optionParseString(key, value, &instance->config.cpuUsage.errorFormat);
-    else if(strcasecmp(key, "--gpu-key") == 0)
-        optionParseString(key, value, &instance->config.gpu.key);
-    else if(strcasecmp(key, "--gpu-format") == 0)
-        optionParseString(key, value, &instance->config.gpu.outputFormat);
-    else if(strcasecmp(key, "--gpu-error") == 0)
-        optionParseString(key, value, &instance->config.gpu.errorFormat);
-    else if(strcasecmp(key, "--memory-key") == 0)
-        optionParseString(key, value, &instance->config.memory.key);
-    else if(strcasecmp(key, "--memory-format") == 0)
-        optionParseString(key, value, &instance->config.memory.outputFormat);
-    else if(strcasecmp(key, "--memory-error") == 0)
-        optionParseString(key, value, &instance->config.memory.errorFormat);
-    else if(strcasecmp(key, "--swap-key") == 0)
-        optionParseString(key, value, &instance->config.swap.key);
-    else if(strcasecmp(key, "--swap-format") == 0)
-        optionParseString(key, value, &instance->config.swap.outputFormat);
-    else if(strcasecmp(key, "--swap-error") == 0)
-        optionParseString(key, value, &instance->config.swap.errorFormat);
-    else if(strcasecmp(key, "--disk-key") == 0)
-        optionParseString(key, value, &instance->config.disk.key);
-    else if(strcasecmp(key, "--disk-format") == 0)
-        optionParseString(key, value, &instance->config.disk.outputFormat);
-    else if(strcasecmp(key, "--disk-error") == 0)
-        optionParseString(key, value, &instance->config.disk.errorFormat);
-    else if(strcasecmp(key, "--battery-key") == 0)
-        optionParseString(key, value, &instance->config.battery.key);
-    else if(strcasecmp(key, "--battery-format") == 0)
-        optionParseString(key, value, &instance->config.battery.outputFormat);
-    else if(strcasecmp(key, "--battery-error") == 0)
-        optionParseString(key, value, &instance->config.battery.errorFormat);
-    else if(strcasecmp(key, "--poweradapter-key") == 0)
-        optionParseString(key, value, &instance->config.powerAdapter.key);
-    else if(strcasecmp(key, "--poweradapter-format") == 0)
-        optionParseString(key, value, &instance->config.powerAdapter.outputFormat);
-    else if(strcasecmp(key, "--poweradapter-error") == 0)
-        optionParseString(key, value, &instance->config.powerAdapter.errorFormat);
-    else if(strcasecmp(key, "--locale-key") == 0)
-        optionParseString(key, value, &instance->config.locale.key);
-    else if(strcasecmp(key, "--locale-format") == 0)
-        optionParseString(key, value, &instance->config.locale.outputFormat);
-    else if(strcasecmp(key, "--locale-error") == 0)
-        optionParseString(key, value, &instance->config.locale.errorFormat);
-    else if(strcasecmp(key, "--local-ip-key") == 0)
-        optionParseString(key, value, &instance->config.localIP.key);
-    else if(strcasecmp(key, "--local-ip-format") == 0)
-        optionParseString(key, value, &instance->config.localIP.outputFormat);
-    else if(strcasecmp(key, "--local-ip-error") == 0)
-        optionParseString(key, value, &instance->config.localIP.errorFormat);
-    else if(strcasecmp(key, "--public-ip-key") == 0)
-        optionParseString(key, value, &instance->config.publicIP.key);
-    else if(strcasecmp(key, "--public-ip-format") == 0)
-        optionParseString(key, value, &instance->config.publicIP.outputFormat);
-    else if(strcasecmp(key, "--public-ip-error") == 0)
-        optionParseString(key, value, &instance->config.publicIP.errorFormat);
-    else if(strcasecmp(key, "--weather-key") == 0)
-        optionParseString(key, value, &instance->config.weather.key);
-    else if(strcasecmp(key, "--weather-format") == 0)
-        optionParseString(key, value, &instance->config.weather.outputFormat);
-    else if(strcasecmp(key, "--weather-error") == 0)
-        optionParseString(key, value, &instance->config.weather.errorFormat);
-    else if(strcasecmp(key, "--player-key") == 0)
-        optionParseString(key, value, &instance->config.player.key);
-    else if(strcasecmp(key, "--player-format") == 0)
-        optionParseString(key, value, &instance->config.player.outputFormat);
-    else if(strcasecmp(key, "--player-error") == 0)
-        optionParseString(key, value, &instance->config.player.errorFormat);
-    else if(strcasecmp(key, "--song-key") == 0 || strcasecmp(key, "--media-key") == 0)
-        optionParseString(key, value, &instance->config.song.key);
-    else if(strcasecmp(key, "--song-format") == 0 || strcasecmp(key, "--media-format") == 0)
-        optionParseString(key, value, &instance->config.song.outputFormat);
-    else if(strcasecmp(key, "--song-error") == 0 || strcasecmp(key, "--media-error") == 0)
-        optionParseString(key, value, &instance->config.song.errorFormat);
-    else if(strcasecmp(key, "--datetime-key") == 0)
-        optionParseString(key, value, &instance->config.dateTime.key);
-    else if(strcasecmp(key, "--datetime-format") == 0)
-        optionParseString(key, value, &instance->config.dateTime.outputFormat);
-    else if(strcasecmp(key, "--datetime-error") == 0)
-        optionParseString(key, value, &instance->config.dateTime.errorFormat);
-    else if(strcasecmp(key, "--date-key") == 0)
-        optionParseString(key, value, &instance->config.date.key);
-    else if(strcasecmp(key, "--date-format") == 0)
-        optionParseString(key, value, &instance->config.date.outputFormat);
-    else if(strcasecmp(key, "--date-error") == 0)
-        optionParseString(key, value, &instance->config.date.errorFormat);
-    else if(strcasecmp(key, "--time-key") == 0)
-        optionParseString(key, value, &instance->config.time.key);
-    else if(strcasecmp(key, "--time-format") == 0)
-        optionParseString(key, value, &instance->config.time.outputFormat);
-    else if(strcasecmp(key, "--time-error") == 0)
-        optionParseString(key, value, &instance->config.time.errorFormat);
-    else if(strcasecmp(key, "--vulkan-key") == 0)
-        optionParseString(key, value, &instance->config.vulkan.key);
-    else if(strcasecmp(key, "--vulkan-format") == 0)
-        optionParseString(key, value, &instance->config.vulkan.outputFormat);
-    else if(strcasecmp(key, "--vulkan-error") == 0)
-        optionParseString(key, value, &instance->config.vulkan.errorFormat);
-    else if(strcasecmp(key, "--opengl-key") == 0)
-        optionParseString(key, value, &instance->config.openGL.key);
-    else if(strcasecmp(key, "--opengl-format") == 0)
-        optionParseString(key, value, &instance->config.openGL.outputFormat);
-    else if(strcasecmp(key, "--opengl-error") == 0)
-        optionParseString(key, value, &instance->config.openGL.errorFormat);
-    else if(strcasecmp(key, "--opencl-key") == 0)
-        optionParseString(key, value, &instance->config.openCL.key);
-    else if(strcasecmp(key, "--opencl-format") == 0)
-        optionParseString(key, value, &instance->config.openCL.outputFormat);
-    else if(strcasecmp(key, "--opencl-error") == 0)
-        optionParseString(key, value, &instance->config.openCL.errorFormat);
-    else if(strcasecmp(key, "--users-key") == 0)
-        optionParseString(key, value, &instance->config.users.key);
-    else if(strcasecmp(key, "--users-format") == 0)
-        optionParseString(key, value, &instance->config.users.outputFormat);
-    else if(strcasecmp(key, "--users-error") == 0)
-        optionParseString(key, value, &instance->config.users.errorFormat);
+    else if(optionParseModuleArgs(key, value, "os", &instance->config.os)) {}
+    else if(optionParseModuleArgs(key, value, "host", &instance->config.host)) {}
+    else if(optionParseModuleArgs(key, value, "bios", &instance->config.bios)) {}
+    else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
+    else if(optionParseModuleArgs(key, value, "kernel", &instance->config.kernel)) {}
+    else if(optionParseModuleArgs(key, value, "uptime", &instance->config.uptime)) {}
+    else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
+    else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
+    else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
+    else if(optionParseModuleArgs(key, value, "resolution", &instance->config.resolution)) {}
+    else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
+    else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
+    else if(optionParseModuleArgs(key, value, "wm-theme", &instance->config.wmTheme)) {}
+    else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
+    else if(optionParseModuleArgs(key, value, "icons", &instance->config.icons)) {}
+    else if(optionParseModuleArgs(key, value, "font", &instance->config.font)) {}
+    else if(optionParseModuleArgs(key, value, "cursor", &instance->config.cursor)) {}
+    else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
+    else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
+    else if(optionParseModuleArgs(key, value, "cpu", &instance->config.terminal)) {}
+    else if(optionParseModuleArgs(key, value, "cpu-usage", &instance->config.cpuUsage)) {}
+    else if(optionParseModuleArgs(key, value, "gpu", &instance->config.gpu)) {}
+    else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
+    else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
+    else if(optionParseModuleArgs(key, value, "disk", &instance->config.disk)) {}
+    else if(optionParseModuleArgs(key, value, "battery", &instance->config.battery)) {}
+    else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
+    else if(optionParseModuleArgs(key, value, "locale", &instance->config.locale)) {}
+    else if(optionParseModuleArgs(key, value, "local-ip", &instance->config.localIP)) {}
+    else if(optionParseModuleArgs(key, value, "public-ip", &instance->config.publicIP)) {}
+    else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
+    else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
+    else if(optionParseModuleArgs(key, value, "song", &instance->config.song)) {}
+    else if(optionParseModuleArgs(key, value, "datetime", &instance->config.dateTime)) {}
+    else if(optionParseModuleArgs(key, value, "date", &instance->config.date)) {}
+    else if(optionParseModuleArgs(key, value, "time", &instance->config.time)) {}
+    else if(optionParseModuleArgs(key, value, "vulkan", &instance->config.vulkan)) {}
+    else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
+    else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
+    else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
 
     ///////////////////
     //Library options//
