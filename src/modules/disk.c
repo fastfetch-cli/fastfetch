@@ -101,14 +101,20 @@ static void printMountpoint(FFinstance* instance, const FFlist* disks, const cha
 
 static void printMountpoints(FFinstance* instance, const FFlist* disks)
 {
+    #ifdef _WIN32
+    const char separator = ';';
+    #else
+    const char separator = ':';
+    #endif
+
     FFstrbuf mountpoints;
     ffStrbufInitCopy(&mountpoints, &instance->config.diskFolders);
-    ffStrbufTrim(&mountpoints, ':');
+    ffStrbufTrim(&mountpoints, separator);
 
     uint32_t startIndex = 0;
     while(startIndex < mountpoints.length)
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&mountpoints, startIndex, ':');
+        uint32_t colonIndex = ffStrbufNextIndexC(&mountpoints, startIndex, separator);
         mountpoints.chars[colonIndex] = '\0';
 
         printMountpoint(instance, disks, mountpoints.chars + startIndex);
