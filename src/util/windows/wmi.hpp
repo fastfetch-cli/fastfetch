@@ -19,7 +19,7 @@ struct FFWmiRecord
         if(!pEnumerator) return;
 
         ULONG ret;
-        bool ok = SUCCEEDED(pEnumerator->Next(WBEM_INFINITE, 1, &obj, &ret)) && ret;
+        bool ok = SUCCEEDED(pEnumerator->Next((LONG)WBEM_INFINITE, 1, &obj, &ret)) && ret;
         if(!ok) obj = nullptr;
     }
     FFWmiRecord(const FFWmiRecord&) = delete;
