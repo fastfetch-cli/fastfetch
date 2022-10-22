@@ -647,79 +647,36 @@ static void optionParseString(const char* key, const char* value, FFstrbuf* buff
     ffStrbufSetS(buffer, value);
 }
 
+static inline bool startsWith(const char* str, const char* compareTo)
+{
+    return strncasecmp(str, compareTo, strlen(compareTo)) == 0;
+}
+
 static void optionParseColor(const char* key, const char* value, FFstrbuf* buffer)
 {
     optionCheckString(key, value, buffer);
 
-    static const char reset[] = "reset_";
-    static const char bright[] = "bright_";
-
-    static const char black[] = "black";
-    static const char red[] = "red";
-    static const char green[] = "green";
-    static const char yellow[] = "yellow";
-    static const char blue[] = "blue";
-    static const char magenta[] = "magenta";
-    static const char cyan[] = "cyan";
-    static const char white[] = "white";
-
     while(*value != '\0')
     {
-        if(strncasecmp(value, reset, sizeof(reset) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "0;");
-            value += sizeof(reset) - 1;
-        }
-        else if(strncasecmp(value, bright, sizeof(bright) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "1;");
-            value += sizeof(bright) - 1;
-        }
-        else if(strncasecmp(value, black, sizeof(black) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "30");
-            value += sizeof(black) - 1;
-        }
-        else if(strncasecmp(value, red, sizeof(red) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "31");
-            value += sizeof(red) - 1;
-        }
-        else if(strncasecmp(value, green, sizeof(green) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "32");
-            value += sizeof(green) - 1;
-        }
-        else if(strncasecmp(value, yellow, sizeof(yellow) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "33");
-            value += sizeof(yellow) - 1;
-        }
-        else if(strncasecmp(value, blue, sizeof(blue) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "34");
-            value += sizeof(blue) - 1;
-        }
-        else if(strncasecmp(value, magenta, sizeof(magenta) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "35");
-            value += sizeof(magenta) - 1;
-        }
-        else if(strncasecmp(value, cyan, sizeof(cyan) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "36");
-            value += sizeof(cyan) - 1;
-        }
-        else if(strncasecmp(value, white, sizeof(white) - 1) == 0)
-        {
-            ffStrbufAppendS(buffer, "37");
-            value += sizeof(white) - 1;
-        }
-        else
+        #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
+            if(startsWith(value, #prefix)) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
+
+        FF_APPEND_COLOR_CODE_COND(reset_, "0;")
+        else FF_APPEND_COLOR_CODE_COND(bright_, "1;")
+        else FF_APPEND_COLOR_CODE_COND(black, "30")
+        else FF_APPEND_COLOR_CODE_COND(red, "31")
+        else FF_APPEND_COLOR_CODE_COND(green, "32")
+        else FF_APPEND_COLOR_CODE_COND(yellow, "33")
+        else FF_APPEND_COLOR_CODE_COND(blue, "34")
+        else FF_APPEND_COLOR_CODE_COND(magenta, "35")
+        else FF_APPEND_COLOR_CODE_COND(cyan, "36")
+        else FF_APPEND_COLOR_CODE_COND(white, "37")
         {
             ffStrbufAppendC(buffer, *value);
             ++value;
         }
+
+        #undef FF_APPEND_COLOR_CODE_COND
     }
 }
 
@@ -856,50 +813,62 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         puts(FASTFETCH_PROJECT_VERSION);
         exit(0);
     }
-    else if(strcasecmp(key, "--print-config-system") == 0)
+    else if(startsWith(key, "--print"))
     {
-        puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
-        exit(0);
+        const char* subkey = key + strlen("--print");
+        if(strcasecmp(subkey, "-config-system") == 0)
+        {
+            puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-config-user") == 0)
+        {
+            puts(FASTFETCH_DATATEXT_CONFIG_USER);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-structure") == 0)
+        {
+            puts(FASTFETCH_DATATEXT_STRUCTURE);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-logos") == 0)
+        {
+            ffLogoBuiltinPrint(instance);
+            exit(0);
+        }
+        else
+            goto error;
     }
-    else if(strcasecmp(key, "--print-config-user") == 0)
+    else if(startsWith(key, "--list"))
     {
-        puts(FASTFETCH_DATATEXT_CONFIG_USER);
-        exit(0);
-    }
-    else if(strcasecmp(key, "--print-structure") == 0)
-    {
-        puts(FASTFETCH_DATATEXT_STRUCTURE);
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-modules") == 0)
-    {
-        puts(FASTFETCH_DATATEXT_MODULES);
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-presets") == 0)
-    {
-        listAvailablePresets(instance);
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-features") == 0)
-    {
-        ffListFeatures();
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-logos") == 0)
-    {
-        ffLogoBuiltinList();
-        exit(0);
-    }
-    else if(strcasecmp(key, "--list-logos-autocompletion") == 0)
-    {
-        ffLogoBuiltinListAutocompletion();
-        exit(0);
-    }
-    else if(strcasecmp(key, "--print-logos") == 0)
-    {
-        ffLogoBuiltinPrint(instance);
-        exit(0);
+        const char* subkey = key + strlen("--list");
+        if(strcasecmp(subkey, "-modules") == 0)
+        {
+            puts(FASTFETCH_DATATEXT_MODULES);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-presets") == 0)
+        {
+            listAvailablePresets(instance);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-features") == 0)
+        {
+            ffListFeatures();
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-logos") == 0)
+        {
+            ffLogoBuiltinList();
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-logos-autocompletion") == 0)
+        {
+            ffLogoBuiltinListAutocompletion();
+            exit(0);
+        }
+        else
+            goto error;
     }
 
     ///////////////////
@@ -919,7 +888,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
-    else if(strcasecmp(key, "--multithreading") == 0)
+    else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
         instance->config.multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
@@ -945,49 +914,55 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logo.paddingLeft = 0;
         }
     }
-    else if(strcasecmp(key, "--logo-type") == 0)
+    else if(startsWith(key, "--logo"))
     {
-        optionParseEnum(key, value, &instance->config.logo.type,
-            "auto", FF_LOGO_TYPE_AUTO,
-            "builtin", FF_LOGO_TYPE_BUILTIN,
-            "file", FF_LOGO_TYPE_FILE,
-            "raw", FF_LOGO_TYPE_RAW,
-            "sixel", FF_LOGO_TYPE_SIXEL,
-            "kitty", FF_LOGO_TYPE_KITTY,
-            "chafa", FF_LOGO_TYPE_CHAFA,
-            NULL
-        );
-    }
-    else if(strncasecmp(key, "--logo-color-", 13) == 0 && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
-    {
-        //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-        int index = (int)key[13] - 49;
-
-        //Match only --logo-color-[1-9]
-        if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
+        const char* subkey = key + strlen("--logo");
+        if(strcasecmp(subkey, "-type") == 0)
         {
-            fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
-            exit(472);
+            optionParseEnum(key, value, &instance->config.logo.type,
+                "auto", FF_LOGO_TYPE_AUTO,
+                "builtin", FF_LOGO_TYPE_BUILTIN,
+                "file", FF_LOGO_TYPE_FILE,
+                "raw", FF_LOGO_TYPE_RAW,
+                "sixel", FF_LOGO_TYPE_SIXEL,
+                "kitty", FF_LOGO_TYPE_KITTY,
+                "chafa", FF_LOGO_TYPE_CHAFA,
+                NULL
+            );
         }
+        else if(startsWith(subkey, "-color-") && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
+        {
+            //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
+            int index = (int)key[13] - 49;
 
-        optionParseColor(key, value, &instance->config.logo.colors[index]);
+            //Match only --logo-color-[1-9]
+            if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
+            {
+                fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
+                exit(472);
+            }
+
+            optionParseColor(key, value, &instance->config.logo.colors[index]);
+        }
+        else if(strcasecmp(subkey, "-width") == 0)
+            instance->config.logo.width = optionParseUInt32(key, value);
+        else if(strcasecmp(subkey, "-height") == 0)
+            instance->config.logo.height = optionParseUInt32(key, value);
+        else if(strcasecmp(subkey, "-padding") == 0)
+        {
+            uint32_t padding = optionParseUInt32(key, value);
+            instance->config.logo.paddingLeft = padding;
+            instance->config.logo.paddingRight = padding;
+        }
+        else if(strcasecmp(subkey, "-padding-left") == 0)
+            instance->config.logo.paddingLeft = optionParseUInt32(key, value);
+        else if(strcasecmp(subkey, "-padding-right") == 0)
+            instance->config.logo.paddingRight = optionParseUInt32(key, value);
+        else if(strcasecmp(subkey, "-print-remaining") == 0)
+            instance->config.logo.printRemaining = optionParseBoolean(value);
+        else
+            goto error;
     }
-    else if(strcasecmp(key, "--logo-width") == 0)
-        instance->config.logo.width = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--logo-height") == 0)
-        instance->config.logo.height = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--logo-padding") == 0)
-    {
-        uint32_t padding = optionParseUInt32(key, value);
-        instance->config.logo.paddingLeft = padding;
-        instance->config.logo.paddingRight = padding;
-    }
-    else if(strcasecmp(key, "--logo-padding-left") == 0)
-        instance->config.logo.paddingLeft = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--logo-padding-right") == 0)
-        instance->config.logo.paddingRight = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--logo-print-remaining") == 0)
-        instance->config.logo.printRemaining = optionParseBoolean(value);
     else if(strcasecmp(key, "--sixel") == 0)
     {
         optionParseString(key, value, &instance->config.logo.source);
@@ -1100,50 +1075,56 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Library options//
     ///////////////////
 
-    else if(strcasecmp(key, "--lib-PCI") == 0)
-        optionParseString(key, value, &instance->config.libPCI);
-    else if(strcasecmp(key, "--lib-vulkan") == 0)
-        optionParseString(key, value, &instance->config.libVulkan);
-    else if(strcasecmp(key, "--lib-freetype") == 0)
-        optionParseString(key, value, &instance->config.libfreetype);
-    else if(strcasecmp(key, "--lib-wayland") == 0)
-        optionParseString(key, value, &instance->config.libWayland);
-    else if(strcasecmp(key, "--lib-xcb-randr") == 0)
-        optionParseString(key, value, &instance->config.libXcbRandr);
-    else if(strcasecmp(key, "--lib-xcb") == 0)
-        optionParseString(key, value, &instance->config.libXcb);
-    else if(strcasecmp(key, "--lib-Xrandr") == 0)
-        optionParseString(key, value, &instance->config.libXrandr);
-    else if(strcasecmp(key, "--lib-X11") == 0)
-        optionParseString(key, value, &instance->config.libX11);
-    else if(strcasecmp(key, "--lib-gio") == 0)
-        optionParseString(key, value, &instance->config.libGIO);
-    else if(strcasecmp(key, "--lib-DConf") == 0)
-        optionParseString(key, value, &instance->config.libDConf);
-    else if(strcasecmp(key, "--lib-dbus") == 0)
-        optionParseString(key, value, &instance->config.libDBus);
-    else if(strcasecmp(key, "--lib-XFConf") == 0)
-        optionParseString(key, value, &instance->config.libXFConf);
-    else if(strcasecmp(key, "--lib-sqlite") == 0 || strcasecmp(key, "--lib-sqlite3") == 0)
-        optionParseString(key, value, &instance->config.libSQLite3);
-    else if(strcasecmp(key, "--lib-rpm") == 0)
-        optionParseString(key, value, &instance->config.librpm);
-    else if(strcasecmp(key, "--lib-imagemagick") == 0)
-        optionParseString(key, value, &instance->config.libImageMagick);
-    else if(strcasecmp(key, "--lib-z") == 0)
-        optionParseString(key, value, &instance->config.libZ);
-    else if(strcasecmp(key, "--lib-chafa") == 0)
-        optionParseString(key, value, &instance->config.libChafa);
-    else if(strcasecmp(key, "--lib-egl") == 0)
-        optionParseString(key, value, &instance->config.libEGL);
-    else if(strcasecmp(key, "--lib-glx") == 0)
-        optionParseString(key, value, &instance->config.libGLX);
-    else if(strcasecmp(key, "--lib-osmesa") == 0)
-        optionParseString(key, value, &instance->config.libOSMesa);
-    else if(strcasecmp(key, "--lib-opencl") == 0)
-        optionParseString(key, value, &instance->config.libOpenCL);
-    else if(strcasecmp(key, "--lib-cjson") == 0)
-        optionParseString(key, value, &instance->config.libcJSON);
+    else if(startsWith(key, "--lib"))
+    {
+        const char* subkey = key + strlen("--lib");
+        if(strcasecmp(subkey, "-PCI") == 0)
+            optionParseString(key, value, &instance->config.libPCI);
+        else if(strcasecmp(subkey, "-vulkan") == 0)
+            optionParseString(key, value, &instance->config.libVulkan);
+        else if(strcasecmp(subkey, "-freetype") == 0)
+            optionParseString(key, value, &instance->config.libfreetype);
+        else if(strcasecmp(subkey, "-wayland") == 0)
+            optionParseString(key, value, &instance->config.libWayland);
+        else if(strcasecmp(subkey, "-xcb-randr") == 0)
+            optionParseString(key, value, &instance->config.libXcbRandr);
+        else if(strcasecmp(subkey, "-xcb") == 0)
+            optionParseString(key, value, &instance->config.libXcb);
+        else if(strcasecmp(subkey, "-Xrandr") == 0)
+            optionParseString(key, value, &instance->config.libXrandr);
+        else if(strcasecmp(subkey, "-X11") == 0)
+            optionParseString(key, value, &instance->config.libX11);
+        else if(strcasecmp(subkey, "-gio") == 0)
+            optionParseString(key, value, &instance->config.libGIO);
+        else if(strcasecmp(subkey, "-DConf") == 0)
+            optionParseString(key, value, &instance->config.libDConf);
+        else if(strcasecmp(subkey, "-dbus") == 0)
+            optionParseString(key, value, &instance->config.libDBus);
+        else if(strcasecmp(subkey, "-XFConf") == 0)
+            optionParseString(key, value, &instance->config.libXFConf);
+        else if(strcasecmp(subkey, "-sqlite") == 0 || strcasecmp(subkey, "-sqlite3") == 0)
+            optionParseString(key, value, &instance->config.libSQLite3);
+        else if(strcasecmp(subkey, "-rpm") == 0)
+            optionParseString(key, value, &instance->config.librpm);
+        else if(strcasecmp(subkey, "-imagemagick") == 0)
+            optionParseString(key, value, &instance->config.libImageMagick);
+        else if(strcasecmp(subkey, "-z") == 0)
+            optionParseString(key, value, &instance->config.libZ);
+        else if(strcasecmp(subkey, "-chafa") == 0)
+            optionParseString(key, value, &instance->config.libChafa);
+        else if(strcasecmp(subkey, "-egl") == 0)
+            optionParseString(key, value, &instance->config.libEGL);
+        else if(strcasecmp(subkey, "-glx") == 0)
+            optionParseString(key, value, &instance->config.libGLX);
+        else if(strcasecmp(subkey, "-osmesa") == 0)
+            optionParseString(key, value, &instance->config.libOSMesa);
+        else if(strcasecmp(subkey, "-opencl") == 0)
+            optionParseString(key, value, &instance->config.libOpenCL);
+        else if(strcasecmp(subkey, "-cjson") == 0)
+            optionParseString(key, value, &instance->config.libcJSON);
+        else
+            goto error;
+    }
 
     //////////////////
     //Module options//
@@ -1206,6 +1187,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else
     {
+error:
         fprintf(stderr, "Error: unknown option: %s\n", key);
         exit(400);
     }
