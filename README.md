@@ -53,7 +53,7 @@ The following libraries are used if present at runtime:
 ### macOS
 
 * [`MediaRemote`](https://iphonedev.wiki/index.php/MediaRemote.framework): Need for Media detection. It's a private framework provided by newer macOS system.
-* [`libvulkan`](https://www.vulkan.org/): Vulkan module. To get it actually working, both loader (`vulkan-loader`) and driver (molten-vk) need to be installed.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module. To get it actually working, both loader (`vulkan-loader`) and driver (`molten-vk`) need to be installed.
 
 ### Windows
 
@@ -64,6 +64,7 @@ The following libraries are used if present at runtime:
 ### Android
 
 * [`freetype`](https://www.freetype.org/): Used for Termux font detection.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module, also used for GPU detection. Usually has been provided by Android system.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
