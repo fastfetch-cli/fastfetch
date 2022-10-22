@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "common/parsing.h"
+#include "common/bar.h"
 #include "detection/disk/disk.h"
 
 #define FF_DISK_MODULE_NAME "Disk"
@@ -35,14 +36,30 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
     if(instance->config.disk.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, key.chars, 0, NULL);
+
+        FFstrbuf str;
+        ffStrbufInit(&str);
+
         if(disk->bytesTotal > 0)
-            printf("%s / %s (%u%%)", usedPretty.chars, totalPretty.chars, bytesPercentage);
+        {
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                ffAppendPercentBar(instance, &str, bytesPercentage, 0, 5, 8);
+                ffStrbufAppendC(&str, ' ');
+            }
+            ffStrbufAppendF(&str, "%s / %s", usedPretty.chars, totalPretty.chars);
+
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffStrbufAppendF(&str, " (%u%%)", bytesPercentage);
+        }
         else
-            fputs("unknown", stdout);
+            ffStrbufAppendS(&str, "Unknown");
 
         if(disk->type == FF_DISK_TYPE_EXTERNAL)
-            printf(" [Removable]");
-        putchar('\n');
+            ffStrbufAppendS(&str, " [Removable]");
+
+        ffStrbufPutTo(&str, stdout);
+        ffStrbufDestroy(&str);
     }
     else
     {

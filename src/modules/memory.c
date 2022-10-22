@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "common/parsing.h"
+#include "common/bar.h"
 #include "detection/memory/memory.h"
 #include "detection/swap/swap.h"
 
@@ -41,7 +42,24 @@ static void printMemory(FFinstance* instance, const char* name, const FFModuleAr
         if (storage->bytesTotal == 0)
             puts("Disabled");
         else
-            printf("%s / %s (%u%%)\n", usedPretty.chars, totalPretty.chars, percentage);
+        {
+            FFstrbuf str;
+            ffStrbufInit(&str);
+
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                ffAppendPercentBar(instance, &str, percentage, 0, 5, 8);
+                ffStrbufAppendC(&str, ' ');
+            }
+
+            ffStrbufAppendF(&str, "%s / %s", usedPretty.chars, totalPretty.chars);
+
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffStrbufAppendF(&str, " (%u%%)", percentage);
+
+            ffStrbufPutTo(&str, stdout);
+            ffStrbufDestroy(&str);
+        }
     }
     else
     {

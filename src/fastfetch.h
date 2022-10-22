@@ -189,6 +189,8 @@ typedef struct FFconfig
     FFstrbuf osFile;
 
     FFstrbuf playerName;
+
+    uint32_t percentType;
 } FFconfig;
 
 typedef struct FFstate

@@ -33,18 +33,18 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
         return;
     }
 
-    ffStrbufDestroy(&testBatteryBuffer);
     BatteryResult* result = ffListAdd(results);
 
     //capacity must exist and be not empty
-    ffStrbufInit(&result->capacity);
     ffStrbufAppendS(dir, "/capacity");
-    ffReadFileBuffer(dir->chars, &result->capacity);
+    bool available = ffReadFileBuffer(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
-
-    if(result->capacity.length == 0)
+    if(available)
+        result->capacity = ffStrbufToDouble(&testBatteryBuffer);
+    ffStrbufDestroy(&testBatteryBuffer);
+    if(!available)
     {
-        ffStrbufDestroy(&result->capacity);
+        result->capacity = 0.0/0.0;
         --results->length;
         return;
     }

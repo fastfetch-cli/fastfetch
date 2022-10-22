@@ -1,11 +1,12 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "common/bar.h"
 #include "detection/battery/battery.h"
 
 #define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFinstance* instance,  BatteryResult* result, uint8_t index)
+static void printBattery(FFinstance* instance, BatteryResult* result, uint8_t index)
 {
     if(instance->config.battery.outputFormat.length == 0)
     {
@@ -15,27 +16,47 @@ static void printBattery(FFinstance* instance,  BatteryResult* result, uint8_t i
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
-        if(result->capacity.length > 0)
-        {
-            ffStrbufWriteTo(&result->capacity, stdout);
-            putchar('%');
+        FFstrbuf str;
+        ffStrbufInit(&str);
 
-            if(showStatus)
-                fputs(" [", stdout);
+        if(result->capacity >= 0)
+        {
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                if(result->capacity <= 20)
+                    ffAppendPercentBar(instance, &str, (uint8_t)result->capacity, 10, 10, 0);
+                else if(result->capacity <= 50)
+                    ffAppendPercentBar(instance, &str, (uint8_t)result->capacity, 10, 0, 10);
+                else
+                    ffAppendPercentBar(instance, &str, (uint8_t)result->capacity, 0, 10, 10);
+            }
+
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            {
+                if(str.length > 0)
+                    ffStrbufAppendC(&str, ' ');
+                ffStrbufAppendF(&str, "%.0f%%", result->capacity);
+            }
         }
 
         if(showStatus)
         {
-            ffStrbufWriteTo(&result->status, stdout);
-
-            if(result->capacity.length > 0)
-                putchar(']');
+            if(str.length > 0)
+                ffStrbufAppendF(&str, " [%s]", result->status.chars);
+            else
+                ffStrbufAppend(&str, &result->status);
         }
 
         if(result->temperature == result->temperature) //FF_BATTERY_TEMP_UNSET
-            printf(" - %.1f°C", result->temperature);
+        {
+            if(str.length > 0)
+                ffStrbufAppendS(&str, " - ");
 
-        putchar('\n');
+            ffStrbufAppendF(&str, "%.1f°C", result->temperature);
+        }
+
+        ffStrbufPutTo(&str, stdout);
+        ffStrbufDestroy(&str);
     }
     else
     {
@@ -43,7 +64,7 @@ static void printBattery(FFinstance* instance,  BatteryResult* result, uint8_t i
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->capacity},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &result->capacity},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
         });
@@ -71,7 +92,6 @@ void ffPrintBattery(FFinstance* instance)
             ffStrbufDestroy(&result->manufacturer);
             ffStrbufDestroy(&result->modelName);
             ffStrbufDestroy(&result->technology);
-            ffStrbufDestroy(&result->capacity);
             ffStrbufDestroy(&result->status);
         }
         if(results.length == 0)
