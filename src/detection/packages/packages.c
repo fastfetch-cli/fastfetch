@@ -1,6 +1,8 @@
 #include "packages.h"
 #include "detection/internal.h"
 
+#include <stddef.h>
+
 void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result);
 
 const FFPackagesResult* ffDetectPackages(const FFinstance* instance)
@@ -11,21 +13,7 @@ const FFPackagesResult* ffDetectPackages(const FFinstance* instance)
 
         ffDetectPackagesImpl(instance, &result);
 
-        result.all = 0
-            + result.pacman
-            + result.dpkg
-            + result.rpm
-            + result.emerge
-            + result.xbps
-            + result.nixSystem
-            + result.nixUser
-            + result.nixDefault
-            + result.apk
-            + result.pkg
-            + result.flatpak
-            + result.snap
-            + result.brew
-            + result.port
-            + result.scoop;
+        for(uint32_t i = 0; i < offsetof(FFPackagesResult, all) / sizeof(uint32_t); ++i)
+            result.all += ((uint32_t *)&result)[i];
     );
 }

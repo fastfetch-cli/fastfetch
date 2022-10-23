@@ -53,6 +53,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(brew)
         FF_PRINT_PACKAGE(port)
         FF_PRINT_PACKAGE(scoop)
+        FF_PRINT_PACKAGE(choco)
 
         //Fix linter warning of unused value of all
         (void) all;
