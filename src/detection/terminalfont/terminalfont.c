@@ -181,25 +181,73 @@ exit:
     return error;
 }
 
-static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+#ifdef _WIN32
+    #include "common/io.h"
+
+    #include <shlobj.h>
+#endif
+
+static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
     FFstrbuf json;
     ffStrbufInit(&json);
-    const char* error;
-    error = ffProcessAppendStdOut(&json, (char* const[]) {
-        "cmd.exe",
-        "/c",
-        //print the file content directly, so we don't need to handle the difference of Windows and POSIX path
-        "if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json "
-        "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json ) "
-        "else if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json "
-        "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json ) "
-        "else if exist \"%LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json\" "
-        "( type %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json ) "
-        "else ( call )",
-        NULL
-    });
+    const char* error = NULL;
+
+    #ifdef _WIN32
+    if(terminalExe && terminalExe->length > 0)
+    {
+        char jsonPath[MAX_PATH + 1];
+        if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, jsonPath)))
+        {
+            size_t remaining = sizeof(jsonPath) - strlen(jsonPath) - 1;
+            if(ffStrbufContainIgnCaseS(terminalExe, "_8wekyb3d8bbwe\\"))
+            {
+                // Microsoft Store version
+                if(ffStrbufContainIgnCaseS(terminalExe, ".WindowsTerminalPreview_"))
+                {
+                    // Preview version
+                    strncat(jsonPath, "\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json", remaining);
+                    if(!ffAppendFileBuffer(jsonPath, &json))
+                        error = "Error reading Windows Terminal Preview settings JSON file";
+                }
+                else
+                {
+                    // Stable version
+                    strncat(jsonPath, "\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json", remaining);
+                    if(!ffAppendFileBuffer(jsonPath, &json))
+                        error = "Error reading Windows Terminal settings JSON file";
+                }
+            }
+            else
+            {
+                strncat(jsonPath, "\\Microsoft\\Windows Terminal\\settings.json", remaining);
+                if(!ffAppendFileBuffer(jsonPath, &json))
+                    error = "Error reading Windows Terminal settings JSON file";
+            }
+        }
+    }
+    #else
+    FF_UNUSED(terminalExe);
+    #endif
+
+    if(!error && json.length == 0)
+    {
+        error = ffProcessAppendStdOut(&json, (char* const[]) {
+            "cmd.exe",
+            "/c",
+            //print the file content directly, so we don't need to handle the difference of Windows and POSIX path
+            "if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json "
+            "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json ) "
+            "else if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json "
+            "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json ) "
+            "else if exist \"%LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json\" "
+            "( type %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json ) "
+            "else ( call )",
+            NULL
+        });
+    }
+
     if(error)
     {
         ffStrbufAppendS(&terminalFont->error, error);
@@ -234,9 +282,9 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFon
 
 #else
 
-static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
-    FF_UNUSED(instance, terminalFont);
+    FF_UNUSED(instance, terminalExe, terminalFont);
     ffStrbufAppendS(&terminalFont->error, "fastfetch is built without libcjson support");
 }
 
@@ -244,6 +292,26 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFon
 #endif //defined(_WIN32) || defined(__linux__)
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
+
+static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+{
+    if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "alacritty") == 0)
+        detectAlacritty(instance, terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
+        detectTTY(terminalFont);
+
+    #if defined(_WIN32) || defined(__linux__)
+    //Used by both Linux (WSL) and Windows
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0 ||
+        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WindowsTerminal.exe") == 0)
+        detectFromWindowsTeriminal(instance, &terminalShell->terminalExe, terminalFont);
+    #endif
+
+    else
+        return false;
+
+    return true;
+}
 
 const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
 {
@@ -254,19 +322,8 @@ const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
 
         if(terminalShell->terminalProcessName.length == 0)
             ffStrbufAppendS(&result.error, "Terminal font needs successfull terminal detection");
-        else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "alacritty") == 0)
-            detectAlacritty(instance, &result);
-        else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
-            detectTTY(&result);
 
-        #if defined(_WIN32) || defined(__linux__)
-        //Used by both Linux (WSL) and Windows
-        else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0 ||
-            ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WindowsTerminal.exe") == 0)
-            detectFromWindowsTeriminal(instance, &result);
-        #endif
-
-        else
+        else if(detectTerminalFontCommon(instance, terminalShell, &result))
             ffDetectTerminalFontPlatform(instance, terminalShell, &result);
 
         if(result.error.length == 0 && result.font.pretty.length == 0)
