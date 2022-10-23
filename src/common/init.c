@@ -147,9 +147,9 @@ static void initState(FFstate* state)
 
 static void initModuleArg(FFModuleArgs* args)
 {
-    ffStrbufInitA(&args->key, 0);
-    ffStrbufInitA(&args->outputFormat, 0);
-    ffStrbufInitA(&args->errorFormat, 0);
+    ffStrbufInit(&args->key);
+    ffStrbufInit(&args->outputFormat);
+    ffStrbufInit(&args->errorFormat);
 }
 
 static void defaultConfig(FFinstance* instance)

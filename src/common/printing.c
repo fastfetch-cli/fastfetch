@@ -129,8 +129,13 @@ void ffPrintColor(const FFstrbuf* colorValue)
 
 void ffPrintCharTimes(char c, uint32_t times)
 {
-    for(uint32_t i = 0; i < times; i++)
-        putchar(c);
+    char str[32];
+    memset(str, c, sizeof(str)); //2 instructions when compiling with AVX2 enabled
+    for(uint32_t i = sizeof(str); i <= times; i += sizeof(str))
+        fwrite(str, 1, sizeof(str), stdout);
+    uint32_t remaining = times % sizeof(str);
+    if(remaining > 0)
+        fwrite(str, 1, remaining, stdout);
 }
 
 void ffPrintUserString(const char* value)
