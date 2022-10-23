@@ -11,7 +11,7 @@ void ffAppendPercentBar(FFinstance* instance, FFstrbuf* buffer, uint8_t percent,
     // ...
     // [85%, 95%) prints 9 blocks;
     // [95%,100%] prints 10 blocks
-    percent = (percent + 5) / 10;
+    percent = (uint8_t)(percent + 5) / 10;
     assert(percent <= 10);
 
     if(!instance->config.pipe)
