@@ -125,6 +125,7 @@ static void initState(FFstate* state)
     #ifdef WIN32
     //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
     setlocale(LC_ALL, ".UTF8");
+    setvbuf(stdout, NULL, _IOFBF, 4096);
     #endif
 
     state->logoWidth = 0;
