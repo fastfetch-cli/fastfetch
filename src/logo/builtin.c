@@ -1302,6 +1302,38 @@ static const FFlogo* getLogoWindows11()
     FF_LOGO_NAMES("Windows 11", "Windows Server 2022")
     FF_LOGO_LINES(
         "$1\n"
+        ",,**************/ ///////////////()\n"
+        "****************/ ///////////////((\n"
+        "***************// //////////////(((\n"
+        "**************/// ////////////(((((\n"
+        "************///// /////////((((((((\n"
+        "*********//////// /////((((((((((((\n"
+        "*******////////// ///((((((((((((((\n"
+        "****///////////// (((((((((((((((((\n"
+        "\n"
+        "/////////////(((( (((((((((((((((((\n"
+        "////////////((((( (((((((((((((((((\n"
+        "///////////(((((( (((((((((((((((((\n"
+        "/////////(((((((( (((((((((((((((((\n"
+        "///////(((((((((( (((((((((((((((((\n"
+        "////((((((((((((( (((((((((((((((((\n"
+        "((((((((((((((((( (((((((((((((((((\n"
+        "((((((((((((((((( (((((((((((((((()"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("33"); //yellow
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoWindows11Old()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Windows 11_old")
+    FF_LOGO_LINES(
+        "$1\n"
         "################  ################\n"
         "################  ################\n"
         "################  ################\n"
@@ -1354,7 +1386,7 @@ static const FFlogo* getLogoWindows8()
     FF_LOGO_COLORS(
         "36" //cyan
     )
-    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_KEYS("33"); //yellow
     FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
@@ -2133,6 +2165,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoMintOld,
         getLogoMsys2,
         getLogoWindows11,
+        getLogoWindows11Old,
         getLogoWindows8,
         getLogoWindows,
         getLogoNixOS,
