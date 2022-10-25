@@ -378,7 +378,7 @@ if(WIN32)
         src/util/windows/wmi.cpp
         src/util/windows/getline.c
         src/util/windows/pwd.c
-        src/util/windows/utsname.cpp
+        src/util/windows/utsname.c
 
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/media/media_nosupport.c

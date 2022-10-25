@@ -9,7 +9,15 @@ void ffPrintKernel(FFinstance* instance)
     if(instance->config.kernel.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_KERNEL_MODULE_NAME, 0, &instance->config.kernel.key);
-        puts(instance->state.utsname.release);
+
+        #ifdef _WIN32
+            if(instance->state.utsname.version[0] != '\0')
+                printf("%s (%s)\n", instance->state.utsname.release, instance->state.utsname.version);
+            else
+                puts(instance->state.utsname.release);
+        #else
+            puts(instance->state.utsname.release);
+        #endif
     }
     else
     {
