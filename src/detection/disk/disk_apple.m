@@ -35,12 +35,12 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         NSError* error;
 
         NSNumber* isBrowsable;
-        if(removable)
-            disk->type = FF_DISK_TYPE_EXTERNAL;
-        else if([url getResourceValue:&isBrowsable forKey:NSURLVolumeIsBrowsableKey error:&error] == YES && isBrowsable.boolValue)
-            disk->type = FF_DISK_TYPE_REGULAR;
-        else
+        if([url getResourceValue:&isBrowsable forKey:NSURLVolumeIsBrowsableKey error:&error] == YES && !isBrowsable.boolValue)
             disk->type = FF_DISK_TYPE_HIDDEN;
+        else if(removable)
+            disk->type = FF_DISK_TYPE_EXTERNAL;
+        else
+            disk->type = FF_DISK_TYPE_REGULAR;
 
         NSString* volumeName;
         if([url getResourceValue:&volumeName forKey:NSURLVolumeNameKey error:&error] == YES)
