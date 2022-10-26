@@ -13,6 +13,10 @@
 
 #ifdef __APPLE__
     #include <libproc.h>
+#elif defined(__FreeBSD__)
+    #include <sys/types.h>
+    #include <sys/user.h>
+    #include <sys/sysctl.h>
 #endif
 
 static void setExeName(FFstrbuf* exe, const char** exeName)
@@ -47,7 +51,13 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
     #else
 
-    //TODO: support bsd (https://www.freebsd.org/cgi/man.cgi?query=kinfo_getproc)
+    size_t size = exe->allocated;
+    if(!sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
+       exe->chars, &size,
+        NULL, 0
+    ))
+        exe->length = (uint32_t)size;
 
     #endif
 
@@ -92,8 +102,19 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 
     #else
 
-    //TODO: support bsd (https://www.freebsd.org/cgi/man.cgi?query=kinfo_getproc)
-    error = "unimplemented";
+    struct kinfo_proc proc;
+    size_t size = sizeof(proc);
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PID, pid}, 4,
+        &proc, &size,
+        NULL, 0
+    ))
+        error = "sysctl(KERN_PROC_PID) failed";
+    else
+    {
+        *ppid = (pid_t)proc.ki_ppid;
+        strncpy(name, proc.ki_comm, COMMLEN);
+    }
 
     #endif
 
