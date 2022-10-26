@@ -1,6 +1,10 @@
 #include "processes.h"
 
 #include <sys/sysctl.h>
+#ifdef __FreeBSD__
+    #include <sys/types.h>
+    #include <sys/user.h>
+#endif
 
 uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
 {

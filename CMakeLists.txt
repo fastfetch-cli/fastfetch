@@ -303,6 +303,7 @@ if(BSD OR APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/sysctl.c
         src/detection/uptime/uptime_bsd.c
+        src/detection/processes/processes_bsd.c
     )
 endif()
 
@@ -310,6 +311,7 @@ if(LINUX OR ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/processes/processes_linux.c
         src/detection/swap/swap_linux.c
         src/detection/uptime/uptime_linux.c
     )
@@ -321,7 +323,6 @@ if(LINUX OR ANDROID OR BSD)
         src/detection/disk/disk_linux.c
         src/detection/temps/temps_linux.c
         src/detection/opengl/opengl_linux.c
-        src/detection/processes/processes_linux.c
         src/detection/packages/packages_linux.c
 
         src/detection/poweradapter/poweradapter_nosupport.c
@@ -407,7 +408,6 @@ if(APPLE)
         src/detection/temps/temps_apple.c
         src/detection/font/font_apple.m
         src/detection/opengl/opengl_apple.c
-        src/detection/processes/processes_apple.c
         src/detection/packages/packages_apple.c
 
         src/detection/bios/bios_nosupport.c
