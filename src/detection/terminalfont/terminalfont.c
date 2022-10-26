@@ -323,7 +323,7 @@ const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
         if(terminalShell->terminalProcessName.length == 0)
             ffStrbufAppendS(&result.error, "Terminal font needs successfull terminal detection");
 
-        else if(detectTerminalFontCommon(instance, terminalShell, &result))
+        else if(!detectTerminalFontCommon(instance, terminalShell, &result))
             ffDetectTerminalFontPlatform(instance, terminalShell, &result);
 
         if(result.error.length == 0 && result.font.pretty.length == 0)
