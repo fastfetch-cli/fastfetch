@@ -2,6 +2,7 @@
 
 #include <time.h>
 #include <sys/sysctl.h>
+#include <sys/time.h>
 
 uint64_t ffDetectUptime(const FFinstance* instance)
 {

@@ -7,10 +7,9 @@
 
 typedef struct FFPackagesResult
 {
-    uint32_t all;
-
     uint32_t apk;
     uint32_t brew;
+    uint32_t choco;
     uint32_t dpkg;
     uint32_t emerge;
     uint32_t flatpak;
@@ -24,6 +23,8 @@ typedef struct FFPackagesResult
     uint32_t scoop;
     uint32_t snap;
     uint32_t xbps;
+
+    uint32_t all; //Make sure this goes last
 
     FFstrbuf pacmanBranch;
 } FFPackagesResult;
