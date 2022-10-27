@@ -20,8 +20,9 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         //Format of the file: "<device> <mountpoint> <filesystem> <options> ..." (Same as fstab)
         char* currentPos = line;
 
-        //Non pseudo filesystems have their device in /dev/, we only add those
-        if(strncasecmp(currentPos, "/dev/", 5) != 0)
+        //Non pseudo filesystems have their device in /dev/
+        //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
+        if(strncmp(currentPos, "/dev/", 5) != 0 && strncmp(currentPos, "drvfs", 5) != 0)
             continue;
 
         //Skip /dev/
