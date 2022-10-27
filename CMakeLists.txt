@@ -331,12 +331,8 @@ endif()
 
 if(LINUX OR BSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_linux.c
-        src/detection/bios/bios_linux.c
-        src/detection/board/board_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/battery/battery_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/xcb.c
@@ -348,6 +344,15 @@ if(LINUX OR BSD)
         src/detection/font/font_linux.c
         src/detection/qt.c
         src/detection/gtk.c
+    )
+endif()
+
+if(LINUX)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/host/host_linux.c
+        src/detection/bios/bios_linux.c
+        src/detection/board/board_linux.c
+        src/detection/battery/battery_linux.c
     )
 endif()
 
@@ -421,6 +426,11 @@ if(BSD)
         src/detection/cpuUsage/cpuUsage_bsd.c
         src/detection/memory/memory_bsd.c
         src/detection/swap/swap_bsd.c
+        src/detection/host/host_bsd.c
+
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
     )
 endif()
 
