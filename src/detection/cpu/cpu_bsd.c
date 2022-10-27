@@ -5,7 +5,17 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
 {
     FF_UNUSED(instance);
 
-    cpu->temperature = FF_CPU_TEMP_UNSET;
+    if (instance->config.cpuTemp)
+    {
+        FFstrbuf cpuTemp;
+        ffStrbufInit(&cpuTemp);
+        if(ffSysctlGetString("temperature", &cpuTemp))
+            cpu->temperature = FF_CPU_TEMP_UNSET;
+        else
+            cpu->temperature = ffStrbufToDouble(&cpuTemp);
+    }
+    else
+        cpu->temperature = FF_CPU_TEMP_UNSET;
 
     if(cached)
         return;
