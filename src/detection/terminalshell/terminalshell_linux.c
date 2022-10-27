@@ -153,6 +153,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "sh")        == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
+        strcasecmp(name, "csh")       == 0 ||
+        strcasecmp(name, "tcsh")      == 0 ||
         strcasecmp(name, "fish")      == 0 ||
         strcasecmp(name, "dash")      == 0 ||
         strcasecmp(name, "pwsh")      == 0 ||
@@ -251,11 +253,15 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getUserShellFromEnv(FFTerminalShellResult* result)
+static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResult* result)
 {
-    ffStrbufAppendS(&result->userShellExe, getenv("SHELL"));
+    if(instance->state.passwd->pw_shell[0] != '\0')
+        ffStrbufAppendS(&result->userShellExe, instance->state.passwd->pw_shell);
+    else
+        ffStrbufAppendS(&result->userShellExe, getenv("SHELL"));
     if(result->userShellExe.length == 0)
         return;
+
     setExeName(&result->userShellExe, &result->userShellExeName);
 
     //If shell detection via processes failed
@@ -337,7 +343,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
-    getUserShellFromEnv(&result);
+    getUserShellFromEnv(instance, &result);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
     if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
