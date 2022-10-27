@@ -24,7 +24,11 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
 
     ffStrbufAppendS(result, properties->driverName);
 
-    if(!ffStrSet(properties->driverInfo))
+    /*
+     * Some drivers (android for example) expose a multiline string as driver info.
+     * It contains too much info anyways, so we just don't append it.
+     */
+    if(!ffStrSet(properties->driverInfo) || strchr(properties->driverInfo, '\n') != NULL)
         return;
 
     ffStrbufAppendS(result, " [");
