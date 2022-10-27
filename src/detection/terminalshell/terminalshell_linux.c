@@ -153,6 +153,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "sh")        == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
+        strcasecmp(name, "csh")       == 0 ||
+        strcasecmp(name, "tcsh")      == 0 ||
         strcasecmp(name, "fish")      == 0 ||
         strcasecmp(name, "dash")      == 0 ||
         strcasecmp(name, "pwsh")      == 0 ||
@@ -251,11 +253,15 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getUserShellFromEnv(FFTerminalShellResult* result)
+static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResult* result)
 {
-    ffStrbufAppendS(&result->userShellExe, getenv("SHELL"));
+    if(instance->state.passwd->pw_shell[0] != '\0')
+        ffStrbufAppendS(&result->userShellExe, instance->state.passwd->pw_shell);
+    else
+        ffStrbufAppendS(&result->userShellExe, getenv("SHELL"));
     if(result->userShellExe.length == 0)
         return;
+
     setExeName(&result->userShellExe, &result->userShellExeName);
 
     //If shell detection via processes failed
@@ -313,13 +319,21 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     }
     init = true;
 
+    #ifdef __APPLE__
+    const uint32_t exePathLen = PROC_PIDPATHINFO_MAXSIZE;
+    #elif defined(MAXPATH)
+    const uint32_t exePathLen = MAXPATH;
+    #else
+    const uint32_t exePathLen = 260;
+    #endif
+
     ffStrbufInit(&result.shellProcessName);
-    ffStrbufInitA(&result.shellExe, 128);
+    ffStrbufInitA(&result.shellExe, exePathLen);
     result.shellExeName = result.shellExe.chars;
     ffStrbufInit(&result.shellVersion);
 
     ffStrbufInit(&result.terminalProcessName);
-    ffStrbufInitA(&result.terminalExe, 128);
+    ffStrbufInitA(&result.terminalExe, exePathLen);
     result.terminalExeName = result.terminalExe.chars;
 
     ffStrbufInit(&result.userShellExe);
@@ -329,7 +343,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
-    getUserShellFromEnv(&result);
+    getUserShellFromEnv(instance, &result);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
     if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)

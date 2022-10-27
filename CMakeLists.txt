@@ -302,6 +302,7 @@ endif()
 if(BSD OR APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/sysctl.c
+        src/detection/disk/disk_bsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/processes/processes_bsd.c
     )
@@ -310,6 +311,8 @@ endif()
 if(LINUX OR ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_linux.c
+        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/disk/disk_linux.c
         src/detection/memory/memory_linux.c
         src/detection/processes/processes_linux.c
         src/detection/swap/swap_linux.c
@@ -319,8 +322,6 @@ endif()
 
 if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpuUsage/cpuUsage_linux.c
-        src/detection/disk/disk_linux.c
         src/detection/temps/temps_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/packages/packages_linux.c
@@ -331,12 +332,8 @@ endif()
 
 if(LINUX OR BSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_linux.c
-        src/detection/bios/bios_linux.c
-        src/detection/board/board_linux.c
         src/detection/os/os_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/battery/battery_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/xcb.c
@@ -348,6 +345,15 @@ if(LINUX OR BSD)
         src/detection/font/font_linux.c
         src/detection/qt.c
         src/detection/gtk.c
+    )
+endif()
+
+if(LINUX)
+    list(APPEND LIBFASTFETCH_SRC
+        src/detection/host/host_linux.c
+        src/detection/bios/bios_linux.c
+        src/detection/board/board_linux.c
+        src/detection/battery/battery_linux.c
     )
 endif()
 
@@ -418,8 +424,14 @@ endif()
 if(BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_bsd.c
+        src/detection/cpuUsage/cpuUsage_bsd.c
         src/detection/memory/memory_bsd.c
         src/detection/swap/swap_bsd.c
+        src/detection/host/host_bsd.c
+
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
     )
 endif()
 

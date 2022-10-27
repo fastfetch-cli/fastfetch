@@ -2,11 +2,11 @@
 
 #include <stdlib.h>
 
-void ffSysctlGetString(const char* propName, FFstrbuf* result)
+const char* ffSysctlGetString(const char* propName, FFstrbuf* result)
 {
     size_t neededLength;
     if(sysctlbyname(propName, NULL, &neededLength, NULL, 0) != 0 || neededLength == 1) //neededLength is 1 for empty strings, because of the null terminator
-        return;
+        return "sysctlbyname() failed";
 
     ffStrbufEnsureFree(result, (uint32_t) neededLength - 1);
 
@@ -14,6 +14,8 @@ void ffSysctlGetString(const char* propName, FFstrbuf* result)
         result->length += (uint32_t) neededLength - 1;
 
     result->chars[result->length] = '\0';
+
+    return NULL;
 }
 
 int ffSysctlGetInt(const char* propName, int defaultValue)

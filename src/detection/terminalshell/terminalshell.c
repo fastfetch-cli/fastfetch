@@ -71,6 +71,17 @@ static void getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
     ffStrbufSubstrAfterLastC(version, ' ');
 }
 
+static void getShellVersionTcsh(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }); // tcsh 6.24.01 (Astron) 2022-05-12 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
+    ffStrbufSubstrAfterFirstC(version, ' '); // 6.24.01 (Astron) 2022-05-12 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
+    ffStrbufSubstrBeforeFirstC(version, ' '); // 6.24.01
+}
+
 static void getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef _WIN32
@@ -128,6 +139,8 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         getShellVersionFish(exe, version);
     else if(strcasecmp(exeName, "pwsh") == 0)
         getShellVersionPwsh(exe, version);
+    else if(strcasecmp(exeName, "csh") == 0 || strcasecmp(exeName, "tcsh") == 0)
+        getShellVersionTcsh(exe, version);
     else if(strcasecmp(exeName, "nu") == 0)
         getShellVersionNu(exe, version);
 
