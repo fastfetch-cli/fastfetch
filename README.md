@@ -1,6 +1,6 @@
 # Fastfetch
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, BSD, MacOS and Windows are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, FreeBSD, MacOS and Windows are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -26,7 +26,7 @@ Fastfetch dynamically loads needed libraries if they are available. On Linux, it
 
 The following libraries are used if present at runtime:
 
-### Linux and BSD
+### Linux and FreeBSD
 
 * [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
@@ -48,7 +48,7 @@ The following libraries are used if present at runtime:
 * [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
-* [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( Windows, WSL ).
+* [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
 
 ### macOS
 
