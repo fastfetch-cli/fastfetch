@@ -10,7 +10,13 @@ const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
 
     FILE* procStat = fopen("/proc/stat", "r");
     if(procStat == NULL)
+    {
+        #ifdef __ANDROID__
+        return "Accessing \"/proc/stat\" is restricted on Android O+";
+        #else
         return "fopen(\"""/proc/stat\", \"r\") == NULL";
+        #endif
+    }
 
     if (fscanf(procStat, "cpu%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64, &user, &nice, &system, &idle, &iowait, &irq, &softirq) < 0)
     {
