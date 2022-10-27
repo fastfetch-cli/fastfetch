@@ -55,12 +55,21 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         while(isspace(*currentPos))
             ++currentPos;
 
+        #ifdef __ANDROID__
+        if(ffStrbufEqualS(&disk->mountpoint, "/") || ffStrbufEqualS(&disk->mountpoint, "/storage/emulated"))
+            disk->type = FF_DISK_TYPE_REGULAR;
+        else if(ffStrbufStartsWithS(&disk->mountpoint, "/mnt/media_rw/"))
+            disk->type = FF_DISK_TYPE_EXTERNAL;
+        else
+            disk->type = FF_DISK_TYPE_HIDDEN;
+        #else
         if(strstr(currentPos, "nosuid") != NULL || strstr(currentPos, "nodev") != NULL)
             disk->type = FF_DISK_TYPE_EXTERNAL;
         else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
             disk->type = FF_DISK_TYPE_HIDDEN;
         else
             disk->type = FF_DISK_TYPE_REGULAR;
+        #endif
 
         //Detects stats
         struct statvfs fs;
