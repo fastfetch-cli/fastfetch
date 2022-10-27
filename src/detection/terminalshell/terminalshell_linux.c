@@ -313,13 +313,21 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     }
     init = true;
 
+    #ifdef __APPLE__
+    const uint32_t exePathLen = PROC_PIDPATHINFO_MAXSIZE;
+    #elif defined(MAXPATH)
+    const uint32_t exePathLen = MAXPATH;
+    #else
+    const uint32_t exePathLen = 260;
+    #endif
+
     ffStrbufInit(&result.shellProcessName);
-    ffStrbufInitA(&result.shellExe, 128);
+    ffStrbufInitA(&result.shellExe, exePathLen);
     result.shellExeName = result.shellExe.chars;
     ffStrbufInit(&result.shellVersion);
 
     ffStrbufInit(&result.terminalProcessName);
-    ffStrbufInitA(&result.terminalExe, 128);
+    ffStrbufInitA(&result.terminalExe, exePathLen);
     result.terminalExeName = result.terminalExe.chars;
 
     ffStrbufInit(&result.userShellExe);
