@@ -310,6 +310,7 @@ endif()
 if(LINUX OR ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_linux.c
+        src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/memory/memory_linux.c
         src/detection/processes/processes_linux.c
         src/detection/swap/swap_linux.c
@@ -319,7 +320,6 @@ endif()
 
 if(LINUX OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/temps/temps_linux.c
         src/detection/opengl/opengl_linux.c
@@ -418,6 +418,7 @@ endif()
 if(BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/detection/cpu/cpu_bsd.c
+        src/detection/cpuUsage/cpuUsage_bsd.c
         src/detection/memory/memory_bsd.c
         src/detection/swap/swap_bsd.c
     )
