@@ -143,7 +143,7 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
     instance->state.logoWidth += instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
     //Go to the leftmost position
-    fputs("\033[9999999D", stdout);
+    putc('\r', stdout);
 
     //If the logo height is > 1, go up the height
     if(instance->state.logoHeight > 0)
