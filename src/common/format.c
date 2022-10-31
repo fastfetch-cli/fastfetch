@@ -135,6 +135,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             break;
         }
 
+
         // test for end of an if, if so do nothing
         if(placeholderValue.length == 1 && placeholderValue.chars[0] == '?')
         {
@@ -254,7 +255,8 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
-        ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
+        if(index != 0)
+            ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
 
         ffStrbufDestroy(&placeholderValue);
     }
