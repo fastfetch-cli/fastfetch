@@ -1049,7 +1049,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "cursor", &instance->config.cursor)) {}
     else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
     else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
-    else if(optionParseModuleArgs(key, value, "cpu", &instance->config.terminal)) {}
+    else if(optionParseModuleArgs(key, value, "cpu", &instance->config.cpu)) {}
     else if(optionParseModuleArgs(key, value, "cpu-usage", &instance->config.cpuUsage)) {}
     else if(optionParseModuleArgs(key, value, "gpu", &instance->config.gpu)) {}
     else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
