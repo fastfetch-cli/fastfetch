@@ -20,8 +20,9 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         //Format of the file: "<device> <mountpoint> <filesystem> <options> ..." (Same as fstab)
         char* currentPos = line;
 
-        //Non pseudo filesystems have their device in /dev/, we only add those
-        if(strncasecmp(currentPos, "/dev/", 5) != 0)
+        //Non pseudo filesystems have their device in /dev/
+        //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
+        if(strncmp(currentPos, "/dev/", 5) != 0 && strncmp(currentPos, "drvfs", 5) != 0)
             continue;
 
         //Skip /dev/
@@ -55,12 +56,21 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         while(isspace(*currentPos))
             ++currentPos;
 
+        #ifdef __ANDROID__
+        if(ffStrbufEqualS(&disk->mountpoint, "/") || ffStrbufEqualS(&disk->mountpoint, "/storage/emulated"))
+            disk->type = FF_DISK_TYPE_REGULAR;
+        else if(ffStrbufStartsWithS(&disk->mountpoint, "/mnt/media_rw/"))
+            disk->type = FF_DISK_TYPE_EXTERNAL;
+        else
+            disk->type = FF_DISK_TYPE_HIDDEN;
+        #else
         if(strstr(currentPos, "nosuid") != NULL || strstr(currentPos, "nodev") != NULL)
             disk->type = FF_DISK_TYPE_EXTERNAL;
         else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
             disk->type = FF_DISK_TYPE_HIDDEN;
         else
             disk->type = FF_DISK_TYPE_REGULAR;
+        #endif
 
         //Detects stats
         struct statvfs fs;
