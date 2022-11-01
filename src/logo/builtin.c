@@ -1669,6 +1669,56 @@ static const FFlogo* getLogoPop()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoParabola()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("parabola", "parabola-gnulinux")
+    FF_LOGO_LINES(
+        "                          `.-.    `.\n"
+        "                   `.`  `:++.   `-+o+.\n"
+        "             `` `:+/. `:+/.   `-+oooo+\n"
+        "        ``-::-.:+/. `:+/.   `-+oooooo+\n"
+        "    `.-:///-  ..`   .-.   `-+oooooooo-\n"
+        " `..-..`                 `+ooooooooo:\n"
+        "``                        :oooooooo/\n"
+        "                          `ooooooo:\n"
+        "                          `oooooo:\n"
+        "                          -oooo+.\n"
+        "                          +ooo/`\n"
+        "                         -ooo-\n"
+        "                        `+o/.\n"
+        "                        /+-\n"
+        "                       //`\n"
+        "                      -."
+    )
+    FF_LOGO_COLORS(
+        "35" //magenta
+    )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoParabolaSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("parabola_small", "parabola-gnulinux_small")
+    FF_LOGO_LINES(
+        "  __ __ __  _\n"
+        ".`_//_//_/ / `.\n"
+        "          /  .`\n"
+        "         / .`\n"
+        "        /.`\n"
+        "       /`"
+    )
+    FF_LOGO_COLORS(
+        "35" //magenta
+    )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoPopSmall()
 {
     FF_LOGO_INIT
@@ -2177,6 +2227,8 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoOpenSuseTumbleweed,
         getLogoPop,
         getLogoPopSmall,
+        getLogoParabola,
+        getLogoParabolaSmall,
         getLogoReborn,
         getLogoRebornSmall,
         getLogoRedHatEnterpriseLinux,
