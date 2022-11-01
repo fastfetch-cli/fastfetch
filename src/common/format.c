@@ -38,6 +38,14 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     }
 }
 
+/**
+ * @brief parses a string to a uint32_t
+ *
+ * If the string can't be parsed, or is < 1, uint32_t max is returned.
+ *
+ * @param placeholderValue the string to parse
+ * @return uint32_t the parsed value
+ */
 static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
 {
     uint32_t result = UINT32_MAX;
@@ -45,7 +53,7 @@ static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
     if(placeholderValue->chars[0] != '-')
         sscanf(placeholderValue->chars, "%u", &result);
 
-    return result;
+    return result == 0 ? UINT32_MAX : result;
 }
 
 static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start, const FFstrbuf* placeholderValue, uint32_t index, uint32_t formatStringLength)
