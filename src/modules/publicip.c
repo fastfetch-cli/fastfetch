@@ -5,12 +5,13 @@
 #define FF_PUBLICIP_MODULE_NAME "Public IP"
 #define FF_PUBLICIP_NUM_FORMAT_ARGS 1
 
-static FFSockType sockfd;
+static FFNetworkingState state;
+static int status = -1;
 
 void ffPreparePublicIp(FFinstance* instance)
 {
     if(instance->config.publicIpUrl.length == 0)
-        sockfd = ffNetworkingSendHttpRequest("ipinfo.io", "/ip", NULL, instance->config.publicIpTimeout);
+        status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/ip", NULL);
     else
     {
         FFstrbuf host;
@@ -27,7 +28,7 @@ void ffPreparePublicIp(FFinstance* instance)
             host.chars[pathStartIndex] = '\0';
         }
 
-        sockfd = ffNetworkingSendHttpRequest(host.chars, path.length == 0 ? "/" : path.chars, NULL, instance->config.publicIpTimeout);
+        status = ffNetworkingSendHttpRequest(&state, host.chars, path.length == 0 ? "/" : path.chars, NULL);
 
         ffStrbufDestroy(&path);
         ffStrbufDestroy(&host);
@@ -36,10 +37,10 @@ void ffPreparePublicIp(FFinstance* instance)
 
 void ffPrintPublicIp(FFinstance* instance)
 {
-    if(sockfd == 0)
+    if(status == -1)
         ffPreparePublicIp(instance);
 
-    if(sockfd == INVALID_SOCKET)
+    if(status == 0)
     {
         ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, "Failed to connect to an IP detection server");
         return;
@@ -47,7 +48,7 @@ void ffPrintPublicIp(FFinstance* instance)
 
     FFstrbuf result;
     ffStrbufInitA(&result, 4096);
-    bool success = ffNetworkingRecvHttpResponse(sockfd, &result);
+    bool success = ffNetworkingRecvHttpResponse(&state, &result, instance->config.publicIpTimeout);
     if(success) ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
 
     if(!success || result.length == 0)
