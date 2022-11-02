@@ -305,13 +305,13 @@ FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK4, FFinstance*)
 void startDetectionThreads(FFinstance* instance)
 {
     #ifdef FF_HAVE_THREADS
-    ffThreadCreateAndDetach(ffConnectDisplayServerThreadMain, instance);
+    ffThreadDetach(ffThreadCreate(ffConnectDisplayServerThreadMain, instance));
 
     #ifdef FF_DETECT_QT_GTK
-    ffThreadCreateAndDetach(ffDetectQtThreadMain, instance);
-    ffThreadCreateAndDetach(ffDetectGTK2ThreadMain, instance);
-    ffThreadCreateAndDetach(ffDetectGTK3ThreadMain, instance);
-    ffThreadCreateAndDetach(ffDetectGTK4ThreadMain, instance);
+    ffThreadDetach(ffThreadCreate(ffDetectQtThreadMain, instance));
+    ffThreadDetach(ffThreadCreate(ffDetectGTK2ThreadMain, instance));
+    ffThreadDetach(ffThreadCreate(ffDetectGTK3ThreadMain, instance));
+    ffThreadDetach(ffThreadCreate(ffDetectGTK4ThreadMain, instance));
     #endif
 
     #else
