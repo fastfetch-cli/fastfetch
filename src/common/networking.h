@@ -3,6 +3,7 @@
 #ifndef FF_INCLUDED_common_networking
 #define FF_INCLUDED_common_networking
 
+#include "common/thread.h"
 #include "util/FFstrbuf.h"
 
 #ifdef _WIN32
@@ -11,10 +12,16 @@
 
 typedef struct FFNetworkingState {
     #ifdef _WIN32
-    uintptr_t sockfd;
-    OVERLAPPED overlapped;
+        uintptr_t sockfd;
+        OVERLAPPED overlapped;
     #else
-    int sockfd;
+        int sockfd;
+        FFstrbuf host;
+        FFstrbuf command;
+
+        #ifdef FF_HAVE_THREADS
+            FFThreadType thread;
+        #endif
     #endif
 } FFNetworkingState;
 

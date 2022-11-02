@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
+static void connectAndSend(FFNetworkingState* state)
 {
     struct addrinfo hints = {
         .ai_family = AF_INET,
@@ -15,47 +15,73 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
 
     struct addrinfo* addr;
 
-    if(getaddrinfo(host, "80", &hints, &addr) != 0)
-        return false;
+    if(getaddrinfo(state->host.chars, "80", &hints, &addr) != 0)
+        goto error;
 
     state->sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
     if(state->sockfd == -1)
     {
         freeaddrinfo(addr);
-        return false;
+        goto error;
     }
 
     if(connect(state->sockfd, addr->ai_addr, addr->ai_addrlen) == -1)
     {
         close(state->sockfd);
         freeaddrinfo(addr);
-        return false;
+        goto error;
     }
 
     freeaddrinfo(addr);
 
-    FFstrbuf command;
-    ffStrbufInitA(&command, 64);
-    ffStrbufAppendS(&command, "GET ");
-    ffStrbufAppendS(&command, path);
-    ffStrbufAppendS(&command, " HTTP/1.1\nHost: ");
-    ffStrbufAppendS(&command, host);
-    ffStrbufAppendS(&command, "\r\n");
-    ffStrbufAppendS(&command, headers);
-    ffStrbufAppendS(&command, "\r\n");
-
-    if(send(state->sockfd, command.chars, command.length, 0) < 0)
+    if(send(state->sockfd, state->command.chars, state->command.length, 0) < 0)
     {
-        ffStrbufDestroy(&command);
         close(state->sockfd);
-        return false;
+        goto error;
     }
-    ffStrbufDestroy(&command);
-    return true;
+
+    goto exit;
+
+error:
+    state->sockfd = -1;
+
+exit:
+    ffStrbufDestroy(&state->host);
+    ffStrbufDestroy(&state->command);
+}
+
+FF_THREAD_ENTRY_DECL_WRAPPER(connectAndSend, FFNetworkingState*);
+
+bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
+{
+    ffStrbufInitS(&state->host, host);
+
+    ffStrbufInitA(&state->command, 64);
+    ffStrbufAppendS(&state->command, "GET ");
+    ffStrbufAppendS(&state->command, path);
+    ffStrbufAppendS(&state->command, " HTTP/1.1\nHost: ");
+    ffStrbufAppendS(&state->command, host);
+    ffStrbufAppendS(&state->command, "\r\n");
+    ffStrbufAppendS(&state->command, headers);
+    ffStrbufAppendS(&state->command, "\r\n");
+
+    #ifdef FF_HAVE_THREADS
+        state->thread = ffThreadCreate(connectAndSendThreadMain, state);
+        return state->thread != NULL;
+    #else
+        connectAndSend(state);
+        return state->sockfd != -1;
+    #endif
 }
 
 bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout)
 {
+    #ifdef FF_HAVE_THREADS
+        ffThreadJoin(state->thread);
+    #endif
+    if(state->sockfd == -1)
+        return false;
+
     if(timeout > 0)
     {
         struct timeval timev;
