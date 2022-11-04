@@ -220,7 +220,6 @@ set(LIBFASTFETCH_SRC
     src/common/parsing.c
     src/common/settings.c
     src/common/library.c
-    src/common/networking.c
     src/common/bar.c
     src/logo/logo.c
     src/logo/builtin.c
@@ -293,6 +292,7 @@ set(LIBFASTFETCH_SRC
 if(LINUX OR APPLE OR ANDROID OR BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/processing_linux.c
+        src/common/networking_linux.c
         src/detection/users/users_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/localip/localip_linux.c
@@ -360,6 +360,7 @@ endif()
 if(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/processing_windows.c
+        src/common/networking_windows.c
         src/detection/host/host_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
