@@ -1,0 +1,47 @@
+//
+// Include the necessary resources
+//
+#include <winver.h>
+#include <ntdef.h>
+
+#ifdef RC_INVOKED
+
+//
+// Set up debug information
+//
+#if DEBUG
+#define VER_DEBUG VS_FF_DEBUG
+#else
+#define VER_DEBUG 0
+#endif
+
+// ------- version info -------------------------------------------------------
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION             @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,@PROJECT_VERSION_TWEAK_NUM@
+PRODUCTVERSION          @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,@PROJECT_VERSION_TWEAK_NUM@
+FILEFLAGSMASK           VS_FFI_FILEFLAGSMASK
+FILEFLAGS               (VER_DEBUG|VS_FF_PRERELEASE)
+FILEOS                  VOS_NT
+FILETYPE                VFT_APP
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
+		BEGIN
+			VALUE "Comments",         "@PROJECT_HOMEPAGE_URL@"
+			VALUE "FileDescription",  "@PROJECT_DESCRIPTION@"
+			VALUE "FileVersion",      "@PROJECT_VERSION@@PROJECT_VERSION_TWEAK@"
+			VALUE "InternalName",     "@TARGET_NAME@.exe"
+			VALUE "LegalCopyright",   "@PROJECT_LICENSE@"
+			VALUE "OriginalFilename", "@TARGET_NAME@.exe"
+			VALUE "ProductName",      "@PROJECT_NAME@"
+			VALUE "ProductVersion",   "@PROJECT_VERSION@@PROJECT_VERSION_TWEAK@"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409,1252
+	END
+END
+#endif
