@@ -1,6 +1,6 @@
 # Fastfetch
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, FreeBSD, MacOS and Windows are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -61,6 +61,8 @@ The following libraries are used if present at runtime:
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
 
+Note: On Windows 10-, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). Also make sure to [use `chcp 65001` to enable UTF-8 support](https://conemu.github.io/en/UnicodeSupport.html#utf-8) if you run Windows locale other than English. 
+
 ### Android
 
 * [`freetype`](https://www.freetype.org/): Used for Termux font detection.
@@ -101,7 +103,7 @@ KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 
 ##### Terminal fonts
 ```
-Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, iTerm2, Apple Terminal, TTY, Windows Terminal, Termux, mintty
+Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, iTerm2, Apple Terminal, TTY, Windows Terminal, Termux, mintty, ConEmu
 ```
 
 ## Building
