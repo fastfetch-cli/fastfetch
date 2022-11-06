@@ -26,6 +26,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     if(FFWmiRecord record = query.next())
     {
         record.getString(L"Caption", &os->variant);
+        ffStrbufTrimRight(&os->variant, ' ');
         if(ffStrbufStartsWithS(&os->variant, "Microsoft Windows "))
         {
             ffStrbufAppendS(&os->name, "Microsoft Windows");
