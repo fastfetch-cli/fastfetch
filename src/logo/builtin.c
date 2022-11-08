@@ -2113,6 +2113,39 @@ static const FFlogo* getLogoUbuntuSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoVanilla()
+{
+    
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("vanilla", "vanilla-os","vanilla-linux");
+    FF_LOGO_LINES(
+"                .----: \n"
+"              .-------.\n"
+"             :---::----:\n"
+"            .----::-----.\n"
+"  .........  :----::-----: ..:::-::::..\n"
+".-----------------::------------------:\n"
+" ----::-----------::----------::::---:\n"
+"  -----:::--------::-------:::-------\n"
+"   :------::::--::...:::::---------:\n"
+"    .---------::..    ..:---------.\n"
+"      .::-----::..    .::----::.\n"
+"        .:------:.......:-------:\n"
+"       .--------::::::::-:::-------.\n"
+"      .-------::-----.:-----::------.\n"
+"     -----::------:   :------::-----\n"
+"    :--::--------:     .-------::---:\n"
+"   :----------::         .:----------\n"
+"    :--------:             :--------:"
+    )
+    FF_LOGO_COLORS(
+        "33" //yellow
+    )
+    FF_LOGO_COLOR_KEYS("33"); // yellow
+    FF_LOGO_COLOR_TITLE("33"); // yellow
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoVoid()
 {
     FF_LOGO_INIT
@@ -2272,6 +2305,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoUbuntu,
         getLogoUbuntuOld,
         getLogoUbuntuSmall,
+        getLogoVanilla,
         getLogoVoid,
         getLogoVoidSmall,
         getLogoZorin,
