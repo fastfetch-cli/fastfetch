@@ -4,38 +4,41 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
+static inline void wrapRegCloseKey(HKEY* phKey)
+{
+    if(*phKey)
+        RegCloseKey(*phKey);
+}
+
 bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
 {
     FF_UNUSED(instance);
 
-    HKEY hKey;
+    HKEY __attribute__((__cleanup__(wrapRegCloseKey))) hKey = NULL;
     if(RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &hKey) != ERROR_SUCCESS)
     {
         ffStrbufAppendS(themeOrError, "RegOpenKeyExW() failed");
         return false;
     }
 
-    bool result = true;
     int SystemUsesLightTheme = 1;
     DWORD bufSize = sizeof(SystemUsesLightTheme);
 
-    if(RegQueryValueExW(hKey, L"SystemUsesLightTheme", NULL, NULL, (LPBYTE)&SystemUsesLightTheme, &bufSize) != ERROR_SUCCESS)
+    if(RegGetValueW(hKey, NULL, L"SystemUsesLightTheme", RRF_RT_DWORD, NULL, &SystemUsesLightTheme, &bufSize) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(themeOrError, "RegOpenKeyExW(SystemUsesLightTheme) failed");
-        goto exit;
+        ffStrbufAppendS(themeOrError, "RegGetValueW(SystemUsesLightTheme) failed");
+        return false;
     }
 
     int AppsUsesLightTheme = 1;
     bufSize = sizeof(AppsUsesLightTheme);
-    if(RegQueryValueExW(hKey, L"AppsUseLightTheme", NULL, NULL, (LPBYTE)&AppsUsesLightTheme, &bufSize) != ERROR_SUCCESS)
+    if(RegGetValueW(hKey, NULL, L"AppsUseLightTheme", RRF_RT_DWORD, NULL, &AppsUsesLightTheme, &bufSize) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(themeOrError, "RegOpenKeyExW(AppsUseLightTheme) failed");
-        goto exit;
+        ffStrbufAppendS(themeOrError, "RegGetValueW(AppsUseLightTheme) failed");
+        return false;
     }
 
     ffStrbufAppendF(themeOrError, "System - %s, Apps - %s", SystemUsesLightTheme ? "Light" : "Dark", AppsUsesLightTheme ? "Light" : "Dark");
 
-exit:
-    RegCloseKey(hKey);
-    return result;
+    return true;
 }

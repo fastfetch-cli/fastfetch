@@ -27,27 +27,30 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
         .hStdOutput = hChildStdoutWrite,
     };
 
-    FFstrbuf cmdline;
-    ffStrbufInitF(&cmdline, "\"%s\"", argv[0]);
-    for(char* const* parg = &argv[1]; *parg; ++parg)
+    BOOL success;
+
     {
-        ffStrbufAppendC(&cmdline, ' ');
-        ffStrbufAppendS(&cmdline, *parg);
+        FF_STRBUF_AUTO_DESTROY cmdline;
+        ffStrbufInitF(&cmdline, "\"%s\"", argv[0]);
+        for(char* const* parg = &argv[1]; *parg; ++parg)
+        {
+            ffStrbufAppendC(&cmdline, ' ');
+            ffStrbufAppendS(&cmdline, *parg);
+        }
+
+        success = CreateProcessA(
+            NULL,          // application name
+            cmdline.chars, // command line
+            NULL,          // process security attributes
+            NULL,          // primary thread security attributes
+            TRUE,          // handles are inherited
+            0,             // creation flags
+            NULL,          // use parent's environment
+            NULL,          // use parent's current directory
+            &siStartInfo,  // STARTUPINFO pointer
+            &piProcInfo    // receives PROCESS_INFORMATION
+        );
     }
-
-    BOOL success = CreateProcessA(
-        NULL,          // application name
-        cmdline.chars, // command line
-        NULL,          // process security attributes
-        NULL,          // primary thread security attributes
-        TRUE,          // handles are inherited
-        0,             // creation flags
-        NULL,          // use parent's environment
-        NULL,          // use parent's current directory
-        &siStartInfo,  // STARTUPINFO pointer
-        &piProcInfo);  // receives PROCESS_INFORMATION
-
-    ffStrbufDestroy(&cmdline);
 
     CloseHandle(hChildStdoutWrite);
     if(!success)

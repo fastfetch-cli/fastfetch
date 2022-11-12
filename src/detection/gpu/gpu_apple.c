@@ -8,7 +8,7 @@
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
-    FFlist temps;
+    FF_LIST_AUTO_DESTROY temps;
     ffListInit(&temps, sizeof(FFTempValue));
 
     if(ffStrbufStartsWithS(gpuName, "Apple M1"))
@@ -35,7 +35,6 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
         ffStrbufDestroy(&tempValue->deviceClass);
     }
     result /= temps.length;
-    ffListDestroy(&temps);
     return result;
 }
 

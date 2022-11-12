@@ -7,10 +7,10 @@
 
 static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
+    FF_STRBUF_AUTO_DESTROY fontName;
     ffStrbufInit(&fontName);
 
-    FFstrbuf fontSize;
+    FF_STRBUF_AUTO_DESTROY fontSize;
     ffStrbufInit(&fontSize);
 
     ffParsePropFileHomeValues(instance, ".minttyrc", 2, (FFpropquery[]) {
@@ -23,9 +23,12 @@ static void detectMintty(const FFinstance* instance, FFTerminalFontResult* termi
         ffStrbufAppendC(&fontSize, '9');
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
 
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
+static inline void wrapRegCloseKey(HKEY* phKey)
+{
+    if(*phKey)
+        RegCloseKey(*phKey);
 }
 
 static void detectConhost(const FFinstance* instance, FFTerminalFontResult* terminalFont)
@@ -34,7 +37,7 @@ static void detectConhost(const FFinstance* instance, FFTerminalFontResult* term
 
     //Current font of conhost doesn't seem to be detectable, we detect default font instead
 
-    HKEY hKey;
+    HKEY __attribute__((__cleanup__(wrapRegCloseKey))) hKey = NULL;
     if(RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_READ, &hKey) != ERROR_SUCCESS)
     {
         ffStrbufAppendS(&terminalFont->error, "RegOpenKeyExW() failed");
@@ -43,34 +46,26 @@ static void detectConhost(const FFinstance* instance, FFTerminalFontResult* term
 
     DWORD bufSize;
 
-    wchar_t fontNameW[64];
-    bufSize = sizeof(fontNameW);
-    if(RegQueryValueExW(hKey, L"FaceName", NULL, NULL, (LPBYTE)fontNameW, &bufSize) != ERROR_SUCCESS)
+    char fontName[128];
+    bufSize = sizeof(fontName);
+    if(RegGetValueA(hKey, NULL, "FaceName", RRF_RT_REG_SZ, NULL, fontName, &bufSize) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(&terminalFont->error, "RegOpenKeyExW(FaceName) failed");
-        goto exit;
+        ffStrbufAppendS(&terminalFont->error, "RegGetValueA(FaceName) failed");
+        return;
     }
-    fontNameW[bufSize] = '\0';
-
-    char fontNameA[128];
-    int fontNameALen = WideCharToMultiByte(CP_UTF8, 0, fontNameW, (int)(bufSize / 2), fontNameA, sizeof(fontNameA), NULL, NULL);
-    fontNameA[fontNameALen] = '\0';
 
     uint32_t fontSizeNum = 0;
     bufSize = sizeof(fontSizeNum);
-    if(RegQueryValueExW(hKey, L"fontSize", NULL, NULL, (LPBYTE)&fontSizeNum, &bufSize) != ERROR_SUCCESS)
+    if(RegGetValueW(hKey, NULL, L"FontSize", RRF_RT_DWORD, NULL, &fontSizeNum, &bufSize) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(&terminalFont->error, "RegOpenKeyExW(fontSize) failed");
-        goto exit;
+        ffStrbufAppendS(&terminalFont->error, "RegGetValueW(FontSize) failed");
+        return;
     }
 
     char fontSize[16];
-    snprintf(fontSize, sizeof(fontSize), "%u", (fontSizeNum >> 16));
+    _ultoa((unsigned long)(fontSizeNum >> 16), fontSize, 10);
 
-    ffFontInitValues(&terminalFont->font, fontNameA, fontSize);
-
-exit:
-    RegCloseKey(hKey);
+    ffFontInitValues(&terminalFont->font, fontName, fontSize);
 }
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)

@@ -46,25 +46,21 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
 
 static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
+    FF_STRBUF_AUTO_DESTROY fontName;
     ffStrbufInit(&fontName);
     ffOsascript("tell application \"Terminal\" to font name of window frontmost", &fontName);
 
     if(fontName.length == 0)
     {
         ffStrbufAppendS(&terminalFont->error, "executing osascript failed");
-        ffStrbufDestroy(&fontName);
         return;
     }
 
-    FFstrbuf fontSize;
+    FF_STRBUF_AUTO_DESTROY fontSize;
     ffStrbufInit(&fontSize);
     ffOsascript("tell application \"Terminal\" to font size of window frontmost", &fontSize);
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
-
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
 }
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)

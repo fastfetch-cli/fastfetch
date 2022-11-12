@@ -27,7 +27,7 @@ static uint32_t getNumElements(const char* dirname, unsigned char type)
 
 static uint32_t countBrewPackages(const char* dirname)
 {
-    FFstrbuf baseDir;
+    FF_STRBUF_AUTO_DESTROY baseDir;
     ffStrbufInitS(&baseDir, dirname);
 
     uint32_t result = 0;
@@ -41,7 +41,6 @@ static uint32_t countBrewPackages(const char* dirname)
     result += getNumElements(baseDir.chars, DT_DIR);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
 
-    ffStrbufDestroy(&baseDir);
     return result;
 }
 
@@ -59,14 +58,11 @@ static uint32_t getBrewPackages()
 
 static uint32_t countMacPortsPackages(const char* dirname)
 {
-    FFstrbuf baseDir;
+    FF_STRBUF_AUTO_DESTROY baseDir;
     ffStrbufInitS(&baseDir, dirname);
     ffStrbufAppendS(&baseDir, "/var/macports/software");
 
-    uint32_t result = getNumElements(baseDir.chars, DT_DIR);
-
-    ffStrbufDestroy(&baseDir);
-    return result;
+    return getNumElements(baseDir.chars, DT_DIR);
 }
 
 static uint32_t getMacPortsPackages()
