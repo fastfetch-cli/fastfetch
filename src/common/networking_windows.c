@@ -75,7 +75,7 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
         }
     }
 
-    FFstrbuf command;
+    FF_STRBUF_AUTO_DESTROY command;
     ffStrbufInitA(&command, 64);
     ffStrbufAppendS(&command, "GET ");
     ffStrbufAppendS(&command, path);
@@ -87,7 +87,6 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
 
     BOOL result = ConnectEx(state->sockfd, addr->ai_addr, (int)addr->ai_addrlen, command.chars, command.length, NULL, &state->overlapped);
     freeaddrinfo(addr);
-    ffStrbufDestroy(&command);
 
     if(!result && WSAGetLastError() != WSA_IO_PENDING)
     {
@@ -95,7 +94,6 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
         return false;
     }
 
-    ffStrbufDestroy(&command);
     return true;
 }
 

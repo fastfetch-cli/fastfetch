@@ -18,7 +18,7 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 
     if(FFWmiRecord record = query.next())
     {
-        FFstrbuf fontName;
+        FF_STRBUF_AUTO_DESTROY fontName;
         ffStrbufInit(&fontName);
         record.getString(L"IconTitleFaceName", &fontName);
 
@@ -26,8 +26,6 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
         record.getUnsigned(L"IconTitleSize", &fontSize);
 
         ffStrbufAppendF(&result->fonts[0], "%*s (%upt)", fontName.length, fontName.chars, (unsigned)fontSize);
-
-        ffStrbufDestroy(&fontName);
     }
     else
         ffStrbufInitS(&result->error, "No WMI result returned");

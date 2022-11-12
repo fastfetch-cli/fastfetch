@@ -46,19 +46,17 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
 
 static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf font;
+    FF_STRBUF_AUTO_DESTROY font;
     ffStrbufInit(&font);
     ffOsascript("tell application \"Terminal\" to font name of window frontmost & \" \" & font size of window frontmost", &font);
 
     if(font.length == 0)
     {
         ffStrbufAppendS(&terminalFont->error, "executing osascript failed");
-        ffStrbufDestroy(&font);
         return;
     }
 
     ffFontInitWithSpace(&terminalFont->font, font.chars);
-    ffStrbufDestroy(&font);
 }
 
 static void detectWarpTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
