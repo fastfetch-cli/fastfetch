@@ -36,23 +36,30 @@ const char* ffGetCpuUsageResult(double* result)
         error = ffGetCpuUsageInfo(&inUseAll1, &totalAll1);
         if(error)
             return error;
-        ffTimeSleep(1000);
+        ffTimeSleep(250);
     }
     else
     {
         uint64_t duration = ffTimeGetTick() - startTime;
-        if(duration < 1000)
-            ffTimeSleep(1000 - (uint32_t) duration);
+        if(duration < 250)
+            ffTimeSleep(250 - (uint32_t) duration);
     }
 
-    uint64_t inUseAll2, totalAll2;
-    error = ffGetCpuUsageInfo(&inUseAll2, &totalAll2);
-    if(error)
-        return error;
+    while(true)
+    {
+        uint64_t inUseAll2, totalAll2;
+        error = ffGetCpuUsageInfo(&inUseAll2, &totalAll2);
+        if(error)
+            return error;
 
-    *result = (double)(inUseAll2 - inUseAll1) / (double)(totalAll2 - totalAll1) * 100;
-
-    return NULL;
+        if(inUseAll2 != inUseAll1)
+        {
+            *result = (double)(inUseAll2 - inUseAll1) / (double)(totalAll2 - totalAll1) * 100;
+            return NULL;
+        }
+        else
+            ffTimeSleep(250);
+    }
 }
 
 #endif //FF_DETECTION_CPUUSAGE_NOWAIT
