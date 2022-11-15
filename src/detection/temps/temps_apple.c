@@ -104,12 +104,11 @@ static uint32_t smcStrtoul(const char *str, int size, int base)
 
 static void smcUltostr(char *str, uint32_t val)
 {
-    str[0] = '\0';
-    sprintf(str, "%c%c%c%c",
-            (unsigned int)val >> 24,
-            (unsigned int)val >> 16,
-            (unsigned int)val >> 8,
-            (unsigned int)val);
+    str[0] = (char)(val >> 24);
+    str[1] = (char)(val >> 16);
+    str[2] = (char)(val >> 8);
+    str[3] = (char)val;
+    str[4] = '\0';
 }
 
 static const char *smcCall(io_connect_t conn, uint32_t selector, SmcKeyData_t *inputStructure, SmcKeyData_t *outputStructure)
