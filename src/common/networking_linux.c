@@ -67,7 +67,7 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
 
     #ifdef FF_HAVE_THREADS
         state->thread = ffThreadCreate(connectAndSendThreadMain, state);
-        return state->thread != NULL;
+        return !!state->thread;
     #else
         connectAndSend(state);
         return state->sockfd != -1;
