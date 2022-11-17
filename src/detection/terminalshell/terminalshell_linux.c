@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "detection/host/host.h"
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
@@ -239,10 +238,8 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(!ffStrSet(term))
     {
         //We are in WSL but not in Windows Terminal
-        const FFHostResult* host = ffDetectHost();
-        if(ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_WSL) == 0 ||
-            ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS) == 0) //TODO better WSL or MSYS detection
-        term = "conhost";
+        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
+            term = "conhost";
     }
     #endif
 
