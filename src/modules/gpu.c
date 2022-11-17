@@ -44,12 +44,6 @@ void ffPrintGPU(FFinstance* instance)
     if(ffPrintFromCache(instance, FF_GPU_MODULE_NAME, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS))
         return;
 
-    if(ffStrbufCompS(&ffDetectHost()->productName, FF_HOST_PRODUCT_NAME_WSL) == 0)
-    {
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "WSL doesn't expose senseful GPU names");
-        return;
-    }
-
     const FFlist* gpus = ffDetectGPU(instance);
 
     if(gpus->length == 0)
