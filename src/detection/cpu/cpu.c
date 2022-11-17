@@ -31,7 +31,6 @@ static void detectCPU(const FFinstance* instance, FFCPUResult* cpu)
         return;
 
     const char* removeStrings[] = {
-        "(R)", "(r)", "(TM)", "(tm)",
         " CPU", " FPU", " APU", " Processor",
         " Dual-Core", " Quad-Core", " Six-Core", " Eight-Core", " Ten-Core",
         " 2-Core", " 4-Core", " 6-Core", " 8-Core", " 10-Core", " 12-Core", " 14-Core", " 16-Core",
