@@ -31,7 +31,7 @@ const char* detectTermux(const FFinstance* instance, FFTerminalFontResult* termi
         goto exit;
     }
 
-    if(ffFT_New_Face(library, FF_TERMUX_FONT_PATH, 0, &face ))
+    if(ffFT_New_Face(library, FF_TERMUX_FONT_PATH, 0, &face))
     {
         error = "FT_NEW_Face(" FF_TERMUX_FONT_PATH ") failed";
         goto exit;
@@ -49,7 +49,7 @@ exit:
     #else
 
     FF_UNUSED(terminalFont);
-    ffStrbufSetS(&terminalFont->error, "fastfetch is built without freetype2 support");
+    return "fastfetch is built without freetype2 support";
 
     #endif
 }
