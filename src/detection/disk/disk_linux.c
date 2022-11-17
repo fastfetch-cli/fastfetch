@@ -73,9 +73,9 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         #endif
 
         //Detects stats
-        struct statvfs fs;
-        if(statvfs(disk->mountpoint.chars, &fs) != 0)
-            memset(&fs, 0, sizeof(struct statvfs)); //Set all values to 0, so our values get initialized to 0 too
+        struct statvfs64 fs;
+        if(statvfs64(disk->mountpoint.chars, &fs) != 0)
+            memset(&fs, 0, sizeof(struct statvfs64)); //Set all values to 0, so our values get initialized to 0 too
 
         disk->bytesTotal = fs.f_blocks * fs.f_frsize;
         disk->bytesUsed = disk->bytesTotal - (fs.f_bavail * fs.f_frsize);
