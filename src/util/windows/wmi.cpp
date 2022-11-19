@@ -128,7 +128,7 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error)
     if (InitOnceExecuteOnce(&s_InitOnce, &InitHandleFunction, nullptr, (void**)&context) == FALSE)
     {
         if(error)
-            ffStrbufInitS(error, context);
+            ffStrbufAppendS(error, context);
         return;
     }
 

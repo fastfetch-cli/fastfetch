@@ -28,5 +28,5 @@ extern "C" void ffDetectHostImpl(FFHostResult* host)
         record.getString(L"Vendor", &host->sysVendor);
     }
     else
-        ffStrbufInitS(&host->error, "No Wmi result returned");
+        ffStrbufAppendS(&host->error, "No Wmi result returned");
 }
