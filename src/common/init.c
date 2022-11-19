@@ -125,6 +125,7 @@ static void initState(FFstate* state)
     #ifdef WIN32
     //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
     setlocale(LC_ALL, ".UTF8");
+    setvbuf(stdout, NULL, _IOFBF, 4096);
     #endif
 
     state->logoWidth = 0;
@@ -334,7 +335,7 @@ static void resetConsole()
 BOOL WINAPI consoleHandler(DWORD signal)
 {
     FF_UNUSED(signal);
-    resetConsole();
+        resetConsole();
     exit(0);
 }
 #else
@@ -360,7 +361,7 @@ void ffStart(FFinstance* instance)
     DWORD mode = 0;
     GetConsoleMode(hStdout, &mode);
     SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-    SetConsoleOutputCP(CP_UTF8);
+    // SetConsoleOutputCP(CP_UTF8);
     #else
     struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
