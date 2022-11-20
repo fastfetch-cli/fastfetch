@@ -209,249 +209,247 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/util/FFstrbuf.c
-    src/util/FFlist.c
-    src/util/FFvaluestore.c
-    src/common/init.c
-    src/common/io.c
-    src/common/printing.c
+    src/common/bar.c
     src/common/caching.c
-    src/common/properties.c
     src/common/font.c
     src/common/format.c
-    src/common/parsing.c
-    src/common/settings.c
+    src/common/init.c
+    src/common/io.c
     src/common/library.c
-    src/common/bar.c
-    src/logo/logo.c
-    src/logo/builtin.c
-    src/logo/image/image.c
-    src/logo/image/im7.c
-    src/logo/image/im6.c
-    src/detection/vulkan.c
-    src/detection/datetime.c
-    src/detection/title.c
-    src/detection/host/host.c
-    src/detection/os/os.c
+    src/common/parsing.c
+    src/common/printing.c
+    src/common/properties.c
+    src/common/settings.c
     src/detection/cpu/cpu.c
     src/detection/cpuUsage/cpuUsage.c
-    src/detection/gpu/gpu.c
-    src/detection/memory/memory.c
-    src/detection/swap/swap.c
-    src/detection/font/font.c
+    src/detection/datetime.c
+    src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
+    src/detection/font/font.c
+    src/detection/gpu/gpu.c
+    src/detection/host/host.c
+    src/detection/media/media.c
+    src/detection/memory/memory.c
+    src/detection/os/os.c
+    src/detection/packages/packages.c
+    src/detection/swap/swap.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
-    src/detection/media/media.c
-    src/detection/packages/packages.c
-    src/detection/disk/disk.c
-    src/modules/break.c
-    src/modules/custom.c
-    src/modules/title.c
-    src/modules/separator.c
-    src/modules/os.c
-    src/modules/host.c
+    src/detection/title.c
+    src/detection/vulkan.c
+    src/logo/builtin.c
+    src/logo/image/im6.c
+    src/logo/image/im7.c
+    src/logo/image/image.c
+    src/logo/logo.c
+    src/modules/battery.c
     src/modules/bios.c
     src/modules/board.c
-    src/modules/kernel.c
-    src/modules/uptime.c
-    src/modules/processes.c
-    src/modules/packages.c
-    src/modules/shell.c
-    src/modules/resolution.c
-    src/modules/de.c
-    src/modules/wm.c
-    src/modules/wmtheme.c
-    src/modules/theme.c
-    src/modules/icons.c
-    src/modules/font.c
-    src/modules/cursor.c
-    src/modules/terminal.c
-    src/modules/terminalfont.c
+    src/modules/break.c
+    src/modules/colors.c
     src/modules/cpu.c
     src/modules/cpuUsage.c
-    src/modules/gpu.c
-    src/modules/memory.c
-    src/modules/disk.c
-    src/modules/battery.c
-    src/modules/poweradapter.c
-    src/modules/locale.c
-    src/modules/vulkan.c
-    src/modules/localip.c
-    src/modules/publicip.c
-    src/modules/weather.c
-    src/modules/player.c
-    src/modules/song.c
-    src/modules/datetime.c
+    src/modules/cursor.c
+    src/modules/custom.c
     src/modules/date.c
-    src/modules/time.c
-    src/modules/colors.c
-    src/modules/opengl.c
+    src/modules/datetime.c
+    src/modules/de.c
+    src/modules/disk.c
+    src/modules/font.c
+    src/modules/gpu.c
+    src/modules/host.c
+    src/modules/icons.c
+    src/modules/kernel.c
+    src/modules/locale.c
+    src/modules/localip.c
+    src/modules/memory.c
     src/modules/opencl.c
+    src/modules/opengl.c
+    src/modules/os.c
+    src/modules/packages.c
+    src/modules/player.c
+    src/modules/poweradapter.c
+    src/modules/processes.c
+    src/modules/publicip.c
+    src/modules/resolution.c
+    src/modules/separator.c
+    src/modules/shell.c
+    src/modules/song.c
+    src/modules/terminal.c
+    src/modules/terminalfont.c
+    src/modules/theme.c
+    src/modules/time.c
+    src/modules/title.c
+    src/modules/uptime.c
     src/modules/users.c
+    src/modules/vulkan.c
+    src/modules/weather.c
+    src/modules/wm.c
+    src/modules/wmtheme.c
+    src/util/FFlist.c
+    src/util/FFstrbuf.c
+    src/util/FFvaluestore.c
 )
-
-if(LINUX OR APPLE OR ANDROID OR BSD)
-    list(APPEND LIBFASTFETCH_SRC
-        src/common/processing_linux.c
-        src/common/networking_linux.c
-        src/detection/users/users_linux.c
-        src/detection/terminalshell/terminalshell_linux.c
-        src/detection/localip/localip_linux.c
-    )
-endif()
-
-if(BSD OR APPLE)
-    list(APPEND LIBFASTFETCH_SRC
-        src/common/sysctl.c
-        src/detection/disk/disk_bsd.c
-        src/detection/uptime/uptime_bsd.c
-        src/detection/processes/processes_bsd.c
-    )
-endif()
-
-if(LINUX OR ANDROID)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpu/cpu_linux.c
-        src/detection/cpuUsage/cpuUsage_linux.c
-        src/detection/disk/disk_linux.c
-        src/detection/memory/memory_linux.c
-        src/detection/processes/processes_linux.c
-        src/detection/swap/swap_linux.c
-        src/detection/uptime/uptime_linux.c
-    )
-endif()
-
-if(LINUX OR ANDROID OR BSD)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/temps/temps_linux.c
-        src/detection/opengl/opengl_linux.c
-        src/detection/packages/packages_linux.c
-
-        src/detection/poweradapter/poweradapter_nosupport.c
-    )
-endif()
-
-if(LINUX OR BSD)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/os/os_linux.c
-        src/detection/gpu/gpu_linux.c
-        src/detection/displayserver/linux/displayserver_linux.c
-        src/detection/displayserver/linux/wayland.c
-        src/detection/displayserver/linux/xcb.c
-        src/detection/displayserver/linux/xlib.c
-        src/detection/displayserver/linux/wmde.c
-        src/detection/terminalfont/terminalfont_linux.c
-        src/detection/media/media_linux.c
-        src/detection/wmtheme/wmtheme_linux.c
-        src/detection/font/font_linux.c
-        src/detection/qt.c
-        src/detection/gtk.c
-    )
-endif()
 
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_linux.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
-        src/detection/battery/battery_linux.c
+        src/detection/cpu/cpu_linux.c
+        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/disk/disk_linux.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/gtk.c
+        src/detection/host/host_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_linux.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/qt.c
+        src/detection/swap/swap_linux.c
+        src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_linux.c
+        src/detection/users/users_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
     )
-endif()
-
-if(WIN32)
+elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/processing_windows.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/cpu/cpu_linux.c
+        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/disk/disk_linux.c
+        src/detection/displayserver/displayserver_nosupport.c
+        src/detection/font/font_nosupport.c
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/gtk.c
+        src/detection/host/host_android.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_nosupport.c
+        src/detection/memory/memory_linux.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_android.c
+        src/detection/packages/packages_linux.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/qt.c
+        src/detection/swap/swap_linux.c
+        src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_android.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_linux.c
+        src/detection/users/users_linux.c
+        src/detection/wmtheme/wmtheme_nosupport.c
+    )
+elseif(BSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/common/sysctl.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/cpu/cpu_bsd.c
+        src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/disk/disk_bsd.c
+        src/detection/host/host_bsd.c
+        src/detection/localip/localip_linux.c
+        src/detection/memory/memory_bsd.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_bsd.c
+        src/detection/swap/swap_bsd.c
+        src/detection/temps/temps_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_bsd.c
+        src/detection/users/users_linux.c
+    )
+elseif(APPLE)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/common/sysctl.c
+        src/detection/battery/battery_apple.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/cpu/cpu_apple.c
+        src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/disk/disk_apple.m
+        src/detection/disk/disk_bsd.c
+        src/detection/displayserver/displayserver_apple.c
+        src/detection/font/font_apple.m
+        src/detection/gpu/gpu_apple.c
+        src/detection/host/host_apple.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_apple.m
+        src/detection/memory/memory_apple.c
+        src/detection/opengl/opengl_apple.c
+        src/detection/os/os_apple.m
+        src/detection/packages/packages_apple.c
+        src/detection/poweradapter/poweradapter_apple.c
+        src/detection/processes/processes_bsd.c
+        src/detection/swap/swap_apple.c
+        src/detection/temps/temps_apple.c
+        src/detection/terminalfont/terminalfont_apple.m
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_bsd.c
+        src/detection/users/users_linux.c
+        src/detection/wmtheme/wmtheme_apple.m
+        src/util/apple/cf_helpers.c
+        src/util/apple/osascript.m
+    )
+elseif(WIN32)
+    list(APPEND LIBFASTFETCH_SRC
         src/common/networking_windows.c
-        src/detection/host/host_windows.cpp
+        src/common/processing_windows.c
+        src/detection/battery/battery_windows.cpp
         src/detection/bios/bios_windows.cpp
         src/detection/board/board_windows.cpp
         src/detection/cpu/cpu_windows.cpp
-        src/detection/gpu/gpu_windows.cpp
-        src/detection/battery/battery_windows.cpp
-        src/detection/displayserver/displayserver_windows.c
-        src/detection/wmtheme/wmtheme_windows.c
-        src/detection/opengl/opengl_windows.c
-        src/detection/users/users_windows.cpp
-        src/detection/os/os_windows.cpp
-        src/detection/processes/processes_windows.cpp
-        src/detection/disk/disk_windows.c
-        src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
-        src/detection/memory/memory_windows.cpp
-        src/detection/swap/swap_windows.cpp
+        src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/disk/disk_windows.c
+        src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.cpp
-        src/detection/terminalfont/terminalfont_windows.c
+        src/detection/gpu/gpu_windows.cpp
+        src/detection/host/host_windows.cpp
         src/detection/localip/localip_windows.c
-        src/detection/uptime/uptime_windows.c
+        src/detection/media/media_nosupport.c
+        src/detection/memory/memory_windows.cpp
+        src/detection/opengl/opengl_windows.c
+        src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_windows.cpp
+        src/detection/swap/swap_windows.cpp
+        src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
-        src/util/windows/wmi.cpp
+        src/detection/uptime/uptime_windows.c
+        src/detection/users/users_windows.cpp
+        src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
         src/util/windows/pwd.c
         src/util/windows/utsname.c
-
-        src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/media/media_nosupport.c
-    )
-endif()
-
-if(APPLE)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpuUsage/cpuUsage_apple.c
-        src/util/apple/cf_helpers.c
-        src/util/apple/osascript.m
-        src/detection/host/host_apple.c
-        src/detection/os/os_apple.m
-        src/detection/cpu/cpu_apple.c
-        src/detection/gpu/gpu_apple.c
-        src/detection/battery/battery_apple.c
-        src/detection/poweradapter/poweradapter_apple.c
-        src/detection/memory/memory_apple.c
-        src/detection/swap/swap_apple.c
-        src/detection/displayserver/displayserver_apple.c
-        src/detection/terminalfont/terminalfont_apple.m
-        src/detection/media/media_apple.m
-        src/detection/disk/disk_apple.m
-        src/detection/wmtheme/wmtheme_apple.m
-        src/detection/temps/temps_apple.c
-        src/detection/font/font_apple.m
-        src/detection/opengl/opengl_apple.c
-        src/detection/packages/packages_apple.c
-
-        src/detection/bios/bios_nosupport.c
-        src/detection/board/board_nosupport.c
-    )
-endif()
-
-if(BSD)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpu/cpu_bsd.c
-        src/detection/cpuUsage/cpuUsage_bsd.c
-        src/detection/memory/memory_bsd.c
-        src/detection/swap/swap_bsd.c
-        src/detection/host/host_bsd.c
-
-        src/detection/battery/battery_nosupport.c
-        src/detection/bios/bios_nosupport.c
-        src/detection/board/board_nosupport.c
-    )
-endif()
-
-if(ANDROID)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_android.c
-        src/detection/os/os_android.c
-        src/detection/terminalfont/terminalfont_android.c
-
-        src/detection/bios/bios_nosupport.c
-        src/detection/board/board_nosupport.c
-        src/detection/displayserver/displayserver_nosupport.c
-        src/detection/battery/battery_nosupport.c
-        src/detection/gpu/gpu_nosupport.c
-        src/detection/font/font_nosupport.c
-        src/detection/media/media_nosupport.c
-        src/detection/wmtheme/wmtheme_nosupport.c
+        src/util/windows/wmi.cpp
     )
 endif()
 
