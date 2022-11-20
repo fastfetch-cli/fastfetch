@@ -334,12 +334,9 @@ static void resetConsole()
 #ifdef _WIN32
 BOOL WINAPI consoleHandler(DWORD signal)
 {
-    if(signal == CTRL_C_EVENT)
-    {
+    FF_UNUSED(signal);
         resetConsole();
-        return TRUE;
-    }
-    return false;
+    exit(0);
 }
 #else
 static void exitSignalHandler(int signal)
@@ -360,6 +357,11 @@ void ffStart(FFinstance* instance)
 
     #ifdef _WIN32
     SetConsoleCtrlHandler(consoleHandler, TRUE);
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    GetConsoleMode(hStdout, &mode);
+    SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    // SetConsoleOutputCP(CP_UTF8);
     #else
     struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);

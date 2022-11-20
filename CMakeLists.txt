@@ -7,6 +7,8 @@ project(fastfetch
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
 )
 
+set(PROJECT_LICENSE "MIT license")
+
 ###################
 # Target Platform #
 ###################
@@ -577,6 +579,26 @@ add_executable(flashfetch
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+if(WIN32)
+    if(PROJECT_VERSION_TWEAK)
+        string(REGEX MATCH "[0-9]+" PROJECT_VERSION_TWEAK_NUM "${PROJECT_VERSION_TWEAK}")
+    else()
+        set(PROJECT_VERSION_TWEAK_NUM "0")
+    endif()
+
+    set(TARGET_NAME fastfetch)
+    configure_file(src/util/windows/version.rc.in version.fastfetch.rc)
+    target_sources(fastfetch
+        PRIVATE version.fastfetch.rc
+    )
+
+    set(TARGET_NAME flashfetch)
+    configure_file(src/util/windows/version.rc.in version.flashfetch.rc)
+    target_sources(flashfetch
+        PRIVATE version.flashfetch.rc
+    )
+endif()
 
 ###################
 # Testing targets #

@@ -23,12 +23,15 @@ struct FFWmiRecord
         if(!ok) obj = nullptr;
     }
     FFWmiRecord(const FFWmiRecord&) = delete;
-    FFWmiRecord(FFWmiRecord&& other) {
-        obj = other.obj;
-        other.obj = nullptr;
-    }
+    FFWmiRecord(FFWmiRecord&& other) { *this = (FFWmiRecord&&)other; }
     ~FFWmiRecord() { if(obj) obj->Release(); }
     explicit operator bool() { return !!obj; }
+    FFWmiRecord& operator =(FFWmiRecord&& other) {
+        if(obj) obj->Release();
+        obj = other.obj;
+        other.obj = nullptr;
+        return *this;
+    }
 
     bool getString(const wchar_t* key, FFstrbuf* strbuf);
     bool getSigned(const wchar_t* key, int64_t* integer);
@@ -43,13 +46,16 @@ struct FFWmiQuery
     FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error = nullptr);
     explicit FFWmiQuery(IEnumWbemClassObject* pEnumerator): pEnumerator(pEnumerator) {}
     FFWmiQuery(const FFWmiQuery& other) = delete;
-    FFWmiQuery(FFWmiQuery&& other) {
-        pEnumerator = other.pEnumerator;
-        other.pEnumerator = nullptr;
-    }
+    FFWmiQuery(FFWmiQuery&& other) { *this = (FFWmiQuery&&)other; }
     ~FFWmiQuery() { if(pEnumerator) pEnumerator->Release(); }
 
     explicit operator bool() { return !!pEnumerator; }
+    FFWmiQuery& operator =(FFWmiQuery&& other) {
+        if(pEnumerator) pEnumerator->Release();
+        pEnumerator = other.pEnumerator;
+        other.pEnumerator = nullptr;
+        return *this;
+    }
 
     FFWmiRecord next() {
         FFWmiRecord result(pEnumerator);

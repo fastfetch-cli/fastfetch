@@ -29,7 +29,7 @@
         static inline void ffThreadMutexLock(FFThreadMutex* mutex) { pthread_mutex_lock(mutex); }
         static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) { pthread_mutex_unlock(mutex); }
         static inline FFThreadType ffThreadCreate(void* (* func)(void*), void* data) {
-            FFThreadType newThread = NULL;
+            FFThreadType newThread = 0;
             pthread_create(&newThread, NULL, func, data);
             return newThread;
         }

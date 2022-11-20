@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "detection/host/host.h"
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
@@ -180,10 +179,17 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(
         result->terminalProcessName.length > 0 &&
         !ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "login") &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(login)") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "systemd") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "init") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(init)") != 0 &&
+        !ffStrbufIgnCaseEqualS(&result->terminalProcessName, "(login)") &&
+
+        #ifdef __APPLE__
+        !ffStrbufIgnCaseEqualS(&result->terminalProcessName, "launchd") &&
+        !ffStrbufIgnCaseEqualS(&result->terminalProcessName, "stable") && //for WarpTerminal
+        #else
+        !ffStrbufIgnCaseEqualS(&result->terminalProcessName, "systemd") &&
+        !ffStrbufIgnCaseEqualS(&result->terminalProcessName, "init") &&
+        !ffStrbufIgnCaseEqualS(&result->terminalProcessName, "(init)") &&
+        #endif
+
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
     ) return;
 
@@ -193,11 +199,13 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(getenv("SSH_CONNECTION") != NULL)
         term = getenv("SSH_TTY");
 
+    #ifdef __linux__
     //Windows Terminal
     if(!ffStrSet(term) && (
         getenv("WT_SESSION") != NULL ||
         getenv("WT_PROFILE_ID") != NULL
     )) term = "Windows Terminal";
+    #endif
 
     //Alacritty
     if(!ffStrSet(term) && (
@@ -230,10 +238,8 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(!ffStrSet(term))
     {
         //We are in WSL but not in Windows Terminal
-        const FFHostResult* host = ffDetectHost();
-        if(ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_WSL) == 0 ||
-            ffStrbufCompS(&host->productName, FF_HOST_PRODUCT_NAME_MSYS) == 0) //TODO better WSL or MSYS detection
-        term = "conhost";
+        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
+            term = "conhost";
     }
     #endif
 
@@ -365,6 +371,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.terminalPrettyName, "iTerm");
     else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
         ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
+        ffStrbufInitS(&result.terminalPrettyName, "Warp");
     else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else

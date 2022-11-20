@@ -27,20 +27,22 @@ static int detectVersion(struct utsname *name)
 
     DWORD bufSize;
 
-    DWORD currentMajorVersionNumber;
-    bufSize = sizeof(currentMajorVersionNumber);
-    if(RegGetValueA(hKey, NULL, "CurrentMajorVersionNumber", RRF_RT_REG_DWORD, NULL, &currentMajorVersionNumber, &bufSize) != ERROR_SUCCESS)
-    {
-        RegCloseKey(hKey);
-        return 1;
-    }
+    char currentVersion[32];
 
-    DWORD currentMinorVersionNumber;
-    bufSize = sizeof(currentMinorVersionNumber);
-    if(RegGetValueA(hKey, NULL, "CurrentMinorVersionNumber", RRF_RT_REG_DWORD, NULL, &currentMinorVersionNumber, &bufSize) != ERROR_SUCCESS)
     {
-        RegCloseKey(hKey);
-        return 1;
+        DWORD currentMajorVersionNumber;
+        DWORD currentMinorVersionNumber;
+        bufSize = sizeof(currentMajorVersionNumber);
+        if(RegGetValueW(hKey, NULL, L"CurrentMajorVersionNumber", RRF_RT_REG_DWORD, NULL, &currentMajorVersionNumber, &bufSize) == ERROR_SUCCESS &&
+            RegGetValueW(hKey, NULL, L"CurrentMinorVersionNumber", RRF_RT_REG_DWORD, NULL, &currentMinorVersionNumber, &bufSize) == ERROR_SUCCESS
+        )
+            snprintf(currentVersion, sizeof(currentVersion), "%u.%u", (unsigned)currentMajorVersionNumber, (unsigned)currentMinorVersionNumber);
+        else
+        {
+            bufSize = sizeof(currentVersion);
+            if(RegGetValueA(hKey, NULL, "CurrentVersion", RRF_RT_REG_SZ, NULL, currentVersion, &bufSize) != ERROR_SUCCESS)
+                strcpy(currentVersion, "0.0");
+        }
     }
 
     char currentBuildNumber[32];
@@ -53,7 +55,7 @@ static int detectVersion(struct utsname *name)
     if(RegGetValueA(hKey, NULL, "UBR", RRF_RT_REG_DWORD, NULL, &ubr, &bufSize) != ERROR_SUCCESS || bufSize != sizeof(ubr))
         ubr = 0;
 
-    snprintf(name->release, sizeof(name->release), "%u.%u.%s.%u", (unsigned)currentMajorVersionNumber, (unsigned)currentMinorVersionNumber, currentBuildNumber, (unsigned)ubr);
+    snprintf(name->release, sizeof(name->release), "%s.%s.%u", currentVersion, currentBuildNumber, (unsigned)ubr);
 
     bufSize = sizeof(name->version);
     RegGetValueA(hKey, NULL, "DisplayVersion", RRF_RT_REG_SZ, NULL, name->version, &bufSize);

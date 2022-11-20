@@ -189,6 +189,8 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetS(&result->terminalPrettyName, "Visual Studio Code");
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
+    else if(ffStrbufStartsWithIgnCaseS(&result->terminalPrettyName, "ConEmuC"))
+        ffStrbufSetS(&result->terminalPrettyName, "ConEmu");
 
     return ppid;
 }

@@ -5,9 +5,6 @@
 
 #include "fastfetch.h"
 
-#define FF_HOST_PRODUCT_NAME_WSL "Windows Subsystem for Linux"
-#define FF_HOST_PRODUCT_NAME_MSYS "Windows on MSYS"
-
 typedef struct FFHostResult
 {
     FFstrbuf productFamily;

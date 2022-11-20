@@ -22,7 +22,7 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
                                        error:&error];
     if(error)
     {
-        ffStrbufAppendS(&terminalFont->error, [error localizedDescription].UTF8String);
+        ffStrbufAppendS(&terminalFont->error, error.localizedDescription.UTF8String);
         return;
     }
 
@@ -46,25 +46,42 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
 
 static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
-    ffOsascript("tell application \"Terminal\" to font name of window frontmost", &fontName);
+    FF_STRBUF_AUTO_DESTROY font;
+    ffStrbufInit(&font);
+    ffOsascript("tell application \"Terminal\" to font name of window frontmost & \" \" & font size of window frontmost", &font);
 
-    if(fontName.length == 0)
+    if(font.length == 0)
     {
         ffStrbufAppendS(&terminalFont->error, "executing osascript failed");
-        ffStrbufDestroy(&fontName);
         return;
     }
 
-    FFstrbuf fontSize;
-    ffStrbufInit(&fontSize);
-    ffOsascript("tell application \"Terminal\" to font size of window frontmost", &fontSize);
+    ffFontInitWithSpace(&terminalFont->font, font.chars);
+}
 
-    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+static void detectWarpTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
+    NSError* error;
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/dev.warp.Warp-Stable.plist", instance->state.passwd->pw_dir];
+    NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
+                                       error:&error];
+    if(error)
+    {
+        ffStrbufAppendS(&terminalFont->error, error.localizedDescription.UTF8String);
+        return;
+    }
 
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
+    NSString* fontName = [dict valueForKey:@"FontName"];
+    if(!fontName)
+        fontName = @"Hack";
+    else
+        fontName = [fontName stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
+
+    NSString* fontSize = [dict valueForKey:@"FontSize"];
+    if(!fontSize)
+        fontSize = @"13";
+
+    ffFontInitValues(&terminalFont->font, fontName.UTF8String, fontSize.UTF8String);
 }
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
@@ -73,4 +90,6 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectIterm2(instance, terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Apple_Terminal") == 0)
         detectAppleTerminal(terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WarpTerminal") == 0)
+        detectWarpTerminal(instance, terminalFont);
 }

@@ -7,7 +7,7 @@
 
 static double detectBatteryTemp()
 {
-    FFlist temps;
+    FF_LIST_AUTO_DESTROY temps;
     ffListInit(&temps, sizeof(FFTempValue));
 
     ffDetectCoreTemps(FF_TEMP_BATTERY, &temps);
@@ -25,7 +25,6 @@ static double detectBatteryTemp()
         ffStrbufDestroy(&tempValue->deviceClass);
     }
     result /= temps.length;
-    ffListDestroy(&temps);
     return result;
 }
 

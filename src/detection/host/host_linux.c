@@ -1,5 +1,6 @@
 #include "host.h"
 #include "common/io.h"
+#include "common/processing.h"
 
 #include <stdlib.h>
 
@@ -94,6 +95,27 @@ void ffDetectHostImpl(FFHostResult* host)
     {
         //On WSL, the real host can't be detected. Instead use WSL as host.
         if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
-            ffStrbufAppendS(&host->productName, FF_HOST_PRODUCT_NAME_WSL);
+        {
+            ffStrbufAppendS(&host->productName, "Windows Subsystem for Linux");
+
+            FFstrbuf wslVer; //Wide charactors
+            ffStrbufInit(&wslVer);
+            if(!ffProcessAppendStdOut(&wslVer, (char* const[]){
+                "wsl.exe",
+                "--version",
+                NULL
+            }) && wslVer.length > 0)
+            {
+                ffStrbufSubstrBeforeFirstC(&wslVer, '\r'); //CRLF
+                ffStrbufSubstrAfterLastC(&wslVer, ' ');
+                ffStrbufAppendS(&host->productName, " (");
+                for(uint32_t i = 0; i < wslVer.length; ++i) {
+                    if(wslVer.chars[i]) //don't append \0
+                        ffStrbufAppendC(&host->productName, wslVer.chars[i]);
+                }
+                ffStrbufAppendC(&host->productName, ')');
+            }
+            ffStrbufDestroy(&wslVer);
+        }
     }
 }

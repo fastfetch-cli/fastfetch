@@ -15,7 +15,7 @@ static double getFrequency(const char* propName)
 
 static double detectCpuTemp(const FFstrbuf* cpuName)
 {
-    FFlist temps;
+    FF_LIST_AUTO_DESTROY temps;
     ffListInit(&temps, sizeof(FFTempValue));
 
     if(ffStrbufStartsWithS(cpuName, "Apple M1"))
@@ -38,7 +38,6 @@ static double detectCpuTemp(const FFstrbuf* cpuName)
         ffStrbufDestroy(&tempValue->deviceClass);
     }
     result /= temps.length;
-    ffListDestroy(&temps);
     return result;
 }
 
