@@ -422,7 +422,7 @@ elseif(WIN32)
         src/common/networking_windows.c
         src/common/processing_windows.c
         src/detection/battery/battery_windows.cpp
-        src/detection/bios/bios_windows.cpp
+        src/detection/bios/bios_windows.c
         src/detection/board/board_windows.cpp
         src/detection/cpu/cpu_windows.cpp
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
