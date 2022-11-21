@@ -10,7 +10,7 @@ extern "C" {
 
 #include <chrono>
 
-#ifdef FF_USE_WIN_FAST_PPID_DETECTION
+#ifdef FF_USE_WIN_NTAPI
 
 #include <winternl.h>
 
