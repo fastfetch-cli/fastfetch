@@ -1,60 +1,31 @@
 #include "fastfetch.h"
 #include "wmtheme.h"
-
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
-
-static inline void wrapRegCloseKey(HKEY* phKey)
-{
-    if(*phKey)
-        RegCloseKey(*phKey);
-}
+#include "util/windows/register.h"
 
 bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
 {
     FF_UNUSED(instance);
 
-    HKEY __attribute__((__cleanup__(wrapRegCloseKey))) hKey = NULL;
-    if(RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL))
     {
-        int SystemUsesLightTheme = 1;
-        DWORD bufSize = sizeof(SystemUsesLightTheme);
-
-        if(RegGetValueW(hKey, NULL, L"SystemUsesLightTheme", RRF_RT_DWORD, NULL, &SystemUsesLightTheme, &bufSize) != ERROR_SUCCESS)
-        {
-            ffStrbufAppendS(themeOrError, "RegGetValueW(SystemUsesLightTheme) failed");
+        uint32_t SystemUsesLightTheme = 1;
+        if(!ffRegReadUint(hKey, "SystemUsesLightTheme", &SystemUsesLightTheme, themeOrError))
             return false;
-        }
 
-        int AppsUsesLightTheme = 1;
-        bufSize = sizeof(AppsUsesLightTheme);
-        if(RegGetValueW(hKey, NULL, L"AppsUseLightTheme", RRF_RT_DWORD, NULL, &AppsUsesLightTheme, &bufSize) != ERROR_SUCCESS)
-        {
-            ffStrbufAppendS(themeOrError, "RegGetValueW(AppsUseLightTheme) failed");
+        uint32_t AppsUsesLightTheme = 1;
+        if(!ffRegReadUint(hKey, "AppsUseLightTheme", &AppsUsesLightTheme, themeOrError))
             return false;
-        }
 
         ffStrbufAppendF(themeOrError, "System - %s, Apps - %s", SystemUsesLightTheme ? "Light" : "Dark", AppsUsesLightTheme ? "Light" : "Dark");
 
         return true;
     }
-    else if(RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+    else if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL))
     {
-        DWORD length = 0;
-        if(RegGetValueA(hKey, NULL, "CurrentTheme", RRF_RT_REG_SZ, NULL, NULL, &length) != ERROR_SUCCESS)
-        {
-            ffStrbufAppendS(themeOrError, "RegGetValueA(CurrentTheme, NULL) failed");
+        if(!ffRegReadStrbuf(hKey, "CurrentTheme", themeOrError, themeOrError))
             return false;
-        }
 
-        ffStrbufEnsureFree(themeOrError, length);
-        if(RegGetValueA(hKey, NULL, "CurrentTheme", RRF_RT_REG_SZ, NULL, themeOrError->chars, &length) != ERROR_SUCCESS)
-        {
-            ffStrbufAppendS(themeOrError, "RegGetValueA(CurrentTheme) failed");
-            return false;
-        }
-
-        themeOrError->length = length;
         ffStrbufSubstrBeforeLastC(themeOrError, '.');
         ffStrbufSubstrAfterLastC(themeOrError, '\\');
         if (isalpha(themeOrError->chars[0]))
