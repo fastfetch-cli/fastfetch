@@ -449,6 +449,7 @@ elseif(WIN32)
         src/util/windows/getline.c
         src/util/windows/pwd.c
         src/util/windows/register.c
+        src/util/windows/unicode.c
         src/util/windows/utsname.c
         src/util/windows/wmi.cpp
     )
@@ -546,6 +547,7 @@ elseif(WIN32)
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
         PRIVATE "version"
+        PRIVATE "setupapi"
     )
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)

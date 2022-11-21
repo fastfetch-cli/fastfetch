@@ -1,5 +1,6 @@
 extern "C" {
 #include "os.h"
+#include "util/windows/unicode.h"
 }
 #include "util/windows/wmi.hpp"
 
@@ -36,11 +37,7 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
             return "GetProcAddress(BrandingFormatString) failed";
 
         const wchar_t* rawName = BrandingFormatString(L"%WINDOWS_LONG%");
-        int size_needed = WideCharToMultiByte(CP_UTF8, 0, rawName, -1, nullptr, 0, nullptr, nullptr);
-        ffStrbufEnsureFree(osName, (uint32_t)size_needed);
-        WideCharToMultiByte(CP_UTF8, 0, rawName, -1, osName->chars, size_needed, nullptr, nullptr);
-        osName->length = (uint32_t)size_needed;
-        osName->chars[size_needed] = '\0';
+        ffWcharToUtf8(rawName, osName);
         GlobalFree((HGLOBAL)rawName);
         return NULL;
     }
