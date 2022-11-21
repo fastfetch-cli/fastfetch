@@ -35,8 +35,7 @@ void ffPrintHost(FFinstance* instance)
 
     if(host->productVersion.length > 0)
     {
-        ffStrbufAppendC(&output, ' ');
-        ffStrbufAppend(&output, &host->productVersion);
+        ffStrbufAppendF(&output, " (%s)", host->productVersion.chars);
     }
 
     ffPrintAndWriteToCache(instance, FF_HOST_MODULE_NAME, &instance->config.host, &output, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {

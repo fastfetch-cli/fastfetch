@@ -431,7 +431,7 @@ elseif(WIN32)
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.cpp
         src/detection/gpu/gpu_windows.cpp
-        src/detection/host/host_windows.cpp
+        src/detection/host/host_windows.c
         src/detection/localip/localip_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
