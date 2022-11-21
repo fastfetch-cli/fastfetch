@@ -434,13 +434,13 @@ elseif(WIN32)
         src/detection/host/host_windows.cpp
         src/detection/localip/localip_windows.c
         src/detection/media/media_nosupport.c
-        src/detection/memory/memory_windows.cpp
+        src/detection/memory/memory_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.cpp
-        src/detection/swap/swap_windows.cpp
+        src/detection/swap/swap_windows.c
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/uptime/uptime_windows.c
