@@ -421,7 +421,7 @@ elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/networking_windows.c
         src/common/processing_windows.c
-        src/detection/battery/battery_windows.cpp
+        src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
         src/detection/cpu/cpu_windows.c
