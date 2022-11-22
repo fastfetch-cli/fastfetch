@@ -67,6 +67,7 @@ cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
 cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
+cmake_dependent_option(USE_WIN_GPU_DXGI "Use DXGI to detect GPUs instead of WMI. Faster, but may ignore GPUs that only support DX9" ON "WIN32" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -548,9 +549,13 @@ elseif(WIN32)
         PRIVATE "ntdll"
         PRIVATE "version"
         PRIVATE "setupapi"
+        PRIVATE "dxgi"
     )
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
+    endif()
+    if(USE_WIN_GPU_DXGI)
+        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_GPU_DXGI)
     endif()
 endif()
 

@@ -1,10 +1,6 @@
 #include "gpu.h"
 #include "detection/vulkan.h"
 
-#define FF_GPU_VENDOR_NAME_AMD "AMD"
-#define FF_GPU_VENDOR_NAME_INTEL "Intel"
-#define FF_GPU_VENDOR_NAME_NVIDIA "NVIDIA"
-
 #ifdef FF_HAVE_LIBPCI
 #include "common/library.h"
 #include "common/properties.h"
