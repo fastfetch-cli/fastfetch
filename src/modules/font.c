@@ -45,9 +45,14 @@ static void printFont(const FFFontResult* font)
 
 static void printFont(const FFFontResult* font)
 {
-    if(font->fonts[0].length > 0)
+    const char* types[] = { "Caption", "Menu", "Message", "Status" };
+    for(uint32_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
     {
-        printf("%s [Desktop]", font->fonts[0].chars);
+        if(font->fonts[i].length > 0)
+        {
+            printf("%s [%s]", font->fonts[i].chars, types[i]);
+            break;
+        }
     }
 }
 
