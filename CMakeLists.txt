@@ -430,7 +430,6 @@ elseif(WIN32)
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
         src/detection/cpu/cpu_windows.c
-        src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
