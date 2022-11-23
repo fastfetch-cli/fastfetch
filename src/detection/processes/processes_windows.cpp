@@ -1,15 +1,11 @@
 extern "C" {
 #include "processes.h"
+#include "util/mallocHelper.h"
 }
 
 #ifdef FF_USE_WIN_NTAPI
 
 #include <winternl.h>
-
-static inline void wrapFree(SYSTEM_PROCESS_INFORMATION** ptr)
-{
-    free(*ptr);
-}
 
 uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
 {
@@ -23,7 +19,7 @@ uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
     }
     size += sizeof(SystemProcessInformation) * 5; //What if new processes are created during two syscalls?
 
-    SYSTEM_PROCESS_INFORMATION* __attribute__((__cleanup__(wrapFree))) pstart = (SYSTEM_PROCESS_INFORMATION*)malloc(size);
+    SYSTEM_PROCESS_INFORMATION* FF_AUTO_FREE pstart = (SYSTEM_PROCESS_INFORMATION*)malloc(size);
     if(!pstart)
     {
         ffStrbufAppendF(error, "malloc(%u) failed", (unsigned)size);

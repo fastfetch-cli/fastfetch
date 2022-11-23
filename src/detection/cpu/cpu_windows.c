@@ -1,10 +1,6 @@
 #include "cpu.h"
 #include "util/windows/register.h"
-
-static inline void wrapFree(SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX** ptr)
-{
-    free(*ptr);
-}
+#include "util/mallocHelper.h"
 
 void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
 {
@@ -23,7 +19,7 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
     {
         DWORD length = 0;
         GetLogicalProcessorInformationEx(RelationProcessorCore, NULL, &length);
-        SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* __attribute__((__cleanup__(wrapFree)))
+        SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
             pLogicalInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
 
         if(pLogicalInfo && GetLogicalProcessorInformationEx(RelationProcessorCore, pLogicalInfo, &length))

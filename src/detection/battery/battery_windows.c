@@ -1,14 +1,11 @@
 #include "battery.h"
 #include "util/windows/unicode.h"
+#include "util/mallocHelper.h"
 
 #include <setupapi.h>
 #include <batclass.h>
 #include <devguid.h>
 
-static inline void wrapFree(SP_DEVICE_INTERFACE_DETAIL_DATA_W** ptr)
-{
-    free(*ptr);
-}
 static inline void wrapCloseHandle(HANDLE* handle)
 {
     if(*handle)
@@ -38,7 +35,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
 
         DWORD cbRequired = 0;
         SetupDiGetDeviceInterfaceDetailW(hdev, &did, NULL, 0, &cbRequired, NULL); //Fail with not enough buffer
-        SP_DEVICE_INTERFACE_DETAIL_DATA_W* __attribute__((__cleanup__(wrapFree))) pdidd = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)malloc(cbRequired);
+        SP_DEVICE_INTERFACE_DETAIL_DATA_W* FF_AUTO_FREE pdidd = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)malloc(cbRequired);
         if(!pdidd)
             break; //Out of memory
 
