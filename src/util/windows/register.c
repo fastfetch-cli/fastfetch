@@ -34,13 +34,13 @@ bool ffRegReadStrbuf(HKEY hKey, const char* valueName, FFstrbuf* result, FFstrbu
     DWORD bufSize; //with tailing '\0'
     if(RegGetValueA(hKey, NULL, valueName, RRF_RT_REG_SZ, NULL, NULL, &bufSize) != ERROR_SUCCESS)
     {
-        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, NULL, RRF_RT_REG_SZ) failed", valueName);
+        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, NULL, RRF_RT_REG_SZ) failed", valueName ? valueName : "(default)");
         return false;
     }
     ffStrbufEnsureFree(result, bufSize - 1);
     if(RegGetValueA(hKey, NULL, valueName, RRF_RT_REG_SZ, NULL, result->chars, &bufSize) != ERROR_SUCCESS)
     {
-        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_REG_SZ) failed", valueName);
+        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_REG_SZ) failed", valueName ? valueName : "(default)");
         return false;
     }
     result->length = bufSize - 1;
@@ -52,7 +52,7 @@ bool ffRegReadUint(HKEY hKey, const char* valueName, uint32_t* result, FFstrbuf*
     DWORD bufSize = sizeof(*result);
     if(RegGetValueA(hKey, NULL, valueName, RRF_RT_DWORD, NULL, result, &bufSize) != ERROR_SUCCESS)
     {
-        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_DWORD) failed", valueName);
+        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_DWORD) failed", valueName ? valueName : "(default)");
         return false;
     }
     return true;

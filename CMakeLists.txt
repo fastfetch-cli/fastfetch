@@ -301,6 +301,7 @@ if(LINUX)
         src/detection/board/board_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
@@ -336,6 +337,7 @@ elseif(ANDROID)
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/cpu/cpu_linux.c
+        src/detection/cursor/cursor_nosupport.c
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/displayserver_nosupport.c
@@ -370,6 +372,7 @@ elseif(BSD)
         src/detection/board/board_nosupport.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/host/host_bsd.c
         src/detection/localip/localip_linux.c
@@ -394,6 +397,7 @@ elseif(APPLE)
         src/detection/board/board_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/cursor/cursor_nosupport.c
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/displayserver_apple.c
@@ -428,6 +432,7 @@ elseif(WIN32)
         src/detection/cpu/cpu_windows.c
         src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
         src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.cpp
