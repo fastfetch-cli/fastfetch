@@ -16,8 +16,8 @@ static inline void wrapRegCloseKey(HKEY* phKey)
 
 #define FF_HKEY_AUTO_DESTROY HKEY __attribute__((__cleanup__(wrapRegCloseKey)))
 
-bool ffRegOpenKeyForRead(HKEY hKey, const char* lpSubKey, HKEY* result, FFstrbuf* error);
-bool ffRegReadStrbuf(HKEY hKey, const char* valueName, FFstrbuf* result, FFstrbuf* error);
-bool ffRegReadUint(HKEY hKey, const char* valueName, uint32_t* result, FFstrbuf* error);
+bool ffRegOpenKeyForRead(HKEY hKey, const wchar_t* subKeyW, HKEY* result, FFstrbuf* error);
+bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFstrbuf* error);
+bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error);
 
 #endif

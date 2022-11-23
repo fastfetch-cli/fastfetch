@@ -7,23 +7,23 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
     FF_UNUSED(instance);
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL))
+    if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL))
     {
         uint32_t SystemUsesLightTheme = 1;
-        if(!ffRegReadUint(hKey, "SystemUsesLightTheme", &SystemUsesLightTheme, themeOrError))
+        if(!ffRegReadUint(hKey, L"SystemUsesLightTheme", &SystemUsesLightTheme, themeOrError))
             return false;
 
         uint32_t AppsUsesLightTheme = 1;
-        if(!ffRegReadUint(hKey, "AppsUseLightTheme", &AppsUsesLightTheme, themeOrError))
+        if(!ffRegReadUint(hKey, L"AppsUseLightTheme", &AppsUsesLightTheme, themeOrError))
             return false;
 
         ffStrbufAppendF(themeOrError, "System - %s, Apps - %s", SystemUsesLightTheme ? "Light" : "Dark", AppsUsesLightTheme ? "Light" : "Dark");
 
         return true;
     }
-    else if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL))
+    else if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL))
     {
-        if(!ffRegReadStrbuf(hKey, "CurrentTheme", themeOrError, themeOrError))
+        if(!ffRegReadStrbuf(hKey, L"CurrentTheme", themeOrError, themeOrError))
             return false;
 
         ffStrbufSubstrBeforeLastC(themeOrError, '.');

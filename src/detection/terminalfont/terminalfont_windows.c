@@ -31,16 +31,16 @@ static void detectConhost(const FFinstance* instance, FFTerminalFontResult* term
     //Current font of conhost doesn't seem to be detectable, we detect default font instead
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, "Console", &hKey, &terminalFont->error))
+    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Console", &hKey, &terminalFont->error))
         return;
 
     FF_STRBUF_AUTO_DESTROY fontName;
     ffStrbufInit(&fontName);
-    if(!ffRegReadStrbuf(hKey, "FaceName", &fontName, &terminalFont->error))
+    if(!ffRegReadStrbuf(hKey, L"FaceName", &fontName, &terminalFont->error))
         return;
 
     uint32_t fontSizeNum = 0;
-    if(!ffRegReadUint(hKey, "FontSize", &fontSizeNum, &terminalFont->error))
+    if(!ffRegReadUint(hKey, L"FontSize", &fontSizeNum, &terminalFont->error))
         return;
 
     char fontSize[16];

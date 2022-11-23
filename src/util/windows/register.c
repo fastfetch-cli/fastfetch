@@ -1,4 +1,6 @@
 #include "register.h"
+#include "unicode.h"
+#include "util/mallocHelper.h"
 
 static const char* hKey2Str(HKEY hKey)
 {
@@ -18,41 +20,62 @@ static const char* hKey2Str(HKEY hKey)
     return "UNKNOWN";
 }
 
-bool ffRegOpenKeyForRead(HKEY hKey, const char* lpSubKey, HKEY* result, FFstrbuf* error)
+bool ffRegOpenKeyForRead(HKEY hKey, const wchar_t* subKeyW, HKEY* result, FFstrbuf* error)
 {
-    if(RegOpenKeyExA(hKey, lpSubKey, 0, KEY_READ, result) != ERROR_SUCCESS)
+    if(RegOpenKeyExW(hKey, subKeyW, 0, KEY_READ, result) != ERROR_SUCCESS)
     {
         if(error)
-            ffStrbufAppendF(error, "RegOpenKeyExW(%s\\%s) failed", hKey2Str(hKey), lpSubKey);
+        {
+            FF_STRBUF_AUTO_DESTROY subKeyA = ffStrbufFromWchar(subKeyW);
+            ffStrbufAppendF(error, "RegOpenKeyExW(%s\\%s) failed", hKey2Str(hKey), subKeyA.chars);
+        }
         return false;
     }
     return true;
 }
 
-bool ffRegReadStrbuf(HKEY hKey, const char* valueName, FFstrbuf* result, FFstrbuf* error)
+bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFstrbuf* error)
 {
     DWORD bufSize; //with tailing '\0'
-    if(RegGetValueA(hKey, NULL, valueName, RRF_RT_REG_SZ, NULL, NULL, &bufSize) != ERROR_SUCCESS)
+    if(RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_SZ, NULL, NULL, &bufSize) != ERROR_SUCCESS)
     {
-        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, NULL, RRF_RT_REG_SZ) failed", valueName ? valueName : "(default)");
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufFromWchar(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueA(%s, NULL, RRF_RT_REG_SZ) failed", valueNameA.chars);
+        }
         return false;
     }
-    ffStrbufEnsureFree(result, bufSize - 1);
-    if(RegGetValueA(hKey, NULL, valueName, RRF_RT_REG_SZ, NULL, result->chars, &bufSize) != ERROR_SUCCESS)
+    wchar_t* FF_AUTO_FREE resultW = (wchar_t*)malloc(bufSize);
+    if(RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_SZ, NULL, resultW, &bufSize) != ERROR_SUCCESS)
     {
-        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_REG_SZ) failed", valueName ? valueName : "(default)");
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufFromWchar(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_REG_SZ) failed", valueNameA.chars);
+        }
         return false;
     }
-    result->length = bufSize - 1;
+    ffWcharToUtf8(resultW, result);
     return true;
 }
 
-bool ffRegReadUint(HKEY hKey, const char* valueName, uint32_t* result, FFstrbuf* error)
+bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error)
 {
     DWORD bufSize = sizeof(*result);
-    if(RegGetValueA(hKey, NULL, valueName, RRF_RT_DWORD, NULL, result, &bufSize) != ERROR_SUCCESS)
+    if(RegGetValueW(hKey, NULL, valueNameW, RRF_RT_DWORD, NULL, result, &bufSize) != ERROR_SUCCESS)
     {
-        if(error) ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_DWORD) failed", valueName ? valueName : "(default)");
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufFromWchar(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_DWORD) failed", valueNameA.chars);
+        }
         return false;
     }
     return true;

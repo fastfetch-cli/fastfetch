@@ -11,18 +11,18 @@ void ffDetectBios(FFBiosResult* bios)
     ffStrbufInit(&bios->biosVersion);
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &bios->error))
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &bios->error))
         return;
 
-    if(!ffRegReadStrbuf(hKey, "BIOSVersion", &bios->biosRelease, &bios->error))
+    if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->biosRelease, &bios->error))
         return;
-    ffRegReadStrbuf(hKey, "BIOSVendor", &bios->biosVendor, NULL);
-    ffRegReadStrbuf(hKey, "BIOSReleaseDate", &bios->biosDate, NULL);
+    ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->biosVendor, NULL);
+    ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->biosDate, NULL);
 
     uint32_t major, minor;
     if(
-        ffRegReadUint(hKey, "BiosMajorRelease", &major, NULL) &&
-        ffRegReadUint(hKey, "BiosMinorRelease", &minor, NULL)
+        ffRegReadUint(hKey, L"BiosMajorRelease", &major, NULL) &&
+        ffRegReadUint(hKey, L"BiosMinorRelease", &minor, NULL)
     )
         ffStrbufAppendF(&bios->biosVersion, "%u.%u", (unsigned)major, (unsigned)minor);
 }

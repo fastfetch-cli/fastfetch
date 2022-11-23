@@ -16,12 +16,12 @@ void ffDetectHostImpl(FFHostResult* host)
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
 
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &host->error))
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &host->error))
         return;
 
-    ffRegReadStrbuf(hKey, "SystemProductName", &host->productName, NULL);
-    ffRegReadStrbuf(hKey, "SystemFamily", &host->productFamily, NULL);
-    ffRegReadStrbuf(hKey, "SystemVersion", &host->productVersion, NULL);
-    ffRegReadStrbuf(hKey, "SystemSKU", &host->productSku, NULL);
-    ffRegReadStrbuf(hKey, "SystemManufacturer", &host->sysVendor, NULL);
+    ffRegReadStrbuf(hKey, L"SystemProductName", &host->productName, NULL);
+    ffRegReadStrbuf(hKey, L"SystemFamily", &host->productFamily, NULL);
+    ffRegReadStrbuf(hKey, L"SystemVersion", &host->productVersion, NULL);
+    ffRegReadStrbuf(hKey, L"SystemSKU", &host->productSku, NULL);
+    ffRegReadStrbuf(hKey, L"SystemManufacturer", &host->sysVendor, NULL);
 }

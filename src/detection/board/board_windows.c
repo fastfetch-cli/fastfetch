@@ -11,11 +11,11 @@ void ffDetectBoard(FFBoardResult* board)
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
 
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &board->error))
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &board->error))
         return;
 
-    if(!ffRegReadStrbuf(hKey, "BaseBoardProduct", &board->boardName, &board->error))
+    if(!ffRegReadStrbuf(hKey, L"BaseBoardProduct", &board->boardName, &board->error))
         return;
-    ffRegReadStrbuf(hKey, "BaseBoardManufacturer", &board->boardVendor, NULL);
-    ffRegReadStrbuf(hKey, "BaseBoardVersion", &board->boardVersion, NULL);
+    ffRegReadStrbuf(hKey, L"BaseBoardManufacturer", &board->boardVendor, NULL);
+    ffRegReadStrbuf(hKey, L"BaseBoardVersion", &board->boardVersion, NULL);
 }

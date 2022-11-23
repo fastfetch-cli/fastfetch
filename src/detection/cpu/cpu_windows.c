@@ -39,15 +39,15 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
     cpu->coresLogical = (uint16_t)GetMaximumProcessorCount(ALL_PROCESSOR_GROUPS);
 
     FF_HKEY_AUTO_DESTROY hKey;
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
         return;
 
     {
         uint32_t mhz;
-        if(ffRegReadUint(hKey, "~MHz", &mhz, NULL))
+        if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
             cpu->frequencyMax = mhz / 1000.0;
     }
 
-    ffRegReadStrbuf(hKey, "ProcessorNameString", &cpu->name, NULL);
-    ffRegReadStrbuf(hKey, "VendorIdentifier", &cpu->vendor, NULL);
+    ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
+    ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
 }

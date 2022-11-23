@@ -6,5 +6,6 @@
 #include "fastfetch.h"
 
 void ffWcharToUtf8(const wchar_t* input, FFstrbuf* result);
+FFstrbuf ffStrbufFromWchar(const wchar_t* input);
 
 #endif
