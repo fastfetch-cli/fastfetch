@@ -450,7 +450,7 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/uptime/uptime_windows.c
-        src/detection/users/users_windows.cpp
+        src/detection/users/users_windows.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
         src/util/windows/pwd.c
@@ -555,6 +555,7 @@ elseif(WIN32)
         PRIVATE "version"
         PRIVATE "setupapi"
         PRIVATE "dxgi"
+        PRIVATE "wtsapi32"
     )
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
