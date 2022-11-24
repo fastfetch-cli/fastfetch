@@ -511,6 +511,40 @@ static const FFlogo* getLogoCentOSSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoCRUX()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("CRUX", "crux")
+    FF_LOGO_LINES(
+        "         $1odddd\n"
+        "      oddxkkkxxdoo\n"
+        "     ddcoddxxxdoool\n"
+        "     xdclodod  olol\n"
+        "     xoc  xdd  olol\n"
+        "     xdc  $2k00$1Okdlol\n"
+        "     xxd$2kOKKKOkd$1ldd\n"
+        "     xdco$2xOkdlo$1dldd\n"
+        "     ddc:cl$2lll$1oooodo\n"
+        "   odxxdd$3xkO000kx$1ooxdo\n"
+        "  oxddx$30NMMMMMMWW0o$1dkkxo\n"
+        " oooxd$30WMMMMMMMMMW0o$1dxkx\n"
+        "docldkXW$3MMMMMMMWWN$1Odolco\n"
+        "xx$2dx$1kxxOKN$3WMMWN$10xdoxo::c\n"
+        "$2xOkkO$10oo$3odOW$2WW$1XkdodOxc:l\n"
+        "$2dkkkxkkk$3OKX$2NNNX0Oxx$1xc:cd\n"
+        " $2odxxdx$3xllo$2dddooxx$1dc:ldo\n"
+        "   $2lodd$1dolccc$2ccox$1xoloo\n"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "35", //magenta
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("35");
+    FF_LOGO_COLOR_TITLE("34");
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoCrystalLinux()
 {
     FF_LOGO_INIT
@@ -2251,6 +2285,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoCelOS,
         getLogoCentOS,
         getLogoCentOSSmall,
+        getLogoCRUX,
         getLogoCrystalLinux,
         getLogoDebian,
         getLogoDevuan,
