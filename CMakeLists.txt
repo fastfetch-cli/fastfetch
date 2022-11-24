@@ -343,7 +343,6 @@ elseif(ANDROID)
         src/detection/displayserver/displayserver_nosupport.c
         src/detection/font/font_nosupport.c
         src/detection/gpu/gpu_nosupport.c
-        src/detection/gtk.c
         src/detection/host/host_android.c
         src/detection/localip/localip_linux.c
         src/detection/media/media_nosupport.c
@@ -353,7 +352,6 @@ elseif(ANDROID)
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
-        src/detection/qt.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
@@ -374,18 +372,31 @@ elseif(BSD)
         src/detection/cpuUsage/cpuUsage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/gtk.c
         src/detection/host/host_bsd.c
         src/detection/localip/localip_linux.c
+        src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/opengl/opengl_linux.c
+        src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_bsd.c
+        src/detection/qt.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
