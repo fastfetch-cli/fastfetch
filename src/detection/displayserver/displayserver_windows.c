@@ -39,10 +39,19 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
     const FFOSResult* os = ffDetectOS(instance);
-    if(ffStrbufCompS(&os->version, "11") == 0 || ffStrbufCompS(&os->version, "10") == 0)
-        ffStrbufSetS(&ds->dePrettyName, "Fluent");
-    else if(ffStrbufCompS(&os->version, "8") == 0 || ffStrbufStartsWithS(&os->version, "8."))
-        ffStrbufSetS(&ds->dePrettyName, "Metro");
+    if(
+        ffStrbufEqualS(&os->version, "11") ||
+        ffStrbufEqualS(&os->version, "10") ||
+        ffStrbufEqualS(&os->version, "2022") ||
+        ffStrbufEqualS(&os->version, "2019") ||
+        ffStrbufEqualS(&os->version, "2016")
+    ) ffStrbufSetS(&ds->dePrettyName, "Fluent");
+    else if(
+        ffStrbufEqualS(&os->version, "8") ||
+        ffStrbufEqualS(&os->version, "81.") ||
+        ffStrbufEqualS(&os->version, "2012 R2") ||
+        ffStrbufEqualS(&os->version, "2012")
+    ) ffStrbufSetS(&ds->dePrettyName, "Metro");
     else
         ffStrbufSetS(&ds->dePrettyName, "Aero");
 }
