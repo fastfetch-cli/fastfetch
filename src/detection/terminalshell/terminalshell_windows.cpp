@@ -4,11 +4,8 @@ extern "C" {
 #include "common/thread.h"
 }
 
-#include <inttypes.h>
 #include <processthreadsapi.h>
 #include <wchar.h>
-
-#include <chrono>
 
 #ifdef FF_USE_WIN_NTAPI
 
@@ -59,6 +56,7 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
 #else
 
 #include "util/windows/wmi.hpp"
+#include <inttypes.h>
 
 static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName)
 {
@@ -143,9 +141,9 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "nu"))
         ffStrbufSetS(&result->shellPrettyName, "nushell");
-    else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
+    else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "explorer"))
     {
-        ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer"); // Started without shell
+        ffStrbufSetS(&result->shellPrettyName, "Windows Explorer"); // Started without shell
         return 0;
     }
 
@@ -199,12 +197,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
 {
     if(
         result->terminalProcessName.length > 0 &&
-        !ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "login") &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(login)") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "systemd") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "init") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(init)") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "explorer") != 0
     ) return;
 
     const char* term = nullptr;
