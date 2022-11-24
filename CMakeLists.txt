@@ -32,7 +32,10 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG NOT WIN32)
 find_package(Threads)
 
-find_package(PkgConfig REQUIRED)
+find_package(PkgConfig)
+if(NOT PKG_CONFIG_FOUND)
+    message(WARNING "pkg-config not found, library detection might be limited")
+endif()
 
 include(CheckIncludeFile)
 
@@ -488,20 +491,33 @@ if(HAVE_UTMPX_H)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
 endif()
 
-function(ff_lib_enable VARNAME)
+function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     if(NOT ENABLE_${VARNAME})
         return()
     endif()
 
-    pkg_search_module(${VARNAME} ${ARGN})
+    if(PKG_CONFIG_FOUND)
+        pkg_search_module(${VARNAME} QUIET ${PKGCONFIG_NAMES})
+    endif()
+
     if(NOT ${VARNAME}_FOUND)
-        message(WARNING "Package ${ARGV1} not found, building without support.")
+        find_package(${CMAKE_NAME} QUIET)
+
+        set(${VARNAME}_FOUND ${${CMAKE_NAME}_FOUND})
+        set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
+        set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
+        set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+    endif()
+
+    if(NOT ${VARNAME}_FOUND)
+        message(STATUS "Library: missing: ${VARNAME}")
         return()
     endif()
 
+    message(STATUS "Library: found ${VARNAME}")
+
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
-    target_link_directories(libfastfetch PRIVATE ${${VARNAME}_LIBRARY_DIRS})
 
     foreach(FLAG ${${VARNAME}_CFLAGS_OTHER})
         if(FLAG MATCHES "-D.*")
@@ -511,29 +527,98 @@ function(ff_lib_enable VARNAME)
     endforeach()
 endfunction()
 
-ff_lib_enable(LIBPCI libpci)
-ff_lib_enable(VULKAN vulkan)
-ff_lib_enable(WAYLAND wayland-client)
-ff_lib_enable(XCB_RANDR xcb-randr)
-ff_lib_enable(XCB xcb)
-ff_lib_enable(XRANDR xrandr)
-ff_lib_enable(X11 x11)
-ff_lib_enable(GIO gio-2.0)
-ff_lib_enable(DCONF dconf)
-ff_lib_enable(DBUS dbus-1)
-ff_lib_enable(XFCONF libxfconf-0)
-ff_lib_enable(SQLITE3 sqlite3)
-ff_lib_enable(RPM rpm)
-ff_lib_enable(IMAGEMAGICK7 MagickCore-7.Q16HDRI MagickCore-7.Q16 MagickCore-7 /usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16HDRI.pc /usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16.pc /usr/lib/imagemagick7/pkgconfig/MagickCore-7.pc)
-ff_lib_enable(IMAGEMAGICK6 MagickCore-6.Q16HDRI MagickCore-6.Q16 MagickCore-6 /usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16HDRI.pc /usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16.pc /usr/lib/imagemagick6/pkgconfig/MagickCore-6.pc)
-ff_lib_enable(ZLIB zlib)
-ff_lib_enable(CHAFA chafa>=1.10)
-ff_lib_enable(EGL egl)
-ff_lib_enable(GLX glx)
-ff_lib_enable(OSMESA osmesa)
-ff_lib_enable(OPENCL OpenCL)
-ff_lib_enable(LIBCJSON libcjson)
-ff_lib_enable(FREETYPE freetype2)
+ff_lib_enable(LIBPCI
+    "libpci"
+    "Pci"
+)
+ff_lib_enable(VULKAN
+    "vulkan"
+    "Vulkan"
+)
+ff_lib_enable(WAYLAND
+    "wayland-client"
+    "WaylandClient"
+)
+ff_lib_enable(XCB_RANDR
+    "xcb-randr"
+    "XcbRandr"
+)
+ff_lib_enable(XCB
+    "xcb"
+    "Xcb"
+)
+ff_lib_enable(XRANDR
+    "xrandr"
+    "XRandr"
+)
+ff_lib_enable(X11
+    "x11"
+    "X11"
+)
+ff_lib_enable(GIO
+    "gio-2.0"
+    "GIO"
+)
+ff_lib_enable(DCONF
+    "dconf"
+    "DConf"
+)
+ff_lib_enable(DBUS
+    "dbus-1"
+    "DBus"
+)
+ff_lib_enable(XFCONF
+    "libxfconf-0"
+    "XFConf"
+)
+ff_lib_enable(SQLITE3
+    "sqlite3"
+    "SQLite3"
+)
+ff_lib_enable(RPM
+    "rpm"
+    "RPM"
+)
+ff_lib_enable(IMAGEMAGICK7
+    "MagickCore-7.Q16HDRI;MagickCore-7.Q16;MagickCore-7;/usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16HDRI.pc;/usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16.pc;/usr/lib/imagemagick7/pkgconfig/MagickCore-7.pc"
+    "ImageMagick7"
+)
+ff_lib_enable(IMAGEMAGICK6
+    "MagickCore-6.Q16HDRI;MagickCore-6.Q16;MagickCore-6;/usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16HDRI.pc;/usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16.pc;/usr/lib/imagemagick6/pkgconfig/MagickCore-6.pc"
+    "ImageMagick6"
+)
+ff_lib_enable(ZLIB
+    "zlib"
+    "ZLIB"
+)
+ff_lib_enable(CHAFA
+    "chafa>=1.10"
+    "Chafa"
+)
+ff_lib_enable(EGL
+    "egl"
+    "EGL"
+)
+ff_lib_enable(GLX
+    "glx"
+    "GLX"
+)
+ff_lib_enable(OSMESA
+    "osmesa"
+    "OSMesa"
+)
+ff_lib_enable(OPENCL
+    "OpenCL"
+    "OpenCL"
+)
+ff_lib_enable(LIBCJSON
+    "libcjson"
+    "CJson"
+)
+ff_lib_enable(FREETYPE
+    "freetype2"
+    "FreeType2"
+)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
