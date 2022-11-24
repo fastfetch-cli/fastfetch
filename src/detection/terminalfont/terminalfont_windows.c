@@ -2,9 +2,7 @@
 #include "common/io.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
-
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
+#include "util/windows/register.h"
 
 static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
@@ -26,47 +24,29 @@ static void detectMintty(const FFinstance* instance, FFTerminalFontResult* termi
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-static inline void wrapRegCloseKey(HKEY* phKey)
-{
-    if(*phKey)
-        RegCloseKey(*phKey);
-}
-
 static void detectConhost(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
     FF_UNUSED(instance);
 
     //Current font of conhost doesn't seem to be detectable, we detect default font instead
 
-    HKEY __attribute__((__cleanup__(wrapRegCloseKey))) hKey = NULL;
-    if(RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_READ, &hKey) != ERROR_SUCCESS)
-    {
-        ffStrbufAppendS(&terminalFont->error, "RegOpenKeyExW() failed");
+    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Console", &hKey, &terminalFont->error))
         return;
-    }
 
-    DWORD bufSize;
-
-    char fontName[128];
-    bufSize = sizeof(fontName);
-    if(RegGetValueA(hKey, NULL, "FaceName", RRF_RT_REG_SZ, NULL, fontName, &bufSize) != ERROR_SUCCESS)
-    {
-        ffStrbufAppendS(&terminalFont->error, "RegGetValueA(FaceName) failed");
+    FF_STRBUF_AUTO_DESTROY fontName;
+    ffStrbufInit(&fontName);
+    if(!ffRegReadStrbuf(hKey, L"FaceName", &fontName, &terminalFont->error))
         return;
-    }
 
     uint32_t fontSizeNum = 0;
-    bufSize = sizeof(fontSizeNum);
-    if(RegGetValueW(hKey, NULL, L"FontSize", RRF_RT_DWORD, NULL, &fontSizeNum, &bufSize) != ERROR_SUCCESS)
-    {
-        ffStrbufAppendS(&terminalFont->error, "RegGetValueW(FontSize) failed");
+    if(!ffRegReadUint(hKey, L"FontSize", &fontSizeNum, &terminalFont->error))
         return;
-    }
 
     char fontSize[16];
     _ultoa((unsigned long)(fontSizeNum >> 16), fontSize, 10);
 
-    ffFontInitValues(&terminalFont->font, fontName, fontSize);
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize);
 }
 
 static void detectConEmu(const FFinstance* instance, FFTerminalFontResult* terminalFont)

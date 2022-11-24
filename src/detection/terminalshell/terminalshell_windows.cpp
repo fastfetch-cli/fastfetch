@@ -4,13 +4,11 @@ extern "C" {
 #include "common/thread.h"
 }
 
-#include <inttypes.h>
 #include <processthreadsapi.h>
 #include <wchar.h>
+#include <tlhelp32.h>
 
-#include <chrono>
-
-#ifdef FF_USE_WIN_FAST_PPID_DETECTION
+#ifdef FF_USE_WIN_NTAPI
 
 #include <winternl.h>
 
@@ -59,6 +57,7 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
 #else
 
 #include "util/windows/wmi.hpp"
+#include <inttypes.h>
 
 static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName)
 {
@@ -140,12 +139,33 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "powershell_ise"))
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell ISE");
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "cmd"))
-        ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
+    {
+        ffStrbufClear(&result->shellPrettyName);
+
+        HANDLE snapshot;
+        while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
+
+        if(snapshot)
+        {
+            MODULEENTRY32W module = { .dwSize = sizeof(module) };
+            for(BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module))
+            {
+                if(wcsncmp(module.szModule, L"clink_dll_", wcslen(L"clink_dll_")) == 0)
+                {
+                    ffStrbufAppendS(&result->shellPrettyName, "CMD (with Clink)");
+                    break;
+                }
+            }
+            CloseHandle(snapshot);
+        }
+        if(result->shellPrettyName.length == 0)
+            ffStrbufAppendS(&result->shellPrettyName, "Command Prompt");
+    }
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "nu"))
         ffStrbufSetS(&result->shellPrettyName, "nushell");
-    else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
+    else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "explorer"))
     {
-        ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer"); // Started without shell
+        ffStrbufSetS(&result->shellPrettyName, "Windows Explorer"); // Started without shell
         return 0;
     }
 
@@ -199,12 +219,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
 {
     if(
         result->terminalProcessName.length > 0 &&
-        !ffStrbufStartsWithIgnCaseS(&result->terminalProcessName, "login") &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(login)") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "systemd") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "init") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "(init)") != 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "0") != 0
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "explorer") != 0
     ) return;
 
     const char* term = nullptr;

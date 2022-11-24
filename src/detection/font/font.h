@@ -14,7 +14,7 @@ typedef struct FFFontResult
     /**
      * Linux / BSD: QT,      GTK2,  GTK3,        GTK4
      * MacOS:       System,  User,  System Mono, User Mono
-     * Windows:     Desktop, Unset, Unset,       Unset
+     * Windows:     Caption, Menu,  Message,     Status
      * Other:       Unset,   Unset, Unset,       Unset
      */
     FFstrbuf fonts[FF_DETECT_FONT_NUM_FONTS];

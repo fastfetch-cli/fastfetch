@@ -195,7 +195,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
     const char* error = NULL;
 
     #ifdef _WIN32
-    if(terminalExe && terminalExe->length > 0)
+    if(terminalExe && terminalExe->length > 0 && !ffStrbufEqualS(terminalExe, "Windows Terminal"))
     {
         char jsonPath[MAX_PATH + 1];
         if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, jsonPath)))

@@ -66,7 +66,8 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
-cmake_dependent_option(USE_WIN_FAST_PPID_DETECTION "Use internal NTAPI instead of querying WMI to get PPID" ON "WIN32" OFF)
+cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
+cmake_dependent_option(USE_WIN_GPU_DXGI "Use DXGI to detect GPUs instead of WMI. Faster, but may ignore GPUs that only support DX9" ON "WIN32" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -300,6 +301,7 @@ if(LINUX)
         src/detection/board/board_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
@@ -335,12 +337,12 @@ elseif(ANDROID)
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/cpu/cpu_linux.c
+        src/detection/cursor/cursor_nosupport.c
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/displayserver_nosupport.c
         src/detection/font/font_nosupport.c
         src/detection/gpu/gpu_nosupport.c
-        src/detection/gtk.c
         src/detection/host/host_android.c
         src/detection/localip/localip_linux.c
         src/detection/media/media_nosupport.c
@@ -350,7 +352,6 @@ elseif(ANDROID)
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
-        src/detection/qt.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
@@ -369,19 +370,33 @@ elseif(BSD)
         src/detection/board/board_nosupport.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/gtk.c
         src/detection/host/host_bsd.c
         src/detection/localip/localip_linux.c
+        src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/opengl/opengl_linux.c
+        src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_bsd.c
+        src/detection/qt.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -393,6 +408,7 @@ elseif(APPLE)
         src/detection/board/board_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/cursor/cursor_nosupport.c
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/displayserver_apple.c
@@ -421,33 +437,35 @@ elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/networking_windows.c
         src/common/processing_windows.c
-        src/detection/battery/battery_windows.cpp
-        src/detection/bios/bios_windows.cpp
-        src/detection/board/board_windows.cpp
-        src/detection/cpu/cpu_windows.cpp
-        src/detection/cpuUsage/cpuUsage_nowait_windows.cpp
+        src/detection/battery/battery_windows.c
+        src/detection/bios/bios_windows.c
+        src/detection/board/board_windows.c
+        src/detection/cpu/cpu_windows.c
         src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c
-        src/detection/font/font_windows.cpp
+        src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.cpp
-        src/detection/host/host_windows.cpp
+        src/detection/host/host_windows.c
         src/detection/localip/localip_windows.c
         src/detection/media/media_nosupport.c
-        src/detection/memory/memory_windows.cpp
+        src/detection/memory/memory_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.cpp
-        src/detection/swap/swap_windows.cpp
+        src/detection/swap/swap_windows.c
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/uptime/uptime_windows.c
-        src/detection/users/users_windows.cpp
+        src/detection/users/users_windows.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
         src/util/windows/pwd.c
+        src/util/windows/register.c
+        src/util/windows/unicode.c
         src/util/windows/utsname.c
         src/util/windows/wmi.cpp
     )
@@ -545,9 +563,15 @@ elseif(WIN32)
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
         PRIVATE "version"
+        PRIVATE "setupapi"
+        PRIVATE "dxgi"
+        PRIVATE "wtsapi32"
     )
-    if(USE_WIN_FAST_PPID_DETECTION)
-        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_FAST_PPID_DETECTION)
+    if(USE_WIN_NTAPI)
+        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
+    endif()
+    if(USE_WIN_GPU_DXGI)
+        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_GPU_DXGI)
     endif()
 endif()
 

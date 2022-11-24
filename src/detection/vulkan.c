@@ -182,7 +182,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 
         //Add the device to the list of devices shown by the GPU module
 
-        //We don't want softare rasterizers to show up as physical gpu
+        //We don't want software rasterizers to show up as physical gpu
         if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
             continue;
 
