@@ -6,6 +6,7 @@ extern "C" {
 
 #include <processthreadsapi.h>
 #include <wchar.h>
+#include <tlhelp32.h>
 
 #ifdef FF_USE_WIN_NTAPI
 
@@ -138,7 +139,28 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "powershell_ise"))
         ffStrbufSetS(&result->shellPrettyName, "Windows PowerShell ISE");
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "cmd"))
-        ffStrbufSetS(&result->shellPrettyName, "Command Prompt");
+    {
+        ffStrbufClear(&result->shellPrettyName);
+
+        HANDLE snapshot;
+        while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
+
+        if(snapshot)
+        {
+            MODULEENTRY32W module = { .dwSize = sizeof(module) };
+            for(BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module))
+            {
+                if(wcsncmp(module.szModule, L"clink_dll_", wcslen(L"clink_dll_")) == 0)
+                {
+                    ffStrbufAppendS(&result->shellPrettyName, "CMD (with Clink)");
+                    break;
+                }
+            }
+            CloseHandle(snapshot);
+        }
+        if(result->shellPrettyName.length == 0)
+            ffStrbufAppendS(&result->shellPrettyName, "Command Prompt");
+    }
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "nu"))
         ffStrbufSetS(&result->shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "explorer"))
