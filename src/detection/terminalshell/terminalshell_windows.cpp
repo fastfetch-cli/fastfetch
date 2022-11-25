@@ -147,7 +147,8 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
 
         if(snapshot)
         {
-            MODULEENTRY32W module = { .dwSize = sizeof(module) };
+            MODULEENTRY32W module;
+            module.dwSize = sizeof(module);
             for(BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module))
             {
                 if(wcsncmp(module.szModule, L"clink_dll_", wcslen(L"clink_dll_")) == 0)

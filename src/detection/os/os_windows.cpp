@@ -31,8 +31,7 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
     //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
     if(HMODULE __attribute__((__cleanup__(wrapFreeLibrary))) hWinbrand = LoadLibraryW(L"winbrand.dll"))
     {
-        PWSTR(WINAPI* BrandingFormatString)(PCWSTR);
-        (FARPROC&)BrandingFormatString = GetProcAddress(hWinbrand, "BrandingFormatString");
+        auto BrandingFormatString = (PWSTR(WINAPI*)(PCWSTR))GetProcAddress(hWinbrand, "BrandingFormatString");
         if(!BrandingFormatString)
             return "GetProcAddress(BrandingFormatString) failed";
 
