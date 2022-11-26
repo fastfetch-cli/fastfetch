@@ -86,7 +86,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             bqi.InformationLevel = BatteryDeviceName;
             wchar_t name[64];
             if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), name, sizeof(name), &dwOut, NULL))
-                ffWcharToUtf8(name, &battery->modelName);
+                ffStrbufSetWS(&battery->modelName, name);
         }
 
         {
@@ -94,7 +94,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             bqi.InformationLevel = BatteryManufactureName;
             wchar_t name[64];
             if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), name, sizeof(name), &dwOut, NULL))
-                ffWcharToUtf8(name, &battery->manufacturer);
+                ffStrbufSetWS(&battery->manufacturer, name);
         }
 
         battery->temperature = 0.0/0.0;

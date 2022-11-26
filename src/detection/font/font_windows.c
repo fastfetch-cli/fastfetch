@@ -15,7 +15,7 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 
     for(uint32_t i = 0; i < sizeof(fonts) / sizeof(fonts[0]); ++i)
     {
-        ffWcharToUtf8(fonts[i]->lfFaceName, &result->fonts[i]);
+        ffStrbufSetWS(&result->fonts[i], fonts[i]->lfFaceName);
         if(fonts[i]->lfHeight < 0)
             ffStrbufAppendF(&result->fonts[i], " (%dpt)", (int)-fonts[i]->lfHeight);
     }

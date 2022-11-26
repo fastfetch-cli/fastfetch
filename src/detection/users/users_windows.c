@@ -42,8 +42,8 @@ void ffDetectUsers(FFlist* users, FFstrbuf* error)
         if(session->State != WTSActive)
             continue;
 
-        FF_STRBUF_AUTO_DESTROY domainName = ffStrbufFromWchar(session->pDomainName);
-        FF_STRBUF_AUTO_DESTROY userName = ffStrbufFromWchar(session->pUserName);
+        FF_STRBUF_AUTO_DESTROY domainName = ffStrbufCreateWS(session->pDomainName);
+        FF_STRBUF_AUTO_DESTROY userName = ffStrbufCreateWS(session->pUserName);
 
         ffStrbufInitF((FFstrbuf*)ffListAdd(users), "%s\\%s", domainName.chars, userName.chars);
     }

@@ -36,7 +36,7 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
             return "GetProcAddress(BrandingFormatString) failed";
 
         const wchar_t* rawName = BrandingFormatString(L"%WINDOWS_LONG%");
-        ffWcharToUtf8(rawName, osName);
+        ffStrbufSetWS(osName, rawName);
         GlobalFree((HGLOBAL)rawName);
         return NULL;
     }

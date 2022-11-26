@@ -36,7 +36,7 @@ static const char* detectWithDxgi(FFlist* gpus)
             ffStrbufInit(&gpu->vendor);
 
         ffStrbufInit(&gpu->name);
-        ffWcharToUtf8(desc.Description, &gpu->name);
+        ffStrbufSetWS(&gpu->name, desc.Description);
 
         ffStrbufInit(&gpu->driver);
 

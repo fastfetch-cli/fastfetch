@@ -26,7 +26,7 @@ bool ffRegOpenKeyForRead(HKEY hKey, const wchar_t* subKeyW, HKEY* result, FFstrb
     {
         if(error)
         {
-            FF_STRBUF_AUTO_DESTROY subKeyA = ffStrbufFromWchar(subKeyW);
+            FF_STRBUF_AUTO_DESTROY subKeyA = ffStrbufCreateWS(subKeyW);
             ffStrbufAppendF(error, "RegOpenKeyExW(%s\\%s) failed", hKey2Str(hKey), subKeyA.chars);
         }
         return false;
@@ -43,7 +43,7 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
         {
             if(!valueNameW)
                 valueNameW = L"(default)";
-            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufFromWchar(valueNameW);
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
             ffStrbufAppendF(error, "RegGetValueA(%s, NULL, RRF_RT_REG_SZ) failed", valueNameA.chars);
         }
         return false;
@@ -55,12 +55,12 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
         {
             if(!valueNameW)
                 valueNameW = L"(default)";
-            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufFromWchar(valueNameW);
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
             ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_REG_SZ) failed", valueNameA.chars);
         }
         return false;
     }
-    ffWcharToUtf8(resultW, result);
+    ffStrbufSetWS(result, resultW);
     return true;
 }
 
@@ -73,7 +73,7 @@ bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstr
         {
             if(!valueNameW)
                 valueNameW = L"(default)";
-            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufFromWchar(valueNameW);
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
             ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_DWORD) failed", valueNameA.chars);
         }
         return false;
