@@ -50,6 +50,7 @@ int main(int argc, char** argv)
     //ffPrintSong(&instance);
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
+    //ffPrintWifi(&instance);
     //ffPrintCPUUsage(&instance);
     ffPrintLocale(&instance);
     //ffPrintDateTime(&instance);

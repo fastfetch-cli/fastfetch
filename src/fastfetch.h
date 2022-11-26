@@ -108,6 +108,7 @@ typedef struct FFconfig
     FFModuleArgs shell;
     FFModuleArgs resolution;
     FFModuleArgs de;
+    FFModuleArgs wifi;
     FFModuleArgs wm;
     FFModuleArgs wmTheme;
     FFModuleArgs theme;
@@ -293,6 +294,7 @@ void ffPrintTime(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
+void ffPrintWifi(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);

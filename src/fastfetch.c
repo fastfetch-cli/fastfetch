@@ -350,6 +350,24 @@ static inline void printCommandHelp(const char* command)
             "Public IP address"
         );
     }
+    else if(strcasecmp(command, "wifi-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("wifi", "{4} - {6}", 3,
+            "Interface description",
+            "Interface status",
+            "Connection status",
+            "Connection SSID",
+            "Connection mac address",
+            "Connection PHY type",
+            "Connection signal quality (percentage)",
+            "Connection RX rate",
+            "Connection TX rate",
+            "Security enabled",
+            "Security 802.1X enabled",
+            "Security auth algorithm",
+            "Security cipher algorithm"
+        );
+    }
     else if(strcasecmp(command, "player-format") == 0)
     {
         constructAndPrintCommandHelpFormat("player", "{}", 4,
@@ -1041,6 +1059,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
     else if(optionParseModuleArgs(key, value, "resolution", &instance->config.resolution)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
+    else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
     else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
     else if(optionParseModuleArgs(key, value, "wm-theme", &instance->config.wmTheme)) {}
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
@@ -1310,6 +1329,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintLocalIp(instance);
     else if(strcasecmp(line, "publicip") == 0)
         ffPrintPublicIp(instance);
+    else if(strcasecmp(line, "wifi") == 0)
+        ffPrintWifi(instance);
     else if(strcasecmp(line, "weather") == 0)
         ffPrintWeather(instance);
     else if(strcasecmp(line, "player") == 0)

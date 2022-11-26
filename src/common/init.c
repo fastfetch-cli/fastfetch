@@ -16,11 +16,6 @@
     #include <signal.h>
 #endif
 
-static bool strbufEqualsAdapter(const void* first, const void* second)
-{
-    return ffStrbufComp(second, first) == 0;
-}
-
 static void initConfigDirs(FFstate* state)
 {
     ffListInit(&state->configDirs, sizeof(FFstrbuf));
@@ -35,7 +30,7 @@ static void initConfigDirs(FFstate* state)
     }
 
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
-        if(ffListFirstIndexComp(&state->configDirs, element, strbufEqualsAdapter) < state->configDirs.length - 1) \
+        if(ffListFirstIndexComp(&state->configDirs, element, (bool(*)(const void*, const void*))ffStrbufEqual) < state->configDirs.length - 1) \
         { \
             ffStrbufDestroy(ffListGet(&state->configDirs, state->configDirs.length - 1)); \
             --state->configDirs.length; \
@@ -214,6 +209,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
+    initModuleArg(&instance->config.wifi);
     initModuleArg(&instance->config.player);
     initModuleArg(&instance->config.song);
     initModuleArg(&instance->config.dateTime);
@@ -441,6 +437,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);
     destroyModuleArg(&instance->config.weather);
+    destroyModuleArg(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);
     destroyModuleArg(&instance->config.song);
     destroyModuleArg(&instance->config.dateTime);

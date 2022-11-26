@@ -237,6 +237,7 @@
 #--locale-key Locale
 #--local-ip-key Local IP ({1})
 #--public-ip-key Public IP
+#--wifi-key Wifi
 #--weather-key Weather
 #--player-key Media Player
 #--song-key Song

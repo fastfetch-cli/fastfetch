@@ -289,6 +289,7 @@ set(LIBFASTFETCH_SRC
     src/modules/users.c
     src/modules/vulkan.c
     src/modules/weather.c
+    src/modules/wifi.c
     src/modules/wm.c
     src/modules/wmtheme.c
     src/util/FFlist.c
@@ -331,6 +332,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
+        src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_linux.c
     )
 elseif(ANDROID)
@@ -362,6 +364,7 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
+        src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
     )
 elseif(BSD)
@@ -400,6 +403,7 @@ elseif(BSD)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
+        src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_linux.c
     )
 elseif(APPLE)
@@ -433,6 +437,7 @@ elseif(APPLE)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
+        src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
@@ -465,6 +470,7 @@ elseif(WIN32)
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
+        src/detection/wifi/wifi_windows.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
         src/util/windows/pwd.c
@@ -652,6 +658,7 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "dxgi"
         PRIVATE "wtsapi32"
+        PRIVATE "wlanapi.lib"
     )
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
