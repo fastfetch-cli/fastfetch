@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "util/windows/register.h"
+#include "util/windows/registry.h"
 #include "util/mallocHelper.h"
 
 void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)

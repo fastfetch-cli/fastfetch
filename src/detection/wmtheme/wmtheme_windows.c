@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "wmtheme.h"
-#include "util/windows/register.h"
+#include "util/windows/registry.h"
 
 const char* colorHexToString(DWORD hex)
 {

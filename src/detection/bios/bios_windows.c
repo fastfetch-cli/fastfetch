@@ -1,5 +1,5 @@
 #include "bios.h"
-#include "util/windows/register.h"
+#include "util/windows/registry.h"
 
 void ffDetectBios(FFBiosResult* bios)
 {

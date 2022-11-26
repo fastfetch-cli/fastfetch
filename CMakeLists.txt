@@ -468,7 +468,7 @@ elseif(WIN32)
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
         src/util/windows/pwd.c
-        src/util/windows/register.c
+        src/util/windows/registry.c
         src/util/windows/unicode.c
         src/util/windows/utsname.c
         src/util/windows/wmi.cpp

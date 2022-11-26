@@ -2,7 +2,7 @@
 #include "common/io.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
-#include "util/windows/register.h"
+#include "util/windows/registry.h"
 
 static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {

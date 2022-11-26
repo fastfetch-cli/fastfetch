@@ -1,4 +1,4 @@
-#include "register.h"
+#include "registry.h"
 #include "unicode.h"
 #include "util/mallocHelper.h"
 

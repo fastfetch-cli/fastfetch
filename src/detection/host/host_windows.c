@@ -1,5 +1,5 @@
 #include "host.h"
-#include "util/windows/register.h"
+#include "util/windows/registry.h"
 
 void ffDetectHostImpl(FFHostResult* host)
 {
