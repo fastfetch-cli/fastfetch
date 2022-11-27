@@ -161,6 +161,7 @@ typedef struct FFconfig
     FFstrbuf libOpenCL;
     FFstrbuf libcJSON;
     FFstrbuf libfreetype;
+    FFstrbuf libwlanapi;
 
     bool cpuTemp;
     bool gpuTemp;

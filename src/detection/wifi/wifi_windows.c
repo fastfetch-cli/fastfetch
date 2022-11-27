@@ -1,18 +1,8 @@
 #include "wifi.h"
+#include "common/library.h"
 #include "util/windows/unicode.h"
 
 #include <wlanapi.h>
-
-static inline void wrapCloseHandle(HANDLE* handle)
-{
-    if(*handle)
-        CloseHandle(*handle);
-}
-static inline void wrapWlanFreeMemory(void* memory)
-{
-    if(*(void**)memory)
-        WlanFreeMemory(*(void**)memory);
-}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
@@ -50,29 +40,37 @@ static void convertIfStateToString(WLAN_INTERFACE_STATE state, FFstrbuf* result)
     }
 }
 
-void ffDetectWifi(const FFinstance* instance, FFWifiResult* result)
+static const char* detectWifiImpl(const FFinstance* instance, FFWifiResult* result)
 {
-    FF_UNUSED(instance);
+    FF_LIBRARY_LOAD(wlanapi, &instance->config.libcJSON, "dlopen wlanapi"FF_LIBRARY_EXTENSION" failed", "wlanapi"FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanOpenHandle)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanEnumInterfaces)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanQueryInterface)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanFreeMemory)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanCloseHandle)
 
     DWORD curVersion;
-    HANDLE __attribute__((__cleanup__(wrapCloseHandle))) hClient = NULL;
-    if(WlanOpenHandle(1, NULL, &curVersion, &hClient) != ERROR_SUCCESS)
+    HANDLE hClient = NULL;
+    WLAN_INTERFACE_INFO_LIST* ifList = NULL;
+    WLAN_CONNECTION_ATTRIBUTES* connInfo = NULL;
+    const char* error = NULL;
+
+    if(ffWlanOpenHandle(1, NULL, &curVersion, &hClient) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(&result->error, "WlanOpenHandle() failed");
-        return;
+        error = "WlanOpenHandle() failed";
+        goto exit;
     }
 
-    WLAN_INTERFACE_INFO_LIST* __attribute__((__cleanup__(wrapWlanFreeMemory))) ifList = NULL;
-    if(WlanEnumInterfaces(hClient, NULL, &ifList) != ERROR_SUCCESS)
+    if(ffWlanEnumInterfaces(hClient, NULL, &ifList) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(&result->error, "WlanEnumInterfaces() failed");
-        return;
+        error = "WlanEnumInterfaces() failed";
+        goto exit;
     }
 
     if(ifList->dwNumberOfItems == 0)
     {
-        ffStrbufAppendS(&result->error, "WlanEnumInterfaces() returns empty result");
-        return;
+        error = "No wifi interfaces found";
+        goto exit;
     }
 
     WLAN_INTERFACE_INFO* ifInfo = (WLAN_INTERFACE_INFO*)&ifList->InterfaceInfo[0];
@@ -80,13 +78,12 @@ void ffDetectWifi(const FFinstance* instance, FFWifiResult* result)
     convertIfStateToString(ifInfo->isState, &result->inf.status);
 
     if(ifInfo->isState != wlan_interface_state_connected)
-        return;
+        goto exit;
 
-    WLAN_CONNECTION_ATTRIBUTES* __attribute__((__cleanup__(wrapWlanFreeMemory))) connInfo = NULL;
     DWORD connectInfoSize = sizeof(WLAN_CONNECTION_ATTRIBUTES);
     WLAN_OPCODE_VALUE_TYPE opCode = wlan_opcode_value_type_invalid;
 
-    if(WlanQueryInterface(hClient,
+    if(ffWlanQueryInterface(hClient,
         &ifInfo->InterfaceGuid,
         wlan_intf_opcode_current_connection,
         NULL,
@@ -94,8 +91,8 @@ void ffDetectWifi(const FFinstance* instance, FFWifiResult* result)
         (PVOID*)&connInfo,
         &opCode) != ERROR_SUCCESS)
     {
-        ffStrbufAppendS(&result->error, "WlanQueryInterface() failed");
-        return;
+        error = "WlanQueryInterface() failed";
+        goto exit;
     }
 
     convertIfStateToString(connInfo->isState, &result->conn.status);
@@ -237,6 +234,18 @@ void ffDetectWifi(const FFinstance* instance, FFWifiResult* result)
         ffStrbufAppendF(&result->security.cipherAlgo, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11CipherAlgorithm);
         break;
     }
+
+exit:
+    if(connInfo) ffWlanFreeMemory(connInfo);
+    if(ifList) ffWlanFreeMemory(ifList);
+    if(hClient) ffWlanCloseHandle(hClient, NULL);
+    dlclose(wlanapi);
+    return error;
 }
 
 #pragma GCC diagnostic pop
+
+void ffDetectWifi(const FFinstance* instance, FFWifiResult* result)
+{
+    ffStrbufAppendS(&result->error, detectWifiImpl(instance, result));
+}

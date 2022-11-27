@@ -58,6 +58,7 @@ The following libraries are used if present at runtime:
 ### Windows
 
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Used for Windows Terminal font detection.
+* [`wlanapi`](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/): A system dll which isn't supported by Windows Server by default. Used for Wifi info detection.
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
 
