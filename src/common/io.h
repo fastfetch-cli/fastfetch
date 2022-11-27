@@ -5,7 +5,7 @@
 
 #include "fastfetch.h"
 
-#include <sys/stat.h> //mode_t
+#include <sys/stat.h> //mode_t, fstat, stat
 
 bool ffWriteFDBuffer(int fd, const FFstrbuf* content);
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);
@@ -15,6 +15,10 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer);
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
 bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer);
+
+#ifdef _WIN32
+bool ffAppendHandleBuffer(HANDLE handle, FFstrbuf* buffer);
+#endif
 
 bool ffFileExists(const char* fileName, mode_t mode);
 
