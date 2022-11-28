@@ -120,8 +120,8 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
     ssize_t readed = 0;
 
-    struct stat64 fileInfo;
-    if(fstat64(fd, &fileInfo) != 0)
+    struct stat fileInfo;
+    if(fstat(fd, &fileInfo) != 0)
         return false;
 
     ffStrbufEnsureFree(buffer, fileInfo.st_size > 0 ? (uint32_t)fileInfo.st_size : 31);
