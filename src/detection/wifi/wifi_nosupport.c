@@ -1,7 +1,7 @@
 #include "wifi.h"
 
-void ffDetectWifi(const FFinstance* instance, FFWifiResult* result)
+const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
 {
     FF_UNUSED(instance);
-    ffStrbufAppendS(&result->error, "Not supported on this platform");
+    return "Not supported on this platform";
 }

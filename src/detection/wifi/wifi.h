@@ -35,10 +35,8 @@ typedef struct FFWifiResult
     struct FFWifiInterface inf;
     struct FFWifiConnection conn;
     struct FFWifiSecurity security;
-
-    FFstrbuf error;
 } FFWifiResult;
 
-void ffDetectWifi(const FFinstance* instance, FFWifiResult* result);
+const char* ffDetectWifi(const FFinstance* instance, FFlist* result /*list of FFWifiItem*/);
 
 #endif
