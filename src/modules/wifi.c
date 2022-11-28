@@ -3,7 +3,7 @@
 #include "detection/wifi/wifi.h"
 
 #define FF_WIFI_MODULE_NAME "Wifi"
-#define FF_WIFI_NUM_FORMAT_ARGS 13
+#define FF_WIFI_NUM_FORMAT_ARGS 12
 
 void ffPrintWifi(FFinstance* instance)
 {
@@ -49,8 +49,7 @@ void ffPrintWifi(FFinstance* instance)
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate},
                     {FF_FORMAT_ARG_TYPE_BOOL, &item->security.enabled},
                     {FF_FORMAT_ARG_TYPE_BOOL, &item->security.oneXEnabled},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->security.authAlgo},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->security.cipherAlgo},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->security.algorithm},
                 });
             }
 
@@ -60,8 +59,7 @@ void ffPrintWifi(FFinstance* instance)
             ffStrbufDestroy(&item->conn.ssid);
             ffStrbufDestroy(&item->conn.macAddress);
             ffStrbufDestroy(&item->conn.phyType);
-            ffStrbufDestroy(&item->security.authAlgo);
-            ffStrbufDestroy(&item->security.cipherAlgo);
+            ffStrbufDestroy(&item->security.algorithm);
         }
     }
     else

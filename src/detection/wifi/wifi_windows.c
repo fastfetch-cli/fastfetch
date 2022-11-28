@@ -88,8 +88,7 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         item->conn.txRate = 0.0/0.0;
         item->security.enabled = false;
         item->security.oneXEnabled = false;
-        ffStrbufInit(&item->security.authAlgo);
-        ffStrbufInit(&item->security.cipherAlgo);
+        ffStrbufInit(&item->security.algorithm);
 
         ffStrbufSetWS(&item->inf.description, ifInfo->strInterfaceDescription);
         convertIfStateToString(ifInfo->isState, &item->inf.status);
@@ -168,85 +167,86 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         switch (connInfo->wlanSecurityAttributes.dot11AuthAlgorithm)
         {
             case DOT11_AUTH_ALGO_80211_OPEN:
-                ffStrbufAppendS(&item->security.authAlgo, "802.11 Open");
+                ffStrbufAppendS(&item->security.algorithm, "802.11 Open");
                 break;
             case DOT11_AUTH_ALGO_80211_SHARED_KEY:
-                ffStrbufAppendS(&item->security.authAlgo, "802.11 Shared");
+                ffStrbufAppendS(&item->security.algorithm, "802.11 Shared");
                 break;
             case DOT11_AUTH_ALGO_WPA:
-                ffStrbufAppendS(&item->security.authAlgo, "WPA");
+                ffStrbufAppendS(&item->security.algorithm, "WPA");
                 break;
             case DOT11_AUTH_ALGO_WPA_PSK:
-                ffStrbufAppendS(&item->security.authAlgo, "WPA-PSK");
+                ffStrbufAppendS(&item->security.algorithm, "WPA-PSK");
                 break;
             case DOT11_AUTH_ALGO_WPA_NONE:
-                ffStrbufAppendS(&item->security.authAlgo, "WPA-None");
+                ffStrbufAppendS(&item->security.algorithm, "WPA-None");
                 break;
             case DOT11_AUTH_ALGO_RSNA:
-                ffStrbufAppendS(&item->security.authAlgo, "RSNA");
+                ffStrbufAppendS(&item->security.algorithm, "RSNA");
                 break;
             case DOT11_AUTH_ALGO_RSNA_PSK:
-                ffStrbufAppendS(&item->security.authAlgo, "RSNA with PSK");
+                ffStrbufAppendS(&item->security.algorithm, "RSNA with PSK");
                 break;
             case 8 /* DOT11_AUTH_ALGO_WPA3 */:
-                ffStrbufAppendS(&item->security.authAlgo, "WPA3");
+                ffStrbufAppendS(&item->security.algorithm, "WPA3");
                 break;
             case 9 /* DOT11_AUTH_ALGO_WPA3_SAE */:
-                ffStrbufAppendS(&item->security.authAlgo, "WPA3-SAE");
+                ffStrbufAppendS(&item->security.algorithm, "WPA3-SAE");
                 break;
             case 10 /* DOT11_AUTH_ALGO_OWE */:
-                ffStrbufAppendS(&item->security.authAlgo, "OWE");
+                ffStrbufAppendS(&item->security.algorithm, "OWE");
                 break;
             case 11 /* DOT11_AUTH_ALGO_WPA3_ENT */:
-                ffStrbufAppendS(&item->security.authAlgo, "OWE-ENT");
+                ffStrbufAppendS(&item->security.algorithm, "OWE-ENT");
                 break;
             default:
-                ffStrbufAppendF(&item->security.authAlgo, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11AuthAlgorithm);
+                ffStrbufAppendF(&item->security.algorithm, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11AuthAlgorithm);
                 break;
         }
+        ffStrbufAppendS(&item->security.algorithm, " - ");
         switch (connInfo->wlanSecurityAttributes.dot11CipherAlgorithm)
         {
         case DOT11_CIPHER_ALGO_NONE:
-            ffStrbufAppendS(&item->security.cipherAlgo, "None");
+            ffStrbufAppendS(&item->security.algorithm, "None");
             break;
         case DOT11_CIPHER_ALGO_WEP40:
-            ffStrbufAppendS(&item->security.cipherAlgo, "WEP-40");
+            ffStrbufAppendS(&item->security.algorithm, "WEP-40");
             break;
         case DOT11_CIPHER_ALGO_TKIP:
-            ffStrbufAppendS(&item->security.cipherAlgo, "TKIP");
+            ffStrbufAppendS(&item->security.algorithm, "TKIP");
             break;
         case DOT11_CIPHER_ALGO_CCMP:
-            ffStrbufAppendS(&item->security.cipherAlgo, "CCMP");
+            ffStrbufAppendS(&item->security.algorithm, "CCMP");
             break;
         case DOT11_CIPHER_ALGO_WEP104:
-            ffStrbufAppendS(&item->security.cipherAlgo, "WEP-104");
+            ffStrbufAppendS(&item->security.algorithm, "WEP-104");
             break;
         case 0x06 /* DOT11_CIPHER_ALGO_BIP */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "BIP-CMAC-128");
+            ffStrbufAppendS(&item->security.algorithm, "BIP-CMAC-128");
             break;
         case 0x08 /* DOT11_CIPHER_ALGO_GCMP */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "GCMP-128");
+            ffStrbufAppendS(&item->security.algorithm, "GCMP-128");
             break;
         case 0x09 /* DOT11_CIPHER_ALGO_GCMP_256 */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "GCMP-256");
+            ffStrbufAppendS(&item->security.algorithm, "GCMP-256");
             break;
         case 0x0a /* DOT11_CIPHER_ALGO_CCMP_256 */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "CCMP-256");
+            ffStrbufAppendS(&item->security.algorithm, "CCMP-256");
             break;
         case 0x0b /* DOT11_CIPHER_ALGO_BIP_GMAC_128 */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "BIP-GMAC-128");
+            ffStrbufAppendS(&item->security.algorithm, "BIP-GMAC-128");
             break;
         case 0x0c /* DOT11_CIPHER_ALGO_BIP_GMAC_256 */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "BIP-GMAC-256");
+            ffStrbufAppendS(&item->security.algorithm, "BIP-GMAC-256");
             break;
         case 0x0d /* DOT11_CIPHER_ALGO_BIP_CMAC_256 */:
-            ffStrbufAppendS(&item->security.cipherAlgo, "BIP-CMAC-256");
+            ffStrbufAppendS(&item->security.algorithm, "BIP-CMAC-256");
             break;
         case DOT11_CIPHER_ALGO_WEP:
-            ffStrbufAppendS(&item->security.cipherAlgo, "WEP");
+            ffStrbufAppendS(&item->security.algorithm, "WEP");
             break;
         default:
-            ffStrbufAppendF(&item->security.cipherAlgo, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11CipherAlgorithm);
+            ffStrbufAppendF(&item->security.algorithm, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11CipherAlgorithm);
             break;
         }
         ffWlanFreeMemory(connInfo);

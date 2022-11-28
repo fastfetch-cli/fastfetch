@@ -437,7 +437,7 @@ elseif(APPLE)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_apple.m
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
@@ -641,6 +641,7 @@ if(APPLE)
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
+        PRIVATE "-framework CoreWLAN"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)

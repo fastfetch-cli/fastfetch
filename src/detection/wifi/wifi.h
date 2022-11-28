@@ -26,8 +26,7 @@ struct FFWifiSecurity
 {
     bool enabled;
     bool oneXEnabled;
-    FFstrbuf authAlgo;
-    FFstrbuf cipherAlgo;
+    FFstrbuf algorithm;
 };
 
 typedef struct FFWifiResult

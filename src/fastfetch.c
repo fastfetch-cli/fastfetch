@@ -364,8 +364,7 @@ static inline void printCommandHelp(const char* command)
             "Connection TX rate",
             "Security enabled",
             "Security 802.1X enabled",
-            "Security auth algorithm",
-            "Security cipher algorithm"
+            "Security algorithm"
         );
     }
     else if(strcasecmp(command, "player-format") == 0)
