@@ -140,6 +140,55 @@ static void detectXFCETerminal(const FFinstance* instance, FFTerminalFontResult*
     ffStrbufDestroy(&useSysFont);
 }
 
+static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+
+    FFstrbuf fontSize;
+    ffStrbufInit(&fontSize);
+
+    FFstrbuf profile;
+    ffStrbufInitF(&profile, "%s/.config/deepin/deepin-terminal/config.conf", instance->state.passwd->pw_dir);
+    FILE* file = fopen(profile.chars, "r");
+
+    if(file)
+    {
+        char* line = NULL;
+        size_t len = 0;
+
+        for(int count = 0; getline(&line, &len, file) != -1 && count < 2;)
+        {
+            if(strcmp(line, "[basic.interface.font]\n") == 0)
+            {
+                if(getline(&line, &len, file) != -1)
+                    ffParsePropLine(line, "value=", &fontName);
+                ++count;
+            }
+            else if(strcmp(line, "[basic.interface.font_size]\n") == 0)
+            {
+                if(getline(&line, &len, file) != -1)
+                    ffParsePropLine(line, "value=", &fontSize);
+                ++count;
+            }
+        }
+
+        fclose(file);
+    }
+
+    ffStrbufDestroy(&profile);
+
+    if(fontName.length == 0)
+        ffStrbufAppendS(&fontName, "Noto Sans Mono");
+    if(fontSize.length == 0)
+        ffStrbufAppendS(&fontSize, "11");
+
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+
+    ffStrbufDestroy(&fontName);
+    ffStrbufDestroy(&fontSize);
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0)
@@ -152,4 +201,6 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "gnome-terminal-") == 0)
         detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "deepin-terminal") == 0)
+        detectDeepinTerminal(instance, terminalFont);
 }
