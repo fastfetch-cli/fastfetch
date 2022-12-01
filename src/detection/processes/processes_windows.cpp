@@ -5,6 +5,7 @@ extern "C" {
 
 #ifdef FF_USE_WIN_NTAPI
 
+#include <ntstatus.h>
 #include <winternl.h>
 
 uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
@@ -12,7 +13,7 @@ uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
     FF_UNUSED(instance);
 
     ULONG size = 0;
-    if(NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &size) != (NTSTATUS)0xC0000004 /*STATUS_INFO_LENGTH_MISMATCH*/)
+    if(NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
     {
         ffStrbufAppendS(error, "NtQuerySystemInformation(SystemProcessInformation, NULL) failed");
         return 0;
