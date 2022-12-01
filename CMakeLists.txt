@@ -465,7 +465,7 @@ elseif(WIN32)
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.cpp
-        src/detection/swap/swap_windows.c
+        src/detection/swap/swap_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
         src/detection/uptime/uptime_windows.c
