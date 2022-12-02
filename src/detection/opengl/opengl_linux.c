@@ -158,6 +158,7 @@ typedef struct GLXData
     FF_LIBRARY_SYMBOL(glXDestroyGLXPixmap)
     FF_LIBRARY_SYMBOL(XFreePixmap)
     FF_LIBRARY_SYMBOL(XCloseDisplay)
+    FF_LIBRARY_SYMBOL(XFree)
 
     Display* display;
     XVisualInfo* visualInfo;
@@ -213,7 +214,9 @@ static const char* glxHandleDisplay(FFOpenGLResult* result, GLXData* data)
     if(data->visualInfo == NULL)
         return "glXChooseVisual returned NULL";
 
-    return glxHandleVisualInfo(result, data);
+    const char* error = glxHandleVisualInfo(result, data);
+    data->ffXFree(data->visualInfo);
+    return error;
 }
 
 static const char* glxHandleData(FFOpenGLResult* result, GLXData* data)
@@ -247,6 +250,7 @@ static const char* glxPrint(FFinstance* instance, FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXDestroyGLXPixmap);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XFreePixmap);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XCloseDisplay);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XFree);
 
     const char* error = glxHandleData(result, &data);
     dlclose(glx);
