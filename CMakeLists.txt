@@ -332,7 +332,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_linux.c
         src/detection/wmtheme/wmtheme_linux.c
     )
 elseif(ANDROID)
