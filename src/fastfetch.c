@@ -909,6 +909,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disable-stdout-buffer") == 0)
+    {
+        if(optionParseBoolean(value))
+            setvbuf(stdout, NULL, _IONBF, 0);
+    }
     else if(strcasecmp(key, "--escape-bedrock") == 0)
         instance->config.escapeBedrock = optionParseBoolean(value);
     else if(strcasecmp(key, "--pipe") == 0)

@@ -175,6 +175,7 @@ __fastfetch_completion()
         "--logo-print-remaining"
         "--multithreading"
         "--allow-slow-operations"
+        "--disable-stdout-buffer"
         "--disable-linewrap"
         "--hide-cursor"
         "--cpu-temp"

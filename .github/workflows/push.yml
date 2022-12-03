@@ -35,7 +35,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --disable-stdout-buffer
 
       - name: run flashfetch
         run: ./flashfetch
@@ -81,7 +81,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --disable-stdout-buffer
 
       - name: run flashfetch
         run: ./flashfetch
@@ -113,7 +113,7 @@ jobs:
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package
-            ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+            ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --disable-stdout-buffer
             ./flashfetch
             ctest
 
@@ -180,7 +180,7 @@ jobs:
         run: cp /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --disable-stdout-buffer
 
       - name: run flashfetch
         run: ./flashfetch
