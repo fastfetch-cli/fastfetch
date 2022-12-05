@@ -13,6 +13,8 @@ static const char* detectInf(uint32_t ifIndex, FFWifiResult* wifi)
 
 const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
 {
+    FF_UNUSED(instance);
+
     struct if_nameindex* infs = if_nameindex();
     if(!infs)
         return "if_nameindex() failed";
