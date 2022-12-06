@@ -3,6 +3,7 @@
 #include "common/printing.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
+#include "util/textModifier.h"
 
 #include <ctype.h>
 #include <string.h>

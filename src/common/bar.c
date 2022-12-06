@@ -1,3 +1,4 @@
+#include "util/textModifier.h"
 #include "bar.h"
 
 // green, yellow, red: print the color on nth (0~9) block

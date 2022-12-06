@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/format.h"
 #include "common/parsing.h"
+#include "util/textModifier.h"
 
 #include <inttypes.h>
 

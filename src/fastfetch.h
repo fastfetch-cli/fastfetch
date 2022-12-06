@@ -26,10 +26,6 @@
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
 
-#define FASTFETCH_TEXT_MODIFIER_BOLT  "\033[1m"
-#define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
-#define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
-
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
 typedef enum FFLogoType

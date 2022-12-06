@@ -1,7 +1,9 @@
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
+#include "util/textModifier.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 __attribute__((__noreturn__))
 static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineNo)
@@ -17,14 +19,12 @@ static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineN
 #define VERIFY(expression) if(!(expression)) testFailed(&strbuf, #expression, __LINE__)
 
 int shouldNotBeCalled(int c) {
-    FF_UNUSED(c);
+    (void)c;
     exit(1);
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
-    FF_UNUSED(argc, argv)
-
     FFstrbuf strbuf;
 
     //destroy 0

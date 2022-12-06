@@ -5,6 +5,7 @@
 #include "detection/qt.h"
 #include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/textModifier.h"
 
 #include <stdlib.h>
 #include <unistd.h>
