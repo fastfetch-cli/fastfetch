@@ -26,12 +26,21 @@ void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
 {
     assert(format != NULL);
 
-    ffStrbufInit(strbuf);
-
     va_list arguments;
     va_start(arguments, format);
-    ffStrbufAppendVF(strbuf, format, arguments);
+    ffStrbufInitVF(strbuf, format, arguments);
     va_end(arguments);
+}
+
+void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
+{
+    assert(format != NULL);
+
+    int len = vasprintf(&strbuf->chars, format, arguments);
+    assert(len >= 0);
+
+    strbuf->allocated = (uint32_t)(len + 1);
+    strbuf->length = (uint32_t)len;
 }
 
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
@@ -168,10 +177,13 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
 {
     assert(format != NULL);
 
-    ffStrbufClear(strbuf);
-
     va_list arguments;
     va_start(arguments, format);
+
+    if(strbuf->allocated == 0)
+        return ffStrbufInitVF(strbuf, format, arguments);
+
+    ffStrbufClear(strbuf);
     ffStrbufAppendVF(strbuf, format, arguments);
     va_end(arguments);
 }

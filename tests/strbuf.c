@@ -199,6 +199,13 @@ int main(int argc, char** argv)
 
     ffStrbufDestroy(&strbuf);
 
+    //initF
+    ffStrbufInitF(&strbuf, "%s", "1234567890123456789012345678901");
+    VERIFY(strbuf.allocated == 32);
+    VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
+
+    ffStrbufDestroy(&strbuf);
+
     //Success
     puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);
 }
