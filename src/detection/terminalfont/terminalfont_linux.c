@@ -173,6 +173,7 @@ static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResul
             }
         }
 
+        free(line);
         fclose(file);
     }
 
