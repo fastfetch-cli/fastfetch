@@ -180,6 +180,11 @@ if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     )
     string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
 endif()
+if(PROJECT_VERSION_TWEAK)
+    string(REGEX MATCH "[0-9]+" PROJECT_VERSION_TWEAK_NUM "${PROJECT_VERSION_TWEAK}")
+else()
+    set(PROJECT_VERSION_TWEAK_NUM 0)
+endif()
 
 #############
 # Text data #
@@ -684,6 +689,9 @@ target_link_libraries(libfastfetch
 add_executable(fastfetch
     src/fastfetch.c
 )
+target_compile_definitions(fastfetch
+    PRIVATE FASTFETCH_TARGET_BINARY_NAME="fastfetch"
+)
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
 )
@@ -691,27 +699,22 @@ target_link_libraries(fastfetch
 add_executable(flashfetch
     src/flashfetch.c
 )
+target_compile_definitions(flashfetch
+    PRIVATE FASTFETCH_TARGET_BINARY_NAME="flashfetch"
+)
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
 
 if(WIN32)
-    if(PROJECT_VERSION_TWEAK)
-        string(REGEX MATCH "[0-9]+" PROJECT_VERSION_TWEAK_NUM "${PROJECT_VERSION_TWEAK}")
-    else()
-        set(PROJECT_VERSION_TWEAK_NUM "0")
-    endif()
-
     set(TARGET_NAME fastfetch)
-    configure_file(src/util/windows/version.rc.in version.fastfetch.rc)
     target_sources(fastfetch
-        PRIVATE version.fastfetch.rc
+        PRIVATE src/util/windows/version.rc
     )
 
     set(TARGET_NAME flashfetch)
-    configure_file(src/util/windows/version.rc.in version.flashfetch.rc)
     target_sources(flashfetch
-        PRIVATE version.flashfetch.rc
+        PRIVATE src/util/windows/version.rc
     )
 endif()
 
