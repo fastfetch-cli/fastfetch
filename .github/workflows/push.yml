@@ -95,8 +95,8 @@ jobs:
           name: fastfetch-macos
           path: ./fastfetch-*.*
 
-  bsd:
-    name: BSD
+  freebsd:
+    name: FreeBSD
     runs-on: macos-12
     permissions:
       security-events: write
@@ -120,7 +120,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: fastfetch-bsd
+          name: fastfetch-freebsd
           path: ./fastfetch-*.*
 
   windows:
@@ -197,6 +197,80 @@ jobs:
             ./fastfetch.exe
             ./flashfetch.exe
 
+  windows-old:
+    name: Windows-old
+    runs-on: windows-latest
+    permissions:
+      security-events: write
+      contents: read
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: setup-msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-cjson mingw-w64-x86_64-vulkan-loader mingw-w64-x86_64-opencl-icd
+
+      - name: print msys version
+        run: uname -a
+
+      # https://github.com/msys2/MINGW-packages/issues/13524#event-7555720785
+      - name: create OpenCL.pc
+        run: |
+          cat > /mingw64/lib/pkgconfig/OpenCL.pc << EOF
+          prefix=/mingw64
+          exec_prefix=${prefix}
+          libdir=${exec_prefix}/lib
+          includedir=${prefix}/include
+
+          Name: OpenCL
+          Description: Open Computing Language generic Installable Client Driver Loader
+          Version: 2022.09.30-1
+          Libs: -L${libdir} -lOpenCL.dll
+          Cflags: -I${includedir}
+          EOF
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: c, cpp
+
+      - name: configure project
+        run: env PKG_CONFIG_PATH=/mingw64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build .
+
+      - name: perform CodeQL analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: copy necessary dlls
+        run: cp /mingw64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
+
+      - name: run fastfetch
+        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+
+      - name: run flashfetch
+        run: ./flashfetch
+
+      - name: run tests
+        run: ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastfetch-windows-old
+          path: |
+            ./*.dll
+            ./fastfetch.exe
+            ./flashfetch.exe
+
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
     name: Release
@@ -204,7 +278,7 @@ jobs:
     needs:
       - linux
       - macos
-      - bsd
+      - freebsd
       - windows
     permissions:
       contents: write
@@ -225,4 +299,4 @@ jobs:
           tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-bsd/*,fastfetch-windows/*
+          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-freebsd/*,fastfetch-windows/*
