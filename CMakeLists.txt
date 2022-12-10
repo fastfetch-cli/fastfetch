@@ -690,7 +690,7 @@ add_executable(fastfetch
     src/fastfetch.c
 )
 target_compile_definitions(fastfetch
-    PRIVATE FASTFETCH_TARGET_BINARY_NAME="fastfetch"
+    PRIVATE FASTFETCH_TARGET_BINARY_NAME=fastfetch
 )
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
@@ -700,7 +700,7 @@ add_executable(flashfetch
     src/flashfetch.c
 )
 target_compile_definitions(flashfetch
-    PRIVATE FASTFETCH_TARGET_BINARY_NAME="flashfetch"
+    PRIVATE FASTFETCH_TARGET_BINARY_NAME=flashfetch
 )
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
