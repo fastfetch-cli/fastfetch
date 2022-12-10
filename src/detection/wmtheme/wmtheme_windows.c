@@ -54,6 +54,8 @@ const char* colorHexToString(DWORD hex)
         case 0x4c574e: return "Sage";
         case 0x807143: return "Camouflage desert";
         case 0x766c59: return "Camouflage";
+        case 0x000000: return "Black";
+        case 0xFFFFFF: return "White";
         default: return NULL;
     }
 }
@@ -62,20 +64,30 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
 {
     FF_UNUSED(instance);
 
-    {
+    do {
+        uint32_t rgbColor;
         uint32_t bgrColor;
         DWORD bufSize = sizeof(bgrColor);
         if(RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\DWM", L"AccentColor", RRF_RT_REG_DWORD, NULL, &bgrColor, &bufSize) == ERROR_SUCCESS)
         {
             ffStrbufAppendS(themeOrError, "Accent Color - ");
-            DWORD rgbColor = ((bgrColor & 0xFF) << 16) | (bgrColor & 0xFF00) | ((bgrColor >> 16) & 0xFF);
-            const char* text = colorHexToString(rgbColor);
-            if(text)
-                ffStrbufAppendS(themeOrError, text);
-            else
-                ffStrbufAppendF(themeOrError, "#%06lX", rgbColor);
+            rgbColor = ((bgrColor & 0xFF) << 16) | (bgrColor & 0xFF00) | ((bgrColor >> 16) & 0xFF);
+
         }
-    }
+        else if(RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\DWM", L"ColorizationColor", RRF_RT_REG_DWORD, NULL, &rgbColor, &bufSize) == ERROR_SUCCESS)
+        {
+            ffStrbufAppendS(themeOrError, "Colorization Color - ");
+            rgbColor &= 0xFFFFFF;
+        }
+        else
+            break;
+
+        const char* text = colorHexToString(rgbColor);
+        if(text)
+            ffStrbufAppendS(themeOrError, text);
+        else
+            ffStrbufAppendF(themeOrError, "#%06lX", (long)rgbColor);
+    } while(false);
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL))
@@ -99,10 +111,11 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
         ffStrbufInit(&theme);
         if(ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, NULL))
         {
-            ffStrbufSubstrBeforeLastC(themeOrError, '.');
-            ffStrbufSubstrAfterLastC(themeOrError, '\\');
-            if(isalpha(themeOrError->chars[0]))
-                themeOrError->chars[0] = (char)toupper(themeOrError->chars[0]);
+            ffStrbufSubstrBeforeLastC(&theme, '.');
+            ffStrbufSubstrAfterLastC(&theme, '\\');
+            if(isalpha(theme.chars[0]))
+                theme.chars[0] = (char)toupper(theme.chars[0]);
+
             if(themeOrError->length > 0) ffStrbufAppendS(themeOrError, ", ");
             ffStrbufAppendF(themeOrError, "Theme - %s", theme.chars);
         }
