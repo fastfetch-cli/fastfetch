@@ -132,6 +132,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
+        strcasecmp(name, "sh")            == 0 || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
         strcasecmp(name, "sudo")          == 0 ||
         strcasecmp(name, "su")            == 0 ||
         strcasecmp(name, "doas")          == 0 ||
@@ -149,7 +150,6 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
     //Known shells
     if(
         strcasecmp(name, "bash")      == 0 ||
-        strcasecmp(name, "sh")        == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
         strcasecmp(name, "csh")       == 0 ||
