@@ -507,7 +507,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
     //Performance optimisation
     #ifndef FF_HAVE_CHAFA
-        if(type == FF_LOGO_TYPE_CHAFA)
+        if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
             return false;
     #endif
 
