@@ -25,7 +25,7 @@ General options:
 
 Logo options:
     -l,--logo <logo>:                set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file
-    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file, raw, sixel, kitty or chafa.
+    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa.
     --logo-width <width>:            set the width of the logo (in characters), if it is an image
     --logo-height <height>:          set the height of the logo (in characters), if it is an image
     --logo-color-[1-9] <color>:      overwrite a color in the logo
@@ -33,11 +33,13 @@ Logo options:
     --logo-padding-left <padding>:   set the padding on the left of the logo
     --logo-padding-right <padding>:  set the padding on the right of the logo
     --logo-print-remaining <?value>: weather to print the remaining logo, if it has more lines than modules to display
+    --file <file>:                   short for --logo-type file --logo <file>
+    --file-raw <file>:               short for --logo-type file-raw --logo <file>
+    --data <data>:                   short for --logo-type data --logo <data>
+    --data-raw <data>:               short for --logo-type data-raw --logo <data>
     --sixel <file>:                  short for --logo-type sixel --logo <file>
     --kitty <file>:                  short for --logo-type kitty --logo <file>
     --chafa <file>:                  short for --logo-type chafa --logo <file>
-    --file <file>:                   short for --logo-type file --logo <file>
-    --raw <file>:                    short for --logo-type raw --logo <file>
 
 Display options:
     -s,--structure <structure>:  sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.

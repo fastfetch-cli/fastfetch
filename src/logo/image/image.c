@@ -114,7 +114,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
     instance->state.logoHeight = requestData->logoCharacterHeight;
-    if(requestData->type == FF_LOGO_TYPE_KITTY)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
         instance->state.logoHeight -= 1;
 
     //Write cache files
@@ -346,15 +346,15 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     }
 
     bool printSuccessful = false;
-    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
     {
         #ifdef FF_HAVE_CHAFA
             printSuccessful = printImageChafa(instance, requestData, &imageData);
         #endif
     }
-    else if(requestData->type == FF_LOGO_TYPE_KITTY)
+    else if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
         printSuccessful = printImageKitty(instance, requestData, &imageData);
-    else if(requestData->type == FF_LOGO_TYPE_SIXEL)
+    else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         printSuccessful = printImageSixel(instance, requestData, &imageData);
 
     ffDestroyImageInfo(imageData.imageInfo);
@@ -407,7 +407,7 @@ static bool printCachedChars(FFinstance* instance, FFLogoRequestData* requestDat
     FFstrbuf content;
     ffStrbufInitA(&content, 32768);
 
-    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
         readCachedStrbuf(requestData, &content, FF_CACHE_FILE_CHAFA);
 
     if(content.length == 0)
@@ -440,13 +440,13 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
     }
 
     int fd = -1;
-    if(requestData->type == FF_LOGO_TYPE_KITTY)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
         if(fd == -1)
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
     }
-    else if(requestData->type == FF_LOGO_TYPE_SIXEL)
+    else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
 
     if(fd == -1)
@@ -473,7 +473,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
 
 static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
 {
-    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
         return printCachedChars(instance, requestData);
     else
         return printCachedPixel(instance, requestData);
@@ -517,7 +517,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     requestData.characterPixelHeight = 1;
 
     if(
-        (type != FF_LOGO_TYPE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
+        (type != FF_LOGO_TYPE_IMAGE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
         !getCharacterPixelDimensions(&requestData)
     )
         return false;

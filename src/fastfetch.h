@@ -30,13 +30,15 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 
 typedef enum FFLogoType
 {
-    FF_LOGO_TYPE_AUTO,    //If something is given, first try builtin, then file. Otherwise detect logo
-    FF_LOGO_TYPE_BUILTIN, //Builtin ascii art.
-    FF_LOGO_TYPE_FILE,    //Raw text file, printed as is.
-    FF_LOGO_TYPE_RAW,     //Raw text file, printed with color codes replacement.
-    FF_LOGO_TYPE_SIXEL,   //Image file, printed as sixel codes.
-    FF_LOGO_TYPE_KITTY,   //Image file, printed as kitty graphics protocol
-    FF_LOGO_TYPE_CHAFA    //Image file, printed as ascii art using libchafa
+    FF_LOGO_TYPE_AUTO,        //if something is given, first try builtin, then file. Otherwise detect logo
+    FF_LOGO_TYPE_BUILTIN,     //builtin ascii art
+    FF_LOGO_TYPE_FILE,        //text file, printed with color code replacement
+    FF_LOGO_TYPE_FILE_RAW,    //text file, printed as is
+    FF_LOGO_TYPE_DATA,        //text data, printed with color code replacement
+    FF_LOGO_TYPE_DATA_RAW,    //text data, printed as is
+    FF_LOGO_TYPE_IMAGE_SIXEL, //image file, printed as sixel codes.
+    FF_LOGO_TYPE_IMAGE_KITTY, //image file, printed as kitty graphics protocol
+    FF_LOGO_TYPE_IMAGE_CHAFA, //image file, printed as ascii art using libchafa
 } FFLogoType;
 
 typedef enum FFBinaryPrefixType

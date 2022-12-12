@@ -67,7 +67,7 @@
 
 # Logo type option:
 # Sets the logo type to use.
-# Must be auto, builtin, file, raw, sixel, kitty or chafa.
+# Must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa.
 # Default is auto.
 #--logo-type auto
 

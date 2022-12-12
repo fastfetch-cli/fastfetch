@@ -50,13 +50,13 @@ static void constructAndPrintCommandHelpFormat(const char* name, const char* def
 static inline void printCommandHelp(const char* command)
 {
     if(command == NULL)
-        fputs(FASTFETCH_DATATEXT_HELP, stdout);
+        puts(FASTFETCH_DATATEXT_HELP);
     else if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
-        fputs(FASTFETCH_DATATEXT_HELP_COLOR, stdout);
+        puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(strcasecmp(command, "format") == 0)
-        fputs(FASTFETCH_DATATEXT_HELP_FORMAT, stdout);
+        puts(FASTFETCH_DATATEXT_HELP_FORMAT);
     else if(strcasecmp(command, "load-config") == 0 || strcasecmp(command, "loadconfig") == 0 || strcasecmp(command, "config") == 0)
-        fputs(FASTFETCH_DATATEXT_HELP_CONFIG, stdout);
+        puts(FASTFETCH_DATATEXT_HELP_CONFIG);
     else if(strcasecmp(command, "os-format") == 0)
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
@@ -945,10 +945,12 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
                 "auto", FF_LOGO_TYPE_AUTO,
                 "builtin", FF_LOGO_TYPE_BUILTIN,
                 "file", FF_LOGO_TYPE_FILE,
-                "raw", FF_LOGO_TYPE_RAW,
-                "sixel", FF_LOGO_TYPE_SIXEL,
-                "kitty", FF_LOGO_TYPE_KITTY,
-                "chafa", FF_LOGO_TYPE_CHAFA,
+                "file-raw", FF_LOGO_TYPE_FILE_RAW,
+                "data", FF_LOGO_TYPE_DATA,
+                "data-raw", FF_LOGO_TYPE_DATA_RAW,
+                "sixel", FF_LOGO_TYPE_IMAGE_SIXEL,
+                "kitty", FF_LOGO_TYPE_IMAGE_KITTY,
+                "chafa", FF_LOGO_TYPE_IMAGE_CHAFA,
                 NULL
             );
         }
@@ -985,30 +987,40 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else
             goto error;
     }
-    else if(strcasecmp(key, "--sixel") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_SIXEL;
-    }
-    else if(strcasecmp(key, "--kitty") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_KITTY;
-    }
     else if(strcasecmp(key, "--file") == 0)
     {
         optionParseString(key, value, &instance->config.logo.source);
         instance->config.logo.type = FF_LOGO_TYPE_FILE;
     }
-    else if(strcasecmp(key, "--raw") == 0)
+    else if(strcasecmp(key, "--file-raw") == 0)
     {
         optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_RAW;
+        instance->config.logo.type = FF_LOGO_TYPE_FILE_RAW;
+    }
+    else if(strcasecmp(key, "--data") == 0)
+    {
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_DATA;
+    }
+    else if(strcasecmp(key, "--data-raw") == 0)
+    {
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_DATA_RAW;
+    }
+    else if(strcasecmp(key, "--sixel") == 0)
+    {
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_SIXEL;
+    }
+    else if(strcasecmp(key, "--kitty") == 0)
+    {
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_KITTY;
     }
     else if(strcasecmp(key, "--chafa") == 0)
     {
         optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_CHAFA;
+        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_CHAFA;
     }
 
     ///////////////////
