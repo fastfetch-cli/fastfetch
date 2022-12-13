@@ -25,35 +25,30 @@ static uint32_t getNumElements(const char* dirname, unsigned char type)
     return num_elements;
 }
 
-static uint32_t countBrewPackages(const char* dirname)
+static void countBrewPackages(const char* dirname, FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY baseDir;
     ffStrbufInitS(&baseDir, dirname);
 
-    uint32_t result = 0;
     uint32_t baseDirLength = baseDir.length;
 
     ffStrbufAppendS(&baseDir, "/Caskroom");
-    result += getNumElements(baseDir.chars, DT_DIR);
+    result->brewCask += getNumElements(baseDir.chars, DT_DIR);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
 
     ffStrbufAppendS(&baseDir, "/Cellar");
-    result += getNumElements(baseDir.chars, DT_DIR);
+    result->brew += getNumElements(baseDir.chars, DT_DIR);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
-
-    return result;
 }
 
-static uint32_t getBrewPackages()
+static void getBrewPackages(FFPackagesResult* result)
 {
     const char* prefix = getenv("HOMEBREW_PREFIX");
     if(ffStrSet(prefix))
-        return countBrewPackages(prefix);
+        return countBrewPackages(prefix, result);
 
-    uint32_t result = 0;
-    result += countBrewPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/homebrew");
-    result += countBrewPackages(FASTFETCH_TARGET_DIR_ROOT"/usr/local");
-    return result;
+    countBrewPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/homebrew", result);
+    countBrewPackages(FASTFETCH_TARGET_DIR_ROOT"/usr/local", result);
 }
 
 static uint32_t countMacPortsPackages(const char* dirname)
@@ -77,6 +72,6 @@ static uint32_t getMacPortsPackages()
 void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 {
     FF_UNUSED(instance);
-    result->brew = getBrewPackages();
+    getBrewPackages(result);
     result->port = getMacPortsPackages();
 }

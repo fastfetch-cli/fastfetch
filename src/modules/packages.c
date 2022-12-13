@@ -3,7 +3,7 @@
 #include "detection/packages/packages.h"
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 17
+#define FF_PACKAGES_NUM_FORMAT_ARGS 19
 
 void ffPrintPackages(FFinstance* instance)
 {
@@ -51,6 +51,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(flatpak)
         FF_PRINT_PACKAGE(snap)
         FF_PRINT_PACKAGE(brew)
+        FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
         FF_PRINT_PACKAGE(port)
         FF_PRINT_PACKAGE(scoop)
         FF_PRINT_PACKAGE(choco)
@@ -78,8 +79,10 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts->flatpak},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->snap},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->brew},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->brewCask},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->port},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->scoop}
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->scoop},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->choco},
         });
     }
 }
