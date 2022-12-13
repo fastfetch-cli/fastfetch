@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: install required packages
-        run: brew install vulkan-headers molten-vk
+        run: brew install vulkan-loader molten-vk
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
