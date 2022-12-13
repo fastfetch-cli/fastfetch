@@ -38,7 +38,13 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
 
 static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed", "libvulkan"FF_LIBRARY_EXTENSION, 2, "vulkan-1"FF_LIBRARY_EXTENSION, -1)
+    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed",
+        #ifdef __APPLE__
+            "libMoltenVK"FF_LIBRARY_EXTENSION, -1
+        #else
+            "libvulkan"FF_LIBRARY_EXTENSION, 2, "vulkan-1"FF_LIBRARY_EXTENSION, -1
+        #endif
+    )
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkDestroyInstance)
@@ -88,16 +94,9 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         .pApplicationInfo = &applicationInfo,
         .enabledLayerCount = 0,
         .ppEnabledLayerNames = NULL,
-
-        #if defined(__APPLE__) && defined(VK_KHR_portability_enumeration)
-            .enabledExtensionCount = 1,
-            .ppEnabledExtensionNames = (const char* const[]) { VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME },
-            .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR
-        #else
-            .enabledExtensionCount = 0,
-            .ppEnabledExtensionNames = NULL,
-            .flags = 0
-        #endif
+        .enabledExtensionCount = 0,
+        .ppEnabledExtensionNames = NULL,
+        .flags = 0
     };
 
     VkInstance vkInstance;

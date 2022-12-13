@@ -341,7 +341,7 @@
 # Sets an user specific path to a library to load.
 # Must be a valid path to a library.
 #--lib-PCI /usr/lib/libpci.so
-#--lib-vulkan /usr/lib/libvulkan.so
+#--lib-vulkan /usr/lib/libvulkan.so (libMoltenVK.dylib on macOS)
 #--lib-wayland /usr/lib/libwayland-client.so
 #--lib-xcb-randr /usr/lib/libxcb-randr.so
 #--lib-xcb /usr/lib/libxcb.so

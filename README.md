@@ -53,7 +53,7 @@ The following libraries are used if present at runtime:
 ### macOS
 
 * [`MediaRemote`](https://iphonedev.wiki/index.php/MediaRemote.framework): Need for Media detection. It's a private framework provided by newer macOS system.
-* [`libvulkan`](https://www.vulkan.org/): Vulkan module. To get it actually working, both loader (`vulkan-loader`) and driver (`molten-vk`) need to be installed.
+* [`MoltenVK`](https://github.com/KhronosGroup/MoltenVK): Vulkan driver for macOS.
 
 ### Windows
 
