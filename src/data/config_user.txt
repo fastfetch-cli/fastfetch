@@ -34,7 +34,8 @@
 #--multithreading true
 
 # Print stat option:
-# Sets if fastfetch should print time usage (in ms) for individual modules.
+# Sets if fastfetch should print time usage (in ms) for individual modules
+# If true, it will also enable --show-errors
 # Must be true or false.
 # Default is false.
 #--stat true

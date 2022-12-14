@@ -910,7 +910,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
         instance->config.multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--stat") == 0)
-        instance->config.stat = optionParseBoolean(value);
+    {
+        if((instance->config.stat = optionParseBoolean(value)))
+            instance->config.showErrors = true;
+    }
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--unbuffered") == 0)
