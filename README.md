@@ -12,16 +12,16 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 
 ## Customization
 
-With customization and speed being two competing goals, this project actually builds two executables.  
-The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
-The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
-At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.  
+With customization and speed being two competing goals, this project actually builds two executables.
+The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.
+The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
+At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.  
+Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.
 
 
 The following libraries are used if present at runtime:
@@ -62,7 +62,7 @@ The following libraries are used if present at runtime:
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
 
-Note: On Windows 10-, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). Also make sure to [use `chcp 65001` to enable UTF-8 support](https://conemu.github.io/en/UnicodeSupport.html#utf-8) if you run Windows locale other than English. 
+Note: On Windows 10-, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). Fastfetch on Windows targets [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment), which is not installed On Windows 10- by default. If you get errors like `ucrtbase.dll is missing`, try upgrading your system with `Windows Update` or downloading `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) which targets the ancient MSVCRT.
 
 ### Android
 
@@ -109,7 +109,7 @@ Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, Deepin Te
 
 ## Building
 
-fastfetch uses [`cmake`](https://cmake.org/) for building. [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) is recommended for better library detection. The simplest steps to build the fastfetch and flashfetch binaries are:  
+fastfetch uses [`cmake`](https://cmake.org/) for building. [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) is recommended for better library detection. The simplest steps to build the fastfetch and flashfetch binaries are:
 ```bash
 mkdir -p build
 cd build
