@@ -6,20 +6,23 @@
 #include <stdint.h>
 #ifdef _WIN32
     #include <synchapi.h>
-    #include <sysinfoapi.h>
+    #include <profileapi.h>
 #else
-    #include <sys/time.h>
     #include <time.h>
 #endif
 
 static inline uint64_t ffTimeGetTick() //In msec
 {
     #ifdef _WIN32
-        return GetTickCount64();
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        LARGE_INTEGER start;
+        QueryPerformanceCounter(&start);
+        return (uint64_t)(start.QuadPart * 1000 / frequency.QuadPart);
     #else
-        struct timeval timeNow;
-        gettimeofday(&timeNow, NULL);
-        return (uint64_t)((timeNow.tv_sec * 1000) + (timeNow.tv_usec / 1000));
+        struct timespec timeNow;
+        clock_gettime(CLOCK_MONOTONIC, &timeNow);
+        return (uint64_t)((timeNow.tv_sec * 1000) + (timeNow.tv_nsec / 1000000));
     #endif
 }
 
