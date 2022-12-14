@@ -70,6 +70,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
+cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
 cmake_dependent_option(USE_WIN_GPU_DXGI "Use DXGI to detect GPUs instead of WMI. Faster, but may ignore GPUs that only support DX9" ON "WIN32" OFF)
 
@@ -637,6 +638,11 @@ if(ENABLE_THREADS)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
+endif()
+
+
+if(ENABLE_BUFFER)
+    target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
 endif()
 
 if(APPLE)

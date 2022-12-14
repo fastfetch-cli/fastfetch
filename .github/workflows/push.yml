@@ -35,7 +35,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -81,7 +81,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -113,7 +113,7 @@ jobs:
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package
-            time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+            time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
             time ./flashfetch
             ctest
 
@@ -180,7 +180,7 @@ jobs:
         run: cp /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -242,7 +242,7 @@ jobs:
           languages: c, cpp
 
       - name: configure project
-        run: env PKG_CONFIG_PATH=/mingw64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: env PKG_CONFIG_PATH=/mingw64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_BUFFER=Off .
 
       - name: build project
         run: cmake --build .
@@ -254,7 +254,7 @@ jobs:
         run: cp /mingw64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch

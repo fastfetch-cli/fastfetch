@@ -40,12 +40,6 @@
 # Default is false.
 #--stat true
 
-# Disable stdout buffer option:
-# Sets if fastfetch should disable application buffer of stdout. Mainly for debugging purpose.
-# Must be true or false.
-# Default is false.
-#--unbuffered false
-
 # Slow operations option:
 # Sets if fastfetch is allowed to use known slow operations to detect more / better values.
 # Must be true or false.

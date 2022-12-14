@@ -176,7 +176,6 @@ __fastfetch_completion()
         "--multithreading"
         "--stat"
         "--allow-slow-operations"
-        "--unbuffered"
         "--disable-linewrap"
         "--hide-cursor"
         "--cpu-temp"

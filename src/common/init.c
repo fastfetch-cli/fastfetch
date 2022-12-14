@@ -354,6 +354,9 @@ void ffStart(FFinstance* instance)
     ffHideCursor = instance->config.hideCursor && !instance->config.pipe;
 
     #ifdef _WIN32
+    #ifdef FF_ENABLE_BUFFER
+        setvbuf(stdout, NULL, _IOFBF, 4096);
+    #endif
     SetConsoleCtrlHandler(consoleHandler, TRUE);
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
@@ -361,6 +364,9 @@ void ffStart(FFinstance* instance)
     SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     SetConsoleOutputCP(CP_UTF8);
     #else
+    #ifndef FF_ENABLE_BUFFER
+        setvbuf(stdout, NULL, _IONBF, 0);
+    #endif
     struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);

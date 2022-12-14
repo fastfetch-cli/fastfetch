@@ -916,11 +916,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
-    else if(strcasecmp(key, "--unbuffered") == 0)
-    {
-        if(optionParseBoolean(value))
-            setvbuf(stdout, NULL, _IONBF, 0);
-    }
     else if(strcasecmp(key, "--escape-bedrock") == 0)
         instance->config.escapeBedrock = optionParseBoolean(value);
     else if(strcasecmp(key, "--pipe") == 0)
@@ -1434,6 +1429,10 @@ int main(int argc, const char** argv)
             else
                 printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
         }
+
+        #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+            fflush(stdout);
+        #endif
 
         startIndex = colonIndex + 1;
     }
