@@ -35,10 +35,10 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
 
       - name: run flashfetch
-        run: ./flashfetch
+        run: time ./flashfetch
 
       - name: run tests
         run: ctest
@@ -81,10 +81,10 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
 
       - name: run flashfetch
-        run: ./flashfetch
+        run: time ./flashfetch
 
       - name: run tests
         run: ctest
@@ -113,8 +113,8 @@ jobs:
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package
-            ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
-            ./flashfetch
+            time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+            time ./flashfetch
             ctest
 
       - name: upload artifacts
@@ -180,10 +180,10 @@ jobs:
         run: cp /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
 
       - name: run flashfetch
-        run: ./flashfetch
+        run: time ./flashfetch
 
       - name: run tests
         run: ctest
@@ -254,10 +254,10 @@ jobs:
         run: cp /mingw64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
+        run: time ./fastfetch --recache --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all --unbuffered
 
       - name: run flashfetch
-        run: ./flashfetch
+        run: time ./flashfetch
 
       - name: run tests
         run: ctest
