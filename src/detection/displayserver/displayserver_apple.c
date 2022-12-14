@@ -31,7 +31,7 @@ static void detectResolution(FFDisplayServerResult* ds)
     }
 }
 
-static void detectWM(FFDisplayServerResult* ds)
+static void detectWMPlugin(FFstrbuf* name)
 {
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
     u_int requestLength = sizeof(request) / sizeof(*request);
@@ -54,9 +54,8 @@ static void detectWM(FFDisplayServerResult* ds)
             strcasecmp(comm, "rectangle") != 0
         ) continue;
 
-        ffStrbufAppendS(&ds->wmProcessName, comm);
-        ffStrbufAppendS(&ds->wmPrettyName, comm);
-        ds->wmPrettyName.chars[0] = (char) toupper(ds->wmPrettyName.chars[0]);
+        ffStrbufAppendS(name, comm);
+        name->chars[0] = (char) toupper(name->chars[0]);
         break;
     }
 
@@ -67,19 +66,21 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 {
     FF_UNUSED(instance);
 
-    ffStrbufInit(&ds->wmProcessName);
-    ffStrbufInit(&ds->wmPrettyName);
-    ffStrbufInitA(&ds->wmProtocolName, 0);
-    detectWM(ds);
-    if(ds->wmProcessName.length == 0)
+    ffStrbufInitS(&ds->wmProcessName, "quartz");
+    ffStrbufInitS(&ds->wmPrettyName, "Quartz Compositor");
+    ffStrbufInit(&ds->wmProtocolName);
+
+    if(instance->config.allowSlowOperations)
     {
-        ffStrbufAppendS(&ds->wmProcessName, "quartz");
-        ffStrbufAppendS(&ds->wmPrettyName, "Quartz Compositor");
+        FF_STRBUF_AUTO_DESTROY name;
+        detectWMPlugin(&name);
+        if(name.length)
+            ffStrbufAppendF(&ds->wmPrettyName, " (with %s)", name.chars);
     }
 
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
-    ffStrbufInitA(&ds->deVersion, 0);
+    ffStrbufInit(&ds->deVersion);
     ffStrbufAppendS(&ds->deProcessName, "aqua");
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
