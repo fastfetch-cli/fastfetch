@@ -3,10 +3,12 @@
 #include "common/printing.h"
 #include "common/parsing.h"
 #include "common/io.h"
+#include "common/time.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <inttypes.h>
 
 #ifdef WIN32
     #include "util/windows/getline.h"
@@ -907,6 +909,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
         instance->config.multithreading = optionParseBoolean(value);
+    else if(strcasecmp(key, "--stat") == 0)
+        instance->config.stat = optionParseBoolean(value);
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
         instance->config.allowSlowOperations = optionParseBoolean(value);
     else if(strcasecmp(key, "--unbuffered") == 0)
@@ -1412,7 +1416,21 @@ int main(int argc, const char** argv)
         uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
         data.structure.chars[colonIndex] = '\0';
 
+        uint64_t ms = 0;
+        if(__builtin_expect(instance.config.stat, false))
+            ms = ffTimeGetTick();
+
         parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
+
+        if(__builtin_expect(instance.config.stat, false))
+        {
+            char str[32];
+            int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
+            if(instance.config.pipe)
+                puts(str);
+            else
+                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+        }
 
         startIndex = colonIndex + 1;
     }

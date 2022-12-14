@@ -94,6 +94,7 @@ typedef struct FFconfig
     FFGLType glType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
+    bool stat;
 
     FFModuleArgs os;
     FFModuleArgs host;

@@ -177,6 +177,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.glType = FF_GL_TYPE_AUTO;
     instance->config.pipe = false;
     instance->config.multithreading = true;
+    instance->config.stat = false;
 
     initModuleArg(&instance->config.os);
     initModuleArg(&instance->config.host);

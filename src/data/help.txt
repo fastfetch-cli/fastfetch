@@ -18,6 +18,7 @@ General options:
     --nocache <?value>:               don't use cached values, but also don't overwrite existing ones
     --load-config <file>:             load a config file or a preset (+)
     --multithreading <?value>:        use multiple threads to detect values
+    --stat <?value>:                  print time usage (in ms) for individual modules
     --allow-slow-operations <?value>: allow operations that are usually very slow for more detailed output
     --unbuffered <?value>: disable stdout application buffer
     --escape-bedrock <?value>:        on bedrock linux, sets if it should escape the bedrock jail or not
