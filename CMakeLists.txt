@@ -671,6 +671,7 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "dxgi"
         PRIVATE "wtsapi32"
+        PRIVATE "powrprof"
     )
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
