@@ -239,6 +239,7 @@ set(LIBFASTFETCH_SRC
     src/detection/font/font.c
     src/detection/gpu/gpu.c
     src/detection/host/host.c
+    src/detection/locale/locale.c
     src/detection/media/media.c
     src/detection/memory/memory.c
     src/detection/os/os.c
