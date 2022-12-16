@@ -746,6 +746,39 @@ static const FFlogo* getLogoEndeavour()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoEnso()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("enso", "uqc")
+    FF_LOGO_LINES(
+        "                .:--==--:.                     \n"
+        "            :=*#############*+-.               \n"
+        "         .+##################*##*:             \n"
+        "       .*##########+==-==++*####*##-           \n"
+        "      =########=:           .-+**#***.         \n"
+        "     *#######-                  ++*#**.        \n"
+        "    +######+                     -*+#**        \n"
+        "   :######*                       .*+**=       \n"
+        "   *######:                        --#*#       \n"
+        "   #######                          +++#.      \n"
+        "   #######.                         ++=*.      \n"
+        "   *######+                        .-+*+       \n"
+        "   :#######-                       -:*+:       \n"
+        "    =#######*.                    :.*+-        \n"
+        "     +########*-                  :*=-         \n"
+        "      =###########+=:            =+=:          \n"
+        "       .+#############.       .-==:            \n"
+        "         .=###########=   ..:--:.              \n"
+        "            .-+######+                         \n"
+    )
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoFedora()
 {
     FF_LOGO_INIT
@@ -2287,6 +2320,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoDebianSmall,
         getLogoDeepin,
         getLogoEndeavour,
+        getLogoEnso,
         getLogoFedora,
         getLogoFedoraSmall,
         getLogoFedoraOld,
