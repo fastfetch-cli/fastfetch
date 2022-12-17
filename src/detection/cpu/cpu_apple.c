@@ -41,32 +41,29 @@ static double detectCpuTemp(const FFstrbuf* cpuName)
     return result;
 }
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 {
     FF_UNUSED(instance);
 
-    if(!cached)
-    {
-        ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
-        ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
+    ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
+    ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
 
-        cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
-        if(cpu->coresPhysical == 1)
-            cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu", 1);
+    cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
+    if(cpu->coresPhysical == 1)
+        cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu", 1);
 
-        cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.logicalcpu_max", 1);
-        if(cpu->coresLogical == 1)
-            cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
+    cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.logicalcpu_max", 1);
+    if(cpu->coresLogical == 1)
+        cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
 
-        cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.logicalcpu", 1);
-        if(cpu->coresOnline == 1)
-            cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
+    cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.logicalcpu", 1);
+    if(cpu->coresOnline == 1)
+        cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
-        cpu->frequencyMin = getFrequency("hw.cpufrequency_min");
-        cpu->frequencyMax = getFrequency("hw.cpufrequency_max");
-        if(cpu->frequencyMax == 0.0)
-            cpu->frequencyMax = getFrequency("hw.cpufrequency");
-    }
+    cpu->frequencyMin = getFrequency("hw.cpufrequency_min");
+    cpu->frequencyMax = getFrequency("hw.cpufrequency_max");
+    if(cpu->frequencyMax == 0.0)
+        cpu->frequencyMax = getFrequency("hw.cpufrequency");
 
     if (instance->config.cpuTemp)
         cpu->temperature = detectCpuTemp(&cpu->name);

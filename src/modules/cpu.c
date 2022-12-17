@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "common/caching.h"
 #include "detection/cpu/cpu.h"
 
 #define FF_CPU_MODULE_NAME "CPU"

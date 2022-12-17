@@ -169,8 +169,6 @@ __fastfetch_completion()
 
     local FF_OPTIONS_BOOL=(
         "-r"
-        "--recache"
-        "--nocache"
         "--show-errors"
         "--logo-print-remaining"
         "--multithreading"

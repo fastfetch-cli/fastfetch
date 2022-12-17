@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "common/caching.h"
 #include "detection/bios/bios.h"
 
 #define FF_BIOS_MODULE_NAME "Bios"
@@ -8,9 +7,6 @@
 
 void ffPrintBios(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_BIOS_MODULE_NAME, &instance->config.bios, FF_BIOS_NUM_FORMAT_ARGS))
-        return;
-
     FFBiosResult result;
     ffDetectBios(&result);
 
@@ -26,12 +22,20 @@ void ffPrintBios(FFinstance* instance)
         goto exit;
     }
 
-    ffPrintAndWriteToCache(instance, FF_BIOS_MODULE_NAME, &instance->config.bios, &result.biosRelease, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosDate},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosRelease},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosVendor},
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosVersion},
-    });
+    if(instance->config.bios.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(instance, FF_BIOS_MODULE_NAME, 0, &instance->config.bios.key);
+        puts(result.biosRelease.chars);
+    }
+    else
+    {
+        ffPrintFormat(instance, FF_BIOS_MODULE_NAME, 0, &instance->config.bios, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosDate},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosRelease},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosVendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosVersion},
+        });
+    }
 
 exit:
     ffStrbufDestroy(&result.biosDate);

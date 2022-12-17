@@ -2,15 +2,11 @@
 #include "util/windows/registry.h"
 #include "util/mallocHelper.h"
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 {
     FF_UNUSED(instance);
 
     cpu->temperature = FF_CPU_TEMP_UNSET;
-
-    if(cached)
-        return;
-
     cpu->coresPhysical = cpu->coresLogical = cpu->coresOnline = 0;
     cpu->frequencyMax = cpu->frequencyMin = 0;
     ffStrbufInit(&cpu->name);
