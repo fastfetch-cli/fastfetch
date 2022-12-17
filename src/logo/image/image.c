@@ -25,7 +25,7 @@
 
 static bool compressBlob(const FFinstance* instance, void** blob, size_t* length)
 {
-    FF_LIBRARY_LOAD(zlib, &instance->config.libZ, false, "libz.so", 2)
+    FF_LIBRARY_LOAD(zlib, &instance->config.libZ, false, "libz" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
 
@@ -216,7 +216,7 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
 #include <chafa/chafa.h>
 static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
-    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa.so", 1)
+    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_add_by_tags, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)

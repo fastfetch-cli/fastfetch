@@ -91,7 +91,7 @@ typedef struct GSettingsData
 
 static const GSettingsData* getGSettingsData(const FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0.so", 1);
+    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
@@ -163,7 +163,7 @@ typedef struct DConfData
 
 static const DConfData* getDConfData(const FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf.so", 2);
+    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf" FF_LIBRARY_EXTENSION, 2);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
@@ -233,7 +233,7 @@ typedef struct XFConfData
 
 static const XFConfData* getXFConfData(const FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0.so", 4);
+    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)
@@ -294,7 +294,7 @@ typedef struct SQLiteData
 
 static const SQLiteData* getSQLiteData(const FFinstance* instance)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance->config.libSQLite3, "libsqlite3.so", 1);
+    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance->config.libSQLite3, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_open_v2)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_prepare_v2)

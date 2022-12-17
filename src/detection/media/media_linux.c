@@ -295,7 +295,7 @@ static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
 {
     DBusData data;
 
-    FF_LIBRARY_LOAD(dbus, &instance->config.libDBus, "dlopen dbus failed", "libdbus-1.so", 4);
+    FF_LIBRARY_LOAD(dbus, &instance->config.libDBus, "dlopen dbus failed", "libdbus-1" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dbus, dbus_bus_get)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_new_method_call)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(dbus, data, dbus_message_iter_init)
