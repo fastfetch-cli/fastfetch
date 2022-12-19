@@ -213,7 +213,7 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
 }
 
 #ifdef FF_HAVE_CHAFA
-#include <chafa/chafa.h>
+#include <chafa.h>
 static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
     FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1)
