@@ -234,7 +234,10 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     size_t length;
     void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
     if(!checkAllocationResult(blob, length))
+    {
+        dlclose(chafa);
         return false;
+    }
 
     ChafaSymbolMap* symbolMap = ffchafa_symbol_map_new();
     ffchafa_symbol_map_add_by_tags(symbolMap, CHAFA_SYMBOL_TAG_ALL);
@@ -266,6 +269,7 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffchafa_canvas_unref(canvas);
     ffchafa_canvas_config_unref(canvasConfig);
     ffchafa_symbol_map_unref(symbolMap);
+    dlclose(chafa);
 
     return true;
 }
