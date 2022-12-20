@@ -273,6 +273,8 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
 
 FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* requestData, const FFIMData* imData)
 {
+    FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreGenesis, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
+    FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreTerminus, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
     FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imData->library, DestroyExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireImageInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
@@ -286,14 +288,20 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, ImageToBlob, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, Base64Encode, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
+    ffMagickCoreGenesis(NULL, MagickFalse);
+
     imageData.exceptionInfo = ffAcquireExceptionInfo();
     if(imageData.exceptionInfo == NULL)
+    {
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+    }
 
     ImageInfo* imageInfoIn = ffAcquireImageInfo();
     if(imageInfoIn == NULL)
     {
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -305,6 +313,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     if(imageData.image == NULL)
     {
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -325,6 +334,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     {
         ffDestroyImage(imageData.image);
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -333,6 +343,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     if(resized == NULL)
     {
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
     imageData.image = resized;
@@ -342,6 +353,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     {
         ffDestroyImage(imageData.image);
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -360,6 +372,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     ffDestroyImageInfo(imageData.imageInfo);
     ffDestroyImage(imageData.image);
     ffDestroyExceptionInfo(imageData.exceptionInfo);
+    ffMagickCoreTerminus();
 
     return printSuccessful ? FF_LOGO_IMAGE_RESULT_SUCCESS : FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 }
