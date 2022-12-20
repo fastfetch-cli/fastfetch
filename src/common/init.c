@@ -21,6 +21,8 @@ static void initConfigDirs(FFstate* state)
 {
     ffListInit(&state->configDirs, sizeof(FFstrbuf));
 
+    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
+
     const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
     if(ffStrSet(xdgConfigHome))
     {
@@ -29,6 +31,8 @@ static void initConfigDirs(FFstate* state)
         ffStrbufAppendS(buffer, xdgConfigHome);
         ffStrbufEnsureEndsWithC(buffer, '/');
     }
+
+    #endif
 
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
         if(ffListFirstIndexComp(&state->configDirs, element, (bool(*)(const void*, const void*))ffStrbufEqual) < state->configDirs.length - 1) \
@@ -48,6 +52,8 @@ static void initConfigDirs(FFstate* state)
     ffStrbufAppendS(userHome, state->passwd->pw_dir);
     ffStrbufEnsureEndsWithC(userHome, '/');
     FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
+
+    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
 
     FFstrbuf xdgConfigDirs;
     ffStrbufInitA(&xdgConfigDirs, 64);
@@ -79,6 +85,8 @@ static void initConfigDirs(FFstate* state)
     ffStrbufInitA(systemConfigHome, 64);
     ffStrbufAppendS(systemConfigHome, FASTFETCH_TARGET_DIR_ETC"/xdg/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigHome)
+
+    #endif
 
     FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfig, 64);
