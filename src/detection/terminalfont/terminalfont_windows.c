@@ -2,7 +2,9 @@
 #include "common/io.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
-#include "util/windows/registry.h"
+#include "util/windows/unicode.h"
+
+#include <wincon.h>
 
 static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
@@ -28,23 +30,17 @@ static void detectConhost(const FFinstance* instance, FFTerminalFontResult* term
 {
     FF_UNUSED(instance);
 
-    //Current font of conhost doesn't seem to be detectable, we detect default font instead
-
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Console", &hKey, &terminalFont->error))
+    CONSOLE_FONT_INFOEX cfi = { .cbSize = sizeof(cfi) };
+    if(!GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi))
+    {
+        ffStrbufAppendS(&terminalFont->error, "GetCurrentConsoleFontEx() failed");
         return;
+    }
 
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
-    if(!ffRegReadStrbuf(hKey, L"FaceName", &fontName, &terminalFont->error))
-        return;
-
-    uint32_t fontSizeNum = 0;
-    if(!ffRegReadUint(hKey, L"FontSize", &fontSizeNum, &terminalFont->error))
-        return;
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreateWS(cfi.FaceName);
 
     char fontSize[16];
-    _ultoa((unsigned long)(fontSizeNum >> 16), fontSize, 10);
+    _ultoa((unsigned long)(cfi.dwFontSize.Y), fontSize, 10);
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize);
 }
