@@ -22,7 +22,7 @@
 #else
 #include <wincon.h>
 
-inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
+static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
 {
     return _fullpath(resolved_name, file_name, _MAX_PATH);
 }
@@ -226,7 +226,10 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
 #include <chafa.h>
 static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
-    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(glib, &instance->config.libChafa, false, "libglib-2.0-0" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL(glib, g_string_free, false)
+
+    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa-0" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_add_by_tags, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)
@@ -238,7 +241,6 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_unref, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, g_string_free, false)
 
     imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
     size_t length;
@@ -271,8 +273,8 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     result.allocated = (uint32_t) str->allocated_len;
     result.length = (uint32_t) str->len;
     result.chars = str->str;
-
-    ffLogoPrintChars(instance, result.chars, false);
+    puts(result.chars);
+    // ffLogoPrintChars(instance, result.chars, false);
     writeCacheStrbuf(requestData, &result, FF_CACHE_FILE_CHAFA);
 
     ffg_string_free(str, TRUE);
@@ -280,6 +282,7 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffchafa_canvas_config_unref(canvasConfig);
     ffchafa_symbol_map_unref(symbolMap);
     dlclose(chafa);
+    dlclose(glib);
 
     return true;
 }
@@ -531,12 +534,20 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 
     #else
 
+    setmode (fileno (stdin), O_BINARY);
+    setmode (fileno (stdout), O_BINARY);
+    
     CONSOLE_FONT_INFO cfi;
-    if(GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi) == FALSE) // Only works for ConHost
-        return false;
-
-    requestData->characterPixelWidth = cfi.dwFontSize.X;
-    requestData->characterPixelHeight = cfi.dwFontSize.Y;
+    if(GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi) != FALSE) // Only works for ConHost
+    {
+        requestData->characterPixelWidth = cfi.dwFontSize.X;
+        requestData->characterPixelHeight = cfi.dwFontSize.Y;
+    }
+    else
+    {
+        requestData->characterPixelWidth = 8;
+        requestData->characterPixelHeight = 16;
+    }
 
     #endif
 
