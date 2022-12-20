@@ -16,7 +16,17 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#ifndef _WIN32
 #include <sys/ioctl.h>
+#else
+#include <wincon.h>
+
+inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
+{
+    return _fullpath(resolved_name, file_name, _MAX_PATH);
+}
+#endif
 
 #ifdef FF_HAVE_ZLIB
 #include "common/library.h"
@@ -498,6 +508,8 @@ static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
 
 static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 {
+    #ifndef _WIN32
+
     struct winsize winsize;
 
     //Initialize every member to 0, because it isn't guaranteed that every terminal sets them all
@@ -516,6 +528,17 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 
     requestData->characterPixelWidth = winsize.ws_xpixel / (double) winsize.ws_col;
     requestData->characterPixelHeight = winsize.ws_ypixel / (double) winsize.ws_row;
+
+    #else
+
+    CONSOLE_FONT_INFO cfi;
+    if(GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi) == FALSE) // Only works for ConHost
+        return false;
+
+    requestData->characterPixelWidth = cfi.dwFontSize.X;
+    requestData->characterPixelHeight = cfi.dwFontSize.Y;
+
+    #endif
 
     return requestData->characterPixelWidth > 1.0 && requestData->characterPixelHeight > 1.0;
 }
