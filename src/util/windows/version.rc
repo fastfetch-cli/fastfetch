@@ -1,6 +1,7 @@
 //
 // Include the necessary resources
 //
+#include <winuser.h>
 #include <winver.h>
 #include <ntdef.h>
 #include "fastfetch_config.h"
@@ -16,7 +17,10 @@
 #define VER_DEBUG 0
 #endif
 
-#define FF_TO_STR(str) #str
+#define FF_TO_STR1(str) #str
+#define FF_TO_STR(str) FF_TO_STR1(str)
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "manifest.xml"
 
 // ------- version info -------------------------------------------------------
 
