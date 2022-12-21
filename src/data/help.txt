@@ -20,7 +20,7 @@ General options:
     --multithreading <?value>:        use multiple threads to detect values
     --stat <?value>:                  print time usage (in ms) for individual modules
     --allow-slow-operations <?value>: allow operations that are usually very slow for more detailed output
-    --escape-bedrock <?value>:        whether to escape the bedrock jail on Bedrock Linux
+    --escape-bedrock <?value>:        on Bedrock Linux, whether to escape the bedrock jail
     --pipe <?value>:                  disable logo and all escape sequences
 
 Logo options:
