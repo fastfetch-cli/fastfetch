@@ -1,68 +1,68 @@
 Usage: fastfetch <options>
 
 Informative options:
-    -h,--help:             shows this message and exits
-    -h,--help <command>:   shows help for a specific command and exits
-    -v,--version:          prints the version of fastfetch and exits
-    --list-logos:          list available logos and exits
-    --list-modules:        lists available modules and exits
-    --list-presets:        list presets fastfetch knows about and exits. They can be loaded with --load-config. (+)
-    --list-features:       list the supported features fastfetch was compiled with and exits. Mainly for development.
-    --print-logos:         show available logos and exits
-    --print-config-system: prints the default system config and exits
-    --print-config-user:   prints the default user config and exits
-    --print-structure:     prints the default structure and exits
+    -h,--help:             Show this message and exit
+    -h,--help <command>:   Show help for a specific command and exit
+    -v,--version:          Print the version of fastfetch and exit
+    --list-logos:          List available logos and exit
+    --list-modules:        List available modules and exit
+    --list-presets:        List presets fastfetch knows about and exit; they can be loaded with --load-config (+)
+    --list-features:       List the supported features fastfetch was compiled with and exit (mainly for development)
+    --print-logos:         Show available logos and exit
+    --print-config-system: Print the default system config and exit
+    --print-config-user:   Print the default user config and exit
+    --print-structure:     Print the default structure and exit
 
 General options:
-    -r,--recache <?value>:            generate new cached values
-    --nocache <?value>:               don't use cached values, but also don't overwrite existing ones
-    --load-config <file>:             load a config file or a preset (+)
-    --multithreading <?value>:        use multiple threads to detect values
-    --stat <?value>:                  print time usage (in ms) for individual modules
-    --allow-slow-operations <?value>: allow operations that are usually very slow for more detailed output
-    --escape-bedrock <?value>:        on Bedrock Linux, whether to escape the bedrock jail
-    --pipe <?value>:                  disable logo and all escape sequences
+    -r,--recache <?value>:            Generate new cached values
+    --nocache <?value>:               Don't use cached values, but also don't overwrite existing ones
+    --load-config <file>:             Load a config file or a preset (+)
+    --multithreading <?value>:        Use multiple threads to detect values
+    --stat <?value>:                  Print time usage (in ms) for individual modules
+    --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
+    --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
+    --pipe <?value>:                  Disable logo and all escape sequences
 
 Logo options:
-    -l,--logo <logo>:                set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file
-    --logo-type <type>:              set the type of the logo given. Must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa.
-    --logo-width <width>:            set the width of the logo (in characters), if it is an image
-    --logo-height <height>:          set the height of the logo (in characters), if it is an image
-    --logo-color-[1-9] <color>:      overwrite a color in the logo
-    --logo-padding <padding>:        set the padding on the left and the right of the logo
-    --logo-padding-left <padding>:   set the padding on the left of the logo
-    --logo-padding-right <padding>:  set the padding on the right of the logo
-    --logo-print-remaining <?value>: whether to print the remaining logo, if it has more lines than modules to display
-    --file <file>:                   short for --logo-type file --logo <file>
-    --file-raw <file>:               short for --logo-type file-raw --logo <file>
-    --data <data>:                   short for --logo-type data --logo <data>
-    --data-raw <data>:               short for --logo-type data-raw --logo <data>
-    --sixel <file>:                  short for --logo-type sixel --logo <file>
-    --kitty <file>:                  short for --logo-type kitty --logo <file>
-    --chafa <file>:                  short for --logo-type chafa --logo <file>
+    -l,--logo <logo>:                Set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file
+    --logo-type <type>:              Set the type of the logo given. Must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa.
+    --logo-width <width>:            Set the width of the logo (in characters), if it is an image
+    --logo-height <height>:          Set the height of the logo (in characters), if it is an image
+    --logo-color-[1-9] <color>:      Overwrite a color in the logo
+    --logo-padding <padding>:        Set the padding on the left and the right of the logo
+    --logo-padding-left <padding>:   Set the padding on the left of the logo
+    --logo-padding-right <padding>:  Set the padding on the right of the logo
+    --logo-print-remaining <?value>: Whether to print the remaining logo, if it has more lines than modules to display
+    --file <file>:                   Short for --logo-type file --logo <file>
+    --file-raw <file>:               Short for --logo-type file-raw --logo <file>
+    --data <data>:                   Short for --logo-type data --logo <data>
+    --data-raw <data>:               Short for --logo-type data-raw --logo <data>
+    --sixel <file>:                  Short for --logo-type sixel --logo <file>
+    --kitty <file>:                  Short for --logo-type kitty --logo <file>
+    --chafa <file>:                  Short for --logo-type chafa --logo <file>
 
 Display options:
-    -s,--structure <structure>:  sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
-    --color-keys <color>:        sets the color of the keys
-    --color-title <color>:       sets the color of the title
-    -c,--color <color>:          sets the color of both the keys and the title
-    --separator <str>:           sets the separator between key and value. Default is a colon with a space
-    --set <key=value>:           hard set the value of a key
-    --set-keyless <key=value>:   hard set the value of a key, but don't print the key or the separator
-    --show-errors <?value>:      print occurring errors
-    --disable-linewrap <?value>: whether to disable line wrap during the run
-    --hide-cursor <?value>:      whether to hide the cursor during the run
-    --binary-prefix <value>:     sets the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
+    -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
+    --color-keys <color>:        Set the color of the keys
+    --color-title <color>:       Set the color of the title
+    -c,--color <color>:          Set the color of both the keys and title
+    --separator <str>:           Set the separator between key and value. Default is a colon with a space
+    --set <key=value>:           Hard set the value of a key
+    --set-keyless <key=value>:   Hard set the value of a key, but don't print the key or the separator
+    --show-errors <?value>:      Print occurring errors
+    --disable-linewrap <?value>: Whether to disable line wrap during the run
+    --hide-cursor <?value>:      Whether to hide the cursor during the run
+    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
 
 General module options:
-    --<module>-format <format>: Sets the format string to use for each specific module.
+    --<module>-format <format>: Set the format string to use for each specific module.
                                 To see how a format string works, use fastfetch --help format.
                                 To see help about a specific format string, use fastfetch --help <module>-format.
 
-    --<module>-key <key>:       Sets the key to use for each specific module.
+    --<module>-key <key>:       Set the key to use for each specific module.
                                 For modules which print multiple lines, the string is parsed as a format string with the index as first character.
 
-    --<module>-error <format>:  Sets the error format string to use for each specific module.
+    --<module>-error <format>:  Set the error format string to use for each specific module.
                                 The error is given as the first and only argument.
                                 Setting this for a module will cause it to appear, even if --show-errors is not given.
 
@@ -90,12 +90,12 @@ Library options: Set the path of a library to load
     --lib-cjson <path>
 
 Module specific options:
-    --title-fqdn <?value>:          Sets if the title should use fully qualified domain name. Default is false.
+    --title-fqdn <?value>:          Set if the title should use fully qualified domain name. Default is false.
     --separator-string <str>:       Set the string printed by the separator module
     --os-file <path>:               Set the path to the file containing OS information
     --disk-folders <folders>:       A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
-    --disk-show-removable <?value>: Sets if removable volume should be printed. Default is true.
-    --disk-show-hidden <?value>:    Sets if hidden volumes should be printed. Default is false
+    --disk-show-removable <?value>: Set if removable volume should be printed. Default is true.
+    --disk-show-hidden <?value>:    Set if hidden volumes should be printed. Default is false
     --battery-dir <folder>:         The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp  <?value>:           Detect and display CPU temperature if supported. Default is false
     --gpu-temp  <?value>:           Detect and display GPU temperature if supported. Default is false
@@ -109,8 +109,8 @@ Module specific options:
     --weather-timeout:              Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:        The output weather format to be used. It must be URI encoded.
     --player-name:                  The name of the player to use
-    --gl <value>:                   Sets the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
-    --percent-type <value>:         Sets the percentage output type. 1 for percentage number, 2 for bar, 3 for both. Default is 1
+    --gl <value>:                   Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
+    --percent-type <value>:         Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both. Default is 1
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.
