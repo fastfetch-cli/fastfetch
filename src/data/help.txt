@@ -1,22 +1,22 @@
 Usage: fastfetch <options>
 
 Informative options:
-    -h,--help:             Show this message and exit
-    -h,--help <command>:   Show help for a specific command and exit
-    -v,--version:          Print the version of fastfetch and exit
-    --list-logos:          List available logos and exit
-    --list-modules:        List available modules and exit
-    --list-presets:        List presets fastfetch knows about and exit; they can be loaded with --load-config (+)
-    --list-features:       List the supported features fastfetch was compiled with and exit (mainly for development)
-    --print-logos:         Show available logos and exit
-    --print-config-system: Print the default system config and exit
-    --print-config-user:   Print the default user config and exit
-    --print-structure:     Print the default structure and exit
+    -h,--help:             Show this message
+    -h,--help <command>:   Show help for a specific command
+    -v,--version:          Show the version of fastfetch
+    --list-logos:          List available logos
+    --list-modules:        List available modules
+    --list-presets:        List presets fastfetch knows about; they can be loaded with --load-config (+)
+    --list-features:       List the supported features fastfetch was compiled with (mainly for development)
+    --print-logos:         Print available logos
+    --print-config-system: Print the default system config
+    --print-config-user:   Print the default user config
+    --print-structure:     Print the default structure
 
 General options:
     --load-config <file>:             Load a config file or preset (+)
     --multithreading <?value>:        Use multiple threads to detect values
-    --stat <?value>:                  Print time usage (in ms) for individual modules
+    --stat <?value>:                  Show time usage (in ms) for individual modules
     --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
     --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
     --pipe <?value>:                  Disable logo and all escape sequences
