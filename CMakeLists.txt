@@ -221,7 +221,6 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
 set(LIBFASTFETCH_SRC
     src/common/bar.c
-    src/common/caching.c
     src/common/font.c
     src/common/format.c
     src/common/init.c

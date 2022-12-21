@@ -895,16 +895,9 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     ///////////////////
 
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
-    {
-        //Set cacheSave as well, because the user expects the values to be cached when expliciting using --recache
         instance->config.recache = optionParseBoolean(value);
-        instance->config.cacheSave = instance->config.recache;
-    }
     else if(strcasecmp(key, "--nocache") == 0)
-    {
-        instance->config.recache = optionParseBoolean(value);
-        instance->config.cacheSave = false;
-    }
+        fputs("`--nocache` are obsoleted. Caching functions other than image caching are removed.\n\n", stderr);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)

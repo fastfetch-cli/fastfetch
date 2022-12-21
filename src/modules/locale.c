@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "common/caching.h"
 #include "common/printing.h"
 #include "detection/locale/locale.h"
 
@@ -8,9 +7,6 @@
 
 void ffPrintLocale(FFinstance* instance)
 {
-    if(ffPrintFromCache(instance, FF_LOCALE_MODULE_NAME, &instance->config.locale, FF_LOCALE_NUM_FORMAT_ARGS))
-        return;
-
     FFstrbuf locale;
     ffStrbufInit(&locale);
 
@@ -21,9 +17,17 @@ void ffPrintLocale(FFinstance* instance)
         return;
     }
 
-    ffPrintAndWriteToCache(instance, FF_LOCALE_MODULE_NAME, &instance->config.locale, &locale, FF_LOCALE_NUM_FORMAT_ARGS, (FFformatarg[]){
-        {FF_FORMAT_ARG_TYPE_STRBUF, &locale}
-    });
+    if(instance->config.locale.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(instance, FF_LOCALE_MODULE_NAME, 0, &instance->config.locale.key);
+        ffStrbufPutTo(&locale, stdout);
+    }
+    else
+    {
+        ffPrintFormat(instance, FF_LOCALE_MODULE_NAME, 0, &instance->config.locale, FF_LOCALE_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &locale}
+        });
+    }
 
     ffStrbufDestroy(&locale);
 }

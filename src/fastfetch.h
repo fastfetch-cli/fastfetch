@@ -85,7 +85,6 @@ typedef struct FFconfig
 
     bool showErrors;
     bool recache;
-    bool cacheSave;
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
