@@ -82,15 +82,12 @@ static double detectCPUTemp(const FFinstance* instance)
     return FF_CPU_TEMP_UNSET;
 }
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu, bool cached)
+void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 {
     if(instance->config.cpuTemp)
         cpu->temperature = detectCPUTemp(instance);
     else
         cpu->temperature = FF_CPU_TEMP_UNSET;
-
-    if(cached)
-        return;
 
     FFstrbuf physicalCoresBuffer;
     ffStrbufInit(&physicalCoresBuffer);

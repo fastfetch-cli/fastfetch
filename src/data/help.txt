@@ -14,8 +14,6 @@ Informative options:
     --print-structure:     prints the default stucture and exits
 
 General options:
-    -r,--recache <?value>:            generate new cached values
-    --nocache <?value>:               don't use cached values, but also don't overwrite existing ones
     --load-config <file>:             load a config file or a preset (+)
     --multithreading <?value>:        use multiple threads to detect values
     --stat <?value>:                  print time usage (in ms) for individual modules
