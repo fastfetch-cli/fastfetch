@@ -138,7 +138,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
 
-    instance->config.logo.chafaFgOnly = true;
+    instance->config.logo.chafaFgOnly = false;
     ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
 
     ffStrbufInit(&instance->config.colorKeys);

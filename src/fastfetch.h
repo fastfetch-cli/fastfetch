@@ -210,7 +210,6 @@ typedef struct FFstate
     #endif
 
     FFlist configDirs;
-    FFstrbuf cacheDir;
 } FFstate;
 
 typedef struct FFinstance

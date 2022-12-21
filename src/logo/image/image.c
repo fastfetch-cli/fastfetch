@@ -24,7 +24,12 @@
 
 static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
 {
-    return _fullpath(resolved_name, file_name, _MAX_PATH);
+    char* result = _fullpath(resolved_name, file_name, _MAX_PATH);
+    if(result)
+    {
+        resolved_name[1] = resolved_name[0]; // Drive Name
+        resolved_name[0] = '/';
+    }
 }
 #endif
 
@@ -270,7 +275,7 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffchafa_canvas_config_set_symbol_map(canvasConfig, symbolMap);
     ffchafa_canvas_config_set_color_space(canvasConfig, CHAFA_COLOR_SPACE_DIN99D);
     ffchafa_canvas_config_set_canvas_mode(canvasConfig, CHAFA_CANVAS_MODE_TRUECOLOR);
-    ffchafa_canvas_config_set_fg_only_enabled(canvasConfig, instance->config.logo.chafaFgOnly);
+    // ffchafa_canvas_config_set_fg_only_enabled(canvasConfig, instance->config.logo.chafaFgOnly);
     // TODO: expose more chafa configs to fastfetch flags
 
     ChafaCanvas* canvas = ffchafa_canvas_new(canvasConfig);
@@ -587,7 +592,19 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     requestData.logoPixelHeight = simpleCeil((double) instance->config.logo.height * requestData.characterPixelHeight);
 
     ffStrbufInitA(&requestData.cacheDir, PATH_MAX * 2);
-    ffStrbufAppend(&requestData.cacheDir, &instance->state.cacheDir);
+
+    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
+    ffStrbufAppendS(&requestData.cacheDir, getenv("XDG_CACHE_HOME"));
+    #endif
+
+    if(requestData.cacheDir.length == 0)
+    {
+        ffStrbufAppendS(&requestData.cacheDir, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&requestData.cacheDir, "/.cache/");
+    }
+    else
+        ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
+
     ffStrbufAppendS(&requestData.cacheDir, "images");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);
