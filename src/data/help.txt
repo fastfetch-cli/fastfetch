@@ -32,7 +32,7 @@ Logo options:
     --logo-padding <padding>:        set the padding on the left and the right of the logo
     --logo-padding-left <padding>:   set the padding on the left of the logo
     --logo-padding-right <padding>:  set the padding on the right of the logo
-    --logo-print-remaining <?value>: weather to print the remaining logo, if it has more lines than modules to display
+    --logo-print-remaining <?value>: whether to print the remaining logo, if it has more lines than modules to display
     --file <file>:                   short for --logo-type file --logo <file>
     --file-raw <file>:               short for --logo-type file-raw --logo <file>
     --data <data>:                   short for --logo-type data --logo <data>
@@ -50,8 +50,8 @@ Display options:
     --set <key=value>:           hard set the value of a key
     --set-keyless <key=value>:   hard set the value of a key, but don't print the key or the separator
     --show-errors <?value>:      print occurring errors
-    --disable-linewrap <?value>: weather to disable line wrap during the run
-    --hide-cursor <?value>:      weather to hide the cursor during the run
+    --disable-linewrap <?value>: whether to disable line wrap during the run
+    --hide-cursor <?value>:      whether to hide the cursor during the run
     --binary-prefix <value>:     sets the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
 
 General module options:
