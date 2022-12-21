@@ -88,11 +88,11 @@ Library options: Set the path of a library to load
     --lib-cjson <path>
 
 Module specific options:
-    --title-fqdn <?value>:          Set if the title should use fully qualified domain name. Default is false.
+    --title-fqdn <?value>:          Set if the title should use fully qualified domain name. Default is false
     --separator-string <str>:       Set the string printed by the separator module
     --os-file <path>:               Set the path to the file containing OS information
     --disk-folders <folders>:       A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
-    --disk-show-removable <?value>: Set if removable volume should be printed. Default is true.
+    --disk-show-removable <?value>: Set if removable volume should be printed. Default is true
     --disk-show-hidden <?value>:    Set if hidden volumes should be printed. Default is false
     --battery-dir <folder>:         The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp  <?value>:           Detect and display CPU temperature if supported. Default is false
