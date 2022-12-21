@@ -226,19 +226,30 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
 #include <chafa.h>
 static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
-    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false,
+        "libchafa" FF_LIBRARY_EXTENSION, 1,
+        "libchafa-0" FF_LIBRARY_EXTENSION, -1 // Required for Windows
+    )
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_add_by_tags, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_apply_selectors, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_geometry, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_symbol_map, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_color_space, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_canvas_mode, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_fg_only_enabled, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_draw_all_pixels, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_print, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_unref, false)
+
+    #ifndef _WIN32
+    // FIXME: These functions must be imported from `libglib` dlls. Leak them for now
     FF_LIBRARY_LOAD_SYMBOL(chafa, g_string_free, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, g_error_free, false)
+    #endif
 
     imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
     size_t length;
@@ -250,11 +261,17 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     }
 
     ChafaSymbolMap* symbolMap = ffchafa_symbol_map_new();
-    ffchafa_symbol_map_add_by_tags(symbolMap, CHAFA_SYMBOL_TAG_ALL);
+    GError* error = NULL;
+    if(!ffchafa_symbol_map_apply_selectors(symbolMap, instance->config.logo.chafaSymbols.chars, &error))
+        fputs(error->message, stderr);
 
     ChafaCanvasConfig* canvasConfig = ffchafa_canvas_config_new();
     ffchafa_canvas_config_set_geometry(canvasConfig, (gint) requestData->logoCharacterWidth, (gint) requestData->logoCharacterHeight);
     ffchafa_canvas_config_set_symbol_map(canvasConfig, symbolMap);
+    ffchafa_canvas_config_set_color_space(canvasConfig, CHAFA_COLOR_SPACE_DIN99D);
+    ffchafa_canvas_config_set_canvas_mode(canvasConfig, CHAFA_CANVAS_MODE_TRUECOLOR);
+    ffchafa_canvas_config_set_fg_only_enabled(canvasConfig, instance->config.logo.chafaFgOnly);
+    // TODO: expose more chafa configs to fastfetch flags
 
     ChafaCanvas* canvas = ffchafa_canvas_new(canvasConfig);
     ffchafa_canvas_draw_all_pixels(
@@ -275,7 +292,11 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffLogoPrintChars(instance, result.chars, false);
     writeCacheStrbuf(requestData, &result, FF_CACHE_FILE_CHAFA);
 
+    #ifndef _WIN32
     ffg_string_free(str, TRUE);
+    ffg_error_free(error);
+    #endif
+
     ffchafa_canvas_unref(canvas);
     ffchafa_canvas_config_unref(canvasConfig);
     ffchafa_symbol_map_unref(symbolMap);

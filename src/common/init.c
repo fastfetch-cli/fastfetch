@@ -138,6 +138,9 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
 
+    instance->config.logo.chafaFgOnly = true;
+    ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
+
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);
 
@@ -381,6 +384,7 @@ static void destroyModuleArg(FFModuleArgs* args)
 static void destroyConfig(FFinstance* instance)
 {
     ffStrbufDestroy(&instance->config.logo.source);
+    ffStrbufDestroy(&instance->config.logo.chafaSymbols);
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufDestroy(&instance->config.logo.colors[i]);
     ffStrbufDestroy(&instance->config.colorKeys);

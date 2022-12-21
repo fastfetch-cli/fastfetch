@@ -75,6 +75,9 @@ typedef struct FFconfig
         uint32_t paddingLeft;
         uint32_t paddingRight;
         bool printRemaining;
+
+        bool chafaFgOnly;
+        FFstrbuf chafaSymbols;
     } logo;
 
     //If one of those is empty, ffLogoPrint will set them

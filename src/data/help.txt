@@ -38,6 +38,8 @@ Logo options:
     --sixel <file>:                  short for --logo-type sixel --logo <file>
     --kitty <file>:                  short for --logo-type kitty --logo <file>
     --chafa <file>:                  short for --logo-type chafa --logo <file>
+    --chafa-symbols <str>:           specify character symbols to employ in final output. See chafa document for detail
+    --chafa-fg-only <?value>:        produces character-cell output using foreground colors only. See chafa document for detail
 
 Display options:
     -s,--structure <structure>:  sets the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.

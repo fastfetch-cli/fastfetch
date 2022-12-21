@@ -1017,6 +1017,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.logo.source);
         instance->config.logo.type = FF_LOGO_TYPE_IMAGE_CHAFA;
     }
+    else if(strcasecmp(key, "--chafa-fg-only") == 0)
+    {
+        instance->config.logo.chafaFgOnly = optionParseBoolean(value);
+    }
+    else if(strcasecmp(key, "--chafa-symbols") == 0)
+    {
+        optionParseString(key, value, &instance->config.logo.chafaSymbols);
+    }
 
     ///////////////////
     //Display options//
