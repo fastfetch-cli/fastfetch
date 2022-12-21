@@ -14,9 +14,7 @@ Informative options:
     --print-structure:     Print the default structure and exit
 
 General options:
-    -r,--recache <?value>:            Generate new cached values
-    --nocache <?value>:               Don't use cached values, but also don't overwrite existing ones
-    --load-config <file>:             Load a config file or a preset (+)
+    --load-config <file>:             Load a config file or preset (+)
     --multithreading <?value>:        Use multiple threads to detect values
     --stat <?value>:                  Print time usage (in ms) for individual modules
     --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
@@ -24,8 +22,8 @@ General options:
     --pipe <?value>:                  Disable logo and all escape sequences
 
 Logo options:
-    -l,--logo <logo>:                Set the logo to use. The type is specified by --logo-type. If default: the name of a builtin logo or a path to a file
-    --logo-type <type>:              Set the type of the logo given. Must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa.
+    -l,--logo <logo>:                Set the logo; if default, the name of a builtin logo or a path to a file
+    --logo-type <type>:              Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa
     --logo-width <width>:            Set the width of the logo (in characters), if it is an image
     --logo-height <height>:          Set the height of the logo (in characters), if it is an image
     --logo-color-[1-9] <color>:      Overwrite a color in the logo
@@ -52,7 +50,7 @@ Display options:
     --show-errors <?value>:      Print occurring errors
     --disable-linewrap <?value>: Whether to disable line wrap during the run
     --hide-cursor <?value>:      Whether to hide the cursor during the run
-    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
+    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC.
 
 General module options:
     --<module>-format <format>: Set the format string to use for each specific module.
