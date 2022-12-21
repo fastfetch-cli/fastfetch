@@ -1726,6 +1726,45 @@ static const FFlogo* getLogoOpenSuseTumbleweed()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoOpenMandriva()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("openmandriva", "open-mandriva", "open_mandriva")
+    FF_LOGO_LINES(
+        "                 ``````\n"
+        "            `-:/+++++++//:-.`\n"
+        "         .:+++oooo+/:.``   ``\n"
+        "      `:+ooooooo+:.  `-:/++++++/:.`\n"
+        "     -+oooooooo:` `-++o+/::::://+o+/-\n"
+        "   `/ooooooooo-  -+oo/.`        `-/oo+.\n"
+        "  `+ooooooooo.  :os/`              .+so:\n"
+        "  +sssssssss/  :ss/                 `+ss-\n"
+        " :ssssssssss`  sss`                  .sso\n"
+        " ossssssssss  `yyo                    sys\n"
+        "`sssssssssss` `yys                   `yys\n"
+        "`sssssssssss:  +yy/                  +yy:\n"
+        " oyyyyyyyyyys. `oyy/`              `+yy+\n"
+        " :yyyyyyyyyyyo. `+yhs:.         `./shy/\n"
+        "  oyyyyyyyyyyys:` .oyhys+:----/+syhy+. `\n"
+        "  `syyyyyyyyyyyyo-` .:osyhhhhhyys+:``.:`\n"
+        "   `oyyyyyyyyyyyyys+-`` `.----.```./oo.\n"
+        "     /yhhhhhhhhhhhhhhyso+//://+osyhy/`\n"
+        "      `/yhhhhhhhhhhhhhhhhhhhhhhhhy/`\n"
+        "        `:oyhhhhhhhhhhhhhhhhhhyo:`\n"
+        "            .:+syhhhhhhhhys+:-`\n"
+        "                ``....``"
+
+
+
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoPop()
 {
     FF_LOGO_INIT
@@ -2353,6 +2392,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoOpenSuseSmall,
         getLogoOpenSuseLeap,
         getLogoOpenSuseTumbleweed,
+        getLogoOpenMandriva,
         getLogoPop,
         getLogoPopSmall,
         getLogoParabola,
