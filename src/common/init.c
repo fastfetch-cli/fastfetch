@@ -140,6 +140,9 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.logo.chafaFgOnly = false;
     ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
+    instance->config.logo.chafaCanvasMode = UINT32_MAX;
+    instance->config.logo.chafaColorSpace = UINT32_MAX;
+    instance->config.logo.chafaDitherMode = UINT32_MAX;
 
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);

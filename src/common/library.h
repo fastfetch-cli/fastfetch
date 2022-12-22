@@ -43,6 +43,9 @@
 #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, returnValue);
 
+#define FF_LIBRARY_LOAD_SYMBOL_LAZY(library, symbolName) \
+    __typeof__(&symbolName) ff ## symbolName = dlsym(library, #symbolName);
+
 #define FF_LIBRARY_LOAD_SYMBOL_MESSAGE(library, symbolName) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, "dlsym " #symbolName " failed");
 

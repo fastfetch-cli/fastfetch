@@ -240,21 +240,12 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_geometry, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_symbol_map, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_color_space, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_canvas_mode, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_fg_only_enabled, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_draw_all_pixels, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_print, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_unref, false)
-
-    #ifndef _WIN32
-    // FIXME: These functions must be imported from `libglib` dlls. Leak them for now
-    FF_LIBRARY_LOAD_SYMBOL(chafa, g_string_free, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, g_error_free, false)
-    #endif
 
     imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
     size_t length;
@@ -273,10 +264,31 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ChafaCanvasConfig* canvasConfig = ffchafa_canvas_config_new();
     ffchafa_canvas_config_set_geometry(canvasConfig, (gint) requestData->logoCharacterWidth, (gint) requestData->logoCharacterHeight);
     ffchafa_canvas_config_set_symbol_map(canvasConfig, symbolMap);
-    ffchafa_canvas_config_set_color_space(canvasConfig, CHAFA_COLOR_SPACE_DIN99D);
-    ffchafa_canvas_config_set_canvas_mode(canvasConfig, CHAFA_CANVAS_MODE_TRUECOLOR);
-    // ffchafa_canvas_config_set_fg_only_enabled(canvasConfig, instance->config.logo.chafaFgOnly);
-    // TODO: expose more chafa configs to fastfetch flags
+
+    if(instance->config.logo.chafaFgOnly)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_fg_only_enabled);
+        if(ffchafa_canvas_config_set_fg_only_enabled)
+            ffchafa_canvas_config_set_fg_only_enabled(canvasConfig, true);
+    }
+    if(instance->config.logo.chafaCanvasMode < CHAFA_CANVAS_MODE_MAX)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_canvas_mode);
+        if(ffchafa_canvas_config_set_canvas_mode)
+            ffchafa_canvas_config_set_canvas_mode(canvasConfig, (ChafaCanvasMode) instance->config.logo.chafaCanvasMode);
+    }
+    if(instance->config.logo.chafaColorSpace < CHAFA_COLOR_SPACE_MAX)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_color_space)
+        if(ffchafa_canvas_config_set_color_space)
+            ffchafa_canvas_config_set_color_space(canvasConfig, (ChafaColorSpace) instance->config.logo.chafaColorSpace);
+    }
+    if(instance->config.logo.chafaDitherMode < CHAFA_DITHER_MODE_MAX)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_dither_mode)
+        if(ffchafa_canvas_config_set_dither_mode)
+            ffchafa_canvas_config_set_dither_mode(canvasConfig, (ChafaDitherMode) instance->config.logo.chafaDitherMode);
+    }
 
     ChafaCanvas* canvas = ffchafa_canvas_new(canvasConfig);
     ffchafa_canvas_draw_all_pixels(
@@ -297,10 +309,16 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffLogoPrintChars(instance, result.chars, false);
     writeCacheStrbuf(requestData, &result, FF_CACHE_FILE_CHAFA);
 
-    #ifndef _WIN32
-    ffg_string_free(str, TRUE);
-    ffg_error_free(error);
-    #endif
+    // FIXME: These functions must be imported from `libglib` dlls on Windows
+    FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_string_free);
+    if(ffg_string_free)
+        ffg_string_free(str, TRUE);
+    if(error)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_error_free)
+        if(ffg_error_free)
+            ffg_error_free(error);
+    }
 
     ffchafa_canvas_unref(canvas);
     ffchafa_canvas_config_unref(canvasConfig);

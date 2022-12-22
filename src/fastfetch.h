@@ -78,6 +78,9 @@ typedef struct FFconfig
 
         bool chafaFgOnly;
         FFstrbuf chafaSymbols;
+        uint32_t chafaCanvasMode;
+        uint32_t chafaColorSpace;
+        uint32_t chafaDitherMode;
     } logo;
 
     //If one of those is empty, ffLogoPrint will set them

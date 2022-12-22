@@ -38,8 +38,11 @@ Logo options:
     --sixel <file>:                  Short for --logo-type sixel --logo <file>
     --kitty <file>:                  Short for --logo-type kitty --logo <file>
     --chafa <file>:                  Short for --logo-type chafa --logo <file>
-    --chafa-symbols <str>:           Specify character symbols to employ in final output. See chafa document for detail
     --chafa-fg-only <?value>:        Produce character-cell output using foreground colors only. See chafa document for detail
+    --chafa-symbols <str>:           Specify character symbols to employ in final output. See chafa document for detail
+    --chafa-canvas-mode <value>:     Determine how colors are used in the output. This value maps the int value of enum ChafaCanvasMode. See chafa document for detail
+    --chafa-color-space <value>:     Set color space used for quantization. 0 for RGB; 1 for DIN99d. See chafa document for detail
+    --chafa-dither-mode <value>:     Set output dither mode (No effect with 24-bit color). This value maps the int value of enum ChafaDitherMode. See chafa document for detail
 
 Display options:
     -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
