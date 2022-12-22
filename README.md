@@ -57,7 +57,7 @@ The following libraries are used if present at runtime:
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel graphics protocol. [`imagemagick`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/imagemagick.rb)
 * [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art. [`chafa`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/chafa.rb)
 
-For image logo, iTerm with sixel protocol should work. Apple Terminal is not supported.
+For image logo, iTerm with iterm image protocol should work. Apple Terminal is not supported.
 
 ### Windows
 
@@ -66,7 +66,12 @@ For image logo, iTerm with sixel protocol should work. Apple Terminal is not sup
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
 
-Note: On Windows 10-, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). Fastfetch on Windows targets [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment), which is not installed On Windows 10- by default. If you get errors like `ucrtbase.dll is missing`, try upgrading your system with `Windows Update` or downloading `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) which targets the ancient MSVCRT.
+Note: On Windows 10-, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) is provided to support these old systems, which
+
+1. Build with the ancient MSVCRT C runtime library, instead of the modern [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library
+2. Disable stdout application buffer, which seems to problematic for ConEmu.
+
+For image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
 
 ### Android
 
@@ -89,7 +94,7 @@ AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, C
 * Some logos have an old variant. Access it by appending _old to the logo name.
 * To disable the logo, use `--logo none`.
 * Get a list of all available logos with `fastfetch --print-logos`.
-* Printing images as logo is supported using Sixel / Kitty graphics protocol or chafas image to text conversion.
+* Printing images as logo is supported using Sixel / Kitty / iTerm graphics protocol or chafas image to text conversion.
 
 ##### Package managers
 ```
