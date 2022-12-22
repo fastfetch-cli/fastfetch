@@ -137,6 +137,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logo.paddingLeft = 0;
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
+    instance->config.logo.preserveAspectRadio = false;
 
     instance->config.logo.chafaFgOnly = false;
     ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default

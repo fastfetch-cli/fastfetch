@@ -2,6 +2,56 @@
 #include "common/io.h"
 #include "common/printing.h"
 
+static FFstrbuf base64Encode(FFstrbuf* in)
+{
+    const char* base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    FFstrbuf out;
+    ffStrbufInitA(&out, 8 * (1 + in->length / 6));
+
+    unsigned val = 0;
+    int valb = -6;
+    for (uint32_t i = 0; i < in->length; ++i)
+    {
+        unsigned char c = (unsigned char) in->chars[i];
+        val = (val << 8) + c;
+        valb += 8;
+        while (valb >= 0)
+        {
+            ffStrbufAppendC(&out, base64Chars[(val>>valb)&0x3F]);
+            valb -= 6;
+        }
+    }
+    if (valb > -6) ffStrbufAppendC(&out, base64Chars[((val<<8)>>(valb+8))&0x3F]);
+    while (out.length % 4) ffStrbufAppendC(&out, '=');
+    return out;
+}
+
+static bool printImageIterm(FFinstance* instance)
+{
+    if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
+        return false;
+
+    FFstrbuf buf;
+    ffStrbufInit(&buf);
+    if(!ffAppendFileBuffer(instance->config.logo.source.chars, &buf))
+        return false;
+
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    FFstrbuf base64 = base64Encode(&buf);
+    printf("\033]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\033[9999999D\n\033[%uA",
+        instance->config.logo.width,
+        instance->config.logo.height,
+        (unsigned) instance->config.logo.preserveAspectRadio,
+        base64.chars,
+        instance->config.logo.height
+    );
+    instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
+    instance->state.logoHeight = instance->config.logo.height;
+
+    return true;
+}
+
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
 #define FF_KITTY_MAX_CHUNK_SIZE 4096
@@ -589,6 +639,9 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
+    if(type == FF_LOGO_TYPE_IMAGE_ITERM)
+        return printImageIterm(instance);
+
     //Performance optimisation
     #ifndef FF_HAVE_CHAFA
         if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
@@ -664,7 +717,8 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 #else //FF_HAVE_IMAGEMAGICK{6, 7}
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
-    FF_UNUSED(instance, type);
+    if(type == FF_LOGO_TYPE_IMAGE_ITERM)
+        return printImageIterm(instance);
     return false;
 }
 #endif //FF_HAVE_IMAGEMAGICK{6, 7}
