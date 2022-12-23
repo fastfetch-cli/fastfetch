@@ -1,6 +1,6 @@
 # Fastfetch
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -57,7 +57,7 @@ The following libraries are used if present at runtime:
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel graphics protocol. [`imagemagick`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/imagemagick.rb)
 * [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art. [`chafa`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/chafa.rb)
 
-For image logo, iTerm with iterm image protocol should work. Apple Terminal is not supported.
+For the image logo, iTerm with iterm image protocol should work. Apple Terminal is not supported.
 
 ### Windows
 
@@ -66,12 +66,12 @@ For image logo, iTerm with iterm image protocol should work. Apple Terminal is n
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
 
-Note: On Windows 10-, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) is provided to support these old systems, which
+Note: On Windows 10, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) is provided to support these old systems, which
 
 1. Build with the ancient MSVCRT C runtime library, instead of the modern [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library
 2. Disable stdout application buffer, which seems to problematic for ConEmu.
 
-For image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
+For the image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
 
 ### Android
 
@@ -146,7 +146,7 @@ Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 s
 ## FAQ
 
 Q: Why do you need a very performant version of neofetch?
-> I like putting neofetch in my ~/.bashrc to have a system overwiew whenever i use the terminal, but the slow speed annoyed me, so i created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
+> I like putting neofetch in my ~/.bashrc to have a system overwiew whenever I use the terminal, but the slow speed annoyed me, so I created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
 
-Q: It does not display [*] correctly for me, what can i do?
-> This is most likely because your system is not implemented (yet). At the moment i am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration
+Q: It does not display [*] correctly for me, what can I do?
+> This is most likely because your system is not implemented (yet). At the moment I am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration
