@@ -55,6 +55,33 @@ static bool printImageIterm(FFinstance* instance)
     return true;
 }
 
+static bool printImageKittyDirect(FFinstance* instance)
+{
+    if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
+        return false;
+
+    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG))
+        return false;
+
+    if(!ffStrbufEndsWithIgnCaseS(&instance->config.logo.source, ".png"))
+        return false;
+
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    FFstrbuf base64 = base64Encode(&instance->config.logo.source);
+    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D",
+        (unsigned) instance->config.logo.width,
+        (unsigned) instance->config.logo.height,
+        base64.chars
+    );
+
+    instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
+    instance->state.logoHeight = instance->config.logo.height;
+
+    ffStrbufDestroy(&base64);
+
+    return true;
+}
+
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
 #define FF_KITTY_MAX_CHUNK_SIZE 4096
@@ -722,6 +749,8 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
     if(type == FF_LOGO_TYPE_IMAGE_ITERM)
         return printImageIterm(instance);
+    if(type == FF_LOGO_TYPE_IMAGE_KITTY)
+        return printImageKittyDirect(instance);
     return false;
 }
 #endif //FF_HAVE_IMAGEMAGICK{6, 7}
