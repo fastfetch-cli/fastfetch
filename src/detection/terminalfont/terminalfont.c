@@ -291,12 +291,43 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 #endif
 #endif //defined(_WIN32) || defined(__linux__)
 
+static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
+{
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+
+    FFstrbuf fontSize;
+    ffStrbufInit(&fontSize);
+
+    FFpropquery fontQuery[] = {
+        {"font_family ", &fontName},
+        {"font_size ", &fontSize},
+    };
+
+    if(!ffParsePropFileConfigValues(instance, "kitty/kitty.conf", 2, fontQuery))
+        return false;
+
+    if(fontName.length == 0)
+        ffStrbufSetS(&fontName, "monospace");
+    if(fontSize.length == 0)
+        ffStrbufSetS(&fontSize, "11.0");
+
+    ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
+
+    ffStrbufDestroy(&fontName);
+    ffStrbufDestroy(&fontSize);
+
+    return true;
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
 static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "alacritty") == 0)
         detectAlacritty(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0)
+        detectKitty(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
 
