@@ -57,15 +57,6 @@ static bool printImageIterm(FFinstance* instance)
 
 static bool printImageKittyDirect(FFinstance* instance)
 {
-    if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
-        return false;
-
-    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG))
-        return false;
-
-    if(!ffStrbufEndsWithIgnCaseS(&instance->config.logo.source, ".png"))
-        return false;
-
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     FFstrbuf base64 = base64Encode(&instance->config.logo.source);
     printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D",
@@ -667,17 +658,8 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
     return requestData->characterPixelWidth > 1.0 && requestData->characterPixelHeight > 1.0;
 }
 
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
 {
-    if(type == FF_LOGO_TYPE_IMAGE_ITERM)
-        return printImageIterm(instance);
-
-    //Performance optimisation
-    #ifndef FF_HAVE_CHAFA
-        if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
-            return false;
-    #endif
-
     FFLogoRequestData requestData;
     requestData.type = type;
     requestData.characterPixelWidth = 1;
@@ -686,8 +668,10 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     if(
         (type != FF_LOGO_TYPE_IMAGE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
         !getCharacterPixelDimensions(&requestData)
-    )
+    ) {
+        fputs("Logo: getCharacterPixelDimensions() failed", stderr);
         return false;
+    }
 
     requestData.logoPixelWidth = simpleCeil((double) instance->config.logo.width * requestData.characterPixelWidth);
     requestData.logoPixelHeight = simpleCeil((double) instance->config.logo.height * requestData.characterPixelHeight);
@@ -713,6 +697,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
+        fputs("Logo: Querying realpath of the image source failed", stderr);
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
@@ -741,16 +726,53 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     #endif
 
     ffStrbufDestroy(&requestData.cacheDir);
-    return result == FF_LOGO_IMAGE_RESULT_SUCCESS;
+
+    switch(result)
+    {
+        case FF_LOGO_IMAGE_RESULT_INIT_ERROR:
+            fputs("Logo: Init Image Magick library failed\n", stderr);
+            return false;
+        case FF_LOGO_IMAGE_RESULT_RUN_ERROR:
+            fputs("Logo: Failed to load / convert the image source\n", stderr);
+            return false;
+        default
+            return true;
+    }
 }
 
-#else //FF_HAVE_IMAGEMAGICK{6, 7}
+#endif //FF_HAVE_IMAGEMAGICK{6, 7}
+
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
+    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG))
+    {
+        fputs("Logo: Image file not found\n", stderr);
+        return false;
+    }
+
     if(type == FF_LOGO_TYPE_IMAGE_ITERM)
         return printImageIterm(instance);
-    if(type == FF_LOGO_TYPE_IMAGE_KITTY)
+
+    if(
+        type == FF_LOGO_TYPE_IMAGE_KITTY &&
+        ffStrbufEndsWithIgnCaseS(&instance->config.logo.source, ".png") &&
+        instance->config.logo.width &&
+        instance->config.logo.height
+    )
         return printImageKittyDirect(instance);
-    return false;
+
+    #ifndef FF_HAVE_CHAFA
+        if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
+        {
+            fputs("Logo: Fastfetch was built without Chafa support\n", stderr);
+            return false;
+        }
+    #endif
+
+    #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
+        return printImageIfExistsSlowPath()
+    #else
+        fputs("Logo: Fastfetch was built without ImageMagick support\n", stderr);
+        return false;
+    #endif
 }
-#endif //FF_HAVE_IMAGEMAGICK{6, 7}
