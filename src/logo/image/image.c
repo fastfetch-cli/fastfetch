@@ -735,7 +735,7 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
         case FF_LOGO_IMAGE_RESULT_RUN_ERROR:
             fputs("Logo: Failed to load / convert the image source\n", stderr);
             return false;
-        default
+        default:
             return true;
     }
 }
@@ -770,7 +770,7 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     #endif
 
     #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
-        return printImageIfExistsSlowPath()
+        return printImageIfExistsSlowPath(instance, type);
     #else
         fputs("Logo: Fastfetch was built without ImageMagick support\n", stderr);
         return false;
