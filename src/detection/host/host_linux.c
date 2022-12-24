@@ -75,15 +75,6 @@ void ffDetectHostImpl(FFHostResult* host)
     ffStrbufInit(&host->productSku);
     getHostValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->productSku);
 
-    ffStrbufInit(&host->chassisType);
-    getHostValue("/sys/devices/virtual/dmi/id/chassis_type", "/sys/class/dmi/id/chassis_type", &host->chassisType);
-
-    ffStrbufInit(&host->chassisVendor);
-    getHostValue("/sys/devices/virtual/dmi/id/chassis_vendor", "/sys/class/dmi/id/chassis_vendor", &host->chassisVendor);
-
-    ffStrbufInit(&host->chassisVersion);
-    getHostValue("/sys/devices/virtual/dmi/id/chassis_version", "/sys/class/dmi/id/chassis_version", &host->chassisVersion);
-
     ffStrbufInit(&host->sysVendor);
     getHostValue("/sys/devices/virtual/dmi/id/sys_vendor", "/sys/class/dmi/id/sys_vendor", &host->sysVendor);
 

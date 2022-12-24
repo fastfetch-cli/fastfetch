@@ -217,6 +217,7 @@
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
 #--os-key OS
 #--host-key Host
+#--chassis-key Chassis
 #--kernel-key Kernel
 #--uptime-key Uptime
 #--processes-key Processes
@@ -260,6 +261,7 @@
 # An empty format string (As they are currently below) will behave as if it was not set.
 #--os-format
 #--host-format
+#--chassis-format
 #--kernel-format
 #--uptime-format
 #--processes-format
@@ -302,6 +304,7 @@
 # If one of them is set, the module will appear, even if --show-errors is not given.
 #--os-error
 #--host-error
+#--chassis-error
 #--kernel-error
 #--uptime-error
 #--processes-error

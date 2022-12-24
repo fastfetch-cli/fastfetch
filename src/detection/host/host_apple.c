@@ -151,11 +151,7 @@ void ffDetectHostImpl(FFHostResult* host)
     ffStrbufInit(&host->productFamily);
     ffStrbufInit(&host->productVersion);
     ffStrbufInit(&host->productSku);
-
     ffStrbufInitS(&host->sysVendor, "Apple");
-    ffStrbufInit(&host->chassisType);
-    ffStrbufInit(&host->chassisVendor);
-    ffStrbufInit(&host->chassisVersion);
 
     ffStrbufAppendS(&host->error, ffSysctlGetString("hw.model", &host->productFamily));
     if(host->error.length == 0)

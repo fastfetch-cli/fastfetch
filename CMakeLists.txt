@@ -257,6 +257,7 @@ set(LIBFASTFETCH_SRC
     src/modules/bios.c
     src/modules/board.c
     src/modules/break.c
+    src/modules/chassis.c
     src/modules/colors.c
     src/modules/cpu.c
     src/modules/cpuUsage.c
@@ -310,6 +311,7 @@ if(LINUX)
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
+        src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/cursor/cursor_linux.c
@@ -348,6 +350,7 @@ elseif(ANDROID)
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuUsage/cpuUsage_linux.c
@@ -381,6 +384,7 @@ elseif(BSD)
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpuUsage/cpuUsage_bsd.c
         src/detection/cursor/cursor_linux.c
@@ -420,6 +424,7 @@ elseif(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
         src/detection/cursor/cursor_nosupport.c
@@ -455,6 +460,7 @@ elseif(WIN32)
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
+        src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_windows.c
         src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cursor/cursor_windows.c

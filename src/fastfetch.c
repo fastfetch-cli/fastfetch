@@ -106,6 +106,14 @@ static inline void printCommandHelp(const char* command)
             "board version"
         );
     }
+    else if(strcasecmp(command, "chassis-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("chassis", "{2} {3}", 4,
+            "chassis type",
+            "chassis vendor",
+            "chassis version"
+        );
+    }
     else if(strcasecmp(command, "kernel-format") == 0)
     {
         constructAndPrintCommandHelpFormat("kernel", "{2}", 3,
@@ -1080,6 +1088,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "host", &instance->config.host)) {}
     else if(optionParseModuleArgs(key, value, "bios", &instance->config.bios)) {}
     else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
+    else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
     else if(optionParseModuleArgs(key, value, "kernel", &instance->config.kernel)) {}
     else if(optionParseModuleArgs(key, value, "uptime", &instance->config.uptime)) {}
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
@@ -1307,6 +1316,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintBios(instance);
     else if(strcasecmp(line, "board") == 0)
         ffPrintBoard(instance);
+    else if(strcasecmp(line, "chassis") == 0)
+        ffPrintChassis(instance);
     else if(strcasecmp(line, "kernel") == 0)
         ffPrintKernel(instance);
     else if(strcasecmp(line, "uptime") == 0)

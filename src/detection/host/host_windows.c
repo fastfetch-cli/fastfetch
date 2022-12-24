@@ -10,9 +10,6 @@ void ffDetectHostImpl(FFHostResult* host)
     ffStrbufInit(&host->productVersion);
     ffStrbufInit(&host->productSku);
     ffStrbufInit(&host->sysVendor);
-    ffStrbufInit(&host->chassisType);
-    ffStrbufInit(&host->chassisVendor);
-    ffStrbufInit(&host->chassisVersion);
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
 

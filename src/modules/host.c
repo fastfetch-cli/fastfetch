@@ -3,7 +3,7 @@
 #include "detection/host/host.h"
 
 #define FF_HOST_MODULE_NAME "Host"
-#define FF_HOST_NUM_FORMAT_ARGS 8
+#define FF_HOST_NUM_FORMAT_ARGS 5
 
 void ffPrintHost(FFinstance* instance)
 {
@@ -49,9 +49,6 @@ void ffPrintHost(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &host->productName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host->productVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host->productSku},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisType},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisVendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->chassisVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host->sysVendor}
         });
     }

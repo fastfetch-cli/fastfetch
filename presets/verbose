@@ -1,5 +1,5 @@
 --os-format System: {}; Name: {}; Pretty name: {}; ID: {}; ID like: {}; Variant: {}; Variant ID: {}; Version: {}; Version ID: {}; Version codename: {}; Build ID: {}; Architecture: {}
---host-format Family: product_family: {}; product_name: {}; product_version: {}; product_sku: {}; bios_date: {}; bios_release: {}; bios_vendor: {}; bios_version: {}; board_name: {}; board_vendor: {}; board_version: {}; chassis_type: {}; chassis_vendor: {}; chassis_version: {}; sys_vendor: {}
+--host-format Family: product_family: {}; product_name: {}; product_version: {}; product_sku: {}; sys_vendor: {}
 --kernel-format Sysname: {}; Release: {}; Version: {}
 --uptime-format Days: {}; Hours: {}; Minutes: {}; Seconds: {}
 --processes-format Count: {}
