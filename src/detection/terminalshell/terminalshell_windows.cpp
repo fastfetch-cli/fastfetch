@@ -242,6 +242,9 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("ALACRITTY_WINDOW_ID") != nullptr
     )) term = "Alacritty";
 
+    if(!term)
+        term = getenv("TERM_PROGRAM");
+
     //Normal Terminal
     if(!term)
         term = getenv("TERM");
