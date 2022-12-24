@@ -203,7 +203,10 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
     }
 
     if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "WindowsTerminal"))
-        ffStrbufSetS(&result->terminalPrettyName, "Windows Terminal");
+        ffStrbufSetS(&result->terminalPrettyName, ffStrbufContainIgnCaseS(&result->terminalExe, ".WindowsTerminalPreview_")
+            ? "Windows Terminal Preview"
+            : "Windows Terminal"
+        );
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "conhost"))
         ffStrbufSetS(&result->terminalPrettyName, "Console Window Host");
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "Code"))
