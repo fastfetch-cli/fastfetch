@@ -30,7 +30,7 @@ void ffPrintChassis(FFinstance* instance)
         ffStrbufInitCopy(&output, &result.chassisType);
 
         if(result.chassisVersion.length > 0)
-            ffStrbufAppendF(&output, " (%s)", &result.chassisVersion.chars);
+            ffStrbufAppendF(&output, " (%s)", result.chassisVersion.chars);
 
         ffStrbufPutTo(&output, stdout);
 
