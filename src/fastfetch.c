@@ -139,13 +139,14 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (xbps), {8} (nix-system), {9} (nix-user), {10} (nix-default), {11} (apk), {12} (pkg), {13} (flatpak), {14} (snap), {15} (brew), {16} (port), {17} (scoop)", 17,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak), {15} (snap), {16} (brew), {17} (brew-cask), {18} (port), {19} (scoop), {20} (choco)", 20,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
             "Number of dpkg packages",
             "Number of rpm packages",
             "Number of emerge packages",
+            "Number of eopkg packages",
             "Number of xbps packages",
             "Number of nix-system packages",
             "Number of nix-user packages",
@@ -155,8 +156,10 @@ static inline void printCommandHelp(const char* command)
             "Number of flatpak packages",
             "Number of snap packages",
             "Number of brew packages",
-            "Number of macports packages"
-            "Number of scoop packages"
+            "Number of brew-cask packages",
+            "Number of macports packages",
+            "Number of scoop packages",
+            "Number of choco packages"
         );
     }
     else if(strcasecmp(command, "shell-format") == 0)

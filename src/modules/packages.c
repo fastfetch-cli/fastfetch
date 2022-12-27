@@ -3,7 +3,7 @@
 #include "detection/packages/packages.h"
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 19
+#define FF_PACKAGES_NUM_FORMAT_ARGS 20
 
 void ffPrintPackages(FFinstance* instance)
 {
@@ -42,6 +42,7 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
         FF_PRINT_PACKAGE(emerge)
+        FF_PRINT_PACKAGE(eopkg)
         FF_PRINT_PACKAGE(xbps)
         FF_PRINT_PACKAGE_NAME(nixSystem, "nix-system")
         FF_PRINT_PACKAGE_NAME(nixUser, "nix-user")
@@ -70,6 +71,7 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts->dpkg},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->rpm},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->emerge},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->eopkg},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->xbps},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->nixSystem},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->nixUser},

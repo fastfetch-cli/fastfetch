@@ -266,6 +266,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
     packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: ");
     packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
     packageCounts->flatpak += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
     packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
     packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
