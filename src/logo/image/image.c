@@ -690,7 +690,7 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
     else
         ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
 
-    ffStrbufAppendS(&requestData.cacheDir, "images");
+    ffStrbufAppendS(&requestData.cacheDir, "fastfetch");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);
     if(realpath(instance->config.logo.source.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
