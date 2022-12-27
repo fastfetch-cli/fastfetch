@@ -2120,6 +2120,41 @@ static const FFlogo* getLogoSlackwareSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoSolus()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("solus", "solus-linux")
+    FF_LOGO_LINES(
+"$2            -```````````\n"
+"          `-+/------------.`\n"
+"       .---:mNo---------------.\n"
+"     .-----yMMMy:---------------.\n"
+"   `------oMMMMMm/----------------`\n"
+"  .------/MMMMMMMN+----------------.\n"
+" .------/NMMMMMMMMm-+/--------------.\n"
+"`------/NMMMMMMMMMN-:mh/-------------`\n"
+".-----/NMMMMMMMMMMM:-+MMd//oso/:-----.\n"
+"-----/NMMMMMMMMMMMM+--mMMMh::smMmyo:--\n"
+"----+NMMMMMMMMMMMMMo--yMMMMNo-:yMMMMd/.\n"
+".--oMMMMMMMMMMMMMMMy--yMMMMMMh:-yMMMy-`\n"
+"`-sMMMMMMMMMMMMMMMMh--dMMMMMMMd:/Ny+y.\n"
+"`-/+osyhhdmmNNMMMMMm-/MMMMMMMmh+/ohm+\n"
+"  .------------:://+-/++++++$1oshddys:\n"
+"   -hhhhyyyyyyyyyyyhhhhddddhysssso-\n"
+"    `:ossssssyysssssssssssssssso:`\n"
+"      `:+ssssssssssssssssssss+-\n"
+"         `-/+ssssssssssso+/-`\n"
+"              `.-----..`\n"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -2146,8 +2181,6 @@ static const FFlogo* getLogoUbuntu()
  "           .':loooooo;  ,oooooooooc\n"
  "               ..';::c'  .;loooo:'\n"
  "                             ."
-
-
     )
     FF_LOGO_COLORS(
         "31", //red
@@ -2405,6 +2438,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoRosaLinux,
         getLogoSlackware,
         getLogoSlackwareSmall,
+        getLogoSolus,
         getLogoUbuntu,
         getLogoUbuntuOld,
         getLogoUbuntuSmall,
