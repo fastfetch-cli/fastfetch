@@ -25,6 +25,7 @@ Features:
 * Supports GPU detection on Android
 * Supports Kitty Terminal terminal font
 * Supports bar output for percentage values
+* Supports Bios module on macOS
 * Supports eopkg package manager detection
 * Supports iTerm image logo protocol
 * Supports image logo printing on macOS
