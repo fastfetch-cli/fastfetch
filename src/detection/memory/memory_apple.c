@@ -4,7 +4,7 @@
 #include <string.h>
 #include <mach/mach.h>
 
-void ffDetectMemoryImpl(FFMemoryStorage* ram)
+void ffDetectMemory(FFMemoryStorage* ram)
 {
     ram->bytesTotal = (uint64_t) ffSysctlGetInt64("hw.memsize", 0);
     if(ram->bytesTotal == 0)

@@ -3,7 +3,7 @@
 
 #include <mach/mach.h>
 
-void ffDetectSwapImpl(FFMemoryStorage* swap)
+void ffDetectSwap(FFMemoryStorage* swap)
 {
     struct xsw_usage xsw;
     size_t size = sizeof(xsw);

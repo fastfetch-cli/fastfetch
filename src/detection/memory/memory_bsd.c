@@ -1,7 +1,7 @@
 #include "memory.h"
 #include "common/sysctl.h"
 
-void ffDetectMemoryImpl(FFMemoryStorage* ram)
+void ffDetectMemory(FFMemoryStorage* ram)
 {
     uint32_t pageSize = (uint32_t) ffSysctlGetInt("hw.pagesize", 0);
     if(pageSize == 0)

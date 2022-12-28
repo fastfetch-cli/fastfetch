@@ -5,6 +5,6 @@
 
 #include "detection/storage.h"
 
-const FFMemoryStorage* ffDetectSwap();
+void ffDetectSwap(FFMemoryStorage* result);
 
 #endif

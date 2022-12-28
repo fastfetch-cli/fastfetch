@@ -5,6 +5,6 @@
 
 #include "detection/storage.h"
 
-const FFMemoryStorage* ffDetectMemory();
+void ffDetectMemory(FFMemoryStorage* result);
 
 #endif

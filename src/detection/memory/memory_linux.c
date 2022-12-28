@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-void ffDetectMemoryImpl(FFMemoryStorage* swap)
+void ffDetectMemory(FFMemoryStorage* ram)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
     {
-        ffStrbufAppendS(&swap->error, "Failed to open /proc/meminfo");
+        ffStrbufAppendS(&ram->error, "Failed to open /proc/meminfo");
         return;
     }
 
@@ -37,9 +37,9 @@ void ffDetectMemoryImpl(FFMemoryStorage* swap)
 
     fclose(meminfo);
 
-    swap->bytesTotal = memTotal * (uint64_t) 1024;
-    if(swap->bytesTotal == 0)
-        ffStrbufAppendS(&swap->error, "Failed to read MemTotal");
+    ram->bytesTotal = memTotal * (uint64_t) 1024;
+    if(ram->bytesTotal == 0)
+        ffStrbufAppendS(&ram->error, "Failed to read MemTotal");
     else
-        swap->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
+        ram->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
 }

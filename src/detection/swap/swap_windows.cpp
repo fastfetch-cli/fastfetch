@@ -9,7 +9,7 @@ extern "C" {
 #include <ntstatus.h>
 
 extern "C"
-void ffDetectSwapImpl(FFMemoryStorage* swap)
+void ffDetectSwap(FFMemoryStorage* swap)
 {
     SYSTEM_INFO sysInfo;
     GetNativeSystemInfo(&sysInfo);

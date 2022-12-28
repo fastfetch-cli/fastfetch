@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void ffDetectSwapImpl(FFMemoryStorage* swap)
+void ffDetectSwap(FFMemoryStorage* swap)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)

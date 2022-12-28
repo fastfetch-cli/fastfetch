@@ -1,6 +1,6 @@
 #include "memory.h"
 
-void ffDetectMemoryImpl(FFMemoryStorage* ram)
+void ffDetectMemory(FFMemoryStorage* ram)
 {
     MEMORYSTATUSEX statex = {
         .dwLength = sizeof(statex),

@@ -76,10 +76,18 @@ static void printMemory(FFinstance* instance, const char* name, const FFModuleAr
 
 void ffPrintMemory(FFinstance* instance)
 {
-    printMemory(instance, FF_MEMORY_MODULE_NAME, &instance->config.memory, ffDetectMemory());
+    FFMemoryStorage result;
+    ffStrbufInit(&result.error);
+    ffDetectMemory(&result);
+    printMemory(instance, FF_MEMORY_MODULE_NAME, &instance->config.memory, &result);
+    ffStrbufDestroy(&result.error);
 }
 
 void ffPrintSwap(FFinstance* instance)
 {
-    printMemory(instance, FF_SWAP_MODULE_NAME, &instance->config.swap, ffDetectSwap());
+    FFMemoryStorage result;
+    ffStrbufInit(&result.error);
+    ffDetectSwap(&result);
+    printMemory(instance, FF_SWAP_MODULE_NAME, &instance->config.swap, &result);
+    ffStrbufDestroy(&result.error);
 }
