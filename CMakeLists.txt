@@ -497,12 +497,6 @@ add_library(libfastfetch OBJECT
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 
-CHECK_INCLUDE_FILE("sys/sysinfo.h" HAVE_SYSINFO_H)
-if(HAVE_SYSINFO_H)
-    # needs to be public, because changes fastfech.h ABI
-    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SYSINFO_H)
-endif()
-
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)

@@ -8,10 +8,8 @@ extern "C" {
 #include <ntstatus.h>
 #include <winternl.h>
 
-uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
+uint32_t ffDetectProcesses(FFstrbuf* error)
 {
-    FF_UNUSED(instance);
-
     ULONG size = 0;
     if(NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
     {
@@ -44,7 +42,7 @@ uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
 
 #include "util/windows/wmi.hpp"
 
-uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
+uint32_t ffDetectProcesses(FFstrbuf* error)
 {
     FFWmiQuery query(L"SELECT NumberOfProcesses FROM Win32_OperatingSystem", error);
     if(!query)

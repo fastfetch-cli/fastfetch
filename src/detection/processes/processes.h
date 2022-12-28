@@ -5,6 +5,6 @@
 
 #include "fastfetch.h"
 
-uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error);
+uint32_t ffDetectProcesses(FFstrbuf* error);
 
 #endif

@@ -5,6 +5,6 @@
 
 #include "fastfetch.h"
 
-uint64_t ffDetectUptime(const FFinstance* instance);
+uint64_t ffDetectUptime();
 
 #endif

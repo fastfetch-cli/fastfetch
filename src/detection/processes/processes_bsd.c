@@ -6,10 +6,8 @@
     #include <sys/user.h>
 #endif
 
-uint32_t ffDetectProcesses(FFinstance* instance, FFstrbuf* error)
+uint32_t ffDetectProcesses(FFstrbuf* error)
 {
-    FF_UNUSED(instance);
-
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
     size_t length;
 

@@ -4,9 +4,8 @@
 #include <sys/sysctl.h>
 #include <sys/time.h>
 
-uint64_t ffDetectUptime(const FFinstance* instance)
+uint64_t ffDetectUptime()
 {
-    FF_UNUSED(instance)
     struct timeval bootTime;
     size_t bootTimeSize = sizeof(bootTime);
     if(sysctl(

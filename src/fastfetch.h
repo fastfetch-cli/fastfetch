@@ -16,10 +16,6 @@
     #include "util/windows/utsname.h"
 #endif
 
-#if FF_HAVE_SYSINFO_H
-    #include <sys/sysinfo.h>
-#endif
-
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 
@@ -211,10 +207,6 @@ typedef struct FFstate
 
     struct passwd* passwd;
     struct utsname utsname;
-
-    #if FF_HAVE_SYSINFO_H
-        struct sysinfo sysinfo;
-    #endif
 
     FFlist configDirs;
 } FFstate;

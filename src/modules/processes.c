@@ -9,7 +9,7 @@ void ffPrintProcesses(FFinstance* instance)
 {
     FFstrbuf error;
     ffStrbufInit(&error);
-    uint32_t numProcesses = ffDetectProcesses(instance, &error);
+    uint32_t numProcesses = ffDetectProcesses(&error);
 
     if(error.length > 0)
     {

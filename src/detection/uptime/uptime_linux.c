@@ -1,11 +1,11 @@
 #include "uptime.h"
 
-uint64_t ffDetectUptime(const FFinstance* instance)
+#include <sys/sysinfo.h>
+
+uint64_t ffDetectUptime()
 {
-    #if FF_HAVE_SYSINFO_H
-        return (uint64_t) instance->state.sysinfo.uptime;
-    #else
-        FF_UNUSED(instance)
+    struct sysinfo info;
+    if(sysinfo(&info) != 0)
         return 0;
-    #endif
+    return (uint32_t) info.uptime;
 }

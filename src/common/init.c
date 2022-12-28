@@ -112,10 +112,6 @@ static void initState(FFstate* state)
     #endif
     uname(&state->utsname);
 
-    #if FF_HAVE_SYSINFO_H
-        sysinfo(&state->sysinfo);
-    #endif
-
     initConfigDirs(state);
 }
 

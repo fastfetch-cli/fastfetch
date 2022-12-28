@@ -3,6 +3,7 @@
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
 
+#include <sys/sysinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -99,13 +100,8 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 
     cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
 
-    #ifdef FF_HAVE_SYSINFO_H
-        cpu->coresLogical = (uint16_t) get_nprocs_conf();
-        cpu->coresOnline = (uint16_t) get_nprocs();
-    #else
-        cpu->coresLogical = 1;
-        cpu->coresOnline = 1;
-    #endif
+    cpu->coresLogical = (uint16_t) get_nprocs_conf();
+    cpu->coresOnline = (uint16_t) get_nprocs();
 
     #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
     if(ffFileExists(BP, S_IFDIR))

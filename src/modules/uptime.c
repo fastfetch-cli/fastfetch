@@ -7,7 +7,7 @@
 
 void ffPrintUptime(FFinstance* instance)
 {
-    uint64_t uptime = ffDetectUptime(instance);
+    uint64_t uptime = ffDetectUptime();
 
     if(uptime == 0)
     {
