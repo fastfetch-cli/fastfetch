@@ -1,8 +1,7 @@
 #include "fastfetch.h"
+#include "common/thread.h"
 #include "detection/vulkan.h"
 #include "detection/gpu/gpu.h"
-
-#include <pthread.h>
 
 #ifdef FF_HAVE_VULKAN
 #include "common/library.h"
@@ -25,7 +24,11 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
 
     ffStrbufAppendS(result, properties->driverName);
 
-    if(!ffStrSet(properties->driverInfo))
+    /*
+     * Some drivers (android for example) expose a multiline string as driver info.
+     * It contains too much info anyways, so we just don't append it.
+     */
+    if(!ffStrSet(properties->driverInfo) || strchr(properties->driverInfo, '\n') != NULL)
         return;
 
     ffStrbufAppendS(result, " [");
@@ -35,7 +38,13 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
 
 static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed", "libvulkan"FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed",
+        #ifdef __APPLE__
+            "libMoltenVK"FF_LIBRARY_EXTENSION, -1
+        #else
+            "libvulkan"FF_LIBRARY_EXTENSION, 2, "vulkan-1"FF_LIBRARY_EXTENSION, -1
+        #endif
+    )
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkDestroyInstance)
@@ -85,16 +94,9 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         .pApplicationInfo = &applicationInfo,
         .enabledLayerCount = 0,
         .ppEnabledLayerNames = NULL,
-
-        #if defined(__APPLE__) && defined(VK_KHR_portability_enumeration)
-            .enabledExtensionCount = 1,
-            .ppEnabledExtensionNames = (const char* const[]) { VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME },
-            .flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR
-        #else
-            .enabledExtensionCount = 0,
-            .ppEnabledExtensionNames = NULL,
-            .flags = 0
-        #endif
+        .enabledExtensionCount = 0,
+        .ppEnabledExtensionNames = NULL,
+        .flags = 0
     };
 
     VkInstance vkInstance;
@@ -179,7 +181,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 
         //Add the device to the list of devices shown by the GPU module
 
-        //We don't want softare rasterizers to show up as physical gpu
+        //We don't want software rasterizers to show up as physical gpu
         if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
             continue;
 
@@ -217,13 +219,13 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
 {
     static FFVulkanResult result;
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    pthread_mutex_lock(&mutex);
+    ffThreadMutexLock(&mutex);
     if(init)
     {
-        pthread_mutex_unlock(&mutex);
+        ffThreadMutexUnlock(&mutex);
         return &result;
     }
     init = true;
@@ -240,6 +242,6 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
         result.error = "fastfetch was compiled without vulkan support";
     #endif
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
     return &result;
 }

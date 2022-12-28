@@ -2,7 +2,7 @@
 #include "common/settings.h"
 #include "common/properties.h"
 #include "common/parsing.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"
 
 static const char* getSystemMonospaceFont(const FFinstance* instance)
@@ -140,177 +140,55 @@ static void detectXFCETerminal(const FFinstance* instance, FFTerminalFontResult*
     ffStrbufDestroy(&useSysFont);
 }
 
-#ifdef FF_HAVE_LIBCJSON
-
-#include "common/library.h"
-#include "common/processing.h"
-
-#include <cjson/cJSON.h>
-#include <stdlib.h>
-
-typedef struct CJSONData
+static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
-    FF_LIBRARY_SYMBOL(cJSON_Parse)
-    FF_LIBRARY_SYMBOL(cJSON_IsObject)
-    FF_LIBRARY_SYMBOL(cJSON_GetObjectItemCaseSensitive)
-    FF_LIBRARY_SYMBOL(cJSON_IsString)
-    FF_LIBRARY_SYMBOL(cJSON_GetStringValue)
-    FF_LIBRARY_SYMBOL(cJSON_IsNumber)
-    FF_LIBRARY_SYMBOL(cJSON_GetNumberValue)
-    FF_LIBRARY_SYMBOL(cJSON_IsArray)
-    FF_LIBRARY_SYMBOL(cJSON_Delete)
-} CJSONData;
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
 
-static const char* detectWTProfile(CJSONData* cjsonData, cJSON* profile, FFstrbuf* name, int* size)
-{
-    if(!cjsonData->ffcJSON_IsObject(profile))
-        return "cJSON_IsObject(profile) returns false";
+    FFstrbuf fontSize;
+    ffStrbufInit(&fontSize);
 
-    cJSON* font = cjsonData->ffcJSON_GetObjectItemCaseSensitive(profile, "font");
-    if(!cjsonData->ffcJSON_IsObject(font))
-        return "cJSON_IsObject(font) returns false";
+    FFstrbuf profile;
+    ffStrbufInitF(&profile, "%s/.config/deepin/deepin-terminal/config.conf", instance->state.passwd->pw_dir);
+    FILE* file = fopen(profile.chars, "r");
 
-    if(name->length == 0)
+    if(file)
     {
-        cJSON* pface = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "face");
-        if(cjsonData->ffcJSON_IsString(pface))
-            ffStrbufAppendS(name, cjsonData->ffcJSON_GetStringValue(pface));
-    }
-    if(*size < 0)
-    {
-        cJSON* psize = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "size");
-        if(cjsonData->ffcJSON_IsNumber(psize))
-            *size = (int)cjsonData->ffcJSON_GetNumberValue(psize);
-    }
-    return NULL;
-}
+        char* line = NULL;
+        size_t len = 0;
 
-static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, int* size)
-{
-    CJSONData cjsonData;
-
-    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Parse)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsObject)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsString)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetStringValue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsNumber)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetNumberValue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsArray)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Delete)
-
-    const char* error = NULL;
-
-    cJSON* root = cjsonData.ffcJSON_Parse(content->chars);
-    if(!cjsonData.ffcJSON_IsObject(root))
-    {
-        error = "cJSON_Parse() failed";
-        goto exit;
-    }
-
-    cJSON* profiles = cjsonData.ffcJSON_GetObjectItemCaseSensitive(root, "profiles");
-    if(!cjsonData.ffcJSON_IsObject(profiles))
-    {
-        error = "cJSON_GetObjectItemCaseSensitive(root, \"profiles\") failed";
-        goto exit;
-    }
-
-    FFstrbuf wtProfileId;
-    ffStrbufInitS(&wtProfileId, getenv("WT_PROFILE_ID"));
-    ffStrbufTrim(&wtProfileId, '\'');
-    if(wtProfileId.length > 0)
-    {
-        cJSON* list = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "list");
-        if(cjsonData.ffcJSON_IsArray(list))
+        for(int count = 0; getline(&line, &len, file) != -1 && count < 2;)
         {
-            cJSON* profile;
-            cJSON_ArrayForEach(profile, list)
+            if(strcmp(line, "[basic.interface.font]\n") == 0)
             {
-                if(!cjsonData.ffcJSON_IsObject(profile))
-                    continue;
-                cJSON* guid = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profile, "guid");
-                if(!cjsonData.ffcJSON_IsString(guid))
-                    continue;
-                if(ffStrbufCompS(&wtProfileId, cjsonData.ffcJSON_GetStringValue(guid)) == 0)
-                {
-                    detectWTProfile(&cjsonData, profile, name, size);
-                    break;
-                }
+                if(getline(&line, &len, file) != -1)
+                    ffParsePropLine(line, "value=", &fontName);
+                ++count;
+            }
+            else if(strcmp(line, "[basic.interface.font_size]\n") == 0)
+            {
+                if(getline(&line, &len, file) != -1)
+                    ffParsePropLine(line, "value=", &fontSize);
+                ++count;
             }
         }
-    }
-    ffStrbufDestroy(&wtProfileId);
 
-    cJSON* defaults = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "defaults");
-    detectWTProfile(&cjsonData, defaults, name, size);
-
-    if(name->length == 0)
-        ffStrbufSetS(name, "Cascadia Mono");
-    if(*size < 0)
-        *size = 12;
-
-exit:
-    cjsonData.ffcJSON_Delete(root);
-    dlclose(libcjson);
-    return error;
-}
-
-static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
-{
-    //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
-    FFstrbuf json;
-    ffStrbufInit(&json);
-    const char* error;
-    error = ffProcessAppendStdOut(&json, (char* const[]) {
-        "cmd.exe",
-        "/c",
-        //print the file content directly, so we don't need to handle the difference of Windows and POSIX path
-        "if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json "
-        "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json ) "
-        "else if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json "
-        "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json ) "
-        "else if exist \"%LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json\" "
-        "( type %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json ) "
-        "else ( call )",
-        NULL
-    });
-    if(error)
-    {
-        ffStrbufAppendS(&terminalFont->error, error);
-        ffStrbufDestroy(&json);
-        return;
-    }
-    ffStrbufTrimRight(&json, '\n');
-    if(json.length == 0)
-    {
-        ffStrbufAppendS(&terminalFont->error, "Cannot find file \"settings.json\"");
-        ffStrbufDestroy(&json);
-        return;
+        free(line);
+        fclose(file);
     }
 
-    FFstrbuf name;
-    ffStrbufInit(&name);
-    int size = -1;
-    detectFromWTImpl(instance, &json, &name, &size);
-    ffStrbufDestroy(&json);
+    ffStrbufDestroy(&profile);
 
-    char sizeStr[16];
-    snprintf(sizeStr, sizeof(sizeStr), "%d", size);
-    ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
+    if(fontName.length == 0)
+        ffStrbufAppendS(&fontName, "Noto Sans Mono");
+    if(fontSize.length == 0)
+        ffStrbufAppendS(&fontSize, "11");
 
-    ffStrbufDestroy(&name);
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+
+    ffStrbufDestroy(&fontName);
+    ffStrbufDestroy(&fontSize);
 }
-
-#else
-
-static void detectFromWindowsTeriminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
-{
-    FF_UNUSED(instance, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "fastfetch is built without libcjson support");
-}
-
-#endif
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
@@ -324,6 +202,6 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "gnome-terminal-") == 0)
         detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0)
-        detectFromWindowsTeriminal(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "deepin-terminal") == 0)
+        detectDeepinTerminal(instance, terminalFont);
 }

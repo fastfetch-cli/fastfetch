@@ -1,24 +1,26 @@
 #include "fastfetch.h"
-#include "common/caching.h"
 #include "common/parsing.h"
+#include "common/thread.h"
 #include "detection/qt.h"
 #include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/textModifier.h"
 
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <signal.h>
-#include <pthread.h>
-
-static bool strbufEqualsAdapter(const void* first, const void* second)
-{
-    return ffStrbufComp(second, first) == 0;
-}
+#ifdef _WIN32
+    #include <wincon.h>
+    #include <locale.h>
+#else
+    #include <signal.h>
+#endif
 
 static void initConfigDirs(FFstate* state)
 {
     ffListInit(&state->configDirs, sizeof(FFstrbuf));
+
+    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
 
     const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
     if(ffStrSet(xdgConfigHome))
@@ -29,8 +31,10 @@ static void initConfigDirs(FFstate* state)
         ffStrbufEnsureEndsWithC(buffer, '/');
     }
 
+    #endif
+
     #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
-        if(ffListFirstIndexComp(&state->configDirs, element, strbufEqualsAdapter) < state->configDirs.length - 1) \
+        if(ffListFirstIndexComp(&state->configDirs, element, (bool(*)(const void*, const void*))ffStrbufEqual) < state->configDirs.length - 1) \
         { \
             ffStrbufDestroy(ffListGet(&state->configDirs, state->configDirs.length - 1)); \
             --state->configDirs.length; \
@@ -47,6 +51,8 @@ static void initConfigDirs(FFstate* state)
     ffStrbufAppendS(userHome, state->passwd->pw_dir);
     ffStrbufEnsureEndsWithC(userHome, '/');
     FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
+
+    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
 
     FFstrbuf xdgConfigDirs;
     ffStrbufInitA(&xdgConfigDirs, 64);
@@ -79,6 +85,8 @@ static void initConfigDirs(FFstate* state)
     ffStrbufAppendS(systemConfigHome, FASTFETCH_TARGET_DIR_ETC"/xdg/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigHome)
 
+    #endif
+
     FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfig, 64);
     ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ETC"/");
@@ -87,47 +95,31 @@ static void initConfigDirs(FFstate* state)
     #undef FF_ENSURE_ONLY_ONCE_IN_LIST
 }
 
-static void initCacheDir(FFstate* state)
-{
-    ffStrbufInitA(&state->cacheDir, 64);
-
-    ffStrbufAppendS(&state->cacheDir, getenv("XDG_CACHE_HOME"));
-
-    if(state->cacheDir.length == 0)
-    {
-        ffStrbufAppendS(&state->cacheDir, state->passwd->pw_dir);
-        ffStrbufAppendS(&state->cacheDir, "/.cache/");
-    }
-    else
-        ffStrbufEnsureEndsWithC(&state->cacheDir, '/');
-
-    mkdir(state->cacheDir.chars, S_IRWXU | S_IXGRP | S_IRGRP | S_IXOTH | S_IROTH); //I hope everybody has a cache folder, but who knows
-
-    ffStrbufAppendS(&state->cacheDir, "fastfetch/");
-    mkdir(state->cacheDir.chars, S_IRWXU | S_IRGRP | S_IROTH);
-}
-
 static void initState(FFstate* state)
 {
+    #ifdef WIN32
+    //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
+    setlocale(LC_ALL, ".UTF8");
+    #endif
+
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
-    state->passwd = getpwuid(getuid());
+    #ifndef WIN32
+        state->passwd = getpwuid(getuid());
+    #else
+        state->passwd = ffGetPasswd();
+    #endif
     uname(&state->utsname);
 
-    #if FF_HAVE_SYSINFO_H
-        sysinfo(&state->sysinfo);
-    #endif
-
     initConfigDirs(state);
-    initCacheDir(state);
 }
 
 static void initModuleArg(FFModuleArgs* args)
 {
-    ffStrbufInitA(&args->key, 0);
-    ffStrbufInitA(&args->outputFormat, 0);
-    ffStrbufInitA(&args->errorFormat, 0);
+    ffStrbufInit(&args->key);
+    ffStrbufInit(&args->outputFormat);
+    ffStrbufInit(&args->errorFormat);
 }
 
 static void defaultConfig(FFinstance* instance)
@@ -141,6 +133,13 @@ static void defaultConfig(FFinstance* instance)
     instance->config.logo.paddingLeft = 0;
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
+    instance->config.logo.preserveAspectRadio = false;
+
+    instance->config.logo.chafaFgOnly = false;
+    ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
+    instance->config.logo.chafaCanvasMode = UINT32_MAX;
+    instance->config.logo.chafaColorSpace = UINT32_MAX;
+    instance->config.logo.chafaDitherMode = UINT32_MAX;
 
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);
@@ -150,7 +149,6 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.showErrors = false;
     instance->config.recache = false;
-    instance->config.cacheSave = true;
     instance->config.allowSlowOperations = false;
     instance->config.disableLinewrap = true;
     instance->config.hideCursor = true;
@@ -159,9 +157,13 @@ static void defaultConfig(FFinstance* instance)
     instance->config.glType = FF_GL_TYPE_AUTO;
     instance->config.pipe = false;
     instance->config.multithreading = true;
+    instance->config.stat = false;
 
     initModuleArg(&instance->config.os);
     initModuleArg(&instance->config.host);
+    initModuleArg(&instance->config.bios);
+    initModuleArg(&instance->config.board);
+    initModuleArg(&instance->config.chassis);
     initModuleArg(&instance->config.kernel);
     initModuleArg(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
@@ -189,6 +191,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
+    initModuleArg(&instance->config.wifi);
     initModuleArg(&instance->config.player);
     initModuleArg(&instance->config.song);
     initModuleArg(&instance->config.dateTime);
@@ -221,6 +224,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libOpenCL, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
     ffStrbufInitA(&instance->config.libfreetype, 0);
+    ffStrbufInit(&instance->config.libwlanapi);
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
@@ -229,7 +233,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
-    instance->config.diskRemovable = false;
+    instance->config.diskShowRemovable = true;
+    instance->config.diskShowHidden = false;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
@@ -249,6 +254,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.osFile, 0);
 
     ffStrbufInitA(&instance->config.playerName, 0);
+
+    instance->config.percentType = 1;
 }
 
 void ffInitInstance(FFinstance* instance)
@@ -257,87 +264,39 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-#if !defined(__ANDROID__)
+#ifdef FF_HAVE_THREADS
 
-static void* connectDisplayServerThreadMain(void* instance)
-{
-    ffConnectDisplayServer((FFinstance*)instance);
-    return NULL;
-}
+FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
 
-#if !defined(__APPLE__)
+#if !(defined(__APPLE__) || defined(_WIN32))
 
-static void* detectPlasmaThreadMain(void* instance)
-{
-    ffDetectQt((FFinstance*)instance);
-    return NULL;
-}
+#define FF_DETECT_QT_GTK 1
 
-static void* detectGTK2ThreadMain(void* instance)
-{
-    ffDetectGTK2((FFinstance*)instance);
-    return NULL;
-}
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectQt, FFinstance*)
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK2, FFinstance*)
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK3, FFinstance*)
+FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK4, FFinstance*)
 
-static void* detectGTK3ThreadMain(void* instance)
-{
-    ffDetectGTK3((FFinstance*)instance);
-    return NULL;
-}
+#endif //!(defined(__APPLE__) || defined(_WIN32))
 
-static void* detectGTK4ThreadMain(void* instance)
-{
-    ffDetectGTK4((FFinstance*)instance);
-    return NULL;
-}
-
-static void* startThreadsThreadMain(void* instance)
-{
-    pthread_t dsThread;
-    pthread_create(&dsThread, NULL, connectDisplayServerThreadMain, instance);
-    pthread_detach(dsThread);
-
-    pthread_t gtk2Thread;
-    pthread_create(&gtk2Thread, NULL, detectGTK2ThreadMain, instance);
-    pthread_detach(gtk2Thread);
-
-    pthread_t gtk3Thread;
-    pthread_create(&gtk3Thread, NULL, detectGTK3ThreadMain, instance);
-    pthread_detach(gtk3Thread);
-
-    pthread_t gtk4Thread;
-    pthread_create(&gtk4Thread, NULL, detectGTK4ThreadMain, instance);
-    pthread_detach(gtk4Thread);
-
-    pthread_t plasmaThread;
-    pthread_create(&plasmaThread, NULL, detectPlasmaThreadMain, instance);
-    pthread_detach(plasmaThread);
-
-    return NULL;
-}
+#endif //FF_HAVE_THREADS
 
 void startDetectionThreads(FFinstance* instance)
 {
-    pthread_t startThreadsThread;
-    pthread_create(&startThreadsThread, NULL, startThreadsThreadMain, instance);
-    pthread_detach(startThreadsThread);
-}
+    #ifdef FF_HAVE_THREADS
+    ffThreadDetach(ffThreadCreate(ffConnectDisplayServerThreadMain, instance));
 
-#else // !__APPLE__
-void startDetectionThreads(FFinstance* instance)
-{
-    pthread_t startThreadsThread;
-    pthread_create(&startThreadsThread, NULL, connectDisplayServerThreadMain, instance);
-    pthread_detach(startThreadsThread);
-}
-#endif // __APPLE__
+    #ifdef FF_DETECT_QT_GTK
+    ffThreadDetach(ffThreadCreate(ffDetectQtThreadMain, instance));
+    ffThreadDetach(ffThreadCreate(ffDetectGTK2ThreadMain, instance));
+    ffThreadDetach(ffThreadCreate(ffDetectGTK3ThreadMain, instance));
+    ffThreadDetach(ffThreadCreate(ffDetectGTK4ThreadMain, instance));
+    #endif
 
-#else // !__ANDROID__
-void startDetectionThreads(FFinstance* instance)
-{
+    #else
     FF_UNUSED(instance);
+    #endif
 }
-#endif // __ANDROID__
 
 static volatile bool ffDisableLinewrap = true;
 static volatile bool ffHideCursor = true;
@@ -351,12 +310,21 @@ static void resetConsole()
         fputs("\033[?25h", stdout);
 }
 
+#ifdef _WIN32
+BOOL WINAPI consoleHandler(DWORD signal)
+{
+    FF_UNUSED(signal);
+        resetConsole();
+    exit(0);
+}
+#else
 static void exitSignalHandler(int signal)
 {
     FF_UNUSED(signal);
     resetConsole();
     exit(0);
 }
+#endif
 
 void ffStart(FFinstance* instance)
 {
@@ -366,16 +334,25 @@ void ffStart(FFinstance* instance)
     ffDisableLinewrap = instance->config.disableLinewrap && !instance->config.pipe;
     ffHideCursor = instance->config.hideCursor && !instance->config.pipe;
 
-    struct sigaction action = {};
-    action.sa_handler = exitSignalHandler;
-
+    #ifdef _WIN32
+    #ifdef FF_ENABLE_BUFFER
+        setvbuf(stdout, NULL, _IOFBF, 4096);
+    #endif
+    SetConsoleCtrlHandler(consoleHandler, TRUE);
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    GetConsoleMode(hStdout, &mode);
+    SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    SetConsoleOutputCP(CP_UTF8);
+    #else
+    #ifndef FF_ENABLE_BUFFER
+        setvbuf(stdout, NULL, _IONBF, 0);
+    #endif
+    struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
-
-    //We do the cache validation here, so we can skip it if --recache is given
-    if(!instance->config.recache)
-        ffCacheValidate(instance);
+    #endif
 
     //reset everything to default before we start printing
     if(!instance->config.pipe)
@@ -408,6 +385,7 @@ static void destroyModuleArg(FFModuleArgs* args)
 static void destroyConfig(FFinstance* instance)
 {
     ffStrbufDestroy(&instance->config.logo.source);
+    ffStrbufDestroy(&instance->config.logo.chafaSymbols);
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufDestroy(&instance->config.logo.colors[i]);
     ffStrbufDestroy(&instance->config.colorKeys);
@@ -416,6 +394,8 @@ static void destroyConfig(FFinstance* instance)
 
     destroyModuleArg(&instance->config.os);
     destroyModuleArg(&instance->config.host);
+    destroyModuleArg(&instance->config.bios);
+    destroyModuleArg(&instance->config.board);
     destroyModuleArg(&instance->config.kernel);
     destroyModuleArg(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);
@@ -443,6 +423,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);
     destroyModuleArg(&instance->config.weather);
+    destroyModuleArg(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);
     destroyModuleArg(&instance->config.song);
     destroyModuleArg(&instance->config.dateTime);
@@ -475,6 +456,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libOpenCL);
     ffStrbufDestroy(&instance->config.libcJSON);
     ffStrbufDestroy(&instance->config.libfreetype);
+    ffStrbufDestroy(&instance->config.libwlanapi);
 
     ffStrbufDestroy(&instance->config.diskFolders);
     ffStrbufDestroy(&instance->config.batteryDir);
@@ -491,8 +473,6 @@ static void destroyState(FFinstance* instance)
     for(uint32_t i = 0; i < instance->state.configDirs.length; ++i)
         ffStrbufDestroy((FFstrbuf*)ffListGet(&instance->state.configDirs, i));
     ffListDestroy(&instance->state.configDirs);
-
-    ffStrbufDestroy(&instance->state.cacheDir);
 }
 
 void ffDestroyInstance(FFinstance* instance)

@@ -6,7 +6,7 @@
 #ifdef FF_HAVE_WAYLAND
 #include "common/library.h"
 #include "common/io.h"
-#include <pthread.h>
+#include "common/thread.h"
 #include <wayland-client.h>
 #include <sys/socket.h>
 
@@ -56,12 +56,12 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
     if(!(flags & WL_OUTPUT_MODE_CURRENT) || width <= 0 || height <= 0)
         return;
 
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_mutex_lock(&mutex);
+    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
+    ffThreadMutexLock(&mutex);
 
     FFResolutionResult* result = ffListAdd(wldata->results);
 
-    pthread_mutex_unlock(&mutex);
+    ffThreadMutexUnlock(&mutex);
 
     result->width = (uint32_t) width;
     result->height = (uint32_t) height;
@@ -102,7 +102,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
 bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(wayland, &instance->config.libWayland, false, "libwayland-client.so", 1)
+    FF_LIBRARY_LOAD(wayland, &instance->config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)

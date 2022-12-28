@@ -1,10 +1,6 @@
 #include "gpu.h"
 #include "detection/vulkan.h"
 
-#define FF_GPU_VENDOR_NAME_AMD "AMD"
-#define FF_GPU_VENDOR_NAME_INTEL "Intel"
-#define FF_GPU_VENDOR_NAME_NVIDIA "NVIDIA"
-
 #ifdef FF_HAVE_LIBPCI
 #include "common/library.h"
 #include "common/properties.h"
@@ -208,7 +204,7 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 {
     PCIData pci;
 
-    FF_LIBRARY_LOAD(libpci, &instance->config.libPCI, "dlopen libpci.so failed", "libpci.so", 4);
+    FF_LIBRARY_LOAD(libpci, &instance->config.libPCI, "dlopen libpci.so failed", "libpci" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_alloc);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_init);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus);

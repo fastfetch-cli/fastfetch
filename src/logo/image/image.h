@@ -11,7 +11,7 @@ typedef enum FFLogoImageResult
 {
     FF_LOGO_IMAGE_RESULT_SUCCESS,    //Logo printed
     FF_LOGO_IMAGE_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version
-    FF_LOGO_IMAGE_RESULT_RUN_ERROR   //Failed to load / convert image, cancle whole sixel code
+    FF_LOGO_IMAGE_RESULT_RUN_ERROR   //Failed to load / convert image, cancel whole sixel code
 } FFLogoImageResult;
 
 typedef struct FFLogoRequestData

@@ -5,7 +5,7 @@
 # Whitespaces are trimmed at the beginning and the end.
 # Empty lines or lines starting with # are ignored.
 
-# This file was shipped with $"FASTFETCH_PROJECT_VERSION$".
+# This file was shipped with $" FASTFETCH_PROJECT_VERSION $".
 # Use fastfetch --print-config-user > ~/.config/fastfetch/config.conf to overwrite this file with the current defaults
 
 # Below some often usefull options are listed. Uncomment and modify them so they take affect.
@@ -25,13 +25,20 @@
 # Must be a list of module names, separated by colons.
 # List available modules with "fastfetch --list-modules".
 # Get the default structure with "fastfetch --print-structure".
-#--structure $"FASTFETCH_DATATEXT_STRUCTURE$"
+#--structure $" FASTFETCH_DATATEXT_STRUCTURE $"
 
 # Multithreading option:
 # Sets if fastfetch should use multiple threads to detect the values.
 # Must be true or false.
 # Default is true.
 #--multithreading true
+
+# Print stat option:
+# Sets if fastfetch should print time usage (in ms) for individual modules
+# If true, it will also enable --show-errors
+# Must be true or false.
+# Default is false.
+#--stat true
 
 # Slow operations option:
 # Sets if fastfetch is allowed to use known slow operations to detect more / better values.
@@ -61,7 +68,7 @@
 
 # Logo type option:
 # Sets the logo type to use.
-# Must be auto, builtin, file, raw, sixel, kitty or chafa.
+# Must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty or chafa.
 # Default is auto.
 #--logo-type auto
 
@@ -178,7 +185,6 @@
 # OS file option
 # Sets the path to the file containing the operating system information.
 # Should be a valid path to an existing file.
-# Note that you might need to run fastfetch with --recache once for it to take affect.
 # Default is /etc/os-release.
 #--os-file /etc/os-release
 
@@ -200,11 +206,18 @@
 # Default is auto.
 #--gl auto
 
+# Percentage output type option
+# Applies to all modules that prints percentage values. Currently memory, swap, disk, battery and CPU usage are supported.
+# Only works with default format ( without --module-format option ).
+# 0: prints none; 1: prints percent number only; 2: prints bar only; 3: prints both percent number and bar
+#--percent-type 1
+
 # Key options:
 # Sets the displayed key of a module
 # Can be any string. Some of theme take an argument like a format string. See "fastfetch --help format" for help.
 #--os-key OS
 #--host-key Host
+#--chassis-key Chassis
 #--kernel-key Kernel
 #--uptime-key Uptime
 #--processes-key Processes
@@ -231,6 +244,7 @@
 #--locale-key Locale
 #--local-ip-key Local IP ({1})
 #--public-ip-key Public IP
+#--wifi-key Wifi
 #--weather-key Weather
 #--player-key Media Player
 #--song-key Song
@@ -247,6 +261,7 @@
 # An empty format string (As they are currently below) will behave as if it was not set.
 #--os-format
 #--host-format
+#--chassis-format
 #--kernel-format
 #--uptime-format
 #--processes-format
@@ -289,6 +304,7 @@
 # If one of them is set, the module will appear, even if --show-errors is not given.
 #--os-error
 #--host-error
+#--chassis-error
 #--kernel-error
 #--uptime-error
 #--processes-error
@@ -328,7 +344,7 @@
 # Sets an user specific path to a library to load.
 # Must be a valid path to a library.
 #--lib-PCI /usr/lib/libpci.so
-#--lib-vulkan /usr/lib/libvulkan.so
+#--lib-vulkan /usr/lib/libvulkan.so (libMoltenVK.dylib on macOS)
 #--lib-wayland /usr/lib/libwayland-client.so
 #--lib-xcb-randr /usr/lib/libxcb-randr.so
 #--lib-xcb /usr/lib/libxcb.so

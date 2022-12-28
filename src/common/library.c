@@ -10,15 +10,25 @@
     #endif
 #endif
 
-#ifdef __SANITIZE_ADDRESS__
-    #define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
-#else
-    #define FF_DLOPEN_FLAGS RTLD_LAZY
+#ifndef FF_DLOPEN_FLAGS
+    #ifdef __SANITIZE_ADDRESS__
+        #define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
+    #else
+        #define FF_DLOPEN_FLAGS RTLD_LAZY
+    #endif
 #endif
 
 static void* libraryLoad(const char* path, int maxVersion)
 {
     void* result = dlopen(path, FF_DLOPEN_FLAGS);
+
+    #ifdef _WIN32
+
+    // libX.dll.1 never exists on Windows, while libX-1.dll may exist
+    FF_UNUSED(maxVersion)
+
+    #else
+
     if(result != NULL || maxVersion < 0)
         return result;
 
@@ -40,6 +50,9 @@ static void* libraryLoad(const char* path, int maxVersion)
     }
 
     ffStrbufDestroy(&pathbuf);
+
+    #endif
+
     return result;
 }
 

@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "detection/title.h"
+#include "util/textModifier.h"
 
 static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
 {

@@ -8,6 +8,10 @@
 #define FF_GPU_TEMP_UNSET (0/0.0)
 #define FF_GPU_CORE_COUNT_UNSET -1
 
+#define FF_GPU_VENDOR_NAME_AMD "AMD"
+#define FF_GPU_VENDOR_NAME_INTEL "Intel"
+#define FF_GPU_VENDOR_NAME_NVIDIA "NVIDIA"
+
 typedef struct FFGPUResult
 {
     FFstrbuf vendor;

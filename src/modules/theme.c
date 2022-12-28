@@ -10,7 +10,7 @@
 
 void ffPrintTheme(FFinstance* instance)
 {
-    #if defined(__ANDROID__) || defined(__APPLE__)
+    #if defined(__ANDROID__) || defined(__APPLE__) || defined(_WIN32)
 
     FF_UNUSED(instance);
     ffPrintError(instance, FF_THEME_MODULE_NAME, 0, &instance->config.theme, "Theme detection is not supported");

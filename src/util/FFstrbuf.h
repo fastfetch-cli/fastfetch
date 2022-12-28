@@ -13,6 +13,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#ifdef _WIN32
+    #include <shlwapi.h>
+    #define strcasestr StrStrIA
+#endif
+
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
 typedef struct FFstrbuf
@@ -27,6 +32,7 @@ typedef struct FFstrbuf
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
 void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...);
+void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
@@ -40,6 +46,7 @@ void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* va
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
+void ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until);
 
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
@@ -142,9 +149,24 @@ static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
     return memcmp(strbuf->chars, comp->chars, length + 1);
 }
 
+static inline int ffStrbufCompAlphabetically(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return strcmp(strbuf->chars, comp->chars);
+}
+
+static inline FF_C_NODISCARD bool ffStrbufEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return ffStrbufComp(strbuf, comp) == 0;
+}
+
 static inline FF_C_NODISCARD int ffStrbufCompS(const FFstrbuf* strbuf, const char* comp)
 {
     return strcmp(strbuf->chars, comp);
+}
+
+static inline FF_C_NODISCARD bool ffStrbufEqualS(const FFstrbuf* strbuf, const char* comp)
+{
+    return ffStrbufCompS(strbuf, comp) == 0;
 }
 
 static inline FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, const char* comp)
@@ -152,9 +174,19 @@ static inline FF_C_NODISCARD int ffStrbufIgnCaseCompS(const FFstrbuf* strbuf, co
     return strcasecmp(strbuf->chars, comp);
 }
 
+static inline FF_C_NODISCARD bool ffStrbufIgnCaseEqualS(const FFstrbuf* strbuf, const char* comp)
+{
+    return ffStrbufIgnCaseCompS(strbuf, comp) == 0;
+}
+
 static inline FF_C_NODISCARD int ffStrbufIgnCaseComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufIgnCaseCompS(strbuf, comp->chars);
+}
+
+static inline FF_C_NODISCARD bool ffStrbufIgnCaseEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
+{
+    return ffStrbufIgnCaseComp(strbuf, comp) == 0;
 }
 
 static inline FF_C_NODISCARD bool ffStrbufContainS(const FFstrbuf* strbuf, const char* str)
@@ -270,4 +302,9 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCase(const FFstrbuf* strbuf
 {
     return ffStrbufEndsWithIgnCaseNS(strbuf, end->length, end->chars);
 }
+
+#if defined(_WIN32) || defined(__APPLE__)
+    #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
+#endif
+
 #endif

@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 
 #define FF_SHELL_MODULE_NAME "Shell"
 #define FF_SHELL_NUM_FORMAT_ARGS 7
@@ -18,7 +18,7 @@ void ffPrintShell(FFinstance* instance)
     if(instance->config.shell.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_SHELL_MODULE_NAME, 0, &instance->config.shell.key);
-        fputs(result->shellExeName, stdout);
+        ffStrbufWriteTo(&result->shellPrettyName, stdout);
 
         if(result->shellVersion.length > 0)
         {

@@ -8,11 +8,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <pwd.h>
-#include <sys/utsname.h>
-
-#if FF_HAVE_SYSINFO_H
-    #include <sys/sysinfo.h>
+#ifndef _WIN32
+    #include <pwd.h>
+    #include <sys/utsname.h>
+#else
+    #include "util/windows/pwd.h"
+    #include "util/windows/utsname.h"
 #endif
 
 #include "util/FFstrbuf.h"
@@ -20,22 +21,22 @@
 
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
-
-#define FASTFETCH_TEXT_MODIFIER_BOLT  "\033[1m"
-#define FASTFETCH_TEXT_MODIFIER_ERROR "\033[1;31m"
-#define FASTFETCH_TEXT_MODIFIER_RESET "\033[0m"
+#define FF_UNUSED_PARAM __attribute__ ((__unused__))
 
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
 typedef enum FFLogoType
 {
-    FF_LOGO_TYPE_AUTO,    //If something is given, first try builtin, then file. Otherwise detect logo
-    FF_LOGO_TYPE_BUILTIN, //Builtin ascii art.
-    FF_LOGO_TYPE_FILE,    //Raw text file, printed as is.
-    FF_LOGO_TYPE_RAW,     //Raw text file, printed with color codes replacement.
-    FF_LOGO_TYPE_SIXEL,   //Image file, printed as sixel codes.
-    FF_LOGO_TYPE_KITTY,   //Image file, printed as kitty graphics protocol
-    FF_LOGO_TYPE_CHAFA    //Image file, printed as ascii art using libchafa
+    FF_LOGO_TYPE_AUTO,        //if something is given, first try builtin, then file. Otherwise detect logo
+    FF_LOGO_TYPE_BUILTIN,     //builtin ascii art
+    FF_LOGO_TYPE_FILE,        //text file, printed with color code replacement
+    FF_LOGO_TYPE_FILE_RAW,    //text file, printed as is
+    FF_LOGO_TYPE_DATA,        //text data, printed with color code replacement
+    FF_LOGO_TYPE_DATA_RAW,    //text data, printed as is
+    FF_LOGO_TYPE_IMAGE_SIXEL, //image file, printed as sixel codes.
+    FF_LOGO_TYPE_IMAGE_KITTY, //image file, printed as kitty graphics protocol
+    FF_LOGO_TYPE_IMAGE_ITERM, //image file, printed as iterm graphics protocol
+    FF_LOGO_TYPE_IMAGE_CHAFA, //image file, printed as ascii art using libchafa
 } FFLogoType;
 
 typedef enum FFBinaryPrefixType
@@ -72,6 +73,13 @@ typedef struct FFconfig
         uint32_t paddingLeft;
         uint32_t paddingRight;
         bool printRemaining;
+        bool preserveAspectRadio;
+
+        bool chafaFgOnly;
+        FFstrbuf chafaSymbols;
+        uint32_t chafaCanvasMode;
+        uint32_t chafaColorSpace;
+        uint32_t chafaDitherMode;
     } logo;
 
     //If one of those is empty, ffLogoPrint will set them
@@ -82,7 +90,6 @@ typedef struct FFconfig
 
     bool showErrors;
     bool recache;
-    bool cacheSave;
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
@@ -91,9 +98,13 @@ typedef struct FFconfig
     FFGLType glType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
+    bool stat;
 
     FFModuleArgs os;
     FFModuleArgs host;
+    FFModuleArgs bios;
+    FFModuleArgs chassis;
+    FFModuleArgs board;
     FFModuleArgs kernel;
     FFModuleArgs uptime;
     FFModuleArgs processes;
@@ -101,6 +112,7 @@ typedef struct FFconfig
     FFModuleArgs shell;
     FFModuleArgs resolution;
     FFModuleArgs de;
+    FFModuleArgs wifi;
     FFModuleArgs wm;
     FFModuleArgs wmTheme;
     FFModuleArgs theme;
@@ -153,6 +165,7 @@ typedef struct FFconfig
     FFstrbuf libOpenCL;
     FFstrbuf libcJSON;
     FFstrbuf libfreetype;
+    FFstrbuf libwlanapi;
 
     bool cpuTemp;
     bool gpuTemp;
@@ -161,7 +174,8 @@ typedef struct FFconfig
     bool titleFQDN;
 
     FFstrbuf diskFolders;
-    bool diskRemovable;
+    bool diskShowRemovable;
+    bool diskShowHidden;
 
     FFstrbuf batteryDir;
 
@@ -181,6 +195,8 @@ typedef struct FFconfig
     FFstrbuf osFile;
 
     FFstrbuf playerName;
+
+    uint32_t percentType;
 } FFconfig;
 
 typedef struct FFstate
@@ -192,12 +208,7 @@ typedef struct FFstate
     struct passwd* passwd;
     struct utsname utsname;
 
-    #if FF_HAVE_SYSINFO_H
-        struct sysinfo sysinfo;
-    #endif
-
     FFlist configDirs;
-    FFstrbuf cacheDir;
 } FFstate;
 
 typedef struct FFinstance
@@ -249,6 +260,9 @@ void ffPrintTitle(FFinstance* instance);
 void ffPrintSeparator(FFinstance* instance);
 void ffPrintOS(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
+void ffPrintBios(FFinstance* instance);
+void ffPrintBoard(FFinstance* instance);
+void ffPrintChassis(FFinstance* instance);
 void ffPrintKernel(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
@@ -281,6 +295,7 @@ void ffPrintTime(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
+void ffPrintWifi(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);

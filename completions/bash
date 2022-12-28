@@ -169,11 +169,10 @@ __fastfetch_completion()
 
     local FF_OPTIONS_BOOL=(
         "-r"
-        "--recache"
-        "--nocache"
         "--show-errors"
         "--logo-print-remaining"
         "--multithreading"
+        "--stat"
         "--allow-slow-operations"
         "--disable-linewrap"
         "--hide-cursor"
@@ -188,6 +187,8 @@ __fastfetch_completion()
         "--pipe"
         "--title-fqdn"
         "--escape-bedrock"
+        "--disk-show-removable"
+        "--disk-show-hidden"
     )
 
     local FF_OPTIONS_STRING=(
@@ -216,6 +217,7 @@ __fastfetch_completion()
         "--set"
         "--set-keyless"
         "--player-name"
+        "--percent-type"
         "--public-ip-url"
         "--public-ip-timeout"
         "--weather-output-format"
@@ -304,6 +306,9 @@ __fastfetch_completion()
         "--public-ip-key"
         "--public-ip-format"
         "--public-ip-error"
+        "--wifi-key"
+        "--wifi-format"
+        "--wifi-error"
         "--weather-key"
         "--weather-format"
         "--weather-error"

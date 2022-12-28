@@ -1,7 +1,9 @@
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
+#include "util/textModifier.h"
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 __attribute__((__noreturn__))
 static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineNo)
@@ -17,14 +19,12 @@ static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineN
 #define VERIFY(expression) if(!(expression)) testFailed(&strbuf, #expression, __LINE__)
 
 int shouldNotBeCalled(int c) {
-    FF_UNUSED(c);
+    (void)c;
     exit(1);
 }
 
-int main(int argc, char** argv)
+int main(void)
 {
-    FF_UNUSED(argc, argv)
-
     FFstrbuf strbuf;
 
     //destroy 0
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
     VERIFY(strbuf.length == 5);
     VERIFY(strbuf.allocated >= 6);
-    VERIFY(ffStrbufCompS(&strbuf, "12345") == 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "12345"));
 
     //appendNS
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 
     VERIFY(strbuf.length == 9);
     VERIFY(strbuf.allocated >= 10);
-    VERIFY(ffStrbufCompS(&strbuf, "123456789") == 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "123456789"));
 
     //appendS long
 
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     VERIFY(strbuf.length == 9);
     VERIFY(strbuf.allocated >= 110);
     VERIFY(strbuf.chars[strbuf.length] == 0);
-    VERIFY(ffStrbufCompS(&strbuf, "123456789") == 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "123456789"));
 
     //startsWithC
 
@@ -166,10 +166,16 @@ int main(int argc, char** argv)
     VERIFY(!ffStrbufEndsWithIgnCaseS(&strbuf, "0aBcDeFg"));
 
     //ensure
-    ffStrbufEnsureEndsWithC(&strbuf, '^');
-    VERIFY(ffStrbufCompS(&strbuf, "^aBcDeFg"));
     ffStrbufEnsureEndsWithC(&strbuf, '$');
-    VERIFY(ffStrbufCompS(&strbuf, "^aBcDeFg$"));
+    VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG$"));
+    ffStrbufEnsureEndsWithC(&strbuf, '$');
+    VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG$"));
+
+    //clear
+    ffStrbufClear(&strbuf);
+    VERIFY(strbuf.allocated > 0);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.chars && strbuf.chars[0] == 0);
 
     //Destroy
 
@@ -177,7 +183,28 @@ int main(int argc, char** argv)
 
     VERIFY(strbuf.allocated == 0);
     VERIFY(strbuf.length == 0);
-    VERIFY(strbuf.chars == NULL);
+    VERIFY(strbuf.chars && strbuf.chars[0] == 0);
+
+    //initA
+    ffStrbufInitA(&strbuf, 32);
+
+    VERIFY(strbuf.allocated == 32);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.chars && strbuf.chars[0] == 0);
+
+    //appendF
+    ffStrbufAppendF(&strbuf, "%s", "1234567890123456789012345678901");
+    VERIFY(strbuf.allocated == 32);
+    VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
+
+    ffStrbufDestroy(&strbuf);
+
+    //initF
+    ffStrbufInitF(&strbuf, "%s", "1234567890123456789012345678901");
+    VERIFY(strbuf.allocated == 32);
+    VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
+
+    ffStrbufDestroy(&strbuf);
 
     //Success
     puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);

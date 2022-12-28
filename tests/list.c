@@ -1,8 +1,10 @@
-#include "fastfetch.h"
+#include "util/FFlist.h"
+#include "util/textModifier.h"
 
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 __attribute__((__noreturn__))
 static void testFailed(const FFlist* list, const char* expression, int lineNo)
@@ -26,10 +28,8 @@ static bool numEqualsAdapter(const void* first, const void* second)
 
 #define VERIFY(expression) if(!(expression)) testFailed(&list, #expression, __LINE__)
 
-int main(int argc, char** argv)
+int main(void)
 {
-    FF_UNUSED(argc, argv)
-
     FFlist list;
 
     //initA

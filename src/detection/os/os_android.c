@@ -5,14 +5,11 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
 {
     FF_UNUSED(instance);
 
-    ffStrbufInit(&os->name);
-    ffStrbufSetS(&os->name, "Android");
+    ffStrbufInitS(&os->name, "Android");
 
-    ffStrbufInit(&os->prettyName);
-    ffStrbufSetS(&os->prettyName, "Android");
+    ffStrbufInitS(&os->prettyName, "Android");
 
-    ffStrbufInit(&os->id);
-    ffStrbufSetS(&os->id, "android");
+    ffStrbufInitS(&os->id, "android");
 
     ffStrbufInit(&os->version);
     ffSettingsGetAndroidProperty("ro.build.version.release", &os->version);
@@ -26,13 +23,11 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->buildID);
     ffSettingsGetAndroidProperty("ro.build.id", &os->buildID);
 
-    ffStrbufInit(&os->systemName);
-    ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
+    ffStrbufInitS(&os->systemName, instance->state.utsname.sysname);
 
-    ffStrbufInit(&os->architecture);
-    ffStrbufSetS(&os->architecture, instance->state.utsname.machine);
+    ffStrbufInitS(&os->architecture, instance->state.utsname.machine);
 
-    ffStrbufInitA(&os->idLike, 0);
-    ffStrbufInitA(&os->variant, 0);
-    ffStrbufInitA(&os->variantID, 0);
+    ffStrbufInit(&os->idLike);
+    ffStrbufInit(&os->variant);
+    ffStrbufInit(&os->variantID);
 }

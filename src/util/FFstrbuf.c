@@ -26,12 +26,21 @@ void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
 {
     assert(format != NULL);
 
-    ffStrbufInit(strbuf);
-
     va_list arguments;
     va_start(arguments, format);
-    ffStrbufAppendVF(strbuf, format, arguments);
+    ffStrbufInitVF(strbuf, format, arguments);
     va_end(arguments);
+}
+
+void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
+{
+    assert(format != NULL);
+
+    int len = vasprintf(&strbuf->chars, format, arguments);
+    assert(len >= 0);
+
+    strbuf->allocated = (uint32_t)(len + 1);
+    strbuf->length = (uint32_t)len;
 }
 
 uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
@@ -138,31 +147,43 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     va_copy(copy, arguments);
 
     uint32_t free = ffStrbufGetFree(strbuf);
-    uint32_t written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, free, format, arguments);
+    int written = vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated > 0 ? free + 1 : 0, format, arguments);
 
-    if(strbuf->length + written > free)
+    if(written > 0 && strbuf->length + (uint32_t) written > free)
     {
-        ffStrbufEnsureFree(strbuf, written);
-        written = (uint32_t) vsnprintf(strbuf->chars + strbuf->length, ffStrbufGetFree(strbuf), format, copy);
+        ffStrbufEnsureFree(strbuf, (uint32_t) written);
+        written = vsnprintf(strbuf->chars + strbuf->length, (uint32_t) written + 1, format, copy);
     }
 
     va_end(copy);
 
-    if(written == 0)
+    if(written > 0)
+        strbuf->length += (uint32_t) written;
+}
+
+void ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until)
+{
+    if(value == NULL)
         return;
 
-    strbuf->length += written;
-    strbuf->chars[strbuf->length] = '\0';
+    char* end = strchr(value, until);
+    if(end == NULL)
+        ffStrbufAppendS(strbuf, value);
+    else
+        ffStrbufAppendNS(strbuf, (uint32_t) (end - value), value);
 }
 
 void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
 {
     assert(format != NULL);
 
-    ffStrbufClear(strbuf);
-
     va_list arguments;
     va_start(arguments, format);
+
+    if(strbuf->allocated == 0)
+        return ffStrbufInitVF(strbuf, format, arguments);
+
+    ffStrbufClear(strbuf);
     ffStrbufAppendVF(strbuf, format, arguments);
     va_end(arguments);
 }
@@ -426,5 +447,5 @@ void ffStrbufDestroy(FFstrbuf* strbuf)
     //Avoid free-after-use. These 3 assignments are cheap so don't remove them
     strbuf->allocated = strbuf->length = 0;
     free(strbuf->chars);
-    strbuf->chars = NULL;
+    strbuf->chars = CHAR_NULL_PTR;
 }

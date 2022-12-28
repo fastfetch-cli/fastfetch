@@ -3,13 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-void ffDetectMemoryImpl(FFMemoryResult* memory)
+void ffDetectMemory(FFMemoryStorage* ram)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
     {
-        ffStrbufAppendS(&memory->ram.error, "Failed to open /proc/meminfo");
-        ffStrbufAppendS(&memory->swap.error, "Failed to open /proc/meminfo");
+        ffStrbufAppendS(&ram->error, "Failed to open /proc/meminfo");
         return;
     }
 
@@ -21,20 +20,16 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
              memFree = 0,
              buffers = 0,
              cached = 0,
-             sReclaimable = 0,
-             swapTotal = 0,
-             swapFree = 0;
+             sReclaimable = 0;
 
     while (getline(&line, &len, meminfo) != EOF)
     {
-        sscanf(line, "MemTotal: %u", &memTotal);
-        sscanf(line, "Shmem: %u", &shmem);
-        sscanf(line, "MemFree: %u", &memFree);
-        sscanf(line, "Buffers: %u", &buffers);
-        sscanf(line, "Cached: %u", &cached);
-        sscanf(line, "SReclaimable: %u", &sReclaimable);
-        sscanf(line, "SwapTotal: %u", &swapTotal);
-        sscanf(line, "SwapFree: %u", &swapFree);
+        if(!sscanf(line, "MemTotal: %u", &memTotal))
+        if(!sscanf(line, "Shmem: %u", &shmem))
+        if(!sscanf(line, "MemFree: %u", &memFree))
+        if(!sscanf(line, "Buffers: %u", &buffers))
+        if(!sscanf(line, "Cached: %u", &cached))
+            sscanf(line, "SReclaimable: %u", &sReclaimable);
     }
 
     if(line != NULL)
@@ -42,12 +37,9 @@ void ffDetectMemoryImpl(FFMemoryResult* memory)
 
     fclose(meminfo);
 
-    memory->ram.bytesTotal = memTotal * (uint64_t) 1024;
-    if(memory->ram.bytesTotal == 0)
-        ffStrbufAppendS(&memory->ram.error, "Failed to read MemTotal");
+    ram->bytesTotal = memTotal * (uint64_t) 1024;
+    if(ram->bytesTotal == 0)
+        ffStrbufAppendS(&ram->error, "Failed to read MemTotal");
     else
-        memory->ram.bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
-
-    memory->swap.bytesTotal = swapTotal * (uint64_t) 1024;
-    memory->swap.bytesUsed = (swapTotal - swapFree) * (uint64_t) 1024;
+        ram->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
 }

@@ -9,12 +9,14 @@ typedef struct X11PropertyData
 {
     FF_LIBRARY_SYMBOL(XInternAtom)
     FF_LIBRARY_SYMBOL(XGetWindowProperty)
+    FF_LIBRARY_SYMBOL(XFree)
 } X11PropertyData;
 
 static bool x11InitPropertyData(void* libraryHandle, X11PropertyData* propertyData)
 {
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XInternAtom, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XGetWindowProperty, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XFree, false)
 
     return true;
 }
@@ -29,7 +31,8 @@ static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Wi
     unsigned long unused;
     unsigned char* result = NULL;
 
-    data->ffXGetWindowProperty(display, window, requestAtom, 0, 64, False, AnyPropertyType, &actualType, (int*) &unused, &unused, &unused, &result);
+    if(data->ffXGetWindowProperty(display, window, requestAtom, 0, 64, False, AnyPropertyType, &actualType, (int*) &unused, &unused, &unused, &result) != Success)
+        return NULL;
 
     return result;
 }
@@ -43,19 +46,20 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     if(wmWindow == NULL)
         return;
 
-    const char* wmName = (const char*) x11GetProperty(data, display, *wmWindow, "_NET_WM_NAME");
+    char* wmName = (char*) x11GetProperty(data, display, *wmWindow, "_NET_WM_NAME");
     if(wmName == NULL)
-        wmName = (const char*) x11GetProperty(data, display, *wmWindow, "WM_NAME");
+        wmName = (char*) x11GetProperty(data, display, *wmWindow, "WM_NAME");
 
-    if(!ffStrSet(wmName))
-        return;
+    if(ffStrSet(wmName))
+        ffStrbufSetS(&result->wmProcessName, wmName);
 
-    ffStrbufSetS(&result->wmProcessName, wmName);
+    data->ffXFree(wmName);
+    data->ffXFree(wmWindow);
 }
 
 void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(x11, &instance->config.libX11, , "libX11.so", 7, "libX11-xcb.so", 2)
+    FF_LIBRARY_LOAD(x11, &instance->config.libX11, , "libX11" FF_LIBRARY_EXTENSION, 7, "libX11-xcb" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(x11, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay,)
 
@@ -259,7 +263,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 
 void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xrandr, &instance->config.libXrandr, , "libXrandr.so", 3)
+    FF_LIBRARY_LOAD(xrandr, &instance->config.libXrandr, , "libXrandr" FF_LIBRARY_EXTENSION, 3)
 
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XCloseDisplay,)

@@ -13,7 +13,8 @@ typedef enum FFformatargtype
     FF_FORMAT_ARG_TYPE_STRING,
     FF_FORMAT_ARG_TYPE_STRBUF,
     FF_FORMAT_ARG_TYPE_DOUBLE,
-    FF_FORMAT_ARG_TYPE_LIST
+    FF_FORMAT_ARG_TYPE_LIST,
+    FF_FORMAT_ARG_TYPE_BOOL
 } FFformatargtype;
 
 typedef struct FFformatarg
@@ -24,5 +25,7 @@ typedef struct FFformatarg
 
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments);
+
+#define FF_FORMAT_ARG_VALUE_BOOL(xpr) ((xpr) ? (const void*) 1 : NULL)
 
 #endif

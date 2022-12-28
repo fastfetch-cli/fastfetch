@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "util/textModifier.h"
 
 void ffPrintColors(FFinstance* instance)
 {

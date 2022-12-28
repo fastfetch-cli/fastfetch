@@ -1,23 +1,28 @@
 #include "fastfetch.h"
 #include "common/format.h"
 #include "common/parsing.h"
+#include "util/textModifier.h"
+
+#include <inttypes.h>
 
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
 {
     if(formatarg->type == FF_FORMAT_ARG_TYPE_INT)
         ffStrbufAppendF(buffer, "%i", *(int*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT)
-        ffStrbufAppendF(buffer, "%u", *(uint32_t*)formatarg->value);
+        ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT16)
-        ffStrbufAppendF(buffer, "%hu", *(uint16_t*)formatarg->value);
+        ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
-        ffStrbufAppendF(buffer, "%hhu", *(uint8_t*)formatarg->value);
+        ffStrbufAppendF(buffer, "%" PRIu8, *(uint8_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRING)
         ffStrbufAppendS(buffer, (const char*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRBUF)
         ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
         ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_BOOL)
+        ffStrbufAppendS(buffer, formatarg->value != NULL ? "true" : "false");
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_LIST)
     {
         const FFlist* list = formatarg->value;
@@ -34,6 +39,14 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     }
 }
 
+/**
+ * @brief parses a string to a uint32_t
+ *
+ * If the string can't be parsed, or is < 1, uint32_t max is returned.
+ *
+ * @param placeholderValue the string to parse
+ * @return uint32_t the parsed value
+ */
 static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
 {
     uint32_t result = UINT32_MAX;
@@ -41,7 +54,7 @@ static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
     if(placeholderValue->chars[0] != '-')
         sscanf(placeholderValue->chars, "%u", &result);
 
-    return result;
+    return result == 0 ? UINT32_MAX : result;
 }
 
 static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start, const FFstrbuf* placeholderValue, uint32_t index, uint32_t formatStringLength)
@@ -72,7 +85,8 @@ static inline bool formatArgSet(const FFformatarg* arg)
         (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet(arg->value)) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT16 && *(uint16_t*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0)
+        (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_BOOL && arg->value != NULL)
     );
 }
 

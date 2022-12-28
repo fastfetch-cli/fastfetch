@@ -23,6 +23,7 @@ static void printFont(const FFFontResult* font)
     }
 
     ffStrbufWriteTo(&gtk, stdout);
+    ffStrbufDestroy(&gtk);
 }
 
 #elif defined(__APPLE__)
@@ -38,6 +39,21 @@ static void printFont(const FFFontResult* font)
 
     if(font->fonts[1].length > 0)
         printf("%s [User]", font->fonts[1].chars);
+}
+
+#elif defined(_WIN32)
+
+static void printFont(const FFFontResult* font)
+{
+    const char* types[] = { "Caption", "Menu", "Message", "Status" };
+    for(uint32_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
+    {
+        if(font->fonts[i].length > 0)
+        {
+            printf("%s [%s]", font->fonts[i].chars, types[i]);
+            break;
+        }
+    }
 }
 
 #else

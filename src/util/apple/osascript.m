@@ -4,14 +4,14 @@
 #import <AppKit/AppKit.h>
 #import <CoreData/CoreData.h>
 
-bool ffOsascript(const char* input, FFstrbuf* result) {
-    NSString* appleScript = [NSString stringWithUTF8String: input];
-    NSAppleScript* script = [[NSAppleScript alloc] initWithSource:appleScript];
+bool ffOsascript(const char* input, FFstrbuf* result)
+{
+    NSAppleScript* script = [NSAppleScript.alloc initWithSource:@(input)];
     NSDictionary* errInfo = nil;
     NSAppleEventDescriptor* descriptor = [script executeAndReturnError:&errInfo];
     if (errInfo)
         return false;
 
-    ffStrbufSetS(result, [[descriptor stringValue] cStringUsingEncoding:NSUTF8StringEncoding]);
+    ffStrbufSetS(result, descriptor.stringValue.UTF8String);
     return true;
 }

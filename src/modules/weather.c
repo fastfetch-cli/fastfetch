@@ -5,23 +5,24 @@
 #define FF_WEATHER_MODULE_NAME "Weather"
 #define FF_WEATHER_NUM_FORMAT_ARGS 1
 
-static int sockfd;
+static FFNetworkingState state;
+static int status = -1;
 
 void ffPrepareWeather(FFinstance* instance)
 {
     FFstrbuf path;
     ffStrbufInitS(&path, "/?format=");
     ffStrbufAppend(&path, &instance->config.weatherOutputFormat);
-    sockfd = ffNetworkingSendHttpRequest("wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n", instance->config.weatherTimeout);
+    status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
     ffStrbufDestroy(&path);
 }
 
 void ffPrintWeather(FFinstance* instance)
 {
-    if(sockfd == 0)
+    if(status == -1)
         ffPrepareWeather(instance);
 
-    if(sockfd < 0)
+    if(status == 0)
     {
         ffPrintError(instance, FF_WEATHER_MODULE_NAME, 0, &instance->config.weather, "Failed to connect to 'wttr.in'");
         return;
@@ -29,7 +30,7 @@ void ffPrintWeather(FFinstance* instance)
 
     FFstrbuf result;
     ffStrbufInitA(&result, 4096);
-    bool success = ffNetworkingRecvHttpResponse(sockfd, &result);
+    bool success = ffNetworkingRecvHttpResponse(&state, &result, instance->config.weatherTimeout);
     if (success) ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
 
     if(!success || result.length == 0)

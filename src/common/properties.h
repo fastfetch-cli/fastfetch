@@ -3,7 +3,7 @@
 #ifndef FF_INCLUDED_common_properties
 #define FF_INCLUDED_common_properties
 
-#include "util/FFstrbuf.h"
+#include "fastfetch.h"
 
 typedef struct FFpropquery
 {

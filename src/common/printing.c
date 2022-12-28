@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "util/textModifier.h"
 
 void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat)
 {
@@ -93,7 +94,9 @@ static void printError(FFinstance* instance, const char* moduleName, uint8_t mod
         vprintf(message, arguments);
 
         if(!instance->config.pipe)
-            puts(FASTFETCH_TEXT_MODIFIER_RESET);
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
+        putchar('\n');
     }
 }
 
@@ -127,8 +130,13 @@ void ffPrintColor(const FFstrbuf* colorValue)
 
 void ffPrintCharTimes(char c, uint32_t times)
 {
-    for(uint32_t i = 0; i < times; i++)
-        putchar(c);
+    char str[32];
+    memset(str, c, sizeof(str)); //2 instructions when compiling with AVX2 enabled
+    for(uint32_t i = sizeof(str); i <= times; i += sizeof(str))
+        fwrite(str, 1, sizeof(str), stdout);
+    uint32_t remaining = times % sizeof(str);
+    if(remaining > 0)
+        fwrite(str, 1, remaining, stdout);
 }
 
 void ffPrintUserString(const char* value)

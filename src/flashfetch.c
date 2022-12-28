@@ -22,6 +22,9 @@ int main(int argc, char** argv)
     ffPrintSeparator(&instance);
     ffPrintOS(&instance);
     ffPrintHost(&instance);
+    //ffPrintBios(&instance);
+    //ffPrintBoard(&instance);
+    //ffPrintChassis(&instance);
     ffPrintKernel(&instance);
     ffPrintUptime(&instance);
     //ffPrintProcesses(&instance);
@@ -48,6 +51,7 @@ int main(int argc, char** argv)
     //ffPrintSong(&instance);
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
+    //ffPrintWifi(&instance);
     //ffPrintCPUUsage(&instance);
     ffPrintLocale(&instance);
     //ffPrintDateTime(&instance);

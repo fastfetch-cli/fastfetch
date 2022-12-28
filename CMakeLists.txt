@@ -7,17 +7,38 @@ project(fastfetch
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
 )
 
+set(PROJECT_LICENSE "MIT license")
+
 ###################
 # Target Platform #
 ###################
-
-if("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
+if(ANDROID)
+    set(LINUX FALSE)
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
     set(BSD TRUE CACHE BOOL "..." FORCE)
-elseif(NOT APPLE AND NOT ANDROID)
-    message(FATAL_ERROR "Unsupported platform")
+elseif(NOT APPLE AND NOT WIN32)
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
+
+if(WIN32)
+    enable_language(CXX)
+endif()
+
+#############################
+# Compile time dependencies #
+#############################
+
+set(THREADS_PREFER_PTHREAD_FLAG NOT WIN32)
+find_package(Threads)
+
+find_package(PkgConfig)
+if(NOT PKG_CONFIG_FOUND)
+    message(WARNING "pkg-config not found, library detection might be limited")
+endif()
+
+include(CheckIncludeFile)
 
 #####################
 # Configure options #
@@ -26,7 +47,7 @@ endif()
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
@@ -38,30 +59,23 @@ cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR BSD OR APPLE OR WIN32" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR BSD OR APPLE" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
+cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
+cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
+cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
+cmake_dependent_option(USE_WIN_GPU_DXGI "Use DXGI to detect GPUs instead of WMI. Faster, but may ignore GPUs that only support DX9" ON "WIN32" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
-
-#############################
-# Compile time dependencies #
-#############################
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-find_package(PkgConfig REQUIRED)
-
-include(CheckIncludeFile)
 
 ####################
 # Compiler options #
@@ -72,9 +86,23 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+if(ENABLE_THREADS)
+    if(CMAKE_USE_WIN32_THREADS_INIT)
+        message(STATUS "Threads type: Win32 thread")
+    elseif(CMAKE_USE_PTHREADS_INIT)
+        message(STATUS "Threads type: pthread")
+    endif()
+else()
+    message(STATUS "Threads type: disabled")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
+
+if(WIN32)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
+endif()
 
 # Used for dlopen finding dylibs installed by homebrew
 # `/opt/homebrew/lib` is not on in dlopen search path by default
@@ -82,14 +110,19 @@ if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
 endif()
 
-set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined")
+set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
+if(NOT WIN32)
+    set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
+endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
 set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG} -rdynamic")
 
-include(CheckIPOSupported)
-check_ipo_supported(RESULT IPO_SUPPORTED)
-if(IPO_SUPPORTED)
-    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT IPO_SUPPORTED)
+    if(IPO_SUPPORTED)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
 endif()
 
 #######################
@@ -148,6 +181,11 @@ if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     )
     string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
 endif()
+if(PROJECT_VERSION_TWEAK)
+    string(REGEX MATCH "[0-9]+" PROJECT_VERSION_TWEAK_NUM "${PROJECT_VERSION_TWEAK}")
+else()
+    set(PROJECT_VERSION_TWEAK_NUM 0)
+endif()
 
 #############
 # Text data #
@@ -182,165 +220,274 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/util/FFstrbuf.c
-    src/util/FFlist.c
-    src/util/FFvaluestore.c
+    src/common/bar.c
+    src/common/font.c
+    src/common/format.c
     src/common/init.c
     src/common/io.c
-    src/common/printing.c
-    src/common/caching.c
-    src/common/properties.c
-    src/common/font.c
-    src/common/processing.c
-    src/common/format.c
-    src/common/parsing.c
-    src/common/settings.c
     src/common/library.c
-    src/common/networking.c
-    src/logo/logo.c
-    src/logo/builtin.c
-    src/logo/image/image.c
-    src/logo/image/im7.c
-    src/logo/image/im6.c
-    src/detection/qt.c
-    src/detection/gtk.c
-    src/detection/terminalShell.c
-    src/detection/vulkan.c
-    src/detection/datetime.c
-    src/detection/title.c
-    src/detection/host/host.c
-    src/detection/os/os.c
+    src/common/parsing.c
+    src/common/printing.c
+    src/common/properties.c
+    src/common/settings.c
     src/detection/cpu/cpu.c
-    src/detection/gpu/gpu.c
-    src/detection/memory/memory.c
-    src/detection/font/font.c
+    src/detection/cpuUsage/cpuUsage.c
+    src/detection/datetime.c
+    src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
-    src/detection/terminalfont/terminalfont.c
+    src/detection/font/font.c
+    src/detection/gpu/gpu.c
+    src/detection/host/host.c
+    src/detection/locale/locale.c
     src/detection/media/media.c
+    src/detection/os/os.c
+    src/detection/packages/packages.c
+    src/detection/terminalfont/terminalfont.c
+    src/detection/terminalshell/terminalshell.c
+    src/detection/title.c
+    src/detection/vulkan.c
+    src/logo/builtin.c
+    src/logo/image/im6.c
+    src/logo/image/im7.c
+    src/logo/image/image.c
+    src/logo/logo.c
+    src/modules/battery.c
+    src/modules/bios.c
+    src/modules/board.c
     src/modules/break.c
-    src/modules/custom.c
-    src/modules/title.c
-    src/modules/separator.c
-    src/modules/os.c
-    src/modules/host.c
-    src/modules/kernel.c
-    src/modules/uptime.c
-    src/modules/processes.c
-    src/modules/packages.c
-    src/modules/shell.c
-    src/modules/resolution.c
-    src/modules/de.c
-    src/modules/wm.c
-    src/modules/wmtheme.c
-    src/modules/theme.c
-    src/modules/icons.c
-    src/modules/font.c
-    src/modules/cursor.c
-    src/modules/terminal.c
-    src/modules/terminalfont.c
+    src/modules/chassis.c
+    src/modules/colors.c
     src/modules/cpu.c
     src/modules/cpuUsage.c
-    src/modules/gpu.c
-    src/modules/memory.c
-    src/modules/disk.c
-    src/modules/battery.c
-    src/modules/poweradapter.c
-    src/modules/locale.c
-    src/modules/vulkan.c
-    src/modules/localip.c
-    src/modules/publicip.c
-    src/modules/weather.c
-    src/modules/player.c
-    src/modules/song.c
-    src/modules/datetime.c
+    src/modules/cursor.c
+    src/modules/custom.c
     src/modules/date.c
-    src/modules/time.c
-    src/modules/colors.c
-    src/modules/opengl.c
+    src/modules/datetime.c
+    src/modules/de.c
+    src/modules/disk.c
+    src/modules/font.c
+    src/modules/gpu.c
+    src/modules/host.c
+    src/modules/icons.c
+    src/modules/kernel.c
+    src/modules/locale.c
+    src/modules/localip.c
+    src/modules/memory.c
     src/modules/opencl.c
+    src/modules/opengl.c
+    src/modules/os.c
+    src/modules/packages.c
+    src/modules/player.c
+    src/modules/poweradapter.c
+    src/modules/processes.c
+    src/modules/publicip.c
+    src/modules/resolution.c
+    src/modules/separator.c
+    src/modules/shell.c
+    src/modules/song.c
+    src/modules/terminal.c
+    src/modules/terminalfont.c
+    src/modules/theme.c
+    src/modules/time.c
+    src/modules/title.c
+    src/modules/uptime.c
     src/modules/users.c
+    src/modules/vulkan.c
+    src/modules/weather.c
+    src/modules/wifi.c
+    src/modules/wm.c
+    src/modules/wmtheme.c
+    src/util/FFlist.c
+    src/util/FFstrbuf.c
+    src/util/FFvaluestore.c
 )
 
-if(BSD OR APPLE)
+if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/sysctl.c
-    )
-endif()
-
-if(LINUX OR ANDROID)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpu/cpu_linux.c
-        src/detection/memory/memory_linux.c
-    )
-endif()
-
-if(LINUX OR ANDROID OR BSD)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpuUsage/cpuUsage_linux.c
-        src/detection/disk/disk_linux.c
-        src/detection/poweradapter/poweradapter_linux.c
-        src/detection/temps/temps_linux.c
-    )
-endif()
-
-if(LINUX OR BSD)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_linux.c
-        src/detection/os/os_linux.c
-        src/detection/gpu/gpu_linux.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
         src/detection/battery/battery_linux.c
+        src/detection/bios/bios_linux.c
+        src/detection/board/board_linux.c
+        src/detection/chassis/chassis_linux.c
+        src/detection/cpu/cpu_linux.c
+        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cursor/cursor_linux.c
+        src/detection/disk/disk_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
-        src/detection/displayserver/linux/wmde.c
-        src/detection/terminalfont/terminalfont_linux.c
-        src/detection/media/media_linux.c
-        src/detection/wmtheme/wmtheme_linux.c
         src/detection/font/font_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/gtk.c
+        src/detection/host/host_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_linux.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/qt.c
+        src/detection/swap/swap_linux.c
+        src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_linux.c
+        src/detection/users/users_linux.c
+        src/detection/wifi/wifi_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
     )
-endif()
-
-if(APPLE)
+elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_linux.c
+        src/detection/cursor/cursor_nosupport.c
+        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/disk/disk_linux.c
+        src/detection/displayserver/displayserver_nosupport.c
+        src/detection/font/font_nosupport.c
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/host/host_android.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_nosupport.c
+        src/detection/memory/memory_linux.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_android.c
+        src/detection/packages/packages_linux.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/swap/swap_linux.c
+        src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_android.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_linux.c
+        src/detection/users/users_linux.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wmtheme/wmtheme_nosupport.c
+    )
+elseif(BSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/common/sysctl.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_bsd.c
+        src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/cursor/cursor_linux.c
+        src/detection/disk/disk_bsd.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_linux.c
+        src/detection/gtk.c
+        src/detection/host/host_bsd.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_bsd.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_bsd.c
+        src/detection/qt.c
+        src/detection/swap/swap_bsd.c
+        src/detection/temps/temps_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_bsd.c
+        src/detection/users/users_linux.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wmtheme/wmtheme_linux.c
+    )
+elseif(APPLE)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/common/sysctl.c
+        src/detection/battery/battery_apple.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/cursor/cursor_nosupport.c
+        src/detection/disk/disk_apple.m
+        src/detection/disk/disk_bsd.c
+        src/detection/displayserver/displayserver_apple.c
+        src/detection/font/font_apple.m
+        src/detection/gpu/gpu_apple.c
+        src/detection/host/host_apple.c
+        src/detection/localip/localip_linux.c
+        src/detection/media/media_apple.m
+        src/detection/memory/memory_apple.c
+        src/detection/opengl/opengl_apple.c
+        src/detection/os/os_apple.m
+        src/detection/packages/packages_apple.c
+        src/detection/poweradapter/poweradapter_apple.c
+        src/detection/processes/processes_bsd.c
+        src/detection/swap/swap_apple.c
+        src/detection/temps/temps_apple.c
+        src/detection/terminalfont/terminalfont_apple.m
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/uptime/uptime_bsd.c
+        src/detection/users/users_linux.c
+        src/detection/wifi/wifi_apple.m
+        src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
-        src/detection/host/host_apple.c
-        src/detection/os/os_apple.m
-        src/detection/cpu/cpu_apple.c
-        src/detection/gpu/gpu_apple.c
-        src/detection/battery/battery_apple.c
-        src/detection/poweradapter/poweradapter_apple.c
-        src/detection/memory/memory_apple.c
-        src/detection/displayserver/displayserver_apple.c
-        src/detection/terminalfont/terminalfont_apple.m
-        src/detection/media/media_apple.m
-        src/detection/disk/disk_apple.m
-        src/detection/wmtheme/wmtheme_apple.m
-        src/detection/temps/temps_apple.c
-        src/detection/font/font_apple.m
     )
-endif()
-
-if(BSD)
+elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
-        src/detection/cpu/cpu_bsd.c
-        src/detection/memory/memory_bsd.c
-    )
-endif()
-
-if(ANDROID)
-    list(APPEND LIBFASTFETCH_SRC
-        src/detection/host/host_android.c
-        src/detection/os/os_android.c
-        src/detection/gpu/gpu_android.c
-        src/detection/battery/battery_android.c
-        src/detection/displayserver/displayserver_android.c
-        src/detection/terminalfont/terminalfont_android.c
-        src/detection/media/media_android.c
-        src/detection/wmtheme/wmtheme_android.c
-        src/detection/font/font_android.c
+        src/common/networking_windows.c
+        src/common/processing_windows.c
+        src/detection/battery/battery_windows.c
+        src/detection/bios/bios_windows.c
+        src/detection/board/board_windows.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_windows.c
+        src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cursor/cursor_windows.c
+        src/detection/disk/disk_windows.c
+        src/detection/displayserver/displayserver_windows.c
+        src/detection/font/font_windows.c
+        src/detection/gpu/gpu_windows.cpp
+        src/detection/host/host_windows.c
+        src/detection/localip/localip_windows.c
+        src/detection/media/media_nosupport.c
+        src/detection/memory/memory_windows.c
+        src/detection/opengl/opengl_windows.c
+        src/detection/os/os_windows.cpp
+        src/detection/packages/packages_windows.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_windows.cpp
+        src/detection/swap/swap_windows.cpp
+        src/detection/terminalfont/terminalfont_windows.c
+        src/detection/terminalshell/terminalshell_windows.cpp
+        src/detection/uptime/uptime_windows.c
+        src/detection/users/users_windows.c
+        src/detection/wifi/wifi_windows.c
+        src/detection/wmtheme/wmtheme_windows.c
+        src/util/windows/getline.c
+        src/util/windows/pwd.c
+        src/util/windows/registry.c
+        src/util/windows/unicode.c
+        src/util/windows/utsname.c
+        src/util/windows/wmi.cpp
     )
 endif()
 
@@ -350,31 +497,38 @@ add_library(libfastfetch OBJECT
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 
-CHECK_INCLUDE_FILE("sys/sysinfo.h" HAVE_SYSINFO_H)
-if(HAVE_SYSINFO_H)
-    # needs to be public, because changes fastfech.h ABI
-    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SYSINFO_H)
-endif()
-
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
 endif()
 
-function(ff_lib_enable VARNAME)
+function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     if(NOT ENABLE_${VARNAME})
         return()
     endif()
 
-    pkg_search_module(${VARNAME} ${ARGN})
+    if(PKG_CONFIG_FOUND)
+        pkg_search_module(${VARNAME} QUIET ${PKGCONFIG_NAMES})
+    endif()
+
     if(NOT ${VARNAME}_FOUND)
-        message(WARNING "Package ${ARGV1} not found, building without support.")
+        find_package(${CMAKE_NAME} QUIET)
+
+        set(${VARNAME}_FOUND ${${CMAKE_NAME}_FOUND})
+        set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
+        set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
+        set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+    endif()
+
+    if(NOT ${VARNAME}_FOUND)
+        message(STATUS "Library: missing: ${VARNAME}")
         return()
     endif()
 
+    message(STATUS "Library: found ${VARNAME}")
+
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
-    target_link_directories(libfastfetch PRIVATE ${${VARNAME}_LIBRARY_DIRS})
 
     foreach(FLAG ${${VARNAME}_CFLAGS_OTHER})
         if(FLAG MATCHES "-D.*")
@@ -384,40 +538,144 @@ function(ff_lib_enable VARNAME)
     endforeach()
 endfunction()
 
-ff_lib_enable(LIBPCI libpci)
-ff_lib_enable(VULKAN vulkan)
-ff_lib_enable(WAYLAND wayland-client)
-ff_lib_enable(XCB_RANDR xcb-randr)
-ff_lib_enable(XCB xcb)
-ff_lib_enable(XRANDR xrandr)
-ff_lib_enable(X11 x11)
-ff_lib_enable(GIO gio-2.0)
-ff_lib_enable(DCONF dconf)
-ff_lib_enable(DBUS dbus-1)
-ff_lib_enable(XFCONF libxfconf-0)
-ff_lib_enable(SQLITE3 sqlite3)
-ff_lib_enable(RPM rpm)
-ff_lib_enable(IMAGEMAGICK7 MagickCore-7.Q16HDRI MagickCore-7.Q16 MagickCore-7 /usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16HDRI.pc /usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16.pc /usr/lib/imagemagick7/pkgconfig/MagickCore-7.pc)
-ff_lib_enable(IMAGEMAGICK6 MagickCore-6.Q16HDRI MagickCore-6.Q16 MagickCore-6 /usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16HDRI.pc /usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16.pc /usr/lib/imagemagick6/pkgconfig/MagickCore-6.pc)
-ff_lib_enable(ZLIB zlib)
-ff_lib_enable(CHAFA chafa>=1.10)
-ff_lib_enable(EGL egl)
-ff_lib_enable(GLX glx)
-ff_lib_enable(OSMESA osmesa)
-ff_lib_enable(OPENCL OpenCL)
-ff_lib_enable(LIBCJSON libcjson)
-ff_lib_enable(FREETYPE freetype2)
+ff_lib_enable(LIBPCI
+    "libpci"
+    "Pci"
+)
+ff_lib_enable(VULKAN
+    "vulkan"
+    "Vulkan"
+)
+ff_lib_enable(WAYLAND
+    "wayland-client"
+    "WaylandClient"
+)
+ff_lib_enable(XCB_RANDR
+    "xcb-randr"
+    "XcbRandr"
+)
+ff_lib_enable(XCB
+    "xcb"
+    "Xcb"
+)
+ff_lib_enable(XRANDR
+    "xrandr"
+    "XRandr"
+)
+ff_lib_enable(X11
+    "x11"
+    "X11"
+)
+ff_lib_enable(GIO
+    "gio-2.0"
+    "GIO"
+)
+ff_lib_enable(DCONF
+    "dconf"
+    "DConf"
+)
+ff_lib_enable(DBUS
+    "dbus-1"
+    "DBus"
+)
+ff_lib_enable(XFCONF
+    "libxfconf-0"
+    "XFConf"
+)
+ff_lib_enable(SQLITE3
+    "sqlite3"
+    "SQLite3"
+)
+ff_lib_enable(RPM
+    "rpm"
+    "RPM"
+)
+ff_lib_enable(IMAGEMAGICK7
+    "MagickCore-7.Q16HDRI;MagickCore-7.Q16;MagickCore-7;/usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16HDRI.pc;/usr/lib/imagemagick7/pkgconfig/MagickCore-7.Q16.pc;/usr/lib/imagemagick7/pkgconfig/MagickCore-7.pc"
+    "ImageMagick7"
+)
+ff_lib_enable(IMAGEMAGICK6
+    "MagickCore-6.Q16HDRI;MagickCore-6.Q16;MagickCore-6;/usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16HDRI.pc;/usr/lib/imagemagick6/pkgconfig/MagickCore-6.Q16.pc;/usr/lib/imagemagick6/pkgconfig/MagickCore-6.pc"
+    "ImageMagick6"
+)
+ff_lib_enable(ZLIB
+    "zlib"
+    "ZLIB"
+)
+ff_lib_enable(CHAFA
+    "chafa>=1.10"
+    "Chafa"
+)
+ff_lib_enable(EGL
+    "egl"
+    "EGL"
+)
+ff_lib_enable(GLX
+    "glx"
+    "GLX"
+)
+ff_lib_enable(OSMESA
+    "osmesa"
+    "OSMesa"
+)
+ff_lib_enable(OPENCL
+    "OpenCL"
+    "OpenCL"
+)
+ff_lib_enable(LIBCJSON
+    "libcjson"
+    "CJson"
+)
+ff_lib_enable(FREETYPE
+    "freetype2"
+    "FreeType2"
+)
+
+if(ENABLE_THREADS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
+    if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
+        target_link_libraries(libfastfetch PRIVATE Threads::Threads)
+    endif()
+endif()
+
+
+if(ENABLE_BUFFER)
+    target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
+endif()
 
 if(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework CoreFoundation"
         PRIVATE "-framework IOKit"
-        PRIVATE "-framework CoreGraphics"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
+        PRIVATE "-framework CoreWLAN"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
+elseif(WIN32)
+    target_link_libraries(libfastfetch
+        PRIVATE "dwmapi"
+        PRIVATE "gdi32"
+        PRIVATE "iphlpapi"
+        PRIVATE "ole32"
+        PRIVATE "oleaut32"
+        PRIVATE "opengl32"
+        PRIVATE "wbemuuid"
+        PRIVATE "ws2_32"
+        PRIVATE "ntdll"
+        PRIVATE "version"
+        PRIVATE "setupapi"
+        PRIVATE "dxgi"
+        PRIVATE "wtsapi32"
+        PRIVATE "powrprof"
+    )
+    if(USE_WIN_NTAPI)
+        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
+    endif()
+    if(USE_WIN_GPU_DXGI)
+        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_GPU_DXGI)
+    endif()
 endif()
 
 target_include_directories(libfastfetch
@@ -427,7 +685,6 @@ target_include_directories(libfastfetch
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
-    PRIVATE Threads::Threads
 )
 
 ######################
@@ -437,6 +694,9 @@ target_link_libraries(libfastfetch
 add_executable(fastfetch
     src/fastfetch.c
 )
+target_compile_definitions(fastfetch
+    PRIVATE FASTFETCH_TARGET_BINARY_NAME=fastfetch
+)
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
 )
@@ -444,9 +704,24 @@ target_link_libraries(fastfetch
 add_executable(flashfetch
     src/flashfetch.c
 )
+target_compile_definitions(flashfetch
+    PRIVATE FASTFETCH_TARGET_BINARY_NAME=flashfetch
+)
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+if(WIN32)
+    set(TARGET_NAME fastfetch)
+    target_sources(fastfetch
+        PRIVATE src/util/windows/version.rc
+    )
+
+    set(TARGET_NAME flashfetch)
+    target_sources(flashfetch
+        PRIVATE src/util/windows/version.rc
+    )
+endif()
 
 ###################
 # Testing targets #
@@ -519,12 +794,6 @@ if(LINUX)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
 
     set(CPACK_RPM_PACKAGE_LICENSE "MIT")
-elseif(APPLE)
-    set(CPACK_GENERATOR "${CPACK_GENERATOR};DragNDrop")
-
-    set(CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK TRUE)
-elseif(BSD)
-    set(CPACK_GENERATOR "${CPACK_GENERATOR};FreeBSD")
 endif()
 
 set(CPACK_SET_DESTDIR ON)

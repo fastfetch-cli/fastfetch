@@ -104,12 +104,11 @@ static uint32_t smcStrtoul(const char *str, int size, int base)
 
 static void smcUltostr(char *str, uint32_t val)
 {
-    str[0] = '\0';
-    sprintf(str, "%c%c%c%c",
-            (unsigned int)val >> 24,
-            (unsigned int)val >> 16,
-            (unsigned int)val >> 8,
-            (unsigned int)val);
+    str[0] = (char)(val >> 24);
+    str[1] = (char)(val >> 16);
+    str[2] = (char)(val >> 8);
+    str[3] = (char)val;
+    str[4] = '\0';
 }
 
 static const char *smcCall(io_connect_t conn, uint32_t selector, SmcKeyData_t *inputStructure, SmcKeyData_t *outputStructure)
@@ -207,7 +206,7 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
         uint64_t tmp = 0;
         for (uint32_t i = 0; i < val.dataSize; i++)
             tmp += (uint64_t)((uint8_t)(val.bytes[i]) * pow(256, val.dataSize - 1 - i));
-        *value = tmp;
+        *value = (double)tmp;
     }
     else if (strcmp(val.dataType, kDataTypeFlt) == 0)
     {

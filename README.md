@@ -1,6 +1,6 @@
 # Fastfetch
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently Linux, Android, BSD and MacOS are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -21,9 +21,13 @@ There are some premade config files in [`presets`](presets), including the ones 
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. Therefore its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and `libpthread`. They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions, so you probably don't have to worry about it.  
+Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.  
+
 
 The following libraries are used if present at runtime:
+
+### Linux and FreeBSD
+
 * [`libpci`](https://github.com/pciutils/pciutils): GPU output.
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module & fallback for GPU output.
 * [`libxcb-randr`](https://xcb.freedesktop.org/),
@@ -45,34 +49,61 @@ The following libraries are used if present at runtime:
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
-* [`freetype`](https://www.freetype.org/): Needed for Termux font detection ( Android ).
+
+### macOS
+
+* [`MediaRemote`](https://iphonedev.wiki/index.php/MediaRemote.framework): Need for Media detection. It's a private framework provided by newer macOS system.
+* [`MoltenVK`](https://github.com/KhronosGroup/MoltenVK): Vulkan driver for macOS. [`molten-vk`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/molten-vk.rb)
+* [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel graphics protocol. [`imagemagick`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/imagemagick.rb)
+* [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art. [`chafa`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/chafa.rb)
+
+For the image logo, iTerm with iterm image protocol should work. Apple Terminal is not supported.
+
+### Windows
+
+* [`libcJSON`](https://github.com/DaveGamble/cJSON): Used for Windows Terminal font detection.
+* [`wlanapi`](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/): A system dll which isn't supported by Windows Server by default. Used for Wifi info detection.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
+* [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
+
+Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) is provided to support these old systems, which
+
+1. Build with the ancient MSVCRT C runtime library, instead of the modern [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library
+2. Disable stdout application buffer, which seems to problematic for ConEmu.
+
+For the image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
+
+### Android
+
+* [`freetype`](https://www.freetype.org/): Used for Termux font detection.
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module, also used for GPU detection. Usually has been provided by Android system.
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Swap, Disk, Battery, Power Adapter, Player, Media, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, DateTime, Date, Time, Locale, Colors, Break, Custom
+Title, Separator, OS, Host, Bios, Board, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Swap, Disk, Battery, Power Adapter, Player, Media, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, Wifi, DateTime, Date, Time, Locale, Colors, Break, Custom
 ```
 
 ##### Logos
 ```
-AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, Crystal, Debian, Devuan, Deepin, Endeavour, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Ubuntu, Void, Zorin
+AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Devuan, Deepin, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Parabola, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, Ubuntu, Vanilla, Void, Windows 11, Windows 8, Windows, Zorin
 ```
 * Most of the logos have a small variant. Access it by appending _small to the logo name.
 * Some logos have an old variant. Access it by appending _old to the logo name.
 * To disable the logo, use `--logo none`.
 * Get a list of all available logos with `fastfetch --print-logos`.
-* Printing images as logo is supported using Sixel / Kitty graphics protocol or chafas image to text conversion.
+* Printing images as logo is supported using Sixel / Kitty / iTerm graphics protocol or chafas image to text conversion.
 
 ##### Package managers
 ```
-Pacman, dpkg, rpm, emerge, xbps, nix, Flatpak, Snap, apk, pkg, brew, MacPorts
+Pacman, dpkg, rpm, emerge, eopkg, xbps, nix, Flatpak, Snap, apk, pkg, brew, MacPorts, scoop, Chocolatey
 ```
 
 ##### WM themes
 ```
-KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS)
+KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS), DWM (Windows)
 ```
 
 ##### DE versions
@@ -82,12 +113,12 @@ KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
 
 ##### Terminal fonts
 ```
-Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, LXTerminal, iTerm2, Apple Terminal, TTY, Windows Terminal, Termux
+Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, Kitty, LXTerminal, Deepin Terminal, iTerm2, Apple Terminal, Warp, TTY, Windows Terminal, Termux, mintty, ConEmu
 ```
 
 ## Building
 
-fastfetch uses [`cmake`](https://cmake.org/) and [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) for building. The simplest steps to build the fastfetch and flashfetch binaries are:  
+fastfetch uses [`cmake`](https://cmake.org/) for building. [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) is recommended for better library detection. The simplest steps to build the fastfetch and flashfetch binaries are:  
 ```bash
 mkdir -p build
 cd build
@@ -95,7 +126,11 @@ cmake ..
 cmake --build . --target fastfetch --target flashfetch
 ```
 
-If pkg-config fails to find the headers for a library listed in [dependencies](#dependencies), fastfetch will simply build without support for that specific feature. This means, it won't look for it at runtime and just act like it isn't available.
+If the build process fails to find the headers for a library listed in [dependencies](#dependencies), fastfetch will simply build without support for that specific feature. This means, it won't look for it at runtime and just act like it isn't available.
+
+### Building on Windows
+
+Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 sub system is suggested (and tested) to build fastfetch.
 
 ## Packaging
 
@@ -111,7 +146,7 @@ If pkg-config fails to find the headers for a library listed in [dependencies](#
 ## FAQ
 
 Q: Why do you need a very performant version of neofetch?
-> I like putting neofetch in my ~/.bashrc to have a system overwiew whenever i use the terminal, but the slow speed annoyed me, so i created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
+> I like putting neofetch in my ~/.bashrc to have a system overwiew whenever I use the terminal, but the slow speed annoyed me, so I created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
 
-Q: It does not display [*] correctly for me, what can i do?
-> This is most likely because your system is not implemented (yet). At the moment i am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration
+Q: It does not display [*] correctly for me, what can I do?
+> This is most likely because your system is not implemented (yet). At the moment I am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration

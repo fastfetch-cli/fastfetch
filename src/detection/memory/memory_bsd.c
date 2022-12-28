@@ -1,7 +1,7 @@
 #include "memory.h"
 #include "common/sysctl.h"
 
-static void detectRam(FFMemoryStorage* ram)
+void ffDetectMemory(FFMemoryStorage* ram)
 {
     uint32_t pageSize = (uint32_t) ffSysctlGetInt("hw.pagesize", 0);
     if(pageSize == 0)
@@ -21,14 +21,4 @@ static void detectRam(FFMemoryStorage* ram)
         - (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_free_count", 0) * pageSize
         - (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_inactive_count", 0) * pageSize
     ;
-}
-
-static void detectSwap(FFMemoryStorage* swap)
-{
-    ffStrbufAppendS(&swap->error, "Not implemented");
-}
-void ffDetectMemoryImpl(FFMemoryResult* memory)
-{
-    detectRam(&memory->ram);
-    detectSwap(&memory->swap);
 }

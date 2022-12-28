@@ -2,7 +2,8 @@
 #include "common/io.h"
 #include "common/printing.h"
 #include "detection/os/os.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
+#include "util/textModifier.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -265,6 +266,11 @@ static inline void logoPrintDetected(FFinstance* instance)
     logoPrintStruct(instance, logoGetBuiltinDetected(instance));
 }
 
+static void logoPrintData(FFinstance* instance, bool doColorReplacement) {
+    ffLogoPrintChars(instance, instance->config.logo.source.chars, doColorReplacement);
+    logoApplyColorsDetected(instance);
+}
+
 static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement)
 {
     FFstrbuf content;
@@ -293,14 +299,18 @@ static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo)
 
 static void logoPrintKnownType(FFinstance* instance)
 {
-    bool successfull;
+    bool successfull = true;
 
     if(instance->config.logo.type == FF_LOGO_TYPE_BUILTIN)
         successfull = logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars);
     else if(instance->config.logo.type == FF_LOGO_TYPE_FILE)
         successfull = logoPrintFileIfExists(instance, true);
-    else if(instance->config.logo.type == FF_LOGO_TYPE_RAW)
+    else if(instance->config.logo.type == FF_LOGO_TYPE_FILE_RAW)
         successfull = logoPrintFileIfExists(instance, false);
+    else if(instance->config.logo.type == FF_LOGO_TYPE_DATA)
+        logoPrintData(instance, true);
+    else if(instance->config.logo.type == FF_LOGO_TYPE_DATA_RAW)
+        logoPrintData(instance, false);
     else //image
         successfull = logoPrintImageIfExists(instance, instance->config.logo.type);
 
@@ -348,7 +358,7 @@ void ffLogoPrint(FFinstance* instance)
         ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wayst") == 0;
 
     //Try to load the logo as an image. If it succeeds, print it and return.
-    if(logoPrintImageIfExists(instance, supportsKitty ? FF_LOGO_TYPE_KITTY : FF_LOGO_TYPE_CHAFA))
+    if(logoPrintImageIfExists(instance, supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA))
         return;
 
     //Try to load the logo as a file. If it succeeds, print it and return.

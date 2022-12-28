@@ -1,11 +1,15 @@
 #include "fastfetch.h"
 #include "common/io.h"
 
-#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>
-#include <poll.h>
+
+#ifdef _WIN32
+    #include <fileapi.h>
+#else
+    #include <termios.h>
+    #include <poll.h>
+#endif
 
 static void createSubfolders(const char* fileName)
 {
@@ -16,7 +20,13 @@ static void createSubfolders(const char* fileName)
     {
         ffStrbufAppendC(&path, *fileName);
         if(*fileName == '/')
-            mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
+        {
+            mkdir(path.chars
+                #ifndef WIN32
+                , S_IRWXU | S_IRGRP | S_IROTH
+                #endif
+            );
+        }
         ++fileName;
     }
 
@@ -30,6 +40,21 @@ bool ffWriteFDBuffer(int fd, const FFstrbuf* content)
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
+    #ifdef _WIN32
+    HANDLE handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(handle == INVALID_HANDLE_VALUE)
+    {
+        createSubfolders(fileName);
+        handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if(handle == INVALID_HANDLE_VALUE)
+            return false;
+    }
+
+    DWORD written;
+    bool ret = !!WriteFile(handle, data, (DWORD)dataSize, &written, NULL);
+
+    CloseHandle(handle);
+    #else
     int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
@@ -45,6 +70,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     bool ret = write(fd, data, dataSize) != -1;
 
     close(fd);
+    #endif
 
     return ret;
 }
@@ -54,11 +80,51 @@ bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer)
     return ffWriteFileData(fileName, buffer->length, buffer->chars);
 }
 
+#ifdef _WIN32
+
+bool ffAppendHandleBuffer(HANDLE handle, FFstrbuf* buffer)
+{
+    DWORD readed = 0;
+
+    LARGE_INTEGER fileSize;
+    if(!GetFileSizeEx(handle, &fileSize))
+        fileSize.QuadPart = 0;
+
+    ffStrbufEnsureFree(buffer, fileSize.QuadPart > 0 ? (uint32_t)fileSize.QuadPart : 31);
+    uint32_t free = ffStrbufGetFree(buffer);
+
+    bool success;
+    while(
+        (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &readed, NULL)) &&
+        (uint32_t) readed == free
+    ) {
+        buffer->length += (uint32_t) readed;
+        ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
+        free = ffStrbufGetFree(buffer);
+    }
+
+    if(readed > 0)
+        buffer->length += (uint32_t) readed;
+
+    buffer->chars[buffer->length] = '\0';
+
+    ffStrbufTrimRight(buffer, '\n');
+    ffStrbufTrimRight(buffer, ' ');
+
+    return success;
+}
+
+#endif
+
 bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
     ssize_t readed = 0;
 
-    ffStrbufEnsureFree(buffer, 31); // 32 - 1 for the null terminator
+    struct stat fileInfo;
+    if(fstat(fd, &fileInfo) != 0)
+        return false;
+
+    ffStrbufEnsureFree(buffer, fileInfo.st_size > 0 ? (uint32_t)fileInfo.st_size : 31);
     uint32_t free = ffStrbufGetFree(buffer);
 
     while(
@@ -84,6 +150,17 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
+    #ifdef _WIN32
+    HANDLE handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(handle == INVALID_HANDLE_VALUE)
+        return false;
+
+    DWORD readed;
+    if(!ReadFile(handle, data, (DWORD)dataSize, &readed, NULL))
+        return -1;
+
+    return (ssize_t)readed;
+    #else
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return -1;
@@ -93,10 +170,20 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
     close(fd);
 
     return readed;
+    #endif
 }
 
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
+    #ifdef _WIN32
+    HANDLE handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if(handle == INVALID_HANDLE_VALUE)
+        return false;
+
+    bool ret = ffAppendHandleBuffer(handle, buffer);
+
+    CloseHandle(handle);
+    #else
     int fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return false;
@@ -104,6 +191,7 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
     bool ret = ffAppendFDBuffer(fd, buffer);
 
     close(fd);
+    #endif
 
     return ret;
 }
@@ -151,6 +239,7 @@ bool ffFileExists(const char* fileName, mode_t mode)
 
 void ffGetTerminalResponse(const char* request, const char* format, ...)
 {
+    #ifndef WIN32
     struct termios oldTerm, newTerm;
     if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
         return;
@@ -189,4 +278,8 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     va_start(args, format);
     vsscanf(buffer, format, args);
     va_end(args);
+    #else
+    //Unimplemented
+    FF_UNUSED(request, format);
+    #endif
 }

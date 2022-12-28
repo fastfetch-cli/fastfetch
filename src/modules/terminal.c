@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/terminalshell.h"
+#include "detection/terminalshell/terminalshell.h"
 
 #include <string.h>
 
@@ -20,11 +20,7 @@ void ffPrintTerminal(FFinstance* instance)
     if(instance->config.terminal.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminal.key);
-
-        if(strncmp(result->terminalExeName, result->terminalProcessName.chars, result->terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
-            puts(result->terminalExeName);
-        else
-            ffStrbufPutTo(&result->terminalProcessName, stdout);
+        ffStrbufPutTo(&result->terminalPrettyName, stdout);
     }
     else
     {

@@ -2,6 +2,77 @@
 #include "common/io.h"
 #include "common/printing.h"
 
+static FFstrbuf base64Encode(FFstrbuf* in)
+{
+    const char* base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    FFstrbuf out;
+    ffStrbufInitA(&out, 8 * (1 + in->length / 6));
+
+    unsigned val = 0;
+    int valb = -6;
+    for (uint32_t i = 0; i < in->length; ++i)
+    {
+        unsigned char c = (unsigned char) in->chars[i];
+        val = (val << 8) + c;
+        valb += 8;
+        while (valb >= 0)
+        {
+            ffStrbufAppendC(&out, base64Chars[(val>>valb)&0x3F]);
+            valb -= 6;
+        }
+    }
+    if (valb > -6) ffStrbufAppendC(&out, base64Chars[((val<<8)>>(valb+8))&0x3F]);
+    while (out.length % 4) ffStrbufAppendC(&out, '=');
+    return out;
+}
+
+static bool printImageIterm(FFinstance* instance)
+{
+    if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
+        return false;
+
+    FFstrbuf buf;
+    ffStrbufInit(&buf);
+    if(!ffAppendFileBuffer(instance->config.logo.source.chars, &buf))
+        return false;
+
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    FFstrbuf base64 = base64Encode(&buf);
+    printf("\033]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\033[9999999D\n\033[%uA",
+        (unsigned) instance->config.logo.width,
+        (unsigned) instance->config.logo.height,
+        (unsigned) instance->config.logo.preserveAspectRadio,
+        base64.chars,
+        (unsigned) instance->config.logo.height
+    );
+    instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
+    instance->state.logoHeight = instance->config.logo.height;
+
+    ffStrbufDestroy(&buf);
+    ffStrbufDestroy(&base64);
+
+    return true;
+}
+
+static bool printImageKittyDirect(FFinstance* instance)
+{
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    FFstrbuf base64 = base64Encode(&instance->config.logo.source);
+    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D",
+        (unsigned) instance->config.logo.width,
+        (unsigned) instance->config.logo.height,
+        base64.chars
+    );
+
+    instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
+    instance->state.logoHeight = instance->config.logo.height;
+
+    ffStrbufDestroy(&base64);
+
+    return true;
+}
+
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
 #define FF_KITTY_MAX_CHUNK_SIZE 4096
@@ -16,7 +87,22 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#ifndef _WIN32
 #include <sys/ioctl.h>
+#else
+#include <wincon.h>
+
+static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
+{
+    char* result = _fullpath(resolved_name, file_name, _MAX_PATH);
+    if(result)
+    {
+        resolved_name[1] = resolved_name[0]; // Drive Name
+        resolved_name[0] = '/';
+    }
+}
+#endif
 
 #ifdef FF_HAVE_ZLIB
 #include "common/library.h"
@@ -25,7 +111,7 @@
 
 static bool compressBlob(const FFinstance* instance, void** blob, size_t* length)
 {
-    FF_LIBRARY_LOAD(zlib, &instance->config.libZ, false, "libz.so", 2)
+    FF_LIBRARY_LOAD(zlib, &instance->config.libZ, false, "libz" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
 
@@ -114,7 +200,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
     instance->state.logoHeight = requestData->logoCharacterHeight;
-    if(requestData->type == FF_LOGO_TYPE_KITTY)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
         instance->state.logoHeight -= 1;
 
     //Write cache files
@@ -213,12 +299,15 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
 }
 
 #ifdef FF_HAVE_CHAFA
-#include <chafa/chafa.h>
+#include <chafa.h>
 static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData, const ImageData* imageData)
 {
-    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false, "libchafa.so", 1)
+    FF_LIBRARY_LOAD(chafa, &instance->config.libChafa, false,
+        "libchafa" FF_LIBRARY_EXTENSION, 1,
+        "libchafa-0" FF_LIBRARY_EXTENSION, -1 // Required for Windows
+    )
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_add_by_tags, false)
+    FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_apply_selectors, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_geometry, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_set_symbol_map, false)
@@ -228,20 +317,49 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_unref, false)
-    FF_LIBRARY_LOAD_SYMBOL(chafa, g_string_free, false)
 
     imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
     size_t length;
     void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
     if(!checkAllocationResult(blob, length))
+    {
+        dlclose(chafa);
         return false;
+    }
 
     ChafaSymbolMap* symbolMap = ffchafa_symbol_map_new();
-    ffchafa_symbol_map_add_by_tags(symbolMap, CHAFA_SYMBOL_TAG_ALL);
+    GError* error = NULL;
+    if(!ffchafa_symbol_map_apply_selectors(symbolMap, instance->config.logo.chafaSymbols.chars, &error))
+        fputs(error->message, stderr);
 
     ChafaCanvasConfig* canvasConfig = ffchafa_canvas_config_new();
     ffchafa_canvas_config_set_geometry(canvasConfig, (gint) requestData->logoCharacterWidth, (gint) requestData->logoCharacterHeight);
     ffchafa_canvas_config_set_symbol_map(canvasConfig, symbolMap);
+
+    if(instance->config.logo.chafaFgOnly)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_fg_only_enabled);
+        if(ffchafa_canvas_config_set_fg_only_enabled)
+            ffchafa_canvas_config_set_fg_only_enabled(canvasConfig, true);
+    }
+    if(instance->config.logo.chafaCanvasMode < CHAFA_CANVAS_MODE_MAX)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_canvas_mode);
+        if(ffchafa_canvas_config_set_canvas_mode)
+            ffchafa_canvas_config_set_canvas_mode(canvasConfig, (ChafaCanvasMode) instance->config.logo.chafaCanvasMode);
+    }
+    if(instance->config.logo.chafaColorSpace < CHAFA_COLOR_SPACE_MAX)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_color_space)
+        if(ffchafa_canvas_config_set_color_space)
+            ffchafa_canvas_config_set_color_space(canvasConfig, (ChafaColorSpace) instance->config.logo.chafaColorSpace);
+    }
+    if(instance->config.logo.chafaDitherMode < CHAFA_DITHER_MODE_MAX)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, chafa_canvas_config_set_dither_mode)
+        if(ffchafa_canvas_config_set_dither_mode)
+            ffchafa_canvas_config_set_dither_mode(canvasConfig, (ChafaDitherMode) instance->config.logo.chafaDitherMode);
+    }
 
     ChafaCanvas* canvas = ffchafa_canvas_new(canvasConfig);
     ffchafa_canvas_draw_all_pixels(
@@ -262,10 +380,21 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffLogoPrintChars(instance, result.chars, false);
     writeCacheStrbuf(requestData, &result, FF_CACHE_FILE_CHAFA);
 
-    ffg_string_free(str, TRUE);
+    // FIXME: These functions must be imported from `libglib` dlls on Windows
+    FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_string_free);
+    if(ffg_string_free)
+        ffg_string_free(str, TRUE);
+    if(error)
+    {
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_error_free)
+        if(ffg_error_free)
+            ffg_error_free(error);
+    }
+
     ffchafa_canvas_unref(canvas);
     ffchafa_canvas_config_unref(canvasConfig);
     ffchafa_symbol_map_unref(symbolMap);
+    dlclose(chafa);
 
     return true;
 }
@@ -273,6 +402,8 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
 
 FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* requestData, const FFIMData* imData)
 {
+    FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreGenesis, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
+    FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreTerminus, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
     FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imData->library, DestroyExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireImageInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
@@ -286,14 +417,20 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, ImageToBlob, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, Base64Encode, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
+    ffMagickCoreGenesis(NULL, MagickFalse);
+
     imageData.exceptionInfo = ffAcquireExceptionInfo();
     if(imageData.exceptionInfo == NULL)
+    {
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+    }
 
     ImageInfo* imageInfoIn = ffAcquireImageInfo();
     if(imageInfoIn == NULL)
     {
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -305,6 +442,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     if(imageData.image == NULL)
     {
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -325,6 +463,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     {
         ffDestroyImage(imageData.image);
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
@@ -333,6 +472,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     if(resized == NULL)
     {
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
     imageData.image = resized;
@@ -342,24 +482,26 @@ FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* 
     {
         ffDestroyImage(imageData.image);
         ffDestroyExceptionInfo(imageData.exceptionInfo);
+        ffMagickCoreTerminus();
         return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
     }
 
     bool printSuccessful = false;
-    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
     {
         #ifdef FF_HAVE_CHAFA
             printSuccessful = printImageChafa(instance, requestData, &imageData);
         #endif
     }
-    else if(requestData->type == FF_LOGO_TYPE_KITTY)
+    else if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
         printSuccessful = printImageKitty(instance, requestData, &imageData);
-    else if(requestData->type == FF_LOGO_TYPE_SIXEL)
+    else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         printSuccessful = printImageSixel(instance, requestData, &imageData);
 
     ffDestroyImageInfo(imageData.imageInfo);
     ffDestroyImage(imageData.image);
     ffDestroyExceptionInfo(imageData.exceptionInfo);
+    ffMagickCoreTerminus();
 
     return printSuccessful ? FF_LOGO_IMAGE_RESULT_SUCCESS : FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 }
@@ -407,7 +549,7 @@ static bool printCachedChars(FFinstance* instance, FFLogoRequestData* requestDat
     FFstrbuf content;
     ffStrbufInitA(&content, 32768);
 
-    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
         readCachedStrbuf(requestData, &content, FF_CACHE_FILE_CHAFA);
 
     if(content.length == 0)
@@ -440,13 +582,13 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
     }
 
     int fd = -1;
-    if(requestData->type == FF_LOGO_TYPE_KITTY)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
         if(fd == -1)
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
     }
-    else if(requestData->type == FF_LOGO_TYPE_SIXEL)
+    else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
 
     if(fd == -1)
@@ -473,7 +615,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
 
 static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
 {
-    if(requestData->type == FF_LOGO_TYPE_CHAFA)
+    if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
         return printCachedChars(instance, requestData);
     else
         return printCachedPixel(instance, requestData);
@@ -481,6 +623,8 @@ static bool printCached(FFinstance* instance, FFLogoRequestData* requestData)
 
 static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 {
+    #ifndef _WIN32
+
     struct winsize winsize;
 
     //Initialize every member to 0, because it isn't guaranteed that every terminal sets them all
@@ -500,40 +644,60 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
     requestData->characterPixelWidth = winsize.ws_xpixel / (double) winsize.ws_col;
     requestData->characterPixelHeight = winsize.ws_ypixel / (double) winsize.ws_row;
 
+    #else
+
+    CONSOLE_FONT_INFO cfi;
+    if(GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi) == FALSE) // Only works for ConHost
+        return false;
+
+    requestData->characterPixelWidth = cfi.dwFontSize.X;
+    requestData->characterPixelHeight = cfi.dwFontSize.Y;
+
+    #endif
+
     return requestData->characterPixelWidth > 1.0 && requestData->characterPixelHeight > 1.0;
 }
 
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
 {
-    //Performance optimisation
-    #ifndef FF_HAVE_CHAFA
-        if(type == FF_LOGO_TYPE_CHAFA)
-            return false;
-    #endif
-
     FFLogoRequestData requestData;
     requestData.type = type;
     requestData.characterPixelWidth = 1;
     requestData.characterPixelHeight = 1;
 
     if(
-        (type != FF_LOGO_TYPE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
+        (type != FF_LOGO_TYPE_IMAGE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
         !getCharacterPixelDimensions(&requestData)
-    )
+    ) {
+        fputs("Logo: getCharacterPixelDimensions() failed", stderr);
         return false;
+    }
 
     requestData.logoPixelWidth = simpleCeil((double) instance->config.logo.width * requestData.characterPixelWidth);
     requestData.logoPixelHeight = simpleCeil((double) instance->config.logo.height * requestData.characterPixelHeight);
 
     ffStrbufInitA(&requestData.cacheDir, PATH_MAX * 2);
-    ffStrbufAppend(&requestData.cacheDir, &instance->state.cacheDir);
-    ffStrbufAppendS(&requestData.cacheDir, "images");
+
+    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
+    ffStrbufAppendS(&requestData.cacheDir, getenv("XDG_CACHE_HOME"));
+    #endif
+
+    if(requestData.cacheDir.length == 0)
+    {
+        ffStrbufAppendS(&requestData.cacheDir, instance->state.passwd->pw_dir);
+        ffStrbufAppendS(&requestData.cacheDir, "/.cache/");
+    }
+    else
+        ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
+
+    ffStrbufAppendS(&requestData.cacheDir, "fastfetch");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);
     if(realpath(instance->config.logo.source.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
+        fputs("Logo: Querying realpath of the image source failed", stderr);
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
@@ -562,13 +726,53 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     #endif
 
     ffStrbufDestroy(&requestData.cacheDir);
-    return result == FF_LOGO_IMAGE_RESULT_SUCCESS;
+
+    switch(result)
+    {
+        case FF_LOGO_IMAGE_RESULT_INIT_ERROR:
+            fputs("Logo: Init Image Magick library failed\n", stderr);
+            return false;
+        case FF_LOGO_IMAGE_RESULT_RUN_ERROR:
+            fputs("Logo: Failed to load / convert the image source\n", stderr);
+            return false;
+        default:
+            return true;
+    }
 }
 
-#else //FF_HAVE_IMAGEMAGICK{6, 7}
+#endif //FF_HAVE_IMAGEMAGICK{6, 7}
+
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
 {
-    FF_UNUSED(instance, type);
-    return false;
+    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG))
+    {
+        fputs("Logo: Image file not found\n", stderr);
+        return false;
+    }
+
+    if(type == FF_LOGO_TYPE_IMAGE_ITERM)
+        return printImageIterm(instance);
+
+    if(
+        type == FF_LOGO_TYPE_IMAGE_KITTY &&
+        ffStrbufEndsWithIgnCaseS(&instance->config.logo.source, ".png") &&
+        instance->config.logo.width &&
+        instance->config.logo.height
+    )
+        return printImageKittyDirect(instance);
+
+    #ifndef FF_HAVE_CHAFA
+        if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
+        {
+            fputs("Logo: Fastfetch was built without Chafa support\n", stderr);
+            return false;
+        }
+    #endif
+
+    #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
+        return printImageIfExistsSlowPath(instance, type);
+    #else
+        fputs("Logo: Fastfetch was built without ImageMagick support\n", stderr);
+        return false;
+    #endif
 }
-#endif //FF_HAVE_IMAGEMAGICK{6, 7}

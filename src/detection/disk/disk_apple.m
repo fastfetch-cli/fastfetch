@@ -1,25 +1,17 @@
 #include "disk.h"
 
+#include <sys/mount.h>
 #import <Foundation/Foundation.h>
 
-const char* ffDiskAutodetectFolders(FFinstance* instance, FFlist* folders)
+void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
-    NSArray *keys = [NSArray arrayWithObjects:NSURLVolumeNameKey, nil];
-    NSArray *urls = [NSFileManager.defaultManager mountedVolumeURLsIncludingResourceValuesForKeys:keys
-                                                  options:NSVolumeEnumerationSkipHiddenVolumes];
-    if(urls == nil)
-        return "[NSFileManager.defaultManager mountedVolumeURLsIncludingResourceValuesForKeys] failed";
+    // FreeBSD doesn't support these flags
+    if(fs->f_flags & MNT_DONTBROWSE)
+        disk->type = FF_DISK_TYPE_HIDDEN;
+    else if(fs->f_flags & MNT_REMOVABLE)
+        disk->type = FF_DISK_TYPE_EXTERNAL;
+    else
+        disk->type = FF_DISK_TYPE_REGULAR;
 
-    for (NSURL *url in urls) {
-        NSError *error;
-        NSNumber* removable;
-        if([url getResourceValue:&removable forKey:NSURLVolumeIsRemovableKey error:&error] == NO)
-            continue;
-        if(removable.boolValue && !instance->config.diskRemovable)
-            continue;
-
-        ffStrbufInitS((FFstrbuf *)ffListAdd(folders), [url.relativePath cStringUsingEncoding:NSUTF8StringEncoding]);
-    }
-
-    return NULL;
+    ffStrbufInitS(&disk->name, [NSFileManager.defaultManager displayNameAtPath:@(fs->f_mntonname)].UTF8String);
 }

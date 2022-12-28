@@ -1,48 +1,25 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-
-#if FF_HAVE_UTMPX_H
-    #include <utmpx.h>
-#else
-    //for Android compatibility
-    #include <utmp.h>
-    #define utmpx utmp
-    #define setutxent setutent
-    #define getutxent getutent
-#endif
+#include "detection/users/users.h"
 
 #define FF_USERS_MODULE_NAME "Users"
 #define FF_USERS_NUM_FORMAT_ARGS 1
 
 void ffPrintUsers(FFinstance* instance)
 {
-    struct utmpx* n = NULL;
-    setutxent();
-
     FFlist users;
-    ffListInit(&users, sizeof(n->ut_user) + 1);
+    ffListInit(&users, sizeof(FFstrbuf));
 
-next:
-    while((n = getutxent()))
+    FFstrbuf error;
+    ffStrbufInit(&error);
+
+    ffDetectUsers(&users, &error);
+
+    if(error.length > 0)
     {
-        if(n->ut_type == USER_PROCESS)
-        {
-            for(uint32_t i = 0; i < users.length; ++i)
-            {
-                if(strcmp((const char*)ffListGet(&users, i), n->ut_user) == 0)
-                    goto next;
-            }
-
-            char* dest = ffListAdd(&users);
-            strncpy(dest, n->ut_user, sizeof(n->ut_user));
-            dest[sizeof(n->ut_user)] = '\0';
-        }
-    }
-
-    if(users.length == 0)
-    {
+        ffPrintError(instance, FF_USERS_MODULE_NAME, 0, &instance->config.users, "%*s", error.length, error.chars);
         ffListDestroy(&users);
-        ffPrintError(instance, FF_USERS_MODULE_NAME, 0, &instance->config.users, "Unable to detect users");
+        ffStrbufDestroy(&error);
         return;
     }
 
@@ -52,8 +29,11 @@ next:
     {
         if(i > 0)
             ffStrbufAppendS(&result, ", ");
-        ffStrbufAppendS(&result, (const char*)ffListGet(&users, i));
+        FFstrbuf* user = (FFstrbuf*)ffListGet(&users, i);
+        ffStrbufAppend(&result, user);
+        ffStrbufDestroy(user);
     }
+
     ffListDestroy(&users);
 
     if(instance->config.users.outputFormat.length == 0)
