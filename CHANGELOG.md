@@ -1,3 +1,59 @@
+# 1.8.0
+
+This release introduces Windows support! Fastfetch now fully support all major desktop OSes (Linux, macOS, Windows and FreeBSD)
+
+Notable Changes:
+* Bios / Board / Chassis modules are splitted against Host module for performance reasons
+* Caching is removed. Option `--nocache` is removed accordingly
+
+Features:
+* Windows (7 and newer) is officially and fully supported
+* FreeBSD support is improved greatly (Cpu Temp, Cpu Usage, Disk, Host, Processes, Swap, Terminal / Shell, Uptime)
+* Adds a new flag `--stat`, which prints time usage for individual modules
+* Adds Wifi module which supports Windows and macOS
+* Adds data source option for logo printing
+* Detects Homebrew Cellar and Cask seperately
+* Detects WSL version
+* Detects disk based on mount point
+* Exposes more chafa configs
+* Improves performance for Cpu Usage, Public IP, Weather modules
+* Improves performance for Kitty image protocol when both image width / height specified
+* Improves performance for large file loading
+* Improves performance for macOS WM and Host detection
+* Improves shell and terminal detection on macOS
+* Supports Deepin Terminal terminal font
+* Supports GPU detection on Android
+* Supports Kitty Terminal terminal font
+* Supports bar output for percentage values
+* Supports eopkg package manager detection
+* Supports iTerm image logo protocol
+* Supports image logo printing on macOS
+* Supports tcsh version detection
+* Vulkan module on macOS no longer requires vulkan-loader to work
+
+Logos:
+* Alpine
+* CRUX
+* EndeavourOS
+* Enso
+* Garuda small
+* Nobara
+* OpenMandriva
+* Parabola GNU/Linux-libre
+* Rocky
+* Rosa
+* Solus
+* Univalent
+* Vanilla OS
+
+Bugfixes:
+* Fixes disk size detection on 32bit Linux (#337)
+* Fixes cpu freq detection in WSL 
+* Fixes internal bug of FFstrbuf
+* Fixes some memory leaks
+* Fixes segfault if 0 is given as argument index
+* Lots of code refactors
+
 # 1.7.5
 
 Fixes a crash on linux that could happen when getting zsh version (#285)
