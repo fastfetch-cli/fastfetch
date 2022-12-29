@@ -61,10 +61,10 @@ For the image logo, iTerm with iterm image protocol should work. Apple Terminal 
 
 ### Windows
 
-* [`libcJSON`](https://github.com/DaveGamble/cJSON): Used for Windows Terminal font detection.
 * [`wlanapi`](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/): A system dll which isn't supported by Windows Server by default. Used for Wifi info detection.
-* [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers.
-* [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module
+* [`libcJSON`](https://github.com/DaveGamble/cJSON): Used for Windows Terminal font detection. [`cjson`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-cjson)
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers. [`vulkan-loader`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-loader) [`vulkan-headers`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-headers)
+* [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module. [`opencl-icd`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-opencl-icd)
 
 Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) is provided to support these old systems, which
 
@@ -75,8 +75,8 @@ For the image logo, only chafa is supported due to [the design flaw of ConPTY](h
 
 ### Android
 
-* [`freetype`](https://www.freetype.org/): Used for Termux font detection.
-* [`libvulkan`](https://www.vulkan.org/): Vulkan module, also used for GPU detection. Usually has been provided by Android system.
+* [`freetype`](https://www.freetype.org/): Used for Termux font detection. [`freetype`](https://github.com/termux/termux-packages/tree/master/packages/freetype)
+* [`libvulkan`](https://www.vulkan.org/): Vulkan module, also used for GPU detection. Usually has been provided by Android system. [`vulkan-loader-android`](https://github.com/termux/termux-packages/tree/master/packages/vulkan-loader-android) [`vulkan-headers`](https://github.com/termux/termux-packages/tree/master/packages/vulkan-headers)
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
@@ -130,7 +130,15 @@ If the build process fails to find the headers for a library listed in [dependen
 
 ### Building on Windows
 
-Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 sub system is suggested (and tested) to build fastfetch.
+Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 subsystem (or CLANGARM64 if needed) is suggested (and tested) to build fastfetch. If you need Windows 7 / 8.x support, using MINGW64 is suggested.
+
+1. Install [MSYS2](https://www.msys2.org/#installation)
+1. Open `MSYS2 CLANG64` (not `MSYS2 / MSYS`, which targets cygwin C runtime)
+1. Install dependencies  
+```bash
+pacman -Syu mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-pkgconf mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
+```
+1. Follow building instructions of Linux
 
 ## Packaging
 
