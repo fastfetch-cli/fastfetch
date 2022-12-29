@@ -1,5 +1,6 @@
 #include "disk.h"
 
+#include <limits.h>
 #include <ctype.h>
 #include <sys/statvfs.h>
 
@@ -7,28 +8,19 @@ static void strbufAppendMountPoint(FFstrbuf* mountpoint, const char* source)
 {
     while(*source != '\0' && !isspace(*source))
     {
-        //Backslash is encoded as \134
-        if(strncmp(source, "\\134", 4) == 0)
+        //After a backslash the next 3 characters are octal ascii codes
+        if(*source == '\\' && strnlen(source, 4) == 4)
         {
-            ffStrbufAppendC(mountpoint, '\\');
-            source += 4;
-            continue;
-        }
+            char octal[4] = {0};
+            strncpy(octal, source + 1, 3);
 
-        //Space is encoded as \040
-        if(strncmp(source, "\\040", 4) == 0)
-        {
-            ffStrbufAppendC(mountpoint, ' ');
-            source += 4;
-            continue;
-        }
-
-        //Tab is encoded as \011
-        if(strncmp(source, "\\011", 4) == 0)
-        {
-            ffStrbufAppendC(mountpoint, '\t');
-            source += 4;
-            continue;
+            long value = strtol(octal, NULL, 8); //Returns 0 on error, so no need to check endptr
+            if(value > 0 && value < CHAR_MAX)
+            {
+                ffStrbufAppendC(mountpoint, (char) value);
+                source += 4;
+                continue;
+            }
         }
 
         ffStrbufAppendC(mountpoint, *source);
