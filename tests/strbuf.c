@@ -204,6 +204,10 @@ int main(void)
     VERIFY(strbuf.allocated == 32);
     VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
 
+    //containC
+    VERIFY(ffStrbufContainC(&strbuf, '1'));
+    VERIFY(!ffStrbufContainC(&strbuf, '-'));
+
     ffStrbufDestroy(&strbuf);
 
     //Success

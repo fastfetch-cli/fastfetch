@@ -189,6 +189,11 @@ static inline FF_C_NODISCARD bool ffStrbufIgnCaseEqual(const FFstrbuf* strbuf, c
     return ffStrbufIgnCaseComp(strbuf, comp) == 0;
 }
 
+static inline FF_C_NODISCARD bool ffStrbufContainC(const FFstrbuf* strbuf, char c)
+{
+    return memchr(strbuf->chars, c, strbuf->length) != NULL;
+}
+
 static inline FF_C_NODISCARD bool ffStrbufContainS(const FFstrbuf* strbuf, const char* str)
 {
     return strstr(strbuf->chars, str) != NULL;
