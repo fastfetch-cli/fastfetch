@@ -7,6 +7,14 @@ static void strbufAppendMountPoint(FFstrbuf* mountpoint, const char* source)
 {
     while(*source != '\0' && !isspace(*source))
     {
+        //Backslash is encoded as \134
+        if(strncmp(source, "\\134", 4) == 0)
+        {
+            ffStrbufAppendC(mountpoint, '\\');
+            source += 4;
+            continue;
+        }
+
         //Space is encoded as \040
         if(strncmp(source, "\\040", 4) == 0)
         {
