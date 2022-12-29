@@ -3,6 +3,31 @@
 #include <ctype.h>
 #include <sys/statvfs.h>
 
+static void strbufAppendMountPoint(FFstrbuf* mountpoint, const char* source)
+{
+    while(*source != '\0' && !isspace(*source))
+    {
+        //Space is encoded as \040
+        if(strncmp(source, "\\040", 4) == 0)
+        {
+            ffStrbufAppendC(mountpoint, ' ');
+            source += 4;
+            continue;
+        }
+
+        //Tab is encoded as \011
+        if(strncmp(source, "\\011", 4) == 0)
+        {
+            ffStrbufAppendC(mountpoint, '\t');
+            source += 4;
+            continue;
+        }
+
+        ffStrbufAppendC(mountpoint, *source);
+        ++source;
+    }
+}
+
 void ffDetectDisksImpl(FFDiskResult* disks)
 {
     FILE* mountsFile = fopen("/proc/mounts", "r");
@@ -25,7 +50,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         if(strncmp(currentPos, "/dev/", 5) != 0 && strncmp(currentPos, "drvfs", 5) != 0)
             continue;
 
-        //Skip /dev/
+        //Skip /dev/ or drvfs
         currentPos += 5;
 
         //Don't show loop file systems
@@ -41,7 +66,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             ++currentPos;
 
         ffStrbufInitA(&disk->mountpoint, 16);
-        ffStrbufAppendSUntilC(&disk->mountpoint, currentPos, ' ');
+        strbufAppendMountPoint(&disk->mountpoint, currentPos);
 
         //Go to filesystem
         currentPos += disk->mountpoint.length;
