@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.7.5
+    VERSION 1.8.0
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -380,7 +380,7 @@ elseif(BSD)
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_nosupport.c
-        src/detection/bios/bios_nosupport.c
+        src/detection/bios/bios_bsd.c
         src/detection/board/board_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c
