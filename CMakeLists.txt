@@ -380,7 +380,7 @@ elseif(BSD)
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_nosupport.c
-        src/detection/bios/bios_nosupport.c
+        src/detection/bios/bios_bsd.c
         src/detection/board/board_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c

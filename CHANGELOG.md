@@ -8,7 +8,7 @@ Notable Changes:
 
 Features:
 * Windows (7 and newer) is officially and fully supported
-* FreeBSD support is improved greatly (Cpu Temp, Cpu Usage, Disk, Host, Processes, Swap, Terminal / Shell, Uptime)
+* FreeBSD support is improved greatly (Bios, Cpu Temp, Cpu Usage, Disk, Host, Processes, Swap, Terminal / Shell, Uptime)
 * Adds a new flag `--stat`, which prints time usage for individual modules
 * Adds Wifi module which supports Windows and macOS
 * Adds data source option for logo printing
