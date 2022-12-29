@@ -141,7 +141,7 @@ jobs:
         with:
           msystem: CLANG64
           update: true
-          install: git mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
+          install: git zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
 
       - name: print msys version
         run: uname -a
@@ -188,14 +188,14 @@ jobs:
       - name: run tests
         run: ctest
 
+      - name: create zip archive
+        run: zip fastfetch-windows.zip *.dll fastfetch.exe flashfetch.exe
+
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-windows
-          path: |
-            ./*.dll
-            ./fastfetch.exe
-            ./flashfetch.exe
+          path: ./fastfetch-windows.zip
 
   windows-old:
     name: Windows-old
@@ -215,7 +215,7 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-cjson mingw-w64-x86_64-vulkan-loader mingw-w64-x86_64-opencl-icd
+          install: git zip mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-cjson mingw-w64-x86_64-vulkan-loader mingw-w64-x86_64-opencl-icd
 
       - name: print msys version
         run: uname -a
@@ -262,14 +262,14 @@ jobs:
       - name: run tests
         run: ctest
 
+      - name: create zip archive
+        run: zip fastfetch-windows-old.zip *.dll fastfetch.exe flashfetch.exe
+
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-windows-old
-          path: |
-            ./*.dll
-            ./fastfetch.exe
-            ./flashfetch.exe
+          path: ./fastfetch-windows-old.zip
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
