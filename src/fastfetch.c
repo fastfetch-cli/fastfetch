@@ -701,6 +701,7 @@ static void optionParseColor(const char* key, const char* value, FFstrbuf* buffe
         else FF_APPEND_COLOR_CODE_COND(magenta, "35")
         else FF_APPEND_COLOR_CODE_COND(cyan, "36")
         else FF_APPEND_COLOR_CODE_COND(white, "37")
+        else
         {
             ffStrbufAppendC(buffer, *value);
             ++value;
