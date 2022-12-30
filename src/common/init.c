@@ -193,7 +193,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.weather);
     initModuleArg(&instance->config.wifi);
     initModuleArg(&instance->config.player);
-    initModuleArg(&instance->config.song);
+    initModuleArg(&instance->config.media);
     initModuleArg(&instance->config.dateTime);
     initModuleArg(&instance->config.date);
     initModuleArg(&instance->config.time);
@@ -425,7 +425,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.weather);
     destroyModuleArg(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);
-    destroyModuleArg(&instance->config.song);
+    destroyModuleArg(&instance->config.media);
     destroyModuleArg(&instance->config.dateTime);
     destroyModuleArg(&instance->config.date);
     destroyModuleArg(&instance->config.time);

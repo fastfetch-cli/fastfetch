@@ -1,3 +1,9 @@
+# 1.8.1
+
+Notable Changes:
+
+* `Song` was used as an alias to `Media` module. It's removed to avoid confusion. All song related flags (`--song-key`, etc) should change to media (`--media-key`, etc).
+
 # 1.8.0
 
 This release introduces Windows support! Fastfetch now fully support all major desktop OSes (Linux, macOS, Windows and FreeBSD)
@@ -72,7 +78,7 @@ Features:
 * MacPorts package manager support (@SladeGetz, #234)
 * Battery support for MacOS (@CarterLi, #235)
 * Processes, swap & terminal font support for MacOS(@CarterLi, #237)
-* Song support for MacOS (@CarterLi, #242)
+* Media support for MacOS (@CarterLi, #242)
 * Player support for MacOS (@CarterLi, #245)
 * WM theme support for MacOS (@CarterLi, #246)
 * CPU usage support for MacOS (@CarterLi, #247)

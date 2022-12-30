@@ -284,7 +284,7 @@ set(LIBFASTFETCH_SRC
     src/modules/resolution.c
     src/modules/separator.c
     src/modules/shell.c
-    src/modules/song.c
+    src/modules/media.c
     src/modules/terminal.c
     src/modules/terminalfont.c
     src/modules/theme.c

@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     ffPrintBattery(&instance);
     ffPrintPowerAdapter(&instance);
     //ffPrintPlayer(&instance);
-    //ffPrintSong(&instance);
+    //ffPrintMedia(&instance);
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
     //ffPrintWifi(&instance);

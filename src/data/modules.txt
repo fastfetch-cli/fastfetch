@@ -18,6 +18,7 @@ Icons
 Kernel
 Locale
 LocalIP
+Media
 Memory
 OpenGL
 OS
@@ -29,7 +30,6 @@ PublicIP
 Resolution
 Separator
 Shell
-Song
 Swap
 Terminal
 TerminalFont

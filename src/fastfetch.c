@@ -389,9 +389,9 @@ static inline void printCommandHelp(const char* command)
             "URL name"
         );
     }
-    else if(strcasecmp(command, "song-format") == 0 || strcasecmp(command, "media-format") == 0)
+    else if(strcasecmp(command, "media-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("song", "{3} - {1}", 4,
+        constructAndPrintCommandHelpFormat("media", "{3} - {1}", 4,
             "Pretty media name",
             "Media name",
             "Artist name",
@@ -1122,7 +1122,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "public-ip", &instance->config.publicIP)) {}
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
     else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
-    else if(optionParseModuleArgs(key, value, "song", &instance->config.song)) {}
+    else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
     else if(optionParseModuleArgs(key, value, "datetime", &instance->config.dateTime)) {}
     else if(optionParseModuleArgs(key, value, "date", &instance->config.date)) {}
     else if(optionParseModuleArgs(key, value, "time", &instance->config.time)) {}
@@ -1380,8 +1380,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintWeather(instance);
     else if(strcasecmp(line, "player") == 0)
         ffPrintPlayer(instance);
-    else if(strcasecmp(line, "media") == 0 || strcasecmp(line, "song") == 0)
-        ffPrintSong(instance);
+    else if(strcasecmp(line, "media") == 0)
+        ffPrintMedia(instance);
     else if(strcasecmp(line, "datetime") == 0)
         ffPrintDateTime(instance);
     else if(strcasecmp(line, "date") == 0)
