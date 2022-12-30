@@ -134,7 +134,7 @@ typedef struct FFconfig
     FFModuleArgs publicIP;
     FFModuleArgs weather;
     FFModuleArgs player;
-    FFModuleArgs song;
+    FFModuleArgs media;
     FFModuleArgs dateTime;
     FFModuleArgs date;
     FFModuleArgs time;
@@ -288,7 +288,7 @@ void ffPrintBattery(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
-void ffPrintSong(FFinstance* instance);
+void ffPrintMedia(FFinstance* instance);
 void ffPrintDateTime(FFinstance* instance);
 void ffPrintDate(FFinstance* instance);
 void ffPrintTime(FFinstance* instance);

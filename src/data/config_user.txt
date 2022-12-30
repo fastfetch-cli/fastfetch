@@ -247,7 +247,7 @@
 #--wifi-key Wifi
 #--weather-key Weather
 #--player-key Media Player
-#--song-key Song
+#--media-key Media
 #--datetime-key Date Time
 #--vulkan-key Vulkan
 #--opengl-key OpenGL
@@ -290,7 +290,7 @@
 #--public-ip-format
 #--weather-format
 #--player-format
-#--song-format
+#--media-format
 #--datetime-format
 #--vulkan-format
 #--opengl-format
@@ -333,7 +333,7 @@
 #--public-ip-error
 #--weather-error
 #--player-error
-#--song-error
+#--media-error
 #--datetime-error
 #--vulkan-error
 #--opengl-error

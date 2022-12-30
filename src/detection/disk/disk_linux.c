@@ -1,7 +1,32 @@
 #include "disk.h"
 
+#include <limits.h>
 #include <ctype.h>
 #include <sys/statvfs.h>
+
+static void strbufAppendMountPoint(FFstrbuf* mountpoint, const char* source)
+{
+    while(*source != '\0' && !isspace(*source))
+    {
+        //After a backslash the next 3 characters are octal ascii codes
+        if(*source == '\\' && strnlen(source, 4) == 4)
+        {
+            char octal[4] = {0};
+            strncpy(octal, source + 1, 3);
+
+            long value = strtol(octal, NULL, 8); //Returns 0 on error, so no need to check endptr
+            if(value > 0 && value < CHAR_MAX)
+            {
+                ffStrbufAppendC(mountpoint, (char) value);
+                source += 4;
+                continue;
+            }
+        }
+
+        ffStrbufAppendC(mountpoint, *source);
+        ++source;
+    }
+}
 
 void ffDetectDisksImpl(FFDiskResult* disks)
 {
@@ -25,7 +50,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         if(strncmp(currentPos, "/dev/", 5) != 0 && strncmp(currentPos, "drvfs", 5) != 0)
             continue;
 
-        //Skip /dev/
+        //Skip /dev/ or drvfs
         currentPos += 5;
 
         //Don't show loop file systems
@@ -41,7 +66,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             ++currentPos;
 
         ffStrbufInitA(&disk->mountpoint, 16);
-        ffStrbufAppendSUntilC(&disk->mountpoint, currentPos, ' ');
+        strbufAppendMountPoint(&disk->mountpoint, currentPos);
 
         //Go to filesystem
         currentPos += disk->mountpoint.length;

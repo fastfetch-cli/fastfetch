@@ -60,7 +60,7 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
             case kCWPHYMode11ac:
                 ffStrbufAppendS(&item->conn.phyType, "802.11ac (Wi-Fi 5)");
                 break;
-            case kCWPHYMode11ax:
+            case 6 /*kCWPHYMode11ax*/:
                 ffStrbufAppendS(&item->conn.phyType, "802.11ax (Wi-Fi 6)");
                 break;
             case 7 /*kCWPHYMode11be?*/:

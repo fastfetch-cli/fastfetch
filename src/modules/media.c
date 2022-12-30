@@ -4,8 +4,8 @@
 
 #include <ctype.h>
 
-#define FF_SONG_MODULE_NAME "Media"
-#define FF_SONG_NUM_FORMAT_ARGS 5
+#define FF_MEDIA_MODULE_NAME "Media"
+#define FF_MEDIA_NUM_FORMAT_ARGS 5
 
 static bool shouldIgoreChar(char c)
 {
@@ -42,13 +42,13 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
     return false;
 }
 
-void ffPrintSong(FFinstance* instance)
+void ffPrintMedia(FFinstance* instance)
 {
     const FFMediaResult* media = ffDetectMedia(instance);
 
     if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song, "%s", media->error.chars);
+        ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &instance->config.media, "%s", media->error.chars);
         return;
     }
 
@@ -69,7 +69,7 @@ void ffPrintSong(FFinstance* instance)
     if(songPretty.length == 0)
         ffStrbufAppend(&songPretty, &media->song);
 
-    if(instance->config.song.outputFormat.length == 0)
+    if(instance->config.media.outputFormat.length == 0)
     {
         //We don't expose artistPretty to the format, as it might be empty (when the think that the artist is already in the song title)
         FFstrbuf artistPretty;
@@ -81,7 +81,7 @@ void ffPrintSong(FFinstance* instance)
         if(artistInSongTitle(&songPretty, &artistPretty))
             ffStrbufClear(&artistPretty);
 
-        ffPrintLogoAndKey(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song.key);
+        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &instance->config.media.key);
 
         if(artistPretty.length > 0)
         {
@@ -98,7 +98,7 @@ void ffPrintSong(FFinstance* instance)
     }
     else
     {
-        ffPrintFormat(instance, FF_SONG_MODULE_NAME, 0, &instance->config.song, FF_SONG_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_MEDIA_MODULE_NAME, 0, &instance->config.media, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
