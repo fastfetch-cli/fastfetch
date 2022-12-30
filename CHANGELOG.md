@@ -7,6 +7,7 @@ Notable Changes:
 Bugfixes:
 
 * Mountpoint paths don't get decoded (#364)
+* Adds a missing else statement to fix color parsing (#365)
 
 # 1.8.0
 
