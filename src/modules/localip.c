@@ -40,6 +40,7 @@ void ffPrintLocalIp(FFinstance* instance)
         }
         else
         {
+            ffStrbufClear(&key);
             ffParseFormatString(&key, &instance->config.localIP.key, 1, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name}
             });
