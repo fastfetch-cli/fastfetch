@@ -2,12 +2,13 @@
 
 Notable Changes:
 
-* `Song` was used as an alias to `Media` module. It's removed to avoid confusion. All song related flags (`--song-key`, etc) should change to media (`--media-key`, etc).
+* `Song` was used as an alias to `Media` module. It's removed to avoid confusion. All song related flags (`--song-key`, etc) should change to media (`--media-key`, etc). (@CarterLi)
 
 Bugfixes:
 
-* Mountpoint paths don't get decoded (#364)
-* Adds a missing else statement to fix color parsing (#365)
+* Mountpoint paths on linux get decoded correctly (#364)
+* Color parsing once again works (@IanManske, #365)
+* Using a custom key with a placeholder for the local ip module now does work correctly if multiple interfaces are present (#368)
 
 # 1.8.0
 
