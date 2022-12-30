@@ -4,6 +4,10 @@ Notable Changes:
 
 * `Song` was used as an alias to `Media` module. It's removed to avoid confusion. All song related flags (`--song-key`, etc) should change to media (`--media-key`, etc).
 
+Bugfixes:
+
+* Mountpoint paths don't get decoded (#364)
+
 # 1.8.0
 
 This release introduces Windows support! Fastfetch now fully support all major desktop OSes (Linux, macOS, Windows and FreeBSD)
