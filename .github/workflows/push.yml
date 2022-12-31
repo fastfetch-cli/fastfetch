@@ -189,16 +189,16 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-windows.zip *.dll fastfetch.exe flashfetch.exe
+        run: zip fastfetch-$(./fastfetch --version-raw)-Windows.zip *.dll fastfetch.exe flashfetch.exe
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-windows
-          path: ./fastfetch-windows.zip
+          path: ./fastfetch-*-Windows.zip
 
-  windows-old:
-    name: Windows-old
+  win7:
+    name: Win7
     runs-on: windows-latest
     permissions:
       security-events: write
@@ -263,13 +263,13 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-windows-old.zip *.dll fastfetch.exe flashfetch.exe
+        run: zip fastfetch-$(./fastfetch --version-raw)-Win7.zip *.dll fastfetch.exe flashfetch.exe
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: fastfetch-windows-old
-          path: ./fastfetch-windows-old.zip
+          name: fastfetch-win7
+          path: ./fastfetch-*-Win7.zip
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
@@ -280,6 +280,7 @@ jobs:
       - macos
       - freebsd
       - windows
+      - win7
     permissions:
       contents: write
     steps:
@@ -299,4 +300,4 @@ jobs:
           tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-freebsd/*,fastfetch-windows/*
+          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-freebsd/*,fastfetch-windows/*,fastfetch-win7/*
