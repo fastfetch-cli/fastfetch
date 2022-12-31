@@ -40,9 +40,9 @@ static void convertIfStateToString(WLAN_INTERFACE_STATE state, FFstrbuf* result)
     }
 }
 
-const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
+const char* ffDetectWifi(FF_UNUSED_PARAM const FFinstance* instance, FFlist* result)
 {
-    FF_LIBRARY_LOAD(wlanapi, &instance->config.libcJSON, "dlopen wlanapi"FF_LIBRARY_EXTENSION" failed", "wlanapi"FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(wlanapi, NULL, "dlopen wlanapi"FF_LIBRARY_EXTENSION" failed", "wlanapi"FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanOpenHandle)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanEnumInterfaces)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanQueryInterface)

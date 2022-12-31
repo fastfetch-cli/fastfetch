@@ -2,27 +2,7 @@
 #include "util/windows/unicode.h"
 
 #include <wtsapi32.h>
-
-//at the time of writing, <wtsapi32.h> of MinGW doesn't have the definition of WTSEnumerateSessionsExW
-typedef struct _WTS_SESSION_INFO_1W {
-    DWORD ExecEnvId;
-    WTS_CONNECTSTATE_CLASS State;
-    DWORD SessionId;
-    LPWSTR pSessionName;
-    LPWSTR pHostName;
-    LPWSTR pUserName;
-    LPWSTR pDomainName;
-    LPWSTR pFarmName;
-} WTS_SESSION_INFO_1W, * PWTS_SESSION_INFO_1W;
-
-BOOL
-WINAPI
-WTSEnumerateSessionsExW(
-    HANDLE hServer,
-    DWORD* pLevel,
-    DWORD Filter,
-    PWTS_SESSION_INFO_1W* ppSessionInfo,
-    DWORD* pCount);
+#include "wtsapi32_extend.h"
 
 void ffDetectUsers(FFlist* users, FFstrbuf* error)
 {
@@ -48,7 +28,7 @@ void ffDetectUsers(FFlist* users, FFstrbuf* error)
         ffStrbufInitF((FFstrbuf*)ffListAdd(users), "%s\\%s", domainName.chars, userName.chars);
     }
 
-    WTSFreeMemory(sessionInfo);
+    WTSFreeMemoryExW(WTSTypeSessionInfoLevel1, sessionInfo, 1);
 
     if(users->length == 0)
         ffStrbufAppendS(error, "Unable to detect users");

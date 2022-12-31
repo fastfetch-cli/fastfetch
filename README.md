@@ -12,17 +12,18 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 
 ## Customization
 
-With customization and speed being two competing goals, this project actually builds two executables.  
-The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.  
-The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).  
-At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.  
+With customization and speed being two competing goals, this project actually builds two executables.
+
+* The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.
+* The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
+
+At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.  
-
+Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.
 
 The following libraries are used if present at runtime:
 
@@ -66,9 +67,9 @@ For the image logo, iTerm with iterm image protocol should work. Apple Terminal 
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers. [`vulkan-loader`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-loader) [`vulkan-headers`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-headers)
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module. [`opencl-icd`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-opencl-icd)
 
-Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-windows-old` in [Github Actions](https://github.com/LinusDierheimer/fastfetch/actions) is provided to support these old systems, which
+Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-win7` is provided to support these old systems, which
 
-1. Build with the ancient MSVCRT C runtime library, instead of the modern [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library
+1. Build with the ancient [MSVCRT](https://en.wikipedia.org/wiki/Microsoft_Windows_library_files#MSVCRT.DLL,_MSVCP*.DLL_and_CRTDLL.DLL) C runtime library, instead of the modern [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library
 2. Disable stdout application buffer, which seems to problematic for ConEmu.
 
 For the image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
@@ -118,7 +119,7 @@ Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, Kitty, LXTerminal, De
 
 ## Building
 
-fastfetch uses [`cmake`](https://cmake.org/) for building. [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) is recommended for better library detection. The simplest steps to build the fastfetch and flashfetch binaries are:  
+fastfetch uses [`cmake`](https://cmake.org/) for building. [`pkg-config`](https://www.freedesktop.org/wiki/Software/pkg-config/) is recommended for better library detection. The simplest steps to build the fastfetch and flashfetch binaries are:
 ```bash
 mkdir -p build
 cd build
@@ -134,7 +135,7 @@ Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 s
 
 1. Install [MSYS2](https://www.msys2.org/#installation)
 1. Open `MSYS2 CLANG64` (not `MSYS2 / MSYS`, which targets cygwin C runtime)
-1. Install dependencies  
+1. Install dependencies
 ```bash
 pacman -Syu mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-pkgconf mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
 ```

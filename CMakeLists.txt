@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.8.1
+    VERSION 1.8.2
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -654,6 +654,7 @@ if(APPLE)
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)
+    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
     target_link_libraries(libfastfetch
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
