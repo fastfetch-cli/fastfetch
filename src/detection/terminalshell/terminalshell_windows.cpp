@@ -120,6 +120,8 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "gdb")           ||
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "lldb")          ||
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "guake-wrapped") ||
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "fastfetch")     || //scoop warps the real binaries with a "shim" exe
+        ffStrbufIgnCaseEqualS(&result->shellPrettyName, "flashfetch")    ||
         ffStrbufContainIgnCaseS(&result->shellPrettyName, "debug")
     ) {
         ffStrbufClear(&result->shellProcessName);
