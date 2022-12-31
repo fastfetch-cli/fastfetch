@@ -1,3 +1,12 @@
+# 1.8.2
+
+Bugfixes:
+
+* Fix memleaks Users module (Windows)
+* Fix shell detection when installed with scoop (Windows)
+* Don't use libcJSON as wlanapi's dll name (Windows)
+* Align artifact names to other platforms (Windows)
+
 # 1.8.1
 
 Notable Changes:
@@ -61,7 +70,7 @@ Logos:
 
 Bugfixes:
 * Fixes disk size detection on 32bit Linux (#337)
-* Fixes cpu freq detection in WSL 
+* Fixes cpu freq detection in WSL
 * Fixes internal bug of FFstrbuf
 * Fixes some memory leaks
 * Fixes segfault if 0 is given as argument index
@@ -137,12 +146,12 @@ Other:
 
 # 1.7.0
 
-This release brings support for MacOS!  
+This release brings support for MacOS!
 The basics things are working, but it is far from feature parity with Linux.
 I developed this in a VM, so bugs on real hardware are likely.
 If you have a Mac and no idea what to do with your free time, i am very happy to accept pull requests / work on issues.
 
-A lot of things were changed under the hood to make this possible, which should bring better performance and stability on all platforms. 
+A lot of things were changed under the hood to make this possible, which should bring better performance and stability on all platforms.
 
 Besides that, the following things have changed:
 
@@ -208,7 +217,7 @@ Features:
 * Load `/etc/fastfetch/config.conf` before user config
 * Disk: print one decimal point if size < 100GB
 * `--title-fqdn` option, to print fully qualified domain name instead of host name in title
- 
+
 Logos:
 * updated old NixOS logo
 
