@@ -654,6 +654,7 @@ if(APPLE)
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)
+    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
     target_link_libraries(libfastfetch
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
