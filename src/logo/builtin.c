@@ -1032,8 +1032,8 @@ static const FFlogo* getLogoKDENeon()
     FF_LOGO_COLORS(
         "32" //green
     )
-    FF_LOGO_COLOR_KEYS("32"); //green
-    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1872,6 +1872,73 @@ static const FFlogo* getLogoPopSmall()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoRaspberryPi()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("raspbian", "raspi", "raspberrypi" "raspberrypios"  "pios")
+    FF_LOGO_LINES(
+        "   $2`.::///+:/-.        --///+//-:`\n"
+        " `+oooooooooooo:   `+oooooooooooo:\n"
+        "  /oooo++//ooooo:  ooooo+//+ooooo.\n"
+        "  `+ooooooo:-:oo-  +o+::/ooooooo:\n"
+        "   `:oooooooo+``    `.oooooooo+-\n"
+        "     `:++ooo/.        :+ooo+/.`$1\n"
+        "        ...`  `.----.` ``..\n"
+        "     .::::-``:::::::::.`-:::-`\n"
+        "    -:::-`   .:::::::-`  `-:::-\n"
+        "   `::.  `.--.`  `` `.---.``.::`\n"
+        "       .::::::::`  -::::::::` `\n"
+        " .::` .:::::::::- `::::::::::``::.\n"
+        "-:::` ::::::::::.  ::::::::::.`:::-\n"
+        "::::  -::::::::.   `-::::::::  ::::\n"
+        "-::-   .-:::-.``....``.-::-.   -::-\n"
+        " .. ``       .::::::::.     `..`..\n"
+        "   -:::-`   -::::::::::`  .:::::`\n"
+        "   :::::::` -::::::::::` :::::::.\n"
+        "   .:::::::  -::::::::. ::::::::\n"
+        "    `-:::::`   ..--.`   ::::::.\n"
+        "      `...`  `...--..`  `...`\n"
+        "            .::::::::::\n"
+        "             `.-::::-`"
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
+
+static const FFlogo* getLogoRaspberryPiSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("raspbian_small", "raspi_small", "raspberrypi_small" "pios_small")
+    FF_LOGO_LINES(
+        "   $2.~~.   .~~.\n"
+        "  '. \ ' ' / .'$1\n"
+        "   .~ .~~~..~.\n"
+        "  : .~.'~'.~. :\n"
+        " ~ (   ) (   ) ~\n"
+        "( : '~'.~.'~' : )\n"
+        " ~ .~ (   ) ~. ~\n"
+        "  (  : '~' :  )\n"
+        "   '~ .~~~. ~'\n"
+        "       '~'"
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
+
+
+
 static const FFlogo* getLogoReborn()
 {
     FF_LOGO_INIT
@@ -2428,6 +2495,8 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoOpenMandriva,
         getLogoPop,
         getLogoPopSmall,
+        getLogoRaspberryPi,
+        getLogoRaspberryPiSmall,
         getLogoParabola,
         getLogoParabolaSmall,
         getLogoReborn,
