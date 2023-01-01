@@ -1915,7 +1915,7 @@ static const FFlogo* getLogoRaspbianSmall()
     FF_LOGO_NAMES("raspbian_small", "raspi_small", "raspberrypi_small" "raspberrypios_small" "pios_small")
     FF_LOGO_LINES(
         "   $2.~~.   .~~.\n"
-        "  '. \ ' ' / .'$1\n"
+        "  '. \\ ' ' / .'$1\n"
         "   .~ .~~~..~.\n"
         "  : .~.'~'.~. :\n"
         " ~ (   ) (   ) ~\n"
