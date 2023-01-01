@@ -39,7 +39,7 @@ static bool printImageIterm(FFinstance* instance)
     ffStrbufInit(&buf);
     if(!ffAppendFileBuffer(instance->config.logo.source.chars, &buf))
     {
-        fputs("Logo: failed to load image file\n", stderr);
+        fputs("Logo: Failed to load image file\n", stderr);
         return false;
     }
 

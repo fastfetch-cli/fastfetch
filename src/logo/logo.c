@@ -8,6 +8,16 @@
 #include <ctype.h>
 #include <string.h>
 
+static void ffLogoPrintCharsRaw(FFinstance* instance, const char* data, size_t length)
+{
+    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    fwrite(data, length, 1, stdout);
+    printf("\033[9999999D\n\033[%uA", instance->config.logo.height);
+    instance->state.logoWidth = instance->config.logo.paddingLeft + instance->config.logo.width + instance->config.logo.paddingRight;
+    instance->state.logoHeight = instance->config.logo.height;
+}
+
 void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplacement)
 {
     uint32_t currentlineLength = 0;
@@ -271,19 +281,23 @@ static void logoPrintData(FFinstance* instance, bool doColorReplacement) {
     logoApplyColorsDetected(instance);
 }
 
-static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement)
+static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement, bool raw)
 {
     FFstrbuf content;
-    ffStrbufInitA(&content, 2047);
+    ffStrbufInit(&content);
 
     if(!ffAppendFileBuffer(instance->config.logo.source.chars, &content))
     {
         ffStrbufDestroy(&content);
+        fputs("Logo: Failed to load file content from logo source\n", stderr);
         return false;
     }
 
     logoApplyColorsDetected(instance);
-    ffLogoPrintChars(instance, content.chars, doColorReplacement);
+    if(raw)
+        ffLogoPrintCharsRaw(instance, content.chars, content.length);
+    else
+        ffLogoPrintChars(instance, content.chars, doColorReplacement);
     ffStrbufDestroy(&content);
     return true;
 }
@@ -304,13 +318,23 @@ static void logoPrintKnownType(FFinstance* instance)
     if(instance->config.logo.type == FF_LOGO_TYPE_BUILTIN)
         successfull = logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars);
     else if(instance->config.logo.type == FF_LOGO_TYPE_FILE)
-        successfull = logoPrintFileIfExists(instance, true);
+        successfull = logoPrintFileIfExists(instance, true, false);
     else if(instance->config.logo.type == FF_LOGO_TYPE_FILE_RAW)
-        successfull = logoPrintFileIfExists(instance, false);
+        successfull = logoPrintFileIfExists(instance, false, false);
     else if(instance->config.logo.type == FF_LOGO_TYPE_DATA)
         logoPrintData(instance, true);
     else if(instance->config.logo.type == FF_LOGO_TYPE_DATA_RAW)
         logoPrintData(instance, false);
+    else if(instance->config.logo.type == FF_LOGO_TYPE_IMAGE_RAW)
+    {
+        if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
+        {
+            fputs("both `--logo-width` and `--logo-height` must be specified\n", stderr);
+            successfull = false;
+        }
+        else
+            successfull = logoPrintFileIfExists(instance, false, true);
+    }
     else //image
         successfull = logoPrintImageIfExists(instance, instance->config.logo.type);
 
@@ -362,7 +386,7 @@ void ffLogoPrint(FFinstance* instance)
         return;
 
     //Try to load the logo as a file. If it succeeds, print it and return.
-    if(logoPrintFileIfExists(instance, true))
+    if(logoPrintFileIfExists(instance, true, false))
         return;
 
     logoPrintDetected(instance);

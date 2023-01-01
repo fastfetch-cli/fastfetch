@@ -104,6 +104,16 @@ Printing images as logo is supported using Sixel / Kitty / iTerm graphics protoc
 * Kitty: Because [kitty support png](https://sw.kovidgoyal.net/kitty/graphics-protocol/#png-data) natively, using `png` image file with both `--logo-width` and `--logo-height` being specified is recommanded to get maximum performance. Otherwise, imagemagick is required to convert image to RGBA data.
 * iTerm: [Since iTerm supports a lot of image format](https://iterm2.com/documentation-images.html), imagemagick support is not required. However, both `--logo-width` and `--logo-height` must be specified since fastfetch has no idea about the size of the image.
 * Chafa: Requires imagemagick support.
+* Raw: use a pre-converted image file so that fastfetch don't need to convert the image format on the fly.
+```shell
+# brew install libsixel
+$ img2sixel image.png -o image.sixel
+$ fastfetch --raw image.sixel --logo-width 30 --logo-height 15
+
+# wget https://iterm2.com/utilities/imgcat && chmod +x imgcat
+$ imgcat image.png > image.raw
+$ fastfetch --raw image.raw --logo-width 30 --logo-height 15
+```
 
 ##### Package managers
 ```
