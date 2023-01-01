@@ -1,3 +1,18 @@
+# dev
+
+Features:
+* `--logo-padding-top` option (@CarterLi, #372)
+* Raw image file as logo support (@CarterLi)
+
+Logos:
+* Raspbian (@IamNoRobot, #373)
+
+Bugfixes:
+* `--logo-type` now does accept `iterm` too (@CarterLi, #374)
+ 
+Other:
+* Fixed a Typo in iterm error message (@jessebot, #376)
+
 # 1.8.2
 
 Bugfixes:
