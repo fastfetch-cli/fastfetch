@@ -957,6 +957,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
                 "data-raw", FF_LOGO_TYPE_DATA_RAW,
                 "sixel", FF_LOGO_TYPE_IMAGE_SIXEL,
                 "kitty", FF_LOGO_TYPE_IMAGE_KITTY,
+                "iterm", FF_LOGO_TYPE_IMAGE_ITERM,
                 "chafa", FF_LOGO_TYPE_IMAGE_CHAFA,
                 "raw", FF_LOGO_TYPE_IMAGE_RAW,
                 NULL
