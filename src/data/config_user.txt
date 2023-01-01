@@ -114,6 +114,12 @@
 # Default is 0.
 #--logo-padding-right 0
 
+# Logo padding top option:
+# Adds a padding to the top side of the logo.
+# Must be a positive integer.
+# Default is 0.
+#--logo-padding-top 0
+
 # Logo print remaining option:
 # Sets if the remaining logo should be printed, it is has more lines than modules to show.
 # Must be true or false.

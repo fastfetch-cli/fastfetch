@@ -71,6 +71,7 @@ typedef struct FFconfig
         FFstrbuf colors[FASTFETCH_LOGO_MAX_COLORS];
         uint32_t width;
         uint32_t height;
+        uint32_t paddingTop;
         uint32_t paddingLeft;
         uint32_t paddingRight;
         bool printRemaining;

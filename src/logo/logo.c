@@ -11,11 +11,12 @@
 static void ffLogoPrintCharsRaw(FFinstance* instance, const char* data, size_t length)
 {
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+    ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     fwrite(data, length, 1, stdout);
-    printf("\033[9999999D\n\033[%uA", instance->config.logo.height);
+    instance->state.logoHeight = instance->config.logo.paddingTop + instance->config.logo.height;
     instance->state.logoWidth = instance->config.logo.paddingLeft + instance->config.logo.width + instance->config.logo.paddingRight;
-    instance->state.logoHeight = instance->config.logo.height;
+    printf("\033[9999999D\n\033[%uA", instance->state.logoHeight);
 }
 
 void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplacement)
@@ -23,7 +24,10 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
     uint32_t currentlineLength = 0;
 
     fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+    ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+
+    instance->state.logoHeight = instance->config.logo.paddingTop;
 
     //Use logoColor[0] as the default color
     if(doColorReplacement)

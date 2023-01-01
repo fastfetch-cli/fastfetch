@@ -196,6 +196,7 @@ __fastfetch_completion()
         "--logo-padding"
         "--logo-padding-left"
         "--logo-padding-right"
+        "--logo-padding-top"
         "--logo-color-1"
         "--logo-color-2"
         "--logo-color-3"

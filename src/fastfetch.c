@@ -939,6 +939,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         //this is usally wanted when using the none logo
         if(strcasecmp(value, "none") == 0)
         {
+            instance->config.logo.paddingTop = 0;
             instance->config.logo.paddingRight = 0;
             instance->config.logo.paddingLeft = 0;
         }
@@ -987,6 +988,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logo.paddingLeft = padding;
             instance->config.logo.paddingRight = padding;
         }
+        else if(strcasecmp(subkey, "-padding-top") == 0)
+            instance->config.logo.paddingTop = optionParseUInt32(key, value);
         else if(strcasecmp(subkey, "-padding-left") == 0)
             instance->config.logo.paddingLeft = optionParseUInt32(key, value);
         else if(strcasecmp(subkey, "-padding-right") == 0)

@@ -31,6 +31,7 @@ Logo options:
     --logo-padding <padding>:              Set the padding on the left and the right of the logo
     --logo-padding-left <padding>:         Set the padding on the left of the logo
     --logo-padding-right <padding>:        Set the padding on the right of the logo
+    --logo-padding-top <padding>:          Set the padding on the top of the logo
     --logo-print-remaining <?value>:       Whether to print the remaining logo, if it has more lines than modules to display
     --file <file>:                         Short for --logo-type file --logo <file>
     --file-raw <file>:                     Short for --logo-type file-raw --logo <file>

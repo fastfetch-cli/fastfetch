@@ -44,16 +44,17 @@ static bool printImageIterm(FFinstance* instance)
     }
 
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     FFstrbuf base64 = base64Encode(&buf);
+    instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
+    instance->state.logoHeight = instance->config.logo.paddingTop + instance->config.logo.height;
     printf("\033]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\033[9999999D\n\033[%uA",
         (unsigned) instance->config.logo.width,
         (unsigned) instance->config.logo.height,
         (unsigned) instance->config.logo.preserveAspectRadio,
         base64.chars,
-        (unsigned) instance->config.logo.height
+        (unsigned) instance->state.logoHeight
     );
-    instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
-    instance->state.logoHeight = instance->config.logo.height;
 
     ffStrbufDestroy(&buf);
     ffStrbufDestroy(&base64);
@@ -64,6 +65,7 @@ static bool printImageIterm(FFinstance* instance)
 static bool printImageKittyDirect(FFinstance* instance)
 {
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
+    ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     FFstrbuf base64 = base64Encode(&instance->config.logo.source);
     printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D",
         (unsigned) instance->config.logo.width,
@@ -72,7 +74,7 @@ static bool printImageKittyDirect(FFinstance* instance)
     );
 
     instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
-    instance->state.logoHeight = instance->config.logo.height;
+    instance->state.logoHeight = instance->config.logo.paddingTop + instance->config.logo.height;
 
     ffStrbufDestroy(&base64);
 
@@ -205,7 +207,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     //Calculate character dimensions
     instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
-    instance->state.logoHeight = requestData->logoCharacterHeight;
+    instance->state.logoHeight = requestData->logoCharacterHeight + instance->config.logo.paddingTop;
     if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
         instance->state.logoHeight -= 1;
 
@@ -219,6 +221,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
         writeCacheUint32(requestData, instance->state.logoHeight, FF_CACHE_FILE_HEIGHT);
 
     //Write result to stdout
+    ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     fflush(stdout);
     ffWriteFDBuffer(STDOUT_FILENO, result);
@@ -600,6 +603,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
     if(fd == -1)
         return false;
 
+    ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     fflush(stdout);
 
@@ -611,7 +615,7 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
     close(fd);
 
     instance->state.logoWidth = requestData->logoCharacterWidth + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
-    instance->state.logoHeight = requestData->logoCharacterHeight;
+    instance->state.logoHeight = requestData->logoCharacterHeight + instance->config.logo.paddingTop;
 
     //Go to upper left corner
     fputs("\033[9999999D", stdout);

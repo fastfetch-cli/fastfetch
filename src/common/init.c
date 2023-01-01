@@ -130,6 +130,7 @@ static void defaultConfig(FFinstance* instance)
         ffStrbufInit(&instance->config.logo.colors[i]);
     instance->config.logo.width = 0;
     instance->config.logo.height = 0; //preserve aspect ratio
+    instance->config.logo.paddingTop = 0;
     instance->config.logo.paddingLeft = 0;
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
