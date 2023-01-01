@@ -31,7 +31,7 @@ static bool printImageIterm(FFinstance* instance)
 {
     if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
     {
-        fputs("Logo: `item` protocol only works when both `--logo-width` and `--logo-height` being specified\n", stderr);
+        fputs("Logo: `iterm` protocol only works when both `--logo-width` and `--logo-height` being specified\n", stderr);
         return false;
     }
 
