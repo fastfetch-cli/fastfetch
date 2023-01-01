@@ -30,12 +30,18 @@ static FFstrbuf base64Encode(FFstrbuf* in)
 static bool printImageIterm(FFinstance* instance)
 {
     if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
+    {
+        fputs("Logo: `item` protocol only works when both `--logo-width` and `--logo-height` being specified\n", stderr);
         return false;
+    }
 
     FFstrbuf buf;
     ffStrbufInit(&buf);
     if(!ffAppendFileBuffer(instance->config.logo.source.chars, &buf))
+    {
+        fputs("Logo: failed to load image file\n", stderr);
         return false;
+    }
 
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     FFstrbuf base64 = base64Encode(&buf);

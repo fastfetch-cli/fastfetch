@@ -95,7 +95,15 @@ AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, C
 * Some logos have an old variant. Access it by appending _old to the logo name.
 * To disable the logo, use `--logo none`.
 * Get a list of all available logos with `fastfetch --print-logos`.
-* Printing images as logo is supported using Sixel / Kitty / iTerm graphics protocol or chafas image to text conversion.
+
+###### Image logo
+
+Printing images as logo is supported using Sixel / Kitty / iTerm graphics protocol or chafas image to text conversion.
+
+* Sixel: fastfetch must be built with imagemagick support to convert image to sixel format
+* Kitty: Because [kitty support png](https://sw.kovidgoyal.net/kitty/graphics-protocol/#png-data) natively, using `png` image file with both `--logo-width` and `--logo-height` being specified is recommanded to get maximum performance. Otherwise, imagemagick is required to convert image to RGBA data.
+* iTerm: [Since iTerm supports a lot of image format](https://iterm2.com/documentation-images.html), imagemagick support is not required. However, both `--logo-width` and `--logo-height` must be specified since fastfetch has no idea about the size of the image.
+* Chafa: Requires imagemagick support.
 
 ##### Package managers
 ```
