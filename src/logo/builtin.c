@@ -1032,8 +1032,8 @@ static const FFlogo* getLogoKDENeon()
     FF_LOGO_COLORS(
         "32" //green
     )
-    FF_LOGO_COLOR_KEYS("31"); //red
-    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1871,8 +1871,7 @@ static const FFlogo* getLogoPopSmall()
     FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
-
-static const FFlogo* getLogoRaspberryPi()
+static const FFlogo* getLogoRaspbian()
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("raspbian", "raspi", "raspberrypi" "raspberrypios"  "pios")
@@ -1910,11 +1909,10 @@ static const FFlogo* getLogoRaspberryPi()
     FF_LOGO_RETURN
 }
 
-
-static const FFlogo* getLogoRaspberryPiSmall()
+static const FFlogo* getLogoRaspbianSmall()
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("raspbian_small", "raspi_small", "raspberrypi_small" "pios_small")
+    FF_LOGO_NAMES("raspbian_small", "raspi_small", "raspberrypi_small" "raspberrypios_small" "pios_small")
     FF_LOGO_LINES(
         "   $2.~~.   .~~.\n"
         "  '. \ ' ' / .'$1\n"
@@ -1935,9 +1933,6 @@ static const FFlogo* getLogoRaspberryPiSmall()
     FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
-
-
-
 
 static const FFlogo* getLogoReborn()
 {
@@ -2495,10 +2490,10 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoOpenMandriva,
         getLogoPop,
         getLogoPopSmall,
-        getLogoRaspberryPi,
-        getLogoRaspberryPiSmall,
         getLogoParabola,
         getLogoParabolaSmall,
+        getLogoRaspbian,
+        getLogoRaspbianSmall,
         getLogoReborn,
         getLogoRebornSmall,
         getLogoRedHatEnterpriseLinux,
