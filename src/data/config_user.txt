@@ -6,7 +6,7 @@
 # Empty lines or lines starting with # are ignored.
 
 # This file was shipped with $" FASTFETCH_PROJECT_VERSION $".
-# Use fastfetch --print-config-user > ~/.config/fastfetch/config.conf to overwrite this file with the current defaults
+# Use fastfetch --gen-config-force to overwrite this file with the current defaults
 
 # Below some often usefull options are listed. Uncomment and modify them so they take affect.
 # Note that there are a lot more options than the ones listed here, take a look at "fastfetch --help".
@@ -16,7 +16,7 @@
 # Load additional config files.
 # Some are shipped with fastfetch, list them with "fastfetch --list-presets".
 # Must be a path to a config file or the name of a shipped preset.
-# The config file is completly loaded before continuing in the current file, so the placement of this option matters, as later options overwrite already set ones.
+# The config file is completely loaded before continuing in the current file, so the placement of this option matters, as later options overwrite already set ones.
 # Can be used multiple times to load multiple config files / presets.
 #--load-config /path/to/config.txt
 

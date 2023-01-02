@@ -1,5 +1,8 @@
 # dev
 
+Notable Changes:
+* fastfetch no longer creates a sample config file silently. Use `--gen-config` to generate one.
+
 Features:
 * `--logo-padding-top` option (@CarterLi, #372)
 * Raw image file as logo support (@CarterLi)

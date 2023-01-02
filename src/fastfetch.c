@@ -603,6 +603,25 @@ static bool parseConfigFile(FFinstance* instance, FFdata* data, const char* path
     return true;
 }
 
+static void generateConfigFile(FFinstance* instance, bool force)
+{
+    FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance->state.configDirs, 0);
+    // Paths generated in `init.c/initConfigDirs` end with `/`
+    ffStrbufAppendS(filename, "fastfetch/config.conf");
+
+    if (!force && ffFileExists(filename->chars, S_IFREG))
+    {
+        fprintf(stderr, "Config file exists in `%s`, use `--gen-config-force` to overwrite\n", filename->chars);
+        exit(1);
+    }
+    else
+    {
+        ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
+        printf("A sample config file has been written in `%s`", filename->chars);
+        exit(0);
+    }
+}
+
 static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
     if(value == NULL)
@@ -912,6 +931,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         fputs("`--nocache` are obsoleted. Caching functions other than image caching are removed.\n\n", stderr);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
+    else if(strcasecmp(key, "--gen-config") == 0)
+        generateConfigFile(instance, false);
+    else if(strcasecmp(key, "--gen-config-force") == 0)
+        generateConfigFile(instance, true);
     else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
         instance->config.multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--stat") == 0)
@@ -1265,7 +1288,7 @@ error:
     }
 }
 
-static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
+FF_UNUSED_PARAM static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
 {
     parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF"/fastfetch/config.conf");
 }
@@ -1278,10 +1301,9 @@ static void parseConfigFileUser(FFinstance* instance, FFdata* data)
     FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
     uint32_t filenameLength = filename->length;
 
-    ffStrbufAppendS(filename, "/fastfetch/config.conf");
+    ffStrbufAppendS(filename, "fastfetch/config.conf");
 
-    if(!parseConfigFile(instance, data, filename->chars))
-        ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
+    parseConfigFile(instance, data, filename->chars);
 
     ffStrbufSubstrBefore(filename, filenameLength);
 }
@@ -1424,7 +1446,7 @@ int main(int argc, const char** argv)
     data.loadUserConfig = true;
 
     #ifndef _WIN32
-    parseConfigFileSystem(&instance, &data);
+        parseConfigFileSystem(&instance, &data);
     #endif
 
     parseConfigFileUser(&instance, &data);

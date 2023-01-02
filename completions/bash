@@ -160,6 +160,8 @@ __fastfetch_completion()
         "--print-config-system"
         "--print-config-user"
         "--print-structure"
+        "--gen-config"
+        "--gen-config-force"
     )
 
     local FF_OPTIONS_HELP=(
