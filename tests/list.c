@@ -40,6 +40,10 @@ int main(void)
     VERIFY(list.capacity == 0);
     VERIFY(list.length == 0);
 
+    //forEach
+    FF_LIST_FOR_EACH(uint32_t, item, list)
+        VERIFY(false);
+
     //add
     for (uint32_t i = 1; i <= FF_LIST_DEFAULT_ALLOC + 1; ++i)
     {
@@ -60,6 +64,12 @@ int main(void)
         VERIFY(*(uint32_t*)ffListGet(&list, 0) == 1);
         VERIFY(*(uint32_t*)ffListGet(&list, i - 1) == i);
     }
+
+    uint32_t sum = 0;
+    //forEach
+    FF_LIST_FOR_EACH(uint32_t, item, list)
+        sum += *item;
+    VERIFY(sum == (1 + FF_LIST_DEFAULT_ALLOC + 1) * (FF_LIST_DEFAULT_ALLOC + 1) / 2);
 
     // ffListFirstIndexComp
     uint32_t n = 10;

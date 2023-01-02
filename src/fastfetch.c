@@ -538,6 +538,15 @@ static inline void listAvailablePresets(FFinstance* instance)
     ffStrbufDestroy(&folder);
 }
 
+static void listConfigPaths(FFinstance* instance)
+{
+    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.configDirs)
+    {
+        ffStrbufAppendS(folder, "fastfetch/config.conf");
+        printf("%s%s\n", folder->chars, ffFileExists(folder->chars, S_IFREG) ? " (*)" : "");
+    }
+}
+
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
 
 static bool parseConfigFile(FFinstance* instance, FFdata* data, const char* path)
@@ -900,6 +909,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else if(strcasecmp(subkey, "-presets") == 0)
         {
             listAvailablePresets(instance);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-config-paths") == 0)
+        {
+            listConfigPaths(instance);
             exit(0);
         }
         else if(strcasecmp(subkey, "-features") == 0)

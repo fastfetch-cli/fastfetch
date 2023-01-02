@@ -45,6 +45,12 @@ static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void
     qsort(list->data, list->length, list->elementSize, compar);
 }
 
+#define FF_LIST_FOR_EACH(itemType, itemVarName, listVar) \
+    assert(sizeof(itemType) == (listVar).elementSize); \
+    for(itemType* itemVarName = (itemType*)(listVar).data; \
+        itemVarName - (itemType*)(listVar).data < (listVar).length; \
+        ++itemVarName)
+
 #if defined(_WIN32) || defined(__APPLE__)
     #define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
 #endif

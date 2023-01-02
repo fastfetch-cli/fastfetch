@@ -4,6 +4,7 @@ Informative options:
     -h,--help:             Show this message
     -h,--help <command>:   Show help for a specific command
     -v,--version:          Show the version of fastfetch
+    --list-config-paths:   List search paths of config files
     --list-logos:          List available logos
     --list-modules:        List available modules
     --list-presets:        List presets fastfetch knows about; they can be loaded with --load-config (+)

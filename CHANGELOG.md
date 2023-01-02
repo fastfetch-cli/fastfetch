@@ -8,6 +8,7 @@ Features:
 * Raw image file as logo support (@CarterLi)
 * Look for config files in `$LOCALAPPDATA` (Windows)
 * Look for config files in `~/Library/Preferences` (macOS)
+* Add `--list-config-paths` option which list search paths of config files
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
