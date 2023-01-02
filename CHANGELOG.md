@@ -3,6 +3,7 @@
 Features:
 * `--logo-padding-top` option (@CarterLi, #372)
 * Raw image file as logo support (@CarterLi)
+* Look for config files in $LOCALAPPDATA (Windows) (@CarterLi)
 
 Logos:
 * Raspbian (@IamNoRobot, #373)

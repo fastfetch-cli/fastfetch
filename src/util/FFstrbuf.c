@@ -328,6 +328,12 @@ uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
     return strbuf->length;
 }
 
+void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace)
+{
+    for (char *current_pos = strchr(strbuf->chars, find); current_pos; current_pos = strchr(current_pos + 1, find))
+        *current_pos = replace;
+}
+
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
 {
     if(strbuf->length <= index)

@@ -12,6 +12,8 @@
 #ifdef _WIN32
     #include <wincon.h>
     #include <locale.h>
+    #include <shlobj.h>
+    #include "util/windows/unicode.h"
 #else
     #include <signal.h>
 #endif
@@ -20,7 +22,22 @@ static void initConfigDirs(FFstate* state)
 {
     ffListInit(&state->configDirs, sizeof(FFstrbuf));
 
-    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
+    #ifdef _WIN32
+
+    {
+        PWSTR pPath;
+        if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, 0, NULL, &pPath)))
+        {
+            FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
+            ffStrbufInit(buffer);
+            ffStrbufSetWS(buffer, pPath);
+            ffStrbufReplaceAllC(buffer, '\\', '/');
+            ffStrbufEnsureEndsWithC(buffer, '/');
+        }
+        CoTaskMemFree(pPath);
+    }
+
+    #elif !(defined(__APPLE__) || defined(__ANDROID__))
 
     const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
     if(ffStrSet(xdgConfigHome))

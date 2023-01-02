@@ -208,6 +208,12 @@ int main(void)
     VERIFY(ffStrbufContainC(&strbuf, '1'));
     VERIFY(!ffStrbufContainC(&strbuf, '-'));
 
+    //replaceAllC
+    ffStrbufReplaceAllC(&strbuf, '1', '-');
+    VERIFY(ffStrbufEqualS(&strbuf, "-234567890-234567890-234567890-"));
+    ffStrbufReplaceAllC(&strbuf, '1', '-');
+    VERIFY(ffStrbufEqualS(&strbuf, "-234567890-234567890-234567890-"));
+
     ffStrbufDestroy(&strbuf);
 
     //Success
