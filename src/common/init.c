@@ -37,7 +37,15 @@ static void initConfigDirs(FFstate* state)
         CoTaskMemFree(pPath);
     }
 
-    #elif !(defined(__APPLE__) || defined(__ANDROID__))
+    #elif defined(__APPLE__)
+
+    {
+        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
+        ffStrbufInitS(buffer, state->passwd->pw_dir);
+        ffStrbufAppendS(buffer, "/Library/Preferences/");
+    }
+
+    #elif !defined(__ANDROID__)
 
     const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
     if(ffStrSet(xdgConfigHome))

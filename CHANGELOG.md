@@ -6,7 +6,8 @@ Notable Changes:
 Features:
 * `--logo-padding-top` option (@CarterLi, #372)
 * Raw image file as logo support (@CarterLi)
-* Look for config files in $LOCALAPPDATA (Windows) (@CarterLi)
+* Look for config files in `$LOCALAPPDATA` (Windows)
+* Look for config files in `~/Library/Preferences` (macOS)
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
@@ -16,7 +17,7 @@ Bugfixes:
 
 Other:
 * Fixed a Typo in iterm error message (@jessebot, #376)
-* Don't try to load config file in `/etc` (Windows) (@jessebot, #376)
+* Don't try to load config file in `/etc` (Windows)
 
 # 1.8.2
 
