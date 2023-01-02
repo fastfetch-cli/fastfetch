@@ -2,6 +2,7 @@
 
 Notable Changes:
 * fastfetch no longer creates a sample config file silently. Use `--gen-config` to generate one.
+* fastfetch now search for user config file in the order of `fastfetch --list-config-paths`
 
 Features:
 * `--logo-padding-top` option (@CarterLi, #372)

@@ -1312,14 +1312,18 @@ static void parseConfigFileUser(FFinstance* instance, FFdata* data)
     if(!data->loadUserConfig)
         return;
 
-    FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
-    uint32_t filenameLength = filename->length;
+    FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.configDirs)
+    {
+        uint32_t filenameLength = filename->length;
 
-    ffStrbufAppendS(filename, "fastfetch/config.conf");
+        ffStrbufAppendS(filename, "fastfetch/config.conf");
 
-    parseConfigFile(instance, data, filename->chars);
+        bool found = parseConfigFile(instance, data, filename->chars);
 
-    ffStrbufSubstrBefore(filename, filenameLength);
+        ffStrbufSubstrBefore(filename, filenameLength);
+
+        if(found) break;
+    }
 }
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)
