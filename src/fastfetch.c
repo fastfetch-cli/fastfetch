@@ -1423,7 +1423,10 @@ int main(int argc, const char** argv)
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
+    #ifndef _WIN32
     parseConfigFileSystem(&instance, &data);
+    #endif
+
     parseConfigFileUser(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 

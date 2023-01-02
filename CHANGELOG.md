@@ -10,9 +10,10 @@ Logos:
 
 Bugfixes:
 * `--logo-type` now does accept `iterm` too (@CarterLi, #374)
- 
+
 Other:
 * Fixed a Typo in iterm error message (@jessebot, #376)
+* Don't try to load config file in `/etc` (Windows) (@jessebot, #376)
 
 # 1.8.2
 
