@@ -26,7 +26,7 @@ static void initConfigDirs(FFstate* state)
 
     {
         PWSTR pPath;
-        if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, 0, NULL, &pPath)))
+        if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_RoamingAppData, 0, NULL, &pPath)))
         {
             FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
             ffStrbufInit(buffer);

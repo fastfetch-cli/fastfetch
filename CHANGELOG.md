@@ -7,7 +7,7 @@ Notable Changes:
 Features:
 * `--logo-padding-top` option (@CarterLi, #372)
 * Raw image file as logo support (@CarterLi)
-* Look for config files in `$LOCALAPPDATA` (Windows)
+* Look for config files in `$APPDATA` ([RoamingAppData](https://superuser.com/questions/21458/why-are-there-directories-called-local-locallow-and-roaming-under-users-user#answer-21462)) (Windows)
 * Look for config files in `~/Library/Preferences` (macOS)
 * Add `--list-config-paths` option which list search paths of config files
 
