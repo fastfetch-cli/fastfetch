@@ -16,6 +16,7 @@ Logos:
 
 Bugfixes:
 * `--logo-type` now does accept `iterm` too (@CarterLi, #374)
+* Fix mintty terminal font detection
 
 Other:
 * Fixed a Typo in iterm error message (@jessebot, #376)

@@ -77,6 +77,30 @@ static void initConfigDirs(FFstate* state)
     ffStrbufEnsureEndsWithC(userHome, '/');
     FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
 
+    #ifdef _WIN32
+
+    if(getenv("MSYSTEM") && getenv("HOME"))
+    {
+        // We are in MSYS2 / Git Bash
+
+        FFstrbuf* msysConfigHome = ffListAdd(&state->configDirs);
+        ffStrbufInitA(msysConfigHome, 64);
+        ffStrbufAppendS(msysConfigHome, getenv("HOME"));
+        ffStrbufReplaceAllC(msysConfigHome, '\\', '/');
+        ffStrbufEnsureEndsWithC(msysConfigHome, '/');
+        ffStrbufAppendS(msysConfigHome, ".config/");
+        FF_ENSURE_ONLY_ONCE_IN_LIST(msysConfigHome)
+
+        FFstrbuf* msysHome = ffListAdd(&state->configDirs);
+        ffStrbufInitA(msysHome, 64);
+        ffStrbufAppendS(msysHome, getenv("HOME"));
+        ffStrbufReplaceAllC(msysHome, '\\', '/');
+        ffStrbufEnsureEndsWithC(msysHome, '/');
+        FF_ENSURE_ONLY_ONCE_IN_LIST(msysHome)
+    }
+
+    #endif
+
     #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
 
     FFstrbuf xdgConfigDirs;
@@ -112,10 +136,14 @@ static void initConfigDirs(FFstate* state)
 
     #endif
 
+    #ifndef _WIN32
+
     FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
     ffStrbufInitA(systemConfig, 64);
     ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ETC"/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfig)
+
+    #endif
 
     #undef FF_ENSURE_ONLY_ONCE_IN_LIST
 }
