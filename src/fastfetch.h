@@ -38,6 +38,7 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_IMAGE_ITERM, //image file, printed as iterm graphics protocol
     FF_LOGO_TYPE_IMAGE_CHAFA, //image file, printed as ascii art using libchafa
     FF_LOGO_TYPE_IMAGE_RAW,   //image file, printed as raw binary string
+    FF_LOGO_TYPE_NONE,        //--logo none
 } FFLogoType;
 
 typedef enum FFBinaryPrefixType

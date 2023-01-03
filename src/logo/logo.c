@@ -339,6 +339,8 @@ static void logoPrintKnownType(FFinstance* instance)
         else
             successfull = logoPrintFileIfExists(instance, false, true);
     }
+    else if(instance->config.logo.type == FF_LOGO_TYPE_NONE)
+        logoApplyColorsDetected(instance);
     else //image
         successfull = logoPrintImageIfExists(instance, instance->config.logo.type);
 

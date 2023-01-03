@@ -136,7 +136,7 @@ Bugfixes:
 * Don't segfault in GPU code on Intel Macs (@CarterLi, #236)
 * Don't use hardcoded size units in presets (@dr460nf1r3, #255)
 * Don't crash with some format strings (#252)
-* --logo-none keeps key color now (#264)
+* --logo none keeps key color now (#264)
 
 # 1.7.2
 

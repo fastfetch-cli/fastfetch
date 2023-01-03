@@ -979,6 +979,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logo.paddingTop = 0;
             instance->config.logo.paddingRight = 0;
             instance->config.logo.paddingLeft = 0;
+            instance->config.logo.type = FF_LOGO_TYPE_NONE;
         }
     }
     else if(startsWith(key, "--logo"))
@@ -998,6 +999,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
                 "iterm", FF_LOGO_TYPE_IMAGE_ITERM,
                 "chafa", FF_LOGO_TYPE_IMAGE_CHAFA,
                 "raw", FF_LOGO_TYPE_IMAGE_RAW,
+                "none", FF_LOGO_TYPE_NONE,
                 NULL
             );
         }
