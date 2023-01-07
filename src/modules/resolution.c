@@ -28,7 +28,7 @@ void ffPrintResolution(FFinstance* instance)
                 printf(" @ %iHz", result->refreshRate);
 
             if(result->brightness >= 0)
-                printf(" (☀️ %d%%)", result->brightness);
+                printf(" (Brightness %d%%)", result->brightness);
 
             putchar('\n');
         }

@@ -1,36 +1,13 @@
+extern "C" {
 #include "displayserver.h"
 #include "detection/os/os.h"
-#include "util/mallocHelper.h"
+}
+#include "util/windows/wmi.hpp"
 
 #include <dwmapi.h>
-#include <WinUser.h>
-#include <wchar.h>
-#include <highlevelmonitorconfigurationapi.h>
+#include <winuser.h>
 
-static WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_UNUSED_PARAM HDC hDC, FF_UNUSED_PARAM LPRECT rc, LPARAM data)
-{
-    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
-    DISPLAY_DEVICEW* displayDevice = (DISPLAY_DEVICEW *) data;
-    if(GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi) && wcscmp(mi.szDevice, displayDevice->DeviceName) == 0)
-    {
-        DWORD arraySize;
-        if(GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, &arraySize) && arraySize > 0)
-        {
-            PHYSICAL_MONITOR* FF_AUTO_FREE physicalMonitorArray = malloc(arraySize * sizeof(*physicalMonitorArray));
-            if(GetPhysicalMonitorsFromHMONITOR(hMonitor, arraySize, physicalMonitorArray))
-            {
-                DWORD minValue, currentValue, maxValue;
-                if(GetMonitorBrightness(physicalMonitorArray[0].hPhysicalMonitor, &minValue, &currentValue, &maxValue))
-                    displayDevice->StateFlags = currentValue * 100 / maxValue;
-
-                DestroyPhysicalMonitors(arraySize, physicalMonitorArray);
-            }
-        }
-        return FALSE;
-    }
-    return TRUE;
-}
-
+extern "C"
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
 {
     FF_UNUSED(instance);
@@ -52,19 +29,33 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deVersion);
     ffListInit(&ds->resolutions, sizeof(FFResolutionResult));
 
-    DISPLAY_DEVICEW displayDevice = { .cb = sizeof(DISPLAY_DEVICEW) };
+    DISPLAY_DEVICEW displayDevice;
+    displayDevice.cb = sizeof(DISPLAY_DEVICEW);
     for(DWORD devNum = 0; EnumDisplayDevicesW(NULL, devNum, &displayDevice, 0) != 0; ++devNum)
     {
         if(!(displayDevice.StateFlags & DISPLAY_DEVICE_ACTIVE))
             continue;
-        DEVMODEW devMode = { .dmSize = sizeof(DEVMODEW) };
+        DEVMODEW devMode;
+        devMode.dmSize = sizeof(DEVMODEW);
         if(EnumDisplaySettingsW(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode) == 0)
             continue;
 
-        displayDevice.StateFlags = (DWORD) -1;
-        EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM)(void*) &displayDevice);
+        ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, -1);
+    }
 
-        ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, (int) displayDevice.StateFlags);
+    //TODO: support multiple monitors
+    if(ds->resolutions.length == 1)
+    {
+        FFWmiQuery query(L"SELECT CurrentBrightness FROM WmiMonitorBrightness WHERE Active = true", nullptr, FFWmiNamespace::WMI);
+        if(FFWmiRecord record = query.next())
+        {
+            uint64_t brightness;
+            record.getUnsigned(L"CurrentBrightness", &brightness);
+            FF_LIST_FOR_EACH(FFResolutionResult, resolution, ds->resolutions)
+            {
+                resolution->brightness = (int) brightness;
+            }
+        }
     }
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067

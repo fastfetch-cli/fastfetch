@@ -26,7 +26,7 @@ static void CoUninitializeWrap()
     CoUninitialize();
 }
 
-static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
+static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lpContext)
 {
     HRESULT hres;
 
@@ -76,15 +76,15 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     // the current user and obtain pointer pSvc
     // to make IWbemServices calls.
     hres = pLoc->ConnectServer(
-         bstr_t(L"ROOT\\CIMV2"),  // Object path of WMI namespace
-         nullptr,                 // User name. nullptr = current user
-         nullptr,                 // User password. nullptr = current
-         0,                       // Locale. nullptr indicates current
-         0,                       // Security flags.
-         0,                       // Authority (for example, Kerberos)
-         0,                       // Context object
-         &pSvc                    // pointer to IWbemServices proxy
-         );
+        bstr_t((const wchar_t*) lpParameter), // Object path of WMI namespace
+        nullptr,                              // User name. nullptr = current user
+        nullptr,                              // User password. nullptr = current
+        0,                                    // Locale. nullptr indicates current
+        0,                                    // Security flags.
+        0,                                    // Authority (for example, Kerberos)
+        0,                                    // Context object
+        &pSvc                                 // pointer to IWbemServices proxy
+    );
     pLoc->Release();
     pLoc = nullptr;
 
@@ -120,13 +120,17 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID, PVOID *lpContext)
     return TRUE;
 }
 
-FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error)
+FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace wmiNs)
     : pEnumerator(nullptr)
 {
-    static INIT_ONCE s_InitOnce = INIT_ONCE_STATIC_INIT;
+    static INIT_ONCE s_InitOnce[(int) FFWmiNamespace::LAST] = {};
     const char* context;
-    if (InitOnceExecuteOnce(&s_InitOnce, &InitHandleFunction, nullptr, (void**)&context) == FALSE)
-    {
+    if (InitOnceExecuteOnce(
+        &s_InitOnce[(int)wmiNs],
+        &InitHandleFunction,
+        (PVOID) (wmiNs == FFWmiNamespace::CIMV2 ? L"ROOT\\CIMV2" : L"ROOT\\WMI"),
+        (void**)&context) == FALSE
+    ) {
         if(error)
             ffStrbufAppendS(error, context);
         return;

@@ -463,7 +463,7 @@ elseif(WIN32)
         src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
-        src/detection/displayserver/displayserver_windows.c
+        src/detection/displayserver/displayserver_windows.cpp
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
@@ -671,7 +671,6 @@ elseif(WIN32)
         PRIVATE "dxgi"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
-        PRIVATE "dxva2"
     )
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
