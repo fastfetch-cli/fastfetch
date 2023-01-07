@@ -1,8 +1,35 @@
 #include "displayserver.h"
 #include "detection/os/os.h"
+#include "util/mallocHelper.h"
 
 #include <dwmapi.h>
 #include <WinUser.h>
+#include <wchar.h>
+#include <highlevelmonitorconfigurationapi.h>
+
+static WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_UNUSED_PARAM HDC hDC, FF_UNUSED_PARAM LPRECT rc, LPARAM data)
+{
+    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
+    DISPLAY_DEVICEW* displayDevice = (DISPLAY_DEVICEW *) data;
+    if(GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi) && wcscmp(mi.szDevice, displayDevice->DeviceName) == 0)
+    {
+        DWORD arraySize;
+        if(GetNumberOfPhysicalMonitorsFromHMONITOR(hMonitor, &arraySize) && arraySize > 0)
+        {
+            PHYSICAL_MONITOR* FF_AUTO_FREE physicalMonitorArray = malloc(arraySize * sizeof(*physicalMonitorArray));
+            if(GetPhysicalMonitorsFromHMONITOR(hMonitor, arraySize, physicalMonitorArray))
+            {
+                DWORD minValue, currentValue, maxValue;
+                if(GetMonitorBrightness(physicalMonitorArray[0].hPhysicalMonitor, &minValue, &currentValue, &maxValue))
+                    displayDevice->StateFlags = currentValue * 100 / maxValue;
+
+                DestroyPhysicalMonitors(arraySize, physicalMonitorArray);
+            }
+        }
+        return FALSE;
+    }
+    return TRUE;
+}
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
 {
@@ -34,7 +61,10 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
         if(EnumDisplaySettingsW(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode) == 0)
             continue;
 
-        ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, -1);
+        displayDevice.StateFlags = (DWORD) -1;
+        EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM)(void*) &displayDevice);
+
+        ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, (int) displayDevice.StateFlags);
     }
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
