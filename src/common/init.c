@@ -45,7 +45,7 @@ static void initConfigDirs(FFstate* state)
         ffStrbufAppendS(buffer, "/Library/Preferences/");
     }
 
-    #elif !defined(__ANDROID__)
+    #else
 
     const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
     if(ffStrSet(xdgConfigHome))
