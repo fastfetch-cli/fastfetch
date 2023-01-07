@@ -1305,27 +1305,19 @@ error:
     }
 }
 
-FF_UNUSED_PARAM static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
+static void parseConfigFiles(FFinstance* instance, FFdata* data)
 {
-    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF"/fastfetch/config.conf");
-}
-
-static void parseConfigFileUser(FFinstance* instance, FFdata* data)
-{
-    if(!data->loadUserConfig)
-        return;
-
-    FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.configDirs)
+    for(uint32_t i = instance->state.configDirs.length; i > 0; --i)
     {
-        uint32_t filenameLength = filename->length;
+        if(!data->loadUserConfig)
+            return;
 
-        ffStrbufAppendS(filename, "fastfetch/config.conf");
+        FFstrbuf* dir = ffListGet(&instance->state.configDirs, i - 1);
+        uint32_t dirLength = dir->length;
 
-        bool found = parseConfigFile(instance, data, filename->chars);
-
-        ffStrbufSubstrBefore(filename, filenameLength);
-
-        if(found) break;
+        ffStrbufAppendS(dir, "fastfetch/config.conf");
+        parseConfigFile(instance, data, dir->chars);
+        ffStrbufSubstrBefore(dir, dirLength);
     }
 }
 
@@ -1466,11 +1458,7 @@ int main(int argc, const char** argv)
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
-    #ifndef _WIN32
-        parseConfigFileSystem(&instance, &data);
-    #endif
-
-    parseConfigFileUser(&instance, &data);
+    parseConfigFiles(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
     //If we don't have a custom structure, use the default one

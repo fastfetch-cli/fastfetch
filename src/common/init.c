@@ -101,7 +101,7 @@ static void initConfigDirs(FFstate* state)
 
     #endif
 
-    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
+    #if !defined(_WIN32) && !defined(__APPLE__)
 
     FFstrbuf xdgConfigDirs;
     ffStrbufInitA(&xdgConfigDirs, 64);
@@ -142,6 +142,12 @@ static void initConfigDirs(FFstate* state)
     ffStrbufInitA(systemConfig, 64);
     ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ETC"/");
     FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfig)
+
+    FFstrbuf* systemConfigInstall = ffListAdd(&state->configDirs);
+    ffStrbufInitA(systemConfigInstall, 64);
+    ffStrbufAppendS(systemConfigInstall, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF"/");
+    FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigInstall)
+
 
     #endif
 
