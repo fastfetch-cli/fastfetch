@@ -109,6 +109,7 @@ static inline char* realpath(const char* restrict file_name, char* restrict reso
         resolved_name[1] = resolved_name[0]; // Drive Name
         resolved_name[0] = '/';
     }
+    return result;
 }
 #endif
 
