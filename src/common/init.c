@@ -25,40 +25,7 @@
         --list->length; \
     }
 
-#ifdef _WIN32
-void pathsAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
-{
-    PWSTR pPath;
-    if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
-    {
-        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
-        ffStrbufInit(buffer);
-        ffStrbufSetWS(buffer, pPath);
-        ffStrbufReplaceAllC(buffer, '\\', '/');
-        ffStrbufEnsureEndsWithC(buffer, '/');
-        FF_ENSURE_ONLY_ONCE_IN_LIST(dirs, buffer);
-    }
-    CoTaskMemFree(pPath);
-}
-
-void pathsAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)
-{
-    const char* value = getenv(env);
-    if(!ffStrSet(value))
-        return;
-
-    FFstrbuf* buffer = ffListAdd(dirs);
-    ffStrbufInitA(buffer, 64);
-    ffStrbufAppendS(buffer, value);
-    ffStrbufReplaceAllC(buffer, '\\', '/');
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    ffStrbufAppendS(buffer, suffix);
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    FF_ENSURE_ONLY_ONCE_IN_LIST(dirs, buffer);
-}
-#endif
-
-void pathsAddHome(FFlist* dirs, FFstate* state, const char* suffix)
+static void pathsAddHome(FFlist* dirs, FFstate* state, const char* suffix)
 {
     FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
     ffStrbufInitA(buffer, 64);
@@ -68,7 +35,7 @@ void pathsAddHome(FFlist* dirs, FFstate* state, const char* suffix)
     FF_ENSURE_ONLY_ONCE_IN_LIST(dirs, buffer);
 }
 
-void pathsAddAbsolute(FFlist* dirs, const char* path)
+static void pathsAddAbsolute(FFlist* dirs, const char* path)
 {
     FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
     ffStrbufInitA(buffer, 64);
@@ -77,11 +44,15 @@ void pathsAddAbsolute(FFlist* dirs, const char* path)
     FF_ENSURE_ONLY_ONCE_IN_LIST(dirs, buffer);
 }
 
-void pathsAddEnv(FFlist* dirs, const char* env)
+static void pathsAddEnv(FFlist* dirs, const char* env)
 {
+    const char* envValue = getenv(env);
+    if(!ffStrSet(envValue))
+        return;
+
     FFstrbuf value;
     ffStrbufInitA(&value, 64);
-    ffStrbufAppendS(&value, getenv(env));
+    ffStrbufAppendS(&value, envValue);
 
     uint32_t startIndex = 0;
     while (startIndex < value.length)
@@ -103,20 +74,53 @@ void pathsAddEnv(FFlist* dirs, const char* env)
     ffStrbufDestroy(&value);
 }
 
+#ifdef _WIN32
+static void pathsAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
+{
+    PWSTR pPath;
+    if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
+    {
+        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
+        ffStrbufInit(buffer);
+        ffStrbufSetWS(buffer, pPath);
+        ffStrbufReplaceAllC(buffer, '\\', '/');
+        ffStrbufEnsureEndsWithC(buffer, '/');
+        FF_ENSURE_ONLY_ONCE_IN_LIST(dirs, buffer);
+    }
+    CoTaskMemFree(pPath);
+}
+
+static void pathsAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)
+{
+    const char* value = getenv(env);
+    if(!ffStrSet(value))
+        return;
+
+    FFstrbuf* buffer = ffListAdd(dirs);
+    ffStrbufInitA(buffer, 64);
+    ffStrbufAppendS(buffer, value);
+    ffStrbufReplaceAllC(buffer, '\\', '/');
+    ffStrbufEnsureEndsWithC(buffer, '/');
+    ffStrbufAppendS(buffer, suffix);
+    ffStrbufEnsureEndsWithC(buffer, '/');
+    FF_ENSURE_ONLY_ONCE_IN_LIST(dirs, buffer);
+}
+#endif
+
 static void initConfigDirs(FFstate* state)
 {
     ffListInit(&state->configDirs, sizeof(FFstrbuf));
+
+    pathsAddEnv(&state->configDirs, "XDG_CONFIG_HOME"); // On systems where this is not set (Windows & Apple presumably), this wil do nothing
+    pathsAddHome(&state->configDirs, state, "/.config/");
 
     #ifdef _WIN32
         pathsAddKnownFolder(&state->configDirs, &FOLDERID_RoamingAppData);
         pathsAddKnownFolder(&state->configDirs, &FOLDERID_LocalAppData);
     #elif defined(__APPLE__)
         pathsAddHome(&state->configDirs, state, "/Library/Preferences/");
-    #else
-        pathsAddEnv(&state->configDirs, "XDG_CONFIG_HOME");
     #endif
 
-    pathsAddHome(&state->configDirs, state, "/.config/");
     pathsAddHome(&state->configDirs, state, "");
 
     #ifdef _WIN32
@@ -128,8 +132,9 @@ static void initConfigDirs(FFstate* state)
         }
     #endif
 
+    pathsAddEnv(&state->configDirs, "XDG_CONFIG_DIRS");
+
     #if !defined(_WIN32) && !defined(__APPLE__)
-        pathsAddEnv(&state->configDirs, "XDG_CONFIG_DIRS");
         pathsAddAbsolute(&state->configDirs, FASTFETCH_TARGET_DIR_ETC"/xdg/");
     #endif
 
@@ -143,16 +148,16 @@ static void initDataDirs(FFstate* state)
 {
     ffListInit(&state->dataDirs, sizeof(FFstrbuf));
 
+    pathsAddEnv(&state->dataDirs, "XDG_DATA_HOME"); // On systems where this is not set (Windows & Apple presumably), this wil do nothing
+    pathsAddHome(&state->dataDirs, state, "/.local/share/");
+
     #ifdef _WIN32
         pathsAddKnownFolder(&state->dataDirs, &FOLDERID_RoamingAppData);
         pathsAddKnownFolder(&state->dataDirs, &FOLDERID_LocalAppData);
     #elif defined(__APPLE__)
         pathsAddHome(&state->dataDirs, state, "/Library/Application Support/");
-    #else
-        pathsAddEnv(&state->dataDirs, "XDG_DATA_HOME");
     #endif
 
-    pathsAddHome(&state->dataDirs, state, "/.local/share/");
     pathsAddHome(&state->dataDirs, state, "");
 
     #ifdef _WIN32
@@ -164,9 +169,7 @@ static void initDataDirs(FFstate* state)
         }
     #endif
 
-    #if !defined(_WIN32) && !defined(__APPLE__)
-        pathsAddEnv(&state->dataDirs, "XDG_DATA_DIRS");
-    #endif
+    pathsAddEnv(&state->dataDirs, "XDG_DATA_DIRS");
 
     #if !defined(_WIN32)
         pathsAddAbsolute(&state->dataDirs, FASTFETCH_TARGET_DIR_USR"/local/share/");
