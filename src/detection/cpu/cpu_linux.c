@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz)
+static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
 {
     FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
@@ -19,7 +19,7 @@ static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrb
     while(getline(&line, &len, cpuinfo) != -1)
     {
         //Stop after the first CPU
-        if(cpu->name.length > 0 && (*line == '\0' || *line == '\n'))
+        if(*line == '\0' || *line == '\n')
             break;
 
         (void)(
@@ -27,6 +27,8 @@ static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrb
             ffParsePropLine(line, "vendor_id :", &cpu->vendor) ||
             ffParsePropLine(line, "cpu cores :", physicalCoresBuffer) ||
             ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
+            ffParsePropLine(line, "isa :", cpuIsa) ||
+            ffParsePropLine(line, "uarch :", cpuUarch) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) //For Android devices
         );
     }
@@ -83,6 +85,25 @@ static double detectCPUTemp(const FFinstance* instance)
     return FF_CPU_TEMP_UNSET;
 }
 
+static void parseIsa(FFstrbuf* cpuIsa)
+{
+    if(ffStrbufStartsWithS(cpuIsa, "rv"))
+    {
+        // RISC-V ISA string example: "rv64imafdch_zicsr_zifencei".
+        // The _z parts are not important for CPU showcasing, so we remove them.
+        if(ffStrbufContainC(cpuIsa, '_'))
+            ffStrbufSubstrBeforeFirstC(cpuIsa, '_');
+        // Then we replace "imafd" with "g" since "g" is a shorthand.
+        if(ffStrbufContainS(cpuIsa, "imafd"))
+        {
+            // Remove 4 of the 5 characters and replace the remaining one with "g".
+            ffStrbufRemoveSubstr(cpuIsa, 4, 8);
+            cpuIsa->chars[4] = 'g';
+        }
+        // The final ISA output of the above example is "rv64gch".
+    }
+}
+
 void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 {
     if(instance->config.cpuTemp)
@@ -96,7 +117,13 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     FFstrbuf cpuMHz;
     ffStrbufInit(&cpuMHz);
 
-    parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz);
+    FFstrbuf cpuIsa;
+    ffStrbufInit(&cpuIsa);
+
+    FFstrbuf cpuUarch;
+    ffStrbufInit(&cpuUarch);
+
+    parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
 
     cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
 
@@ -114,6 +141,23 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
         cpu->frequencyMin = cpu->frequencyMax = ffStrbufToDouble(&cpuMHz) / 1000;
     }
 
+    if(cpuUarch.length > 0)
+    {
+        if(cpu->name.length > 0)
+            ffStrbufAppendC(&cpu->name, ' ');
+        ffStrbufAppend(&cpu->name, &cpuUarch);
+    }
+
+    if(cpuIsa.length > 0)
+    {
+        parseIsa(&cpuIsa);
+        if(cpu->name.length > 0)
+            ffStrbufAppendC(&cpu->name, ' ');
+        ffStrbufAppend(&cpu->name, &cpuIsa);
+    }
+
     ffStrbufDestroy(&physicalCoresBuffer);
     ffStrbufDestroy(&cpuMHz);
+    ffStrbufDestroy(&cpuIsa);
+    ffStrbufDestroy(&cpuUarch);
 }
