@@ -285,12 +285,38 @@ static void logoPrintData(FFinstance* instance, bool doColorReplacement) {
     logoApplyColorsDetected(instance);
 }
 
+static bool loadLogoFile(const FFinstance* instance, FFstrbuf* buffer)
+{
+    if(ffAppendFileBuffer(instance->config.logo.source.chars, buffer))
+        return true;
+
+    FFstrbuf fullPath;
+    ffStrbufInit(&fullPath);
+
+    FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance->state.dataDirs)
+    {
+        //We need to copy it, because multiple threads might be using dataDirs at the same time
+        ffStrbufSet(&fullPath, dataDir);
+        ffStrbufAppendS(&fullPath, "fastfetch/logos/");
+        ffStrbufAppend(&fullPath, &instance->config.logo.source);
+
+        if(ffAppendFileBuffer(fullPath.chars, buffer))
+        {
+            ffStrbufDestroy(&fullPath);
+            return true;
+        }
+    }
+
+    ffStrbufDestroy(&fullPath);
+    return false;
+}
+
 static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement, bool raw)
 {
     FFstrbuf content;
     ffStrbufInit(&content);
 
-    if(!ffAppendFileBuffer(instance->config.logo.source.chars, &content))
+    if(!loadLogoFile(instance, &content))
     {
         ffStrbufDestroy(&content);
         fputs("Logo: Failed to load file content from logo source\n", stderr);
