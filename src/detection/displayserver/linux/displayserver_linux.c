@@ -1,6 +1,55 @@
 #include "displayserver_linux.h"
+#include "common/io.h"
 
 #include <dirent.h>
+
+static void parseBacklight(FFDisplayServerResult* result)
+{
+    if(result->resolutions.length != 1)
+        return;
+
+    //https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight
+    const char* backlightDirPath = "/sys/class/backlight/";
+
+    DIR* dirp = opendir(backlightDirPath);
+    if(dirp == NULL)
+        return;
+
+    FFstrbuf backlightDir;
+    ffStrbufInitA(&backlightDir, 64);
+    ffStrbufAppendS(&backlightDir, backlightDirPath);
+
+    uint32_t backlightDirLength = backlightDir.length;
+
+    FFstrbuf buffer;
+    ffStrbufInit(&buffer);
+
+    struct dirent* entry;
+    if((entry = readdir(dirp)) != NULL)
+    {
+        ffStrbufAppendS(&backlightDir, entry->d_name);
+        ffStrbufAppendS(&backlightDir, "/actual_brightness");
+        if(ffReadFileBuffer(backlightDir.chars, &buffer))
+        {
+            double actualBrightness = ffStrbufToDouble(&buffer);
+            ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
+
+            ffStrbufAppendS(&backlightDir, "/max_brightness");
+            if(ffReadFileBuffer(backlightDir.chars, &buffer))
+            {
+                double maxBrightness = ffStrbufToDouble(&buffer);
+                FF_LIST_FOR_EACH(FFResolutionResult, resolution, result->resolutions)
+                {
+                    resolution->brightness = (int) (actualBrightness * 100 / maxBrightness);
+                }
+            }
+        }
+    }
+
+    closedir(dirp);
+    ffStrbufDestroy(&backlightDir);
+    ffStrbufDestroy(&buffer);
+}
 
 static void parseDRM(FFDisplayServerResult* result)
 {
@@ -83,4 +132,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 
     //This fills in missing information about WM / DE by using env vars and iterating processes
     ffdsDetectWMDE(instance, ds);
+
+    parseBacklight(ds);
 }
