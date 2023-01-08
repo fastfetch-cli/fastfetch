@@ -73,7 +73,7 @@ static bool detectCursorFromXDG(const FFinstance* instance, bool user, FFCursorR
     if(user)
         ffParsePropFileHome(instance, ".icons/default/index.theme", "Inherits =", &result->theme);
     else
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/icons/default/index.theme", "Inherits =", &result->theme);
+        ffParsePropFileData(instance, "icons/default/index.theme", "Inherits =", &result->theme);
 
     return result->theme.length > 0;
 }

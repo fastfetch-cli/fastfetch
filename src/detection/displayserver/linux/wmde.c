@@ -116,38 +116,34 @@ static void applyBetterWM(FFDisplayServerResult* result, const char* processName
         ffStrbufAppend(&result->wmPrettyName, &result->wmProcessName);
 }
 
-static void getKDE(FFDisplayServerResult* result)
+static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, "KDE Plasma");
 
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    ffParsePropFileData(instance, "xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData(instance, "xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData(instance, "wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-    if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/local/share/xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-    if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/local/share/wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData(instance, "wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
 
     applyBetterWM(result, getenv("KDEWM"));
 }
 
-static void getGnome(FFDisplayServerResult* result)
+static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
     ffStrbufSetS(&result->dePrettyName, "GNOME");
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
+    ffParsePropFileData(instance, "gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
 }
 
-static void getCinnamon(FFDisplayServerResult* result)
+static void getCinnamon(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "cinnamon");
     ffStrbufSetS(&result->dePrettyName, "Cinnamon");
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
+    ffParsePropFileData(instance, "applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
 }
 
 static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
@@ -164,7 +160,7 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
     FFstrbuf micro;
     ffStrbufInit(&micro);
 
-    ffParsePropFileValues(FASTFETCH_TARGET_DIR_USR"/share/mate-about/mate-version.xml", 3, (FFpropquery[]) {
+    ffParsePropFileDataValues(instance, "mate-about/mate-version.xml", 3, (FFpropquery[]) {
         {"<platform>", &major},
         {"<minor>", &minor},
         {"<micro>", &micro}
@@ -193,7 +189,7 @@ static void getXFCE4(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "xfce4-session");
     ffStrbufSetS(&result->dePrettyName, "Xfce4");
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
+    ffParsePropFileData(instance, "gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -214,12 +210,12 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
     ffStrbufSetS(&result->dePrettyName, "LXQt");
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/lib/pkgconfig/lxqt.pc", "Version:", &result->deVersion);
+    ffParsePropFileData(instance, "gconfig/lxqt.pc", "Version:", &result->deVersion);
 
     if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
+        ffParsePropFileData(instance, "cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
+        ffParsePropFileData(instance, "cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -253,19 +249,19 @@ static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResul
         strcasecmp(name, "plasma") == 0 ||
         strcasecmp(name, "plasmashell") == 0 ||
         strcasecmp(name, "plasmawayland") == 0
-    ) getKDE(result);
+    ) getKDE(instance, result);
 
     else if(
         strcasecmp(name, "Gnome") == 0 ||
         strcasecmp(name, "ubuntu:GNOME") == 0 ||
         strcasecmp(name, "ubuntu") == 0 ||
         strcasecmp(name, "gnome-shell") == 0
-    ) getGnome(result);
+    ) getGnome(instance, result);
 
     else if(
         strcasecmp(name, "X-Cinnamon") == 0 ||
         strcasecmp(name, "Cinnamon") == 0
-    ) getCinnamon(result);
+    ) getCinnamon(instance, result);
 
     else if(
         strcasecmp(name, "XFCE") == 0 ||

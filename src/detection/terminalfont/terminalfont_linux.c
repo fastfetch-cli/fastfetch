@@ -88,15 +88,15 @@ static void detectKonsole(const FFinstance* instance, FFTerminalFontResult* term
     }
 
     FFstrbuf profilePath;
-    ffStrbufInitA(&profilePath, 64);
-    ffStrbufAppendS(&profilePath, ".local/share/konsole/");
+    ffStrbufInitA(&profilePath, 32);
+    ffStrbufAppendS(&profilePath, "konsole/");
     ffStrbufAppend(&profilePath, &profile);
 
     ffStrbufDestroy(&profile);
 
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
-    ffParsePropFileHome(instance, profilePath.chars, "Font =", &fontName);
+    ffParsePropFileData(instance, profilePath.chars, "Font =", &fontName);
 
     if(fontName.length == 0)
         ffStrbufAppendF(&terminalFont->error, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath.chars);

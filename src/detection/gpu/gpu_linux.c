@@ -58,7 +58,7 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
-static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
+static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     u8 revId;
     bool revIdSet = false;;
@@ -82,7 +82,7 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufInit(&query);
     ffStrbufAppendF(&query, "%X, %X,", device->device_id, revId);
 
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/libdrm/amdgpu.ids", query.chars, &gpu->name);
+    ffParsePropFileData(instance, "libdrm/amdgpu.ids", query.chars, &gpu->name);
 
     ffStrbufDestroy(&query);
 
@@ -94,11 +94,11 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufRemoveStringsA(&gpu->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
 }
 
-static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
+static void pciDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     if(ffStrbufCompS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD) == 0)
     {
-        drmDetectDeviceName(gpu, pci, device);
+        drmDetectDeviceName(instance, gpu, pci, device);
         if(gpu->name.length > 0)
             return;
     }
@@ -188,7 +188,7 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     pciDetectVendorName(gpu, pci, device);
 
     ffStrbufInit(&gpu->name);
-    pciDetectDeviceName(gpu, pci, device);
+    pciDetectDeviceName(instance, gpu, pci, device);
 
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);

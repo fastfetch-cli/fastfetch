@@ -144,11 +144,6 @@ done:
     return true;
 }
 
-bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileValues(filename, 1, (FFpropquery[]){{start, buffer}});
-}
-
 bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
     FFstrbuf absolutePath;
@@ -164,22 +159,17 @@ bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeF
     return result;
 }
 
-bool ffParsePropFileHome(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileHomeValues(instance, relativeFile, 1, (FFpropquery[]){{start, buffer}});
-}
-
-bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
+bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
     bool foundAFile = false;
 
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 64);
 
-    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
+    for(uint32_t i = 0; i < list->length; i++)
     {
-        //We need to copy the config dir each time, because it used by multiple threads, so we can't directly write to it.
-        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
+        //We need to copy the dir each time, because it used by multiple threads, so we can't directly write to it.
+        ffStrbufSet(&baseDir, ffListGet(list, i));
         ffStrbufAppendS(&baseDir, relativeFile);
 
         if(ffParsePropFileValues(baseDir.chars, numQueries, queries))
@@ -202,9 +192,4 @@ bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativ
     ffStrbufDestroy(&baseDir);
 
     return foundAFile;
-}
-
-bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileConfigValues(instance, relativeFile, 1, (FFpropquery[]){{start, buffer}});
 }

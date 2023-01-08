@@ -211,7 +211,8 @@ typedef struct FFstate
     struct passwd* passwd;
     struct utsname utsname;
 
-    FFlist configDirs;
+    FFlist configDirs; // List of FFstrbuf, trailing slash included
+    FFlist dataDirs;   // List of FFstrbuf, trailing slash included
 } FFstate;
 
 typedef struct FFinstance

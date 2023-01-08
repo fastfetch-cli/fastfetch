@@ -526,17 +526,11 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
 
 static inline void listAvailablePresets(FFinstance* instance)
 {
-    FFstrbuf folder;
-    ffStrbufInitA(&folder, 64);
-
-    ffStrbufSetS(&folder, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&folder, "/.local/share/fastfetch/presets/");
-    listAvailablePresetsFromFolder(&folder, 0, NULL);
-
-    ffStrbufSetS(&folder, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
-    listAvailablePresetsFromFolder(&folder, 0, NULL);
-
-    ffStrbufDestroy(&folder);
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.dataDirs)
+    {
+        ffStrbufAppendS(path, "fastfetch/presets/");
+        listAvailablePresetsFromFolder(path, 0, NULL);
+    }
 }
 
 static void listConfigPaths(FFinstance* instance)
@@ -545,6 +539,15 @@ static void listConfigPaths(FFinstance* instance)
     {
         ffStrbufAppendS(folder, "fastfetch/config.conf");
         printf("%s%s\n", folder->chars, ffFileExists(folder->chars, S_IFREG) ? " (*)" : "");
+    }
+}
+
+static void listDataPaths(FFinstance* instance)
+{
+    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.dataDirs)
+    {
+        ffStrbufAppendS(folder, "fastfetch/");
+        puts(folder->chars);
     }
 }
 
@@ -645,37 +648,26 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
     if(parseConfigFile(instance, data, value))
         return;
 
-    //Try to load as an user preset
+    //Try to load as a relative path
 
-    FFstrbuf filename;
-    ffStrbufInitA(&filename, 64);
-
-    ffStrbufAppendS(&filename, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&filename, "/.local/share/fastfetch/presets/");
-    ffStrbufAppendS(&filename, value);
-
-    if(parseConfigFile(instance, data, filename.chars))
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.dataDirs)
     {
-        ffStrbufDestroy(&filename);
-        return;
-    }
+        uint32_t pathLength = path->length;
 
+        ffStrbufAppendS(path, "fastfetch/presets/");
+        ffStrbufAppendS(path, value);
 
-    //Try to load as a system preset
+        bool success = parseConfigFile(instance, data, path->chars);
 
-    ffStrbufSetS(&filename, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
-    ffStrbufAppendS(&filename, value);
+        ffStrbufSubstrBefore(path, pathLength);
 
-    if(parseConfigFile(instance, data, filename.chars))
-    {
-        ffStrbufDestroy(&filename);
-        return;
+        if(success)
+            return;
     }
 
     //File not found
 
     fprintf(stderr, "Error: couldn't find config: %s\n", value);
-    ffStrbufDestroy(&filename);
     exit(414);
 }
 
@@ -915,6 +907,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else if(strcasecmp(subkey, "-config-paths") == 0)
         {
             listConfigPaths(instance);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-data-paths") == 0)
+        {
+            listDataPaths(instance);
             exit(0);
         }
         else if(strcasecmp(subkey, "-features") == 0)

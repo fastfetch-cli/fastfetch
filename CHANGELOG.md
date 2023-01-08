@@ -10,6 +10,7 @@ Features:
 * Look for config files in `$APPDATA` ([RoamingAppData](https://superuser.com/questions/21458/why-are-there-directories-called-local-locallow-and-roaming-under-users-user#answer-21462)) (Windows)
 * Look for config files in `~/Library/Preferences` (macOS)
 * Add `--list-config-paths` option which list search paths of config files
+* Add `--list-data-paths` option which list search paths for presets and logos
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
