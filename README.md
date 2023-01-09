@@ -21,6 +21,8 @@ At the moment the performance difference is measurable, but too small to be huma
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
+Logos can be heavily customized to. See the [logo documentation](doc/logo.md) for more information.
+
 ## Dependencies
 
 Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.
@@ -88,32 +90,9 @@ All categories not listed here should work without needing a specific implementa
 Title, Separator, OS, Host, Bios, Board, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Swap, Disk, Battery, Power Adapter, Player, Media, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, Wifi, DateTime, Date, Time, Locale, Colors, Break, Custom
 ```
 
-##### Logos
+##### Builtin logos
 ```
 AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Devuan, Deepin, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Parabola, Raspbian, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, Ubuntu, Vanilla, Void, Windows 11, Windows 8, Windows, Zorin
-```
-* Most of the logos have a small variant. Access it by appending _small to the logo name.
-* Some logos have an old variant. Access it by appending _old to the logo name.
-* To disable the logo, use `--logo none`.
-* Get a list of all available logos with `fastfetch --print-logos`.
-
-###### Image logo
-
-Printing images as logo is supported using Sixel / Kitty / iTerm graphics protocol or chafas image to text conversion.
-
-* Sixel: fastfetch must be built with imagemagick support to convert image to sixel format
-* Kitty: Because [kitty support png](https://sw.kovidgoyal.net/kitty/graphics-protocol/#png-data) natively, using `png` image file with both `--logo-width` and `--logo-height` being specified is recommanded to get maximum performance. Otherwise, imagemagick is required to convert image to RGBA data.
-* iTerm: [Since iTerm supports a lot of image format](https://iterm2.com/documentation-images.html), imagemagick support is not required. However, both `--logo-width` and `--logo-height` must be specified since fastfetch has no idea about the size of the image.
-* Chafa: Requires imagemagick support.
-* Raw: use a pre-converted image file so that fastfetch don't need to convert the image format on the fly.
-```shell
-# brew install libsixel
-$ img2sixel image.png -o image.sixel
-$ fastfetch --raw image.sixel --logo-width 30 --logo-height 15
-
-# wget https://iterm2.com/utilities/imgcat && chmod +x imgcat
-$ imgcat image.png > image.raw
-$ fastfetch --raw image.raw --logo-width 30 --logo-height 15
 ```
 
 ##### Package managers
