@@ -2,6 +2,10 @@
 #include "common/io.h"
 #include "common/printing.h"
 
+#ifdef __APPLE__
+    #include <sys/syslimits.h>
+#endif
+
 static FFstrbuf base64Encode(FFstrbuf* in)
 {
     const char* base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
