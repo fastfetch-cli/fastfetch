@@ -25,15 +25,18 @@ static void parseBacklight(FFDisplayServerResult* result)
     ffStrbufInit(&buffer);
 
     struct dirent* entry;
-    if((entry = readdir(dirp)) != NULL)
+    while((entry = readdir(dirp)) != NULL)
     {
+        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
         ffStrbufAppendS(&backlightDir, entry->d_name);
         ffStrbufAppendS(&backlightDir, "/actual_brightness");
         if(ffReadFileBuffer(backlightDir.chars, &buffer))
         {
             double actualBrightness = ffStrbufToDouble(&buffer);
             ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
-
+            ffStrbufAppendS(&backlightDir, entry->d_name);
             ffStrbufAppendS(&backlightDir, "/max_brightness");
             if(ffReadFileBuffer(backlightDir.chars, &buffer))
             {
@@ -43,6 +46,8 @@ static void parseBacklight(FFDisplayServerResult* result)
                     resolution->brightness = (int) (actualBrightness * 100 / maxBrightness);
                 }
             }
+
+            break;
         }
     }
 
