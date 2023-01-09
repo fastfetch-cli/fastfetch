@@ -310,7 +310,7 @@ if(LINUX)
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
-        src/detection/brightness/brightness_nosupport.c
+        src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
