@@ -73,6 +73,9 @@ static void parseDRM(FFDisplayServerResult* result)
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
+        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
         ffStrbufAppendS(&drmDir, entry->d_name);
         ffStrbufAppendS(&drmDir, "/modes");
 

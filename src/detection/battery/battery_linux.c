@@ -99,6 +99,9 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
+        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
         ffStrbufAppendS(&baseDir, entry->d_name);
         parseBattery(&baseDir, results);
         ffStrbufSubstrBefore(&baseDir, baseDirLength);

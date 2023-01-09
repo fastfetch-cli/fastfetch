@@ -309,6 +309,8 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
     {
         if(entry->d_type != DT_DIR)
             continue;
+        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
 
         ffStrbufAppendS(baseDir, entry->d_name);
         getPackageCounts(instance, baseDir, packageCounts);
