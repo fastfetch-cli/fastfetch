@@ -7,8 +7,6 @@
 #include <assert.h>
 #include <CoreGraphics/CGDirectDisplay.h>
 
-extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float *brightness) __attribute__((weak_import));
-
 static void detectResolution(FFDisplayServerResult* ds)
 {
     CGDirectDisplayID screens[128];
@@ -22,15 +20,10 @@ static void detectResolution(FFDisplayServerResult* ds)
         CGDisplayModeRef mode = CGDisplayCopyDisplayMode(screen);
         if(mode)
         {
-            float brightness;
-            if(DisplayServicesGetBrightness == NULL || DisplayServicesGetBrightness(screen, &brightness) != kCGErrorSuccess)
-                brightness = -1;
-
             ffdsAppendResolution(ds,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
-                (uint32_t)CGDisplayModeGetRefreshRate(mode),
-                (int32_t)(brightness * 100)
+                (uint32_t)CGDisplayModeGetRefreshRate(mode)
             );
             CGDisplayModeRelease(mode);
         }

@@ -19,7 +19,7 @@ uint32_t ffdsParseRefreshRate(int32_t refreshRate)
     return (uint32_t) refreshRate;
 }
 
-bool ffdsAppendResolution(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate, int32_t brightness)
+bool ffdsAppendResolution(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate)
 {
     if(width == 0 || height == 0)
         return false;
@@ -28,7 +28,6 @@ bool ffdsAppendResolution(FFDisplayServerResult* result, uint32_t width, uint32_
     resolution->width = width;
     resolution->height = height;
     resolution->refreshRate = refreshRate;
-    resolution->brightness = brightness;
 
     return true;
 }

@@ -27,9 +27,6 @@ void ffPrintResolution(FFinstance* instance)
             if(result->refreshRate > 0)
                 printf(" @ %iHz", result->refreshRate);
 
-            if(result->brightness >= 0)
-                printf(" (Brightness %d%%)", result->brightness);
-
             putchar('\n');
         }
         else
@@ -37,8 +34,7 @@ void ffPrintResolution(FFinstance* instance)
             ffPrintFormat(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.resolution, FF_RESOLUTION_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_INT, &result->width},
                 {FF_FORMAT_ARG_TYPE_INT, &result->height},
-                {FF_FORMAT_ARG_TYPE_INT, &result->refreshRate},
-                {FF_FORMAT_ARG_TYPE_INT, &result->brightness},
+                {FF_FORMAT_ARG_TYPE_INT, &result->refreshRate}
             });
         }
     }

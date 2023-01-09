@@ -469,7 +469,7 @@ elseif(WIN32)
         src/detection/cpuUsage/cpuUsage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
-        src/detection/displayserver/displayserver_windows.cpp
+        src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
