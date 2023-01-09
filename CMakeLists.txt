@@ -463,7 +463,7 @@ elseif(WIN32)
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
-        src/detection/brightness/brightness_nosupport.c
+        src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_windows.c
         src/detection/cpuUsage/cpuUsage_windows.c
