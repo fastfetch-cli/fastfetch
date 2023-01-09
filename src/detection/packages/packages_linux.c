@@ -140,7 +140,7 @@ static uint32_t getNixPackagesImpl(char* path)
     ffStrbufInitA(&command, 255);
     ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
     ffStrbufAppendS(&command, path);
-    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq");
+    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq | wc -l");
 
     ffProcessAppendStdOut(&output, (char* const[]) {
         "sh",
@@ -149,13 +149,12 @@ static uint32_t getNixPackagesImpl(char* path)
         NULL
     });
 
-    //Each package is a new line in the output. If at least one line is found, add 1 for the last line.
-    uint32_t result = ffStrbufCountC(&output, '\n');
-    if(result > 0)
-        result++;
+    int result = (int) strtol(output.chars, NULL, 10);
 
+    ffStrbufDestroy(&command);
     ffStrbufDestroy(&output);
-    return result;
+
+    return (uint32_t) result;
 }
 
 static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
