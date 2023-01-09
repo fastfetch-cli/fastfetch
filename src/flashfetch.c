@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     ffPrintPackages(&instance);
     ffPrintShell(&instance);
     ffPrintResolution(&instance);
+    // ffPrintBrightness(&instance);
     ffPrintDesktopEnvironment(&instance);
     ffPrintWM(&instance);
     ffPrintWMTheme(&instance);

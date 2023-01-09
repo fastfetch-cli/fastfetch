@@ -247,6 +247,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.host);
     initModuleArg(&instance->config.bios);
     initModuleArg(&instance->config.board);
+    initModuleArg(&instance->config.brightness);
     initModuleArg(&instance->config.chassis);
     initModuleArg(&instance->config.kernel);
     initModuleArg(&instance->config.uptime);

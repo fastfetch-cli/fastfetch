@@ -230,6 +230,7 @@
 #--packages-key Packages
 #--shell-key Shell
 #--resolution-key Resolution {1}
+#--brightness-key Brightness ({1})
 #--de-key DE
 #--wm-key WM
 #--wm-theme-key WM Theme
@@ -274,6 +275,7 @@
 #--packages-format
 #--shell-format
 #--resolution-format
+#--brightness-format
 #--de-format
 #--wm-format
 #--wm-theme-format
@@ -317,6 +319,7 @@
 #--packages-error
 #--shell-error
 #--resolution-error
+#--brightness-error
 #--de-error
 #--wm-error
 #--wm-theme-error

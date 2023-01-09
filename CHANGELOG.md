@@ -11,6 +11,7 @@ Features:
 * Look for config files in `~/Library/Preferences` (macOS)
 * Add `--list-config-paths` option which list search paths of config files
 * Add `--list-data-paths` option which list search paths for presets and logos
+* Add `Brightness` module support
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
