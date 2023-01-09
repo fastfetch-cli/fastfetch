@@ -554,9 +554,13 @@ static void destroyConfig(FFinstance* instance)
 
 static void destroyState(FFinstance* instance)
 {
-    for(uint32_t i = 0; i < instance->state.configDirs.length; ++i)
-        ffStrbufDestroy((FFstrbuf*)ffListGet(&instance->state.configDirs, i));
+    FF_LIST_FOR_EACH(FFstrbuf, configDir, instance->state.configDirs)
+        ffStrbufDestroy(configDir);
     ffListDestroy(&instance->state.configDirs);
+
+    FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance->state.dataDirs)
+        ffStrbufDestroy(dataDir);
+    ffListDestroy(&instance->state.dataDirs);
 }
 
 void ffDestroyInstance(FFinstance* instance)
