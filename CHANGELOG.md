@@ -12,6 +12,7 @@ Features:
 * Add `--list-config-paths` option which list search paths of config files
 * Add `--list-data-paths` option which list search paths for presets and logos
 * Add `Brightness` module support
+* Add `Battery` module support for FreeBSD
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
