@@ -155,3 +155,29 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         ok = false;
     return ok;
 }
+
+bool fftsGetTerminalVersion(FFstrbuf* processName, FF_UNUSED_PARAM FFstrbuf* exe, FFstrbuf* version)
+{
+    const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
+    if(termProgramVersion)
+    {
+        const char* termProgram = getenv("TERM_PROGRAM");
+        if(termProgram)
+        {
+            if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
+                (strcmp(termProgram, "vscode") == 0 && ffStrbufStartsWithIgnCaseS(processName, "code"))
+            ) {
+                ffStrbufSetS(version, termProgramVersion);
+                return true;
+            }
+        }
+    }
+
+    #ifdef _WIN32
+
+    return getFileVersion(exe->chars, version);
+
+    #endif
+
+    return false;
+}

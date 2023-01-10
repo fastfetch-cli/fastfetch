@@ -310,6 +310,8 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
         getShellVersionGeneric(exe, exeName, version);
 }
 
+bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
+
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     FF_UNUSED(instance);
@@ -377,6 +379,9 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);
+
+    ffStrbufInit(&result.terminalVersion);
+    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
     ffThreadMutexUnlock(&mutex);
     return &result;

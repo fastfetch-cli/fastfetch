@@ -263,6 +263,8 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     }
 }
 
+extern "C" bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
+
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     FF_UNUSED(instance);
@@ -301,6 +303,9 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getTerminalInfo(&result, ppid);
     if(result.terminalProcessName.length == 0)
         getTerminalFromEnv(&result);
+
+    ffStrbufInit(&result.terminalVersion);
+    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
 exit:
     ffThreadMutexUnlock(&mutex);
