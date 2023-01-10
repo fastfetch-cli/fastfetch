@@ -13,7 +13,7 @@ static int detectSysname(struct utsname *name)
 static int detectNodename(struct utsname *name)
 {
     DWORD bufSize = UTSNAME_MAXLENGTH - 1;
-    if(!GetComputerNameA(name->nodename, &bufSize))
+    if(!GetComputerNameExA(ComputerNameDnsFullyQualified, name->nodename, &bufSize))
         return 1;
     name->nodename[bufSize] = '\0';
     return 0;
