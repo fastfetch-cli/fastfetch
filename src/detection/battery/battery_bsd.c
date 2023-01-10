@@ -22,7 +22,7 @@ const char* ffDetectBatteryImpl(FF_UNUSED_PARAM FFinstance* instance, FFlist* re
     for(int i = 0; i < units; ++i)
     {
         union acpi_battery_ioctl_arg battio;
-        battio.unit = 0;
+        battio.unit = i;
 
         if(ioctl(acpifd, ACPIIO_BATT_GET_BATTINFO, &battio) < 0 || (battio.battinfo.state & ACPI_BATT_STAT_NOT_PRESENT))
             continue;
