@@ -13,6 +13,7 @@ Features:
 * Add `--list-data-paths` option which list search paths for presets and logos
 * Add `Brightness` module support
 * Add `Battery` module support for FreeBSD
+* Add `--disk-show-unknown` option for Disk module
 
 Logos:
 * Raspbian (@IamNoRobot, #373)

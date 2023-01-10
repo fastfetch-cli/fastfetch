@@ -135,6 +135,9 @@ static void printAutodetected(FFinstance* instance, const FFlist* disks)
         if(disk->type == FF_DISK_TYPE_HIDDEN && !instance->config.diskShowHidden)
             continue;
 
+        if(disk->bytesTotal == 0 && !instance->config.diskShowUnknown)
+            continue;
+
         printDisk(instance, disk);
     }
 }

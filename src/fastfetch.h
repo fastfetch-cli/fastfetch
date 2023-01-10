@@ -180,6 +180,7 @@ typedef struct FFconfig
     FFstrbuf diskFolders;
     bool diskShowRemovable;
     bool diskShowHidden;
+    bool diskShowUnknown;
 
     FFstrbuf batteryDir;
 

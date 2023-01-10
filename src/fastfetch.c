@@ -1254,6 +1254,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowRemovable = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-show-hidden") == 0)
         instance->config.diskShowHidden = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disk-show-unknown") == 0)
+        instance->config.diskShowUnknown = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)

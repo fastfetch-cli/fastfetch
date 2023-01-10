@@ -212,6 +212,31 @@
 # Default is auto.
 #--gl auto
 
+# Disk option
+# Sets if removable volume should be printed
+# Must be either true or false
+# Default is true.
+#--disk-show-removable true
+
+# Disk option
+# Sets if hidden volume should be printed
+# Must be either true or false
+# Default is false.
+#--disk-show-hidden false
+
+# Disk option
+# Sets if unknown (unable to detect sizes) volume should be printed
+# Must be either true or false
+# Default is false.
+#--disk-show-unknown false
+
+# Disk option
+# A colon (semicolon on Windows) separated list of folder paths for the disk output
+# This option override `--disk-show-*` options above
+# Must be a string
+# Default is "/:/home" ("C:\\;D:\\ ..." on Windows).
+#--disk-folders /:/home
+
 # Percentage output type option
 # Applies to all modules that prints percentage values. Currently memory, swap, disk, battery and CPU usage are supported.
 # Only works with default format ( without --module-format option ).

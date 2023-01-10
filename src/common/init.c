@@ -320,6 +320,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.diskFolders, 0);
     instance->config.diskShowRemovable = true;
     instance->config.diskShowHidden = false;
+    instance->config.diskShowUnknown = false;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
