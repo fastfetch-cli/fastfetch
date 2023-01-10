@@ -424,7 +424,6 @@ elseif(APPLE)
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_apple.c
-        src/detection/battery/battery_bsd.c
         src/detection/bios/bios_apple.c
         src/detection/board/board_nosupport.c
         src/detection/brightness/brightness_apple.c
