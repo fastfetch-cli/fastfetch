@@ -1,5 +1,7 @@
 #include "fastfetch.h"
+#include "common/io.h"
 #include "common/processing.h"
+#include "common/properties.h"
 
 #ifdef _WIN32
 
@@ -186,6 +188,25 @@ FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* v
     return getExeVersionGeneral(exe, version);
 }
 
+#ifdef _WIN32
+
+static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY buildInfoPath;
+    ffStrbufInitNS(&buildInfoPath, ffStrbufLastIndexC(exe, '\\') + 1, exe->chars);
+    ffStrbufAppendS(&buildInfoPath, "BuildInfo.xml");
+
+    if(ffParsePropFile(buildInfoPath.chars, "StoreVersion=\"", version))
+    {
+        ffStrbufTrimRight(version, '"');
+        return true;
+    }
+
+    return getFileVersion(exe->chars, version);
+}
+
+#endif
+
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef __ANDROID__
@@ -208,6 +229,13 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "deepin-terminal"))
         return getExeVersionGeneral(exe, version);//deepin-terminal 5.4.36
+
+    #endif
+
+    #ifdef _WIN32
+
+    if(ffStrbufIgnCaseEqualS(processName, "WindowsTerminal.exe"))
+        return getTerminalVersionWindowsTerminal(exe, version);
 
     #endif
 
