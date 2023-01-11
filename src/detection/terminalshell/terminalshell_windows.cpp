@@ -218,6 +218,8 @@ static uint32_t getTerminalInfo(const FFinstance* instance, FFTerminalShellResul
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
     else if(ffStrbufStartsWithIgnCaseS(&result->terminalPrettyName, "ConEmuC"))
         ffStrbufSetS(&result->terminalPrettyName, "ConEmu");
+    else if(ffStrbufEqualS(&result->terminalPrettyName, "wezterm-gui"))
+        ffStrbufInitS(&result->terminalPrettyName, "WezTerm");
 
     return ppid;
 }

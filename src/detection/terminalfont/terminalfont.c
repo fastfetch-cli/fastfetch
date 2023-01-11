@@ -356,7 +356,7 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
         detectAlacritty(instance, terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0)
         detectKitty(instance, terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wezterm-gui") == 0)
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
         detectWezterm(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
