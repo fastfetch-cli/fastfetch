@@ -156,15 +156,18 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
     return ok;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("TERMUX_VERSION"));
+    return true;
+}
+
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef __ANDROID__
 
     if(ffStrbufEqualS(processName, "Termux"))
-    {
-        ffStrbufSetS(version, getenv("TERMUX_VERSION"));
-        return true;
-    }
+        return getTerminalVersionTermux(version);
 
     #endif
 
