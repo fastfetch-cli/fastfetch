@@ -37,7 +37,7 @@ static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* te
     ffStrbufDestroy(&fontSize);
 }
 
-static void detectTTY(FFTerminalFontResult* terminalFont)
+FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 {
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
@@ -291,7 +291,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 #endif
 #endif //defined(_WIN32) || defined(__linux__)
 
-static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
+FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
 {
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
@@ -354,17 +354,20 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
 {
     if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "alacritty"))
         detectAlacritty(instance, terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0)
-        detectKitty(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
         detectWezterm(instance, terminalFont);
+
+    #ifndef _WIN32
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
+        detectKitty(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
+    #endif
 
     #if defined(_WIN32) || defined(__linux__)
     //Used by both Linux (WSL) and Windows
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Windows Terminal") == 0 ||
-        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WindowsTerminal.exe") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "Windows Terminal") ||
+        ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "WindowsTerminal.exe"))
         detectFromWindowsTeriminal(instance, &terminalShell->terminalExe, terminalFont);
     #endif
 
