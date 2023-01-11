@@ -310,8 +310,6 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCase(const FFstrbuf* strbuf
     return ffStrbufEndsWithIgnCaseNS(strbuf, end->length, end->chars);
 }
 
-#if defined(_WIN32) || defined(__APPLE__)
-    #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
-#endif
+#define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
 
 #endif

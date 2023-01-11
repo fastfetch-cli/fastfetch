@@ -51,8 +51,6 @@ static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void
         itemVarName - (itemType*)(listVar).data < (listVar).length; \
         ++itemVarName)
 
-#if defined(_WIN32) || defined(__APPLE__)
-    #define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
-#endif
+#define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
 
 #endif
