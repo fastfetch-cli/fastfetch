@@ -177,6 +177,9 @@ typedef struct FFconfig
 
     bool titleFQDN;
 
+    bool shellVersion;
+    bool terminalVersion;
+
     FFstrbuf diskFolders;
     bool diskShowRemovable;
     bool diskShowHidden;

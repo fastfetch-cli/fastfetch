@@ -315,6 +315,9 @@ static void defaultConfig(FFinstance* instance)
     instance->config.gpuTemp = false;
     instance->config.batteryTemp = false;
 
+    instance->config.shellVersion = true;
+    instance->config.terminalVersion = true;
+
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);

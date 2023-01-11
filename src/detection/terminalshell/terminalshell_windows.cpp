@@ -132,7 +132,8 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     }
 
     ffStrbufClear(&result->shellVersion);
-    fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
+    if(instance->config.shellVersion)
+        fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
 
     if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "pwsh"))
         ffStrbufSetS(&result->shellPrettyName, "PowerShell");
@@ -305,7 +306,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         getTerminalFromEnv(&result);
 
     ffStrbufInit(&result.terminalVersion);
-    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
+    if(instance->config.terminalVersion)
+        fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
 exit:
     ffThreadMutexUnlock(&mutex);
