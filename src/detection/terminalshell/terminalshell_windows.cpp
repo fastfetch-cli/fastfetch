@@ -99,7 +99,7 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
 
 extern "C" bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
-static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
+static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
@@ -128,7 +128,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufClear(&result->shellPrettyName);
         ffStrbufClear(&result->shellExe);
         result->shellExeName = nullptr;
-        return getShellInfo(result, ppid);
+        return getShellInfo(instance, result, ppid);
     }
 
     ffStrbufClear(&result->shellVersion);
@@ -176,7 +176,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     return ppid;
 }
 
-static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
+static uint32_t getTerminalInfo(const FFinstance* instance, FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
@@ -202,7 +202,7 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufClear(&result->terminalPrettyName);
         ffStrbufClear(&result->terminalExe);
         result->terminalExeName = "";
-        return getTerminalInfo(result, ppid);
+        return getTerminalInfo(instance, result, ppid);
     }
 
     if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "WindowsTerminal"))
@@ -300,8 +300,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     if(!getProcessInfo(0, &ppid, nullptr, nullptr, nullptr))
         goto exit;
 
-    ppid = getShellInfo(&result, ppid);
-    getTerminalInfo(&result, ppid);
+    ppid = getShellInfo(instance, &result, ppid);
+    getTerminalInfo(instance, &result, ppid);
     if(result.terminalProcessName.length == 0)
         getTerminalFromEnv(&result);
 
