@@ -320,6 +320,34 @@ static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result
     return true;
 }
 
+static bool detectWezterm(FF_UNUSED_PARAM const FFinstance* instance, FFTerminalFontResult* result)
+{
+    FF_STRBUF_AUTO_DESTROY fontName;
+    ffStrbufInit(&fontName);
+
+    ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){
+        "wezterm",
+        "ls-fonts",
+        "--text",
+        "a",
+        NULL
+    }));
+    if(result->error.length)
+        return false;
+
+    //LeftToRight
+    // 0 a    \u{61}       x_adv=7  cells=1  glyph=a,180  wezterm.font("JetBrains Mono", {weight="Regular", stretch="Normal", style="Normal"})
+    //                                      <built-in>, BuiltIn
+    ffStrbufSubstrAfterFirstC(&fontName, '"');
+    ffStrbufSubstrBeforeFirstC(&fontName, '"');
+
+    if(!fontName.length)
+        return false;
+
+    ffFontInitCopy(&result->font, fontName.chars);
+    return true;
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
 static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
@@ -328,6 +356,8 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
         detectAlacritty(instance, terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0)
         detectKitty(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wezterm-gui") == 0)
+        detectWezterm(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
 

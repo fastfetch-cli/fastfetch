@@ -375,6 +375,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
         ffStrbufInitS(&result.terminalPrettyName, "Warp");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
+        ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
     else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else
