@@ -21,7 +21,7 @@
 
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
-#define FF_UNUSED_PARAM __attribute__ ((__unused__))
+#define FF_MAYBE_UNUSED __attribute__ ((__unused__))
 
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 

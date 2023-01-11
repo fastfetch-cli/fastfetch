@@ -3,7 +3,7 @@
 
 #include <dirent.h>
 
-const char* ffDetectBrightness(FF_UNUSED_PARAM FFlist* result)
+const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
 {
     //https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight
     const char* backlightDirPath = "/sys/class/backlight/";

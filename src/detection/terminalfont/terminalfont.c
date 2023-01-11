@@ -320,7 +320,7 @@ static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result
     return true;
 }
 
-static bool detectWezterm(FF_UNUSED_PARAM const FFinstance* instance, FFTerminalFontResult* result)
+static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY fontName;
     ffStrbufInit(&fontName);

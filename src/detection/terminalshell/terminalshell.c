@@ -156,7 +156,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
     return ok;
 }
 
-bool fftsGetTerminalVersion(FFstrbuf* processName, FF_UNUSED_PARAM FFstrbuf* exe, FFstrbuf* version)
+bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef __ANDROID__
 
