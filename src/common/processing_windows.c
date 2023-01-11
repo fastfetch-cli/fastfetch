@@ -4,7 +4,6 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
-//We can't use this native version yet because we still use POSIX path ( eg /usr/bin/fish ) at a lot of places.
 const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
 {
     SECURITY_ATTRIBUTES saAttr = {
