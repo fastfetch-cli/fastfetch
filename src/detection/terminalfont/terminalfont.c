@@ -352,7 +352,7 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
 
 static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
-    if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "alacritty") == 0)
+    if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "alacritty"))
         detectAlacritty(instance, terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0)
         detectKitty(instance, terminalFont);
