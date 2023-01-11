@@ -176,6 +176,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
     return true;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    })) return false;
+
+    //kitty 0.21.2 created by Kovid Goyal
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef __ANDROID__
@@ -189,6 +203,13 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "gnome-terminal-"))
         return getTerminalVersionGnome(version);
+
+    #endif
+
+    #ifndef _WIN32
+
+    if(ffStrbufIgnCaseEqualS(processName, "kitty"))
+        return getTerminalVersionKitty(exe, version);
 
     #endif
 
