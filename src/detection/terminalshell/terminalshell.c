@@ -205,6 +205,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* v
     return true;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionXfce4(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    })) return false;
+
+    //xfce4-terminal 1.0.4 (Xfce 4.18)...
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 FF_MAYBE_UNUSED static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
     if(ffProcessAppendStdOut(version, (char* const[]){
@@ -235,6 +249,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "konsole"))
         return getTerminalVersionKonsole(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
+        return getTerminalVersionXfce4(exe, version);
 
     #endif
 
