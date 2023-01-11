@@ -176,6 +176,35 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
     return true;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* version)
+{
+    const char* konsoleVersion = getenv("KONSOLE_VERSION");
+    if(konsoleVersion)
+    {
+        //221201
+        long major = strtol(konsoleVersion, NULL, 10);
+        if (major >= 0)
+        {
+            long patch = major % 100;
+            major /= 100;
+            long minor = major % 100;
+            major /= 100;
+            ffStrbufSetF(version, "%ld.%ld.%ld", major, minor, patch);
+            return true;
+        }
+    }
+
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    })) return false;
+
+    //konsole 22.12.1
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return true;
+}
+
 FF_MAYBE_UNUSED static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
     if(ffProcessAppendStdOut(version, (char* const[]){
@@ -203,6 +232,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "gnome-terminal-"))
         return getTerminalVersionGnome(version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "konsole"))
+        return getTerminalVersionKonsole(exe, version);
 
     #endif
 
