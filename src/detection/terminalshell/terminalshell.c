@@ -205,6 +205,16 @@ static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
     return getFileVersion(exe->chars, version);
 }
 
+static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("ConEmuBuild"));
+
+    if(version->length)
+        return true;
+
+    return getFileVersion(exe->chars, version);
+}
+
 #endif
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
@@ -236,6 +246,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "WindowsTerminal.exe"))
         return getTerminalVersionWindowsTerminal(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "ConEmuC"))
+        return getTerminalVersionConEmu(exe, version);
 
     #endif
 
