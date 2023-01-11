@@ -645,7 +645,6 @@ if(ENABLE_THREADS)
     endif()
 endif()
 
-
 if(ENABLE_BUFFER)
     target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
 endif()
@@ -719,6 +718,11 @@ target_compile_definitions(flashfetch
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c
+    target_compile_definitions(fastfetch PRIVATE FF_ENABLE_BUFFER)
+    target_compile_definitions(flashfetch PRIVATE FF_ENABLE_BUFFER)
+endif()
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

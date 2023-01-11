@@ -1482,6 +1482,10 @@ int main(int argc, const char** argv)
 
     ffStart(&instance);
 
+    #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+        fflush(stdout);
+    #endif
+
     //Parse the structure and call the modules
     uint32_t startIndex = 0;
     while (startIndex < data.structure.length)
