@@ -259,6 +259,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #endif
 
+    if(ffStrbufStartsWithIgnCaseS(processName, "alacritty"))
+        return getExeVersionGeneral(exe, version);
+
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)
     {
