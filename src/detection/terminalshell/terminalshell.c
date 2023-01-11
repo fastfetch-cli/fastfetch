@@ -162,12 +162,33 @@ FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
     return true;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        "gnome-terminal",
+        "--version",
+        NULL
+    })) return false;
+
+    //# GNOME Terminal 3.46.7 using VTE 0.70.2 +BIDI +GNUTLS +ICU +SYSTEMD
+    ffStrbufSubstrAfterFirstS(version, "Terminal ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef __ANDROID__
 
     if(ffStrbufEqualS(processName, "Termux"))
         return getTerminalVersionTermux(version);
+
+    #endif
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+
+    if(ffStrbufIgnCaseEqualS(processName, "gnome-terminal-"))
+        return getTerminalVersionGnome(version);
 
     #endif
 
