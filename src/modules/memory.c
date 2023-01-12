@@ -52,11 +52,13 @@ static void printMemory(FFinstance* instance, const char* name, const FFModuleAr
                 ffStrbufAppendC(&str, ' ');
             }
 
-            ffStrbufAppendF(&str, "%s / %s", usedPretty.chars, totalPretty.chars);
+            if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
             if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffStrbufAppendF(&str, " (%u%%)", percentage);
+                ffStrbufAppendF(&str, str.length > 0 ? "(%u%%)" : "%u%%", percentage);
 
+            ffStrbufTrimRight(&str, ' ');
             ffStrbufPutTo(&str, stdout);
             ffStrbufDestroy(&str);
         }
