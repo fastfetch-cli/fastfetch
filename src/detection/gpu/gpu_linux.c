@@ -172,6 +172,7 @@ static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* dev
     //There is no straightforward way to detect the type of a GPU.
     //The approach taken here is to look at the memory sizes of the device.
     //Since integrated GPUs usually use the system ram, they don't have expansive ROMs
+    //and their memory sizes are usually smaller than 1GB.
 
     if(!(pci->ffpci_fill_info(device, PCI_FILL_SIZES) & PCI_FILL_SIZES))
     {
@@ -180,9 +181,22 @@ static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* dev
     }
 
     if(device->rom_size > 0)
+    {
         gpu->type = FF_GPU_TYPE_DISCRETE;
-    else
-        gpu->type = FF_GPU_TYPE_INTEGRATED;
+        return;
+    }
+
+    uint32_t numSizes = sizeof(device->size) / sizeof(device->size[0]);
+    for(uint32_t i = 0; i < numSizes; i++)
+    {
+        if(device->size[i] > 1024 * 1024 * 1024) //1GB
+        {
+            gpu->type = FF_GPU_TYPE_INTEGRATED;
+            return;
+        }
+    }
+
+    gpu->type = FF_GPU_TYPE_INTEGRATED;
 }
 
 static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData* pci, struct pci_dev* device)
