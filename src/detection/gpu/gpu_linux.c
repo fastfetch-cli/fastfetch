@@ -189,9 +189,9 @@ static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* dev
     uint32_t numSizes = sizeof(device->size) / sizeof(device->size[0]);
     for(uint32_t i = 0; i < numSizes; i++)
     {
-        if(device->size[i] > 1024 * 1024 * 1024) //1GB
+        if(device->size[i] >= 1024 * 1024 * 1024) //1GB
         {
-            gpu->type = FF_GPU_TYPE_INTEGRATED;
+            gpu->type = FF_GPU_TYPE_DISCRETE;
             return;
         }
     }
