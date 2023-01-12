@@ -190,6 +190,11 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         ffStrbufInit(&gpu->name);
         ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
 
+        if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU)
+            gpu->type = FF_GPU_TYPE_INTEGRATED;
+        else
+            gpu->type = FF_GPU_TYPE_DISCRETE;
+
         //No way to detect those using vulkan
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->driver);

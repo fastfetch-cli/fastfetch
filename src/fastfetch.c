@@ -288,12 +288,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "gpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("gpu", "{} {}", 5,
+        constructAndPrintCommandHelpFormat("gpu", "{} {}", 6,
             "GPU vendor",
             "GPU name",
             "GPU driver",
             "GPU temperature",
-            "GPU core count"
+            "GPU core count",
+            "GPU type"
         );
     }
     else if(strcasecmp(command, "memory-format") == 0)
@@ -1246,6 +1247,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.gpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-temp") == 0)
         instance->config.batteryTemp = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
+        instance->config.gpuHideIntegrated = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-hide-discrete") == 0)
+        instance->config.gpuHideDiscrete = optionParseBoolean(value);
     else if(strcasecmp(key, "--title-fqdn") == 0)
         instance->config.titleFQDN = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)

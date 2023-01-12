@@ -315,6 +315,9 @@ static void defaultConfig(FFinstance* instance)
     instance->config.gpuTemp = false;
     instance->config.batteryTemp = false;
 
+    instance->config.gpuHideIntegrated = false;
+    instance->config.gpuHideDiscrete = false;
+
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);

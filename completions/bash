@@ -191,6 +191,8 @@ __fastfetch_completion()
         "--escape-bedrock"
         "--disk-show-removable"
         "--disk-show-hidden"
+        "--gpu-hide-integrated"
+        "--gpu-hide-discrete"
     )
 
     local FF_OPTIONS_STRING=(

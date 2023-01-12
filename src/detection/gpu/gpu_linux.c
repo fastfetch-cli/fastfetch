@@ -61,7 +61,7 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     u8 revId;
-    bool revIdSet = false;;
+    bool revIdSet = false;
 
     #if PCI_LIB_VERSION >= 0x030800
         revIdSet = pci->ffpci_fill_info(device, PCI_FILL_CLASS_EXT) & PCI_FILL_CLASS_EXT;
@@ -167,6 +167,24 @@ static void pciDetectTemperatur(const FFinstance* instance, FFGPUResult* gpu, st
     }
 }
 
+static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* device)
+{
+    //There is no straightforward way to detect the type of a GPU.
+    //The approach taken here is to look at the memory sizes of the device.
+    //Since integrated GPUs usually use the system ram, they don't have expansive ROMs
+
+    if(!(pci->ffpci_fill_info(device, PCI_FILL_SIZES) & PCI_FILL_SIZES))
+    {
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+        return;
+    }
+
+    if(device->rom_size > 0)
+        gpu->type = FF_GPU_TYPE_DISCRETE;
+    else
+        gpu->type = FF_GPU_TYPE_INTEGRATED;
+}
+
 static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData* pci, struct pci_dev* device)
 {
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
@@ -175,7 +193,9 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     pci->ffpci_lookup_name(pci->access, class, sizeof(class) - 1, PCI_LOOKUP_CLASS, device->device_class);
 
     if(
+        //https://pci-ids.ucw.cz/read/PD/03
         strcasecmp("VGA compatible controller", class) != 0 &&
+        strcasecmp("XGA compatible controller", class) != 0 &&
         strcasecmp("3D controller", class)             != 0 &&
         strcasecmp("Display controller", class)        != 0
     ) return;
@@ -192,6 +212,8 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
 
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
+
+    detectType(gpu, pci, device);
 
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 

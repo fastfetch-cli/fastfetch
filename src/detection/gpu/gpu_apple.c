@@ -59,6 +59,8 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         FFGPUResult* gpu = ffListAdd(gpus);
 
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+
         ffStrbufInitA(&gpu->vendor, 0);
 
         ffStrbufInit(&gpu->driver);

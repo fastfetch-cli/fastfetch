@@ -12,8 +12,16 @@
 #define FF_GPU_VENDOR_NAME_INTEL "Intel"
 #define FF_GPU_VENDOR_NAME_NVIDIA "NVIDIA"
 
+typedef enum FFGpuType
+{
+    FF_GPU_TYPE_INTEGRATED,
+    FF_GPU_TYPE_DISCRETE,
+    FF_GPU_TYPE_UNKNOWN
+} FFGpuType;
+
 typedef struct FFGPUResult
 {
+    FFGpuType type;
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;

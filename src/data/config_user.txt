@@ -212,6 +212,13 @@
 # Default is auto.
 #--gl auto
 
+# GPU hide options
+# Sets weather to hide certain gpu types
+# Must be either true or false
+# Default is false.
+#--gpu-hide-integrated
+#--gpu-hide-discrete
+
 # Disk option
 # Sets if removable volume should be printed
 # Must be either true or false

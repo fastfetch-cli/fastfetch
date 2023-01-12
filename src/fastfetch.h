@@ -175,6 +175,9 @@ typedef struct FFconfig
     bool gpuTemp;
     bool batteryTemp;
 
+    bool gpuHideIntegrated;
+    bool gpuHideDiscrete;
+
     bool titleFQDN;
 
     FFstrbuf diskFolders;

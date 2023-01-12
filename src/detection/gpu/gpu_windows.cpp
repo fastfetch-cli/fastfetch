@@ -26,6 +26,8 @@ static const char* detectWithDxgi(FFlist* gpus)
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
 
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+
         if(wmemchr((const wchar_t[]) {0x1002, 0x1022}, (wchar_t)desc.VendorId, 2))
             ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
         else if(wmemchr((const wchar_t[]) {0x03e7, 0x8086, 0x8087}, (wchar_t)desc.VendorId, 3))
@@ -64,6 +66,8 @@ static const char* detectWithWmi(FFlist* gpus)
     while(FFWmiRecord record = query.next())
     {
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
 
         ffStrbufInit(&gpu->vendor);
         record.getString(L"AdapterCompatibility", &gpu->vendor);
