@@ -6,8 +6,11 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-const char* ffDetectBatteryImpl(FF_UNUSED_PARAM FFinstance* instance, FFlist* results)
+const char* ffDetectBatteryImpl(FF_MAYBE_UNUSED FFinstance* instance, FFlist* results)
 {
+    //https://www.freebsd.org/cgi/man.cgi?acpi_battery(4)
+    //https://gitlab.xfce.org/panel-plugins/xfce4-battery-plugin/-/blob/master/panel-plugin/libacpi.c
+
     int acpifd = open("/dev/acpi", O_RDONLY);
     if(acpifd < 0)
         return "open(\"/dev/acpi\", O_RDONLY) failed";

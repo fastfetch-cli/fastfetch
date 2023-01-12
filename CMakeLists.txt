@@ -102,6 +102,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 if(WIN32)
     set(CMAKE_CXX_STANDARD 11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
 
 # Used for dlopen finding dylibs installed by homebrew
@@ -644,7 +645,6 @@ if(ENABLE_THREADS)
     endif()
 endif()
 
-
 if(ENABLE_BUFFER)
     target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
 endif()
@@ -718,6 +718,11 @@ target_compile_definitions(flashfetch
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c
+    target_compile_definitions(fastfetch PRIVATE FF_ENABLE_BUFFER)
+    target_compile_definitions(flashfetch PRIVATE FF_ENABLE_BUFFER)
+endif()
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

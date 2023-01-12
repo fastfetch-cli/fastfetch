@@ -318,6 +318,9 @@ static void defaultConfig(FFinstance* instance)
     instance->config.gpuHideIntegrated = false;
     instance->config.gpuHideDiscrete = false;
 
+    instance->config.shellVersion = true;
+    instance->config.terminalVersion = true;
+
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);

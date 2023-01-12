@@ -219,6 +219,18 @@
 #--gpu-hide-integrated
 #--gpu-hide-discrete
 
+# Shell option
+# Sets if shell version should be detected and printed
+# Must be either true or false
+# Default is true.
+#--shell-version true
+
+# Terminal option
+# Sets if terminal version should be detected and printed
+# Must be either true or false
+# Default is true.
+#--terminal-version true
+
 # Disk option
 # Sets if removable volume should be printed
 # Must be either true or false

@@ -310,6 +310,8 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
         getShellVersionGeneric(exe, exeName, version);
 }
 
+bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
+
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
     FF_UNUSED(instance);
@@ -350,12 +352,17 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 
     getTerminalFromEnv(&result);
     getUserShellFromEnv(instance, &result);
-    getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
-    if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
-        getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
-    else
-        ffStrbufSet(&result.userShellVersion, &result.shellVersion);
+    ffStrbufClear(&result.shellVersion);
+    if(instance->config.shellVersion)
+    {
+        getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
+
+        if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
+            getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
+        else
+            ffStrbufSet(&result.userShellVersion, &result.shellVersion);
+    }
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
         ffStrbufInitS(&result.shellPrettyName, "PowerShell");
@@ -373,10 +380,17 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
         ffStrbufInitS(&result.terminalPrettyName, "Warp");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
+        ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
     else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);
+
+    ffStrbufInit(&result.terminalVersion);
+
+    if(instance->config.terminalVersion)
+        fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
     ffThreadMutexUnlock(&mutex);
     return &result;
