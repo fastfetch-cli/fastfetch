@@ -1,7 +1,7 @@
 #include "FFlist.h"
 
 #include <stdlib.h>
-#include <memory.h>
+#include <string.h>
 
 void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
 {
