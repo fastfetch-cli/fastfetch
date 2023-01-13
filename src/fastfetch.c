@@ -1301,6 +1301,20 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--percent-type") == 0)
         instance->config.percentType = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--command-shell") == 0)
+        optionParseString(key, value, &instance->config.commandShell);
+    else if(strcasecmp(key, "--command-key") == 0)
+    {
+        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandKeys);
+        ffStrbufInit(result);
+        optionParseString(key, value, result);
+    }
+    else if(strcasecmp(key, "--command-text") == 0)
+    {
+        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandTexts);
+        ffStrbufInit(result);
+        optionParseString(key, value, result);
+    }
 
     //////////////////
     //Unknown option//
@@ -1454,6 +1468,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOpenCL(instance);
     else if(strcasecmp(line, "users") == 0)
         ffPrintUsers(instance);
+    else if(strcasecmp(line, "command") == 0)
+        ffPrintCommand(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }

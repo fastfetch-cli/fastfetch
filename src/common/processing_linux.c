@@ -31,8 +31,8 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     //Parent
     close(pipes[1]);
     waitpid(childPid, NULL, 0);
-    ffAppendFDBuffer(pipes[0], buffer);
+    bool ok = ffAppendFDBuffer(pipes[0], buffer);
     close(pipes[0]);
 
-    return NULL;
+    return ok ? NULL : "ffAppendFDBuffer() failed";
 }
