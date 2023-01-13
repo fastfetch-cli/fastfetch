@@ -5,6 +5,7 @@
 #include "util/apple/cf_helpers.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
+#include <wchar.h>
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
@@ -61,7 +62,19 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         gpu->type = FF_GPU_TYPE_UNKNOWN;
 
-        ffStrbufInitA(&gpu->vendor, 0);
+        ffStrbufInit(&gpu->vendor);
+        int vendorId;
+        if(!ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId))
+        {
+            if(vendorId == 0x106b)
+                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
+            else if(wmemchr((const wchar_t[]) {0x1002, 0x1022}, (wchar_t)vendorId, 2))
+                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+            else if(wmemchr((const wchar_t[]) {0x03e7, 0x8086, 0x8087}, (wchar_t)vendorId, 3))
+                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+            else if(wmemchr((const wchar_t[]) {0x0955, 0x10de, 0x12d2}, (wchar_t)vendorId, 3))
+                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+        }
 
         ffStrbufInit(&gpu->driver);
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);
