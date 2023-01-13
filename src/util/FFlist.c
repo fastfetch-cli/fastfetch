@@ -1,6 +1,7 @@
 #include "FFlist.h"
 
 #include <stdlib.h>
+#include <memory.h>
 
 void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
 {
@@ -32,6 +33,27 @@ uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compF
     }
 
     return list->length;
+}
+
+bool ffListShift(FFlist* list, void* result)
+{
+    if(list->length == 0)
+        return false;
+
+    memcpy(result, list->data, list->elementSize);
+    memmove(list->data, list->data + list->elementSize, list->elementSize * (list->length - 1));
+    --list->length;
+    return true;
+}
+
+bool ffListPop(FFlist* list, void* result)
+{
+    if(list->length == 0)
+        return false;
+
+    memcpy(result, ffListGet(list, list->length - 1), list->elementSize);
+    --list->length;
+    return result;
 }
 
 void ffListDestroy(FFlist* list)
