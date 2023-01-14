@@ -239,6 +239,13 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
     ffStrbufDestroy(&wmProcessNameBuffer);
 }
 
+static void getBudgie(const FFinstance* instance, FFDisplayServerResult* result)
+{
+    ffStrbufSetS(&result->dePrettyName, "Budgie");
+    ffStrbufSetS(&result->deProcessName, "budgie-desktop");
+    ffParsePropFileData(instance, "budgie/budgie-version.xml", "<str>", &result->deVersion);
+}
+
 static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResult* result, const char* name)
 {
     if(!ffStrSet(name))
@@ -282,6 +289,13 @@ static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResul
         strcasecmp(name, "X-LXQT") == 0 ||
         strcasecmp(name, "lxqt-session") == 0
     ) getLXQt(instance, result);
+
+    else if(
+        strcasecmp(name, "Budgie") == 0 ||
+        strcasecmp(name, "X-Budgie") == 0 ||
+        strcasecmp(name, "budgie-desktop") == 0 ||
+        strcasecmp(name, "Budgie:GNOME") == 0
+    ) getBudgie(instance, result);
 }
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
