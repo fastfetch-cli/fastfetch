@@ -192,7 +192,9 @@ static void initState(FFstate* state)
     #else
         state->passwd = ffGetPasswd();
     #endif
-    uname(&state->utsname);
+
+    if(uname(&state->utsname) != 0)
+        memset(&state->utsname, 0, sizeof(struct utsname));
 
     initConfigDirs(state);
     initDataDirs(state);
