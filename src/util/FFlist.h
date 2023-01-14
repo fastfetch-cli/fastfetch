@@ -53,7 +53,7 @@ static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void
 #define FF_LIST_FOR_EACH(itemType, itemVarName, listVar) \
     assert(sizeof(itemType) == (listVar).elementSize); \
     for(itemType* itemVarName = (itemType*)(listVar).data; \
-        itemVarName - (itemType*)(listVar).data < (listVar).length; \
+        itemVarName - (itemType*)(listVar).data < (intptr_t)(listVar).length; \
         ++itemVarName)
 
 #define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
