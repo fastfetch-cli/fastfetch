@@ -83,7 +83,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
     else if(
         ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0 ||
         ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Unity") == 0 ||
-        fStrbufIgnCaseCompS(&wmde->dePrettyName, "Budgie") == 0
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Budgie") == 0
     ) {
         themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
