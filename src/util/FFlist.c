@@ -41,7 +41,7 @@ bool ffListShift(FFlist* list, void* result)
         return false;
 
     memcpy(result, list->data, list->elementSize);
-    memmove(list->data, list->data + list->elementSize, list->elementSize * (list->length - 1));
+    memmove(list->data, list->data + list->elementSize, (size_t) list->elementSize * (list->length - 1));
     --list->length;
     return true;
 }
