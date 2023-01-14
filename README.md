@@ -84,32 +84,32 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Bios, Board, Kernel, Uptime, Processes, Packages, Shell, Resolution, Brightness, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Swap, Disk, Battery, Power Adapter, Player, Media, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, Wifi, DateTime, Date, Time, Locale, Colors, Break, Custom
+Battery, Bios, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Resolution, Separator OS, Shell, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
 ```
 
 ##### Builtin logos
 ```
-AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Devuan, Deepin, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Parabola, Raspbian, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, Ubuntu, Vanilla, Void, Windows 11, Windows 8, Windows, Zorin
+AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Deepin, Devuan, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, Ubuntu, Vanilla, Void, Windows, Windows 11, Windows 8, Zorin
 ```
 
 ##### Package managers
 ```
-Pacman, dpkg, rpm, emerge, eopkg, xbps, nix, Flatpak, Snap, apk, pkg, brew, MacPorts, scoop, Chocolatey
+apk, brew, Chocolatey, dpkg, emerge, eopkg, Flatpak, MacPorts, nix, Pacman, pkg, rpm, scoop, Snap, xbps
 ```
 
 ##### WM themes
 ```
-KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS), DWM (Windows)
+DWM (Windows), KWin, Marco, Muffin, Mutter, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS), XFWM
 ```
 
 ##### DE versions
 ```
-KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
+Budgie, Cinnamon, Gnome, KDE Plasma, LXQt, Mate, XFCE4
 ```
 
 ##### Terminal fonts
 ```
-Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, Kitty, LXTerminal, Deepin Terminal, iTerm2, Apple Terminal, Warp, TTY, Windows Terminal, Termux, mintty, ConEmu, WezTerm
+Alacritty, Apple Terminal, ConEmu, Deepin Terminal, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, mintty, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
 ```
 
 ## Building
