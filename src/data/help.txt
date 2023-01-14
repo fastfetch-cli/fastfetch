@@ -126,6 +126,9 @@ Module specific options:
     --player-name:                  The name of the player to use
     --gl <value>:                   Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
     --percent-type <value>:         Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only. Default is 1
+    --command-shell <str>:          Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
+    --command-key <str>:            Set the module key to display, can be specified mulitple times
+    --command-text <str>:           Set the command text to be executed, can be specified mulitple times
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

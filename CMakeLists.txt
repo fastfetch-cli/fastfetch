@@ -263,6 +263,7 @@ set(LIBFASTFETCH_SRC
     src/modules/cpuUsage.c
     src/modules/cursor.c
     src/modules/custom.c
+    src/modules/command.c
     src/modules/date.c
     src/modules/datetime.c
     src/modules/de.c

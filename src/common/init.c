@@ -350,6 +350,18 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.playerName, 0);
 
     instance->config.percentType = 1;
+
+    ffStrbufInitS(&instance->config.commandShell,
+        #ifdef _WIN32
+        "cmd"
+        #elif defined(__FreeBSD__)
+        "csh"
+        #else
+        "bash"
+        #endif
+    );
+    ffListInit(&instance->config.commandKeys, sizeof(FFstrbuf));
+    ffListInit(&instance->config.commandTexts, sizeof(FFstrbuf));
 }
 
 void ffInitInstance(FFinstance* instance)
@@ -564,6 +576,14 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
     ffStrbufDestroy(&instance->config.osFile);
     ffStrbufDestroy(&instance->config.playerName);
+
+    ffStrbufDestroy(&instance->config.commandShell);
+    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandKeys)
+        ffStrbufDestroy(item);
+    ffListDestroy(&instance->config.commandKeys);
+    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandTexts)
+        ffStrbufDestroy(item);
+    ffListDestroy(&instance->config.commandTexts);
 }
 
 static void destroyState(FFinstance* instance)

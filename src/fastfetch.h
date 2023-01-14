@@ -208,6 +208,10 @@ typedef struct FFconfig
     FFstrbuf playerName;
 
     uint32_t percentType;
+
+    FFstrbuf commandShell;
+    FFlist commandKeys;
+    FFlist commandTexts;
 } FFconfig;
 
 typedef struct FFstate
@@ -314,5 +318,6 @@ void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
+void ffPrintCommand(FFinstance* instance);
 
 #endif
