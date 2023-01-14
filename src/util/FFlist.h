@@ -26,6 +26,11 @@ void* ffListAdd(FFlist* list);
 
 FF_C_NODISCARD uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
 
+// Removes the first element, and copy its value to `*result`
+bool ffListShift(FFlist* list, void* result);
+// Removes the last element, and copy its value to `*result`
+bool ffListPop(FFlist* list, void* result);
+
 void ffListDestroy(FFlist* list);
 
 static inline void ffListInit(FFlist* list, uint32_t elementSize)

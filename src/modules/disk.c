@@ -47,17 +47,22 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
                 ffAppendPercentBar(instance, &str, bytesPercentage, 0, 5, 8);
                 ffStrbufAppendC(&str, ' ');
             }
-            ffStrbufAppendF(&str, "%s / %s", usedPretty.chars, totalPretty.chars);
+
+            if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
             if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffStrbufAppendF(&str, " (%u%%)", bytesPercentage);
+            {
+                ffStrbufAppendF(&str, str.length > 0 ? "(%u%%) " : "%u%% ", bytesPercentage);
+            }
         }
         else
-            ffStrbufAppendS(&str, "Unknown");
+            ffStrbufAppendS(&str, "Unknown ");
 
-        if(disk->type == FF_DISK_TYPE_EXTERNAL)
-            ffStrbufAppendS(&str, " [Removable]");
+        if(disk->type == FF_DISK_TYPE_EXTERNAL && !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            ffStrbufAppendS(&str, "[Removable]");
 
+        ffStrbufTrimRight(&str, ' ');
         ffStrbufPutTo(&str, stdout);
         ffStrbufDestroy(&str);
     }

@@ -37,13 +37,13 @@ static void printGPUResult(FFinstance* instance, uint8_t index, const FFGPUResul
     }
     else
     {
-        FFstrbuf type;
+        const char* type;
         if(gpu->type == FF_GPU_TYPE_INTEGRATED)
-            ffStrbufInitS(&type, "Integrated");
+            type = "Integrated";
         else if(gpu->type == FF_GPU_TYPE_DISCRETE)
-            ffStrbufInitS(&type, "Discrete");
+            type = "Discrete";
         else
-            ffStrbufInitS(&type, "Unknown");
+            type = "Unknown";
 
         ffPrintFormat(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
@@ -51,10 +51,8 @@ static void printGPUResult(FFinstance* instance, uint8_t index, const FFGPUResul
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
             {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &type},
+            {FF_FORMAT_ARG_TYPE_STRING, type},
         });
-
-        ffStrbufDestroy(&type);
     }
 }
 

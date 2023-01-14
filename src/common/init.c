@@ -402,6 +402,10 @@ static void resetConsole()
 
     if(ffHideCursor)
         fputs("\033[?25h", stdout);
+
+    #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+        fflush(stdout);
+    #endif
 }
 
 #ifdef _WIN32
