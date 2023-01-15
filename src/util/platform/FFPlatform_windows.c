@@ -109,22 +109,25 @@ static void getDataDirs(FFPlatform* platform)
 static void getUserName(FFPlatform* platform)
 {
     ffStrbufEnsureFree(&platform->userName, 64);
-    GetUserNameA(platform->userName.chars, (LPDWORD) ffStrbufGetFree(&platform->userName));
-    ffStrbufRecalculateLength(&platform->userName);
+    DWORD len = (DWORD) ffStrbufGetFree(&platform->userName);
+    if(GetUserNameA(platform->userName.chars, &len))
+        platform->userName.length = (uint32_t) len;
 }
 
 static void getHostName(FFPlatform* platform)
 {
     ffStrbufEnsureFree(&platform->hostName, 64);
-    GetComputerNameA(platform->hostName.chars, (LPDWORD) ffStrbufGetFree(&platform->hostName));
-    ffStrbufRecalculateLength(&platform->hostName);
+    DWORD len = (DWORD) ffStrbufGetFree(&platform->hostName);
+    if(GetComputerNameExA(ComputerNameDnsHostname, platform->hostName.chars, &len))
+        platform->hostName.length = (uint32_t) len;
 }
 
 static void getDomainName(FFPlatform* platform)
 {
     ffStrbufEnsureFree(&platform->domainName, 64);
-    GetComputerNameExA(ComputerNameDnsDomain, platform->domainName.chars, (LPDWORD) ffStrbufGetFree(&platform->domainName));
-    ffStrbufRecalculateLength(&platform->domainName);
+    DWORD len = (DWORD) ffStrbufGetFree(&platform->domainName);
+    if(GetComputerNameExA(ComputerNameDnsDomain, platform->domainName.chars, &len))
+        platform->domainName.length = (uint32_t) len;
 }
 
 static void getSystemName(FFPlatform* platform)
@@ -171,8 +174,9 @@ static void getSystemReleaseAndVersion(FFPlatform* platform)
     ffStrbufAppendF(&platform->systemRelease, "%s.%s.%u", currentVersion, currentBuildNumber, (unsigned)ubr);
 
     ffStrbufEnsureFree(&platform->systemVersion, 256);
-    RegGetValueA(hKey, NULL, "DisplayVersion", RRF_RT_REG_SZ, NULL, platform->systemVersion.chars, (LPDWORD) ffStrbufGetFree(&platform->systemVersion));
-    ffStrbufRecalculateLength(&platform->systemVersion);
+    bufSize = (DWORD) ffStrbufGetFree(&platform->systemVersion);
+    if(RegGetValueA(hKey, NULL, "DisplayVersion", RRF_RT_REG_SZ, NULL, platform->systemVersion.chars, &bufSize) == ERROR_SUCCESS)
+        platform->systemVersion.length = (uint32_t) bufSize;
 
     RegCloseKey(hKey);
 }
