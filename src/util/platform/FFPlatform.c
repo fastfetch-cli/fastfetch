@@ -66,6 +66,11 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&platform->hostName);
     ffStrbufDestroy(&platform->domainName);
     ffStrbufDestroy(&platform->userShell);
+
+    ffStrbufDestroy(&platform->systemArchitecture);
+    ffStrbufDestroy(&platform->systemName);
+    ffStrbufDestroy(&platform->systemRelease);
+    ffStrbufDestroy(&platform->systemVersion);
 }
 
 void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path)
