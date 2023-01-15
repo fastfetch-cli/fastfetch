@@ -28,7 +28,7 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
 static void detectScoop(const FFinstance* instance, FFPackagesResult* result)
 {
     char scoopPath[MAX_PATH + 3];
-    strcpy(scoopPath, instance->state.passwd->pw_dir);
+    strcpy(scoopPath, instance->state.platform.homeDir.chars);
     strncat(scoopPath, "/scoop/apps/*", sizeof(scoopPath) - 1 - strlen(scoopPath));
     result->scoop = getNumElements(scoopPath, FILE_ATTRIBUTE_DIRECTORY);
     if(result->scoop > 0)

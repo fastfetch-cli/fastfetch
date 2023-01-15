@@ -113,7 +113,7 @@ static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
     ffStrbufAppendS(&platform->userShell, shell);
 }
 
-void ffPlatformInitÎmpl(FFPlatform* platform)
+void ffPlatformInitImpl(FFPlatform* platform)
 {
     struct passwd* pwd = getpwuid(getuid());
 

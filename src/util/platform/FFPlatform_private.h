@@ -5,7 +5,7 @@
 
 #include "FFPlatform.h"
 
-void ffPlatformInitÎmpl(FFPlatform* platform);
+void ffPlatformInitImpl(FFPlatform* platform);
 
 #define FF_PLATFORM_PATH_UNIQUE(list, element) \
     if(ffListFirstIndexComp(list, element, (bool(*)(const void*, const void*))ffStrbufEqual) < list->length - 1) \

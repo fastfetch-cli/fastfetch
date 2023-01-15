@@ -211,7 +211,7 @@ static void getSystemArchitecture(FFPlatform* platform)
     }
 }
 
-void ffPlatformInitÎmpl(FFPlatform* platform)
+void ffPlatformInitImpl(FFPlatform* platform)
 {
     getHomeDir(platform);
     getCacheDir(platform);

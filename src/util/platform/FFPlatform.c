@@ -17,7 +17,7 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->systemVersion);
     ffStrbufInit(&platform->systemArchitecture);
 
-    ffPlatformInitÎmpl(platform);
+    ffPlatformInitImpl(platform);
 
     if(platform->domainName.length == 0)
         ffStrbufAppend(&platform->domainName, &platform->hostName);
