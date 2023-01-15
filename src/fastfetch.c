@@ -651,20 +651,23 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
 
     //Try to load as a relative path
 
+    FFstrbuf absolutePath;
+    ffStrbufInitA(&absolutePath, 128);
+
     FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
-        uint32_t pathLength = path->length;
+        //We need to copy it, because if a config file loads a config file, the value of path must be unchanged
+        ffStrbufSet(&absolutePath, path);
+        ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
+        ffStrbufAppendS(&absolutePath, value);
 
-        ffStrbufAppendS(path, "fastfetch/presets/");
-        ffStrbufAppendS(path, value);
-
-        bool success = parseConfigFile(instance, data, path->chars);
-
-        ffStrbufSubstrBefore(path, pathLength);
+        bool success = parseConfigFile(instance, data, absolutePath.chars);
 
         if(success)
             return;
     }
+
+    ffStrbufDestroy(&absolutePath);
 
     //File not found
 
