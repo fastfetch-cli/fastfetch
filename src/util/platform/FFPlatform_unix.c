@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/utsname.h>
-#include <netdb.h>
 
 static void getHomeDir(FFPlatform* platform, const struct passwd* pwd)
 {
@@ -40,7 +39,7 @@ static void getConfigDirs(FFPlatform* platform)
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
 
     #if defined(__APPLE__)
-        pathsAddHome(&state->configDirs, state, "/Library/Preferences/");
+        ffPlatformPathAddHome(&state->configDirs, platform, "/Library/Preferences/");
     #endif
 
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
@@ -58,6 +57,11 @@ static void getDataDirs(FFPlatform* platform)
 {
     ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
+
+    #if defined(__APPLE__)
+        ffPlatformPathAddHome(&platform->dataDirs, platform, "/Library/Application Support/");
+    #endif
+
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
     ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR"/local/share/");
@@ -83,6 +87,8 @@ static void getHostName(FFPlatform* platform, const struct utsname* uts)
         ffStrbufAppendS(&platform->hostName, uts->nodename);
 }
 
+#ifdef __linux__
+#include <netdb.h>
 static void getDomainName(FFPlatform* platform)
 {
     struct addrinfo hints = {0};
@@ -103,6 +109,7 @@ static void getDomainName(FFPlatform* platform)
 
     freeaddrinfo(info);
 }
+#endif
 
 static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
 {

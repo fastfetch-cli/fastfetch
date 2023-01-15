@@ -11,9 +11,9 @@ static void getHomeDir(FFPlatform* platform)
     PWSTR pPath;
     if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_Profile, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
-        ffStrbufSetWS(&platform->home_dir, pPath);
-        ffStrbufReplaceAllC(&platform->home_dir, '\\', '/');
-        ffStrbufEnsureEndsWithC(&platform->home_dir, '/');
+        ffStrbufSetWS(&platform->homeDir, pPath);
+        ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
+        ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
     }
     CoTaskMemFree(pPath);
 }
@@ -23,18 +23,18 @@ static void getCacheDir(FFPlatform* platform)
     PWSTR pPath;
     if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
-        ffStrbufSetWS(&platform->cache_dir, pPath);
-        ffStrbufReplaceAllC(&platform->cache_dir, '\\', '/');
-        ffStrbufEnsureEndsWithC(&platform->cache_dir, '/');
+        ffStrbufSetWS(&platform->cacheDir, pPath);
+        ffStrbufReplaceAllC(&platform->cacheDir, '\\', '/');
+        ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
     }
     else
     {
-        ffStrbufAppend(&platform->cache_dir, &platform->home_dir);
-        ffStrbufAppendS(&platform->cache_dir, "AppData/Local/");
+        ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
+        ffStrbufAppendS(&platform->cacheDir, "AppData/Local/");
     }
     CoTaskMemFree(pPath);
 
-    ffStrbufAppendS(&platform->cache_dir, "fastfetch/");
+    ffStrbufAppendS(&platform->cacheDir, "fastfetch/");
 }
 
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
