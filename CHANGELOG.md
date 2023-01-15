@@ -1,5 +1,9 @@
 # dev
 
+Notable Changes:
+
+* With the support of Win32 platform, original Windows 64bit artifact file is renamed to Win64 to avoid possible confusion
+
 Features:
 * Bluetooth module
 * Sound module
@@ -7,6 +11,7 @@ Features:
 * Support colored percentage numbers output (#409)
 * Support `--localip-compact-type` option (#408)
 * Terminator terminal font detection (@Zerogiven, #415)
+* Windows 32bit compatibility
 
 Bugfixes:
 

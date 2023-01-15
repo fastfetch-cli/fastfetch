@@ -115,15 +115,15 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     CJSONData cjsonData;
 
     FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson"FF_LIBRARY_EXTENSION" failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Parse)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsObject)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsString)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetStringValue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsNumber)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetNumberValue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsArray)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Delete)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Parse, cJSON_Parse@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsObject, cJSON_IsObject@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive, cJSON_GetObjectItemCaseSensitive@8)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsString, cJSON_IsString@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetStringValue, cJSON_GetStringValue@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsNumber, cJSON_IsNumber@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetNumberValue, cJSON_GetNumberValue@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsArray, cJSON_IsArray@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Delete, cJSON_Delete@4)
 
     const char* error = NULL;
 

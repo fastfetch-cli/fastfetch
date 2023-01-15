@@ -40,6 +40,14 @@
         return returnValue; \
     }
 
+#define FF_LIBRARY_LOAD_SYMBOL_ADDRESS2(library, symbolMapping, symbolName, alternateName, returnValue) \
+    symbolMapping = dlsym(library, #symbolName); \
+    if(symbolMapping == NULL && !(symbolMapping = dlsym(library, #alternateName))) \
+    { \
+        dlclose(library); \
+        return returnValue; \
+    }
+
 #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, returnValue);
 
@@ -49,11 +57,17 @@
 #define FF_LIBRARY_LOAD_SYMBOL_MESSAGE(library, symbolName) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, "dlsym " #symbolName " failed");
 
+#define FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(library, symbolName, alternateName) \
+    __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS2(library, ff ## symbolName, symbolName, alternateName, "dlsym " #symbolName " failed");
+
 #define FF_LIBRARY_LOAD_SYMBOL_VAR(library, varName, symbolName, returnValue) \
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, varName.ff ## symbolName, symbolName, returnValue);
 
 #define FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(library, varName, symbolName) \
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, varName.ff ## symbolName, symbolName, "dlsym " #symbolName " failed");
+
+#define FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(library, varName, symbolName, alternateName) \
+    FF_LIBRARY_LOAD_SYMBOL_ADDRESS2(library, varName.ff ## symbolName, symbolName, alternateName, "dlsym " #symbolName " failed");
 
 #define FF_LIBRARY_LOAD_SYMBOL_PTR(library, varName, symbolName, returnValue) \
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, varName->ff ## symbolName, symbolName, returnValue);

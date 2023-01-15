@@ -46,11 +46,11 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
             "libvulkan"FF_LIBRARY_EXTENSION, 2, "vulkan-1"FF_LIBRARY_EXTENSION, -1
         #endif
     )
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkDestroyInstance)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkEnumeratePhysicalDevices)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetPhysicalDeviceProperties)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(vulkan, vkGetInstanceProcAddr, vkGetInstanceProcAddr@8)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(vulkan, vkCreateInstance, vkCreateInstance@12)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(vulkan, vkDestroyInstance, vkDestroyInstance@8)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(vulkan, vkEnumeratePhysicalDevices, vkEnumeratePhysicalDevices@12)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(vulkan, vkGetPhysicalDeviceProperties, vkGetPhysicalDeviceProperties@8)
 
     //Some drivers (nvdc) print messages to stdout
     //and thats the best way i found to disable that
