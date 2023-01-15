@@ -39,7 +39,7 @@ static void getConfigDirs(FFPlatform* platform)
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
 
     #if defined(__APPLE__)
-        ffPlatformPathAddHome(&state->configDirs, platform, "/Library/Preferences/");
+        ffPlatformPathAddHome(&platform->configDirs, platform, "/Library/Preferences/");
     #endif
 
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
@@ -135,7 +135,11 @@ void ffPlatformInitImpl(FFPlatform* platform)
 
     getUserName(platform, pwd);
     getHostName(platform, &uts);
-    getDomainName(platform);
+
+    #ifdef __linux__
+        getDomainName(platform);
+    #endif
+
     getUserShell(platform, pwd);
 
     ffStrbufAppendS(&platform->systemName, uts.sysname);

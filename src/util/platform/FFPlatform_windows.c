@@ -88,7 +88,7 @@ static void getConfigDirs(FFPlatform* platform)
     ffPlatformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
 }
 
-static void getConfigDirs(FFPlatform* platform)
+static void getDataDirs(FFPlatform* platform)
 {
     ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
     ffPlatformPathAddHome(&platform->dataDirs, platform, "/.local/share/");
@@ -185,25 +185,25 @@ static void getSystemArchitecture(FFPlatform* platform)
     switch(sysInfo.wProcessorArchitecture)
     {
         case PROCESSOR_ARCHITECTURE_AMD64:
-            strcpy(name->machine, "x86_64");
+            ffStrbufAppendS(&platform->systemArchitecture, "x86_64");
             break;
         case PROCESSOR_ARCHITECTURE_IA64:
-            strcpy(name->machine, "ia64");
+            ffStrbufAppendS(&platform->systemArchitecture, "ia64");
             break;
         case PROCESSOR_ARCHITECTURE_INTEL:
-            strcpy(name->machine, "x86");
+            ffStrbufAppendS(&platform->systemArchitecture, "i686");
             break;
         case PROCESSOR_ARCHITECTURE_ARM64:
-            strcpy(name->machine, "aarch64");
+            ffStrbufAppendS(&platform->systemArchitecture, "aarch64");
             break;
         case PROCESSOR_ARCHITECTURE_ARM:
-            strcpy(name->machine, "arm");
+            ffStrbufAppendS(&platform->systemArchitecture, "arm");
             break;
         case PROCESSOR_ARCHITECTURE_PPC:
-            strcpy(name->machine, "ppc");
+            ffStrbufAppendS(&platform->systemArchitecture, "ppc");
             break;
         case PROCESSOR_ARCHITECTURE_MIPS:
-            strcpy(name->machine, "mips");
+            ffStrbufAppendS(&platform->systemArchitecture, "mips");
             break;
         case PROCESSOR_ARCHITECTURE_UNKNOWN:
         default:
