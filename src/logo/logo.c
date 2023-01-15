@@ -205,7 +205,7 @@ static const FFlogo* logoGetBuiltin(const char* name)
     return NULL;
 }
 
-static const FFlogo* logoGetBuiltinDetected(FFinstance* instance)
+static const FFlogo* logoGetBuiltinDetected(const FFinstance* instance)
 {
     const FFOSResult* os = ffDetectOS(instance);
 
@@ -225,7 +225,7 @@ static const FFlogo* logoGetBuiltinDetected(FFinstance* instance)
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(os->systemName.chars);
+    logo = logoGetBuiltin(instance->state.platform.systemName.chars);
     if(logo != NULL)
         return logo;
 
@@ -293,7 +293,7 @@ static bool loadLogoFile(const FFinstance* instance, FFstrbuf* buffer)
     FFstrbuf fullPath;
     ffStrbufInit(&fullPath);
 
-    FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance->state.dataDirs)
+    FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance->state.platform.dataDirs)
     {
         //We need to copy it, because multiple threads might be using dataDirs at the same time
         ffStrbufSet(&fullPath, dataDir);

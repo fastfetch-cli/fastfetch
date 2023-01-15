@@ -245,7 +245,6 @@ set(LIBFASTFETCH_SRC
     src/detection/packages/packages.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
-    src/detection/title.c
     src/detection/vulkan.c
     src/logo/builtin.c
     src/logo/image/im6.c
@@ -303,6 +302,7 @@ set(LIBFASTFETCH_SRC
     src/util/FFlist.c
     src/util/FFstrbuf.c
     src/util/FFvaluestore.c
+    src/util/platform/FFPlatform.c
 )
 
 if(LINUX)
@@ -344,6 +344,7 @@ if(LINUX)
         src/detection/users/users_linux.c
         src/detection/wifi/wifi_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -378,6 +379,7 @@ elseif(ANDROID)
         src/detection/users/users_linux.c
         src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(BSD)
     list(APPEND LIBFASTFETCH_SRC
@@ -419,6 +421,7 @@ elseif(BSD)
         src/detection/users/users_linux.c
         src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -457,6 +460,7 @@ elseif(APPLE)
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
@@ -496,6 +500,7 @@ elseif(WIN32)
         src/util/windows/unicode.c
         src/util/windows/utsname.c
         src/util/windows/wmi.cpp
+        src/util/platform/FFPlatform_windows.c
     )
 endif()
 

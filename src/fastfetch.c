@@ -527,7 +527,7 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
 
 static inline void listAvailablePresets(FFinstance* instance)
 {
-    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.dataDirs)
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/presets/");
         listAvailablePresetsFromFolder(path, 0, NULL);
@@ -536,7 +536,7 @@ static inline void listAvailablePresets(FFinstance* instance)
 
 static void listConfigPaths(FFinstance* instance)
 {
-    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.configDirs)
+    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.configDirs)
     {
         ffStrbufAppendS(folder, "fastfetch/config.conf");
         printf("%s%s\n", folder->chars, ffFileExists(folder->chars, S_IFREG) ? " (*)" : "");
@@ -545,7 +545,7 @@ static void listConfigPaths(FFinstance* instance)
 
 static void listDataPaths(FFinstance* instance)
 {
-    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.dataDirs)
+    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.dataDirs)
     {
         ffStrbufAppendS(folder, "fastfetch/");
         puts(folder->chars);
@@ -619,7 +619,7 @@ static bool parseConfigFile(FFinstance* instance, FFdata* data, const char* path
 
 static void generateConfigFile(FFinstance* instance, bool force)
 {
-    FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance->state.configDirs, 0);
+    FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance->state.platform.configDirs, 0);
     // Paths generated in `init.c/initConfigDirs` end with `/`
     ffStrbufAppendS(filename, "fastfetch/config.conf");
 
@@ -651,7 +651,7 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
 
     //Try to load as a relative path
 
-    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.dataDirs)
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
         uint32_t pathLength = path->length;
 
@@ -1330,12 +1330,12 @@ error:
 
 static void parseConfigFiles(FFinstance* instance, FFdata* data)
 {
-    for(uint32_t i = instance->state.configDirs.length; i > 0; --i)
+    for(uint32_t i = instance->state.platform.configDirs.length; i > 0; --i)
     {
         if(!data->loadUserConfig)
             return;
 
-        FFstrbuf* dir = ffListGet(&instance->state.configDirs, i - 1);
+        FFstrbuf* dir = ffListGet(&instance->state.platform.configDirs, i - 1);
         uint32_t dirLength = dir->length;
 
         ffStrbufAppendS(dir, "fastfetch/config.conf");

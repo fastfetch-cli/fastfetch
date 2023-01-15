@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/title.h"
 #include "util/textModifier.h"
 
 static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
@@ -19,12 +18,13 @@ static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
 
 void ffPrintTitle(FFinstance* instance)
 {
-    const FFTitleResult* result = ffDetectTitle(instance);
-
     ffLogoPrintLine(instance);
 
-    printTitlePart(instance, &result->userName);
+    printTitlePart(instance, &instance->state.platform.userName);
     putchar('@');
-    printTitlePart(instance, instance->config.titleFQDN ? &result->fqdn : &result->hostname);
+    printTitlePart(instance, instance->config.titleFQDN ?
+        &instance->state.platform.domainName :
+        &instance->state.platform.hostName
+    );
     putchar('\n');
 }

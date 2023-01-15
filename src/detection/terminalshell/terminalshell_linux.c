@@ -261,10 +261,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
 
 static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResult* result)
 {
-    if(instance->state.passwd->pw_shell[0] != '\0')
-        ffStrbufAppendS(&result->userShellExe, instance->state.passwd->pw_shell);
-    else
-        ffStrbufAppendS(&result->userShellExe, getenv("SHELL"));
+    ffStrbufSet(&result->userShellExe, &instance->state.platform.userShell);
     if(result->userShellExe.length == 0)
         return;
 

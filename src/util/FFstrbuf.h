@@ -18,6 +18,8 @@
     #define strcasestr StrStrIA
 #endif
 
+bool ffStrSet(const char* str);
+
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
 typedef struct FFstrbuf

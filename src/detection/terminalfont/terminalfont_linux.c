@@ -149,7 +149,9 @@ static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResul
     ffStrbufInit(&fontSize);
 
     FFstrbuf profile;
-    ffStrbufInitF(&profile, "%s/.config/deepin/deepin-terminal/config.conf", instance->state.passwd->pw_dir);
+    ffStrbufInit(&profile);
+    ffStrbufAppend(&profile, &instance->state.platform.homeDir);
+    ffStrbufAppendS(&profile, ".config/deepin/deepin-terminal/config.conf"); //TODO: Use config dirs
     FILE* file = fopen(profile.chars, "r");
 
     if(file)

@@ -3,17 +3,6 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-bool ffStrSet(const char* str)
-{
-    if(str == NULL)
-        return false;
-
-    while(isspace(*str))
-        str++;
-
-    return *str != '\0';
-}
-
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch)
 {
     if(major->length > 0)

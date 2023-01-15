@@ -148,7 +148,7 @@ bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeF
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
-    ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
+    ffStrbufAppend(&absolutePath, &instance->state.platform.homeDir);
     ffStrbufAppendC(&absolutePath, '/');
     ffStrbufAppendS(&absolutePath, relativeFile);
 

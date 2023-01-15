@@ -691,20 +691,8 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
     requestData.logoPixelWidth = simpleCeil((double) instance->config.logo.width * requestData.characterPixelWidth);
     requestData.logoPixelHeight = simpleCeil((double) instance->config.logo.height * requestData.characterPixelHeight);
 
-    ffStrbufInitA(&requestData.cacheDir, PATH_MAX * 2);
-
-    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
-    ffStrbufAppendS(&requestData.cacheDir, getenv("XDG_CACHE_HOME"));
-    #endif
-
-    if(requestData.cacheDir.length == 0)
-    {
-        ffStrbufAppendS(&requestData.cacheDir, instance->state.passwd->pw_dir);
-        ffStrbufAppendS(&requestData.cacheDir, "/.cache/");
-    }
-    else
-        ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
-
+    ffStrbufInit(&requestData.cacheDir);
+    ffStrbufAppend(&requestData.cacheDir, &instance->state.platform.cacheDir);
     ffStrbufAppendS(&requestData.cacheDir, "fastfetch");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);

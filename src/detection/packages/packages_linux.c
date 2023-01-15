@@ -339,7 +339,7 @@ void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
             result->rpm = getRpmFromLibrpm(instance);
     #endif
 
-    ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
+    ffStrbufSet(&baseDir, &instance->state.platform.homeDir);
     result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
 
     ffStrbufDestroy(&baseDir);

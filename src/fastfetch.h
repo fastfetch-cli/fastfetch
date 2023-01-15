@@ -8,16 +8,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifndef _WIN32
-    #include <pwd.h>
-    #include <sys/utsname.h>
-#else
-    #include "util/windows/pwd.h"
-    #include "util/windows/utsname.h"
-#endif
-
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
+#include "util/platform/FFPlatform.h"
 
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
@@ -220,11 +213,7 @@ typedef struct FFstate
     uint32_t logoHeight;
     uint32_t keysHeight;
 
-    struct passwd* passwd;
-    struct utsname utsname;
-
-    FFlist configDirs; // List of FFstrbuf, trailing slash included
-    FFlist dataDirs;   // List of FFstrbuf, trailing slash included
+    FFPlatform platform;
 } FFstate;
 
 typedef struct FFinstance

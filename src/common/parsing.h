@@ -14,7 +14,6 @@ typedef struct FFVersion
 
 #define FF_VERSION_INIT ((FFVersion) {0})
 
-bool ffStrSet(const char* str);
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);
 

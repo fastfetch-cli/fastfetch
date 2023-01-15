@@ -34,7 +34,7 @@ static inline bool ffParsePropFileList(const FFlist* list, const char* relativeF
 
 static inline bool ffParsePropFileConfigValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
-    return ffParsePropFileListValues(&instance->state.configDirs, relativeFile, numQueries, queries);
+    return ffParsePropFileListValues(&instance->state.platform.configDirs, relativeFile, numQueries, queries);
 }
 
 static inline bool ffParsePropFileConfig(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
@@ -44,7 +44,7 @@ static inline bool ffParsePropFileConfig(const FFinstance* instance, const char*
 
 static inline bool ffParsePropFileDataValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
-    return ffParsePropFileListValues(&instance->state.dataDirs, relativeFile, numQueries, queries);
+    return ffParsePropFileListValues(&instance->state.platform.dataDirs, relativeFile, numQueries, queries);
 }
 
 static inline bool ffParsePropFileData(const FFinstance* instance, const char* relativeFile, const char* start, FFstrbuf* buffer)
