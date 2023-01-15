@@ -21,14 +21,16 @@ Features:
 * Support `WezTerm` terminal font detection (requires [`wezterm` executable](https://wezfurlong.org/wezterm/cli/general.html) being available)
 * Add `--shell-version` and `--terminal-version` options to disable shell / terminal version detection
 * Enhance `--percent-type` to allow hiding other texts (#387)
+* Add Wifi module basic support for Linux
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
 
 Bugfixes:
 * `--logo-type` now does accept `iterm` too (@CarterLi, #374)
-* Fix mintty terminal font detection
+* Fix mintty terminal font detection (Windows)
 * Fix bug that line buffering doesn't work properly (Windows)
+* Fix rpm package count detection (Linux)
 
 Other:
 * Fixed a Typo in iterm error message (@jessebot, #376)
