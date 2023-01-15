@@ -38,7 +38,7 @@ void ffPlatformInit(FFPlatform* platform)
     }
 
     if(platform->systemArchitecture.length == 0)
-        ffStrbufAppendS(&platform->systemName, "Unknown");
+        ffStrbufAppendS(&platform->systemArchitecture, "Unknown");
 }
 
 void ffPlatformDestroy(FFPlatform* platform)
