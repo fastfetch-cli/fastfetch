@@ -30,23 +30,15 @@ void ffPlatformInit(FFPlatform* platform)
             ffStrbufAppendS(&platform->systemName, "FreeBSD");
         #elif defined(__APPLE__)
             ffStrbufAppendS(&platform->systemName, "Darwin");
-        #elif defined(__WIN32__) || defined(__WIN64__)
+        #elif defined(_WIN32)
             ffStrbufAppendS(&platform->systemName, "Windows_NT");
+        #else
+            ffStrbufAppendS(&platform->systemName, "Unknown");
         #endif
     }
 
     if(platform->systemArchitecture.length == 0)
-    {
-        #if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64)
-            ffStrbufAppendS(&platform->systemArchitecture, "x86_64");
-        #elif defined(__i386__) || defined(__i386) || defined(__i486__) || defined(__i486) || defined(__i586__) || defined(__i586) || defined(__i686__) || defined(__i686)
-            ffStrbufAppendS(&platform->systemArchitecture, "i386");
-        #elif defined(__aarch64__)
-            ffStrbufAppendS(&platform->systemArchitecture, "aarch64");
-        #elif defined(__arm__)
-            ffStrbufAppendS(&platform->systemArchitecture, "arm");
-        #endif
-    }
+        ffStrbufAppendS(&platform->systemName, "Unknown");
 }
 
 void ffPlatformDestroy(FFPlatform* platform)
