@@ -86,7 +86,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
-        item->security.enabled = false;
+        item->security.type = FF_WIFI_SECURITY_UNKNOWN;
         item->security.oneXEnabled = false;
         ffStrbufInit(&item->security.algorithm);
 
@@ -162,7 +162,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
         item->conn.rxRate = connInfo->wlanAssociationAttributes.ulRxRate;
         item->conn.txRate = connInfo->wlanAssociationAttributes.ulTxRate;
 
-        item->security.enabled = connInfo->wlanSecurityAttributes.bSecurityEnabled;
+        item->security.type = connInfo->wlanSecurityAttributes.bSecurityEnabled ? FF_WIFI_SECURITY_ENABLED : FF_WIFI_SECURITY_DISABLED;
         item->security.oneXEnabled = connInfo->wlanSecurityAttributes.bOneXEnabled;
         switch (connInfo->wlanSecurityAttributes.dot11AuthAlgorithm)
         {

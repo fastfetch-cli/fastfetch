@@ -22,9 +22,16 @@ struct FFWifiConnection
     double txRate;
 };
 
+enum FFWifiSecurityType
+{
+    FF_WIFI_SECURITY_UNKNOWN,
+    FF_WIFI_SECURITY_ENABLED,
+    FF_WIFI_SECURITY_DISABLED,
+};
+
 struct FFWifiSecurity
 {
-    bool enabled;
+    enum FFWifiSecurityType type;
     bool oneXEnabled;
     FFstrbuf algorithm;
 };

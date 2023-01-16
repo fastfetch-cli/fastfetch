@@ -25,7 +25,7 @@ void ffPrintWifi(FFinstance* instance)
                 if(item->conn.ssid.length)
                 {
                     printf("%s - %s", item->conn.ssid.chars, item->conn.phyType.chars);
-                    if(!item->security.enabled)
+                    if(item->security.type == FF_WIFI_SECURITY_DISABLED)
                         puts(" - insecure");
                     else
                         putchar('\n');
@@ -47,7 +47,7 @@ void ffPrintWifi(FFinstance* instance)
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.signalQuality},
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate},
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate},
-                    {FF_FORMAT_ARG_TYPE_BOOL, &item->security.enabled},
+                    {FF_FORMAT_ARG_TYPE_STRING, item->security.type == FF_WIFI_SECURITY_UNKNOWN ? "Unknown" : item->security.type == FF_WIFI_SECURITY_ENABLED ? "Secure" : "Insecure"},
                     {FF_FORMAT_ARG_TYPE_BOOL, &item->security.oneXEnabled},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &item->security.algorithm},
                 });

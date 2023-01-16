@@ -1,57 +1,82 @@
 #include "wifi.h"
 
 #include "common/io.h"
-#include "common/processing.h"
-#include "common/properties.h"
 
 #include <net/if.h>
+#include <linux/wireless.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 static const char* detectInf(char* ifName, FFWifiResult* wifi)
 {
-    const char* error = NULL;
-    FF_STRBUF_AUTO_DESTROY output;
-    ffStrbufInit(&output);
-    if((error = ffProcessAppendStdOut(&output, (char* const[]){
-        "iw",
-        "dev",
-        ifName,
-        "link",
-        NULL
-    })))
-        return error;
+    int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+    if(sock < 0)
+        return "socket() failed";
 
-    if(output.length == 0)
-        return "iw command execution failed";
+    struct iwreq iwr;
 
-    if(!ffParsePropLines(output.chars, "Connected to ", &wifi->conn.macAddress))
+    strncpy(iwr.ifr_name, ifName, IFNAMSIZ);
+    ffStrbufEnsureFree(&wifi->conn.ssid, IW_ESSID_MAX_SIZE);
+    iwr.u.essid.pointer = (caddr_t) wifi->conn.ssid.chars;
+    iwr.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+    iwr.u.essid.flags = 0;
+    if(ioctl(sock, SIOCGIWESSID, &iwr) >= 0)
+        ffStrbufRecalculateLength(&wifi->conn.ssid);
+
+    if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0)
     {
-        ffStrbufAppendS(&wifi->conn.status, "Disconnected");
-        return NULL;
-    }
-
-    FF_STRBUF_AUTO_DESTROY temp;
-    ffStrbufInit(&temp);
-
-    ffStrbufAppendS(&wifi->conn.status, "Connected");
-    ffStrbufSubstrBefore(&wifi->conn.macAddress, ' ');
-    ffParsePropLines(output.chars, "SSID: ", &wifi->conn.ssid);
-
-    if(ffParsePropLines(output.chars, "signal: ", &temp))
-        wifi->conn.signalQuality = ffStrbufToDouble(&temp);
-
-    if(ffParsePropLines(output.chars, "tx bitrate: ", &temp))
-    {
-        if(ffStrbufContainS(&temp, " HE-MCS "))
-            ffStrbufAppendS(&wifi->conn.phyType, "802.11ax (Wi-Fi 6)");
-        else if(ffStrbufContainS(&temp, " VHT-MCS "))
-            ffStrbufAppendS(&wifi->conn.phyType, "802.11ac (Wi-Fi 5)");
-        else if(ffStrbufContainS(&temp, " MCS "))
-            ffStrbufAppendS(&wifi->conn.phyType, "802.11n (Wi-Fi 4)");
+        if(strncasecmp(iwr.u.name, "IEEE ", 5) == 0)
+            ffStrbufSetS(&wifi->conn.phyType, iwr.u.name + 5);
         else
-            ffStrbufAppendS(&wifi->conn.phyType, "802.11a/b/g");
+            ffStrbufSetS(&wifi->conn.phyType, iwr.u.name);
     }
 
-    wifi->security.enabled = true; //FIXME: Unable to find this info. Set it true so that fastfetch won't print `insecure`
+    if(ioctl(sock, SIOCGIWAP, &iwr) >= 0)
+    {
+        for(int i = 0; i < 6; ++i)
+            ffStrbufAppendF(&wifi->conn.macAddress, "%.2X-", (uint8_t) iwr.u.ap_addr.sa_data[i]);
+        ffStrbufTrimRight(&wifi->conn.macAddress, '-');
+    }
+
+    //FIXME: doesn't work
+    if(ioctl(sock, SIOCGIWSPY, &iwr) >= 0)
+        wifi->conn.signalQuality = iwr.u.qual.level;
+
+    //FIXME: doesn't work
+    struct iw_encode_ext iwe;
+    iwr.u.data.pointer = &iwe;
+    iwr.u.data.length = sizeof(iwe);
+    iwr.u.data.flags = 0;
+    if(ioctl(sock, SIOCGIWENCODEEXT, &iwr) >= 0)
+    {
+        struct iw_encode_ext* iwe = iwr.u.data.pointer;
+        if(iwe->alg == IW_ENCODE_ALG_NONE)
+            wifi->security.type = FF_WIFI_SECURITY_DISABLED;
+        else
+        {
+            wifi->security.type = FF_WIFI_SECURITY_ENABLED;
+            switch(iwe->alg)
+            {
+                case IW_ENCODE_ALG_WEP:
+                    ffStrbufAppendS(&wifi->security.algorithm, "WEP");
+                    break;
+                case IW_ENCODE_ALG_TKIP:
+                    ffStrbufAppendS(&wifi->security.algorithm, "TKIP");
+                    break;
+                case IW_ENCODE_ALG_CCMP:
+                    ffStrbufAppendS(&wifi->security.algorithm, "CCMP");
+                    break;
+                case IW_ENCODE_ALG_PMK:
+                    ffStrbufAppendS(&wifi->security.algorithm, "PMK");
+                    break;
+                case IW_ENCODE_ALG_AES_CMAC:
+                    ffStrbufAppendS(&wifi->security.algorithm, "CMAC");
+                    break;
+            }
+        }
+    }
+
+    close(sock);
 
     return NULL;
 }
@@ -83,7 +108,7 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
-        item->security.enabled = false;
+        item->security.type = FF_WIFI_SECURITY_UNKNOWN;
         item->security.oneXEnabled = false;
         ffStrbufInit(&item->security.algorithm);
 

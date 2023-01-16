@@ -25,7 +25,7 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
-        item->security.enabled = false;
+        item->security.type = FF_WIFI_SECURITY_UNKNOWN;
         item->security.oneXEnabled = false;
         ffStrbufInit(&item->security.algorithm);
 
@@ -72,7 +72,7 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         }
         item->conn.signalQuality = inf.rssiValue >= -50 ? 100 : inf.rssiValue <= -100 ? 0 : (inf.rssiValue + 100) * 2;
         item->conn.txRate = inf.transmitRate;
-        item->security.enabled = inf.security != kCWSecurityNone;
+        item->security.type = inf.security != kCWSecurityNone ? FF_WIFI_SECURITY_ENABLED : FF_WIFI_SECURITY_DISABLED;
         switch(inf.security)
         {
             case kCWSecurityNone:
