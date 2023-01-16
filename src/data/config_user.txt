@@ -231,22 +231,13 @@
 # Default is true.
 #--terminal-version true
 
-# Disk option
-# Sets if removable volume should be printed
+# Disk show options
+# Sets if certain types of disk should be printed
 # Must be either true or false
-# Default is true.
+# Default is false except for --disk-show-removable.
 #--disk-show-removable true
-
-# Disk option
-# Sets if hidden volume should be printed
-# Must be either true or false
-# Default is false.
 #--disk-show-hidden false
-
-# Disk option
-# Sets if unknown (unable to detect sizes) volume should be printed
-# Must be either true or false
-# Default is false.
+#--disk-show-subvolumes false
 #--disk-show-unknown false
 
 # Disk option

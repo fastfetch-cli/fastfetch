@@ -137,6 +137,9 @@ static void printAutodetected(FFinstance* instance, const FFlist* disks)
         if(disk->type == FF_DISK_TYPE_EXTERNAL && !instance->config.diskShowRemovable)
             continue;
 
+        if(disk->type == FF_DISK_TYPE_SUBVOLUME && !instance->config.diskShowSubvolumes)
+            continue;
+
         if(disk->type == FF_DISK_TYPE_HIDDEN && !instance->config.diskShowHidden)
             continue;
 

@@ -156,6 +156,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowRemovable = true;
     instance->config.diskShowHidden = false;
     instance->config.diskShowUnknown = false;
+    instance->config.diskShowSubvolumes = false;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 

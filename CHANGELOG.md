@@ -15,6 +15,7 @@ Features:
 * Add `Brightness` module support
 * Add `Battery` module support for FreeBSD
 * Add `--disk-show-unknown` option for Disk module
+* Add `--disk-show-subvolumes` option for Disk module
 * Add `--gpu-hide-integrated` option (#379)
 * Add `--gpu-hide-discrete` option (#379)
 * Detect terminal version when available

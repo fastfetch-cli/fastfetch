@@ -28,6 +28,21 @@ static void strbufAppendMountPoint(FFstrbuf* mountpoint, const char* source)
     }
 }
 
+#ifndef __ANDROID__
+static bool isSubvolume(const char* options)
+{
+    const char* prefix = "subvol=/@"; //Btrfs subvolume
+    const char* subvolume = strstr(options, prefix);
+    if(subvolume == NULL)
+        return false;
+
+    subvolume += strlen(prefix);
+
+    //If there is no space or comma after the @, it is a btrfs subvolume
+    return *subvolume != ' ' && *subvolume != ',';
+}
+#endif
+
 void ffDetectDisksImpl(FFDiskResult* disks)
 {
     FILE* mountsFile = fopen("/proc/mounts", "r");
@@ -82,19 +97,21 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             ++currentPos;
 
         #ifdef __ANDROID__
-        if(ffStrbufEqualS(&disk->mountpoint, "/") || ffStrbufEqualS(&disk->mountpoint, "/storage/emulated"))
-            disk->type = FF_DISK_TYPE_REGULAR;
-        else if(ffStrbufStartsWithS(&disk->mountpoint, "/mnt/media_rw/"))
-            disk->type = FF_DISK_TYPE_EXTERNAL;
-        else
-            disk->type = FF_DISK_TYPE_HIDDEN;
+            if(ffStrbufEqualS(&disk->mountpoint, "/") || ffStrbufEqualS(&disk->mountpoint, "/storage/emulated"))
+                disk->type = FF_DISK_TYPE_REGULAR;
+            else if(ffStrbufStartsWithS(&disk->mountpoint, "/mnt/media_rw/"))
+                disk->type = FF_DISK_TYPE_EXTERNAL;
+            else
+                disk->type = FF_DISK_TYPE_HIDDEN;
         #else
-        if(strstr(currentPos, "nosuid") != NULL || strstr(currentPos, "nodev") != NULL)
-            disk->type = FF_DISK_TYPE_EXTERNAL;
-        else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
-            disk->type = FF_DISK_TYPE_HIDDEN;
-        else
-            disk->type = FF_DISK_TYPE_REGULAR;
+            if(isSubvolume(currentPos))
+                disk->type = FF_DISK_TYPE_SUBVOLUME;
+            else if(strstr(currentPos, "nosuid") != NULL || strstr(currentPos, "nodev") != NULL)
+                disk->type = FF_DISK_TYPE_EXTERNAL;
+            else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
+                disk->type = FF_DISK_TYPE_HIDDEN;
+            else
+                disk->type = FF_DISK_TYPE_REGULAR;
         #endif
 
         //Detects stats

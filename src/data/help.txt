@@ -100,35 +100,36 @@ Library options: Set the path of a library to load
     --lib-cjson <path>
 
 Module specific options:
-    --title-fqdn <?value>:          Set if the title should use fully qualified domain name. Default is false
-    --separator-string <str>:       Set the string printed by the separator module
-    --os-file <path>:               Set the path to the file containing OS information
-    --shell-version <?value>:       Set if shell version should be detected and printed
-    --terminal-version <?value>:    Set if terminal version should be detected and printed
-    --disk-folders <folders>:       A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
-    --disk-show-removable <?value>: Set if removable volume should be printed. Default is true
-    --disk-show-hidden <?value>:    Set if hidden volumes should be printed. Default is false
-    --disk-show-unknown <?value>:   Set if unknown (unable to detect sizes) volumes should be printed. Default is false
-    --battery-dir <folder>:         The directory where the battery folders are. Standard: /sys/class/power_supply/
-    --cpu-temp  <?value>:           Detect and display CPU temperature if supported. Default is false
-    --gpu-temp  <?value>:           Detect and display GPU temperature if supported. Default is false
-    --gpu-hide-integrated <?value>: Hide integrated GPU if supported. Default is false
-    --gpu-hide-discrete <?value>:   Hide discrete GPU if supported. Default is false
-    --battery-temp  <?value>:       Detect and display Battery temperature if supported. Default is false
-    --localip-show-ipv4 <?value>:   Show IPv4 addresses in local ip module. Default is true
-    --localip-show-ipv6 <?value>:   Show IPv6 addresses in local ip module. Default is false
-    --localip-show-loop <?value>:   Show loop back addresses (127.0.0.1) in local ip module. Default is false
-    --localip-name-prefix <str>:    Show IPs with given name prefix only. Default is empty
-    --public-ip-timeout:            Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
-    --public-ip-url:                The URL of public IP detection server to be used.
-    --weather-timeout:              Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
-    --weather-output-format:        The output weather format to be used. It must be URI encoded.
-    --player-name:                  The name of the player to use
-    --gl <value>:                   Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
-    --percent-type <value>:         Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only. Default is 1
-    --command-shell <str>:          Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
-    --command-key <str>:            Set the module key to display, can be specified mulitple times
-    --command-text <str>:           Set the command text to be executed, can be specified mulitple times
+    --title-fqdn <?value>:           Set if the title should use fully qualified domain name. Default is false
+    --separator-string <str>:        Set the string printed by the separator module
+    --os-file <path>:                Set the path to the file containing OS information
+    --shell-version <?value>:        Set if shell version should be detected and printed
+    --terminal-version <?value>:     Set if terminal version should be detected and printed
+    --disk-folders <folders>:        A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
+    --disk-show-removable <?value>:  Set if removable volume should be printed. Default is true
+    --disk-show-hidden <?value>:     Set if hidden volumes should be printed. Default is false
+    --disk-show-subvolumes <?value>: Set if subvolumes should be printed. Default is false
+    --disk-show-unknown <?value>:    Set if unknown (unable to detect sizes) volumes should be printed. Default is false
+    --battery-dir <folder>:          The directory where the battery folders are. Standard: /sys/class/power_supply/
+    --cpu-temp  <?value>:            Detect and display CPU temperature if supported. Default is false
+    --gpu-temp  <?value>:            Detect and display GPU temperature if supported. Default is false
+    --gpu-hide-integrated <?value>:  Hide integrated GPU if supported. Default is false
+    --gpu-hide-discrete <?value>:    Hide discrete GPU if supported. Default is false
+    --battery-temp  <?value>:        Detect and display Battery temperature if supported. Default is false
+    --localip-show-ipv4 <?value>:    Show IPv4 addresses in local ip module. Default is true
+    --localip-show-ipv6 <?value>:    Show IPv6 addresses in local ip module. Default is false
+    --localip-show-loop <?value>:    Show loop back addresses (127.0.0.1) in local ip module. Default is false
+    --localip-name-prefix <str>:     Show IPs with given name prefix only. Default is empty
+    --public-ip-timeout:             Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
+    --public-ip-url:                 The URL of public IP detection server to be used.
+    --weather-timeout:               Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
+    --weather-output-format:         The output weather format to be used. It must be URI encoded.
+    --player-name:                   The name of the player to use
+    --gl <value>:                    Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
+    --percent-type <value>:          Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only. Default is 1
+    --command-shell <str>:           Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
+    --command-key <str>:             Set the module key to display, can be specified mulitple times
+    --command-text <str>:            Set the command text to be executed, can be specified mulitple times
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

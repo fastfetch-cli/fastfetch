@@ -194,6 +194,7 @@ __fastfetch_completion()
         "--disk-folders"
         "--disk-show-removable"
         "--disk-show-hidden"
+        "--disk-show-subvolumes"
         "--gpu-hide-integrated"
         "--gpu-hide-discrete"
         "--disk-show-unknown"
