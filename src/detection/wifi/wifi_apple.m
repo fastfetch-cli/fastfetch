@@ -10,9 +10,6 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
     if(!interfaces)
         return "CWWiFiClient.sharedWiFiClient.interfaces is nil";
 
-    if(interfaces.count == 0)
-        return "No wifi interfaces found";
-
     for(CWInterface* inf in interfaces)
     {
         FFWifiResult* item = (FFWifiResult*)ffListAdd(result);

@@ -66,12 +66,6 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
         goto exit;
     }
 
-    if(ifList->dwNumberOfItems == 0)
-    {
-        error = "No wifi interfaces found";
-        goto exit;
-    }
-
     for(uint32_t index = 0; index < ifList->dwNumberOfItems; ++index)
     {
         WLAN_INTERFACE_INFO* ifInfo = (WLAN_INTERFACE_INFO*)&ifList->InterfaceInfo[index];
