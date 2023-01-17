@@ -373,13 +373,11 @@ static inline void printCommandHelp(const char* command)
             "Connection status",
             "Connection SSID",
             "Connection mac address",
-            "Connection PHY type",
+            "Connection protocol",
             "Connection signal quality (percentage)",
             "Connection RX rate",
             "Connection TX rate",
-            "Security enabled",
-            "Security 802.1X enabled",
-            "Security algorithm"
+            "Connection Security algorithm"
         );
     }
     else if(strcasecmp(command, "player-format") == 0)
@@ -1236,6 +1234,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             optionParseString(key, value, &instance->config.libcJSON);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
             optionParseString(key, value, &instance->config.libwlanapi);
+        else if(strcasecmp(subkey, "-nm") == 0)
+            optionParseString(key, value, &instance->config.libnm);
         else
             goto error;
     }

@@ -3,7 +3,7 @@
 #include "detection/wifi/wifi.h"
 
 #define FF_WIFI_MODULE_NAME "Wifi"
-#define FF_WIFI_NUM_FORMAT_ARGS 12
+#define FF_WIFI_NUM_FORMAT_ARGS 10
 
 void ffPrintWifi(FFinstance* instance)
 {
@@ -24,11 +24,11 @@ void ffPrintWifi(FFinstance* instance)
                 ffPrintLogoAndKey(instance, FF_WIFI_MODULE_NAME, moduleIndex, &instance->config.wifi.key);
                 if(item->conn.ssid.length)
                 {
-                    printf("%s - %s", item->conn.ssid.chars, item->conn.phyType.chars);
-                    if(item->security.type == FF_WIFI_SECURITY_DISABLED)
-                        puts(" - insecure");
-                    else
-                        putchar('\n');
+                    printf("%s - %s - %s\n",
+                        item->conn.ssid.chars,
+                        item->conn.protocol.chars,
+                        item->conn.security.length > 0 ? item->conn.security.chars : "insecure"
+                    );
                 }
                 else
                 {
@@ -43,13 +43,11 @@ void ffPrintWifi(FFinstance* instance)
                     {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.status},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.ssid},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.macAddress},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.phyType},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.protocol},
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.signalQuality},
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate},
                     {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate},
-                    {FF_FORMAT_ARG_TYPE_STRING, item->security.type == FF_WIFI_SECURITY_UNKNOWN ? "Unknown" : item->security.type == FF_WIFI_SECURITY_ENABLED ? "Secure" : "Insecure"},
-                    {FF_FORMAT_ARG_TYPE_BOOL, &item->security.oneXEnabled},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->security.algorithm},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.security},
                 });
             }
 
@@ -58,8 +56,8 @@ void ffPrintWifi(FFinstance* instance)
             ffStrbufDestroy(&item->conn.status);
             ffStrbufDestroy(&item->conn.ssid);
             ffStrbufDestroy(&item->conn.macAddress);
-            ffStrbufDestroy(&item->conn.phyType);
-            ffStrbufDestroy(&item->security.algorithm);
+            ffStrbufDestroy(&item->conn.protocol);
+            ffStrbufDestroy(&item->conn.security);
         }
     }
     else

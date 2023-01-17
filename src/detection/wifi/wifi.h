@@ -16,31 +16,17 @@ struct FFWifiConnection
     FFstrbuf status;
     FFstrbuf ssid;
     FFstrbuf macAddress;
-    FFstrbuf phyType;
+    FFstrbuf protocol;
+    FFstrbuf security;
     double signalQuality; // Percentage
     double rxRate;
     double txRate;
-};
-
-enum FFWifiSecurityType
-{
-    FF_WIFI_SECURITY_UNKNOWN,
-    FF_WIFI_SECURITY_ENABLED,
-    FF_WIFI_SECURITY_DISABLED,
-};
-
-struct FFWifiSecurity
-{
-    enum FFWifiSecurityType type;
-    bool oneXEnabled;
-    FFstrbuf algorithm;
 };
 
 typedef struct FFWifiResult
 {
     struct FFWifiInterface inf;
     struct FFWifiConnection conn;
-    struct FFWifiSecurity security;
 } FFWifiResult;
 
 const char* ffDetectWifi(const FFinstance* instance, FFlist* result /*list of FFWifiItem*/);

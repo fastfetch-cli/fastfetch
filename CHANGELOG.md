@@ -22,7 +22,7 @@ Features:
 * Support `WezTerm` terminal font detection (requires [`wezterm` executable](https://wezfurlong.org/wezterm/cli/general.html) being available)
 * Add `--shell-version` and `--terminal-version` options to disable shell / terminal version detection
 * Enhance `--percent-type` to allow hiding other texts (#387)
-* Add Wifi module basic support for Linux
+* Add Wifi module support for Linux
 
 Logos:
 * Raspbian (@IamNoRobot, #373)

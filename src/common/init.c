@@ -139,6 +139,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libcJSON, 0);
     ffStrbufInitA(&instance->config.libfreetype, 0);
     ffStrbufInit(&instance->config.libwlanapi);
+    ffStrbufInit(&instance->config.libnm);
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
@@ -400,6 +401,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libcJSON);
     ffStrbufDestroy(&instance->config.libfreetype);
     ffStrbufDestroy(&instance->config.libwlanapi);
+    ffStrbufDestroy(&instance->config.libnm);
 
     ffStrbufDestroy(&instance->config.diskFolders);
     ffStrbufDestroy(&instance->config.batteryDir);
