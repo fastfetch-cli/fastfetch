@@ -34,7 +34,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
         if(EnumDisplaySettingsW(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode) == 0)
             continue;
 
-        ffdsAppendDisplay(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency);
+        ffdsAppendDisplay(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, 0, 0);
     }
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067

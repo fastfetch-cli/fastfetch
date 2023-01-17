@@ -21,9 +21,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
         if(mode)
         {
             ffdsAppendDisplay(ds,
+                (uint32_t)CGDisplayModeGetPixelWidth(mode),
+                (uint32_t)CGDisplayModeGetPixelHeight(mode),
+                (uint32_t)CGDisplayModeGetRefreshRate(mode),
                 (uint32_t)CGDisplayModeGetWidth(mode),
-                (uint32_t)CGDisplayModeGetHeight(mode),
-                (uint32_t)CGDisplayModeGetRefreshRate(mode)
+                (uint32_t)CGDisplayModeGetHeight(mode)
             );
             CGDisplayModeRelease(mode);
         }

@@ -66,6 +66,8 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
     result->width = (uint32_t) width;
     result->height = (uint32_t) height;
     result->refreshRate = ffdsParseRefreshRate(refreshRate / 1000);
+    result->scaledWidth = 0;
+    result->scaledHeight = 0;
 }
 
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)

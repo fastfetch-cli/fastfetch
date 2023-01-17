@@ -27,6 +27,11 @@ void ffPrintDisplay(FFinstance* instance)
             if(result->refreshRate > 0)
                 printf(" @ %iHz", result->refreshRate);
 
+            if(
+                result->scaledWidth > 0 && result->scaledWidth != result->width &&
+                result->scaledHeight > 0 && result->scaledHeight != result->height)
+                printf(" (as %ix%i)", result->scaledWidth, result->scaledHeight);
+
             putchar('\n');
         }
         else
