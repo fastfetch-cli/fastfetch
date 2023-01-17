@@ -24,6 +24,7 @@ Features:
 * Add `--shell-version` and `--terminal-version` options to disable shell / terminal version detection
 * Enhance `--percent-type` to allow hiding other texts (#387)
 * Add Wifi module support for Linux
+* Detect scaled resolutions (Windows, macOS)
 
 Logos:
 * Raspbian (@IamNoRobot, #373)

@@ -37,9 +37,11 @@ void ffPrintDisplay(FFinstance* instance)
         else
         {
             ffPrintFormat(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.display, FF_RESOLUTION_NUM_FORMAT_ARGS, (FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_INT, &result->width},
-                {FF_FORMAT_ARG_TYPE_INT, &result->height},
-                {FF_FORMAT_ARG_TYPE_INT, &result->refreshRate}
+                {FF_FORMAT_ARG_TYPE_UINT, &result->width},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->height},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->refreshRate},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight}
             });
         }
     }
