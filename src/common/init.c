@@ -503,7 +503,10 @@ void ffListFeatures()
             "libcjson\n"
         #endif
         #ifdef FF_HAVE_FREETYPE
-            "freetype"
+            "freetype\n"
+        #endif
+        #ifdef FF_HAVE_LIBNM
+            "libnm\n"
         #endif
         ""
     , stdout);

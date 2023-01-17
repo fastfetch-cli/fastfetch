@@ -1,19 +1,19 @@
 #include "wifi.h"
 
-#include "common/processing.h"
-#include "common/properties.h"
-#include "common/library.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #ifdef FF_HAVE_LIBNM
 
+#include "common/processing.h"
+#include "common/properties.h"
+#include "common/library.h"
+
 #include <glib.h>
 #define NM_NO_INCLUDE_EXTRA_HEADERS 1
 #include <NetworkManager.h>
 
-const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
+static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* result)
 {
     FF_LIBRARY_LOAD(nm, &instance->config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_new);
@@ -197,7 +197,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
     return NULL;
 }
 
-#else
+#endif
 
 #include "common/io.h"
 
@@ -206,80 +206,8 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-static const char* detectInf(char* ifName, FFWifiResult* wifi)
+static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
 {
-    int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
-    if(sock < 0)
-        return "socket() failed";
-
-    struct iwreq iwr;
-
-    strncpy(iwr.ifr_name, ifName, IFNAMSIZ);
-    ffStrbufEnsureFree(&wifi->conn.ssid, IW_ESSID_MAX_SIZE);
-    iwr.u.essid.pointer = (caddr_t) wifi->conn.ssid.chars;
-    iwr.u.essid.length = IW_ESSID_MAX_SIZE + 1;
-    iwr.u.essid.flags = 0;
-    if(ioctl(sock, SIOCGIWESSID, &iwr) >= 0)
-        ffStrbufRecalculateLength(&wifi->conn.ssid);
-
-    if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0)
-    {
-        if(strncasecmp(iwr.u.name, "IEEE ", 5) == 0)
-            ffStrbufSetS(&wifi->conn.protocol, iwr.u.name + 5);
-        else
-            ffStrbufSetS(&wifi->conn.protocol, iwr.u.name);
-    }
-
-    if(ioctl(sock, SIOCGIWAP, &iwr) >= 0)
-    {
-        for(int i = 0; i < 6; ++i)
-            ffStrbufAppendF(&wifi->conn.macAddress, "%.2X-", (uint8_t) iwr.u.ap_addr.sa_data[i]);
-        ffStrbufTrimRight(&wifi->conn.macAddress, '-');
-    }
-
-    //FIXME: doesn't work
-    if(ioctl(sock, SIOCGIWSPY, &iwr) >= 0)
-        wifi->conn.signalQuality = iwr.u.qual.level;
-
-    //FIXME: doesn't work
-    struct iw_encode_ext iwe;
-    iwr.u.data.pointer = &iwe;
-    iwr.u.data.length = sizeof(iwe);
-    iwr.u.data.flags = 0;
-    if(ioctl(sock, SIOCGIWENCODEEXT, &iwr) >= 0)
-    {
-        struct iw_encode_ext* iwe = iwr.u.data.pointer;
-        switch(iwe->alg)
-        {
-            case IW_ENCODE_ALG_WEP:
-                ffStrbufAppendS(&wifi->conn.security, "WEP");
-                break;
-            case IW_ENCODE_ALG_TKIP:
-                ffStrbufAppendS(&wifi->conn.security, "TKIP");
-                break;
-            case IW_ENCODE_ALG_CCMP:
-                ffStrbufAppendS(&wifi->conn.security, "CCMP");
-                break;
-            case IW_ENCODE_ALG_PMK:
-                ffStrbufAppendS(&wifi->conn.security, "PMK");
-                break;
-            case IW_ENCODE_ALG_AES_CMAC:
-                ffStrbufAppendS(&wifi->conn.security, "CMAC");
-                break;
-        }
-    } else {
-        ffStrbufAppendS(&wifi->conn.security, "unknown");
-    }
-
-    close(sock);
-
-    return NULL;
-}
-
-const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
-{
-    FF_UNUSED(instance);
-
     struct if_nameindex* infs = if_nameindex();
     if(!infs)
         return "if_nameindex() failed";
@@ -309,15 +237,82 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         if(!ffAppendFileBuffer(path.chars, &item->inf.status) || !ffStrbufEqualS(&item->inf.status, "up"))
             continue;
 
-        detectInf(i->if_name, item);
+        int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+        if(sock < 0)
+            continue;
+
+        struct iwreq iwr;
+        strncpy(iwr.ifr_name, i->if_name, IFNAMSIZ);
+        ffStrbufEnsureFree(&item->conn.ssid, IW_ESSID_MAX_SIZE);
+        iwr.u.essid.pointer = (caddr_t) item->conn.ssid.chars;
+        iwr.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+        iwr.u.essid.flags = 0;
+        if(ioctl(sock, SIOCGIWESSID, &iwr) >= 0)
+            ffStrbufRecalculateLength(&item->conn.ssid);
+
+        if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0)
+        {
+            if(strncasecmp(iwr.u.name, "IEEE ", 5) == 0)
+                ffStrbufSetS(&item->conn.protocol, iwr.u.name + 5);
+            else
+                ffStrbufSetS(&item->conn.protocol, iwr.u.name);
+        }
+
+        if(ioctl(sock, SIOCGIWAP, &iwr) >= 0)
+        {
+            for(int i = 0; i < 6; ++i)
+                ffStrbufAppendF(&item->conn.macAddress, "%.2X-", (uint8_t) iwr.u.ap_addr.sa_data[i]);
+            ffStrbufTrimRight(&item->conn.macAddress, '-');
+        }
+
+        //FIXME: doesn't work
+        if(ioctl(sock, SIOCGIWSPY, &iwr) >= 0)
+            item->conn.signalQuality = iwr.u.qual.level;
+
+        //FIXME: doesn't work
+        struct iw_encode_ext iwe;
+        iwr.u.data.pointer = &iwe;
+        iwr.u.data.length = sizeof(iwe);
+        iwr.u.data.flags = 0;
+        if(ioctl(sock, SIOCGIWENCODEEXT, &iwr) >= 0)
+        {
+            struct iw_encode_ext* iwe = iwr.u.data.pointer;
+            switch(iwe->alg)
+            {
+                case IW_ENCODE_ALG_WEP:
+                    ffStrbufAppendS(&item->conn.security, "WEP");
+                    break;
+                case IW_ENCODE_ALG_TKIP:
+                    ffStrbufAppendS(&item->conn.security, "TKIP");
+                    break;
+                case IW_ENCODE_ALG_CCMP:
+                    ffStrbufAppendS(&item->conn.security, "CCMP");
+                    break;
+                case IW_ENCODE_ALG_PMK:
+                    ffStrbufAppendS(&item->conn.security, "PMK");
+                    break;
+                case IW_ENCODE_ALG_AES_CMAC:
+                    ffStrbufAppendS(&item->conn.security, "CMAC");
+                    break;
+            }
+        } else {
+            ffStrbufAppendS(&item->conn.security, "unknown");
+        }
+
+        close(sock);
     }
     if_freenameindex(infs);
     ffStrbufDestroy(&path);
 
-    if(result->length == 0)
-        return "No wifi interfaces found";
-
     return NULL;
 }
 
-#endif
+const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
+{
+    #ifdef FF_HAVE_LIBNM
+    if(!detectWifiWithLibnm(instance, result))
+        return NULL;
+    #endif
+
+    return detectWifiWithIoctls(instance, result);
+}
