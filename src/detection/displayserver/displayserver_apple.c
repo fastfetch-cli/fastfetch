@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <CoreGraphics/CGDirectDisplay.h>
 
-static void detectResolution(FFDisplayServerResult* ds)
+static void detectDisplays(FFDisplayServerResult* ds)
 {
     CGDirectDisplayID screens[128];
     uint32_t screenCount;
@@ -20,7 +20,7 @@ static void detectResolution(FFDisplayServerResult* ds)
         CGDisplayModeRef mode = CGDisplayCopyDisplayMode(screen);
         if(mode)
         {
-            ffdsAppendResolution(ds,
+            ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
                 (uint32_t)CGDisplayModeGetRefreshRate(mode)
@@ -84,6 +84,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufAppendS(&ds->deProcessName, "aqua");
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
-    ffListInitA(&ds->resolutions, sizeof(FFResolutionResult), 4);
-    detectResolution(ds);
+    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
+    detectDisplays(ds);
 }

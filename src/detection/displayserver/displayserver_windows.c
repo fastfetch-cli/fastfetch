@@ -23,7 +23,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
     ffStrbufInit(&ds->deVersion);
-    ffListInit(&ds->resolutions, sizeof(FFResolutionResult));
+    ffListInit(&ds->displays, sizeof(FFDisplayResult));
 
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(DISPLAY_DEVICEW) };
     for(DWORD devNum = 0; EnumDisplayDevicesW(NULL, devNum, &displayDevice, 0) != 0; ++devNum)
@@ -34,7 +34,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
         if(EnumDisplaySettingsW(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode) == 0)
             continue;
 
-        ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency);
+        ffdsAppendDisplay(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency);
     }
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067

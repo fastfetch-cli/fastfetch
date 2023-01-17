@@ -33,4 +33,4 @@ You can therefore use --host-format " " to disable host output.
 Note that --host-format "" would evaluate as not set, and therefore use the built-in host format
 
 Format string is also the way to go to set a fixed value - just use one without placeholders.
-For example when running in headless mode, you could use "--resolution-format "Preferred".
+For example when running in headless mode, you could use "--display-format Preferred".

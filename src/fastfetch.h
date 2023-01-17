@@ -107,7 +107,7 @@ typedef struct FFconfig
     FFModuleArgs processes;
     FFModuleArgs packages;
     FFModuleArgs shell;
-    FFModuleArgs resolution;
+    FFModuleArgs display;
     FFModuleArgs de;
     FFModuleArgs wifi;
     FFModuleArgs wm;
@@ -275,7 +275,7 @@ void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
 void ffPrintPackages(FFinstance* instance);
 void ffPrintShell(FFinstance* instance);
-void ffPrintResolution(FFinstance* instance);
+void ffPrintDisplay(FFinstance* instance);
 void ffPrintBrightness(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);

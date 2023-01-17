@@ -59,7 +59,7 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     ffThreadMutexLock(&mutex);
 
-    FFResolutionResult* result = ffListAdd(wldata->results);
+    FFDisplayResult* result = ffListAdd(wldata->results);
 
     ffThreadMutexUnlock(&mutex);
 
@@ -136,7 +136,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
         return false;
     }
 
-    data.results = &result->resolutions;
+    data.results = &result->displays;
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
@@ -151,7 +151,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     ffwl_display_disconnect(display);
     dlclose(wayland);
 
-    //We successfully connected to wayland and detected the resolution.
+    //We successfully connected to wayland and detected the display.
     //So we can set set the session type to wayland.
     //This is used as an indicator that we are running wayland by the x11 backends.
     ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND);

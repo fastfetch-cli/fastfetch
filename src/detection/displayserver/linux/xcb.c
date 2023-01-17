@@ -115,7 +115,7 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
 
     while(iterator.rem > 0)
     {
-        ffdsAppendResolution(
+        ffdsAppendDisplay(
             result,
             (uint32_t) iterator.data->width_in_pixels,
             (uint32_t) iterator.data->height_in_pixels,
@@ -180,7 +180,7 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         modeInfo->dot_clock / (uint32_t) (modeInfo->htotal * modeInfo->vtotal)
     ));
 
-    return ffdsAppendResolution(
+    return ffdsAppendDisplay(
         data->result,
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
@@ -190,7 +190,7 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
 
 static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode)
 {
-    //We do the check here, because we want the best fallback resolution if this call failed
+    //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
         return false;
 
@@ -215,7 +215,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
         return false;
 
     bool res = xcbRandrHandleMode(data, crtcInfoReply->mode);
-    res = res ? true : ffdsAppendResolution(
+    res = res ? true : ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
@@ -258,7 +258,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         data->ffxcb_randr_output_next(&outputIterator);
     };
 
-    return foundOutput ? true : ffdsAppendResolution(
+    return foundOutput ? true : ffdsAppendDisplay(
         data->result,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
@@ -316,7 +316,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         return;
 
     //If detetction failed, fallback to screen = monitor, like in the libxcb.so implementation
-    ffdsAppendResolution(
+    ffdsAppendDisplay(
         data->result,
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,

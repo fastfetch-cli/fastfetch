@@ -264,7 +264,7 @@
 #--processes-key Processes
 #--packages-key Packages
 #--shell-key Shell
-#--resolution-key Resolution {1}
+#--display-key Display {1}
 #--brightness-key Brightness ({1})
 #--de-key DE
 #--wm-key WM
@@ -309,7 +309,7 @@
 #--processes-format
 #--packages-format
 #--shell-format
-#--resolution-format
+#--display-format
 #--brightness-format
 #--de-format
 #--wm-format
@@ -353,7 +353,7 @@
 #--processes-error
 #--packages-error
 #--shell-error
-#--resolution-error
+#--display-error
 #--brightness-error
 #--de-error
 #--wm-error

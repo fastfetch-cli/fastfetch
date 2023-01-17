@@ -4,6 +4,7 @@ Notable Changes:
 * fastfetch no longer creates a sample config file silently. Use `--gen-config` to generate one.
 * fastfetch now search for user config file in the order of `fastfetch --list-config-paths`
 * Unknown disks are hidden by default.
+* `Resolution` module is renamed to `Display`. (#393)
 
 Features:
 * `--logo-padding-top` option (@CarterLi, #372)

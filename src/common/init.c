@@ -83,7 +83,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.processes);
     initModuleArg(&instance->config.packages);
     initModuleArg(&instance->config.shell);
-    initModuleArg(&instance->config.resolution);
+    initModuleArg(&instance->config.display);
     initModuleArg(&instance->config.de);
     initModuleArg(&instance->config.wm);
     initModuleArg(&instance->config.wmTheme);
@@ -345,7 +345,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.processes);
     destroyModuleArg(&instance->config.packages);
     destroyModuleArg(&instance->config.shell);
-    destroyModuleArg(&instance->config.resolution);
+    destroyModuleArg(&instance->config.display);
     destroyModuleArg(&instance->config.de);
     destroyModuleArg(&instance->config.wm);
     destroyModuleArg(&instance->config.wmTheme);

@@ -174,9 +174,9 @@ static inline void printCommandHelp(const char* command)
             "User shell version"
         );
     }
-    else if(strcasecmp(command, "resolution-format") == 0)
+    else if(strcasecmp(command, "display-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("resolution", "{}x{} @ {}Hz", 4,
+        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 4,
             "Screen width",
             "Screen height",
             "Screen refresh rate",
@@ -1147,7 +1147,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
     else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
     else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
-    else if(optionParseModuleArgs(key, value, "resolution", &instance->config.resolution)) {}
+    else if(optionParseModuleArgs(key, value, "display", &instance->config.display)) {}
     else if(optionParseModuleArgs(key, value, "brightness", &instance->config.brightness)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
     else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
@@ -1407,8 +1407,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintPackages(instance);
     else if(strcasecmp(line, "shell") == 0)
         ffPrintShell(instance);
-    else if(strcasecmp(line, "resolution") == 0)
-        ffPrintResolution(instance);
+    else if(strcasecmp(line, "display") == 0)
+        ffPrintDisplay(instance);
     else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
         ffPrintDesktopEnvironment(instance);
     else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)

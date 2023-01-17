@@ -36,8 +36,8 @@ The following libraries are used if present at runtime:
 * [`libxcb-randr`](https://xcb.freedesktop.org/),
     [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
     [`libxcb`](https://xcb.freedesktop.org/),
-    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support The `libxcb*` ones usually have better performance.
-* [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
+    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better display detection and faster WM detection. The `*randr` ones provide multi monitor support The `libxcb*` ones usually have better performance.
+* [`libwayland-client`](https://wayland.freedesktop.org/): Better display performance and output in wayland sessions. Supports different refresh rates per monitor.
 * [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 * [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel or kitty graphics protocol.
@@ -85,7 +85,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Battery, Bios, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Resolution, Separator OS, Shell, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
+Battery, Bios, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator OS, Shell, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
 ```
 
 ##### Builtin logos
