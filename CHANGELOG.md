@@ -25,6 +25,7 @@ Features:
 * Enhance `--percent-type` to allow hiding other texts (#387)
 * Add Wifi module support for Linux
 * Detect scaled resolutions (Windows, macOS)
+* Optimise font module printing (Windows)
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
