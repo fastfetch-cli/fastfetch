@@ -11,7 +11,7 @@ typedef struct
     uint32_t height;
 } DataBundle;
 
-static WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC hDC, FF_MAYBE_UNUSED LPRECT rc, LPARAM lparam)
+static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC hDC, FF_MAYBE_UNUSED LPRECT rc, LPARAM lparam)
 {
     MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
     DataBundle* data = (DataBundle*) lparam;
