@@ -26,6 +26,7 @@ Features:
 * Add Wifi module support for Linux
 * Detect scaled resolutions (Windows, macOS)
 * Optimise font module printing (Windows)
+* Detect pacman package count inside MSYS2 environment (Windows)
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
