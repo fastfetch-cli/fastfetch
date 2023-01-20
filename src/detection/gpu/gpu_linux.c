@@ -146,20 +146,16 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufDestroy(&path);
 }
 
-static void pciDetectTemperatur(const FFinstance* instance, FFGPUResult* gpu, struct pci_dev* device)
+static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
 {
-    const FFTempsResult* tempsResult = ffDetectTemps(instance);
+    const FFTempsResult* tempsResult = ffDetectTemps();
 
     for(uint32_t i = 0; i < tempsResult->values.length; i++)
     {
         FFTempValue* tempValue = ffListGet(&tempsResult->values, i);
 
-        uint32_t tempClass;
-        if(sscanf(tempValue->deviceClass.chars, "%x", &tempClass) != 1)
-            continue;
-
         //The kernel exposes the device class multiplied by 256 for some reason
-        if(tempClass == device->device_class * 256)
+        if(tempValue->deviceClass == device->device_class * 256)
         {
             gpu->temperature = tempValue->value;
             return;
@@ -233,7 +229,7 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
     if(instance->config.gpuTemp)
-        pciDetectTemperatur(instance, gpu, device);
+        pciDetectTemperatur(gpu, device);
 }
 
 static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)

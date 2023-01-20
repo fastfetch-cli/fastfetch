@@ -67,9 +67,9 @@ static double getFrequency(const char* info, const char* scaling)
     return getGHz(scaling);
 }
 
-static double detectCPUTemp(const FFinstance* instance)
+static double detectCPUTemp()
 {
-    const FFTempsResult* temps = ffDetectTemps(instance);
+    const FFTempsResult* temps = ffDetectTemps();
 
     for(uint32_t i = 0; i < temps->values.length; i++)
     {
