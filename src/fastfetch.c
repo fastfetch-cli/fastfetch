@@ -1490,7 +1490,8 @@ int main(int argc, const char** argv)
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
-    parseConfigFiles(&instance, &data);
+    if(!getenv("NO_CONFIG"))
+        parseConfigFiles(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
     //If we don't have a custom structure, use the default one
