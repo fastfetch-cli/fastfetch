@@ -629,7 +629,7 @@ static void generateConfigFile(FFinstance* instance, bool force)
     else
     {
         ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
-        printf("A sample config file has been written in `%s`", filename->chars);
+        printf("A sample config file has been written in `%s`\n", filename->chars);
         exit(0);
     }
 }
