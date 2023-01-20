@@ -29,17 +29,18 @@ static void strbufAppendMountPoint(FFstrbuf* mountpoint, const char* source)
 }
 
 #ifndef __ANDROID__
-static bool isSubvolume(const char* options)
+static bool isSubvolume(const FFlist* allDisks, const FFDisk* currentDisk)
 {
-    const char* prefix = "subvol=/@"; //Btrfs subvolume
-    const char* subvolume = strstr(options, prefix);
-    if(subvolume == NULL)
-        return false;
+    FF_LIST_FOR_EACH(FFDisk, disk, *allDisks)
+    {
+        if(disk == currentDisk)
+            continue;
 
-    subvolume += strlen(prefix);
+        if(ffStrbufEqual(&disk->mountpoint, &currentDisk->mountpoint))
+            return true;
+    }
 
-    //If there is no space or comma after the @, it is a btrfs subvolume
-    return *subvolume != ' ' && *subvolume != ',';
+    return false;
 }
 #endif
 
@@ -104,7 +105,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             else
                 disk->type = FF_DISK_TYPE_HIDDEN;
         #else
-            if(isSubvolume(currentPos))
+            if(isSubvolume(&disks->disks, disk))
                 disk->type = FF_DISK_TYPE_SUBVOLUME;
             else if(strstr(currentPos, "nosuid") != NULL || strstr(currentPos, "nodev") != NULL)
                 disk->type = FF_DISK_TYPE_EXTERNAL;
