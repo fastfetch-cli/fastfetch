@@ -36,6 +36,7 @@ Bugfixes:
 * Fix mintty terminal font detection (Windows)
 * Fix bug that line buffering doesn't work properly (Windows)
 * Fix rpm package count detection (Linux)
+* Fix cpu temp detection (Linux)
 
 Other:
 * Fixed a Typo in iterm error message (@jessebot, #376)
