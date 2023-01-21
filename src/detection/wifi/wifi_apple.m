@@ -119,6 +119,8 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);
                 break;
         }
+        else
+            ffStrbufAppendS(&item->conn.security, "Insecure");
     }
     return NULL;
 }
