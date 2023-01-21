@@ -1,4 +1,4 @@
-# dev
+# 1.9.0
 
 Notable Changes:
 * fastfetch no longer creates a sample config file silently. Use `--gen-config` to generate one.
