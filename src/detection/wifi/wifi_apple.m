@@ -70,6 +70,9 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
 
         switch(inf.security)
         {
+            case kCWSecurityNone:
+                ffStrbufAppendS(&item->conn.security, "Insecure");
+                break;
             case kCWSecurityWEP:
                 ffStrbufAppendS(&item->conn.security, "WEP");
                 break;
@@ -119,8 +122,6 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);
                 break;
         }
-        else
-            ffStrbufAppendS(&item->conn.security, "Insecure");
     }
     return NULL;
 }
