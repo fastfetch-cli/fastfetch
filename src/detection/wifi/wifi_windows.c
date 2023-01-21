@@ -198,6 +198,8 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
             if(connInfo->wlanSecurityAttributes.bOneXEnabled)
                 ffStrbufAppendS(&item->conn.security, " 802.11X");
         }
+        else
+            ffStrbufAppendS(&item->conn.security, "Insecure");
 
         ffWlanFreeMemory(connInfo);
     }

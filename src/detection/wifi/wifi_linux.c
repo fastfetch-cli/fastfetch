@@ -161,8 +161,6 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
                     ffStrbufSetS(&item->conn.protocol, "802.11a/b/g");
             }
         }
-        if(!item->conn.protocol.length)
-            ffStrbufAppendS(&item->conn.protocol, "802.11");
 
         NM80211ApFlags flags = ffnm_access_point_get_flags(ap);
         NM80211ApSecurityFlags wpaFlags = ffnm_access_point_get_wpa_flags(ap);
@@ -188,7 +186,10 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)) {
             ffStrbufAppendS(&item->conn.security, "802.1X ");
         }
-        ffStrbufTrimRight(&item->conn.security, ' ');
+        if (!item->conn.security.length)
+            ffStrbufAppendS(&item->conn.security, "Insecure");
+        else
+            ffStrbufTrimRight(&item->conn.security, ' ');
     }
 
     ffg_object_unref(client);
@@ -294,9 +295,10 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
                 case IW_ENCODE_ALG_AES_CMAC:
                     ffStrbufAppendS(&item->conn.security, "CMAC");
                     break;
+                default:
+                    ffStrbufAppendF(&item->conn.security, "Unknown (%d)", (int) iwe->alg);
+                    break;
             }
-        } else {
-            ffStrbufAppendS(&item->conn.security, "unknown");
         }
 
         close(sock);

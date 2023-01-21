@@ -32,11 +32,12 @@ void ffPrintWifi(FFinstance* instance)
             ffPrintLogoAndKey(instance, FF_WIFI_MODULE_NAME, moduleIndex, &instance->config.wifi.key);
             if(item->conn.ssid.length)
             {
-                printf("%s - %s - %s\n",
-                    item->conn.ssid.chars,
-                    item->conn.protocol.chars,
-                    item->conn.security.length > 0 ? item->conn.security.chars : "insecure"
-                );
+                ffStrbufWriteTo(&item->conn.ssid, stdout);
+                if(item->conn.protocol.length)
+                    printf("- %s", item->conn.protocol.chars);
+                if(item->conn.security.length)
+                    printf("- %s", item->conn.security.chars);
+                putchar('\n');
             }
             else
             {

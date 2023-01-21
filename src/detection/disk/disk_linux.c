@@ -121,11 +121,11 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
 
 #ifdef __ANDROID__
 
-static void detectType(const FFlist* devices, FFDisk* currentDisk, const char* options)
+static void detectType(FF_MAYBE_UNUSED const FFlist* devices, FFDisk* currentDisk, FF_MAYBE_UNUSED const char* options)
 {
     if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
         currentDisk->type = FF_DISK_TYPE_REGULAR;
-    else if(ffStrbufStartsWithS(&disk->mountpoint, "/mnt/media_rw/"))
+    else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/mnt/media_rw/"))
         currentDisk->type = FF_DISK_TYPE_EXTERNAL;
     else
         currentDisk->type = FF_DISK_TYPE_HIDDEN;

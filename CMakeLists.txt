@@ -351,7 +351,7 @@ elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/common/networking_linux.c
         src/common/processing_linux.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_android.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/brightness/brightness_nosupport.c
@@ -378,7 +378,7 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_android.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/util/platform/FFPlatform_unix.c
     )

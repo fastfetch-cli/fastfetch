@@ -67,7 +67,7 @@ static double getFrequency(const char* info, const char* scaling)
     return getGHz(scaling);
 }
 
-static double detectCPUTemp()
+static double detectCPUTemp(void)
 {
     const FFTempsResult* temps = ffDetectTemps();
 
@@ -107,7 +107,7 @@ static void parseIsa(FFstrbuf* cpuIsa)
 void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 {
     if(instance->config.cpuTemp)
-        cpu->temperature = detectCPUTemp(instance);
+        cpu->temperature = detectCPUTemp();
     else
         cpu->temperature = FF_CPU_TEMP_UNSET;
 
