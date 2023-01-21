@@ -27,6 +27,7 @@ Features:
 * Detect scaled resolutions (Windows, macOS)
 * Optimise font module printing (Windows)
 * Detect pacman package count inside MSYS2 environment (Windows)
+* Add Wifi / Battery module support for Android
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
