@@ -121,35 +121,36 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
 
 #ifdef __ANDROID__
 
-static void detectType(const FFlist* allDisks, FFDisk* currentDisk, const char* options)
+static void detectType(const FFlist* devices, FFDisk* currentDisk, const char* options)
 {
-    if(ffStrbufEqualS(&disk->mountpoint, "/") || ffStrbufEqualS(&disk->mountpoint, "/storage/emulated"))
-        disk->type = FF_DISK_TYPE_REGULAR;
+    if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
+        currentDisk->type = FF_DISK_TYPE_REGULAR;
     else if(ffStrbufStartsWithS(&disk->mountpoint, "/mnt/media_rw/"))
-        disk->type = FF_DISK_TYPE_EXTERNAL;
+        currentDisk->type = FF_DISK_TYPE_EXTERNAL;
     else
-        disk->type = FF_DISK_TYPE_HIDDEN;
+        currentDisk->type = FF_DISK_TYPE_HIDDEN;
 }
 
 #else
 
-static bool isSubvolume(const FFlist* allDisks, const FFDisk* currentDisk)
+static bool isSubvolume(const FFlist* devices)
 {
-    FF_LIST_FOR_EACH(FFDisk, disk, *allDisks)
-    {
-        if(disk == currentDisk)
-            continue;
+    const FFstrbuf* currentDevie = ffListGet(devices, devices->length - 1);
 
-        if(ffStrbufEqual(&disk->mountpoint, &currentDisk->mountpoint))
+    for(uint32_t i = 0; i < devices->length - 1; i++)
+    {
+        const FFstrbuf* otherDevice = ffListGet(devices, i);
+
+        if(ffStrbufEqual(currentDevie, otherDevice))
             return true;
     }
 
     return false;
 }
 
-static void detectType(const FFlist* allDisks, FFDisk* currentDisk, const char* options)
+static void detectType(const FFlist* devices, FFDisk* currentDisk, const char* options)
 {
-    if(isSubvolume(allDisks, currentDisk))
+    if(isSubvolume(devices))
         currentDisk->type = FF_DISK_TYPE_SUBVOLUME;
     else if(strstr(options, "nosuid") != NULL || strstr(options, "nodev") != NULL)
         currentDisk->type = FF_DISK_TYPE_EXTERNAL;
@@ -183,8 +184,8 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         return;
     }
 
-    FFstrbuf device;
-    ffStrbufInit(&device);
+    FFlist devices;
+    ffListInit(&devices, sizeof(FFstrbuf));
 
     char* line = NULL;
     size_t len = 0;
@@ -201,8 +202,9 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         char* currentPos = line;
 
         //detect device
-        ffStrbufClear(&device);
-        appendNextEntry(&device, &currentPos);
+        FFstrbuf* device = ffListAdd(&devices);
+        ffStrbufInit(device);
+        appendNextEntry(device, &currentPos);
 
         //detect mountpoint
         ffStrbufInit(&disk->mountpoint);
@@ -214,10 +216,10 @@ void ffDetectDisksImpl(FFDiskResult* disks)
 
         //detect name
         ffStrbufInit(&disk->name);
-        detectName(disk, &device);
+        detectName(disk, device);
 
         //detect type
-        detectType(&disks->disks, disk, currentPos);
+        detectType(&devices, disk, currentPos);
 
         //Detects stats
         detectStats(disk);
@@ -226,7 +228,9 @@ void ffDetectDisksImpl(FFDiskResult* disks)
     if(line != NULL)
         free(line);
 
-    ffStrbufDestroy(&device);
+    FF_LIST_FOR_EACH(FFstrbuf, device, devices)
+        ffStrbufDestroy(device);
+    ffListDestroy(&devices);
 
     fclose(mountsFile);
 }
