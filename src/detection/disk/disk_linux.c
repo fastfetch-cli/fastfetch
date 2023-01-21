@@ -116,6 +116,10 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
         detectNameFromPath(disk, &deviceStat, &basePath);
     }
 
+    //Use the mountpoint as a last resort
+    if(disk->name.length == 0)
+        ffStrbufAppend(&disk->name, &disk->mountpoint);
+
     ffStrbufDestroy(&basePath);
 }
 

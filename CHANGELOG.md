@@ -28,6 +28,7 @@ Features:
 * Optimise font module printing (Windows)
 * Detect pacman package count inside MSYS2 environment (Windows)
 * Add Wifi / Battery module support for Android
+* Disk name support for Linux
 
 Logos:
 * Raspbian (@IamNoRobot, #373)
