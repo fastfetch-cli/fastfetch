@@ -8,7 +8,7 @@
 typedef struct FFTempValue
 {
     FFstrbuf name;
-    FFstrbuf deviceClass;
+    uint32_t deviceClass;
     double value;
 } FFTempValue;
 
@@ -17,6 +17,6 @@ typedef struct FFTempsResult
     FFlist values; //List of FFTempValue
 } FFTempsResult;
 
-const FFTempsResult* ffDetectTemps(const FFinstance* instance);
+const FFTempsResult* ffDetectTemps();
 
 #endif

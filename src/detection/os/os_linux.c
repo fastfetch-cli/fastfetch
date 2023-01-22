@@ -138,11 +138,6 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->versionID);
     ffStrbufInit(&os->codename);
     ffStrbufInit(&os->buildID);
-    ffStrbufInit(&os->systemName);
-    ffStrbufInit(&os->architecture);
-
-    ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
-    ffStrbufSetS(&os->architecture, instance->state.utsname.machine);
 
     detectOS(os, instance);
 

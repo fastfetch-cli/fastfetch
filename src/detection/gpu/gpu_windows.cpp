@@ -40,6 +40,8 @@ static const char* detectWithDxgi(FFlist* gpus)
 
         ffStrbufInit(&gpu->driver);
 
+        gpu->type = desc.DedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+
         adapter->Release();
 
         gpu->temperature = FF_GPU_TEMP_UNSET;
@@ -64,6 +66,8 @@ static const char* detectWithWmi(FFlist* gpus)
     while(FFWmiRecord record = query.next())
     {
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
 
         ffStrbufInit(&gpu->vendor);
         record.getString(L"AdapterCompatibility", &gpu->vendor);

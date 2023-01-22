@@ -1,12 +1,12 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/title.h"
 
 void ffPrintSeparator(FFinstance* instance)
 {
-    const FFTitleResult* result = ffDetectTitle(instance);
-    uint32_t titleLength = result->userName.length + 1 +
-        (instance->config.titleFQDN ? result->fqdn.length : result->hostname.length);
+    uint32_t titleLength = instance->state.platform.userName.length + 1 + (instance->config.titleFQDN ?
+        instance->state.platform.domainName.length :
+        instance->state.platform.hostName.length
+    );
 
     ffLogoPrintLine(instance);
 

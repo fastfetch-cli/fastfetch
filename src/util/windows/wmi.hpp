@@ -11,6 +11,12 @@ extern "C" {
 
 #include <Wbemidl.h>
 
+enum class FFWmiNamespace {
+    CIMV2,
+    WMI,
+    LAST,
+};
+
 struct FFWmiRecord
 {
     IWbemClassObject* obj;
@@ -43,7 +49,7 @@ struct FFWmiQuery
 {
     IEnumWbemClassObject* pEnumerator = nullptr;
 
-    FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error = nullptr);
+    FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error = nullptr, FFWmiNamespace wmiNs = FFWmiNamespace::CIMV2);
     explicit FFWmiQuery(IEnumWbemClassObject* pEnumerator): pEnumerator(pEnumerator) {}
     FFWmiQuery(const FFWmiQuery& other) = delete;
     FFWmiQuery(FFWmiQuery&& other) { *this = (FFWmiQuery&&)other; }

@@ -31,6 +31,7 @@ static bool numEqualsAdapter(const void* first, const void* second)
 int main(void)
 {
     FFlist list;
+    uint32_t n = 0;
 
     //initA
 
@@ -38,6 +39,18 @@ int main(void)
 
     VERIFY(list.elementSize == sizeof(uint32_t));
     VERIFY(list.capacity == 0);
+    VERIFY(list.length == 0);
+
+    //forEach
+    FF_LIST_FOR_EACH(uint32_t, item, list)
+        VERIFY(false);
+
+    //shift
+    VERIFY(!ffListShift(&list, &n));
+    VERIFY(list.length == 0);
+
+    //pop
+    VERIFY(!ffListPop(&list, &n));
     VERIFY(list.length == 0);
 
     //add
@@ -60,12 +73,33 @@ int main(void)
         VERIFY(*(uint32_t*)ffListGet(&list, 0) == 1);
         VERIFY(*(uint32_t*)ffListGet(&list, i - 1) == i);
     }
+    VERIFY(list.length == FF_LIST_DEFAULT_ALLOC + 1);
+
+    uint32_t sum = 0;
+    //forEach
+    FF_LIST_FOR_EACH(uint32_t, item, list)
+        sum += *item;
+    VERIFY(sum == (1 + FF_LIST_DEFAULT_ALLOC + 1) * (FF_LIST_DEFAULT_ALLOC + 1) / 2);
 
     // ffListFirstIndexComp
-    uint32_t n = 10;
+    n = 10;
     VERIFY(ffListFirstIndexComp(&list, &n, numEqualsAdapter) == 9);
     n = 999;
     VERIFY(ffListFirstIndexComp(&list, &n, numEqualsAdapter) == list.length);
+
+    //shift
+    VERIFY(ffListShift(&list, &n));
+    VERIFY(n == 1);
+    VERIFY(list.length == FF_LIST_DEFAULT_ALLOC);
+    VERIFY(*(uint32_t*) ffListGet(&list, 0) == 2);
+    VERIFY(*(uint32_t*) ffListGet(&list, list.length - 1) == FF_LIST_DEFAULT_ALLOC + 1);
+
+    //pop
+    VERIFY(ffListPop(&list, &n));
+    VERIFY(n == FF_LIST_DEFAULT_ALLOC + 1);
+    VERIFY(list.length == FF_LIST_DEFAULT_ALLOC - 1);
+    VERIFY(*(uint32_t*) ffListGet(&list, 0) == 2);
+    VERIFY(*(uint32_t*) ffListGet(&list, list.length - 1) == FF_LIST_DEFAULT_ALLOC);
 
     //Destroy
     ffListDestroy(&list);

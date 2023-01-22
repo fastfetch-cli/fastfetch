@@ -17,7 +17,7 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
     }
 
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.googlecode.iterm2.plist", instance->state.passwd->pw_dir];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.googlecode.iterm2.plist", instance->state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)
@@ -62,7 +62,7 @@ static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 static void detectWarpTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/dev.warp.Warp-Stable.plist", instance->state.passwd->pw_dir];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/dev.warp.Warp-Stable.plist", instance->state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)

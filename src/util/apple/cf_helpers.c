@@ -44,7 +44,10 @@ const char* ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* r
 const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result)
 {
     CFBooleanRef cf = (CFBooleanRef)CFDictionaryGetValue(dict, key);
-    if(cf == NULL || CFGetTypeID(cf) != CFBooleanGetTypeID())
+    if(cf == NULL)
+        return "CFDictionaryGetValue() failed";
+
+    if(CFGetTypeID(cf) != CFBooleanGetTypeID())
         return "TypeID is not 'CFBoolean'";
 
     *result = CFBooleanGetValue(cf);
@@ -53,13 +56,25 @@ const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result)
 
 const char* ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result)
 {
-    CFNumberRef cf = (CFNumberRef)CFDictionaryGetValue(dict, key);
-    if (cf == NULL || CFGetTypeID(cf) != CFNumberGetTypeID())
-        return "TypeID is not 'CFNumber'";
+    CFTypeRef cf = (CFTypeRef)CFDictionaryGetValue(dict, key);
+    if(cf == NULL)
+        return "CFDictionaryGetValue() failed";
 
-    if(!CFNumberGetValue(cf, kCFNumberSInt32Type, result))
-        return "Number type is not SInt32";
-    return NULL;
+    if(CFGetTypeID(cf) == CFNumberGetTypeID())
+    {
+        if(!CFNumberGetValue((CFNumberRef)cf, kCFNumberSInt32Type, result))
+            return "Number type is not SInt32";
+        return NULL;
+    }
+    else if(CFGetTypeID(cf) == CFDataGetTypeID())
+    {
+        if(CFDataGetLength((CFDataRef)cf) != sizeof(int))
+            return "Data length is not sizeof(int)";
+        CFDataGetBytes((CFDataRef)cf, CFRangeMake(0, sizeof(int)), (uint8_t*)result);
+        return NULL;
+    }
+
+    return "TypeID is neither 'CFNumber' nor 'CFData'";
 }
 
 const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryRef* result)

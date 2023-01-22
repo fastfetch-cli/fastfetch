@@ -174,12 +174,13 @@ static inline void printCommandHelp(const char* command)
             "User shell version"
         );
     }
-    else if(strcasecmp(command, "resolution-format") == 0)
+    else if(strcasecmp(command, "display-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("resolution", "{}x{} @ {}Hz", 3,
+        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 4,
             "Screen width",
             "Screen height",
-            "Screen refresh rate"
+            "Screen refresh rate",
+            "Screen brightness"
         );
     }
     else if(strcasecmp(command, "de-format") == 0)
@@ -287,12 +288,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "gpu-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("gpu", "{} {}", 5,
+        constructAndPrintCommandHelpFormat("gpu", "{} {}", 6,
             "GPU vendor",
             "GPU name",
             "GPU driver",
             "GPU temperature",
-            "GPU core count"
+            "GPU core count",
+            "GPU type"
         );
     }
     else if(strcasecmp(command, "memory-format") == 0)
@@ -371,13 +373,11 @@ static inline void printCommandHelp(const char* command)
             "Connection status",
             "Connection SSID",
             "Connection mac address",
-            "Connection PHY type",
+            "Connection protocol",
             "Connection signal quality (percentage)",
             "Connection RX rate",
             "Connection TX rate",
-            "Security enabled",
-            "Security 802.1X enabled",
-            "Security algorithm"
+            "Connection Security algorithm"
         );
     }
     else if(strcasecmp(command, "player-format") == 0)
@@ -525,17 +525,29 @@ static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t inde
 
 static inline void listAvailablePresets(FFinstance* instance)
 {
-    FFstrbuf folder;
-    ffStrbufInitA(&folder, 64);
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
+    {
+        ffStrbufAppendS(path, "fastfetch/presets/");
+        listAvailablePresetsFromFolder(path, 0, NULL);
+    }
+}
 
-    ffStrbufSetS(&folder, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&folder, "/.local/share/fastfetch/presets/");
-    listAvailablePresetsFromFolder(&folder, 0, NULL);
+static void listConfigPaths(FFinstance* instance)
+{
+    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.configDirs)
+    {
+        ffStrbufAppendS(folder, "fastfetch/config.conf");
+        printf("%s%s\n", folder->chars, ffFileExists(folder->chars, S_IFREG) ? " (*)" : "");
+    }
+}
 
-    ffStrbufSetS(&folder, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
-    listAvailablePresetsFromFolder(&folder, 0, NULL);
-
-    ffStrbufDestroy(&folder);
+static void listDataPaths(FFinstance* instance)
+{
+    FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.dataDirs)
+    {
+        ffStrbufAppendS(folder, "fastfetch/");
+        puts(folder->chars);
+    }
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
@@ -603,6 +615,25 @@ static bool parseConfigFile(FFinstance* instance, FFdata* data, const char* path
     return true;
 }
 
+static void generateConfigFile(FFinstance* instance, bool force)
+{
+    FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance->state.platform.configDirs, 0);
+    // Paths generated in `init.c/initConfigDirs` end with `/`
+    ffStrbufAppendS(filename, "fastfetch/config.conf");
+
+    if (!force && ffFileExists(filename->chars, S_IFREG))
+    {
+        fprintf(stderr, "Config file exists in `%s`, use `--gen-config-force` to overwrite\n", filename->chars);
+        exit(1);
+    }
+    else
+    {
+        ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
+        printf("A sample config file has been written in `%s`\n", filename->chars);
+        exit(0);
+    }
+}
+
 static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
     if(value == NULL)
@@ -616,37 +647,29 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
     if(parseConfigFile(instance, data, value))
         return;
 
-    //Try to load as an user preset
+    //Try to load as a relative path
 
-    FFstrbuf filename;
-    ffStrbufInitA(&filename, 64);
+    FFstrbuf absolutePath;
+    ffStrbufInitA(&absolutePath, 128);
 
-    ffStrbufAppendS(&filename, instance->state.passwd->pw_dir);
-    ffStrbufAppendS(&filename, "/.local/share/fastfetch/presets/");
-    ffStrbufAppendS(&filename, value);
-
-    if(parseConfigFile(instance, data, filename.chars))
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
-        ffStrbufDestroy(&filename);
-        return;
+        //We need to copy it, because if a config file loads a config file, the value of path must be unchanged
+        ffStrbufSet(&absolutePath, path);
+        ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
+        ffStrbufAppendS(&absolutePath, value);
+
+        bool success = parseConfigFile(instance, data, absolutePath.chars);
+
+        if(success)
+            return;
     }
 
-
-    //Try to load as a system preset
-
-    ffStrbufSetS(&filename, FASTFETCH_TARGET_DIR_USR"/share/fastfetch/presets/");
-    ffStrbufAppendS(&filename, value);
-
-    if(parseConfigFile(instance, data, filename.chars))
-    {
-        ffStrbufDestroy(&filename);
-        return;
-    }
+    ffStrbufDestroy(&absolutePath);
 
     //File not found
 
     fprintf(stderr, "Error: couldn't find config: %s\n", value);
-    ffStrbufDestroy(&filename);
     exit(414);
 }
 
@@ -836,7 +859,35 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "-v") == 0 || strcasecmp(key, "--version") == 0)
     {
-        puts("fastfetch "FASTFETCH_PROJECT_VERSION""FASTFETCH_PROJECT_VERSION_TWEAK);
+        #ifndef NDEBUG
+            #define FF_BUILD_TYPE "-debug"
+        #else
+            #define FF_BUILD_TYPE
+        #endif
+
+        #if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64)
+            #define FF_ARCHITECTURE "x86_64"
+        #elif defined(__i386__) || defined(__i386) || defined(__i486__) || defined(__i486) || defined(__i586__) || defined(__i586) || defined(__i686__) || defined(__i686)
+            #define FF_ARCHITECTURE "i386"
+        #elif defined(__aarch64__)
+            #define FF_ARCHITECTURE "aarch64"
+        #elif defined(__arm__)
+            #define FF_ARCHITECTURE "arm"
+        #elif defined(__mips__)
+            #define FF_ARCHITECTURE "mips"
+        #elif defined(__powerpc__) || defined(__powerpc)
+            #define FF_ARCHITECTURE "powerpc"
+        #elif defined(__riscv__) || defined(__riscv)
+            #define FF_ARCHITECTURE "riscv"
+        #elif
+            #define FF_ARCHITECTURE "unknown"
+        #endif
+
+        puts("fastfetch " FASTFETCH_PROJECT_VERSION FASTFETCH_PROJECT_VERSION_TWEAK FF_BUILD_TYPE " (" FF_ARCHITECTURE ")");
+
+        #undef FF_ARCHITECTURE
+        #undef FF_BUILD_TYPE
+
         exit(0);
     }
     else if(strcasecmp(key, "--version-raw") == 0)
@@ -883,6 +934,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             listAvailablePresets(instance);
             exit(0);
         }
+        else if(strcasecmp(subkey, "-config-paths") == 0)
+        {
+            listConfigPaths(instance);
+            exit(0);
+        }
+        else if(strcasecmp(subkey, "-data-paths") == 0)
+        {
+            listDataPaths(instance);
+            exit(0);
+        }
         else if(strcasecmp(subkey, "-features") == 0)
         {
             ffListFeatures();
@@ -912,6 +973,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         fputs("`--nocache` are obsoleted. Caching functions other than image caching are removed.\n\n", stderr);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
+    else if(strcasecmp(key, "--gen-config") == 0)
+        generateConfigFile(instance, false);
+    else if(strcasecmp(key, "--gen-config-force") == 0)
+        generateConfigFile(instance, true);
     else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
         instance->config.multithreading = optionParseBoolean(value);
     else if(strcasecmp(key, "--stat") == 0)
@@ -939,8 +1004,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         //this is usally wanted when using the none logo
         if(strcasecmp(value, "none") == 0)
         {
+            instance->config.logo.paddingTop = 0;
             instance->config.logo.paddingRight = 0;
             instance->config.logo.paddingLeft = 0;
+            instance->config.logo.type = FF_LOGO_TYPE_NONE;
         }
     }
     else if(startsWith(key, "--logo"))
@@ -957,7 +1024,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
                 "data-raw", FF_LOGO_TYPE_DATA_RAW,
                 "sixel", FF_LOGO_TYPE_IMAGE_SIXEL,
                 "kitty", FF_LOGO_TYPE_IMAGE_KITTY,
+                "iterm", FF_LOGO_TYPE_IMAGE_ITERM,
                 "chafa", FF_LOGO_TYPE_IMAGE_CHAFA,
+                "raw", FF_LOGO_TYPE_IMAGE_RAW,
+                "none", FF_LOGO_TYPE_NONE,
                 NULL
             );
         }
@@ -985,6 +1055,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             instance->config.logo.paddingLeft = padding;
             instance->config.logo.paddingRight = padding;
         }
+        else if(strcasecmp(subkey, "-padding-top") == 0)
+            instance->config.logo.paddingTop = optionParseUInt32(key, value);
         else if(strcasecmp(subkey, "-padding-left") == 0)
             instance->config.logo.paddingLeft = optionParseUInt32(key, value);
         else if(strcasecmp(subkey, "-padding-right") == 0)
@@ -1035,6 +1107,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         optionParseString(key, value, &instance->config.logo.source);
         instance->config.logo.type = FF_LOGO_TYPE_IMAGE_ITERM;
+    }
+    else if(strcasecmp(key, "--raw") == 0)
+    {
+        optionParseString(key, value, &instance->config.logo.source);
+        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_RAW;
     }
     else if(strcasecmp(key, "--chafa-fg-only") == 0)
         instance->config.logo.chafaFgOnly = optionParseBoolean(value);
@@ -1098,7 +1175,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
     else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
     else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
-    else if(optionParseModuleArgs(key, value, "resolution", &instance->config.resolution)) {}
+    else if(optionParseModuleArgs(key, value, "display", &instance->config.display)) {}
+    else if(optionParseModuleArgs(key, value, "brightness", &instance->config.brightness)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
     else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
     else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
@@ -1184,6 +1262,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             optionParseString(key, value, &instance->config.libcJSON);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
             optionParseString(key, value, &instance->config.libwlanapi);
+        else if(strcasecmp(subkey, "-nm") == 0)
+            optionParseString(key, value, &instance->config.libnm);
         else
             goto error;
     }
@@ -1198,14 +1278,26 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.gpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-temp") == 0)
         instance->config.batteryTemp = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
+        instance->config.gpuHideIntegrated = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-hide-discrete") == 0)
+        instance->config.gpuHideDiscrete = optionParseBoolean(value);
     else if(strcasecmp(key, "--title-fqdn") == 0)
         instance->config.titleFQDN = optionParseBoolean(value);
+    else if(strcasecmp(key, "--shell-version") == 0)
+        instance->config.shellVersion = optionParseBoolean(value);
+    else if(strcasecmp(key, "--terminal-version") == 0)
+        instance->config.terminalVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
     else if(strcasecmp(key, "--disk-show-removable") == 0)
         instance->config.diskShowRemovable = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-show-hidden") == 0)
         instance->config.diskShowHidden = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disk-show-subvolumes") == 0)
+        instance->config.diskShowSubvolumes = optionParseBoolean(value);
+    else if(strcasecmp(key, "--disk-show-unknown") == 0)
+        instance->config.diskShowUnknown = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
@@ -1242,6 +1334,20 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--percent-type") == 0)
         instance->config.percentType = optionParseUInt32(key, value);
+    else if(strcasecmp(key, "--command-shell") == 0)
+        optionParseString(key, value, &instance->config.commandShell);
+    else if(strcasecmp(key, "--command-key") == 0)
+    {
+        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandKeys);
+        ffStrbufInit(result);
+        optionParseString(key, value, result);
+    }
+    else if(strcasecmp(key, "--command-text") == 0)
+    {
+        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandTexts);
+        ffStrbufInit(result);
+        optionParseString(key, value, result);
+    }
 
     //////////////////
     //Unknown option//
@@ -1255,25 +1361,20 @@ error:
     }
 }
 
-static void parseConfigFileSystem(FFinstance* instance, FFdata* data)
+static void parseConfigFiles(FFinstance* instance, FFdata* data)
 {
-    parseConfigFile(instance, data, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF"/fastfetch/config.conf");
-}
+    for(uint32_t i = instance->state.platform.configDirs.length; i > 0; --i)
+    {
+        if(!data->loadUserConfig)
+            return;
 
-static void parseConfigFileUser(FFinstance* instance, FFdata* data)
-{
-    if(!data->loadUserConfig)
-        return;
+        FFstrbuf* dir = ffListGet(&instance->state.platform.configDirs, i - 1);
+        uint32_t dirLength = dir->length;
 
-    FFstrbuf* filename = ffListGet(&instance->state.configDirs, 0);
-    uint32_t filenameLength = filename->length;
-
-    ffStrbufAppendS(filename, "/fastfetch/config.conf");
-
-    if(!parseConfigFile(instance, data, filename->chars))
-        ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
-
-    ffStrbufSubstrBefore(filename, filenameLength);
+        ffStrbufAppendS(dir, "fastfetch/config.conf");
+        parseConfigFile(instance, data, dir->chars);
+        ffStrbufSubstrBefore(dir, dirLength);
+    }
 }
 
 static void parseArguments(FFinstance* instance, FFdata* data, int argc, const char** argv)
@@ -1320,6 +1421,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintBios(instance);
     else if(strcasecmp(line, "board") == 0)
         ffPrintBoard(instance);
+    else if(strcasecmp(line, "brightness") == 0)
+        ffPrintBrightness(instance);
     else if(strcasecmp(line, "chassis") == 0)
         ffPrintChassis(instance);
     else if(strcasecmp(line, "kernel") == 0)
@@ -1332,8 +1435,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintPackages(instance);
     else if(strcasecmp(line, "shell") == 0)
         ffPrintShell(instance);
-    else if(strcasecmp(line, "resolution") == 0)
-        ffPrintResolution(instance);
+    else if(strcasecmp(line, "display") == 0)
+        ffPrintDisplay(instance);
     else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
         ffPrintDesktopEnvironment(instance);
     else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)
@@ -1398,6 +1501,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOpenCL(instance);
     else if(strcasecmp(line, "users") == 0)
         ffPrintUsers(instance);
+    else if(strcasecmp(line, "command") == 0)
+        ffPrintCommand(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
@@ -1413,8 +1518,8 @@ int main(int argc, const char** argv)
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
-    parseConfigFileSystem(&instance, &data);
-    parseConfigFileUser(&instance, &data);
+    if(!getenv("NO_CONFIG"))
+        parseConfigFiles(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
     //If we don't have a custom structure, use the default one
@@ -1431,6 +1536,10 @@ int main(int argc, const char** argv)
         ffPrepareWeather(&instance);
 
     ffStart(&instance);
+
+    #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+        fflush(stdout);
+    #endif
 
     //Parse the structure and call the modules
     uint32_t startIndex = 0;

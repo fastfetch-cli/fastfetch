@@ -8,18 +8,19 @@
 
 static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
 {
+    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
     uint32_t dirLength = dir->length;
 
-    FFstrbuf valueBuffer;
+    FF_STRBUF_AUTO_DESTROY valueBuffer;
     ffStrbufInit(&valueBuffer);
 
     ffStrbufAppendS(dir, "temp1_input");
-    ffReadFileBuffer(dir->chars, &valueBuffer);
+    if(!ffReadFileBuffer(dir->chars, &valueBuffer))
+        return false;
+
     ffStrbufSubstrBefore(dir, dirLength);
 
-    value->value = ffStrbufToDouble(&valueBuffer);
-
-    ffStrbufDestroy(&valueBuffer);
+    value->value = ffStrbufToDouble(&valueBuffer) / 1000; // valueBuffer is millidegree Celsius
 
     if(value->value != value->value)
         return false;
@@ -29,13 +30,19 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufAppendS(dir, "device/class");
-    ffReadFileBuffer(dir->chars, &value->deviceClass);
-    ffStrbufSubstrBefore(dir, dirLength);
+    if(!ffReadFileBuffer(dir->chars, &valueBuffer))
+    {
+        ffStrbufSubstrBefore(dir, dirLength);
+        ffStrbufAppendS(dir, "device/device/class");
+        ffReadFileBuffer(dir->chars, &valueBuffer);
+    }
+    if(valueBuffer.length)
+        value->deviceClass = (uint32_t) strtoul(valueBuffer.chars, NULL, 16);
 
-    return value->name.length > 0 || value->deviceClass.length > 0;
+    return value->name.length > 0 || value->deviceClass > 0;
 }
 
-const FFTempsResult* ffDetectTemps(const FFinstance* instance)
+const FFTempsResult* ffDetectTemps()
 {
     static FFTempsResult result;
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
@@ -48,13 +55,6 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance)
         return &result;
     }
     init = true;
-
-    if(!instance->config.allowSlowOperations)
-    {
-        ffListInitA(&result.values, sizeof(FFTempValue), 0);
-        ffThreadMutexUnlock(&mutex);
-        return &result;
-    }
 
     ffListInitA(&result.values, sizeof(FFTempValue), 16);
 
@@ -83,11 +83,10 @@ const FFTempsResult* ffDetectTemps(const FFinstance* instance)
 
         FFTempValue* temp = ffListAdd(&result.values);
         ffStrbufInit(&temp->name);
-        ffStrbufInit(&temp->deviceClass);
+        temp->deviceClass = 0;
         if(!parseHwmonDir(&baseDir, temp))
         {
             ffStrbufDestroy(&temp->name);
-            ffStrbufDestroy(&temp->deviceClass);
             --result.values.length;
         }
 

@@ -10,5 +10,5 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInitA(&ds->deProcessName, 0);
     ffStrbufInitA(&ds->dePrettyName, 0);
     ffStrbufInitA(&ds->deVersion, 0);
-    ffListInitA(&ds->resolutions, sizeof(FFResolutionResult), 0);
+    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 0);
 }

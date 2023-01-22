@@ -17,8 +17,6 @@ typedef struct FFOSResult
     FFstrbuf versionID;
     FFstrbuf codename;
     FFstrbuf buildID;
-    FFstrbuf systemName;
-    FFstrbuf architecture;
 } FFOSResult;
 
 const FFOSResult* ffDetectOS(const FFinstance* instance);

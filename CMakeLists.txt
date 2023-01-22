@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.8.2
+    VERSION 1.9.0
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -68,6 +68,7 @@ cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" OFF)
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
+cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
@@ -102,6 +103,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
 if(WIN32)
     set(CMAKE_CXX_STANDARD 11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
 
 # Used for dlopen finding dylibs installed by homebrew
@@ -244,7 +246,6 @@ set(LIBFASTFETCH_SRC
     src/detection/packages/packages.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
-    src/detection/title.c
     src/detection/vulkan.c
     src/logo/builtin.c
     src/logo/image/im6.c
@@ -254,6 +255,7 @@ set(LIBFASTFETCH_SRC
     src/modules/battery.c
     src/modules/bios.c
     src/modules/board.c
+    src/modules/brightness.c
     src/modules/break.c
     src/modules/chassis.c
     src/modules/colors.c
@@ -261,6 +263,7 @@ set(LIBFASTFETCH_SRC
     src/modules/cpuUsage.c
     src/modules/cursor.c
     src/modules/custom.c
+    src/modules/command.c
     src/modules/date.c
     src/modules/datetime.c
     src/modules/de.c
@@ -281,7 +284,7 @@ set(LIBFASTFETCH_SRC
     src/modules/poweradapter.c
     src/modules/processes.c
     src/modules/publicip.c
-    src/modules/resolution.c
+    src/modules/display.c
     src/modules/separator.c
     src/modules/shell.c
     src/modules/media.c
@@ -300,6 +303,7 @@ set(LIBFASTFETCH_SRC
     src/util/FFlist.c
     src/util/FFstrbuf.c
     src/util/FFvaluestore.c
+    src/util/platform/FFPlatform.c
 )
 
 if(LINUX)
@@ -309,6 +313,7 @@ if(LINUX)
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
+        src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
@@ -340,14 +345,16 @@ if(LINUX)
         src/detection/users/users_linux.c
         src/detection/wifi/wifi_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/common/networking_linux.c
         src/common/processing_linux.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_android.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cursor/cursor_nosupport.c
@@ -371,17 +378,19 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_android.c
         src/detection/wmtheme/wmtheme_nosupport.c
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/board/board_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpuUsage/cpuUsage_bsd.c
@@ -413,6 +422,7 @@ elseif(BSD)
         src/detection/users/users_linux.c
         src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -422,6 +432,7 @@ elseif(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/board/board_nosupport.c
+        src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
@@ -450,6 +461,7 @@ elseif(APPLE)
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
+        src/util/platform/FFPlatform_unix.c
     )
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
@@ -458,6 +470,7 @@ elseif(WIN32)
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
+        src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_windows.c
         src/detection/cpuUsage/cpuUsage_windows.c
@@ -483,11 +496,10 @@ elseif(WIN32)
         src/detection/wifi/wifi_windows.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
-        src/util/windows/pwd.c
         src/util/windows/registry.c
         src/util/windows/unicode.c
-        src/util/windows/utsname.c
         src/util/windows/wmi.cpp
+        src/util/platform/FFPlatform_windows.c
     )
 endif()
 
@@ -626,6 +638,10 @@ ff_lib_enable(LIBCJSON
     "libcjson"
     "CJson"
 )
+ff_lib_enable(LIBNM
+    "libnm"
+    "libnm"
+)
 ff_lib_enable(FREETYPE
     "freetype2"
     "FreeType2"
@@ -637,7 +653,6 @@ if(ENABLE_THREADS)
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
 endif()
-
 
 if(ENABLE_BUFFER)
     target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
@@ -652,6 +667,7 @@ if(APPLE)
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
+        PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)
     target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
@@ -711,6 +727,11 @@ target_compile_definitions(flashfetch
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c
+    target_compile_definitions(fastfetch PRIVATE FF_ENABLE_BUFFER)
+    target_compile_definitions(flashfetch PRIVATE FF_ENABLE_BUFFER)
+endif()
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

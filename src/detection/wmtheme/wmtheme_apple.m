@@ -9,7 +9,7 @@ static bool detectQuartzCompositor(FFinstance* instance, FFstrbuf* themeOrError)
     FF_UNUSED(instance);
 
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/.GlobalPreferences.plist", instance->state.passwd->pw_dir];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/.GlobalPreferences.plist", instance->state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)

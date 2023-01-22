@@ -4,6 +4,26 @@
 #include <dwmapi.h>
 #include <WinUser.h>
 
+typedef struct
+{
+    WCHAR* deviceName;
+    uint32_t width;
+    uint32_t height;
+} DataBundle;
+
+static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC hDC, FF_MAYBE_UNUSED LPRECT rc, LPARAM lparam)
+{
+    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
+    DataBundle* data = (DataBundle*) lparam;
+    if(GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi) && wcscmp(mi.szDevice, data->deviceName) == 0)
+    {
+        data->width = (uint32_t) mi.rcMonitor.right;
+        data->height = (uint32_t) mi.rcMonitor.bottom;
+        return FALSE;
+    }
+    return TRUE;
+}
+
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
 {
     FF_UNUSED(instance);
@@ -23,7 +43,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
     ffStrbufInit(&ds->deVersion);
-    ffListInit(&ds->resolutions, sizeof(FFResolutionResult));
+    ffListInit(&ds->displays, sizeof(FFDisplayResult));
 
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(DISPLAY_DEVICEW) };
     for(DWORD devNum = 0; EnumDisplayDevicesW(NULL, devNum, &displayDevice, 0) != 0; ++devNum)
@@ -34,7 +54,13 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
         if(EnumDisplaySettingsW(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode) == 0)
             continue;
 
-        ffdsAppendResolution(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency);
+        DataBundle data = {
+            .deviceName = displayDevice.DeviceName,
+            .width = 0,
+            .height = 0,
+        };
+        EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM)&data);
+        ffdsAppendDisplay(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, data.width, data.height);
     }
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067

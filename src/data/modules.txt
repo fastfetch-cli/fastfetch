@@ -11,6 +11,7 @@ Date
 Datetime
 DE
 Disk
+Display
 Font
 GPU
 Host
@@ -27,7 +28,6 @@ Player
 PowerAdapter
 Processes
 PublicIP
-Resolution
 Separator
 Shell
 Swap

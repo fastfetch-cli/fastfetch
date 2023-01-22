@@ -6,13 +6,13 @@
 #include <stdlib.h>
 
 #define FF_GPU_MODULE_NAME "GPU"
-#define FF_GPU_NUM_FORMAT_ARGS 5
+#define FF_GPU_NUM_FORMAT_ARGS 6
 
-static void printGPUResult(FFinstance* instance, uint8_t index, FFGPUResult* gpu)
+static void printGPUResult(FFinstance* instance, uint8_t index, const FFGPUResult* gpu)
 {
     if(instance->config.gpu.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu.key);
+        ffPrintLogoAndKey(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu.key);
 
         FFstrbuf output;
         ffStrbufInitA(&output, gpu->vendor.length + 1 + gpu->name.length);
@@ -37,12 +37,21 @@ static void printGPUResult(FFinstance* instance, uint8_t index, FFGPUResult* gpu
     }
     else
     {
+        const char* type;
+        if(gpu->type == FF_GPU_TYPE_INTEGRATED)
+            type = "Integrated";
+        else if(gpu->type == FF_GPU_TYPE_DISCRETE)
+            type = "Discrete";
+        else
+            type = "Unknown";
+
         ffPrintFormat(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
             {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
+            {FF_FORMAT_ARG_TYPE_STRING, type},
         });
     }
 }
@@ -51,12 +60,27 @@ void ffPrintGPU(FFinstance* instance)
 {
     const FFlist* gpus = ffDetectGPU(instance);
 
-    if(gpus->length == 0)
+    FFlist selectedGpus;
+    ffListInitA(&selectedGpus, sizeof(const FFGPUResult*), gpus->length);
+
+    for(uint32_t i = 0; i < gpus->length; i++)
     {
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "No GPUs found");
-        return;
+        const FFGPUResult* gpu = ffListGet(gpus, i);
+
+        if(gpu->type == FF_GPU_TYPE_INTEGRATED && instance->config.gpuHideIntegrated)
+            continue;
+
+        if(gpu->type == FF_GPU_TYPE_DISCRETE && instance->config.gpuHideDiscrete)
+            continue;
+
+        * (const FFGPUResult**) ffListAdd(&selectedGpus) = gpu;
     }
 
-    for(uint8_t i = 0; i < (uint8_t) gpus->length; i++)
-        printGPUResult(instance, gpus->length == 1 ? 0 : (uint8_t) (i + 1), ffListGet(gpus, i));
+    for(uint32_t i = 0; i < selectedGpus.length; i++)
+        printGPUResult(instance, selectedGpus.length == 1 ? 0 : (uint8_t) (i + 1), * (const FFGPUResult**) ffListGet(&selectedGpus, i));
+
+    if(selectedGpus.length == 0)
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &instance->config.gpu, "No GPUs found");
+
+    ffListDestroy(&selectedGpus);
 }

@@ -88,15 +88,15 @@ static void detectKonsole(const FFinstance* instance, FFTerminalFontResult* term
     }
 
     FFstrbuf profilePath;
-    ffStrbufInitA(&profilePath, 64);
-    ffStrbufAppendS(&profilePath, ".local/share/konsole/");
+    ffStrbufInitA(&profilePath, 32);
+    ffStrbufAppendS(&profilePath, "konsole/");
     ffStrbufAppend(&profilePath, &profile);
 
     ffStrbufDestroy(&profile);
 
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
-    ffParsePropFileHome(instance, profilePath.chars, "Font =", &fontName);
+    ffParsePropFileData(instance, profilePath.chars, "Font =", &fontName);
 
     if(fontName.length == 0)
         ffStrbufAppendF(&terminalFont->error, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath.chars);
@@ -149,7 +149,9 @@ static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResul
     ffStrbufInit(&fontSize);
 
     FFstrbuf profile;
-    ffStrbufInitF(&profile, "%s/.config/deepin/deepin-terminal/config.conf", instance->state.passwd->pw_dir);
+    ffStrbufInit(&profile);
+    ffStrbufAppend(&profile, &instance->state.platform.homeDir);
+    ffStrbufAppendS(&profile, ".config/deepin/deepin-terminal/config.conf"); //TODO: Use config dirs
     FILE* file = fopen(profile.chars, "r");
 
     if(file)

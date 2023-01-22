@@ -6,7 +6,7 @@
 # Empty lines or lines starting with # are ignored.
 
 # This file was shipped with $" FASTFETCH_PROJECT_VERSION $".
-# Use fastfetch --print-config-user > ~/.config/fastfetch/config.conf to overwrite this file with the current defaults
+# Use fastfetch --gen-config-force to overwrite this file with the current defaults
 
 # Below some often usefull options are listed. Uncomment and modify them so they take affect.
 # Note that there are a lot more options than the ones listed here, take a look at "fastfetch --help".
@@ -16,7 +16,7 @@
 # Load additional config files.
 # Some are shipped with fastfetch, list them with "fastfetch --list-presets".
 # Must be a path to a config file or the name of a shipped preset.
-# The config file is completly loaded before continuing in the current file, so the placement of this option matters, as later options overwrite already set ones.
+# The config file is completely loaded before continuing in the current file, so the placement of this option matters, as later options overwrite already set ones.
 # Can be used multiple times to load multiple config files / presets.
 #--load-config /path/to/config.txt
 
@@ -114,6 +114,12 @@
 # Default is 0.
 #--logo-padding-right 0
 
+# Logo padding top option:
+# Adds a padding to the top side of the logo.
+# Must be a positive integer.
+# Default is 0.
+#--logo-padding-top 0
+
 # Logo print remaining option:
 # Sets if the remaining logo should be printed, it is has more lines than modules to show.
 # Must be true or false.
@@ -206,10 +212,45 @@
 # Default is auto.
 #--gl auto
 
+# GPU hide options
+# Sets weather to hide certain gpu types
+# Must be either true or false
+# Default is false.
+#--gpu-hide-integrated
+#--gpu-hide-discrete
+
+# Shell option
+# Sets if shell version should be detected and printed
+# Must be either true or false
+# Default is true.
+#--shell-version true
+
+# Terminal option
+# Sets if terminal version should be detected and printed
+# Must be either true or false
+# Default is true.
+#--terminal-version true
+
+# Disk show options
+# Sets if certain types of disk should be printed
+# Must be either true or false
+# Default is false except for --disk-show-removable.
+#--disk-show-removable true
+#--disk-show-hidden false
+#--disk-show-subvolumes false
+#--disk-show-unknown false
+
+# Disk option
+# A colon (semicolon on Windows) separated list of folder paths for the disk output
+# This option override `--disk-show-*` options above
+# Must be a string
+# Default is "/:/home" ("C:\\;D:\\ ..." on Windows).
+#--disk-folders /:/home
+
 # Percentage output type option
 # Applies to all modules that prints percentage values. Currently memory, swap, disk, battery and CPU usage are supported.
 # Only works with default format ( without --module-format option ).
-# 0: prints none; 1: prints percent number only; 2: prints bar only; 3: prints both percent number and bar
+# 0: prints none; 1: prints percent number only; 2: prints bar only; 3: prints both percent number and bar; 6: prints bar and hide other texts
 #--percent-type 1
 
 # Key options:
@@ -223,7 +264,8 @@
 #--processes-key Processes
 #--packages-key Packages
 #--shell-key Shell
-#--resolution-key Resolution {1}
+#--display-key Display {1}
+#--brightness-key Brightness ({1})
 #--de-key DE
 #--wm-key WM
 #--wm-theme-key WM Theme
@@ -267,7 +309,8 @@
 #--processes-format
 #--packages-format
 #--shell-format
-#--resolution-format
+#--display-format
+#--brightness-format
 #--de-format
 #--wm-format
 #--wm-theme-format
@@ -310,7 +353,8 @@
 #--processes-error
 #--packages-error
 #--shell-error
-#--resolution-error
+#--display-error
+#--brightness-error
 #--de-error
 #--wm-error
 #--wm-theme-error

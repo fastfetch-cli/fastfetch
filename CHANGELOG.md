@@ -1,3 +1,49 @@
+# 1.9.0
+
+Notable Changes:
+* fastfetch no longer creates a sample config file silently. Use `--gen-config` to generate one.
+* fastfetch now search for user config file in the order of `fastfetch --list-config-paths`
+* Unknown disks are hidden by default.
+* `Resolution` module is renamed to `Display`. (#393)
+
+Features:
+* `--logo-padding-top` option (@CarterLi, #372)
+* Raw image file as logo support (@CarterLi)
+* Look for config files in `$APPDATA` ([RoamingAppData](https://superuser.com/questions/21458/why-are-there-directories-called-local-locallow-and-roaming-under-users-user#answer-21462)) (Windows)
+* Look for config files in `~/Library/Preferences` (macOS)
+* Add `--list-config-paths` option which list search paths of config files
+* Add `--list-data-paths` option which list search paths for presets and logos
+* Add `Brightness` module support
+* Add `Battery` module support for FreeBSD
+* Add `--disk-show-unknown` option for Disk module
+* Add `--disk-show-subvolumes` option for Disk module
+* Add `--gpu-hide-integrated` option (#379)
+* Add `--gpu-hide-discrete` option (#379)
+* Detect terminal version when available
+* Support `WezTerm` terminal font detection (requires [`wezterm` executable](https://wezfurlong.org/wezterm/cli/general.html) being available)
+* Add `--shell-version` and `--terminal-version` options to disable shell / terminal version detection
+* Enhance `--percent-type` to allow hiding other texts (#387)
+* Add Wifi module support for Linux
+* Detect scaled resolutions (Windows, macOS)
+* Optimise font module printing (Windows)
+* Detect pacman package count inside MSYS2 environment (Windows)
+* Add Wifi / Battery module support for Android
+* Disk name support for Linux
+
+Logos:
+* Raspbian (@IamNoRobot, #373)
+
+Bugfixes:
+* `--logo-type` now does accept `iterm` too (@CarterLi, #374)
+* Fix mintty terminal font detection (Windows)
+* Fix bug that line buffering doesn't work properly (Windows)
+* Fix rpm package count detection (Linux)
+* Fix cpu temp detection (Linux)
+
+Other:
+* Fixed a Typo in iterm error message (@jessebot, #376)
+* Don't try to load config file in `/etc` (Windows)
+
 # 1.8.2
 
 Bugfixes:
@@ -112,7 +158,7 @@ Bugfixes:
 * Don't segfault in GPU code on Intel Macs (@CarterLi, #236)
 * Don't use hardcoded size units in presets (@dr460nf1r3, #255)
 * Don't crash with some format strings (#252)
-* --logo-none keeps key color now (#264)
+* --logo none keeps key color now (#264)
 
 # 1.7.2
 

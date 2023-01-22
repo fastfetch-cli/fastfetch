@@ -88,9 +88,9 @@ static void detectPlasma(const FFinstance* instance, FFQtResult* result)
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 64);
 
-    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
+    FF_LIST_FOR_EACH(FFstrbuf, configDir, instance->state.platform.configDirs)
     {
-        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
+        ffStrbufSet(&baseDir, configDir);
         ffStrbufAppendS(&baseDir, "kdeglobals");
 
         if(detectPlasmaFromFile(baseDir.chars, result))

@@ -8,20 +8,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifndef _WIN32
-    #include <pwd.h>
-    #include <sys/utsname.h>
-#else
-    #include "util/windows/pwd.h"
-    #include "util/windows/utsname.h"
-#endif
-
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
+#include "util/platform/FFPlatform.h"
 
 static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
-#define FF_UNUSED_PARAM __attribute__ ((__unused__))
+#define FF_MAYBE_UNUSED __attribute__ ((__unused__))
 
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
@@ -37,6 +30,8 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_IMAGE_KITTY, //image file, printed as kitty graphics protocol
     FF_LOGO_TYPE_IMAGE_ITERM, //image file, printed as iterm graphics protocol
     FF_LOGO_TYPE_IMAGE_CHAFA, //image file, printed as ascii art using libchafa
+    FF_LOGO_TYPE_IMAGE_RAW,   //image file, printed as raw binary string
+    FF_LOGO_TYPE_NONE,        //--logo none
 } FFLogoType;
 
 typedef enum FFBinaryPrefixType
@@ -70,6 +65,7 @@ typedef struct FFconfig
         FFstrbuf colors[FASTFETCH_LOGO_MAX_COLORS];
         uint32_t width;
         uint32_t height;
+        uint32_t paddingTop;
         uint32_t paddingLeft;
         uint32_t paddingRight;
         bool printRemaining;
@@ -103,14 +99,15 @@ typedef struct FFconfig
     FFModuleArgs os;
     FFModuleArgs host;
     FFModuleArgs bios;
-    FFModuleArgs chassis;
     FFModuleArgs board;
+    FFModuleArgs brightness;
+    FFModuleArgs chassis;
     FFModuleArgs kernel;
     FFModuleArgs uptime;
     FFModuleArgs processes;
     FFModuleArgs packages;
     FFModuleArgs shell;
-    FFModuleArgs resolution;
+    FFModuleArgs display;
     FFModuleArgs de;
     FFModuleArgs wifi;
     FFModuleArgs wm;
@@ -166,16 +163,25 @@ typedef struct FFconfig
     FFstrbuf libcJSON;
     FFstrbuf libfreetype;
     FFstrbuf libwlanapi;
+    FFstrbuf libnm;
 
     bool cpuTemp;
     bool gpuTemp;
     bool batteryTemp;
 
+    bool gpuHideIntegrated;
+    bool gpuHideDiscrete;
+
     bool titleFQDN;
+
+    bool shellVersion;
+    bool terminalVersion;
 
     FFstrbuf diskFolders;
     bool diskShowRemovable;
     bool diskShowHidden;
+    bool diskShowUnknown;
+    bool diskShowSubvolumes;
 
     FFstrbuf batteryDir;
 
@@ -197,6 +203,10 @@ typedef struct FFconfig
     FFstrbuf playerName;
 
     uint32_t percentType;
+
+    FFstrbuf commandShell;
+    FFlist commandKeys;
+    FFlist commandTexts;
 } FFconfig;
 
 typedef struct FFstate
@@ -205,10 +215,7 @@ typedef struct FFstate
     uint32_t logoHeight;
     uint32_t keysHeight;
 
-    struct passwd* passwd;
-    struct utsname utsname;
-
-    FFlist configDirs;
+    FFPlatform platform;
 } FFstate;
 
 typedef struct FFinstance
@@ -268,7 +275,8 @@ void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
 void ffPrintPackages(FFinstance* instance);
 void ffPrintShell(FFinstance* instance);
-void ffPrintResolution(FFinstance* instance);
+void ffPrintDisplay(FFinstance* instance);
+void ffPrintBrightness(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);
 void ffPrintWMTheme(FFinstance* instance);
@@ -301,5 +309,6 @@ void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
+void ffPrintCommand(FFinstance* instance);
 
 #endif

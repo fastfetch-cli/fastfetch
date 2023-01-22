@@ -14,10 +14,14 @@ static void detectMintty(const FFinstance* instance, FFTerminalFontResult* termi
     FF_STRBUF_AUTO_DESTROY fontSize;
     ffStrbufInit(&fontSize);
 
-    ffParsePropFileHomeValues(instance, ".minttyrc", 2, (FFpropquery[]) {
+    if(!ffParsePropFileConfigValues(instance, "mintty/config", 2, (FFpropquery[]) {
         {"Font=", &fontName},
         {"FontHeight=", &fontSize}
-    });
+    }))
+        ffParsePropFileConfigValues(instance, ".minttyrc", 2, (FFpropquery[]) {
+            {"Font=", &fontName},
+            {"FontHeight=", &fontSize}
+        });
     if(fontName.length == 0)
         ffStrbufAppendS(&fontName, "Lucida Console");
     if(fontSize.length == 0)

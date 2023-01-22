@@ -61,8 +61,6 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->id);
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->versionID);
-    ffStrbufInit(&os->systemName);
-    ffStrbufInit(&os->architecture);
 
     ffStrbufInitA(&os->codename, 0);
     ffStrbufInitA(&os->idLike, 0);
@@ -82,8 +80,6 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
 
     ffStrbufAppend(&os->prettyName, &os->name);
     ffStrbufAppend(&os->versionID, &os->version);
-    ffSysctlGetString("kern.ostype", &os->systemName);
-    ffSysctlGetString("hw.machine", &os->architecture);
 
     parseOSXSoftwareLicense(os);
 }

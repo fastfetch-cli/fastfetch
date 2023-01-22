@@ -46,6 +46,8 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
 extern "C"
 void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
 {
+    FF_UNUSED(instance);
+
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->id);
@@ -56,8 +58,6 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->versionID);
     ffStrbufInit(&os->codename);
     ffStrbufInit(&os->buildID);
-    ffStrbufInit(&os->systemName);
-    ffStrbufInit(&os->architecture);
 
     if(getOsNameByWinbrand(&os->variant) && getOsNameByWmi(&os->variant))
         return;
@@ -106,7 +106,4 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     }
 
     ffStrbufAppendF(&os->id, "%*s %*s", os->prettyName.length, os->prettyName.chars, os->version.length, os->version.chars);
-
-    ffStrbufSetS(&os->architecture, instance->state.utsname.machine);
-    ffStrbufSetS(&os->systemName, instance->state.utsname.sysname);
 }

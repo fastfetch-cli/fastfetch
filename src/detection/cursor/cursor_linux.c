@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 
-static void detectCursorGTK(const FFinstance* instance, FFCursorResult* result)
+static bool detectCursorGTK(const FFinstance* instance, FFCursorResult* result)
 {
     const FFGTKResult* gtk = ffDetectGTK4(instance);
 
@@ -19,25 +19,11 @@ static void detectCursorGTK(const FFinstance* instance, FFCursorResult* result)
         gtk = ffDetectGTK2(instance);
 
     if(gtk->cursor.length == 0)
-    {
-        ffStrbufAppendS(&result->error, "Couldn't detect GTK Cursor");
-        return;
-    }
+        return false;
 
     ffStrbufAppend(&result->theme, &gtk->cursor);
     ffStrbufAppend(&result->size, &gtk->cursorSize);
-}
-
-static void detectCursorXFCE(const FFinstance* instance, FFCursorResult* result)
-{
-    ffStrbufAppendS(&result->theme, ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeName", FF_VARIANT_TYPE_STRING).strValue);
-
-    if(result->theme.length == 0)
-        ffStrbufAppendS(&result->error, "Couldn't find xfce cursor in xfconf (xsettings::/Gtk/CursorThemeName)");
-
-    int cursorSizeVal = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
-    if(cursorSizeVal > 0)
-        ffStrbufAppendF(&result->size, "%i", cursorSizeVal);
+    return true;
 }
 
 static void detectCursorFromConfigFile(const FFinstance* instance, const char* relativeFilePath, const char* themeStart, const char* themeDefault, const char* sizeStart, const char* sizeDefault, FFCursorResult* result)
@@ -68,16 +54,6 @@ static bool detectCursorFromXResources(const FFinstance* instance, FFCursorResul
     return result->theme.length > 0;
 }
 
-static bool detectCursorFromXDG(const FFinstance* instance, bool user, FFCursorResult* result)
-{
-    if(user)
-        ffParsePropFileHome(instance, ".icons/default/index.theme", "Inherits =", &result->theme);
-    else
-        ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/icons/default/index.theme", "Inherits =", &result->theme);
-
-    return result->theme.length > 0;
-}
-
 static bool detectCursorFromEnv(const FFinstance* instance, FFCursorResult* result)
 {
     FF_UNUSED(instance);
@@ -97,35 +73,18 @@ void ffDetectCursor(const FFinstance* instance, FFCursorResult* result)
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufCompS(&wmde->wmPrettyName, "WSLg") == 0)
-    {
         ffStrbufAppendS(&result->error, "WSLg uses native windows cursor");
-        return;
-    }
-
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
-    {
+    else if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
         ffStrbufAppendS(&result->error, "Cursor isn't supported in TTY");
-        return;
-    }
-
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
-        return detectCursorFromConfigFile(instance, "kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
-
-    if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "XFCE"))
-        return detectCursorXFCE(instance, result);
-
-    if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "LXQt"))
-        return detectCursorFromConfigFile(instance, "lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
-
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Mate") == 0)
-        return detectCursorGTK(instance, result);
-
-    if(
-        detectCursorFromEnv(instance, result) ||
-        detectCursorFromXDG(instance, true, result) ||
-        detectCursorFromXResources(instance, result) ||
-        detectCursorFromXDG(instance, false, result)
-    ) return;
-
-    detectCursorGTK(instance, result);
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
+        detectCursorFromConfigFile(instance, "kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
+    else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, "LXQt"))
+        detectCursorFromConfigFile(instance, "lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
+    else if(
+        !detectCursorGTK(instance, result) &&
+        !detectCursorFromEnv(instance, result) &&
+        !ffParsePropFileHome(instance, ".icons/default/index.theme", "Inherits =", &result->theme) &&
+        !detectCursorFromXResources(instance, result) &&
+        !ffParsePropFileData(instance, "icons/default/index.theme", "Inherits =", &result->theme)
+    ) ffStrbufAppendS(&result->error, "Couldn't find cursor");
 }

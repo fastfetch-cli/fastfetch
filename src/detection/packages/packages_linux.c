@@ -140,7 +140,7 @@ static uint32_t getNixPackagesImpl(char* path)
     ffStrbufInitA(&command, 255);
     ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
     ffStrbufAppendS(&command, path);
-    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq");
+    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq | wc -l");
 
     ffProcessAppendStdOut(&output, (char* const[]) {
         "sh",
@@ -149,13 +149,12 @@ static uint32_t getNixPackagesImpl(char* path)
         NULL
     });
 
-    //Each package is a new line in the output. If at least one line is found, add 1 for the last line.
-    uint32_t result = ffStrbufCountC(&output, '\n');
-    if(result > 0)
-        result++;
+    int result = (int) strtol(output.chars, NULL, 10);
 
+    ffStrbufDestroy(&command);
     ffStrbufDestroy(&output);
-    return result;
+
+    return (uint32_t) result;
 }
 
 static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
@@ -272,7 +271,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
     packageCounts->pkg += getSQLite3Int(instance, baseDir, "/var/db/pkg/local.sqlite", "SELECT count(id) FROM packages");
-    packageCounts->rpm += getSQLite3Int(instance, baseDir, "/var/lib/rpm/rmpdb.sqlite", "SELECT count(blob) FROM Packages");
+    packageCounts->rpm += getSQLite3Int(instance, baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
     packageCounts->snap += getSnap(baseDir);
     packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
 }
@@ -309,6 +308,8 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
     {
         if(entry->d_type != DT_DIR)
             continue;
+        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
 
         ffStrbufAppendS(baseDir, entry->d_name);
         getPackageCounts(instance, baseDir, packageCounts);
@@ -338,7 +339,7 @@ void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
             result->rpm = getRpmFromLibrpm(instance);
     #endif
 
-    ffStrbufSetS(&baseDir, instance->state.passwd->pw_dir);
+    ffStrbufSet(&baseDir, &instance->state.platform.homeDir);
     result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
 
     ffStrbufDestroy(&baseDir);

@@ -9,7 +9,8 @@ typedef enum FFDiskType
 {
     FF_DISK_TYPE_REGULAR,
     FF_DISK_TYPE_HIDDEN,
-    FF_DISK_TYPE_EXTERNAL
+    FF_DISK_TYPE_EXTERNAL,
+    FF_DISK_TYPE_SUBVOLUME
 } FFDiskType;
 
 typedef struct FFDisk

@@ -13,7 +13,7 @@ __fastfetch_complete_help()
         "processes-format"
         "packages-format"
         "shell-format"
-        "resolution-format"
+        "display-format"
         "de-format"
         "wm-format"
         "wm-theme-format"
@@ -160,6 +160,8 @@ __fastfetch_completion()
         "--print-config-system"
         "--print-config-user"
         "--print-structure"
+        "--gen-config"
+        "--gen-config-force"
     )
 
     local FF_OPTIONS_HELP=(
@@ -187,8 +189,15 @@ __fastfetch_completion()
         "--pipe"
         "--title-fqdn"
         "--escape-bedrock"
+        "--shell-version"
+        "--terminal-version"
+        "--disk-folders"
         "--disk-show-removable"
         "--disk-show-hidden"
+        "--disk-show-subvolumes"
+        "--gpu-hide-integrated"
+        "--gpu-hide-discrete"
+        "--disk-show-unknown"
     )
 
     local FF_OPTIONS_STRING=(
@@ -196,6 +205,7 @@ __fastfetch_completion()
         "--logo-padding"
         "--logo-padding-left"
         "--logo-padding-right"
+        "--logo-padding-top"
         "--logo-color-1"
         "--logo-color-2"
         "--logo-color-3"
@@ -243,9 +253,9 @@ __fastfetch_completion()
         "--shell-key"
         "--shell-format"
         "--shell-error"
-        "--resolution-key"
-        "--resolution-format"
-        "--resolution-error"
+        "--display-key"
+        "--display-format"
+        "--display-error"
         "--de-key"
         "--de-format"
         "--de-error"

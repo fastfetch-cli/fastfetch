@@ -131,9 +131,9 @@ static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FF
 {
     FFstrbuf absolutePath;
     ffStrbufInitA(&absolutePath, 64);
-    ffStrbufAppendS(&absolutePath, instance->state.passwd->pw_dir);
-    ffStrbufAppendC(&absolutePath, '/');
+    ffStrbufAppend(&absolutePath, &instance->state.platform.homeDir);
 
+    //TODO: use config dirs
     if(ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
         ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
     else if(ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)

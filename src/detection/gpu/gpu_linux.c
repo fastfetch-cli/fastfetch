@@ -58,10 +58,10 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
-static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
+static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     u8 revId;
-    bool revIdSet = false;;
+    bool revIdSet = false;
 
     #if PCI_LIB_VERSION >= 0x030800
         revIdSet = pci->ffpci_fill_info(device, PCI_FILL_CLASS_EXT) & PCI_FILL_CLASS_EXT;
@@ -82,7 +82,7 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufInit(&query);
     ffStrbufAppendF(&query, "%X, %X,", device->device_id, revId);
 
-    ffParsePropFile(FASTFETCH_TARGET_DIR_USR"/share/libdrm/amdgpu.ids", query.chars, &gpu->name);
+    ffParsePropFileData(instance, "libdrm/amdgpu.ids", query.chars, &gpu->name);
 
     ffStrbufDestroy(&query);
 
@@ -94,11 +94,11 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufRemoveStringsA(&gpu->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
 }
 
-static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
+static void pciDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     if(ffStrbufCompS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD) == 0)
     {
-        drmDetectDeviceName(gpu, pci, device);
+        drmDetectDeviceName(instance, gpu, pci, device);
         if(gpu->name.length > 0)
             return;
     }
@@ -146,25 +146,53 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufDestroy(&path);
 }
 
-static void pciDetectTemperatur(const FFinstance* instance, FFGPUResult* gpu, struct pci_dev* device)
+static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
 {
-    const FFTempsResult* tempsResult = ffDetectTemps(instance);
+    const FFTempsResult* tempsResult = ffDetectTemps();
 
     for(uint32_t i = 0; i < tempsResult->values.length; i++)
     {
         FFTempValue* tempValue = ffListGet(&tempsResult->values, i);
 
-        uint32_t tempClass;
-        if(sscanf(tempValue->deviceClass.chars, "%x", &tempClass) != 1)
-            continue;
-
         //The kernel exposes the device class multiplied by 256 for some reason
-        if(tempClass == device->device_class * 256)
+        if(tempValue->deviceClass == device->device_class * 256)
         {
             gpu->temperature = tempValue->value;
             return;
         }
     }
+}
+
+static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* device)
+{
+    //There is no straightforward way to detect the type of a GPU.
+    //The approach taken here is to look at the memory sizes of the device.
+    //Since integrated GPUs usually use the system ram, they don't have expansive ROMs
+    //and their memory sizes are usually smaller than 1GB.
+
+    if(!(pci->ffpci_fill_info(device, PCI_FILL_SIZES) & PCI_FILL_SIZES))
+    {
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+        return;
+    }
+
+    if(device->rom_size > 0)
+    {
+        gpu->type = FF_GPU_TYPE_DISCRETE;
+        return;
+    }
+
+    uint32_t numSizes = sizeof(device->size) / sizeof(device->size[0]);
+    for(uint32_t i = 0; i < numSizes; i++)
+    {
+        if(device->size[i] >= 1024 * 1024 * 1024) //1GB
+        {
+            gpu->type = FF_GPU_TYPE_DISCRETE;
+            return;
+        }
+    }
+
+    gpu->type = FF_GPU_TYPE_INTEGRATED;
 }
 
 static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData* pci, struct pci_dev* device)
@@ -175,7 +203,9 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     pci->ffpci_lookup_name(pci->access, class, sizeof(class) - 1, PCI_LOOKUP_CLASS, device->device_class);
 
     if(
+        //https://pci-ids.ucw.cz/read/PD/03
         strcasecmp("VGA compatible controller", class) != 0 &&
+        strcasecmp("XGA compatible controller", class) != 0 &&
         strcasecmp("3D controller", class)             != 0 &&
         strcasecmp("Display controller", class)        != 0
     ) return;
@@ -188,16 +218,18 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     pciDetectVendorName(gpu, pci, device);
 
     ffStrbufInit(&gpu->name);
-    pciDetectDeviceName(gpu, pci, device);
+    pciDetectDeviceName(instance, gpu, pci, device);
 
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
+
+    detectType(gpu, pci, device);
 
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
     if(instance->config.gpuTemp)
-        pciDetectTemperatur(instance, gpu, device);
+        pciDetectTemperatur(gpu, device);
 }
 
 static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)

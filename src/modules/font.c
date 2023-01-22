@@ -48,12 +48,18 @@ static void printFont(const FFFontResult* font)
     const char* types[] = { "Caption", "Menu", "Message", "Status" };
     for(uint32_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
     {
-        if(font->fonts[i].length > 0)
+        if(i == 0 || !ffStrbufEqual(&font->fonts[i - 1], &font->fonts[i]))
         {
-            printf("%s [%s]", font->fonts[i].chars, types[i]);
-            break;
+            if(i > 0)
+                fputs("], ", stdout);
+            printf("%s [%s", font->fonts[i].chars, types[i]);
+        }
+        else
+        {
+            printf(" / %s", types[i]);
         }
     }
+    putchar(']');
 }
 
 #else

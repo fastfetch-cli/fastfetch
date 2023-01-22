@@ -3,6 +3,17 @@
 #include <ctype.h>
 #include <inttypes.h>
 
+bool ffStrSet(const char* str)
+{
+    if(str == NULL)
+        return false;
+
+    while(isspace(*str))
+        str++;
+
+    return *str != '\0';
+}
+
 static char* CHAR_NULL_PTR = "";
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
@@ -326,6 +337,12 @@ uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
             return i - 1;
     }
     return strbuf->length;
+}
+
+void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace)
+{
+    for (char *current_pos = strchr(strbuf->chars, find); current_pos; current_pos = strchr(current_pos + 1, find))
+        *current_pos = replace;
 }
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)

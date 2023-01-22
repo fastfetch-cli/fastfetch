@@ -18,6 +18,8 @@
     #define strcasestr StrStrIA
 #endif
 
+bool ffStrSet(const char* str);
+
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
 typedef struct FFstrbuf
@@ -68,6 +70,8 @@ FF_C_NODISCARD uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t star
 FF_C_NODISCARD uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str);
 
 FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
+
+void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c);
@@ -308,8 +312,6 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCase(const FFstrbuf* strbuf
     return ffStrbufEndsWithIgnCaseNS(strbuf, end->length, end->chars);
 }
 
-#if defined(_WIN32) || defined(__APPLE__)
-    #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
-#endif
+#define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
 
 #endif

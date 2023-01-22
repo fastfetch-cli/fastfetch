@@ -1,6 +1,6 @@
 # Fastfetch
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written in pure c, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written mainly in C, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -10,16 +10,20 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 <img src="screenshots/example3.png" width="48%" align="top" />
 <img src="screenshots/example5.png" height="15%" align="top" />
 
+There are [screenshots on different platforms](https://github.com/LinusDierheimer/fastfetch/wiki)
+
 ## Customization
 
 With customization and speed being two competing goals, this project actually builds two executables.
 
-* The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `~/.config/fastfetch/config.conf`. To view the available options run `fastfetch --help`.
+* The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `$XDG_CONFIG_HOME/fastfetch/config.conf`. To view the available options run `fastfetch --help`.
 * The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
 
 At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
+
+Logos can be heavily customized to. See the [logo documentation](doc/logo.md) for more information.
 
 ## Dependencies
 
@@ -34,8 +38,8 @@ The following libraries are used if present at runtime:
 * [`libxcb-randr`](https://xcb.freedesktop.org/),
     [`libXrandr`](https://gitlab.freedesktop.org/xorg/lib/libxrandr),
     [`libxcb`](https://xcb.freedesktop.org/),
-    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better resolution detection and faster WM detection. The `*randr` ones provide multi monitor support The `libxcb*` ones usually have better performance.
-* [`libwayland-client`](https://wayland.freedesktop.org/): Better resolution performance and output in wayland sessions. Supports different refresh rates per monitor.
+    [`libX11`](https://gitlab.freedesktop.org/xorg/lib/libx11): At least one of them sould be present in X11 sessions for better display detection and faster WM detection. The `*randr` ones provide multi monitor support The `libxcb*` ones usually have better performance.
+* [`libwayland-client`](https://wayland.freedesktop.org/): Better display performance and output in wayland sessions. Supports different refresh rates per monitor.
 * [`libGIO`](https://developer.gnome.org/gio/unstable/): Needed for values that are only stored GSettings.
 * [`libDConf`](https://developer.gnome.org/dconf/unstable/): Needed for values that are only stored in DConf + Fallback for GSettings.
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel or kitty graphics protocol.
@@ -50,10 +54,12 @@ The following libraries are used if present at runtime:
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
+* [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection on Linux.
 
 ### macOS
 
 * [`MediaRemote`](https://iphonedev.wiki/index.php/MediaRemote.framework): Need for Media detection. It's a private framework provided by newer macOS system.
+* [`DisplayServices`](https://developer.apple.com/forums/thread/666383#663154022): Need for screen brightness detection. It's a private framework provided by newer macOS system.
 * [`MoltenVK`](https://github.com/KhronosGroup/MoltenVK): Vulkan driver for macOS. [`molten-vk`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/molten-vk.rb)
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel graphics protocol. [`imagemagick`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/imagemagick.rb)
 * [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art. [`chafa`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/chafa.rb)
@@ -67,10 +73,7 @@ For the image logo, iTerm with iterm image protocol should work. Apple Terminal 
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers. [`vulkan-loader`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-loader) [`vulkan-headers`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-headers)
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module. [`opencl-icd`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-opencl-icd)
 
-Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, special build `fastfetch-win7` is provided to support these old systems, which
-
-1. Build with the ancient [MSVCRT](https://en.wikipedia.org/wiki/Microsoft_Windows_library_files#MSVCRT.DLL,_MSVCP*.DLL_and_CRTDLL.DLL) C runtime library, instead of the modern [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library
-2. Disable stdout application buffer, which seems to problematic for ConEmu.
+Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, as fastfetch for Windows targets [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library, [it must be installed manually](https://support.microsoft.com/en-us/topic/update-for-universal-c-runtime-in-windows-c0514201-7fe6-95a3-b0a5-287930f3560c) as UCRT is only pre-installed in Windows 10 and later.
 
 For the image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
 
@@ -78,43 +81,39 @@ For the image logo, only chafa is supported due to [the design flaw of ConPTY](h
 
 * [`freetype`](https://www.freetype.org/): Used for Termux font detection. [`freetype`](https://github.com/termux/termux-packages/tree/master/packages/freetype)
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module, also used for GPU detection. Usually has been provided by Android system. [`vulkan-loader-android`](https://github.com/termux/termux-packages/tree/master/packages/vulkan-loader-android) [`vulkan-headers`](https://github.com/termux/termux-packages/tree/master/packages/vulkan-headers)
+* [`termux-api`](https://github.com/termux/termux-api-package): Used for Wifi / Battery detection. Read [the official doc](https://wiki.termux.com/wiki/Termux:API) for detail or if you hang on these modules (IMPORTANT). [`termux-api`](https://github.com/termux/termux-packages/tree/master/packages/termux-api)
 
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
 ##### Available Modules
 ```
-Title, Separator, OS, Host, Bios, Board, Kernel, Uptime, Processes, Packages, Shell, Resolution, DE, WM, WMTheme, Theme, Icons, Font, Cursor, Terminal, Terminal Font, CPU, CPUUsage, GPU, Memory, Swap, Disk, Battery, Power Adapter, Player, Media, Vulkan, OpenGL, OpenCL, LocalIP, PublicIP, Wifi, DateTime, Date, Time, Locale, Colors, Break, Custom
+Battery, Bios, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator OS, Shell, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
 ```
 
-##### Logos
+##### Builtin logos
 ```
-AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Devuan, Deepin, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE Tumbleweed, OpenSUSE LEAP, Parabola, Pop!_OS, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, Ubuntu, Vanilla, Void, Windows 11, Windows 8, Windows, Zorin
+AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Deepin, Devuan, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, Ubuntu, Vanilla, Void, Windows, Windows 11, Windows 8, Zorin
 ```
-* Most of the logos have a small variant. Access it by appending _small to the logo name.
-* Some logos have an old variant. Access it by appending _old to the logo name.
-* To disable the logo, use `--logo none`.
-* Get a list of all available logos with `fastfetch --print-logos`.
-* Printing images as logo is supported using Sixel / Kitty / iTerm graphics protocol or chafas image to text conversion.
 
 ##### Package managers
 ```
-Pacman, dpkg, rpm, emerge, eopkg, xbps, nix, Flatpak, Snap, apk, pkg, brew, MacPorts, scoop, Chocolatey
+apk, brew, Chocolatey, dpkg, emerge, eopkg, Flatpak, MacPorts, nix, Pacman, pkg, rpm, scoop, Snap, xbps
 ```
 
 ##### WM themes
 ```
-KWin, Mutter, Muffin, Marco, XFWM, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS), DWM (Windows)
+DWM (Windows), KWin, Marco, Muffin, Mutter, Openbox (LXDE, LXQT & without DE), Quartz Compositor (macOS), XFWM
 ```
 
 ##### DE versions
 ```
-KDE Plasma, Gnome, Cinnamon, Mate, XFCE4, LXQt
+Budgie, Cinnamon, Gnome, KDE Plasma, LXQt, Mate, XFCE4
 ```
 
 ##### Terminal fonts
 ```
-Konsole, Gnome Terminal, Tilix, XFCE4 Terminal, Alacritty, Kitty, LXTerminal, Deepin Terminal, iTerm2, Apple Terminal, Warp, TTY, Windows Terminal, Termux, mintty, ConEmu
+Alacritty, Apple Terminal, ConEmu, Deepin Terminal, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, mintty, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
 ```
 
 ## Building
@@ -134,12 +133,13 @@ If the build process fails to find the headers for a library listed in [dependen
 Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 subsystem (or CLANGARM64 if needed) is suggested (and tested) to build fastfetch. If you need Windows 7 / 8.x support, using MINGW64 is suggested.
 
 1. Install [MSYS2](https://www.msys2.org/#installation)
-1. Open `MSYS2 CLANG64` (not `MSYS2 / MSYS`, which targets cygwin C runtime)
+1. Open `MSYS2 / CLANG64` (not `MSYS2 / MSYS`, which targets cygwin C runtime)
 1. Install dependencies
 ```bash
 pacman -Syu mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-pkgconf mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
 ```
-1. Follow building instructions of Linux
+
+Follow the building instructions of Linux next.
 
 ## Packaging
 

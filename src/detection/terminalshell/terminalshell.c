@@ -1,5 +1,7 @@
 #include "fastfetch.h"
+#include "common/io.h"
 #include "common/processing.h"
+#include "common/properties.h"
 
 #ifdef _WIN32
 
@@ -36,122 +38,252 @@ static bool getFileVersion(const char* exePath, FFstrbuf* version)
 
 #endif
 
-static void getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
+static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
 {
-    ffProcessAppendStdOut(version, (char* const[]) {
+    return ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "--version",
         NULL
-    }); // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)\nCopyright...
+    }) == NULL;
+}
+
+static bool getExeVersionGeneral(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version))
+        return false;
+
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
+static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version))
+        return false;
+
+    // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)\nCopyright...
     ffStrbufSubstrBeforeFirstC(version, '\n'); // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)
     ffStrbufSubstrBeforeLastC(version, ' '); // GNU bash, version 5.1.16(1)-release
     ffStrbufSubstrAfterLastC(version, ' '); // 5.1.16(1)-release
     ffStrbufSubstrBeforeFirstC(version, '('); // 5.1.16
+    return true;
 }
 
-static void getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
+static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
 {
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
-    ffStrbufSubstrBeforeLastC(version, ' ');
-    ffStrbufSubstrAfterFirstC(version, ' ');
-}
+    if(!getExeVersionRaw(exe, version))
+        return false;
 
-static void getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
+    //fish, version 3.6.0
     ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
+    return true;
 }
 
-static void getShellVersionTcsh(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    }); // tcsh 6.24.01 (Astron) 2022-05-12 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
-    ffStrbufSubstrAfterFirstC(version, ' '); // 6.24.01 (Astron) 2022-05-12 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
-    ffStrbufSubstrBeforeFirstC(version, ' '); // 6.24.01
-}
-
-static void getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
+static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef _WIN32
     if(getFileVersion(exe->chars, version))
-        return;
+    {
+        ffStrbufSubstrBeforeLastC(version, '.');
+        return true;
+    }
     #endif
 
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
+    if(!getExeVersionRaw(exe, version))
+        return false;
+
     ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
+    return true;
 }
 
 #ifdef _WIN32
-static void getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
+static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
-    ffProcessAppendStdOut(version, (char* const[]) {
+    if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-NoLogo",
         "-NoProfile",
         "-Command",
         "$PSVersionTable.PSVersion.ToString()",
         NULL
-    });
+    })) return false;
+
     ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
+    return true;
 }
 
-static void getShellVersionCmd(FFstrbuf* exe, FFstrbuf* version)
+static bool getShellVersionCmd(FFstrbuf* exe, FFstrbuf* version)
 {
-    getFileVersion(exe->chars, version);
+    return getFileVersion(exe->chars, version);
 }
 #endif
 
-static void getShellVersionNu(FFstrbuf* exe, FFstrbuf* version)
-{
-    ffProcessAppendStdOut(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    });
-}
-
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
-    bool ok = true;
     if(strcasecmp(exeName, "bash") == 0 || strcasecmp(exeName, "sh") == 0)
-        getShellVersionBash(exe, version);
-    else if(strcasecmp(exeName, "zsh") == 0)
-        getShellVersionZsh(exe, version);
-    else if(strcasecmp(exeName, "fish") == 0)
-        getShellVersionFish(exe, version);
-    else if(strcasecmp(exeName, "pwsh") == 0)
-        getShellVersionPwsh(exe, version);
-    else if(strcasecmp(exeName, "csh") == 0 || strcasecmp(exeName, "tcsh") == 0)
-        getShellVersionTcsh(exe, version);
-    else if(strcasecmp(exeName, "nu") == 0)
-        getShellVersionNu(exe, version);
+        return getShellVersionBash(exe, version);
+    if(strcasecmp(exeName, "zsh") == 0)
+        return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
+    if(strcasecmp(exeName, "fish") == 0)
+        return getShellVersionFish(exe, version);
+    if(strcasecmp(exeName, "pwsh") == 0)
+        return getShellVersionPwsh(exe, version);
+    if(strcasecmp(exeName, "csh") == 0 || strcasecmp(exeName, "tcsh") == 0)
+        return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
+    if(strcasecmp(exeName, "nu") == 0)
+        return getExeVersionRaw(exe, version); //0.73.0
 
     #ifdef _WIN32
-    else if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
-        getShellVersionWinPowerShell(exe, version);
-    else if(strcasecmp(exeName, "cmd") == 0)
-        getShellVersionCmd(exe, version);
+    if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
+        return getShellVersionWinPowerShell(exe, version);
+    if(strcasecmp(exeName, "cmd") == 0)
+        return getShellVersionCmd(exe, version);
     #endif
 
-    else
-        ok = false;
-    return ok;
+    return false;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("TERMUX_VERSION"));
+    return version->length > 0;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        "gnome-terminal",
+        "--version",
+        NULL
+    })) return false;
+
+    //# GNOME Terminal 3.46.7 using VTE 0.70.2 +BIDI +GNUTLS +ICU +SYSTEMD
+    ffStrbufSubstrAfterFirstS(version, "Terminal ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* version)
+{
+    const char* konsoleVersion = getenv("KONSOLE_VERSION");
+    if(konsoleVersion)
+    {
+        //221201
+        long major = strtol(konsoleVersion, NULL, 10);
+        if (major >= 0)
+        {
+            long patch = major % 100;
+            major /= 100;
+            long minor = major % 100;
+            major /= 100;
+            ffStrbufSetF(version, "%ld.%ld.%ld", major, minor, patch);
+            return true;
+        }
+    }
+
+    return getExeVersionGeneral(exe, version);
+}
+
+#ifdef _WIN32
+
+static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY buildInfoPath;
+    ffStrbufInitNS(&buildInfoPath, ffStrbufLastIndexC(exe, '\\') + 1, exe->chars);
+    ffStrbufAppendS(&buildInfoPath, "BuildInfo.xml");
+
+    if(ffParsePropFile(buildInfoPath.chars, "StoreVersion=\"", version))
+    {
+        ffStrbufTrimRight(version, '"');
+        return true;
+    }
+
+    return getFileVersion(exe->chars, version);
+}
+
+static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("ConEmuBuild"));
+
+    if(version->length)
+        return true;
+
+    return getFileVersion(exe->chars, version);
+}
+
+#endif
+
+bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
+{
+    #ifdef __ANDROID__
+
+    if(ffStrbufEqualS(processName, "Termux"))
+        return getTerminalVersionTermux(version);
+
+    #endif
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+
+    if(ffStrbufIgnCaseEqualS(processName, "gnome-terminal-"))
+        return getTerminalVersionGnome(version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "konsole"))
+        return getTerminalVersionKonsole(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
+        return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
+
+    if(ffStrbufIgnCaseEqualS(processName, "deepin-terminal"))
+        return getExeVersionGeneral(exe, version);//deepin-terminal 5.4.36
+
+    #endif
+
+    #ifdef _WIN32
+
+    if(ffStrbufIgnCaseEqualS(processName, "WindowsTerminal.exe"))
+        return getTerminalVersionWindowsTerminal(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "ConEmuC"))
+        return getTerminalVersionConEmu(exe, version);
+
+    #endif
+
+    #ifndef _WIN32
+
+    if(ffStrbufIgnCaseEqualS(processName, "kitty"))
+        return getExeVersionGeneral(exe, version); //kitty 0.21.2 created by Kovid Goyal
+
+    #endif
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "alacritty"))
+        return getExeVersionGeneral(exe, version);
+
+    const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
+    if(termProgramVersion)
+    {
+        const char* termProgram = getenv("TERM_PROGRAM");
+        if(termProgram)
+        {
+            if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
+                (strcmp(termProgram, "vscode") == 0 && ffStrbufStartsWithIgnCaseS(processName, "code"))
+            ) {
+                ffStrbufSetS(version, termProgramVersion);
+                return true;
+            }
+        }
+    }
+
+    #ifdef _WIN32
+
+    return getFileVersion(exe->chars, version);
+
+    #else
+
+    return false;
+
+    #endif
 }

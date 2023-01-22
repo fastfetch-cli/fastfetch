@@ -20,7 +20,11 @@ void ffPrintTerminal(FFinstance* instance)
     if(instance->config.terminal.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_TERMINAL_MODULE_NAME, 0, &instance->config.terminal.key);
-        ffStrbufPutTo(&result->terminalPrettyName, stdout);
+
+        if(result->terminalVersion.length)
+            printf("%s %s\n", result->terminalPrettyName.chars, result->terminalVersion.chars);
+        else
+            ffStrbufPutTo(&result->terminalPrettyName, stdout);
     }
     else
     {

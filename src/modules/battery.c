@@ -13,6 +13,7 @@ static void printBattery(FFinstance* instance, BatteryResult* result, uint8_t in
         ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &instance->config.battery.key);
 
         bool showStatus =
+            !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
@@ -35,7 +36,7 @@ static void printBattery(FFinstance* instance, BatteryResult* result, uint8_t in
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffStrbufAppendF(&str, "%.0f%%", result->capacity);
+                ffStrbufAppendF(&str, str.length > 0 ? "(%u%%)" : "%u%%", (unsigned) result->capacity);
             }
         }
 

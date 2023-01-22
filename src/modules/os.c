@@ -7,7 +7,7 @@
 #define FF_OS_MODULE_NAME "OS"
 #define FF_OS_NUM_FORMAT_ARGS 12
 
-static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
+static void buildOutputDefault(const FFinstance* instance, const FFOSResult* os, FFstrbuf* result)
 {
     //Create the basic output
     if(os->name.length > 0)
@@ -17,7 +17,7 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     else if(os->id.length > 0)
         ffStrbufAppend(result, &os->id);
     else
-        ffStrbufAppend(result, &os->systemName);
+        ffStrbufAppend(result, &instance->state.platform.systemName);
 
     #ifdef __APPLE__
     if(os->codename.length > 0)
@@ -62,14 +62,14 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     }
 
     //Append architecture if it is missing
-    if(ffStrbufFirstIndex(result, &os->architecture) == result->length)
+    if(ffStrbufFirstIndex(result, &instance->state.platform.systemArchitecture) == result->length)
     {
         ffStrbufAppendC(result, ' ');
-        ffStrbufAppend(result, &os->architecture);
+        ffStrbufAppend(result, &instance->state.platform.systemArchitecture);
     }
 }
 
-static void buildOutputNixOS(const FFOSResult* os, FFstrbuf* result)
+static void buildOutputNixOS(const FFinstance* instance, const FFOSResult* os, FFstrbuf* result)
 {
     ffStrbufAppendS(result, "NixOS");
 
@@ -87,10 +87,10 @@ static void buildOutputNixOS(const FFOSResult* os, FFstrbuf* result)
         ffStrbufAppendC(result, ')');
     }
 
-    if(os->architecture.length > 0)
+    if(instance->state.platform.systemArchitecture.length > 0)
     {
         ffStrbufAppendC(result, ' ');
-        ffStrbufAppend(result, &os->architecture);
+        ffStrbufAppend(result, &instance->state.platform.systemArchitecture);
     }
 }
 
@@ -98,7 +98,7 @@ void ffPrintOS(FFinstance* instance)
 {
     const FFOSResult* os = ffDetectOS(instance);
 
-    if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0 && os->systemName.length == 0)
+    if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0)
     {
         ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, "Could not detect OS");
         return;
@@ -110,9 +110,9 @@ void ffPrintOS(FFinstance* instance)
         ffStrbufInit(&result);
 
         if(ffStrbufIgnCaseCompS(&os->id, "nixos") == 0)
-            buildOutputNixOS(os, &result);
+            buildOutputNixOS(instance, os, &result);
         else
-            buildOutputDefault(os, &result);
+            buildOutputDefault(instance, os, &result);
 
         ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &instance->config.os.key);
         ffStrbufPutTo(&result, stdout);
@@ -121,7 +121,7 @@ void ffPrintOS(FFinstance* instance)
     else
     {
         ffPrintFormat(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->systemName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.platform.systemName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->id},
@@ -132,7 +132,7 @@ void ffPrintOS(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->versionID},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->codename},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->buildID},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->architecture}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.platform.systemArchitecture}
         });
     }
 }

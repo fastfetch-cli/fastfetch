@@ -1871,6 +1871,68 @@ static const FFlogo* getLogoPopSmall()
     FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
+static const FFlogo* getLogoRaspbian()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("raspbian", "raspi", "raspberrypi" "raspberrypios"  "pios")
+    FF_LOGO_LINES(
+        "   $2`.::///+:/-.        --///+//-:`\n"
+        " `+oooooooooooo:   `+oooooooooooo:\n"
+        "  /oooo++//ooooo:  ooooo+//+ooooo.\n"
+        "  `+ooooooo:-:oo-  +o+::/ooooooo:\n"
+        "   `:oooooooo+``    `.oooooooo+-\n"
+        "     `:++ooo/.        :+ooo+/.`$1\n"
+        "        ...`  `.----.` ``..\n"
+        "     .::::-``:::::::::.`-:::-`\n"
+        "    -:::-`   .:::::::-`  `-:::-\n"
+        "   `::.  `.--.`  `` `.---.``.::`\n"
+        "       .::::::::`  -::::::::` `\n"
+        " .::` .:::::::::- `::::::::::``::.\n"
+        "-:::` ::::::::::.  ::::::::::.`:::-\n"
+        "::::  -::::::::.   `-::::::::  ::::\n"
+        "-::-   .-:::-.``....``.-::-.   -::-\n"
+        " .. ``       .::::::::.     `..`..\n"
+        "   -:::-`   -::::::::::`  .:::::`\n"
+        "   :::::::` -::::::::::` :::::::.\n"
+        "   .:::::::  -::::::::. ::::::::\n"
+        "    `-:::::`   ..--.`   ::::::.\n"
+        "      `...`  `...--..`  `...`\n"
+        "            .::::::::::\n"
+        "             `.-::::-`"
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoRaspbianSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("raspbian_small", "raspi_small", "raspberrypi_small" "raspberrypios_small" "pios_small")
+    FF_LOGO_LINES(
+        "   $2.~~.   .~~.\n"
+        "  '. \\ ' ' / .'$1\n"
+        "   .~ .~~~..~.\n"
+        "  : .~.'~'.~. :\n"
+        " ~ (   ) (   ) ~\n"
+        "( : '~'.~.'~' : )\n"
+        " ~ .~ (   ) ~. ~\n"
+        "  (  : '~' :  )\n"
+        "   '~ .~~~. ~'\n"
+        "       '~'"
+    )
+    FF_LOGO_COLORS(
+        "31", //red
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
 
 static const FFlogo* getLogoReborn()
 {
@@ -2430,6 +2492,8 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoPopSmall,
         getLogoParabola,
         getLogoParabolaSmall,
+        getLogoRaspbian,
+        getLogoRaspbianSmall,
         getLogoReborn,
         getLogoRebornSmall,
         getLogoRedHatEnterpriseLinux,

@@ -12,107 +12,19 @@
 #ifdef _WIN32
     #include <wincon.h>
     #include <locale.h>
+    #include <shlobj.h>
+    #include "util/windows/unicode.h"
 #else
     #include <signal.h>
 #endif
 
-static void initConfigDirs(FFstate* state)
-{
-    ffListInit(&state->configDirs, sizeof(FFstrbuf));
-
-    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
-
-    const char* xdgConfigHome = getenv("XDG_CONFIG_HOME");
-    if(ffStrSet(xdgConfigHome))
-    {
-        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
-        ffStrbufInitA(buffer, 64);
-        ffStrbufAppendS(buffer, xdgConfigHome);
-        ffStrbufEnsureEndsWithC(buffer, '/');
-    }
-
-    #endif
-
-    #define FF_ENSURE_ONLY_ONCE_IN_LIST(element) \
-        if(ffListFirstIndexComp(&state->configDirs, element, (bool(*)(const void*, const void*))ffStrbufEqual) < state->configDirs.length - 1) \
-        { \
-            ffStrbufDestroy(ffListGet(&state->configDirs, state->configDirs.length - 1)); \
-            --state->configDirs.length; \
-        }
-
-    FFstrbuf* userConfigHome = ffListAdd(&state->configDirs);
-    ffStrbufInitA(userConfigHome, 64);
-    ffStrbufAppendS(userConfigHome, state->passwd->pw_dir);
-    ffStrbufAppendS(userConfigHome, "/.config/");
-    FF_ENSURE_ONLY_ONCE_IN_LIST(userConfigHome)
-
-    FFstrbuf* userHome = ffListAdd(&state->configDirs);
-    ffStrbufInitA(userHome, 64);
-    ffStrbufAppendS(userHome, state->passwd->pw_dir);
-    ffStrbufEnsureEndsWithC(userHome, '/');
-    FF_ENSURE_ONLY_ONCE_IN_LIST(userHome)
-
-    #if !(defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__))
-
-    FFstrbuf xdgConfigDirs;
-    ffStrbufInitA(&xdgConfigDirs, 64);
-    ffStrbufAppendS(&xdgConfigDirs, getenv("XDG_CONFIG_DIRS"));
-
-    uint32_t startIndex = 0;
-    while (startIndex < xdgConfigDirs.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&xdgConfigDirs, startIndex, ':');
-        xdgConfigDirs.chars[colonIndex] = '\0';
-
-        if(!ffStrSet(xdgConfigDirs.chars + startIndex))
-        {
-            startIndex = colonIndex + 1;
-            continue;
-        }
-
-        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(&state->configDirs);
-        ffStrbufInitA(buffer, 64);
-        ffStrbufAppendS(buffer, xdgConfigDirs.chars + startIndex);
-        ffStrbufEnsureEndsWithC(buffer, '/');
-        FF_ENSURE_ONLY_ONCE_IN_LIST(buffer);
-
-        startIndex = colonIndex + 1;
-    }
-    ffStrbufDestroy(&xdgConfigDirs);
-
-    FFstrbuf* systemConfigHome = ffListAdd(&state->configDirs);
-    ffStrbufInitA(systemConfigHome, 64);
-    ffStrbufAppendS(systemConfigHome, FASTFETCH_TARGET_DIR_ETC"/xdg/");
-    FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfigHome)
-
-    #endif
-
-    FFstrbuf* systemConfig = ffListAdd(&state->configDirs);
-    ffStrbufInitA(systemConfig, 64);
-    ffStrbufAppendS(systemConfig, FASTFETCH_TARGET_DIR_ETC"/");
-    FF_ENSURE_ONLY_ONCE_IN_LIST(systemConfig)
-
-    #undef FF_ENSURE_ONLY_ONCE_IN_LIST
-}
-
 static void initState(FFstate* state)
 {
-    #ifdef WIN32
-    //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
-    setlocale(LC_ALL, ".UTF8");
-    #endif
-
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
-    #ifndef WIN32
-        state->passwd = getpwuid(getuid());
-    #else
-        state->passwd = ffGetPasswd();
-    #endif
-    uname(&state->utsname);
 
-    initConfigDirs(state);
+    ffPlatformInit(&state->platform);
 }
 
 static void initModuleArg(FFModuleArgs* args)
@@ -130,6 +42,7 @@ static void defaultConfig(FFinstance* instance)
         ffStrbufInit(&instance->config.logo.colors[i]);
     instance->config.logo.width = 0;
     instance->config.logo.height = 0; //preserve aspect ratio
+    instance->config.logo.paddingTop = 0;
     instance->config.logo.paddingLeft = 0;
     instance->config.logo.paddingRight = 4;
     instance->config.logo.printRemaining = true;
@@ -163,13 +76,14 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.host);
     initModuleArg(&instance->config.bios);
     initModuleArg(&instance->config.board);
+    initModuleArg(&instance->config.brightness);
     initModuleArg(&instance->config.chassis);
     initModuleArg(&instance->config.kernel);
     initModuleArg(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
     initModuleArg(&instance->config.packages);
     initModuleArg(&instance->config.shell);
-    initModuleArg(&instance->config.resolution);
+    initModuleArg(&instance->config.display);
     initModuleArg(&instance->config.de);
     initModuleArg(&instance->config.wm);
     initModuleArg(&instance->config.wmTheme);
@@ -225,16 +139,25 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libcJSON, 0);
     ffStrbufInitA(&instance->config.libfreetype, 0);
     ffStrbufInit(&instance->config.libwlanapi);
+    ffStrbufInit(&instance->config.libnm);
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
     instance->config.batteryTemp = false;
+
+    instance->config.gpuHideIntegrated = false;
+    instance->config.gpuHideDiscrete = false;
+
+    instance->config.shellVersion = true;
+    instance->config.terminalVersion = true;
 
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
     instance->config.diskShowRemovable = true;
     instance->config.diskShowHidden = false;
+    instance->config.diskShowUnknown = false;
+    instance->config.diskShowSubvolumes = false;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
@@ -256,10 +179,27 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.playerName, 0);
 
     instance->config.percentType = 1;
+
+    ffStrbufInitS(&instance->config.commandShell,
+        #ifdef _WIN32
+        "cmd"
+        #elif defined(__FreeBSD__)
+        "csh"
+        #else
+        "bash"
+        #endif
+    );
+    ffListInit(&instance->config.commandKeys, sizeof(FFstrbuf));
+    ffListInit(&instance->config.commandTexts, sizeof(FFstrbuf));
 }
 
 void ffInitInstance(FFinstance* instance)
 {
+    #ifdef WIN32
+        //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
+        setlocale(LC_ALL, ".UTF8");
+    #endif
+
     initState(&instance->state);
     defaultConfig(instance);
 }
@@ -308,6 +248,10 @@ static void resetConsole()
 
     if(ffHideCursor)
         fputs("\033[?25h", stdout);
+
+    #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+        fflush(stdout);
+    #endif
 }
 
 #ifdef _WIN32
@@ -401,7 +345,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.processes);
     destroyModuleArg(&instance->config.packages);
     destroyModuleArg(&instance->config.shell);
-    destroyModuleArg(&instance->config.resolution);
+    destroyModuleArg(&instance->config.display);
     destroyModuleArg(&instance->config.de);
     destroyModuleArg(&instance->config.wm);
     destroyModuleArg(&instance->config.wmTheme);
@@ -457,6 +401,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libcJSON);
     ffStrbufDestroy(&instance->config.libfreetype);
     ffStrbufDestroy(&instance->config.libwlanapi);
+    ffStrbufDestroy(&instance->config.libnm);
 
     ffStrbufDestroy(&instance->config.diskFolders);
     ffStrbufDestroy(&instance->config.batteryDir);
@@ -466,13 +411,19 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
     ffStrbufDestroy(&instance->config.osFile);
     ffStrbufDestroy(&instance->config.playerName);
+
+    ffStrbufDestroy(&instance->config.commandShell);
+    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandKeys)
+        ffStrbufDestroy(item);
+    ffListDestroy(&instance->config.commandKeys);
+    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandTexts)
+        ffStrbufDestroy(item);
+    ffListDestroy(&instance->config.commandTexts);
 }
 
 static void destroyState(FFinstance* instance)
 {
-    for(uint32_t i = 0; i < instance->state.configDirs.length; ++i)
-        ffStrbufDestroy((FFstrbuf*)ffListGet(&instance->state.configDirs, i));
-    ffListDestroy(&instance->state.configDirs);
+    ffPlatformDestroy(&instance->state.platform);
 }
 
 void ffDestroyInstance(FFinstance* instance)
@@ -552,7 +503,10 @@ void ffListFeatures()
             "libcjson\n"
         #endif
         #ifdef FF_HAVE_FREETYPE
-            "freetype"
+            "freetype\n"
+        #endif
+        #ifdef FF_HAVE_LIBNM
+            "libnm\n"
         #endif
         ""
     , stdout);

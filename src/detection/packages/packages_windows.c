@@ -17,10 +17,10 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
                 counter++;
         } while (FindNextFileA(hFind, &wfd));
         FindClose(hFind);
-    }
 
-    if(type == FILE_ATTRIBUTE_DIRECTORY && counter >= 2)
-        counter -= 2; // accounting for . and ..
+        if(type == FILE_ATTRIBUTE_DIRECTORY && counter >= 2)
+            counter -= 2; // accounting for . and ..
+    }
 
     return counter;
 }
@@ -28,17 +28,15 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
 static void detectScoop(const FFinstance* instance, FFPackagesResult* result)
 {
     char scoopPath[MAX_PATH + 3];
-    strcpy(scoopPath, instance->state.passwd->pw_dir);
+    strcpy(scoopPath, instance->state.platform.homeDir.chars);
     strncat(scoopPath, "/scoop/apps/*", sizeof(scoopPath) - 1 - strlen(scoopPath));
     result->scoop = getNumElements(scoopPath, FILE_ATTRIBUTE_DIRECTORY);
     if(result->scoop > 0)
         result->scoop--; // scoop
 }
 
-static void detectChoco(const FFinstance* instance, FFPackagesResult* result)
+static void detectChoco(FF_MAYBE_UNUSED const FFinstance* instance, FFPackagesResult* result)
 {
-    FF_UNUSED(instance);
-
     const char* chocoInstall = getenv("ChocolateyInstall");
     if(!chocoInstall || chocoInstall[0] == '\0')
         return;
@@ -51,8 +49,22 @@ static void detectChoco(const FFinstance* instance, FFPackagesResult* result)
         result->choco--; // choco
 }
 
+static void detectPacman(FF_MAYBE_UNUSED const FFinstance* instance, FFPackagesResult* result)
+{
+    const char* msystemPrefix = getenv("MSYSTEM_PREFIX");
+    if(!msystemPrefix)
+        return;
+
+    // MSYS2
+    char pacmanPath[MAX_PATH + 3];
+    strcpy(pacmanPath, msystemPrefix);
+    strncat(pacmanPath, "/../var/lib/pacman/local/*", sizeof(pacmanPath) - 1 - strlen(pacmanPath));
+    result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY);
+}
+
 void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 {
     detectScoop(instance, result);
     detectChoco(instance, result);
+    detectPacman(instance, result);
 }

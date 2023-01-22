@@ -80,8 +80,11 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorTheme = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-theme", "org.mate.peripherals-mouse", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-size", "org.mate.peripherals-mouse", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
     }
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Unity") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Budgie") == 0)
-    {
+    else if(
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0 ||
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Unity") == 0 ||
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Budgie") == 0
+    ) {
         themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
         fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
@@ -145,7 +148,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
 
 static void detectGTK(const FFinstance* instance, const char* version, FFGTKResult* result)
 {
-    //Mate, Cinnamon and Gnome use dconf to save theme config
+    //Mate, Cinnamon, Gnome, Unity, Budgie use dconf to save theme config
     //On other DEs, this will do nothing
     detectGTKFromSettings(instance, result);
     if(allPropertiesSet(result))
@@ -155,9 +158,9 @@ static void detectGTK(const FFinstance* instance, const char* version, FFGTKResu
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 64);
 
-    for(uint32_t i = 0; i < instance->state.configDirs.length; i++)
+    FF_LIST_FOR_EACH(FFstrbuf, configDir, instance->state.platform.configDirs)
     {
-        ffStrbufSet(&baseDir, ffListGet(&instance->state.configDirs, i));
+        ffStrbufSet(&baseDir, configDir);
         detectGTKFromConfigDir(&baseDir, version, result);
         if(allPropertiesSet(result))
             break;

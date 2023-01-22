@@ -26,6 +26,11 @@ void* ffListAdd(FFlist* list);
 
 FF_C_NODISCARD uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
 
+// Removes the first element, and copy its value to `*result`
+bool ffListShift(FFlist* list, void* result);
+// Removes the last element, and copy its value to `*result`
+bool ffListPop(FFlist* list, void* result);
+
 void ffListDestroy(FFlist* list);
 
 static inline void ffListInit(FFlist* list, uint32_t elementSize)
@@ -45,8 +50,12 @@ static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void
     qsort(list->data, list->length, list->elementSize, compar);
 }
 
-#if defined(_WIN32) || defined(__APPLE__)
-    #define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
-#endif
+#define FF_LIST_FOR_EACH(itemType, itemVarName, listVar) \
+    assert(sizeof(itemType) == (listVar).elementSize); \
+    for(itemType* itemVarName = (itemType*)(listVar).data; \
+        itemVarName - (itemType*)(listVar).data < (intptr_t)(listVar).length; \
+        ++itemVarName)
+
+#define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
 
 #endif
