@@ -881,7 +881,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             #define FF_ARCHITECTURE "riscv"
         #elif defined(__s390x__)
             #define FF_ARCHITECTURE "s390x"
-        #elif
+        #else
             #define FF_ARCHITECTURE "unknown"
         #endif
 
