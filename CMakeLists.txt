@@ -357,6 +357,7 @@ elseif(ANDROID)
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_nosupport.c
+        src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
@@ -388,11 +389,13 @@ elseif(ANDROID)
     )
 elseif(BSD)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
+        src/detection/bluetooth/bluetooth_linux.c
         src/detection/board/board_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
@@ -435,6 +438,7 @@ elseif(APPLE)
         src/common/sysctl.c
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
+        src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
@@ -473,6 +477,7 @@ elseif(WIN32)
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
+        src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
