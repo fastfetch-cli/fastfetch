@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.9.0
+    VERSION 1.9.1
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -666,6 +666,7 @@ if(APPLE)
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework CoreVideo"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
     )
