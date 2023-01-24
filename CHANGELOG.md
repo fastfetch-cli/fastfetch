@@ -3,6 +3,14 @@
 Features:
 * Bluetooth module
 
+# 1.9.1
+
+Bugfixes:
+
+* Fix builds on s390x (@jonathanspw, #402)
+* Fix zero refresh rate on some monitors (macOS)
+* Fix default formatting of Wifi module
+
 # 1.9.0
 
 Notable Changes:

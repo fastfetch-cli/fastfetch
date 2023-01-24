@@ -6,6 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include <CoreGraphics/CGDirectDisplay.h>
+#include <CoreVideo/CVDisplayLink.h>
 
 static void detectDisplays(FFDisplayServerResult* ds)
 {
@@ -20,10 +21,25 @@ static void detectDisplays(FFDisplayServerResult* ds)
         CGDisplayModeRef mode = CGDisplayCopyDisplayMode(screen);
         if(mode)
         {
+            //https://github.com/glfw/glfw/commit/aab08712dd8142b642e2042e7b7ba563acd07a45
+            double refreshRate = CGDisplayModeGetRefreshRate(mode);
+
+            if (refreshRate == 0)
+            {
+                CVDisplayLinkRef link;
+                if(CVDisplayLinkCreateWithCGDisplay(screen, &link) == kCVReturnSuccess)
+                {
+                    const CVTime time = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
+                    if (!(time.flags & kCVTimeIsIndefinite))
+                        refreshRate = time.timeScale / (double) time.timeValue + 0.5; //59.97...
+                    CVDisplayLinkRelease(link);
+                }
+            }
+
             ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
                 (uint32_t)CGDisplayModeGetPixelHeight(mode),
-                (uint32_t)CGDisplayModeGetRefreshRate(mode),
+                (uint32_t)refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode)
             );

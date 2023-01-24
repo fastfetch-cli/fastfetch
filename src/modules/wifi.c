@@ -34,9 +34,9 @@ void ffPrintWifi(FFinstance* instance)
             {
                 ffStrbufWriteTo(&item->conn.ssid, stdout);
                 if(item->conn.protocol.length)
-                    printf("- %s", item->conn.protocol.chars);
+                    printf(" - %s", item->conn.protocol.chars);
                 if(item->conn.security.length)
-                    printf("- %s", item->conn.security.chars);
+                    printf(" - %s", item->conn.security.chars);
                 putchar('\n');
             }
             else
