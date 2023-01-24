@@ -59,4 +59,6 @@ void ffPrintBluetooth(FFinstance* instance)
         uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
         printDevice(instance, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
     }
+
+    ffListDestroy(&filtered);
 }
