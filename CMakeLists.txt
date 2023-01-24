@@ -477,7 +477,7 @@ elseif(WIN32)
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
@@ -682,6 +682,7 @@ if(APPLE)
 elseif(WIN32)
     target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
     target_link_libraries(libfastfetch
+        PRIVATE "bthprops"
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
