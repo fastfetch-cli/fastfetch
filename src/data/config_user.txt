@@ -295,6 +295,7 @@
 #--opengl-key OpenGL
 #--opencl-key OpenCL
 #--users-key Users
+#--bluetooth-key Bluetooth
 
 # Format options:
 # Sets the format string for module values.
@@ -339,6 +340,7 @@
 #--opengl-format
 #--opencl-format
 #--users-format
+#--bluetooth-format
 
 # Error options:
 # Sets the format string to use if an error occured
@@ -383,6 +385,7 @@
 #--opengl-error
 #--opencl-error
 #--users-error
+#--bluetooth-error
 
 # Library options:
 # Sets an user specific path to a library to load.

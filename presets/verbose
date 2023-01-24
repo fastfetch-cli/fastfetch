@@ -28,3 +28,4 @@
 --vulkan-format driver: {}; Api Version: {}; Conformance Version: {}
 --opengl-format version: {}; renderer: {}; vendor: {}
 --opencl-format version: {}; device: {}; vendor: {}
+--bluetooth-format Name: {}; Address: {}; Type: {}; Battery: {}

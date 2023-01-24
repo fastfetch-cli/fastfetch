@@ -448,6 +448,15 @@ static inline void printCommandHelp(const char* command)
             "vendor"
         );
     }
+    else if(strcasecmp(command, "bluetooth-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("bluetooth", "{1} (4%)", 4,
+            "Name",
+            "Address",
+            "Type",
+            "Battery percentage"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -1208,6 +1217,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
+    else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
 
     ///////////////////
     //Library options//
@@ -1503,6 +1513,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintUsers(instance);
     else if(strcasecmp(line, "command") == 0)
         ffPrintCommand(instance);
+    else if(strcasecmp(line, "bluetooth") == 0)
+        ffPrintBluetooth(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }

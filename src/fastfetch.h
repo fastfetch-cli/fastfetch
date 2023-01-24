@@ -139,6 +139,7 @@ typedef struct FFconfig
     FFModuleArgs openGL;
     FFModuleArgs openCL;
     FFModuleArgs users;
+    FFModuleArgs bluetooth;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -310,5 +311,6 @@ void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 void ffPrintCommand(FFinstance* instance);
+void ffPrintBluetooth(FFinstance* instance);
 
 #endif

@@ -232,6 +232,7 @@ set(LIBFASTFETCH_SRC
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/detection/bluetooth/bluetooth.c
     src/detection/cpu/cpu.c
     src/detection/cpuUsage/cpuUsage.c
     src/detection/datetime.c
@@ -254,6 +255,7 @@ set(LIBFASTFETCH_SRC
     src/logo/logo.c
     src/modules/battery.c
     src/modules/bios.c
+    src/modules/bluetooth.c
     src/modules/board.c
     src/modules/brightness.c
     src/modules/break.c
@@ -308,6 +310,7 @@ set(LIBFASTFETCH_SRC
 
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_linux.c
@@ -318,6 +321,7 @@ if(LINUX)
         src/detection/cpu/cpu_linux.c
         src/detection/cpuUsage/cpuUsage_linux.c
         src/detection/cursor/cursor_linux.c
+        src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c

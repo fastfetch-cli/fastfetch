@@ -115,6 +115,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
+    initModuleArg(&instance->config.bluetooth);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -377,6 +378,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.openGL);
     destroyModuleArg(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
+    destroyModuleArg(&instance->config.bluetooth);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);

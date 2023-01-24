@@ -1,3 +1,8 @@
+# dev
+
+Features:
+* Bluetooth module
+
 # 1.9.0
 
 Notable Changes:

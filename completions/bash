@@ -42,6 +42,7 @@ __fastfetch_complete_help()
         "vulkan-format"
         "opengl-format"
         "opencl-format"
+        "bluetooth-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -349,6 +350,9 @@ __fastfetch_completion()
         "--users-key"
         "--users-format"
         "--users-error"
+        "--bluetooth-key"
+        "--bluetooth-format"
+        "--bluetooth-error"
     )
 
     local FF_OPTIONS_PATH=(
