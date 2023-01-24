@@ -39,7 +39,7 @@ array [                                                     //root
 ]
 */
 
-static void detectBluetoothProperty(FFBluetoothResult* bluetooth, FFDBusData* dbus, DBusMessageIter* iter, bool* connected)
+static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothDevice* device)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
         return;
@@ -81,68 +81,66 @@ static void detectBluetoothProperty(FFBluetoothResult* bluetooth, FFDBusData* db
         dbus->lib->ffdbus_message_iter_next(&deviceIter);
 
         if(strcmp(deviceProperty, "Address") == 0)
-            ffDBusGetValue(dbus, &deviceIter, &bluetooth->address);
+            ffDBusGetValue(dbus, &deviceIter, &device->address);
         else if(strcmp(deviceProperty, "Name") == 0)
-            ffDBusGetValue(dbus, &deviceIter, &bluetooth->name);
+            ffDBusGetValue(dbus, &deviceIter, &device->name);
         else if(strcmp(deviceProperty, "Icon") == 0)
-            ffDBusGetValue(dbus, &deviceIter, &bluetooth->type);
+            ffDBusGetValue(dbus, &deviceIter, &device->type);
         else if(strcmp(deviceProperty, "Percentage") == 0)
-            ffDBusGetByte(dbus, &deviceIter, &bluetooth->battery);
+            ffDBusGetByte(dbus, &deviceIter, &device->battery);
         else if(strcmp(deviceProperty, "Connected") == 0)
-        {
-            ffDBusGetBool(dbus, &deviceIter, connected);
-            if(!*connected)
-                return; //Just for performance, we don't need to continue if we're not connected
-        }
+            ffDBusGetBool(dbus, &deviceIter, &device->connected);
 
         FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
     }
 }
 
-static bool detectBluetoothObject(FFBluetoothResult* bluetooth, FFDBusData* dbus, DBusMessageIter* iter)
+static void detectBluetoothObject(FFBluetoothResult* bluetooth, FFDBusData* dbus, DBusMessageIter* iter)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
-        return false;
+        return;
 
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
     if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_OBJECT_PATH)
-        return false;
+        return;
 
     const char* objectPath;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &objectPath);
 
     //We don't want adapter objects
     if(strstr(objectPath, "dev_") == NULL)
-        return false;
+        return;
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
     if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY)
-        return false;
+        return;
 
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    bool connected = false;
+    FFBluetoothDevice* device = ffListAdd(&bluetooth->devices);
+    ffStrbufInit(&device->name);
+    ffStrbufInit(&device->address);
+    ffStrbufInit(&device->type);
+    device->battery = 0;
+    device->connected = false;
 
     while(true)
     {
-        detectBluetoothProperty(bluetooth, dbus, &arrayIter, &connected);
+        detectBluetoothProperty(dbus, &arrayIter, device);
         FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
     }
 
-    if(!connected || bluetooth->name.length == 0)
+    if(device->name.length == 0)
     {
-        ffStrbufClear(&bluetooth->address);
-        ffStrbufClear(&bluetooth->name);
-        ffStrbufClear(&bluetooth->type);
-        bluetooth->battery = 0;
-        return false;
+        ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->address);
+        ffStrbufDestroy(&device->type);
+        --bluetooth->devices.length;
     }
-
-    return true;
 }
 
 static void detectBluetoothRoot(FFBluetoothResult* bluetooth, FFDBusData* dbus, DBusMessageIter* iter)
@@ -155,9 +153,7 @@ static void detectBluetoothRoot(FFBluetoothResult* bluetooth, FFDBusData* dbus, 
 
     while(true)
     {
-        if(detectBluetoothObject(bluetooth, dbus, &arrayIter))
-            return;
-
+        detectBluetoothObject(bluetooth, dbus, &arrayIter);
         FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
     }
 

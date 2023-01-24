@@ -247,6 +247,12 @@
 # Default is "/:/home" ("C:\\;D:\\ ..." on Windows).
 #--disk-folders /:/home
 
+# Bluetooth show disconnected option
+# Sets if disconnected bluetooth devices should be printed
+# Must be either true or false
+# Default is false.
+#--bluetooth-show-disconnected false
+
 # Percentage output type option
 # Applies to all modules that prints percentage values. Currently memory, swap, disk, battery and CPU usage are supported.
 # Only works with default format ( without --module-format option ).

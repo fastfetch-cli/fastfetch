@@ -184,6 +184,8 @@ typedef struct FFconfig
     bool diskShowUnknown;
     bool diskShowSubvolumes;
 
+    bool bluetoothShowDisconnected;
+
     FFstrbuf batteryDir;
 
     FFstrbuf separatorString;

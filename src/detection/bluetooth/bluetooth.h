@@ -5,13 +5,19 @@
 
 #include "fastfetch.h"
 
-typedef struct FFBluetoothResult
+typedef struct FFBluetoothDevice
 {
-    FFstrbuf error;
     FFstrbuf name;
     FFstrbuf address;
     FFstrbuf type;
     uint8_t battery; // 0-100%
+    bool connected;
+} FFBluetoothDevice;
+
+typedef struct FFBluetoothResult
+{
+    FFstrbuf error;
+    FFlist devices; // List of FFBluetoothDevice
 } FFBluetoothResult;
 
 const FFBluetoothResult* ffDetectBluetooth(const FFinstance* instance);

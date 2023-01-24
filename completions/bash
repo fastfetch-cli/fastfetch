@@ -199,6 +199,7 @@ __fastfetch_completion()
         "--gpu-hide-integrated"
         "--gpu-hide-discrete"
         "--disk-show-unknown"
+        "--bluetooth-show-disconnected"
     )
 
     local FF_OPTIONS_STRING=(

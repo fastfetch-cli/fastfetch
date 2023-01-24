@@ -160,6 +160,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowUnknown = false;
     instance->config.diskShowSubvolumes = false;
 
+    instance->config.bluetoothShowDisconnected = false;
+
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
     ffStrbufInitA(&instance->config.separatorString, 0);
