@@ -3,6 +3,7 @@
 Bugfixes:
 
 * Fix builds on s390x (@jonathanspw, #402)
+* Fix zero refresh rate on some monitors (macOS)
 
 # 1.9.0
 

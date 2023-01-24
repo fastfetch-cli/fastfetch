@@ -666,6 +666,7 @@ if(APPLE)
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework CoreVideo"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
     )
