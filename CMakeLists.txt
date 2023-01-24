@@ -438,7 +438,7 @@ elseif(APPLE)
         src/common/sysctl.c
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_apple.m
         src/detection/board/board_nosupport.c
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
@@ -477,7 +477,7 @@ elseif(WIN32)
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
@@ -676,12 +676,14 @@ if(APPLE)
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-framework CoreVideo"
+        PRIVATE "-framework IOBluetooth"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)
     target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
     target_link_libraries(libfastfetch
+        PRIVATE "bthprops"
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
