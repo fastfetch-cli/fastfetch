@@ -1,3 +1,9 @@
+# 1.9.1
+
+Bugfixes:
+
+* Fix builds on s390x (@jonathanspw, #402)
+
 # 1.9.0
 
 Notable Changes:
