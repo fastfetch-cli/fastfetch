@@ -426,4 +426,5 @@
 #--lib-osmesa /usr/lib/libOSMesa.so
 #--lib-opencl /usr/lib/libOpenCL.so
 #--lib-cjson /usr/lib/libcjson.so
+#--lib-cjson /usr/lib/libasound.so
 #--lib-freetype /data/data/com.termux/files/usr/lib

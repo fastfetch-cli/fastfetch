@@ -164,6 +164,7 @@ typedef struct FFconfig
     FFstrbuf libOpenCL;
     FFstrbuf libcJSON;
     FFstrbuf libfreetype;
+    FFstrbuf libAlsa;
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
 

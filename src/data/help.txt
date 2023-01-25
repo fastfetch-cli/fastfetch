@@ -98,6 +98,8 @@ Library options: Set the path of a library to load
     --lib-osmesa <path>
     --lib-opencl <path>
     --lib-cjson <path>
+    --lib-alsa <path>
+    --lib-freetype <path>
 
 Module specific options:
     --title-fqdn <?value>:                   Set if the title should use fully qualified domain name. Default is false
