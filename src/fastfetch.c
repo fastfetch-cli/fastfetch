@@ -1220,6 +1220,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
     else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
+    else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
 
     ///////////////////
     //Library options//
@@ -1312,6 +1313,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowUnknown = optionParseBoolean(value);
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
+    else if(strcasecmp(key, "--sound-show-all") == 0)
+        instance->config.soundShowAll = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
@@ -1519,6 +1522,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintCommand(instance);
     else if(strcasecmp(line, "bluetooth") == 0)
         ffPrintBluetooth(instance);
+    else if(strcasecmp(line, "sound") == 0)
+        ffPrintSound(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }

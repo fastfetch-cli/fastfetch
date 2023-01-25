@@ -116,6 +116,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
     initModuleArg(&instance->config.bluetooth);
+    initModuleArg(&instance->config.sound);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -161,6 +162,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowSubvolumes = false;
 
     instance->config.bluetoothShowDisconnected = false;
+
+    instance->config.soundShowAll = false;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 

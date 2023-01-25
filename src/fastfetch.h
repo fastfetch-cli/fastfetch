@@ -140,6 +140,7 @@ typedef struct FFconfig
     FFModuleArgs openCL;
     FFModuleArgs users;
     FFModuleArgs bluetooth;
+    FFModuleArgs sound;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -200,6 +201,8 @@ typedef struct FFconfig
 
     FFstrbuf weatherOutputFormat;
     uint32_t weatherTimeout;
+
+    bool soundShowAll;
 
     FFstrbuf osFile;
 
@@ -314,5 +317,6 @@ void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 void ffPrintCommand(FFinstance* instance);
 void ffPrintBluetooth(FFinstance* instance);
+void ffPrintSound(FFinstance* instance);
 
 #endif

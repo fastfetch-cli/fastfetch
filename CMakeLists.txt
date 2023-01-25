@@ -289,6 +289,7 @@ set(LIBFASTFETCH_SRC
     src/modules/display.c
     src/modules/separator.c
     src/modules/shell.c
+    src/modules/sound.c
     src/modules/media.c
     src/modules/terminal.c
     src/modules/terminalfont.c
@@ -341,6 +342,7 @@ if(LINUX)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
         src/detection/qt.c
+        src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
@@ -377,6 +379,7 @@ elseif(ANDROID)
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
+        src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
@@ -421,6 +424,7 @@ elseif(BSD)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_bsd.c
         src/detection/qt.c
+        src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
@@ -459,6 +463,7 @@ elseif(APPLE)
         src/detection/packages/packages_apple.c
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/processes/processes_bsd.c
+        src/detection/sound/sound_apple.c
         src/detection/swap/swap_apple.c
         src/detection/temps/temps_apple.c
         src/detection/terminalfont/terminalfont_apple.m
@@ -497,6 +502,7 @@ elseif(WIN32)
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.cpp
+        src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
@@ -675,6 +681,7 @@ if(APPLE)
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework CoreAudio"
         PRIVATE "-framework CoreVideo"
         PRIVATE "-framework IOBluetooth"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
