@@ -54,7 +54,8 @@ The following libraries are used if present at runtime:
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
-* [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection on Linux.
+* [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection.
+* [`libalsa`](https://www.alsa-project.org/alsa-doc/alsa-lib/): Used for Sound detection.
 
 ### macOS
 
@@ -88,7 +89,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator OS, Shell, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
+Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator, OS, Shell, Sound, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
 ```
 
 ##### Builtin logos

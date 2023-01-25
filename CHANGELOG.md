@@ -2,6 +2,7 @@
 
 Features:
 * Bluetooth module
+* Sound module
 
 # 1.9.1
 
