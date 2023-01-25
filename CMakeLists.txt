@@ -511,6 +511,7 @@ elseif(WIN32)
         src/detection/wifi/wifi_windows.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
+        src/util/windows/com.cpp
         src/util/windows/registry.c
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
@@ -697,7 +698,6 @@ elseif(WIN32)
         PRIVATE "ole32"
         PRIVATE "oleaut32"
         PRIVATE "opengl32"
-        PRIVATE "wbemuuid"
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
         PRIVATE "version"

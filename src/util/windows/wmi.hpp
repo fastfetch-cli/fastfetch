@@ -9,6 +9,7 @@ extern "C" {
     #include "util/FFstrbuf.h"
 }
 
+#include <initguid.h>
 #include <Wbemidl.h>
 
 enum class FFWmiNamespace {
