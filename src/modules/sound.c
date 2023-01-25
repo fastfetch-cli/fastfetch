@@ -65,4 +65,10 @@ void ffPrintSound(FFinstance* instance)
             printDevice(instance, device, 0);
         }
     }
+
+    FF_LIST_FOR_EACH(FFSoundDevice, device, result)
+    {
+        ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->manufacturer);
+    }
 }
