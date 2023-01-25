@@ -285,7 +285,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     FF_UNUSED(instance, terminalExe, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "fastfetch is built without libcjson support");
+    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without libcjson support");
 }
 
 #endif

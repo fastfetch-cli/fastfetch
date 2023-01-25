@@ -49,7 +49,7 @@ exit:
     #else
 
     FF_UNUSED(terminalFont);
-    return "fastfetch is built without freetype2 support";
+    return "Fastfetch was built without freetype2 support";
 
     #endif
 }
