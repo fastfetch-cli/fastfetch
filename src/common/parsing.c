@@ -1,7 +1,11 @@
 #include "fastfetch.h"
 #include "common/parsing.h"
+
 #include <ctype.h>
 #include <inttypes.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat="
 
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch)
 {
@@ -164,3 +168,5 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
         ffStrbufAppendS(buffer, " [GTK4]");
     }
 }
+
+#pragma GCC diagnostic pop

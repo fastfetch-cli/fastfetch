@@ -3,6 +3,9 @@
 
 #include <bluetoothapis.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpointer-sign"
+
 void ffDetectBluetoothImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFBluetoothResult* bluetooth)
 {
     BLUETOOTH_DEVICE_SEARCH_PARAMS btsp = {
@@ -107,3 +110,5 @@ void ffDetectBluetoothImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFBluetoo
         }
     } while (BluetoothFindNextDevice(hFind, &btdi));
 }
+
+#pragma GCC diagnostic pop
