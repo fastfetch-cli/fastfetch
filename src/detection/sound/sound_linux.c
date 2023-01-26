@@ -31,6 +31,7 @@ static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *u
         if(ffStrbufEqualS(&device->manufacturer, i->default_sink_name))
         {
             device->main = true;
+            device->active = true; // Treat the default sink as always active
             break;
         }
     }
