@@ -1,5 +1,7 @@
 #include "dbus.h"
 
+#ifdef FF_HAVE_DBUS
+
 #include "common/thread.h"
 
 static bool loadLibSymbols(const FFinstance* instance, FFDBusLibrary* lib)
@@ -199,3 +201,5 @@ void ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* 
 
     dbus->lib->ffdbus_message_unref(reply);
 }
+
+#endif //FF_DBUS_H
