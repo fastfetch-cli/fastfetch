@@ -57,6 +57,7 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
 
         FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
         device->main = wcscmp(mainDeviceId, immDeviceId) == 0;
+        device->active = device->main;
         device->volume = 0;
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->manufacturer);

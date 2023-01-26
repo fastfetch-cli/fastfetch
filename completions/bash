@@ -379,7 +379,7 @@ __fastfetch_completion()
         "--lib-glx"
         "--lib-osmesa"
         "--lib-opencl"
-        "--lib-alsa"
+        "--lib-pulse"
         "--battery-dir"
     )
 

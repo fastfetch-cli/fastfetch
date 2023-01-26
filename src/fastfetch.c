@@ -1275,6 +1275,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             optionParseString(key, value, &instance->config.libcJSON);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
             optionParseString(key, value, &instance->config.libwlanapi);
+        else if(strcasecmp(key, "-pulse") == 0)
+            optionParseString(key, value, &instance->config.libPulse);
         else if(strcasecmp(subkey, "-nm") == 0)
             optionParseString(key, value, &instance->config.libnm);
         else

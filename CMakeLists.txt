@@ -70,7 +70,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_ALSA "Enable alsa-lib" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND AND NOT ANDROID" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
@@ -425,7 +425,7 @@ elseif(BSD)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_bsd.c
         src/detection/qt.c
-        src/detection/sound/sound_nosupport.c
+        src/detection/sound/sound_linux.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
@@ -663,9 +663,9 @@ ff_lib_enable(FREETYPE
     "freetype2"
     "FreeType2"
 )
-ff_lib_enable(ALSA
-    "alsa"
-    "ALSA"
+ff_lib_enable(PULSE
+    "libpulse"
+    "Pulse"
 )
 
 if(ENABLE_THREADS)

@@ -38,6 +38,7 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* de
 
         FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
         device->main = deviceId == mainDeviceId;
+        device->active = device->main;
         device->volume = 0;
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->manufacturer);

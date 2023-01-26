@@ -140,7 +140,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libOpenCL, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
     ffStrbufInitA(&instance->config.libfreetype, 0);
-    ffStrbufInit(&instance->config.libAlsa);
+    ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
 
@@ -408,7 +408,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libOpenCL);
     ffStrbufDestroy(&instance->config.libcJSON);
     ffStrbufDestroy(&instance->config.libfreetype);
-    ffStrbufDestroy(&instance->config.libAlsa);
+    ffStrbufDestroy(&instance->config.libPulse);
     ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
 
@@ -514,8 +514,8 @@ void ffListFeatures()
         #ifdef FF_HAVE_FREETYPE
             "freetype\n"
         #endif
-        #ifdef FF_HAVE_ALSA
-            "alsa-lib\n"
+        #ifdef FF_HAVE_PULSE
+            "libpulse\n"
         #endif
         #ifdef FF_HAVE_LIBNM
             "libnm\n"

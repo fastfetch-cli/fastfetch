@@ -1,89 +1,134 @@
 #include "sound.h"
 
-#ifdef FF_HAVE_ALSA
+#ifdef FF_HAVE_PULSE
+#include <common/library.h>
+#include <pulse/pulseaudio.h>
 
-#include "common/library.h"
-#include "common/io.h"
-
-#include <alsa/asoundlib.h>
-
-static const char* doDetectSound(const FFinstance* instance, FFlist* devices)
+static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, void *userdata)
 {
-    FF_LIBRARY_LOAD(asound, &instance->config.libAlsa, "dlopen asound failed", "libasound" FF_LIBRARY_EXTENSION, 2);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_open);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_attach);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_selem_register);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_load);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_first_elem);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_elem_next);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_selem_is_active);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_selem_get_playback_volume_range);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_selem_get_playback_volume);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_selem_get_name);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(asound, snd_mixer_close);
+    FF_UNUSED(c);
 
-    snd_mixer_t *mixer;
-    if (ffsnd_mixer_open(&mixer, 0) < 0)
-        return "snd_mixer_open() failed";
+    if(eol > 0 || !i)
+        return;
 
-    if (ffsnd_mixer_attach(mixer, "default") < 0)
+    FFSoundDevice* device = ffListAdd(userdata);
+    ffStrbufInitS(&device->name, i->description);
+    ffStrbufInitS(&device->manufacturer, i->name);
+    device->volume = i->mute ? 0 : (uint8_t) (i->volume.values[0] * 100 / PA_VOLUME_NORM);
+    device->active = i->active_port && i->active_port->available == PA_PORT_AVAILABLE_YES;
+    device->main = false;
+}
+
+static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *userdata)
+{
+    FF_UNUSED(c);
+
+    if(!i)
+        return;
+
+    FF_LIST_FOR_EACH(FFSoundDevice, device, *(FFlist*)userdata)
     {
-        ffsnd_mixer_close(mixer);
-        return "snd_mixer_attach(\"default\") failed";
+        if(ffStrbufEqualS(&device->manufacturer, i->default_sink_name))
+        {
+            device->main = true;
+            break;
+        }
+    }
+}
+
+static const char* detectSound(const FFinstance* instance, FFlist* devices)
+{
+    FF_LIBRARY_LOAD(pulse, &instance->config.libPulse, "Failed to load libpulse.so.0", "libpulse.so.0", 0)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_new)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_get_api)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_iterate)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_free)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_new)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_connect)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_get_state)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_get_sink_info_list)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_get_server_info)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_unref)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_operation_get_state)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_operation_unref)
+
+    pa_mainloop* mainloop = ffpa_mainloop_new();
+    if(!mainloop)
+        return "Failed to create pulseaudio mainloop";
+
+    pa_mainloop_api* mainloopApi = ffpa_mainloop_get_api(mainloop);
+    if(!mainloopApi)
+    {
+        ffpa_mainloop_free(mainloop);
+        return "Failed to get pulseaudio mainloop api";
     }
 
-    if (ffsnd_mixer_selem_register(mixer, NULL, NULL) < 0)
+    pa_context* context = ffpa_context_new(mainloopApi, "fastfetch");
+    if(!context)
     {
-        ffsnd_mixer_close(mixer);
-        return "snd_mixer_selem_register() failed";
+        ffpa_mainloop_free(mainloop);
+        return "Failed to create pulseaudio context";
     }
 
-    if (ffsnd_mixer_load(mixer) < 0)
+    if(ffpa_context_connect(context, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0)
     {
-        ffsnd_mixer_close(mixer);
-        return "snd_mixer_load() failed";
+        ffpa_context_unref(context);
+        ffpa_mainloop_free(mainloop);
+        return "Failed to connect to pulseaudio context";
     }
 
-    for (snd_mixer_elem_t* elem = ffsnd_mixer_first_elem(mixer); elem; elem = ffsnd_mixer_elem_next(elem))
+    int state;
+    while((state = ffpa_context_get_state(context)) != PA_CONTEXT_READY)
     {
-        if (!ffsnd_mixer_selem_is_active(elem))
-            continue;
+        if(!PA_CONTEXT_IS_GOOD(state))
+        {
+            ffpa_context_unref(context);
+            ffpa_mainloop_free(mainloop);
+            return "Failed to get pulseaudio context state";
+        }
 
-        long min, max;
-        if (ffsnd_mixer_selem_get_playback_volume_range(elem, &min, &max) < 0)
-            continue;
-
-        long volume;
-        if (ffsnd_mixer_selem_get_playback_volume(elem, 0, &volume) < 0)
-            continue;
-
-        const char* name = ffsnd_mixer_selem_get_name(elem);
-
-        FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
-        device->main = strcmp(name, "Master") == 0;
-        device->volume = (uint8_t) ((double)(volume - min) * 100.0 / (double)(max - min) + 0.5);
-        ffStrbufInitS(&device->name, name);
-        ffStrbufInit(&device->manufacturer);
+        ffpa_mainloop_iterate(mainloop, 1, NULL);
     }
 
-    ffsnd_mixer_close(mixer);
+    pa_operation* operation = ffpa_context_get_sink_info_list(context, paSinkInfoCallback, devices);
+    if(!operation)
+    {
+        ffpa_context_unref(context);
+        ffpa_mainloop_free(mainloop);
+        return "Failed to get pulseaudio sink info list";
+    }
+
+    while(ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING)
+        ffpa_mainloop_iterate(mainloop, 1, NULL);
+
+    ffpa_operation_unref(operation);
+
+    operation = ffpa_context_get_server_info(context, paServerInfoCallback, devices);
+    if(!operation)
+    {
+        ffpa_context_unref(context);
+        ffpa_mainloop_free(mainloop);
+        return "Failed to get pulseaudio server info";
+    }
+
+    while(ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING)
+        ffpa_mainloop_iterate(mainloop, 1, NULL);
+
+    ffpa_operation_unref(operation);
+
+    ffpa_context_unref(context);
+    ffpa_mainloop_free(mainloop);
     return NULL;
 }
 
-#endif // FF_HAVE_ALSA
+#endif // FF_HAVE_PULSE
 
-const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_UNUSED FFlist* devices /* List of FFSoundDevice */)
+const char* ffDetectSound(const FFinstance* instance, FFlist* devices)
 {
-    #ifdef FF_HAVE_ALSA
-
-    ffSuppressIO(true);
-    const char* error = doDetectSound(instance, devices);
-    ffSuppressIO(false);
-    return error;
-
+    #ifdef FF_HAVE_PULSE
+        return detectSound(instance, devices);
     #else
-
-    return "Fastfetch was built without alsa support";
-
+        FF_UNUSED(instance, devices);
+        return "Fastfetch was built without libpulse support";
     #endif
 }

@@ -55,7 +55,7 @@ The following libraries are used if present at runtime:
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
 * [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection.
-* [`libalsa`](https://www.alsa-project.org/alsa-doc/alsa-lib/): Used for Sound detection.
+* [`libpulse`](https://freedesktop.org/software/pulseaudio/doxygen/): Used for Sound detection.
 
 ### macOS
 

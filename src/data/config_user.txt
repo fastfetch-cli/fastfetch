@@ -428,3 +428,4 @@
 #--lib-cjson /usr/lib/libcjson.so
 #--lib-cjson /usr/lib/libasound.so
 #--lib-freetype /data/data/com.termux/files/usr/lib
+#--lib-pulse /usr/lib/libpulse.so
