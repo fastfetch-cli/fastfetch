@@ -12,8 +12,9 @@ static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, vo
         return;
 
     FFSoundDevice* device = ffListAdd(userdata);
+    ffStrbufInitS(&device->identifier, i->name);
     ffStrbufInitS(&device->name, i->description);
-    ffStrbufInitS(&device->manufacturer, i->name);
+    ffStrbufInitS(&device->manufacturer, i->driver);
     device->volume = i->mute ? 0 : (uint8_t) (i->volume.values[0] * 100 / PA_VOLUME_NORM);
     device->active = i->active_port && i->active_port->available == PA_PORT_AVAILABLE_YES;
     device->main = false;
@@ -28,7 +29,7 @@ static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *u
 
     FF_LIST_FOR_EACH(FFSoundDevice, device, *(FFlist*)userdata)
     {
-        if(ffStrbufEqualS(&device->manufacturer, i->default_sink_name))
+        if(ffStrbufEqualS(&device->identifier, i->default_sink_name))
         {
             device->main = true;
             device->active = true; // Treat the default sink as always active

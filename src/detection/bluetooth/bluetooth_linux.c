@@ -8,32 +8,36 @@ array [                                                     //root
     dict entry(                                             //object
         object path "/org/bluez/hci0/dev_03_21_8B_91_16_4D"
         array [
-            dict entry(                                     //property
-                string "org.bluez.Device1"
-                array [
-                    dict entry(
-                        string "Address"
-                        variant string "03:21:8B:91:16:4D"
-                    )
-                    dict entry(
-                        string "Name"
-                        variant string "JBL TUNE160BT"
-                    )
-                    dict entry(
-                        string "Connected"
-                        variant boolean true
-                    )
-                ]
-            )
-            dict entry(                                     //property
-                string "org.bluez.Battery1"
-                array [
-                    dict entry(
-                        string "Percentage"
-                        variant byte 100
-                    )
-                ]
-            )
+           dict entry(                                      //property
+              string "org.bluez.Device1"
+              array [
+                 dict entry(
+                    string "Address"
+                    variant string "03:21:8B:91:16:4D"
+                 )
+                 dict entry(
+                    string "Name"
+                    variant string "JBL TUNE160BT"
+                 )
+                 dict entry(
+                    string "Icon"
+                    variant string "audio-headset"
+                 )
+                 dict entry(
+                    string "Connected"
+                    variant boolean true
+                 )
+              ]
+           )
+           dict entry(                                      //property
+              string "org.bluez.Battery1"
+              array [
+                 dict entry(
+                    string "Percentage"
+                    variant byte 100
+                 )
+              ]
+           )
         ]
     )
 ]
