@@ -5,6 +5,57 @@ on:
   - pull_request
 
 jobs:
+  linux-buildtest:
+    name: Linux build test
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        compiler: [gcc, clang]
+        enable_libpci: [ON, OFF]
+        enable_vulkan: [ON, OFF]
+        enable_wayland: [ON, OFF]
+        enable_xrandr: [ON, OFF]
+        enable_xcb: [ON, OFF]
+        enable_dconf: [ON, OFF]
+        enable_dbus: [ON, OFF]
+        enable_magick: [ON, OFF]
+        enable_xfconf: [ON, OFF]
+        enable_sqlite: [ON, OFF]
+        enable_rpm: [ON, OFF]
+        enable_egl: [ON, OFF]
+        enable_glx: [ON, OFF]
+        enable_osmesa: [ON, OFF]
+        enable_opencl: [ON, OFF]
+        enable_nm: [ON, OFF]
+        enable_pulse: [ON, OFF]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: install required packages
+        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libcjson-dev libnm-dev libpulse-dev
+
+      - name: configure project
+        env:
+          CC: ${{ matrix.compiler }}
+        run: cmake -DENABLE_LIBPCI=${{ matrix.enable_libpci }} -DENABLE_VULKAN=${{ matrix.enable_vulkan }} -DENABLE_WAYLAND=${{ matrix.enable_wayland }} -DENABLE_XRANDR=${{ matrix.enable_xrandr }} -DENABLE_XCB=${{ matrix.enable_xcb }} -DENABLE_DCONF=${{ matrix.enable_dconf }} -DENABLE_DBUS=${{ matrix.enable_dbus }} -DENABLE_MAGICK=${{ matrix.enable_magick }} -DENABLE_XFCONF=${{ matrix.enable_xfconf }} -DENABLE_SQLITE=${{ matrix.enable_sqlite }} -DENABLE_RPM=${{ matrix.enable_rpm }} -DENABLE_EGL=${{ matrix.enable_egl }} -DENABLE_GLX=${{ matrix.enable_glx }} -DENABLE_OSMESA=${{ matrix.enable_osmesa }} -DENABLE_OPENCL=${{ matrix.enable_opencl }} -DENABLE_NM=${{ matrix.enable_nm }} -DENABLE_PULSE=${{ matrix.enable_pulse }}
+
+      - name: build project
+        run: cmake --build .
+
+      - name: run tests
+        run: ctest
+
+      - name: run fastfetch
+        run: ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+
+      - name: run flashfetch
+        run: ./flashfetch
+
   linux:
     name: Linux
     runs-on: ubuntu-latest
