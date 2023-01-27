@@ -34,7 +34,7 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
 
     IMMDeviceCollection* FF_AUTO_RELEASE_COM_OBJECT pDevices = NULL;
 
-    if (FAILED(pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &pDevices)))
+    if (FAILED(pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &pDevices)))
         return "EnumAudioEndpoints() failed";
 
     uint32_t deviceCount;
@@ -55,9 +55,13 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
         if (FAILED(immDevice->OpenPropertyStore(STGM_READ, &immPropStore)))
             continue;
 
+        DWORD immState;
+        if (FAILED(immDevice->GetState(&immState)))
+            continue;
+
         FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
         device->main = wcscmp(mainDeviceId, immDeviceId) == 0;
-        device->active = device->main;
+        device->active = !!(immState & DEVICE_STATE_ACTIVE);
         device->volume = 0;
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->manufacturer);
@@ -65,7 +69,7 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
         {
             PROPVARIANT __attribute__((__cleanup__(PropVariantClear))) friendlyName;
             PropVariantInit(&friendlyName);
-            if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_DeviceDesc, &friendlyName)))
+            if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_FriendlyName, &friendlyName)))
                 ffStrbufSetWS(&device->name, friendlyName.pwszVal);
             if (SUCCEEDED(immPropStore->GetValue(PKEY_DeviceInterface_FriendlyName, &friendlyName)))
                 ffStrbufSetWS(&device->manufacturer, friendlyName.pwszVal);
