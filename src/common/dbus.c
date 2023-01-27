@@ -202,4 +202,4 @@ void ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* 
     dbus->lib->ffdbus_message_unref(reply);
 }
 
-#endif //FF_DBUS_H
+#endif //FF_HAVE_DBUS

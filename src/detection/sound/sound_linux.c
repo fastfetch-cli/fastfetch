@@ -105,20 +105,17 @@ static const char* detectSound(const FFinstance* instance, FFlist* devices)
     ffpa_operation_unref(operation);
 
     operation = ffpa_context_get_server_info(context, paServerInfoCallback, devices);
-    if(!operation)
+    if(operation)
     {
-        ffpa_context_unref(context);
-        ffpa_mainloop_free(mainloop);
-        return "Failed to get pulseaudio server info";
+        while(ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING)
+            ffpa_mainloop_iterate(mainloop, 1, NULL);
+
+        ffpa_operation_unref(operation);
     }
-
-    while(ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING)
-        ffpa_mainloop_iterate(mainloop, 1, NULL);
-
-    ffpa_operation_unref(operation);
 
     ffpa_context_unref(context);
     ffpa_mainloop_free(mainloop);
+    dlclose(pulse);
     return NULL;
 }
 
