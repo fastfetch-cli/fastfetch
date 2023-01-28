@@ -24,6 +24,6 @@ const FFlogo* ffLogoBuiltinGetUnknown();
 GetLogoMethod* ffLogoBuiltinGetAll();
 
 //image/image.c
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type);
+bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type, bool printError);
 
 #endif

@@ -673,7 +673,7 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
     return requestData->characterPixelWidth > 1.0 && requestData->characterPixelHeight > 1.0;
 }
 
-static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
+static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type, bool printError)
 {
     FFLogoRequestData requestData;
     requestData.type = type;
@@ -684,7 +684,8 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
         (type != FF_LOGO_TYPE_IMAGE_CHAFA || instance->config.logo.width == 0 || instance->config.logo.height == 0) &&
         !getCharacterPixelDimensions(&requestData)
     ) {
-        fputs("Logo: getCharacterPixelDimensions() failed", stderr);
+        if(printError)
+            fputs("Logo: getCharacterPixelDimensions() failed", stderr);
         return false;
     }
 
@@ -700,7 +701,8 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
-        fputs("Logo: Querying realpath of the image source failed", stderr);
+        if(printError)
+            fputs("Logo: Querying realpath of the image source failed", stderr);
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
@@ -730,26 +732,28 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type)
 
     ffStrbufDestroy(&requestData.cacheDir);
 
-    switch(result)
+    if(result == FF_LOGO_IMAGE_RESULT_SUCCESS)
+        return true;
+
+    if(printError)
     {
-        case FF_LOGO_IMAGE_RESULT_INIT_ERROR:
-            fputs("Logo: Init Image Magick library failed\n", stderr);
-            return false;
-        case FF_LOGO_IMAGE_RESULT_RUN_ERROR:
+        if(result == FF_LOGO_IMAGE_RESULT_INIT_ERROR)
+            fputs("Logo: Image Magick library not found\n", stderr);
+        else
             fputs("Logo: Failed to load / convert the image source\n", stderr);
-            return false;
-        default:
-            return true;
     }
+
+    return false;
 }
 
 #endif //FF_HAVE_IMAGEMAGICK{6, 7}
 
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
+bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type, bool printError)
 {
-    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG))
+    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG & S_IFLNK))
     {
-        fputs("Logo: Image file not found\n", stderr);
+        if(printError)
+            fprintf(stderr, "Logo: Image source \"%s\" does not exist\n", instance->config.logo.source.chars);
         return false;
     }
 
@@ -764,18 +768,20 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type)
     )
         return printImageKittyDirect(instance);
 
-    #ifndef FF_HAVE_CHAFA
+    #if !defined(FF_HAVE_CHAFA)
         if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
         {
-            fputs("Logo: Fastfetch was built without Chafa support\n", stderr);
+            if(printError)
+                fputs("Logo: Chafa support is not compiled in\n", stderr);
             return false;
         }
     #endif
 
-    #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
-        return printImageIfExistsSlowPath(instance, type);
-    #else
-        fputs("Logo: Fastfetch was built without ImageMagick support\n", stderr);
+    #if !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
+        if(printError)
+            fputs("Logo: Image Magick support is not compiled in\n", stderr);
         return false;
+    #else
+        return printImageIfExistsSlowPath(instance, type, printError);
     #endif
 }
