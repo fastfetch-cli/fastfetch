@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
 

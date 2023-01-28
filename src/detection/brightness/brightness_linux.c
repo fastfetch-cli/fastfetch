@@ -1,5 +1,5 @@
 #include "brightness.h"
-#include "common/io.h"
+#include "common/io/io.h"
 
 #include <dirent.h>
 

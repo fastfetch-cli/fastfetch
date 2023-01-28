@@ -227,7 +227,6 @@ set(LIBFASTFETCH_SRC
     src/common/font.c
     src/common/format.c
     src/common/init.c
-    src/common/io.c
     src/common/library.c
     src/common/parsing.c
     src/common/printing.c
@@ -313,6 +312,7 @@ set(LIBFASTFETCH_SRC
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
+        src/common/io/io_unix.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_linux.c
@@ -356,6 +356,7 @@ if(LINUX)
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/io/io_unix.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
@@ -394,6 +395,7 @@ elseif(ANDROID)
 elseif(BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
+        src/common/io/io_unix.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
@@ -438,6 +440,7 @@ elseif(BSD)
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/io/io_unix.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
@@ -479,6 +482,7 @@ elseif(APPLE)
     )
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/io/io_windows.c
         src/common/networking_windows.c
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c

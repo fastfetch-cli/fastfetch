@@ -1,5 +1,5 @@
 #include "image.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/printing.h"
 
 #ifdef __APPLE__

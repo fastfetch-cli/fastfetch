@@ -1,5 +1,5 @@
 #include "logo.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/printing.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"

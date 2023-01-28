@@ -200,7 +200,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
 #endif
 
-#include "common/io.h"
+#include "common/io/io.h"
 
 #include <net/if.h>
 #include <linux/wireless.h>

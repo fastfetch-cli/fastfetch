@@ -5,7 +5,7 @@
 
 #ifdef FF_HAVE_WAYLAND
 #include "common/library.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/thread.h"
 #include <wayland-client.h>
 #include <sys/socket.h>

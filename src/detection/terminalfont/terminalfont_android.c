@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "terminalfont.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "common/io.h"
+#include "common/io/io.h"
 
 #ifdef FF_HAVE_FREETYPE
     #include "common/library.h"

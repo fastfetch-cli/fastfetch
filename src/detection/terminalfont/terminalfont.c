@@ -182,7 +182,7 @@ exit:
 }
 
 #ifdef _WIN32
-    #include "common/io.h"
+    #include "common/io/io.h"
 
     #include <shlobj.h>
 #endif
