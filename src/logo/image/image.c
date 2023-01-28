@@ -229,7 +229,7 @@ static void printImagePixels(FFinstance* instance, FFLogoRequestData* requestDat
     ffPrintCharTimes('\n', instance->config.logo.paddingTop);
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     fflush(stdout);
-    ffWriteFDBuffer(STDOUT_FILENO, result);
+    ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), result);
 
     //Go to upper left corner
     fputs("\033[9999999D", stdout);
@@ -614,8 +614,8 @@ static bool printCachedPixel(FFinstance* instance, FFLogoRequestData* requestDat
 
     char buffer[32768];
     ssize_t readBytes;
-    while((readBytes = read(fd, buffer, sizeof(buffer))) > 0)
-        FF_UNUSED(write(STDOUT_FILENO, buffer, (size_t) readBytes));
+    while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
+        ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
 
     close(fd);
 

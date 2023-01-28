@@ -80,7 +80,7 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
     if(fd == -1)
         return -1;
 
-    ssize_t readed = read(fd, data, dataSize);
+    ssize_t readed = ffReadFDData(fd, dataSize, data);
 
     close(fd);
 

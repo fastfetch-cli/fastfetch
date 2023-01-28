@@ -7,20 +7,35 @@
 
 #ifdef _WIN32
     #include <fileapi.h>
+    #include <io.h>
     typedef HANDLE FFNativeFD;
 #else
     #include <unistd.h>
     typedef int FFNativeFD;
 #endif
 
-static inline bool ffWriteFDBuffer(FFNativeFD fd, const FFstrbuf* content)
+static inline FFNativeFD FFUnixFD2NativeFD(int unixfd)
 {
     #ifndef _WIN32
-        return write(fd, content->chars, content->length) != -1;
+        return unixfd;
+    #else
+        return (FFNativeFD) _get_osfhandle(unixfd);
+    #endif
+}
+
+static inline bool ffWriteFDData(FFNativeFD fd, size_t dataSize, const void* data)
+{
+    #ifndef _WIN32
+        return write(fd, data, dataSize) != -1;
     #else
         DWORD written;
-        return WriteFile(fd, content->chars, content->length, &written, NULL) && written == content->length;
+        return WriteFile(fd, data, (DWORD) dataSize, &written, NULL) && written == dataSize;
     #endif
+}
+
+static inline bool ffWriteFDBuffer(FFNativeFD fd, const FFstrbuf* content)
+{
+    return ffWriteFDData(fd, content->length, content->chars);
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);
@@ -30,8 +45,22 @@ static inline bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffe
     return ffWriteFileData(fileName, buffer->length, buffer->chars);
 }
 
-bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
+static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
+{
+    #ifndef _WIN32
+        return read(fd, data, dataSize);
+    #else
+        DWORD readed;
+        if(!ReadFile(fd, data, (DWORD)dataSize, &readed, NULL))
+            return -1;
+
+        return (ssize_t)readed;
+    #endif
+}
+
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
+
+bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
 
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)

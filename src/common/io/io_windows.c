@@ -71,13 +71,13 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
     HANDLE handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(handle == INVALID_HANDLE_VALUE)
-        return false;
-
-    DWORD readed;
-    if(!ReadFile(handle, data, (DWORD)dataSize, &readed, NULL))
         return -1;
 
-    return (ssize_t)readed;
+    ssize_t readed = ffReadFDData(handle, dataSize, data);
+
+    CloseHandle(handle);
+
+    return readed;
 }
 
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
