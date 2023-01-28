@@ -62,7 +62,7 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         return;
     }
 
-    if(!ffFileExists(FF_TERMUX_FONT_PATH, S_IFREG))
+    if(!ffPathExists(FF_TERMUX_FONT_PATH, FF_PATHTYPE_FILE))
     {
         ffFontInitCopy(&terminalFont->font, "monospace");
         return;

@@ -309,7 +309,7 @@ static const SQLiteData* getSQLiteData(const FFinstance* instance)
 
 int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
 {
-    if(!ffFileExists(dbPath, S_IFREG))
+    if(!ffPathExists(dbPath, FF_PATHTYPE_FILE))
         return 0;
 
     const SQLiteData* data = getSQLiteData(instance);

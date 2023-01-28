@@ -7,6 +7,7 @@
 #ifdef _WIN32
     #include <fileapi.h>
 #else
+    #include <sys/stat.h>
     #include <termios.h>
     #include <poll.h>
 #endif
@@ -231,11 +232,46 @@ void ffSuppressIO(bool suppress)
     dup2(suppress ? nullFile : origErr, STDERR_FILENO);
 }
 
-bool ffFileExists(const char* fileName, mode_t mode)
+#ifndef _WIN32
+bool ffPathExists(const char* path, FFPathType type)
 {
     struct stat fileStat;
-    return stat(fileName, &fileStat) == 0 && ((fileStat.st_mode & S_IFMT) == mode);
+    if(stat(path, &fileStat) != 0)
+        return false;
+
+    int mode = fileStat.st_mode & S_IFMT;
+
+    if(type & FF_PATHTYPE_REGULAR && mode == S_IFREG)
+        return true;
+
+    if(type & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
+        return true;
+
+    if(type & FF_PATHTYPE_LINK && mode == S_IFLNK)
+        return true;
+
+    return false;
 }
+
+#else
+bool ffPathExists(const char* path, FFPathType type)
+{
+    DWORD attr = GetFileAttributesA(path);
+    if(attr == INVALID_FILE_ATTRIBUTES)
+        return false;
+
+    if(type & FF_PATHTYPE_REGULAR && !(attr & FILE_ATTRIBUTE_DIRECTORY))
+        return true;
+
+    if(type & FF_PATHTYPE_DIRECTORY && (attr & FILE_ATTRIBUTE_DIRECTORY))
+        return true;
+
+    if(type & FF_PATHTYPE_LINK && (attr & FILE_ATTRIBUTE_REPARSE_POINT))
+        return true;
+
+    return false;
+}
+#endif
 
 void ffGetTerminalResponse(const char* request, const char* format, ...)
 {

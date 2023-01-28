@@ -291,7 +291,7 @@ static bool logoPrintData(FFinstance* instance, bool doColorReplacement) {
 
 static void updateLogoPath(FFinstance* instance)
 {
-    if(ffFileExists(instance->config.logo.source.chars, S_IFREG & S_IFLNK))
+    if(ffPathExists(instance->config.logo.source.chars, FF_PATHTYPE_FILE))
         return;
 
     FFstrbuf fullPath;
@@ -304,7 +304,7 @@ static void updateLogoPath(FFinstance* instance)
         ffStrbufAppendS(&fullPath, "fastfetch/logos/");
         ffStrbufAppend(&fullPath, &instance->config.logo.source);
 
-        if(ffFileExists(fullPath.chars, S_IFREG & S_IFLNK))
+        if(ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
         {
             ffStrbufSet(&instance->config.logo.source, &fullPath);
             break;

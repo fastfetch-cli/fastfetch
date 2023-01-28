@@ -48,7 +48,7 @@ static const char* parseEnv()
 
     if(
         getenv("WAYLAND_DISPLAY") != NULL &&
-        ffFileExists("/mnt/wslg/", S_IFDIR)
+        ffPathExists("/mnt/wslg/", FF_PATHTYPE_DIRECTORY)
     ) return "WSLg";
 
     return NULL;

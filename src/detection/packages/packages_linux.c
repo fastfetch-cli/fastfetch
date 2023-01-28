@@ -88,7 +88,7 @@ static uint32_t countFilesRecursiveImpl(FFstrbuf* baseDirPath, const char* filen
 
     ffStrbufAppendC(baseDirPath, '/');
     ffStrbufAppendS(baseDirPath, filename);
-    bool exists = ffFileExists(baseDirPath->chars, S_IFREG);
+    bool exists = ffPathExists(baseDirPath->chars, FF_PATHTYPE_FILE);
     ffStrbufSubstrBefore(baseDirPath, baseDirPathLength);
     if(exists)
         return 1;
@@ -129,7 +129,7 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDir, const char* dirname, cons
 static uint32_t getNixPackagesImpl(char* path)
 {
     //Nix detection is kinda slow, so we only do it if the dir exists
-    if(!ffFileExists(path, S_IFDIR))
+    if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
         return 0;
 
     FFstrbuf output;

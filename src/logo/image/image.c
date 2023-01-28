@@ -750,7 +750,7 @@ static bool printImageIfExistsSlowPath(FFinstance* instance, FFLogoType type, bo
 
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type, bool printError)
 {
-    if(!ffFileExists(instance->config.logo.source.chars, S_IFREG & S_IFLNK))
+    if(!ffPathExists(instance->config.logo.source.chars, FF_PATHTYPE_FILE))
     {
         if(printError)
             fprintf(stderr, "Logo: Image source \"%s\" does not exist\n", instance->config.logo.source.chars);

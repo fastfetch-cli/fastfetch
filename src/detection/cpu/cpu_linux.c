@@ -131,7 +131,7 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     cpu->coresOnline = (uint16_t) get_nprocs();
 
     #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
-    if(ffFileExists(BP, S_IFDIR))
+    if(ffPathExists(BP, FF_PATHTYPE_DIRECTORY))
     {
         cpu->frequencyMin = getFrequency(BP"cpuinfo_min_freq", BP"scaling_min_freq");
         cpu->frequencyMax = getFrequency(BP"cpuinfo_max_freq", BP"scaling_max_freq");

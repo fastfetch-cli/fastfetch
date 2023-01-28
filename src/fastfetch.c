@@ -556,7 +556,7 @@ static void listConfigPaths(FFinstance* instance)
     FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.configDirs)
     {
         ffStrbufAppendS(folder, "fastfetch/config.conf");
-        printf("%s%s\n", folder->chars, ffFileExists(folder->chars, S_IFREG) ? " (*)" : "");
+        printf("%s%s\n", folder->chars, ffPathExists(folder->chars, FF_PATHTYPE_FILE) ? " (*)" : "");
     }
 }
 
@@ -640,7 +640,7 @@ static void generateConfigFile(FFinstance* instance, bool force)
     // Paths generated in `init.c/initConfigDirs` end with `/`
     ffStrbufAppendS(filename, "fastfetch/config.conf");
 
-    if (!force && ffFileExists(filename->chars, S_IFREG))
+    if (!force && ffPathExists(filename->chars, FF_PATHTYPE_FILE))
     {
         fprintf(stderr, "Config file exists in `%s`, use `--gen-config-force` to overwrite\n", filename->chars);
         exit(1);
