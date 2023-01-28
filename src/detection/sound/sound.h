@@ -7,7 +7,7 @@
 
 typedef struct FFSoundDevice
 {
-    FFstrbuf identifier; // Used internally, not guaranteed to be initialized
+    FFstrbuf identifier;
     FFstrbuf name;
     FFstrbuf manufacturer;
     uint8_t volume; // 0-100%

@@ -63,8 +63,11 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
         device->main = wcscmp(mainDeviceId, immDeviceId) == 0;
         device->active = !!(immState & DEVICE_STATE_ACTIVE);
         device->volume = 0;
+        ffStrbufInit(&device->identifier);
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->manufacturer);
+
+        ffStrbufSetWS(&device->identifier, immDeviceId);
 
         {
             PROPVARIANT __attribute__((__cleanup__(PropVariantClear))) friendlyName;
