@@ -457,6 +457,16 @@ static inline void printCommandHelp(const char* command)
             "Battery percentage"
         );
     }
+    else if(strcasecmp(command, "sound-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("sound", "{2} (3%)", 4,
+            "Main",
+            "Name",
+            "Volume",
+            "Manufacturer",
+            "Identifier"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
