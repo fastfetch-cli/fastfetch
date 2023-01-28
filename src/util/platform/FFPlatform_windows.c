@@ -33,8 +33,6 @@ static void getCacheDir(FFPlatform* platform)
         ffStrbufAppendS(&platform->cacheDir, "AppData/Local/");
     }
     CoTaskMemFree(pPath);
-
-    ffStrbufAppendS(&platform->cacheDir, "fastfetch/");
 }
 
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)

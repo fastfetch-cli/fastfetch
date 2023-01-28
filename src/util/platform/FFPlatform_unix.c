@@ -29,8 +29,6 @@ static void getCacheDir(FFPlatform* platform)
         ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
         ffStrbufAppendS(&platform->cacheDir, ".cache/");
     }
-
-    ffStrbufAppendS(&platform->cacheDir, "fastfetch/");
 }
 
 static void getConfigDirs(FFPlatform* platform)
