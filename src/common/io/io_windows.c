@@ -115,3 +115,48 @@ void ffSuppressIO(bool suppress)
 {
     FF_UNUSED(suppress);
 }
+
+void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
+{
+    uint32_t folderLength = folder->length;
+
+    if(folderName != NULL)
+        printf("%s/\n", folderName);
+
+    ffStrbufAppendC(folder, '*');
+    WIN32_FIND_DATAA entry;
+    HANDLE hFind = FindFirstFileA(folder->chars, &entry);
+    if(hFind == INVALID_HANDLE_VALUE)
+        return;
+
+    do
+    {
+        if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            if(strcmp(entry.cFileName, ".") == 0 || strcmp(entry.cFileName, "..") == 0)
+                continue;
+
+            ffStrbufSubstrBefore(folder, folderLength);
+            ffStrbufAppendS(folder, entry.cFileName);
+            ffStrbufAppendC(folder, '/');
+            listFilesRecursively(folder, (uint8_t) (indentation + 1), entry.cFileName);
+            ffStrbufSubstrBefore(folder, folderLength);
+            continue;
+        }
+
+        for(uint8_t i = 0; i < indentation; i++)
+            fputs("  | ", stdout);
+
+        puts(entry.cFileName);
+    } while (FindNextFileA(hFind, &entry));
+    FindClose(hFind);
+}
+
+void ffListFilesRecursively(const char* path)
+{
+    FFstrbuf folder;
+    ffStrbufInitS(&folder, path);
+    ffStrbufEnsureEndsWithC(&folder, '/');
+    listFilesRecursively(&folder, 0, NULL);
+    ffStrbufDestroy(&folder);
+}

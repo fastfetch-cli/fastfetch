@@ -12,9 +12,6 @@
 
 #ifdef WIN32
     #include "util/windows/getline.h"
-    #include <fileapi.h>
-#else
-    #include <dirent.h>
 #endif
 
 typedef struct CustomValue
@@ -471,83 +468,21 @@ static inline void printCommandHelp(const char* command)
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
 
-static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t indentation, const char* folderName)
-{
-    #ifndef _WIN32
-    DIR* dir = opendir(folder->chars);
-    if(dir == NULL)
-        return;
-
-    uint32_t folderLength = folder->length;
-
-    if(folderName != NULL)
-        printf("%s/\n", folderName);
-
-    struct dirent* entry;
-
-    while((entry = readdir(dir)) != NULL)
-    {
-        if(entry->d_type == DT_DIR)
-        {
-            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-                continue;
-
-            ffStrbufAppendS(folder, entry->d_name);
-            ffStrbufAppendC(folder, '/');
-            listAvailablePresetsFromFolder(folder, (uint8_t) (indentation + 1), entry->d_name);
-            ffStrbufSubstrBefore(folder, folderLength);
-            continue;
-        }
-
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
-
-        puts(entry->d_name);
-    }
-
-    closedir(dir);
-    #else
-    uint32_t folderLength = folder->length;
-
-    if(folderName != NULL)
-        printf("%s/\n", folderName);
-
-    ffStrbufAppendC(folder, '*');
-    WIN32_FIND_DATAA entry;
-    HANDLE hFind = FindFirstFileA(folder->chars, &entry);
-    if(hFind == INVALID_HANDLE_VALUE)
-        return;
-
-    do
-    {
-        if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        {
-            if(strcmp(entry.cFileName, ".") == 0 || strcmp(entry.cFileName, "..") == 0)
-                continue;
-
-            ffStrbufSubstrBefore(folder, folderLength);
-            ffStrbufAppendS(folder, entry.cFileName);
-            ffStrbufAppendC(folder, '/');
-            listAvailablePresetsFromFolder(folder, (uint8_t) (indentation + 1), entry.cFileName);
-            ffStrbufSubstrBefore(folder, folderLength);
-            continue;
-        }
-
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
-
-        puts(entry.cFileName);
-    } while (FindNextFileA(hFind, &entry));
-    FindClose(hFind);
-    #endif
-}
-
-static inline void listAvailablePresets(FFinstance* instance)
+static void listAvailablePresets(FFinstance* instance)
 {
     FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/presets/");
-        listAvailablePresetsFromFolder(path, 0, NULL);
+        ffListFilesRecursively(path->chars);
+    }
+}
+
+static void listAvailableLogos(FFinstance* instance)
+{
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
+    {
+        ffStrbufAppendS(path, "fastfetch/logos/");
+        ffListFilesRecursively(path->chars);
     }
 }
 
@@ -972,7 +907,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         }
         else if(strcasecmp(subkey, "-logos") == 0)
         {
+            puts("Builtin logos:");
             ffLogoBuiltinList();
+            puts("\nCustom logos:");
+            listAvailableLogos(instance);
             exit(0);
         }
         else if(strcasecmp(subkey, "-logos-autocompletion") == 0)

@@ -90,4 +90,6 @@ bool ffPathExists(const char* path, FFPathType pathType);
 // Not thread safe!
 void ffSuppressIO(bool suppress);
 
+void ffListFilesRecursively(const char* path);
+
 #endif // FF_INCLUDED_common_io_io

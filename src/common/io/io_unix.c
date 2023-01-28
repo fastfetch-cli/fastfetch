@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <poll.h>
+#include <dirent.h>
 
 static void createSubfolders(const char* fileName)
 {
@@ -188,4 +189,49 @@ void ffSuppressIO(bool suppress)
 
     dup2(suppress ? nullFile : origOut, STDOUT_FILENO);
     dup2(suppress ? nullFile : origErr, STDERR_FILENO);
+}
+
+void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
+{
+    DIR* dir = opendir(folder->chars);
+    if(dir == NULL)
+        return;
+
+    uint32_t folderLength = folder->length;
+
+    if(folderName != NULL)
+        printf("%s/\n", folderName);
+
+    struct dirent* entry;
+
+    while((entry = readdir(dir)) != NULL)
+    {
+        if(entry->d_type == DT_DIR)
+        {
+            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+
+            ffStrbufAppendS(folder, entry->d_name);
+            ffStrbufAppendC(folder, '/');
+            listFilesRecursively(folder, (uint8_t) (indentation + 1), entry->d_name);
+            ffStrbufSubstrBefore(folder, folderLength);
+            continue;
+        }
+
+        for(uint8_t i = 0; i < indentation; i++)
+            fputs("  | ", stdout);
+
+        puts(entry->d_name);
+    }
+
+    closedir(dir);
+}
+
+void ffListFilesRecursively(const char* path)
+{
+    FFstrbuf folder;
+    ffStrbufInitS(&folder, path);
+    ffStrbufEnsureEndsWithC(&folder, '/');
+    listFilesRecursively(&folder, 0, NULL);
+    ffStrbufDestroy(&folder);
 }
