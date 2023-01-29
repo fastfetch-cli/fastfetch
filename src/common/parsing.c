@@ -73,10 +73,30 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, uint8_t p
 
     if(counter == 0)
         ffStrbufAppendF(result, "%"PRIu64" %s", bytes, prefixes[0]);
-    else if(counter < 3 || (counter == 3 && size < 100.0))
-        ffStrbufAppendF(result, "%.2Lf %s", size, prefixes[counter]);
     else
-        ffStrbufAppendF(result, "%.0Lf %s", size, prefixes[counter]);
+    {
+        static char digits[] = "0123456789";
+        uint32_t units = (uint32_t) (size * 1000);
+        char chars[9];
+        chars[8] = 0;
+
+        for(int8_t i = 7; i >= 0; i--, units /= 10)
+        {
+            chars[i] = digits[units % 10];
+            if(i == 5)
+                chars[--i] = '.';
+        }
+
+        uint8_t skip = 0;
+        while(chars[skip] == '0' && chars[skip + 1] != '.' && chars[skip + 1] != 0)
+            skip++;
+
+        chars[skip + 5] = 0;
+        for(uint8_t i = skip + 4; i > 3 && (chars[i] == '0' || chars[i] == '.'); i--)
+            chars[i] = 0;
+
+        ffStrbufAppendF(result, "%s %s", &chars[skip], prefixes[counter]);
+    }
 }
 
 void ffParseSize(uint64_t bytes, FFBinaryPrefixType binaryPrefix, FFstrbuf* result)
