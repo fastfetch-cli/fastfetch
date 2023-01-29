@@ -4,6 +4,10 @@ Features:
 * Bluetooth module
 * Sound module
 
+Bugfixes:
+
+* Fix a rare case that fails to detect terminal
+
 # 1.9.1
 
 Bugfixes:

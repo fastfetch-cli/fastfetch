@@ -162,6 +162,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
     ) {
         if (result->shellProcessName.length == 0)
         {
+            result->shellPid = (uint32_t) pid;
             ffStrbufSetS(&result->shellProcessName, name);
             getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
         }
@@ -170,6 +171,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         return;
     }
 
+    result->terminalPid = (uint32_t) pid;
     ffStrbufSetS(&result->terminalProcessName, name);
     getProcessInformation(pid, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);
 }
@@ -336,10 +338,12 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     ffStrbufInitA(&result.shellExe, exePathLen);
     result.shellExeName = result.shellExe.chars;
     ffStrbufInit(&result.shellVersion);
+    result.shellPid = 0;
 
     ffStrbufInit(&result.terminalProcessName);
     ffStrbufInitA(&result.terminalExe, exePathLen);
     result.terminalExeName = result.terminalExe.chars;
+    result.terminalPid = 0;
 
     ffStrbufInit(&result.userShellExe);
     result.userShellExeName = result.userShellExe.chars;
