@@ -111,9 +111,7 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace 
     }
 
     // Use the IWbemServices pointer to make requests of WMI
-    HRESULT hres;
-
-    hres = ((IWbemServices*)context)->ExecQuery(
+    HRESULT hres = ((IWbemServices*)context)->ExecQuery(
         bstr_t(L"WQL"),
         bstr_t(queryStr),
         WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
