@@ -113,7 +113,7 @@ bool ffPathExists(const char* path, FFPathType type)
 
 void ffSuppressIO(bool suppress)
 {
-    FF_UNUSED(suppress);
+    (void) suppress; //Not implemented.
 }
 
 void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
