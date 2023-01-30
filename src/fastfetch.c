@@ -928,8 +928,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
         instance->config.recache = optionParseBoolean(value);
-    else if(strcasecmp(key, "--nocache") == 0)
-        fputs("`--nocache` are obsoleted. Caching functions other than image caching are removed.\n\n", stderr);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--gen-config") == 0)
