@@ -152,9 +152,9 @@ const FFQtResult* ffDetectQt(const FFinstance* instance)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "KDE Plasma") == 0)
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA) == 0)
         detectPlasma(instance, &result);
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "LXQt") == 0)
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT) == 0)
         detectLXQt(instance, &result);
 
     ffThreadMutexUnlock(&mutex);

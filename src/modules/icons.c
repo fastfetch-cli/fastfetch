@@ -20,7 +20,7 @@ void ffPrintIcons(FFinstance* instance)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
+    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
     {
         ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.icons, "Icons aren't supported in TTY");
         return;

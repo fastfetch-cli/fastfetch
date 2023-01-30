@@ -200,27 +200,27 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
         return false;
     }
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "KWin") == 0 || ffStrbufIgnCaseCompS(&wm->wmPrettyName, "KDE") == 0 || ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Plasma") == 0)
+    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN) == 0)
         return detectWMThemeFromConfigFile(instance, "kwinrc", "theme =", "Breeze", themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Xfwm4") == 0 || ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Xfwm") == 0)
+    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_XFWM4) == 0)
         return detectXFWM4(instance, themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Mutter") == 0)
+    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUTTER) == 0)
     {
-        if(ffStrbufIgnCaseCompS(&wm->dePrettyName, "Gnome") == 0)
+        if(ffStrbufIgnCaseCompS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) == 0)
             return detectMutter(instance, themeOrError);
         else
             return detectGTKThemeAsWMTheme(instance, themeOrError);
     }
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Muffin") == 0)
+    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUFFIN) == 0)
         return detectMuffin(instance, themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Marco") == 0)
+    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MARCO) == 0)
         return detectWMThemeFromSettings(instance, "/org/mate/Marco/general/theme", "org.mate.Marco.general", NULL, "theme", themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Openbox") == 0)
+    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_OPENBOX) == 0)
         return detectOpenbox(instance, &wm->dePrettyName, themeOrError);
 
     ffStrbufAppendS(themeOrError, "Unknown WM: ");

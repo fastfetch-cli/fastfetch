@@ -39,7 +39,7 @@ static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Wi
 
 static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
 {
-    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND) == 0)
+    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
         return;
 
     Window* wmWindow = (Window*) x11GetProperty(data, display, DefaultRootWindow(display), "_NET_SUPPORTING_WM_CHECK");
@@ -94,7 +94,7 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
 }
 
 #else
@@ -315,7 +315,7 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
 }
 
 #else

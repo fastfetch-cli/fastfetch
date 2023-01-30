@@ -156,7 +156,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     //We successfully connected to wayland and detected the display.
     //So we can set set the session type to wayland.
     //This is used as an indicator that we are running wayland by the x11 backends.
-    ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND);
+    ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
     return true;
 }
 #endif
@@ -187,5 +187,5 @@ void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* resul
 
     //We are probably running a wayland compositor at this point,
     //but fastfetch was compiled without the required library, or loading the library failed.
-    ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND);
+    ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
 }

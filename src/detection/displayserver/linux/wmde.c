@@ -65,31 +65,33 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
         strcasecmp(processName, "kwin_x11") == 0 ||
         strcasecmp(processName, "kwin_x11_wrapper") == 0 ||
         strcasecmp(processName, "kwin") == 0
-    ) ffStrbufSetS(&result->wmPrettyName, "KWin");
+    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
     else if(
         strcasecmp(processName, "gnome-shell") == 0 ||
         strcasecmp(processName, "gnome shell") == 0 ||
         strcasecmp(processName, "gnome-session-binary") == 0 ||
         strcasecmp(processName, "Mutter") == 0
-    ) ffStrbufSetS(&result->wmPrettyName, "Mutter");
+    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
         strcasecmp(processName, "cinnamon-session") == 0 ||
         strcasecmp(processName, "Muffin") == 0
-    ) ffStrbufSetS(&result->wmPrettyName, "Muffin");
+    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
     else if(strcasecmp(processName, "sway") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Sway");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
     else if(strcasecmp(processName, "weston") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Weston");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WESTON);
     else if(strcasecmp(processName, "wayfire") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Wayfire");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WAYFIRE);
     else if(strcasecmp(processName, "openbox") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Openbox");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_OPENBOX);
     else if(strcasecmp(processName, "xfwm4") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Xfwm4");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XFWM4);
     else if(strcasecmp(processName, "Marco") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "Marco");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MARCO);
     else if(strcasecmp(processName, "xmonad") == 0)
-        ffStrbufSetS(&result->wmPrettyName, "XMonad");
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
+    else if(strcasecmp(processName, "WSLg") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WSLG);
     else if( // WMs where the pretty name matches the process name
         strcasecmp(processName, "dwm") == 0 ||
         strcasecmp(processName, "bspwm") == 0 ||
@@ -119,7 +121,7 @@ static void applyBetterWM(FFDisplayServerResult* result, const char* processName
 static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "plasmashell");
-    ffStrbufSetS(&result->dePrettyName, "KDE Plasma");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_PLASMA);
 
     ffParsePropFileData(instance, "xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
@@ -135,21 +137,21 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
 static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
-    ffStrbufSetS(&result->dePrettyName, "GNOME");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
     ffParsePropFileData(instance, "gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
 }
 
 static void getCinnamon(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "cinnamon");
-    ffStrbufSetS(&result->dePrettyName, "Cinnamon");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CINNAMON);
     ffParsePropFileData(instance, "applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
 }
 
 static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "mate-session");
-    ffStrbufSetS(&result->dePrettyName, "MATE");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_MATE);
 
     FFstrbuf major;
     ffStrbufInit(&major);
@@ -188,7 +190,7 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
 static void getXFCE4(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "xfce4-session");
-    ffStrbufSetS(&result->dePrettyName, "Xfce4");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_XFCE4);
     ffParsePropFileData(instance, "gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
@@ -209,7 +211,7 @@ static void getXFCE4(const FFinstance* instance, FFDisplayServerResult* result)
 static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
-    ffStrbufSetS(&result->dePrettyName, "LXQt");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
     ffParsePropFileData(instance, "gconfig/lxqt.pc", "Version:", &result->deVersion);
 
     if(result->deVersion.length == 0)
@@ -241,8 +243,8 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
 
 static void getBudgie(const FFinstance* instance, FFDisplayServerResult* result)
 {
-    ffStrbufSetS(&result->dePrettyName, "Budgie");
     ffStrbufSetS(&result->deProcessName, "budgie-desktop");
+    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_BUDGIE);
     ffParsePropFileData(instance, "budgie/budgie-version.xml", "<str>", &result->deVersion);
 }
 
@@ -307,9 +309,9 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     if(ffStrSet(env))
     {
         if(strcasecmp(env, "x11") == 0)
-            ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
         else if(strcasecmp(env, "tty") == 0)
-            ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY);
+            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
         else
             ffStrbufSetS(&result->wmProtocolName, env);
 
@@ -319,14 +321,14 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     env = getenv("DISPLAY");
     if(ffStrSet(env))
     {
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
         return;
     }
 
     env = getenv("TERM");
-    if(ffStrSet(env))
+    if(ffStrSet(env) && strcasecmp(env, "linux") == 0)
     {
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
         return;
     }
 }
@@ -408,7 +410,7 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
 
     //We don't want to detect anything in TTY
     //This can't happen if a connection succeeded, so we don't need to clear wmProcessName
-    if(ffStrbufIgnCaseCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_TTY) == 0)
+    if(ffStrbufIgnCaseCompS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
         return;
 
     const char* env = parseEnv();

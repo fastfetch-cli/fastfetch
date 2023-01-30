@@ -3,7 +3,7 @@
 #ifndef FF_INCLUDED_common_io_io
 #define FF_INCLUDED_common_io_io
 
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
 
 #ifdef _WIN32
     #include <fileapi.h>
