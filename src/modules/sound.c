@@ -40,8 +40,12 @@ static void printSound(FFinstance* instance, FFlist* devices)
 
     FF_LIST_FOR_EACH(FFSoundDevice, device, *devices)
     {
-        if(!device->active && !instance->config.soundShowAll)
-            continue;
+        switch (instance->config.soundType)
+        {
+            case FF_SOUND_TYPE_MAIN: if (!device->main) continue; break;
+            case FF_SOUND_TYPE_ACTIVE: if (!device->active) continue; break;
+            case FF_SOUND_TYPE_ALL: break;
+        }
 
         *(FFSoundDevice**)ffListAdd(&filtered) = device;
     }

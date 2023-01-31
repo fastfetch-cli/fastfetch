@@ -1261,8 +1261,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowUnknown = optionParseBoolean(value);
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
-    else if(strcasecmp(key, "--sound-show-all") == 0)
-        instance->config.soundShowAll = optionParseBoolean(value);
+    else if(strcasecmp(key, "--sound-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.soundType,
+            "main", FF_SOUND_TYPE_MAIN,
+            "active", FF_SOUND_TYPE_ACTIVE,
+            "all", FF_SOUND_TYPE_ALL,
+            NULL
+        );
+    }
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
