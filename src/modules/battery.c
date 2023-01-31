@@ -36,7 +36,8 @@ static void printBattery(FFinstance* instance, BatteryResult* result, uint8_t in
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffStrbufAppendF(&str, str.length > 0 ? "(%u%%)" : "%u%%", (unsigned) result->capacity);
+
+                ffAppendPercentNum(instance, &str, (uint8_t) result->capacity, 51, 21, str.length > 0);
             }
         }
 
