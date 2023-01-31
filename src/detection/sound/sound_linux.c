@@ -16,7 +16,7 @@ static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, vo
     ffStrbufInitS(&device->name, i->description);
     ffStrbufInitS(&device->manufacturer, i->driver);
     device->volume = i->mute ? 0 : (uint8_t) (i->volume.values[0] * 100 / PA_VOLUME_NORM);
-    device->active = i->active_port && i->active_port->available == PA_PORT_AVAILABLE_YES;
+    device->active = i->active_port && i->active_port->available != PA_PORT_AVAILABLE_NO;
     device->main = false;
 }
 
@@ -32,7 +32,6 @@ static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *u
         if(ffStrbufEqualS(&device->identifier, i->default_sink_name))
         {
             device->main = true;
-            device->active = true; // Treat the default sink as always active
             break;
         }
     }
@@ -40,7 +39,7 @@ static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *u
 
 static const char* detectSound(const FFinstance* instance, FFlist* devices)
 {
-    FF_LIBRARY_LOAD(pulse, &instance->config.libPulse, "Failed to load libpulse.so.0", "libpulse.so.0", 0)
+    FF_LIBRARY_LOAD(pulse, &instance->config.libPulse, "Failed to load libpulse" FF_LIBRARY_EXTENSION, "libpulse" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_new)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_get_api)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_iterate)
