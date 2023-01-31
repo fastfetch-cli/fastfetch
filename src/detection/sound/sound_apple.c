@@ -42,7 +42,6 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* de
         device->volume = 0;
         ffStrbufInitF(&device->identifier, "%u", (unsigned) deviceId);
         ffStrbufInit(&device->name);
-        ffStrbufInit(&device->manufacturer);
 
         uint32_t active;
         dataSize = sizeof(active);
@@ -75,18 +74,6 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* de
         {
             ffCfStrGetString(name, &device->name);
             CFRelease(name);
-        }
-
-        CFStringRef manufacturer;
-        dataSize = sizeof(manufacturer);
-        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
-            kAudioObjectPropertyManufacturer,
-            kAudioObjectPropertyScopeOutput,
-            kAudioObjectPropertyElementMain
-        }, 0, NULL, &dataSize, &manufacturer) == kAudioHardwareNoError)
-        {
-            ffCfStrGetString(manufacturer, &device->manufacturer);
-            CFRelease(manufacturer);
         }
     }
 

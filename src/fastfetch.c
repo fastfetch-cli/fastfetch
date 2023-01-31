@@ -460,7 +460,6 @@ static inline void printCommandHelp(const char* command)
             "Main",
             "Name",
             "Volume",
-            "Manufacturer",
             "Identifier"
         );
     }

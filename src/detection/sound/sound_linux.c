@@ -14,7 +14,6 @@ static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, vo
     FFSoundDevice* device = ffListAdd(userdata);
     ffStrbufInitS(&device->identifier, i->name);
     ffStrbufInitS(&device->name, i->description);
-    ffStrbufInitS(&device->manufacturer, i->driver);
     device->volume = i->mute ? 0 : (uint8_t) (i->volume.values[0] * 100 / PA_VOLUME_NORM);
     device->active = i->active_port && i->active_port->available != PA_PORT_AVAILABLE_NO;
     device->main = false;

@@ -2,7 +2,7 @@
 #include "detection/sound/sound.h"
 
 #define FF_SOUND_MODULE_NAME "Sound"
-#define FF_SOUND_NUM_FORMAT_ARGS 5
+#define FF_SOUND_NUM_FORMAT_ARGS 4
 
 static void printDevice(FFinstance* instance, const FFSoundDevice* device, uint8_t index)
 {
@@ -27,7 +27,6 @@ static void printDevice(FFinstance* instance, const FFSoundDevice* device, uint8
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_UINT8, &device->volume},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier}
         });
     }
@@ -79,6 +78,5 @@ void ffPrintSound(FFinstance* instance)
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
-        ffStrbufDestroy(&device->manufacturer);
     }
 }
