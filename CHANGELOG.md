@@ -3,10 +3,15 @@
 Features:
 * Bluetooth module
 * Sound module
+* Support colored percentage numbers output
 
 Bugfixes:
 
 * Fix a rare case that fails to detect terminal
+
+Other:
+
+* Simplified wmtheme output format (Windows)
 
 # 1.9.1
 
