@@ -336,7 +336,7 @@ if(LINUX)
         src/detection/gtk.c
         src/detection/host/host_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
         src/detection/opengl/opengl_linux.c
