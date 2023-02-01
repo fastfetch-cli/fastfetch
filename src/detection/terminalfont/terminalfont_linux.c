@@ -4,6 +4,7 @@
 #include "common/parsing.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/stringUtils.h"
 
 static const char* getSystemMonospaceFont(const FFinstance* instance)
 {

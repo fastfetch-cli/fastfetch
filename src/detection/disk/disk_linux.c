@@ -1,5 +1,7 @@
 #include "disk.h"
 
+#include "util/stringUtils.h"
+
 #include <limits.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -17,6 +19,10 @@ static bool isPhysicalDevice(const char* device)
 {
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(strcmp(device, "drvfs") == 0)
+        return true;
+
+    //ZFS root pool. The format is rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>
+    if(strncmp(device, "rpool/", 6) == 0)
         return true;
 
     //Pseudo filesystems don't have a device in /dev
@@ -141,6 +147,7 @@ static bool isSubvolume(const FFlist* devices)
 {
     const FFstrbuf* currentDevie = ffListGet(devices, devices->length - 1);
 
+    //Filter all disks which device was already found. This catches BTRFS subvolumes.
     for(uint32_t i = 0; i < devices->length - 1; i++)
     {
         const FFstrbuf* otherDevice = ffListGet(devices, i);
@@ -148,6 +155,11 @@ static bool isSubvolume(const FFlist* devices)
         if(ffStrbufEqual(currentDevie, otherDevice))
             return true;
     }
+
+    //ZFS subvolumes: rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>.
+    //Test if the third slash is present.
+    if(strncmp(currentDevie->chars, "rpool/", 6) == 0 && ffStrHasNChars(currentDevie->chars, '/', 3))
+        return true;
 
     return false;
 }

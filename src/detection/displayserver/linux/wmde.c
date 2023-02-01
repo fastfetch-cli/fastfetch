@@ -3,6 +3,7 @@
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/processing.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <ctype.h>

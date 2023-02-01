@@ -5,6 +5,7 @@
 #include "common/settings.h"
 #include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 

@@ -1,4 +1,5 @@
 #include "FFPlatform_private.h"
+#include "util/stringUtils.h"
 
 void ffPlatformInit(FFPlatform* platform)
 {

@@ -307,6 +307,7 @@ set(LIBFASTFETCH_SRC
     src/util/FFstrbuf.c
     src/util/FFvaluestore.c
     src/util/platform/FFPlatform.c
+    src/util/stringUtils.c
 )
 
 if(LINUX)
