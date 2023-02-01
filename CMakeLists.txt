@@ -464,7 +464,7 @@ elseif(APPLE)
         src/detection/gpu/gpu_apple.c
         src/detection/host/host_apple.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/opengl/opengl_apple.c

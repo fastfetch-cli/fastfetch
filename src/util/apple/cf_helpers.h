@@ -13,4 +13,17 @@ const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result)
 const char* ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result);
 const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryRef* result);
 
+static inline CFNumberRef ffCfCreateInt(int value)
+{
+    return CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &value);
+}
+
+static inline void cfReleaseWrapper(void* type)
+{
+    if (*(CFTypeRef*) type)
+        CFRelease(*(CFTypeRef*) type);
+}
+
+#define FF_CFTYPE_AUTO_RELEASE __attribute__((__cleanup__(cfReleaseWrapper)))
+
 #endif
