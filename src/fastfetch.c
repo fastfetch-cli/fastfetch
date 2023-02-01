@@ -464,6 +464,13 @@ static inline void printCommandHelp(const char* command)
             "Identifier"
         );
     }
+    else if(strcasecmp(command, "gamepad-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("gamepad", "{1}", 1,
+            "Name",
+            "Identifier"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
@@ -1167,6 +1174,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
     else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
     else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
+    else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
 
     ///////////////////
     //Library options//
@@ -1479,6 +1487,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintBluetooth(instance);
     else if(strcasecmp(line, "sound") == 0)
         ffPrintSound(instance);
+    else if(strcasecmp(line, "gamepad") == 0)
+        ffPrintGamepad(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }

@@ -3,6 +3,7 @@
 Features:
 * Bluetooth module
 * Sound module
+* Gamepad module
 * Support colored percentage numbers output
 
 Bugfixes:
