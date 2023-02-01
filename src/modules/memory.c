@@ -56,7 +56,7 @@ static void printMemory(FFinstance* instance, const char* name, const FFModuleAr
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
             if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffStrbufAppendF(&str, str.length > 0 ? "(%u%%)" : "%u%%", percentage);
+                ffAppendPercentNum(instance, &str, (uint8_t) percentage, 50, 80, str.length > 0);
 
             ffStrbufTrimRight(&str, ' ');
             ffStrbufPutTo(&str, stdout);

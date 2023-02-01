@@ -113,7 +113,7 @@ Module specific options:
     --disk-show-subvolumes <?value>:         Set if subvolumes should be printed. Default is false
     --disk-show-unknown <?value>:            Set if unknown (unable to detect sizes) volumes should be printed. Default is false
     --bluetooth-show-disconnected: <?value>: Set if disconnected bluetooth devices should be printed. Default is false
-    --sound-show-all: <?value>:              Set if all sound devices should be printed. Default is false
+    --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp  <?value>:                    Detect and display CPU temperature if supported. Default is false
     --gpu-temp  <?value>:                    Detect and display GPU temperature if supported. Default is false
@@ -130,7 +130,7 @@ Module specific options:
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use
     --gl <value>:                            Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
-    --percent-type <value>:                  Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only. Default is 1
+    --percent-type <value>:                  Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 1
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
     --command-key <str>:                     Set the module key to display, can be specified mulitple times
     --command-text <str>:                    Set the command text to be executed, can be specified mulitple times

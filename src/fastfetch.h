@@ -34,6 +34,13 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_NONE,        //--logo none
 } FFLogoType;
 
+typedef enum FFSoundType
+{
+    FF_SOUND_TYPE_MAIN,
+    FF_SOUND_TYPE_ACTIVE,
+    FF_SOUND_TYPE_ALL,
+} FFSoundType;
+
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -203,7 +210,7 @@ typedef struct FFconfig
     FFstrbuf weatherOutputFormat;
     uint32_t weatherTimeout;
 
-    bool soundShowAll;
+    FFSoundType soundType;
 
     FFstrbuf osFile;
 

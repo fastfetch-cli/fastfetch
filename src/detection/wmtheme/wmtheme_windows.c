@@ -60,64 +60,59 @@ const char* colorHexToString(DWORD hex)
     }
 }
 
-bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
+bool ffDetectWmTheme(FF_MAYBE_UNUSED FFinstance* instance, FFstrbuf* themeOrError)
 {
-    FF_UNUSED(instance);
+    {
+        FF_HKEY_AUTO_DESTROY hKey = NULL;
+        if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL))
+        {
+            FF_STRBUF_AUTO_DESTROY theme;
+            ffStrbufInit(&theme);
+            if(ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, NULL))
+            {
+                ffStrbufSubstrBeforeLastC(&theme, '.');
+                ffStrbufSubstrAfterLastC(&theme, '\\');
+                if(isalpha(theme.chars[0]))
+                    theme.chars[0] = (char)toupper(theme.chars[0]);
+
+                ffStrbufAppendF(themeOrError, "%s", theme.chars);
+            }
+        }
+    }
 
     do {
         uint32_t rgbColor;
         uint32_t bgrColor;
         DWORD bufSize = sizeof(bgrColor);
         if(RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\DWM", L"AccentColor", RRF_RT_REG_DWORD, NULL, &bgrColor, &bufSize) == ERROR_SUCCESS)
-        {
-            ffStrbufAppendS(themeOrError, "Accent Color - ");
             rgbColor = ((bgrColor & 0xFF) << 16) | (bgrColor & 0xFF00) | ((bgrColor >> 16) & 0xFF);
-
-        }
         else if(RegGetValueW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\DWM", L"ColorizationColor", RRF_RT_REG_DWORD, NULL, &rgbColor, &bufSize) == ERROR_SUCCESS)
-        {
-            ffStrbufAppendS(themeOrError, "Colorization Color - ");
             rgbColor &= 0xFFFFFF;
-        }
         else
             break;
 
+        if(themeOrError->length > 0) ffStrbufAppendS(themeOrError, " - ");
         const char* text = colorHexToString(rgbColor);
         if(text)
             ffStrbufAppendS(themeOrError, text);
         else
             ffStrbufAppendF(themeOrError, "#%06lX", (long)rgbColor);
-    } while(false);
+    } while (false);
 
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL))
     {
-        uint32_t value = 1;
-        if(ffRegReadUint(hKey, L"SystemUsesLightTheme", &value, NULL))
+        FF_HKEY_AUTO_DESTROY hKey = NULL;
+        if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL))
         {
-            if(themeOrError->length > 0) ffStrbufAppendS(themeOrError, ", ");
-            ffStrbufAppendF(themeOrError, "System - %s", value ? "Light" : "Dark");
-        }
-
-        if(ffRegReadUint(hKey, L"AppsUseLightTheme", &value, NULL))
-        {
-            if(themeOrError->length > 0) ffStrbufAppendS(themeOrError, ", ");
-            ffStrbufAppendF(themeOrError, "Apps - %s", value ? "Light" : "Dark");
-        }
-    }
-    else if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL))
-    {
-        FF_STRBUF_AUTO_DESTROY theme;
-        ffStrbufInit(&theme);
-        if(ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, NULL))
-        {
-            ffStrbufSubstrBeforeLastC(&theme, '.');
-            ffStrbufSubstrAfterLastC(&theme, '\\');
-            if(isalpha(theme.chars[0]))
-                theme.chars[0] = (char)toupper(theme.chars[0]);
-
-            if(themeOrError->length > 0) ffStrbufAppendS(themeOrError, ", ");
-            ffStrbufAppendF(themeOrError, "Theme - %s", theme.chars);
+            uint32_t system = 1, apps = 1;
+            if (ffRegReadUint(hKey, L"SystemUsesLightTheme", &system, NULL) && ffRegReadUint(hKey, L"AppsUseLightTheme", &apps, NULL))
+            {
+                bool paren = themeOrError->length > 0;
+                if (paren)
+                    ffStrbufAppendS(themeOrError, " (");
+                ffStrbufAppendF(themeOrError, "System: %s, Apps: %s", system ? "Light" : "Dark", apps ? "Light" : "Dark");
+                if (paren)
+                    ffStrbufAppendC(themeOrError, ')');
+            }
         }
     }
 

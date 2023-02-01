@@ -460,7 +460,6 @@ static inline void printCommandHelp(const char* command)
             "Main",
             "Name",
             "Volume",
-            "Manufacturer",
             "Identifier"
         );
     }
@@ -928,8 +927,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
         instance->config.recache = optionParseBoolean(value);
-    else if(strcasecmp(key, "--nocache") == 0)
-        fputs("`--nocache` are obsoleted. Caching functions other than image caching are removed.\n\n", stderr);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--gen-config") == 0)
@@ -1263,8 +1260,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowUnknown = optionParseBoolean(value);
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
-    else if(strcasecmp(key, "--sound-show-all") == 0)
-        instance->config.soundShowAll = optionParseBoolean(value);
+    else if(strcasecmp(key, "--sound-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.soundType,
+            "main", FF_SOUND_TYPE_MAIN,
+            "active", FF_SOUND_TYPE_ACTIVE,
+            "all", FF_SOUND_TYPE_ALL,
+            NULL
+        );
+    }
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)

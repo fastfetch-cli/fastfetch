@@ -65,7 +65,6 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
         device->volume = 0;
         ffStrbufInit(&device->identifier);
         ffStrbufInit(&device->name);
-        ffStrbufInit(&device->manufacturer);
 
         ffStrbufSetWS(&device->identifier, immDeviceId);
 
@@ -74,8 +73,6 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_U
             PropVariantInit(&friendlyName);
             if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_FriendlyName, &friendlyName)))
                 ffStrbufSetWS(&device->name, friendlyName.pwszVal);
-            if (SUCCEEDED(immPropStore->GetValue(PKEY_DeviceInterface_FriendlyName, &friendlyName)))
-                ffStrbufSetWS(&device->manufacturer, friendlyName.pwszVal);
         }
 
         IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume;

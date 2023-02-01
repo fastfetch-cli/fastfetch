@@ -164,7 +164,7 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.bluetoothShowDisconnected = false;
 
-    instance->config.soundShowAll = false;
+    instance->config.soundType = FF_SOUND_TYPE_MAIN;
 
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
