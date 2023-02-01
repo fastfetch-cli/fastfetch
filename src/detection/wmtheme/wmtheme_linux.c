@@ -104,11 +104,13 @@ static bool detectMuffin(FFinstance* instance, FFstrbuf* themeOrError)
         ffStrbufAppendS(themeOrError, theme);
         return true;
     }
+
     if(theme == NULL)
     {
-        ffStrbufAppendS(themeOrError, theme);
+        ffStrbufAppendS(themeOrError, name);
         return true;
     }
+
     ffStrbufAppendF(themeOrError, "%s (%s)", name, theme);
     return true;
 }
