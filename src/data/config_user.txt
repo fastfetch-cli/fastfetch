@@ -309,6 +309,7 @@
 #--users-key Users
 #--bluetooth-key Bluetooth
 #--sound-key Sound
+#--gamepad-key Gamepad
 
 # Format options:
 # Sets the format string for module values.
@@ -355,6 +356,7 @@
 #--users-format
 #--bluetooth-format
 #--sound-format
+#--gamepad-format
 
 # Error options:
 # Sets the format string to use if an error occured
@@ -401,6 +403,7 @@
 #--users-error
 #--bluetooth-error
 #--sound-error
+#--gamepad-error
 
 # Library options:
 # Sets an user specific path to a library to load.
