@@ -8,7 +8,7 @@ Features:
 Bugfixes:
 
 * Fix a rare case that fails to detect terminal
-* Fix Muffin detection (@Zerogiven, #412)
+* Fix Muffin detection (@Zerogiven, #411)
 
 Other:
 
