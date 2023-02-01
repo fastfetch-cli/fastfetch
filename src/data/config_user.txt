@@ -255,9 +255,9 @@
 
 # Sound show all option
 # Sets if all sound devices should be printed
-# Must be either true or false
-# Default is false ( only main device should be printed ).
-#--sound-show-all false
+# Must be either main, active or all. Default is main
+# Default is main.
+#--sound-type main
 
 # Percentage output type option
 # Applies to all modules that prints percentage values. Currently memory, swap, disk, battery and CPU usage are supported.

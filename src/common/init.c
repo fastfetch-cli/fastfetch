@@ -385,6 +385,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
     destroyModuleArg(&instance->config.bluetooth);
+    destroyModuleArg(&instance->config.sound);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);
