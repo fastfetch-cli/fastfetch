@@ -74,7 +74,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* proce
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
         strcasecmp(processName, "cinnamon-session") == 0 ||
-        strcasecmp(processName, "Muffin") == 0
+        strcasecmp(processName, "Muffin") == 0 ||
+        strcasecmp(processName, "Mutter (Muffin)") == 0
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
     else if(strcasecmp(processName, "sway") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
