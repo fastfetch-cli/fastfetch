@@ -114,7 +114,7 @@ Budgie, Cinnamon, Gnome, KDE Plasma, LXQt, Mate, XFCE4
 
 ##### Terminal fonts
 ```
-Alacritty, Apple Terminal, ConEmu, Deepin Terminal, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, mintty, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
+Alacritty, Apple Terminal, ConEmu, Deepin Terminal, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, mintty, Terminator, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
 ```
 
 ## Building

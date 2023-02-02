@@ -320,22 +320,35 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
     return true;
 }
 
-static bool detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
+static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FFstrbuf fontName;
+    FF_STRBUF_AUTO_DESTROY useSystemFont;
+    ffStrbufInit(&useSystemFont);
+
+    FF_STRBUF_AUTO_DESTROY fontName;
     ffStrbufInit(&fontName);
 
-    if(!ffParsePropFileConfig(instance, "terminator/config", "font =", &fontName))
-        return false;
+    FFpropquery fontQuery[] = {
+        {"use_system_font =", &useSystemFont},
+        {"font =", &fontName},
+    };
+
+    if(!ffParsePropFileConfigValues(instance, "terminator/config", 2, fontQuery))
+    {
+        ffStrbufAppendS(&result->error, "Couldn't read Terminator config file");
+        return;
+    }
+
+    if(ffStrbufIgnCaseEqualS(&useSystemFont, "True"))
+    {
+        ffFontInitCopy(&result->font, "System");
+        return;
+    }
 
     if(fontName.length == 0)
-        ffStrbufSetS(&fontName, "Mono 8");
-
-    ffFontInitCopy(&result->font, fontName.chars);
-
-    ffStrbufDestroy(&fontName);
-
-    return true;
+        ffFontInitValues(&result->font, "mono", "8");
+    else
+        ffFontInitPango(&result->font, fontName.chars);
 }
 
 static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)

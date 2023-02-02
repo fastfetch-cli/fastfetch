@@ -6,6 +6,7 @@ Features:
 * Gamepad module
 * Support colored percentage numbers output (#409)
 * Support `--localip-compact-type` option (#408)
+* Terminator terminal font detection (@Zerogiven, #415)
 
 Bugfixes:
 
