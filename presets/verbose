@@ -5,7 +5,7 @@
 --processes-format Count: {}
 --packages-format All: {}; pacman: {}; pacman branch: {}; dpkg: {}; rpm: {}; emerge: {}; eopkg: {}; xbps: {}; apk: {}; flatpak: {}; snap: {}; brew: {}; brew-cask: {}; port: {}; scoop: {}; choco: {}
 --shell-format Process name: {}; Process path: {}; Process exe: {}; Process version: {}; User path: {}; User exe: {}; User version: {}
---display-format Width: {}; Height: {}; Refresh rate: {}
+--display-format Width: {}; Height: {}; Refresh rate: {}; ScaledWith: {}; ScaledHeight: {}
 --de-format Process name: {}; Pretty name: {}; Version: {}
 --wm-format Process name: {}; Pretty name: {}; Protocol: {}
 --wm-theme-format Name: {}

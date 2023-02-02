@@ -174,11 +174,12 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "display-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 4,
+        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 5,
             "Screen width",
             "Screen height",
             "Screen refresh rate",
-            "Screen brightness"
+            "Screen scaled width",
+            "Screen scaled height"
         );
     }
     else if(strcasecmp(command, "de-format") == 0)

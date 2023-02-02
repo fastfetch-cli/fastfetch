@@ -12,12 +12,22 @@
 
 typedef struct WaylandData
 {
-    FFlist* results;
+    FFDisplayServerResult* result;
     FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned)
     FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
     FF_LIBRARY_SYMBOL(wl_proxy_destroy)
+    FF_LIBRARY_SYMBOL(wl_display_roundtrip)
+    struct wl_display* display;
     const struct wl_interface* ffwl_output_interface;
 } WaylandData;
+
+typedef struct WaylandDisplay
+{
+    int32_t width;
+    int32_t height;
+    int32_t refreshRate;
+    int32_t scale;
+} WaylandDisplay;
 
 #ifndef __FreeBSD__
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
@@ -49,25 +59,76 @@ static void stubListener(void* data, ...)
 
 static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
-    WaylandData* wldata = data;
+    FF_UNUSED(output);
 
-    wldata->ffwl_proxy_destroy((struct wl_proxy*) output);
+    if(!(flags & WL_OUTPUT_MODE_CURRENT))
+        return;
 
-    if(!(flags & WL_OUTPUT_MODE_CURRENT) || width <= 0 || height <= 0)
+    WaylandDisplay* display = data;
+    display->width = width;
+    display->height = height;
+    display->refreshRate = refreshRate;
+}
+
+#if WAYLAND_VERSION_MINOR >= 2
+static void waylandOutputScaleListener(void* data, struct wl_output* output, int32_t scale)
+{
+    FF_UNUSED(output);
+
+    WaylandDisplay* display = data;
+    display->scale = scale;
+}
+#endif
+
+static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+{
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
+    if(output == NULL)
+        return;
+
+    WaylandDisplay display = {
+        .width = 0,
+        .height = 0,
+        .refreshRate = 0,
+        .scale = 1,
+    };
+
+    struct wl_output_listener outputListener = {
+        .mode = waylandOutputModeListener,
+        .geometry = (void*) stubListener,
+
+        //https://lists.freedesktop.org/archives/wayland-devel/2013-July/010278.html
+        #if WAYLAND_VERSION_MINOR >= 2
+            .done = (void*) stubListener,
+            .scale = waylandOutputScaleListener,
+        #endif
+
+        //https://lists.freedesktop.org/archives/wayland-devel/2021-December/042064.html
+        #if WAYLAND_VERSION_MINOR >= 20
+            .name = (void*) stubListener,
+            .description = (void*) stubListener,
+        #endif
+    };
+
+    wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display);
+    wldata->ffwl_display_roundtrip(wldata->display);
+    wldata->ffwl_proxy_destroy(output);
+
+    if(display.width <= 0 || display.height <= 0)
         return;
 
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     ffThreadMutexLock(&mutex);
 
-    FFDisplayResult* result = ffListAdd(wldata->results);
+    ffdsAppendDisplay(wldata->result,
+        (uint32_t) display.width,
+        (uint32_t) display.height,
+        ffdsParseRefreshRate(display.refreshRate / 1000),
+        (uint32_t) (display.width * display.scale),
+        (uint32_t) (display.height * display.scale)
+    );
 
     ffThreadMutexUnlock(&mutex);
-
-    result->width = (uint32_t) width;
-    result->height = (uint32_t) height;
-    result->refreshRate = ffdsParseRefreshRate(refreshRate / 1000);
-    result->scaledWidth = 0;
-    result->scaledHeight = 0;
 }
 
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)
@@ -75,31 +136,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     WaylandData* wldata = data;
 
     if(strcmp(interface, wldata->ffwl_output_interface->name) == 0)
-    {
-        struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
-        if(output == NULL)
-            return;
-
-        //Needs to be static, because the scope of the function will already be lost when calling the listener
-        static struct wl_output_listener outputListener = {
-            .mode = waylandOutputModeListener,
-            .geometry = (void*) stubListener,
-
-            //https://lists.freedesktop.org/archives/wayland-devel/2013-July/010278.html
-            #if WAYLAND_VERSION_MINOR >= 2
-                .done = (void*) stubListener,
-                .scale = (void*) stubListener,
-            #endif
-
-            //https://lists.freedesktop.org/archives/wayland-devel/2021-December/042064.html
-            #if WAYLAND_VERSION_MINOR >= 20
-                .name = (void*) stubListener,
-                .description = (void*) stubListener,
-            #endif
-        };
-
-        wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, data);
-    }
+        waylandOutputHandler(wldata, registry, name, version);
 }
 
 bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
@@ -109,7 +146,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_dispatch, false)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_roundtrip, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_proxy_marshal_constructor, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_disconnect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_registry_interface, false)
@@ -119,26 +155,27 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_marshal_constructor_versioned, false)
     FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_add_listener, false)
     FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_destroy, false)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_display_roundtrip, false)
     FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_output_interface, false)
 
-    struct wl_display* display = ffwl_display_connect(NULL);
-    if(display == NULL)
+    data.display = ffwl_display_connect(NULL);
+    if(data.display == NULL)
     {
         dlclose(wayland);
         return false;
     }
 
-    waylandDetectWM(ffwl_display_get_fd(display), result);
+    waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
-    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
+    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
     if(registry == NULL)
     {
-        ffwl_display_disconnect(display);
+        ffwl_display_disconnect(data.display);
         dlclose(wayland);
         return false;
     }
 
-    data.results = &result->displays;
+    data.result = result;
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
@@ -146,11 +183,11 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     };
 
     data.ffwl_proxy_add_listener(registry, (void(**)(void)) &registry_listener, &data);
-    ffwl_display_dispatch(display);
-    ffwl_display_roundtrip(display);
+    ffwl_display_dispatch(data.display);
+    data.ffwl_display_roundtrip(data.display);
 
     data.ffwl_proxy_destroy(registry);
-    ffwl_display_disconnect(display);
+    ffwl_display_disconnect(data.display);
     dlclose(wayland);
 
     //We successfully connected to wayland and detected the display.
