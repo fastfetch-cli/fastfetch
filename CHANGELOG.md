@@ -11,6 +11,7 @@ Bugfixes:
 
 * Fix a rare case that fails to detect terminal
 * Fix Muffin detection (@Zerogiven, #411)
+* Fix IPv6 detection (Windows)
 
 Other:
 
