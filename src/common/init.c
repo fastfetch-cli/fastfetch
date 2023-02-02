@@ -175,6 +175,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
     ffStrbufInit(&instance->config.localIpNamePrefix);
+    instance->config.localIpCompactType = FF_LOCALIP_COMPACT_TYPE_NONE;
 
     instance->config.publicIpTimeout = 0;
     ffStrbufInit(&instance->config.publicIpUrl);

@@ -1290,6 +1290,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowLoop = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-name-prefix") == 0)
         optionParseString(key, value, &instance->config.localIpNamePrefix);
+    else if(strcasecmp(key, "--localip-compact-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.localIpCompactType,
+            "none", FF_LOCALIP_COMPACT_TYPE_NONE,
+            "default", FF_LOCALIP_COMPACT_TYPE_DEFAULT,
+            "v4first", FF_LOCALIP_COMPACT_TYPE_V4FIRST,
+            "v6first", FF_LOCALIP_COMPACT_TYPE_V6FIRST,
+            NULL
+        );
+    }
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)

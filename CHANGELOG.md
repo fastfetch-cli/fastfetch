@@ -4,7 +4,8 @@ Features:
 * Bluetooth module
 * Sound module
 * Gamepad module
-* Support colored percentage numbers output
+* Support colored percentage numbers output (#409)
+* Support `--localip-compact-type` option (#408)
 
 Bugfixes:
 

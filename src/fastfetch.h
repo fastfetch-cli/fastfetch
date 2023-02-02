@@ -41,6 +41,14 @@ typedef enum FFSoundType
     FF_SOUND_TYPE_ALL,
 } FFSoundType;
 
+typedef enum FFLocalIpCompactType
+{
+    FF_LOCALIP_COMPACT_TYPE_NONE,
+    FF_LOCALIP_COMPACT_TYPE_DEFAULT,
+    FF_LOCALIP_COMPACT_TYPE_V4FIRST,
+    FF_LOCALIP_COMPACT_TYPE_V6FIRST,
+} FFLocalIpCompactType;
+
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -204,6 +212,7 @@ typedef struct FFconfig
     bool localIpShowIpV4;
     bool localIpShowIpV6;
     FFstrbuf localIpNamePrefix;
+    FFLocalIpCompactType localIpCompactType;
 
     FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;
