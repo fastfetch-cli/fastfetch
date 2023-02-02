@@ -3,17 +3,6 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-bool ffStrSet(const char* str)
-{
-    if(str == NULL)
-        return false;
-
-    while(isspace(*str))
-        str++;
-
-    return *str != '\0';
-}
-
 static char* CHAR_NULL_PTR = "";
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)

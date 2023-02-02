@@ -7,6 +7,7 @@
 #if defined(FF_HAVE_OPENCL) || defined(__APPLE__)
 #include "common/library.h"
 #include "common/parsing.h"
+#include "util/stringUtils.h"
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100

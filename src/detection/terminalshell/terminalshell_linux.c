@@ -1,9 +1,9 @@
-#include "fastfetch.h"
+#include "terminalshell.h"
 #include "common/io/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
 #include "common/thread.h"
-#include "terminalshell.h"
+#include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <string.h>

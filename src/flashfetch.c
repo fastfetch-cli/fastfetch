@@ -63,6 +63,9 @@ int main(int argc, char** argv)
     //ffPrintOpenCL(&instance);
     //ffPrintUsers(&instance);
     //ffPrintWeather(&instance);
+    //ffPrintBluetooth(&instance);
+    //ffPrintSound(&instance);
+    //ffPrintGamepad(&instance);
     ffPrintBreak(&instance);
     ffPrintColors(&instance);
 

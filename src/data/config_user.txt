@@ -255,9 +255,9 @@
 
 # Sound show all option
 # Sets if all sound devices should be printed
-# Must be either true or false
-# Default is false ( only main device should be printed ).
-#--sound-show-all false
+# Must be either main, active or all. Default is main
+# Default is main.
+#--sound-type main
 
 # Percentage output type option
 # Applies to all modules that prints percentage values. Currently memory, swap, disk, battery and CPU usage are supported.
@@ -309,6 +309,7 @@
 #--users-key Users
 #--bluetooth-key Bluetooth
 #--sound-key Sound
+#--gamepad-key Gamepad
 
 # Format options:
 # Sets the format string for module values.
@@ -355,6 +356,7 @@
 #--users-format
 #--bluetooth-format
 #--sound-format
+#--gamepad-format
 
 # Error options:
 # Sets the format string to use if an error occured
@@ -401,6 +403,7 @@
 #--users-error
 #--bluetooth-error
 #--sound-error
+#--gamepad-error
 
 # Library options:
 # Sets an user specific path to a library to load.

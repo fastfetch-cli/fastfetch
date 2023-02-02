@@ -7,6 +7,7 @@
 #include "common/library.h"
 #include "common/io/io.h"
 #include "common/parsing.h"
+#include "util/stringUtils.h"
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 

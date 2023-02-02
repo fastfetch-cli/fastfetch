@@ -1,5 +1,5 @@
 #include "FFPlatform_private.h"
-
+#include "util/stringUtils.h"
 #include "fastfetch_config.h"
 
 #include <unistd.h>

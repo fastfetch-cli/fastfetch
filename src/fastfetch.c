@@ -1,9 +1,10 @@
 #include "fastfetch.h"
-#include "util/FFvaluestore.h"
 #include "common/printing.h"
 #include "common/parsing.h"
 #include "common/io/io.h"
 #include "common/time.h"
+#include "util/FFvaluestore.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -460,6 +461,13 @@ static inline void printCommandHelp(const char* command)
             "Main",
             "Name",
             "Volume",
+            "Identifier"
+        );
+    }
+    else if(strcasecmp(command, "gamepad-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("gamepad", "{1}", 1,
+            "Name",
             "Identifier"
         );
     }
@@ -1166,6 +1174,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
     else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
     else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
+    else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
 
     ///////////////////
     //Library options//
@@ -1281,6 +1290,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowLoop = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-name-prefix") == 0)
         optionParseString(key, value, &instance->config.localIpNamePrefix);
+    else if(strcasecmp(key, "--localip-compact-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.localIpCompactType,
+            "none", FF_LOCALIP_COMPACT_TYPE_NONE,
+            "default", FF_LOCALIP_COMPACT_TYPE_DEFAULT,
+            "v4first", FF_LOCALIP_COMPACT_TYPE_V4FIRST,
+            "v6first", FF_LOCALIP_COMPACT_TYPE_V6FIRST,
+            NULL
+        );
+    }
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
@@ -1478,6 +1497,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintBluetooth(instance);
     else if(strcasecmp(line, "sound") == 0)
         ffPrintSound(instance);
+    else if(strcasecmp(line, "gamepad") == 0)
+        ffPrintGamepad(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }

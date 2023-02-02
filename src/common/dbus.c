@@ -3,6 +3,7 @@
 #ifdef FF_HAVE_DBUS
 
 #include "common/thread.h"
+#include "util/stringUtils.h"
 
 static bool loadLibSymbols(const FFinstance* instance, FFDBusLibrary* lib)
 {

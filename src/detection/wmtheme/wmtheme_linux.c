@@ -1,10 +1,10 @@
-#include "fastfetch.h"
+#include "wmtheme.h"
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/settings.h"
 #include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
-#include "wmtheme.h"
+#include "util/stringUtils.h"
 
 static bool detectWMThemeFromConfigFile(FFinstance* instance, const char* configFile, const char* themeRegex, const char* defaultValue, FFstrbuf* themeOrError)
 {
@@ -104,11 +104,13 @@ static bool detectMuffin(FFinstance* instance, FFstrbuf* themeOrError)
         ffStrbufAppendS(themeOrError, theme);
         return true;
     }
+
     if(theme == NULL)
     {
-        ffStrbufAppendS(themeOrError, theme);
+        ffStrbufAppendS(themeOrError, name);
         return true;
     }
+
     ffStrbufAppendF(themeOrError, "%s (%s)", name, theme);
     return true;
 }

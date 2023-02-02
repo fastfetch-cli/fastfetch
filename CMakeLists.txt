@@ -274,6 +274,7 @@ set(LIBFASTFETCH_SRC
     src/modules/gpu.c
     src/modules/host.c
     src/modules/icons.c
+    src/modules/gamepad.c
     src/modules/kernel.c
     src/modules/locale.c
     src/modules/localip.c
@@ -307,6 +308,7 @@ set(LIBFASTFETCH_SRC
     src/util/FFstrbuf.c
     src/util/FFvaluestore.c
     src/util/platform/FFPlatform.c
+    src/util/stringUtils.c
 )
 
 if(LINUX)
@@ -335,6 +337,7 @@ if(LINUX)
         src/detection/gtk.c
         src/detection/host/host_linux.c
         src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
         src/detection/opengl/opengl_linux.c
@@ -374,6 +377,7 @@ elseif(ANDROID)
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
         src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
         src/detection/opengl/opengl_linux.c
@@ -419,6 +423,7 @@ elseif(BSD)
         src/detection/gtk.c
         src/detection/host/host_bsd.c
         src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/opengl/opengl_linux.c
@@ -460,6 +465,7 @@ elseif(APPLE)
         src/detection/gpu/gpu_apple.c
         src/detection/host/host_apple.c
         src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/opengl/opengl_apple.c
@@ -500,6 +506,7 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
         src/detection/localip/localip_windows.c
+        src/detection/gamepad/gamepad_windows.cpp
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
         src/detection/opengl/opengl_windows.c
@@ -712,6 +719,7 @@ elseif(WIN32)
         PRIVATE "version"
         PRIVATE "setupapi"
         PRIVATE "dxgi"
+        PRIVATE "dinput8"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
     )

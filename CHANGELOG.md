@@ -3,11 +3,14 @@
 Features:
 * Bluetooth module
 * Sound module
-* Support colored percentage numbers output
+* Gamepad module
+* Support colored percentage numbers output (#409)
+* Support `--localip-compact-type` option (#408)
 
 Bugfixes:
 
 * Fix a rare case that fails to detect terminal
+* Fix Muffin detection (@Zerogiven, #411)
 
 Other:
 
