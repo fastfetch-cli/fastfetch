@@ -325,11 +325,7 @@ static bool detectTerminator(const FFinstance* instance, FFTerminalFontResult* r
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
 
-    FFpropquery fontQuery[] = {
-        {"font =", &fontName},
-    };
-
-    if(!ffParsePropFileConfigValues(instance, "terminator/config", 1, fontQuery))
+    if(!ffParsePropFileConfig(instance, "terminator/config", "font =", &fontName))
         return false;
 
     if(fontName.length == 0)
