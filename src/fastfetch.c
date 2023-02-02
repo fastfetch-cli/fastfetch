@@ -1282,6 +1282,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
+    else if(strcasecmp(key, "--localip-v6first") == 0)
+        instance->config.localIpV6First = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         instance->config.localIpShowIpV4 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)
@@ -1294,9 +1296,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         optionParseEnum(key, value, &instance->config.localIpCompactType,
             "none", FF_LOCALIP_COMPACT_TYPE_NONE,
-            "default", FF_LOCALIP_COMPACT_TYPE_DEFAULT,
-            "v4first", FF_LOCALIP_COMPACT_TYPE_V4FIRST,
-            "v6first", FF_LOCALIP_COMPACT_TYPE_V6FIRST,
+            "oneline", FF_LOCALIP_COMPACT_TYPE_ONELINE,
+            "multiline", FF_LOCALIP_COMPACT_TYPE_MULTILINE,
             NULL
         );
     }

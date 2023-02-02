@@ -124,7 +124,8 @@ Module specific options:
     --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
     --localip-show-loop <?value>:            Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --localip-name-prefix <str>:             Show IPs with given name prefix only. Default is empty
-    --localip-compact-type <str>:            Show IPs in one line. Should be either none (disable one-line mode), default (don't sort the result), v4first (print ipv4 first) and v6first. Default is none
+    --localip-compact-type <str>:            Show IPs in one line. Should be either none, oneline, multiline. Default is none
+    --localip-v6first <?value>:              Set if ipv6 should be printed first. Default is false
     --public-ip-timeout:                     Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --public-ip-url:                         The URL of public IP detection server to be used.
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
