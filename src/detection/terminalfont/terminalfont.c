@@ -320,6 +320,24 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
     return true;
 }
 
+static bool detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
+{
+    FFstrbuf fontName;
+    ffStrbufInit(&fontName);
+
+    if(!ffParsePropFileConfig(instance, "terminator/config", "font =", &fontName))
+        return false;
+
+    if(fontName.length == 0)
+        ffStrbufSetS(&fontName, "Mono 8");
+
+    ffFontInitCopy(&result->font, fontName.chars);
+
+    ffStrbufDestroy(&fontName);
+
+    return true;
+}
+
 static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY fontName;
@@ -354,6 +372,8 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
 {
     if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "alacritty"))
         detectAlacritty(instance, terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "terminator"))
+        detectTerminator(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
         detectWezterm(instance, terminalFont);
 
