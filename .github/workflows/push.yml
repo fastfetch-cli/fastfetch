@@ -31,6 +31,12 @@ jobs:
       - name: build project
         run: cmake --build .
 
+      - name: upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastfetch-linux-buildtest-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.enableFeatures }}
+          path: ./fastfetch
+
       - name: run tests
         run: ctest
 
