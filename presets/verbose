@@ -17,7 +17,7 @@
 --terminal-font-format Pretty: {}; Name: {}; Size: {}; Styles: {}
 --cpu-format Name: {}, Vendor: {}, CoresPhysical: {}, CoresLogical: {}, CoresOnline: {}, FrequencyMin: {}, FrequencyMax: {}, Temperature: {}
 --cpu-usage-format Percentage: {}
---gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}
+--gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}; Type: {}
 --memory-format Used: {}; Total: {}; Percentage: {}
 --disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; Removable: {}; Hidden: {}; Filesystem: {}; Name: {}
 --battery-format Manufactor: {}; Model: {}; Technology: {}; Capacity: {}; Status: {}

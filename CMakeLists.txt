@@ -726,9 +726,6 @@ elseif(WIN32)
     if(USE_WIN_NTAPI)
         target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
     endif()
-    if(USE_WIN_GPU_DXGI)
-        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_GPU_DXGI)
-    endif()
 endif()
 
 target_include_directories(libfastfetch

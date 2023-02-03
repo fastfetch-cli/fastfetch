@@ -17,6 +17,7 @@ Bugfixes:
 Other:
 
 * Simplified wmtheme output format (Windows)
+* Improved GPU detection performance on Windows 11
 
 # 1.9.1
 

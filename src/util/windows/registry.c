@@ -44,7 +44,7 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
             if(!valueNameW)
                 valueNameW = L"(default)";
             FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
-            ffStrbufAppendF(error, "RegGetValueA(%s, NULL, RRF_RT_REG_SZ) failed", valueNameA.chars);
+            ffStrbufAppendF(error, "RegGetValueW(%s, NULL, RRF_RT_REG_SZ) failed", valueNameA.chars);
         }
         return false;
     }
@@ -56,7 +56,7 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
             if(!valueNameW)
                 valueNameW = L"(default)";
             FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
-            ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_REG_SZ) failed", valueNameA.chars);
+            ffStrbufAppendF(error, "RegGetValueW(%s, result, RRF_RT_REG_SZ) failed", valueNameA.chars);
         }
         return false;
     }
@@ -74,7 +74,24 @@ bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstr
             if(!valueNameW)
                 valueNameW = L"(default)";
             FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
-            ffStrbufAppendF(error, "RegGetValueA(%s, result, RRF_RT_DWORD) failed", valueNameA.chars);
+            ffStrbufAppendF(error, "RegGetValueW(%s, result, RRF_RT_DWORD) failed", valueNameA.chars);
+        }
+        return false;
+    }
+    return true;
+}
+
+bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFstrbuf* error)
+{
+    DWORD bufSize = sizeof(*result);
+    if(RegGetValueW(hKey, NULL, valueNameW, RRF_RT_QWORD, NULL, result, &bufSize) != ERROR_SUCCESS)
+    {
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueW(%s, result, RRF_RT_QWORD) failed", valueNameA.chars);
         }
         return false;
     }
