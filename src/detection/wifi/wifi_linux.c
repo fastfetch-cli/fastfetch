@@ -13,6 +13,12 @@
 #define NM_NO_INCLUDE_EXTRA_HEADERS 1
 #include <NetworkManager.h>
 
+//https://developer-old.gnome.org/libnm/stable/libnm-nm-dbus-interface.html
+#ifndef NM_VERSION_1_26
+    #define NM_802_11_AP_SEC_KEY_MGMT_OWE 0x00000800
+    #define NM_802_11_AP_SEC_KEY_MGMT_OWE_TM 0x00001000
+#endif
+
 static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* result)
 {
     FF_LIBRARY_LOAD(nm, &instance->config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
