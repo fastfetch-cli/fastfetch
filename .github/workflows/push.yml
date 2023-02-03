@@ -34,6 +34,9 @@ jobs:
       - name: run tests
         run: ctest
 
+      - name: debug
+        run: llvm-symbolizer --obj=fastfetch 0x4966d2
+
       - name: run fastfetch
         run: ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
 
