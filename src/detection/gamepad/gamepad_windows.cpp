@@ -17,16 +17,16 @@ CALLBACK BOOL DIEnumDevicesCallback(LPCDIDEVICEINSTANCEA lpddi, LPVOID pvRef)
         lpddi->guidInstance.Data4[4], lpddi->guidInstance.Data4[5], lpddi->guidInstance.Data4[6], lpddi->guidInstance.Data4[7]);
     ffStrbufInitS(&device->name, lpddi->tszInstanceName);
 
-	return DIENUM_CONTINUE;
+    return DIENUM_CONTINUE;
 }
 
 extern "C"
 const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */)
 {
-	IDirectInput8A* dinput;
-	if (!SUCCEEDED(DirectInput8Create(GetModuleHandleW(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8A, (void**)&dinput, NULL)))
+    IDirectInput8A* dinput;
+    if (!SUCCEEDED(DirectInput8Create(GetModuleHandleW(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8A, (void**)&dinput, NULL)))
         return "DirectInput8Create() failed";
-    dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, DIEnumDevicesCallback, devices, DIEDFL_ALLDEVICES);
-	dinput->Release();
+    dinput->EnumDevices(DI8DEVCLASS_GAMECTRL, DIEnumDevicesCallback, devices, DIEDFL_ATTACHEDONLY);
+    dinput->Release();
     return NULL;
 }
