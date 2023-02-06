@@ -24,25 +24,9 @@ typedef struct PCIData
     #endif
 } PCIData;
 
-static bool pciIDsContains(u16 searched, const u16* ids)
-{
-    while(*ids != 0)
-    {
-        if(*ids == searched)
-            return true;
-        ids++;
-    }
-    return false;
-}
-
 static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
-    if(pciIDsContains(device->vendor_id, (const u16[]) {0x1002, 0x1022, 0}))
-        ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-    else if(pciIDsContains(device->vendor_id, (const u16[]) {0x03e7, 0x8086, 0x8087, 0}))
-        ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-    else if(pciIDsContains(device->vendor_id, (const u16[]) {0x0955, 0x10de, 0x12d2, 0}))
-        ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+    ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(device->vendor_id));
 
     if(gpu->vendor.length > 0)
         return;
@@ -270,11 +254,12 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 
 #endif
 
-void ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 {
     #ifdef FF_HAVE_LIBPCI
-        pciDetectGPUs(instance, gpus);
+        return pciDetectGPUs(instance, gpus);
     #else
         FF_UNUSED(gpus, instance);
+        return "fastfetch is built without libpci support";
     #endif
 }

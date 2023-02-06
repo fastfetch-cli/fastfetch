@@ -51,14 +51,7 @@ static const char* detectWithRegistry(FFlist* gpus)
 
         uint32_t vendorId;
         if(ffRegReadUint(hSubKey, L"VendorId", &vendorId, nullptr))
-        {
-            if(wmemchr((const wchar_t[]) {0x1002, 0x1022}, (wchar_t)vendorId, 2))
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-            else if(wmemchr((const wchar_t[]) {0x03e7, 0x8086, 0x8087}, (wchar_t)vendorId, 3))
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-            else if(wmemchr((const wchar_t[]) {0x0955, 0x10de, 0x12d2}, (wchar_t)vendorId, 3))
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
-        }
+            ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(vendorId));
 
         uint64_t dedicatedVideoMemory;
         if(ffRegReadUint64(hSubKey, L"DedicatedVideoMemory", &dedicatedVideoMemory, nullptr))
@@ -88,14 +81,8 @@ static const char* detectWithDxgi(FFlist* gpus)
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
 
-        if(wmemchr((const wchar_t[]) {0x1002, 0x1022}, (wchar_t)desc.VendorId, 2))
-            ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-        else if(wmemchr((const wchar_t[]) {0x03e7, 0x8086, 0x8087}, (wchar_t)desc.VendorId, 3))
-            ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-        else if(wmemchr((const wchar_t[]) {0x0955, 0x10de, 0x12d2}, (wchar_t)desc.VendorId, 3))
-            ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
-        else
-            ffStrbufInit(&gpu->vendor);
+        ffStrbufInit(&gpu->vendor);
+        ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(desc.VendorId));
 
         ffStrbufInit(&gpu->name);
         ffStrbufSetWS(&gpu->name, desc.Description);
