@@ -69,40 +69,33 @@ static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* 
 
 static void getConfigDirs(FFPlatform* platform)
 {
-    ffListInit(&platform->configDirs, sizeof(FFstrbuf));
-
-    ffPlatformPathAddEnv(&platform->configDirs, "XDG_CONFIG_HOME");
-    ffPlatformPathAddHome(&platform->configDirs, platform, "/.config/");
-    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_RoamingAppData);
-    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_LocalAppData);
-    ffPlatformPathAddHome(&platform->configDirs, platform, "");
-
-    if(getenv("MSYSTEM") && getenv("HOME"))
+    if(getenv("MSYSTEM"))
     {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->configDirs, "HOME", ".config/");
         platformPathAddEnvSuffix(&platform->configDirs, "HOME", "");
+        platformPathAddEnvSuffix(&platform->configDirs, "MINGW_PREFIX", "etc");
     }
 
-    ffPlatformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
+    ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
+    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_RoamingAppData);
+    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_LocalAppData);
+    ffPlatformPathAddHome(&platform->configDirs, platform, "");
 }
 
 static void getDataDirs(FFPlatform* platform)
 {
-    ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
-    ffPlatformPathAddHome(&platform->dataDirs, platform, "/.local/share/");
-    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_RoamingAppData);
-    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_LocalAppData);
-    ffPlatformPathAddHome(&platform->dataDirs, platform, "");
-
     if(getenv("MSYSTEM") && getenv("HOME"))
     {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->dataDirs, "HOME", ".local/share/");
         platformPathAddEnvSuffix(&platform->dataDirs, "HOME", "");
+        platformPathAddEnvSuffix(&platform->dataDirs, "MINGW_PREFIX", "share");
     }
-
-    ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
+    ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
+    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_RoamingAppData);
+    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_LocalAppData);
+    ffPlatformPathAddHome(&platform->dataDirs, platform, "");
 }
 
 static void getUserName(FFPlatform* platform)
