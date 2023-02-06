@@ -197,6 +197,7 @@ void ffDetectBluetoothImpl(const FFinstance* instance, FFBluetoothResult* blueto
     #ifdef FF_HAVE_DBUS
         ffStrbufAppendS(&bluetooth->error, detectBluetooth(instance, bluetooth));
     #else
+        FF_UNUSED(instance);
         ffStrbufAppendS(&bluetooth->error, "Fastfetch was compiled without DBus support");
     #endif
 }
