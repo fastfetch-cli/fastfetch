@@ -12,6 +12,8 @@ Features:
 * Support `--localip-compact-type` option (#408)
 * Terminator terminal font detection (@Zerogiven, #415)
 * Windows 32bit compatibility
+* Support global configuration in MSYS2 environment (Windows)
+* Support GPU driver version detection on Windows 11
 
 Bugfixes:
 

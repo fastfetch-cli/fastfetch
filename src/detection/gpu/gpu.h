@@ -27,6 +27,7 @@ typedef struct FFGPUResult
     FFstrbuf name;
     FFstrbuf driver;
     double temperature;
+    uint64_t memory;
     int coreCount;
 } FFGPUResult;
 

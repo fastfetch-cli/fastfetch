@@ -6,6 +6,7 @@ extern "C" {
 
 #include <dxgi.h>
 #include <wchar.h>
+#include <inttypes.h>
 
 static const char* detectWithRegistry(FFlist* gpus)
 {
@@ -13,11 +14,11 @@ static const char* detectWithRegistry(FFlist* gpus)
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\DirectX", &hKey, nullptr))
-        return "Open \"SOFTWARE\\Microsoft\\DirectX\" failed";
+        return "Open \"HKLM\\SOFTWARE\\Microsoft\\DirectX\" failed";
 
     uint64_t lastSeen;
     if(!ffRegReadUint64(hKey, L"LastSeen", &lastSeen, nullptr))
-        return "Read \"SOFTWARE\\Microsoft\\DirectX\\LastSeen\" failed";
+        return "Read \"HKLM\\SOFTWARE\\Microsoft\\DirectX\\LastSeen\" failed";
 
     DWORD index = 0;
     wchar_t subKeyName[64];
@@ -55,9 +56,11 @@ static const char* detectWithRegistry(FFlist* gpus)
 
         uint64_t dedicatedVideoMemory;
         if(ffRegReadUint64(hSubKey, L"DedicatedVideoMemory", &dedicatedVideoMemory, nullptr))
-        {
             gpu->type = dedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
-        }
+
+        uint64_t driverVersion;
+        if(ffRegReadUint64(hSubKey, L"DriverVersion", &driverVersion, nullptr))
+            ffStrbufSetF(&gpu->driver, "%" PRIu64 ".%" PRIu64, (driverVersion >> 16) & 0xFFFF, driverVersion & 0xFFFF);
     }
 
     return nullptr;
