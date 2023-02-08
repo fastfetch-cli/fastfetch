@@ -3,6 +3,7 @@ extern "C" {
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
 }
+#include "util/windows/wmi.hpp"
 
 #include <dxgi.h>
 #include <wchar.h>
@@ -111,10 +112,45 @@ static const char* detectWithDxgi(FFlist* gpus)
     return nullptr;
 }
 
+static const char* detectWithWmi(FFlist* gpus)
+{
+    FFWmiQuery query(L"SELECT Name, AdapterCompatibility, DriverVersion FROM Win32_VideoController", nullptr);
+    if(!query)
+        return "Query WMI service failed";
+
+    while(FFWmiRecord record = query.next())
+    {
+        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+
+        ffStrbufInit(&gpu->vendor);
+        record.getString(L"AdapterCompatibility", &gpu->vendor);
+        if(ffStrbufStartsWithS(&gpu->vendor, "Intel "))
+        {
+            //Intel returns "Intel Corporation", not sure about AMD
+            ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+        }
+
+        ffStrbufInit(&gpu->name);
+        record.getString(L"Name", &gpu->name);
+
+        ffStrbufInit(&gpu->driver);
+        record.getString(L"DriverVersion", &gpu->driver);
+
+        gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+    }
+
+    return nullptr;
+}
+
 extern "C"
 const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
 {
-    if (!detectWithRegistry(gpus))
+    if (instance->config.allowSlowOperations)
+        detectWithWmi(gpus);
+    else if (!detectWithRegistry(gpus))
         return nullptr;
     return detectWithDxgi(gpus);
 }
