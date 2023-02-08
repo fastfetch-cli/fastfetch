@@ -20,6 +20,7 @@ Bugfixes:
 * Fix a rare case that fails to detect terminal
 * Fix Muffin detection (@Zerogiven, #411)
 * Fix IPv6 detection (Windows)
+* Fix scoop package count detection when scoop is installed in non-default path (Windows, #417)
 
 Other:
 
