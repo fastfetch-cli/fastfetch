@@ -24,7 +24,7 @@ typedef struct OpenCLData
     FF_LIBRARY_SYMBOL(clGetDeviceInfo)
 } OpenCLData;
 
-static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)
+static const char* openCLHandleData(FFinstance* instance, OpenCLData* data)
 {
     cl_platform_id platformID;
     cl_uint numPlatforms;
@@ -84,12 +84,17 @@ static const char* printOpenCL(FFinstance* instance)
 {
     OpenCLData data;
 
-    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed", "libOpenCL"FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
+    #ifdef _WIN32
+        "OpenCL"FF_LIBRARY_EXTENSION, -1,
+    #endif
+        "libOpenCL"FF_LIBRARY_EXTENSION, 1
+    );
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
 
-    const char* error = openCLHandelData(instance, &data);
+    const char* error = openCLHandleData(instance, &data);
     dlclose(opencl);
     return error;
 }
@@ -103,7 +108,7 @@ static const char* printOpenCL(FFinstance* instance)
     data.ffclGetDeviceIDs = clGetDeviceIDs;
     data.ffclGetDeviceInfo = clGetDeviceInfo;
 
-    return openCLHandelData(instance, &data);
+    return openCLHandleData(instance, &data);
 }
 
 #endif // __APPLE__

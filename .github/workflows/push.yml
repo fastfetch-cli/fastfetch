@@ -188,22 +188,6 @@ jobs:
       - name: print msys version
         run: uname -a
 
-      # https://github.com/msys2/MINGW-packages/issues/13524#event-7555720785
-      - name: create OpenCL.pc
-        run: |
-          cat > /clang64/lib/pkgconfig/OpenCL.pc << EOF
-          prefix=/clang64
-          exec_prefix=${prefix}
-          libdir=${exec_prefix}/lib
-          includedir=${prefix}/include
-
-          Name: OpenCL
-          Description: Open Computing Language generic Installable Client Driver Loader
-          Version: 2022.09.30-1
-          Libs: -L${libdir} -lOpenCL.dll
-          Cflags: -I${includedir}
-          EOF
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
@@ -219,7 +203,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: copy necessary dlls
-        run: cp /clang64/bin/{libcjson,libOpenCL,vulkan-1}.dll .
+        run: cp /clang64/bin/{libcjson,OpenCL,vulkan-1}.dll .
 
       - name: list features
         run: ./fastfetch --list-features
@@ -265,22 +249,6 @@ jobs:
       - name: print msys version
         run: uname -a
 
-      # https://github.com/msys2/MINGW-packages/issues/13524#event-7555720785
-      - name: create OpenCL.pc
-        run: |
-          cat > /clang32/lib/pkgconfig/OpenCL.pc << EOF
-          prefix=/clang32
-          exec_prefix=${prefix}
-          libdir=${exec_prefix}/lib
-          includedir=${prefix}/include
-
-          Name: OpenCL
-          Description: Open Computing Language generic Installable Client Driver Loader
-          Version: 2022.09.30-1
-          Libs: -L${libdir} -lOpenCL.dll
-          Cflags: -I${includedir}
-          EOF
-
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
@@ -296,7 +264,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: copy necessary dlls
-        run: cp /clang32/bin/{libcjson,libOpenCL,vulkan-1}.dll .
+        run: cp /clang32/bin/{libcjson,OpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
         run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
