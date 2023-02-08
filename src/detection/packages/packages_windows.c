@@ -1,4 +1,5 @@
 #include "packages.h"
+#include "util/stringUtils.h"
 
 #include <handleapi.h>
 #include <fileapi.h>
@@ -27,10 +28,21 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
 
 static void detectScoop(const FFinstance* instance, FFPackagesResult* result)
 {
-    char scoopPath[MAX_PATH + 3];
-    strcpy(scoopPath, instance->state.platform.homeDir.chars);
-    strncat(scoopPath, "/scoop/apps/*", sizeof(scoopPath) - 1 - strlen(scoopPath));
-    result->scoop = getNumElements(scoopPath, FILE_ATTRIBUTE_DIRECTORY);
+    FF_STRBUF_AUTO_DESTROY scoopPath;
+    ffStrbufInitA(&scoopPath, MAX_PATH + 3);
+
+    const char* scoopEnv = getenv("SCOOP");
+    if(ffStrSet(scoopEnv))
+    {
+        ffStrbufAppendS(&scoopPath, scoopEnv);
+        ffStrbufAppendS(&scoopPath, "/apps/*");
+    }
+    else
+    {
+        ffStrbufAppendS(&scoopPath, instance->state.platform.homeDir.chars);
+        ffStrbufAppendS(&scoopPath, "/scoop/apps/*");
+    }
+    result->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY);
     if(result->scoop > 0)
         result->scoop--; // scoop
 }
