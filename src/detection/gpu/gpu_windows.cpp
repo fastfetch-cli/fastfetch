@@ -60,7 +60,13 @@ static const char* detectWithRegistry(FFlist* gpus)
 
         uint64_t driverVersion;
         if(ffRegReadUint64(hSubKey, L"DriverVersion", &driverVersion, nullptr))
-            ffStrbufSetF(&gpu->driver, "%" PRIu64 ".%" PRIu64, (driverVersion >> 16) & 0xFFFF, driverVersion & 0xFFFF);
+        {
+            ffStrbufSetF(&gpu->driver, "%" PRIu64 ".%" PRIu64 ".%" PRIu64 ".%" PRIu64,
+                (driverVersion >> 48) & 0xFFFF,
+                (driverVersion >> 32) & 0xFFFF,
+                (driverVersion >> 16) & 0xFFFF,
+                (driverVersion >>  0) & 0xFFFF);
+        }
     }
 
     return nullptr;
