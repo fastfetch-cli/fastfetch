@@ -7,6 +7,7 @@
 static uint32_t getNumElements(const char* searchPath /* including `\*` suffix */, DWORD type, const char* ignore)
 {
     uint32_t counter = 0;
+    bool flag = ignore == NULL;
     WIN32_FIND_DATAA wfd;
     HANDLE hFind = FindFirstFileA(searchPath, &wfd);
 
@@ -15,7 +16,11 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
         do // Managed to locate and create an handle to that folder.
         {
             if(!(wfd.dwFileAttributes & type)) continue;
-            if(ignore != NULL && strcasecmp(ignore, wfd.cFileName) == 0) continue;
+            if(!flag && strcasecmp(ignore, wfd.cFileName) == 0)
+            {
+                flag = true;
+                continue;
+            }
             counter++;
         } while (FindNextFileA(hFind, &wfd));
         FindClose(hFind);
