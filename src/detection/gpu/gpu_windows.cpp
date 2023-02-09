@@ -149,8 +149,9 @@ extern "C"
 const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
 {
     if (instance->config.allowSlowOperations)
-        detectWithWmi(gpus);
-    else if (!detectWithRegistry(gpus))
+        return detectWithWmi(gpus);
+
+    if (!detectWithRegistry(gpus))
         return nullptr;
     return detectWithDxgi(gpus);
 }
