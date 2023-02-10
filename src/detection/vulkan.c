@@ -195,12 +195,14 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
             gpu->type = FF_GPU_TYPE_INTEGRATED;
         else
             gpu->type = FF_GPU_TYPE_DISCRETE;
+        gpu->id = physicalDeviceProperties.properties.deviceID;
+        ffStrbufInitS(&gpu->vendor, ffGetGPUVendorString(physicalDeviceProperties.properties.vendorID));
+        ffStrbufInitF(&gpu->driver, "%X", (unsigned) physicalDeviceProperties.properties.driverVersion);
 
         //No way to detect those using vulkan
-        ffStrbufInit(&gpu->vendor);
-        ffStrbufInit(&gpu->driver);
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->dedicatedTotal = gpu->dedicatedUsed = gpu->sharedTotal = gpu->sharedUsed = 0; //VkPhysicalDeviceMemoryProperties?
     }
 
     //If the highest device version is lower than the instance version, use it as our vulkan version

@@ -60,6 +60,8 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         FFGPUResult* gpu = ffListAdd(gpus);
 
+        gpu->id = 0;
+        gpu->dedicatedTotal = gpu->dedicatedUsed = gpu->sharedTotal = gpu->sharedUsed = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
 
         ffStrbufInit(&gpu->vendor);

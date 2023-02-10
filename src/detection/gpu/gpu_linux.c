@@ -199,6 +199,9 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
 
     FFGPUResult* gpu = ffListAdd(results);
 
+    gpu->id = 0;
+    gpu->dedicatedTotal = gpu->dedicatedUsed = gpu->sharedTotal = gpu->sharedUsed = FF_GPU_VMEM_SIZE_UNSET;
+
     ffStrbufInit(&gpu->vendor);
     pciDetectVendorName(gpu, pci, device);
 
