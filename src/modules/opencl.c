@@ -11,10 +11,10 @@
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100
-#ifdef __APPLE__
-    #include <OpenCL/cl.h>
-#else
+#ifdef FF_HAVE_OPENCL
     #include <CL/cl.h>
+#else
+    #include <OpenCL/cl.h>
 #endif
 
 typedef struct OpenCLData
@@ -99,7 +99,7 @@ static const char* printOpenCL(FFinstance* instance)
     return error;
 }
 
-#elif __APPLE__ // FF_HAVE_OPENCL
+#elif defined(__APPLE__) // FF_HAVE_OPENCL
 
 static const char* printOpenCL(FFinstance* instance)
 {
@@ -111,7 +111,7 @@ static const char* printOpenCL(FFinstance* instance)
     return openCLHandleData(instance, &data);
 }
 
-#endif // __APPLE__
+#endif // FF_HAVE_OPENCL
 
 void ffPrintOpenCL(FFinstance* instance)
 {
