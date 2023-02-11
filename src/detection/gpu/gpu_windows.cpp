@@ -49,7 +49,7 @@ static const char* detectWithRegistry(FFlist* gpus)
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->id = 0;
-        gpu->dedicatedTotal = gpu->dedicatedUsed = gpu->sharedTotal = gpu->sharedUsed = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
         ffRegReadUint64(hSubKey, L"AdapterLuid", &gpu->id, nullptr);
 
@@ -67,8 +67,8 @@ static const char* detectWithRegistry(FFlist* gpus)
         if(ffRegReadUint64(hSubKey, L"DedicatedSystemMemory", &dedicatedSystemMemory, nullptr) &&
            ffRegReadUint64(hSubKey, L"SharedSystemMemory", &sharedSystemMemory, nullptr))
         {
-            gpu->dedicatedTotal = dedicatedVideoMemory + dedicatedSystemMemory;
-            gpu->sharedTotal = sharedSystemMemory;
+            gpu->dedicated.total = dedicatedVideoMemory + dedicatedSystemMemory;
+            gpu->shared.total = sharedSystemMemory;
         }
 
         uint64_t driverVersion;
@@ -102,7 +102,7 @@ static const char* detectWithDxgi(FFlist* gpus)
             continue;
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        gpu->dedicatedTotal = gpu->dedicatedUsed = gpu->sharedTotal = gpu->sharedUsed = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->dedicated.total = gpu->dedicated.total = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
         ffStrbufInit(&gpu->vendor);
         ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(desc.VendorId));
@@ -115,8 +115,8 @@ static const char* detectWithDxgi(FFlist* gpus)
         ffStrbufInit(&gpu->driver);
 
         gpu->type = desc.DedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
-        gpu->dedicatedTotal = desc.DedicatedVideoMemory + desc.DedicatedSystemMemory;
-        gpu->sharedTotal = desc.SharedSystemMemory;
+        gpu->dedicated.total = desc.DedicatedVideoMemory + desc.DedicatedSystemMemory;
+        gpu->shared.total = desc.SharedSystemMemory;
 
         adapter->Release();
 
@@ -149,13 +149,13 @@ static const char* detectMemoryUsage(FFlist* gpus)
         FF_LIST_FOR_EACH(FFGPUResult, gpu, *gpus)
         {
             if (gpu->id != luid) continue;
-            record.getUnsigned(L"DedicatedUsage", &gpu->dedicatedUsed);
-            record.getUnsigned(L"SharedUsage", &gpu->sharedUsed);
+            record.getUnsigned(L"DedicatedUsage", &gpu->dedicated.used);
+            record.getUnsigned(L"SharedUsage", &gpu->shared.used);
             break;
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 extern "C"

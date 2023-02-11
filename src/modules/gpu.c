@@ -33,20 +33,20 @@ static void printGPUResult(FFinstance* instance, uint8_t index, const FFGPUResul
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
             ffStrbufAppendF(&output, " - %.1f°C", gpu->temperature);
 
-        if(gpu->dedicatedTotal != FF_GPU_VMEM_SIZE_UNSET)
+        if(gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.total != 0)
         {
             ffStrbufAppendS(&output, " (");
 
-            if(gpu->dedicatedUsed != FF_GPU_VMEM_SIZE_UNSET)
+            if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
-                ffParseSize(gpu->dedicatedUsed, instance->config.binaryPrefixType, &output);
+                ffParseSize(gpu->dedicated.used, instance->config.binaryPrefixType, &output);
                 ffStrbufAppendS(&output, " / ");
             }
-            ffParseSize(gpu->dedicatedTotal, instance->config.binaryPrefixType, &output);
-            if(gpu->dedicatedUsed != FF_GPU_VMEM_SIZE_UNSET)
+            ffParseSize(gpu->dedicated.total, instance->config.binaryPrefixType, &output);
+            if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffAppendPercentNum(instance, &output, (uint8_t) (gpu->dedicatedUsed * 100 / gpu->dedicatedTotal), 50, 80, false);
+                ffAppendPercentNum(instance, &output, (uint8_t) (gpu->dedicated.used * 100 / gpu->dedicated.total), 50, 80, false);
             }
             ffStrbufAppendC(&output, ')');
         }

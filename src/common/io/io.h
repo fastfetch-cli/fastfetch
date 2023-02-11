@@ -88,7 +88,16 @@ bool ffPathExists(const char* path, FFPathType pathType);
 #endif
 
 // Not thread safe!
-void ffSuppressIO(bool suppress);
+bool ffSuppressIO(bool suppress);
+
+static inline void ffUnsuppressIO(bool* suppressed)
+{
+    if (!*suppressed) return;
+    ffSuppressIO(false);
+    *suppressed = false;
+}
+
+#define FF_SUPPRESS_IO() bool __attribute__((__cleanup__(ffUnsuppressIO), __unused__)) io_suppressed__ = ffSuppressIO(true)
 
 void ffListFilesRecursively(const char* path);
 

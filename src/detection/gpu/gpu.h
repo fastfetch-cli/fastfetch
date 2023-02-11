@@ -21,6 +21,12 @@ typedef enum FFGpuType
     FF_GPU_TYPE_DISCRETE,
 } FFGpuType;
 
+typedef struct FFGPUMemory
+{
+    uint64_t total;
+    uint64_t used;
+} FFGPUMemory;
+
 typedef struct FFGPUResult
 {
     uint64_t id;
@@ -30,10 +36,8 @@ typedef struct FFGPUResult
     FFstrbuf driver;
     double temperature;
     int coreCount;
-    uint64_t dedicatedTotal;
-    uint64_t dedicatedUsed;
-    uint64_t sharedTotal;
-    uint64_t sharedUsed;
+    FFGPUMemory dedicated;
+    FFGPUMemory shared;
 } FFGPUResult;
 
 const FFlist* ffDetectGPU(const FFinstance* instance);

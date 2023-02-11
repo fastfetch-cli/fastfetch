@@ -163,7 +163,7 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     va_end(args);
 }
 
-void ffSuppressIO(bool suppress)
+bool ffSuppressIO(bool suppress)
 {
     static bool init = false;
     static int origOut = -1;
@@ -173,7 +173,7 @@ void ffSuppressIO(bool suppress)
     if(!init)
     {
         if(!suppress)
-            return;
+            return true;
 
         origOut = dup(STDOUT_FILENO);
         origErr = dup(STDERR_FILENO);
@@ -182,13 +182,14 @@ void ffSuppressIO(bool suppress)
     }
 
     if(nullFile == -1)
-        return;
+        return false;
 
     fflush(stdout);
     fflush(stderr);
 
     dup2(suppress ? nullFile : origOut, STDOUT_FILENO);
     dup2(suppress ? nullFile : origErr, STDERR_FILENO);
+    return true;
 }
 
 void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
