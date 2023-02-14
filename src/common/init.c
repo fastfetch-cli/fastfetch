@@ -1,8 +1,6 @@
 #include "fastfetch.h"
 #include "common/parsing.h"
 #include "common/thread.h"
-#include "detection/qt.h"
-#include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/textModifier.h"
 
@@ -219,6 +217,8 @@ void ffInitInstance(FFinstance* instance)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
 
 #if !(defined(__APPLE__) || defined(_WIN32))
+
+#include "detection/gtk_qt/gtk_qt.h"
 
 #define FF_DETECT_QT_GTK 1
 

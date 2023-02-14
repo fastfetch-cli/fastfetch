@@ -333,7 +333,7 @@ if(LINUX)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/gtk.c
+        src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
@@ -344,7 +344,7 @@ if(LINUX)
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
-        src/detection/qt.c
+        src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
@@ -419,7 +419,7 @@ elseif(BSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/gtk.c
+        src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
@@ -430,7 +430,7 @@ elseif(BSD)
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_bsd.c
-        src/detection/qt.c
+        src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_linux.c

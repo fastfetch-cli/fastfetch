@@ -2,7 +2,7 @@
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/settings.h"
-#include "detection/gtk.h"
+#include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/stringUtils.h"
 

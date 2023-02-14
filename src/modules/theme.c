@@ -1,8 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "common/parsing.h"
-#include "detection/qt.h"
-#include "detection/gtk.h"
+#include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 
 #define FF_THEME_MODULE_NAME "Theme"
