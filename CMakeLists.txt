@@ -234,7 +234,7 @@ set(LIBFASTFETCH_SRC
     src/detection/bluetooth/bluetooth.c
     src/detection/cpu/cpu.c
     src/detection/cpuUsage/cpuUsage.c
-    src/detection/datetime.c
+    src/detection/datetime/datetime.c
     src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c

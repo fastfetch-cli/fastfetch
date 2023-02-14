@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/datetime.h"
+#include "detection/datetime/datetime.h"
 
 #define FF_TIME_MODULE_NAME "Time"
 

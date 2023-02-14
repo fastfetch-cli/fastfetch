@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_datetime
-#define FF_INCLUDED_detection_datetime
+#ifndef FF_INCLUDED_detection_datetime_datetime
+#define FF_INCLUDED_detection_datetime_datetime
 
 #include "fastfetch.h"
 
