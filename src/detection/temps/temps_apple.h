@@ -26,6 +26,8 @@ enum FFTempType
     FF_TEMP_GPU_M2X,
 
     FF_TEMP_BATTERY,
+
+    FF_TEMP_MEMORY,
 };
 
 const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result);

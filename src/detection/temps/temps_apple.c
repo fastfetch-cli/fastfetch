@@ -397,6 +397,10 @@ const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
     case FF_TEMP_BATTERY:
         detectTemp(conn, "TB1T", "Battery", result);
         break;
+
+    case FF_TEMP_MEMORY:
+        detectTemp(conn, "Tm02", "Memory", result);
+        break;
     }
 
     return NULL;
