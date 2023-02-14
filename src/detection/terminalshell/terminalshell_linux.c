@@ -53,7 +53,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     size_t size = exe->allocated;
     if(!sysctl(
         (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
-       exe->chars, &size,
+        exe->chars, &size,
         NULL, 0
     ))
         exe->length = (uint32_t)size;
