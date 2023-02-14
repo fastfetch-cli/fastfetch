@@ -1,6 +1,6 @@
 #include "gpu.h"
 #include "detection/internal.h"
-#include "detection/vulkan.h"
+#include "detection/vulkan/vulkan.h"
 
 const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance);
 

@@ -1,5 +1,5 @@
-#include "gpu.h"
-#include "detection/vulkan.h"
+#include "detection/gpu/gpu.h"
+#include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_LIBPCI
 #include "common/library.h"

@@ -246,7 +246,7 @@ set(LIBFASTFETCH_SRC
     src/detection/packages/packages.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
-    src/detection/vulkan.c
+    src/detection/vulkan/vulkan.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c

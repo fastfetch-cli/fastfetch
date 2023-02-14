@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/thread.h"
-#include "detection/vulkan.h"
 #include "detection/gpu/gpu.h"
+#include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_VULKAN
 #include "common/library.h"
