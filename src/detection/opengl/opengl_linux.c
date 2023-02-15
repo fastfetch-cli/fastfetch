@@ -133,9 +133,7 @@ static const char* eglPrint(FFinstance* instance, FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroySurface);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
 
-    const char* error = eglHandleData(result, &eglData);
-    dlclose(egl);
-    return error;
+    return eglHandleData(result, &eglData);
 }
 
 #endif //FF_HAVE_EGL
@@ -252,9 +250,7 @@ static const char* glxPrint(FFinstance* instance, FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XCloseDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XFree);
 
-    const char* error = glxHandleData(result, &data);
-    dlclose(glx);
-    return error;
+    return glxHandleData(result, &data);
 }
 
 #endif //FF_HAVE_GLX
@@ -310,9 +306,7 @@ static const char* osMesaPrint(FFinstance* instance, FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaMakeCurrent);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaDestroyContext);
 
-    const char* error = osMesaHandleData(result, &data);
-    dlclose(osmesa);
-    return error;
+    return osMesaHandleData(result, &data);
 }
 
 #endif //FF_HAVE_OSMESA

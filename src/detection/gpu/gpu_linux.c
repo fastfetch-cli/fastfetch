@@ -251,7 +251,6 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     }
 
     ffpci_cleanup(pci.access);
-    dlclose(libpci);
     return NULL;
 }
 

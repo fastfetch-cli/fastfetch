@@ -103,10 +103,7 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
 
     xcb_connection_t* connection = ffxcb_connect(NULL, NULL);
     if(connection == NULL)
-    {
-        dlclose(xcb);
         return;
-    }
 
     xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(connection));
 
@@ -127,7 +124,6 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
     }
 
     ffxcb_disconnect(connection);
-    dlclose(xcb);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
@@ -368,10 +364,7 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
 
     data.connection = ffxcb_connect(NULL, NULL);
     if(data.connection == NULL)
-    {
-        dlclose(xcbRandr);
         return;
-    }
 
     data.result = result;
 
@@ -387,7 +380,6 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
     }
 
     ffxcb_disconnect(data.connection);
-    dlclose(xcbRandr);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)

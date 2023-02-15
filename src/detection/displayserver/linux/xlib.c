@@ -69,10 +69,7 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 
     Display* display = ffXOpenDisplay(x11);
     if(display == NULL)
-    {
-        dlclose(x11);
         return;
-    }
 
     if(propertyDataInitialized && ScreenCount(display) > 0)
         x11DetectWMFromEWMH(&propertyData, display, result);
@@ -91,7 +88,6 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
     }
 
     ffXCloseDisplay(display);
-    dlclose(x11);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
@@ -298,10 +294,7 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)
-    {
-        dlclose(xrandr);
         return;
-    }
 
     if(propertyDataInitialized && ScreenCount(data.display) > 0)
         x11DetectWMFromEWMH(&propertyData, data.display, result);
@@ -312,7 +305,6 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
         xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i));
 
     ffXCloseDisplay(data.display);
-    dlclose(xrandr);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)

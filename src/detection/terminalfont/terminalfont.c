@@ -177,7 +177,6 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
 
 exit:
     cjsonData.ffcJSON_Delete(root);
-    dlclose(libcjson);
     return error;
 }
 

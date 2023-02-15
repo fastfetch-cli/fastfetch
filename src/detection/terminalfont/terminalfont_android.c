@@ -42,7 +42,6 @@ const char* detectTermux(const FFinstance* instance, FFTerminalFontResult* termi
 exit:
     if(face) ffFT_Done_Face(face);
     if(library) ffFT_Done_FreeType(library);
-    dlclose(freetype);
 
     return error;
 

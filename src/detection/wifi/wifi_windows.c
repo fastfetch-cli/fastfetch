@@ -207,7 +207,6 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
 exit:
     if(ifList) ffWlanFreeMemory(ifList);
     if(hClient) ffWlanCloseHandle(hClient, NULL);
-    dlclose(wlanapi);
     return error;
 }
 

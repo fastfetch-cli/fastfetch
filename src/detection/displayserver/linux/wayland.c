@@ -160,10 +160,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     data.display = ffwl_display_connect(NULL);
     if(data.display == NULL)
-    {
-        dlclose(wayland);
         return false;
-    }
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
@@ -171,7 +168,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     if(registry == NULL)
     {
         ffwl_display_disconnect(data.display);
-        dlclose(wayland);
         return false;
     }
 
@@ -188,7 +184,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
-    dlclose(wayland);
 
     //We successfully connected to wayland and detected the display.
     //So we can set set the session type to wayland.

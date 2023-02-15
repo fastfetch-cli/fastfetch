@@ -45,10 +45,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
     NMClient* client = ffnm_client_new(NULL, NULL);
     if(!client)
-    {
-        dlclose(nm);
         return "Could not create NMClient";
-    }
 
     /* Get all devices managed by NetworkManager */
     const GPtrArray* devices = ffnm_client_get_devices(client);
@@ -199,7 +196,6 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
     }
 
     ffg_object_unref(client);
-    dlclose(nm);
 
     return NULL;
 }

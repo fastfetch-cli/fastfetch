@@ -6,7 +6,7 @@
 #include "fastfetch.h"
 #include "util/FFcheckmacros.h"
 
-#if defined(_WIN32) //We don't force MSYS using LoadLibrary because dlopen also searches $LD_LIBRARY_PATH
+#if defined(_WIN32)
     #include <libloaderapi.h>
     #define FF_DLOPEN_FLAGS 0
     FF_C_NODISCARD static inline void* dlopen(const char* path, int mode) { FF_UNUSED(mode); return LoadLibraryA(path); }
@@ -24,29 +24,30 @@
     #define FF_LIBRARY_EXTENSION ".so"
 #endif
 
+static inline void ffLibraryUnload(void** handle)
+{
+    assert(handle);
+    if (*handle)
+        dlclose(*handle);
+}
+
 #define FF_LIBRARY_SYMBOL(symbolName) \
     __typeof__(&symbolName) ff ## symbolName;
 
 #define FF_LIBRARY_LOAD(libraryObjectName, userLibraryName, returnValue, ...) \
-    void* libraryObjectName = ffLibraryLoad(userLibraryName, __VA_ARGS__, NULL);\
+    void* __attribute__((__cleanup__(ffLibraryUnload))) libraryObjectName = ffLibraryLoad(userLibraryName, __VA_ARGS__, NULL);\
     if(libraryObjectName == NULL) \
         return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \
     symbolMapping = dlsym(library, #symbolName); \
     if(symbolMapping == NULL) \
-    { \
-        dlclose(library); \
-        return returnValue; \
-    }
+        return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS2(library, symbolMapping, symbolName, alternateName, returnValue) \
     symbolMapping = dlsym(library, #symbolName); \
     if(symbolMapping == NULL && !(symbolMapping = dlsym(library, #alternateName))) \
-    { \
-        dlclose(library); \
-        return returnValue; \
-    }
+        return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, returnValue);

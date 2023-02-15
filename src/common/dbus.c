@@ -24,7 +24,7 @@ static bool loadLibSymbols(const FFinstance* instance, FFDBusLibrary* lib)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_pending_call_block, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_pending_call_steal_reply, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_pending_call_unref, false)
-
+    dbus = NULL; // don't auto dlclose
     return true;
 }
 
@@ -178,7 +178,7 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
         return NULL;
     }
 
-    DBusMessage* reply =  dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, FF_DBUS_TIMEOUT_MILLISECONDS, NULL);
+    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, FF_DBUS_TIMEOUT_MILLISECONDS, NULL);
 
     dbus->lib->ffdbus_message_unref(message);
 

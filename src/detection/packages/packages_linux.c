@@ -229,23 +229,16 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
     ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
 
     if(ffrpmReadConfigFiles(NULL, NULL) != 0)
-    {
-        dlclose(rpm);
         return 0;
-    }
 
     rpmts ts = ffrpmtsCreate();
     if(ts == NULL)
-    {
-        dlclose(rpm);
         return 0;
-    }
 
     rpmdbMatchIterator mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0);
     if(mi == NULL)
     {
         ffrpmtsFree(ts);
-        dlclose(rpm);
         return 0;
     }
 
@@ -253,7 +246,6 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 
     ffrpmdbFreeIterator(mi);
     ffrpmtsFree(ts);
-    dlclose(rpm);
 
     return count > 0 ? (uint32_t) count : 0;
 }

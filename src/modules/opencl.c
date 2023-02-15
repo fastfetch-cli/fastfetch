@@ -94,9 +94,7 @@ static const char* printOpenCL(FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
 
-    const char* error = openCLHandleData(instance, &data);
-    dlclose(opencl);
-    return error;
+    return openCLHandleData(instance, &data);
 }
 
 #elif defined(__APPLE__) // FF_HAVE_OPENCL

@@ -114,7 +114,6 @@ static const char* detectSound(const FFinstance* instance, FFlist* devices)
 
     ffpa_context_unref(context);
     ffpa_mainloop_free(mainloop);
-    dlclose(pulse);
     return NULL;
 }
 

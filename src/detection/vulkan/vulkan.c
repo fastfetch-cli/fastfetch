@@ -97,11 +97,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         .ppEnabledExtensionNames = NULL,
         .flags = 0
     }, NULL, &vkInstance) != VK_SUCCESS)
-    {
-        dlclose(vulkan);
         return "ffvkCreateInstance() failed";
-    }
-
 
     //if instance creation succeeded, but vkEnumerateInstanceVersion didn't, this means we are running against a vulkan 1.0 implementation
     //explicitly set this version, if no device is found, so we still have at least this info
@@ -113,7 +109,6 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
     if(ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices) != VK_SUCCESS)
     {
         ffvkDestroyInstance(vkInstance, NULL);
-        dlclose(vulkan);
         return "ffvkEnumeratePhysicalDevices() failed";
     }
 
@@ -234,7 +229,6 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
     ffVersionToPretty(&maxDeviceConformanceVersion, &result->conformanceVersion);
 
     ffvkDestroyInstance(vkInstance, NULL);
-    dlclose(vulkan);
     return NULL;
 }
 

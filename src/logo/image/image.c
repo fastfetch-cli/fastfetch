@@ -131,14 +131,9 @@ static bool compressBlob(const FFinstance* instance, void** blob, size_t* length
     uLong compressedLength = ffcompressBound(*length);
     void* compressed = malloc(compressedLength);
     if(compressed == NULL)
-    {
-        dlclose(zlib);
         return false;
-    }
 
-    int compressResult = ffcompress2(compressed, &compressedLength, *blob, *length, Z_BEST_COMPRESSION);
-    dlclose(zlib);
-    if(compressResult != Z_OK)
+    if(ffcompress2(compressed, &compressedLength, *blob, *length, Z_BEST_COMPRESSION) != Z_OK)
     {
         free(compressed);
         return false;
@@ -336,10 +331,7 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     size_t length;
     void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
     if(!checkAllocationResult(blob, length))
-    {
-        dlclose(chafa);
         return false;
-    }
 
     ChafaSymbolMap* symbolMap = ffchafa_symbol_map_new();
     GError* error = NULL;
@@ -408,7 +400,6 @@ static bool printImageChafa(FFinstance* instance, FFLogoRequestData* requestData
     ffchafa_canvas_unref(canvas);
     ffchafa_canvas_config_unref(canvasConfig);
     ffchafa_symbol_map_unref(symbolMap);
-    dlclose(chafa);
 
     return true;
 }
