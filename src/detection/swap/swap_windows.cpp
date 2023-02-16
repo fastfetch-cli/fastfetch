@@ -23,7 +23,7 @@ void ffDetectSwap(FFMemoryStorage* swap)
         {
             if(!(pstart = (SYSTEM_PAGEFILE_INFORMATION*)realloc(pstart, size)))
             {
-                ffStrbufAppendF(&swap->error, "relloc(pstart, %lu) failed", size);
+                ffStrbufAppendF(&swap->error, "realloc(pstart, %lu) failed", size);
                 return;
             }
         }
