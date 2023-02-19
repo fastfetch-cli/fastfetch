@@ -4,16 +4,22 @@
 #include "common/processing.h"
 #include "common/properties.h"
 
+#define FF_TERMUX_API_PATH FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api"
+#define FF_TERMUX_API_PARAM "BatteryStatus"
+
 const char* ffDetectBatteryImpl(FF_MAYBE_UNUSED FFinstance* instance, FFlist* results)
 {
     FF_STRBUF_AUTO_DESTROY buffer;
     ffStrbufInit(&buffer);
 
     if(ffProcessAppendStdOut(&buffer, (char* const[]){
-        FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api",
-        "BatteryStatus"
+        FF_TERMUX_API_PATH,
+        FF_TERMUX_API_PARAM
     }))
-        return "Starting `" FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api" " BatteryStatus` failed";
+        return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
+
+    if(buffer.length == 0)
+        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints empty";
 
     BatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
