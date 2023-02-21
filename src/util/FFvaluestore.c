@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-typedef char KeyType[33]; //32 byte key + \0
+typedef char KeyType[32]; //31 byte key + \0
 
 void ffValuestoreInit(FFvaluestore* vs, uint32_t valueSize)
 {
