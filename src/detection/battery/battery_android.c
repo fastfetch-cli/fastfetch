@@ -34,6 +34,17 @@ const char* ffDetectBatteryImpl(FF_MAYBE_UNUSED FFinstance* instance, FFlist* re
         ffStrbufClear(&battery->status);
     }
 
+    if(instance->config.batteryTemp)
+    {
+        if(ffParsePropLines(buffer.chars, "\"temperature\": ", &battery->status))
+        {
+            ffStrbufTrimRight(&battery->status, ',');
+            ffStrbufTrim(&battery->status, '"');
+            battery->temperature = ffStrbufToDouble(&battery->status);
+            ffStrbufClear(&battery->status);
+        }
+    }
+
     if(ffParsePropLines(buffer.chars, "\"status\": ", &battery->status))
     {
         ffStrbufTrimRight(&battery->status, ',');
