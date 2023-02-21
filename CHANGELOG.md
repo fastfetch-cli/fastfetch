@@ -1,3 +1,7 @@
+# 1.10.1
+
+New release for debugging #421
+
 # 1.10.0
 
 Notable Changes:
