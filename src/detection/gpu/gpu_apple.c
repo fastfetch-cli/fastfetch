@@ -60,32 +60,20 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         FFGPUResult* gpu = ffListAdd(gpus);
 
+        gpu->id = 0;
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
 
         ffStrbufInit(&gpu->vendor);
         int vendorId;
         if(!ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId))
         {
-            if(vendorId == 0x106b)
-            {
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
+            const char* vendorStr = ffGetGPUVendorString((unsigned) vendorId);
+            ffStrbufAppendS(&gpu->vendor, vendorStr);
+            if (vendorStr == FF_GPU_VENDOR_NAME_APPLE || vendorStr == FF_GPU_VENDOR_NAME_INTEL)
                 gpu->type = FF_GPU_TYPE_INTEGRATED;
-            }
-            else if(wmemchr((const wchar_t[]) {0x1002, 0x1022}, (wchar_t)vendorId, 2))
-            {
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-                gpu->type = FF_GPU_TYPE_DISCRETE; // Apple never used AMD CPUs
-            }
-            else if(wmemchr((const wchar_t[]) {0x03e7, 0x8086, 0x8087}, (wchar_t)vendorId, 3))
-            {
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-                gpu->type = FF_GPU_TYPE_INTEGRATED;
-            }
-            else if(wmemchr((const wchar_t[]) {0x0955, 0x10de, 0x12d2}, (wchar_t)vendorId, 3))
-            {
-                ffStrbufAppendS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+            else if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA || vendorStr == FF_GPU_VENDOR_NAME_AMD)
                 gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
         }
 
         ffStrbufInit(&gpu->driver);

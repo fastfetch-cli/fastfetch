@@ -1,8 +1,6 @@
 #include "fastfetch.h"
 #include "common/parsing.h"
 #include "common/thread.h"
-#include "detection/qt.h"
-#include "detection/gtk.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/textModifier.h"
 
@@ -115,6 +113,9 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
+    initModuleArg(&instance->config.bluetooth);
+    initModuleArg(&instance->config.sound);
+    initModuleArg(&instance->config.gamepad);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -138,6 +139,7 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.libOpenCL, 0);
     ffStrbufInitA(&instance->config.libcJSON, 0);
     ffStrbufInitA(&instance->config.libfreetype, 0);
+    ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
 
@@ -159,6 +161,10 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowUnknown = false;
     instance->config.diskShowSubvolumes = false;
 
+    instance->config.bluetoothShowDisconnected = false;
+
+    instance->config.soundType = FF_SOUND_TYPE_MAIN;
+
     ffStrbufInitA(&instance->config.batteryDir, 0);
 
     ffStrbufInitA(&instance->config.separatorString, 0);
@@ -166,7 +172,9 @@ static void defaultConfig(FFinstance* instance)
     instance->config.localIpShowIpV4 = true;
     instance->config.localIpShowIpV6 = false;
     instance->config.localIpShowLoop = false;
+    instance->config.localIpV6First = false;
     ffStrbufInit(&instance->config.localIpNamePrefix);
+    instance->config.localIpCompactType = FF_LOCALIP_COMPACT_TYPE_NONE;
 
     instance->config.publicIpTimeout = 0;
     ffStrbufInit(&instance->config.publicIpUrl);
@@ -209,6 +217,8 @@ void ffInitInstance(FFinstance* instance)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
 
 #if !(defined(__APPLE__) || defined(_WIN32))
+
+#include "detection/gtk_qt/gtk_qt.h"
 
 #define FF_DETECT_QT_GTK 1
 
@@ -377,6 +387,9 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.openGL);
     destroyModuleArg(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
+    destroyModuleArg(&instance->config.bluetooth);
+    destroyModuleArg(&instance->config.sound);
+    destroyModuleArg(&instance->config.gamepad);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);
@@ -400,6 +413,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libOpenCL);
     ffStrbufDestroy(&instance->config.libcJSON);
     ffStrbufDestroy(&instance->config.libfreetype);
+    ffStrbufDestroy(&instance->config.libPulse);
     ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
 
@@ -504,6 +518,9 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_FREETYPE
             "freetype\n"
+        #endif
+        #ifdef FF_HAVE_PULSE
+            "libpulse\n"
         #endif
         #ifdef FF_HAVE_LIBNM
             "libnm\n"

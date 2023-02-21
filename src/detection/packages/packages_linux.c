@@ -1,5 +1,5 @@
 #include "packages.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
 #include "common/properties.h"
@@ -88,7 +88,7 @@ static uint32_t countFilesRecursiveImpl(FFstrbuf* baseDirPath, const char* filen
 
     ffStrbufAppendC(baseDirPath, '/');
     ffStrbufAppendS(baseDirPath, filename);
-    bool exists = ffFileExists(baseDirPath->chars, S_IFREG);
+    bool exists = ffPathExists(baseDirPath->chars, FF_PATHTYPE_FILE);
     ffStrbufSubstrBefore(baseDirPath, baseDirPathLength);
     if(exists)
         return 1;
@@ -129,7 +129,7 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDir, const char* dirname, cons
 static uint32_t getNixPackagesImpl(char* path)
 {
     //Nix detection is kinda slow, so we only do it if the dir exists
-    if(!ffFileExists(path, S_IFDIR))
+    if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
         return 0;
 
     FFstrbuf output;
@@ -229,23 +229,16 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
     ffrpmlogSetMask(RPMLOG_MASK(RPMLOG_EMERG));
 
     if(ffrpmReadConfigFiles(NULL, NULL) != 0)
-    {
-        dlclose(rpm);
         return 0;
-    }
 
     rpmts ts = ffrpmtsCreate();
     if(ts == NULL)
-    {
-        dlclose(rpm);
         return 0;
-    }
 
     rpmdbMatchIterator mi = ffrpmtsInitIterator(ts, RPMDBI_LABEL, NULL, 0);
     if(mi == NULL)
     {
         ffrpmtsFree(ts);
-        dlclose(rpm);
         return 0;
     }
 
@@ -253,7 +246,6 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 
     ffrpmdbFreeIterator(mi);
     ffrpmtsFree(ts);
-    dlclose(rpm);
 
     return count > 0 ? (uint32_t) count : 0;
 }

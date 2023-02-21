@@ -5,8 +5,7 @@
 
 #include "fastfetch.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include <winreg.h>
 
 static inline void wrapRegCloseKey(HKEY* phKey)
 {
@@ -19,5 +18,6 @@ static inline void wrapRegCloseKey(HKEY* phKey)
 bool ffRegOpenKeyForRead(HKEY hKey, const wchar_t* subKeyW, HKEY* result, FFstrbuf* error);
 bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFstrbuf* error);
 bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error);
+bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFstrbuf* error);
 
 #endif

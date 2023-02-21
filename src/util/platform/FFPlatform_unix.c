@@ -1,5 +1,5 @@
 #include "FFPlatform_private.h"
-
+#include "util/stringUtils.h"
 #include "fastfetch_config.h"
 
 #include <unistd.h>
@@ -8,10 +8,7 @@
 
 static void getHomeDir(FFPlatform* platform, const struct passwd* pwd)
 {
-    const char* home = getenv("HOME");
-    if(!ffStrSet(home) && pwd)
-        home = pwd->pw_dir;
-
+    const char* home = pwd ? pwd->pw_dir : getenv("HOME");
     ffStrbufAppendS(&platform->homeDir, home);
     ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
 }
@@ -29,8 +26,6 @@ static void getCacheDir(FFPlatform* platform)
         ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
         ffStrbufAppendS(&platform->cacheDir, ".cache/");
     }
-
-    ffStrbufAppendS(&platform->cacheDir, "fastfetch/");
 }
 
 static void getConfigDirs(FFPlatform* platform)
@@ -46,11 +41,11 @@ static void getConfigDirs(FFPlatform* platform)
     ffPlatformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
 
     #if !defined(__APPLE__)
-        ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC"/xdg/");
+        ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC "/xdg/");
     #endif
 
-    ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC"/");
-    ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF"/");
+    ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC "/");
+    ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF "/");
 }
 
 static void getDataDirs(FFPlatform* platform)
@@ -59,13 +54,13 @@ static void getDataDirs(FFPlatform* platform)
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
 
     #if defined(__APPLE__)
-        ffPlatformPathAddHome(&platform->dataDirs, platform, "/Library/Application Support/");
+        ffPlatformPathAddHome(&platform->dataDirs, platform, "Library/Application Support/");
     #endif
 
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
     ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
-    ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR"/local/share/");
-    ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR"/share/");
+    ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/local/share/");
+    ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/share/");
 }
 
 static void getUserName(FFPlatform* platform, const struct passwd* pwd)

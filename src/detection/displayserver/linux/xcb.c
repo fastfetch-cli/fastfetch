@@ -62,7 +62,7 @@ static void* xcbGetProperty(XcbPropertyData* data, xcb_connection_t* connection,
 
 static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connection, xcb_window_t rootWindow, FFDisplayServerResult* result)
 {
-    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND) == 0)
+    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
         return;
 
     xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, connection, rootWindow, "_NET_SUPPORTING_WM_CHECK");
@@ -103,10 +103,7 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
 
     xcb_connection_t* connection = ffxcb_connect(NULL, NULL);
     if(connection == NULL)
-    {
-        dlclose(xcb);
         return;
-    }
 
     xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(connection));
 
@@ -120,18 +117,17 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
             (uint32_t) iterator.data->width_in_pixels,
             (uint32_t) iterator.data->height_in_pixels,
             0,
-            0,
-            0
+            (uint32_t) iterator.data->width_in_pixels,
+            (uint32_t) iterator.data->height_in_pixels
         );
         ffxcb_screen_next(&iterator);
     }
 
     ffxcb_disconnect(connection);
-    dlclose(xcb);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
 }
 
 #else
@@ -187,8 +183,8 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
         refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
-        0,
-        0
+        (uint32_t) modeInfo->width,
+        (uint32_t) modeInfo->height
     );
 }
 
@@ -224,8 +220,8 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
         data->defaultRefreshRate,
-        0,
-        0
+        (uint32_t) crtcInfoReply->width,
+        (uint32_t) crtcInfoReply->height
     );
 
     free(crtcInfoReply);
@@ -269,8 +265,8 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
         data->defaultRefreshRate,
-        0,
-        0
+        (uint32_t) monitor->width,
+        (uint32_t) monitor->height
     );
 }
 
@@ -329,8 +325,8 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,
         data->defaultRefreshRate,
-        0,
-        0
+        (uint32_t) screen->width_in_pixels,
+        (uint32_t) screen->height_in_pixels
     );
 }
 
@@ -368,10 +364,7 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
 
     data.connection = ffxcb_connect(NULL, NULL);
     if(data.connection == NULL)
-    {
-        dlclose(xcbRandr);
         return;
-    }
 
     data.result = result;
 
@@ -387,11 +380,10 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
     }
 
     ffxcb_disconnect(data.connection);
-    dlclose(xcbRandr);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
 }
 
 #else

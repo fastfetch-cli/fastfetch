@@ -2,6 +2,7 @@
 
 static inline void ffWrapFree(void* pPtr)
 {
+    assert(pPtr);
     if(*(void**)pPtr)
         free(*(void**)pPtr);
 }

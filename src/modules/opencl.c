@@ -7,13 +7,14 @@
 #if defined(FF_HAVE_OPENCL) || defined(__APPLE__)
 #include "common/library.h"
 #include "common/parsing.h"
+#include "util/stringUtils.h"
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100
-#ifdef __APPLE__
-    #include <OpenCL/cl.h>
-#else
+#ifdef FF_HAVE_OPENCL
     #include <CL/cl.h>
+#else
+    #include <OpenCL/cl.h>
 #endif
 
 typedef struct OpenCLData
@@ -23,7 +24,7 @@ typedef struct OpenCLData
     FF_LIBRARY_SYMBOL(clGetDeviceInfo)
 } OpenCLData;
 
-static const char* openCLHandelData(FFinstance* instance, OpenCLData* data)
+static const char* openCLHandleData(FFinstance* instance, OpenCLData* data)
 {
     cl_platform_id platformID;
     cl_uint numPlatforms;
@@ -83,17 +84,20 @@ static const char* printOpenCL(FFinstance* instance)
 {
     OpenCLData data;
 
-    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed", "libOpenCL"FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
+    #ifdef _WIN32
+        "OpenCL"FF_LIBRARY_EXTENSION, -1,
+    #endif
+        "libOpenCL"FF_LIBRARY_EXTENSION, 1
+    );
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
 
-    const char* error = openCLHandelData(instance, &data);
-    dlclose(opencl);
-    return error;
+    return openCLHandleData(instance, &data);
 }
 
-#elif __APPLE__ // FF_HAVE_OPENCL
+#elif defined(__APPLE__) // FF_HAVE_OPENCL
 
 static const char* printOpenCL(FFinstance* instance)
 {
@@ -102,10 +106,10 @@ static const char* printOpenCL(FFinstance* instance)
     data.ffclGetDeviceIDs = clGetDeviceIDs;
     data.ffclGetDeviceInfo = clGetDeviceInfo;
 
-    return openCLHandelData(instance, &data);
+    return openCLHandleData(instance, &data);
 }
 
-#endif // __APPLE__
+#endif // FF_HAVE_OPENCL
 
 void ffPrintOpenCL(FFinstance* instance)
 {

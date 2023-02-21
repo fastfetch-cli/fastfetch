@@ -1,5 +1,6 @@
 #include "packages.h"
 #include "common/parsing.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 

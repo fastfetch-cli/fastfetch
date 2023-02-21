@@ -21,15 +21,10 @@ FFLogoImageResult ffLogoPrintImageIM7(FFinstance* instance, FFLogoRequestData* r
     )
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
 
-    FFIMData imData;
-    imData.resizeFunc = logoResize;
-    imData.library = imageMagick;
-
-    FFLogoImageResult result = ffLogoPrintImageImpl(instance, requestData, &imData);
-
-    dlclose(imageMagick);
-
-    return result;
+    return ffLogoPrintImageImpl(instance, requestData, &(FFIMData) {
+        .resizeFunc = logoResize,
+        .library = imageMagick,
+    });
 }
 
 #endif

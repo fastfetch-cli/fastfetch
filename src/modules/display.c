@@ -3,7 +3,7 @@
 #include "detection/displayserver/displayserver.h"
 
 #define FF_RESOLUTION_MODULE_NAME "Display"
-#define FF_RESOLUTION_NUM_FORMAT_ARGS 3
+#define FF_RESOLUTION_NUM_FORMAT_ARGS 5
 
 void ffPrintDisplay(FFinstance* instance)
 {

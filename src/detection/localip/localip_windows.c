@@ -77,7 +77,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, false);
+                addNewIp(results, name, addressBuffer, true);
             }
         }
     }

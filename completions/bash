@@ -42,6 +42,7 @@ __fastfetch_complete_help()
         "vulkan-format"
         "opengl-format"
         "opencl-format"
+        "bluetooth-format"
     )
     COMPREPLY=($(compgen -W "${__ff_helps[*]}" -- "$CURRENT_WORD"))
 }
@@ -185,6 +186,7 @@ __fastfetch_completion()
         "--localip-show-ipv6"
         "--localip-show-loop"
         "--localip-name-prefix"
+        "--localip-compact-type"
         "--escape-bedrock"
         "--pipe"
         "--title-fqdn"
@@ -198,6 +200,7 @@ __fastfetch_completion()
         "--gpu-hide-integrated"
         "--gpu-hide-discrete"
         "--disk-show-unknown"
+        "--bluetooth-show-disconnected"
     )
 
     local FF_OPTIONS_STRING=(
@@ -349,6 +352,9 @@ __fastfetch_completion()
         "--users-key"
         "--users-format"
         "--users-error"
+        "--bluetooth-key"
+        "--bluetooth-format"
+        "--bluetooth-error"
     )
 
     local FF_OPTIONS_PATH=(
@@ -374,6 +380,7 @@ __fastfetch_completion()
         "--lib-glx"
         "--lib-osmesa"
         "--lib-opencl"
+        "--lib-pulse"
         "--battery-dir"
     )
 

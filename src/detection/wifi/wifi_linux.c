@@ -13,6 +13,12 @@
 #define NM_NO_INCLUDE_EXTRA_HEADERS 1
 #include <NetworkManager.h>
 
+//https://developer-old.gnome.org/libnm/stable/libnm-nm-dbus-interface.html
+#ifndef NM_VERSION_1_26
+    #define NM_802_11_AP_SEC_KEY_MGMT_OWE 0x00000800
+    #define NM_802_11_AP_SEC_KEY_MGMT_OWE_TM 0x00001000
+#endif
+
 static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* result)
 {
     FF_LIBRARY_LOAD(nm, &instance->config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
@@ -39,10 +45,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
     NMClient* client = ffnm_client_new(NULL, NULL);
     if(!client)
-    {
-        dlclose(nm);
         return "Could not create NMClient";
-    }
 
     /* Get all devices managed by NetworkManager */
     const GPtrArray* devices = ffnm_client_get_devices(client);
@@ -193,14 +196,13 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
     }
 
     ffg_object_unref(client);
-    dlclose(nm);
 
     return NULL;
 }
 
 #endif
 
-#include "common/io.h"
+#include "common/io/io.h"
 
 #include <net/if.h>
 #include <linux/wireless.h>
@@ -219,7 +221,7 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
     for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
     {
         ffStrbufSetF(&path, "/sys/class/net/%s/phy80211", i->if_name);
-        if(!ffFileExists(path.chars, S_IFDIR))
+        if(!ffPathExists(path.chars, FF_PATHTYPE_DIRECTORY))
             continue;
 
         FFWifiResult* item = (FFWifiResult*)ffListAdd(result);

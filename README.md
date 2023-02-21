@@ -45,7 +45,7 @@ The following libraries are used if present at runtime:
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel or kitty graphics protocol.
 * [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art.
 * [`libZ`](https://www.zlib.net/): Faster image output when using kitty graphics protocol.
-* [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Needed for detecting current media player and song.
+* [`libDBus`](https://www.freedesktop.org/wiki/Software/dbus): Bluetooth, Player & Media detection.
 * [`libEGL`](https://www.khronos.org/registry/EGL/),
     [`libGLX`](https://dri.freedesktop.org/wiki/GLX/),
     [`libOSMesa`](https://docs.mesa3d.org/osmesa.html): At least one of them is needed by the OpenGL module for gl context creation.
@@ -54,7 +54,8 @@ The following libraries are used if present at runtime:
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
 * [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
-* [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection on Linux.
+* [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection.
+* [`libpulse`](https://freedesktop.org/software/pulseaudio/doxygen/): Used for Sound detection.
 
 ### macOS
 
@@ -88,7 +89,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Battery, Bios, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator OS, Shell, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
+Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, Gamepad, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator, OS, Shell, Sound, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wifi, WM, WMTheme
 ```
 
 ##### Builtin logos
@@ -113,7 +114,7 @@ Budgie, Cinnamon, Gnome, KDE Plasma, LXQt, Mate, XFCE4
 
 ##### Terminal fonts
 ```
-Alacritty, Apple Terminal, ConEmu, Deepin Terminal, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, mintty, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
+Alacritty, Apple Terminal, ConEmu, Deepin Terminal, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, mintty, Terminator, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
 ```
 
 ## Building

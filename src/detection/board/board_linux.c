@@ -1,5 +1,5 @@
 #include "board.h"
-#include "common/io.h"
+#include "common/io/io.h"
 
 #include <stdlib.h>
 

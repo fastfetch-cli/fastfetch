@@ -7,29 +7,41 @@
 
 #define FF_GPU_TEMP_UNSET (0/0.0)
 #define FF_GPU_CORE_COUNT_UNSET -1
+#define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
 
-#define FF_GPU_VENDOR_NAME_APPLE "Apple"
-#define FF_GPU_VENDOR_NAME_AMD "AMD"
-#define FF_GPU_VENDOR_NAME_INTEL "Intel"
-#define FF_GPU_VENDOR_NAME_NVIDIA "NVIDIA"
+extern const char* FF_GPU_VENDOR_NAME_APPLE;
+extern const char* FF_GPU_VENDOR_NAME_AMD;
+extern const char* FF_GPU_VENDOR_NAME_INTEL;
+extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
 
 typedef enum FFGpuType
 {
+    FF_GPU_TYPE_UNKNOWN,
     FF_GPU_TYPE_INTEGRATED,
     FF_GPU_TYPE_DISCRETE,
-    FF_GPU_TYPE_UNKNOWN
 } FFGpuType;
+
+typedef struct FFGPUMemory
+{
+    uint64_t total;
+    uint64_t used;
+} FFGPUMemory;
 
 typedef struct FFGPUResult
 {
+    uint64_t id;
     FFGpuType type;
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
     double temperature;
     int coreCount;
+    FFGPUMemory dedicated;
+    FFGPUMemory shared;
 } FFGPUResult;
 
 const FFlist* ffDetectGPU(const FFinstance* instance);
+
+const char* ffGetGPUVendorString(unsigned vendorId);
 
 #endif

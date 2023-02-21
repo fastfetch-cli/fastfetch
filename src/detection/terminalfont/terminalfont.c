@@ -115,15 +115,15 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     CJSONData cjsonData;
 
     FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson"FF_LIBRARY_EXTENSION" failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Parse)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsObject)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsString)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetStringValue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsNumber)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_GetNumberValue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_IsArray)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libcjson, cjsonData, cJSON_Delete)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Parse, cJSON_Parse@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsObject, cJSON_IsObject@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive, cJSON_GetObjectItemCaseSensitive@8)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsString, cJSON_IsString@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetStringValue, cJSON_GetStringValue@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsNumber, cJSON_IsNumber@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetNumberValue, cJSON_GetNumberValue@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsArray, cJSON_IsArray@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Delete, cJSON_Delete@4)
 
     const char* error = NULL;
 
@@ -177,12 +177,11 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
 
 exit:
     cjsonData.ffcJSON_Delete(root);
-    dlclose(libcjson);
     return error;
 }
 
 #ifdef _WIN32
-    #include "common/io.h"
+    #include "common/io/io.h"
 
     #include <shlobj.h>
 #endif
@@ -285,7 +284,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     FF_UNUSED(instance, terminalExe, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "fastfetch is built without libcjson support");
+    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without libcjson support");
 }
 
 #endif
@@ -318,6 +317,37 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
     ffStrbufDestroy(&fontSize);
 
     return true;
+}
+
+static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
+{
+    FF_STRBUF_AUTO_DESTROY useSystemFont;
+    ffStrbufInit(&useSystemFont);
+
+    FF_STRBUF_AUTO_DESTROY fontName;
+    ffStrbufInit(&fontName);
+
+    FFpropquery fontQuery[] = {
+        {"use_system_font =", &useSystemFont},
+        {"font =", &fontName},
+    };
+
+    if(!ffParsePropFileConfigValues(instance, "terminator/config", 2, fontQuery))
+    {
+        ffStrbufAppendS(&result->error, "Couldn't read Terminator config file");
+        return;
+    }
+
+    if(ffStrbufIgnCaseEqualS(&useSystemFont, "True"))
+    {
+        ffFontInitCopy(&result->font, "System");
+        return;
+    }
+
+    if(fontName.length == 0)
+        ffFontInitValues(&result->font, "mono", "8");
+    else
+        ffFontInitPango(&result->font, fontName.chars);
 }
 
 static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
@@ -354,6 +384,8 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
 {
     if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "alacritty"))
         detectAlacritty(instance, terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "terminator"))
+        detectTerminator(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
         detectWezterm(instance, terminalFont);
 
@@ -385,7 +417,7 @@ const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
         const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
 
         if(terminalShell->terminalProcessName.length == 0)
-            ffStrbufAppendS(&result.error, "Terminal font needs successfull terminal detection");
+            ffStrbufAppendS(&result.error, "Terminal font needs successful terminal detection");
 
         else if(!detectTerminalFontCommon(instance, terminalShell, &result))
             ffDetectTerminalFontPlatform(instance, terminalShell, &result);

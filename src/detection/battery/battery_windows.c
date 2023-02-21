@@ -8,6 +8,19 @@
 #include <winternl.h>
 #include <powrprof.h>
 
+#ifdef FF_USE_WIN_NTAPI
+    NTSYSCALLAPI
+    NTSTATUS
+    NTAPI
+    NtPowerInformation(
+        IN POWER_INFORMATION_LEVEL InformationLevel,
+        IN PVOID InputBuffer OPTIONAL,
+        IN ULONG InputBufferLength,
+        OUT PVOID OutputBuffer OPTIONAL,
+        IN ULONG OutputBufferLength);
+    #define CallNtPowerInformation NtPowerInformation
+#endif
+
 static inline void wrapCloseHandle(HANDLE* handle)
 {
     if(*handle)

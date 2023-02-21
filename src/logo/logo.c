@@ -1,5 +1,5 @@
 #include "logo.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/printing.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
@@ -280,15 +280,19 @@ static inline void logoPrintDetected(FFinstance* instance)
     logoPrintStruct(instance, logoGetBuiltinDetected(instance));
 }
 
-static void logoPrintData(FFinstance* instance, bool doColorReplacement) {
+static bool logoPrintData(FFinstance* instance, bool doColorReplacement) {
+    if(instance->config.logo.source.length == 0)
+        return false;
+
     ffLogoPrintChars(instance, instance->config.logo.source.chars, doColorReplacement);
     logoApplyColorsDetected(instance);
+    return true;
 }
 
-static bool loadLogoFile(const FFinstance* instance, FFstrbuf* buffer)
+static void updateLogoPath(FFinstance* instance)
 {
-    if(ffAppendFileBuffer(instance->config.logo.source.chars, buffer))
-        return true;
+    if(ffPathExists(instance->config.logo.source.chars, FF_PATHTYPE_FILE))
+        return;
 
     FFstrbuf fullPath;
     ffStrbufInit(&fullPath);
@@ -300,15 +304,14 @@ static bool loadLogoFile(const FFinstance* instance, FFstrbuf* buffer)
         ffStrbufAppendS(&fullPath, "fastfetch/logos/");
         ffStrbufAppend(&fullPath, &instance->config.logo.source);
 
-        if(ffAppendFileBuffer(fullPath.chars, buffer))
+        if(ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
         {
-            ffStrbufDestroy(&fullPath);
-            return true;
+            ffStrbufSet(&instance->config.logo.source, &fullPath);
+            break;
         }
     }
 
     ffStrbufDestroy(&fullPath);
-    return false;
 }
 
 static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement, bool raw)
@@ -316,7 +319,7 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement,
     FFstrbuf content;
     ffStrbufInit(&content);
 
-    if(!loadLogoFile(instance, &content))
+    if(!ffAppendFileBuffer(instance->config.logo.source.chars, &content))
     {
         ffStrbufDestroy(&content);
         fputs("Logo: Failed to load file content from logo source\n", stderr);
@@ -332,45 +335,57 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement,
     return true;
 }
 
-static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo)
+static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo, bool printError)
 {
-    if(!ffLogoPrintImageIfExists(instance, logo))
+    if(!ffLogoPrintImageIfExists(instance, logo, printError))
         return false;
 
     logoApplyColorsDetected(instance);
     return true;
 }
 
-static void logoPrintKnownType(FFinstance* instance)
+static bool logoTryKnownType(FFinstance* instance)
 {
-    bool successfull = true;
+    if(instance->config.logo.type == FF_LOGO_TYPE_NONE)
+    {
+        logoApplyColorsDetected(instance);
+        return true;
+    }
 
     if(instance->config.logo.type == FF_LOGO_TYPE_BUILTIN)
-        successfull = logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars);
-    else if(instance->config.logo.type == FF_LOGO_TYPE_FILE)
-        successfull = logoPrintFileIfExists(instance, true, false);
-    else if(instance->config.logo.type == FF_LOGO_TYPE_FILE_RAW)
-        successfull = logoPrintFileIfExists(instance, false, false);
-    else if(instance->config.logo.type == FF_LOGO_TYPE_DATA)
-        logoPrintData(instance, true);
-    else if(instance->config.logo.type == FF_LOGO_TYPE_DATA_RAW)
-        logoPrintData(instance, false);
-    else if(instance->config.logo.type == FF_LOGO_TYPE_IMAGE_RAW)
+        return logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars);
+
+    if(instance->config.logo.type == FF_LOGO_TYPE_DATA)
+        return logoPrintData(instance, true);
+
+    if(instance->config.logo.type == FF_LOGO_TYPE_DATA_RAW)
+        return logoPrintData(instance, false);
+
+    updateLogoPath(instance); //We sure have a file, resolve relative paths
+
+    if(instance->config.logo.type == FF_LOGO_TYPE_FILE)
+        return logoPrintFileIfExists(instance, true, false);
+
+    if(instance->config.logo.type == FF_LOGO_TYPE_FILE_RAW)
+        return logoPrintFileIfExists(instance, false, false);
+
+    if(instance->config.logo.type == FF_LOGO_TYPE_IMAGE_RAW)
     {
         if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
         {
             fputs("both `--logo-width` and `--logo-height` must be specified\n", stderr);
-            successfull = false;
+            return false;
         }
-        else
-            successfull = logoPrintFileIfExists(instance, false, true);
-    }
-    else if(instance->config.logo.type == FF_LOGO_TYPE_NONE)
-        logoApplyColorsDetected(instance);
-    else //image
-        successfull = logoPrintImageIfExists(instance, instance->config.logo.type);
 
-    if(!successfull)
+        return logoPrintFileIfExists(instance, false, true);
+    }
+
+    return logoPrintImageIfExists(instance, instance->config.logo.type, true);
+}
+
+static void logoPrintKnownType(FFinstance* instance)
+{
+    if(!logoTryKnownType(instance))
         logoPrintDetected(instance);
 }
 
@@ -404,6 +419,9 @@ void ffLogoPrint(FFinstance* instance)
     if(logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars))
         return;
 
+    //Make sure the logo path is set correctly.
+    updateLogoPath(instance);
+
     const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
 
     //Terminal emulators that support kitty graphics protocol.
@@ -414,7 +432,7 @@ void ffLogoPrint(FFinstance* instance)
         ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wayst") == 0;
 
     //Try to load the logo as an image. If it succeeds, print it and return.
-    if(logoPrintImageIfExists(instance, supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA))
+    if(logoPrintImageIfExists(instance, supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
         return;
 
     //Try to load the logo as a file. If it succeeds, print it and return.

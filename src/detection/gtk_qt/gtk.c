@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "detection/gtk.h"
+#include "detection/gtk_qt/gtk_qt.h"
 #include "common/properties.h"
 #include "common/thread.h"
 #include "common/settings.h"
@@ -56,7 +56,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Xfce") == 0 || ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Xfce4") == 0)
+    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_XFCE4) == 0)
     {
         themeName = ffSettingsGetXFConf(instance, "xsettings", "/Net/ThemeName", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGetXFConf(instance, "xsettings", "/Net/IconThemeName", FF_VARIANT_TYPE_STRING).strValue;
@@ -64,7 +64,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorTheme = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeName", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
     }
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_CINNAMON) == 0)
     {
         themeName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/gtk-theme", "org.cinnamon.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/icon-theme", "org.cinnamon.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
@@ -72,7 +72,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorTheme = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/cursor-theme", "org.cinnamon.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/cursor-size", "org.cinnamon.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
     }
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Mate") == 0)
+    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_MATE) == 0)
     {
         themeName = ffSettingsGet(instance, "/org/mate/interface/gtk-theme", "org.mate.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGet(instance, "/org/mate/interface/icon-theme", "org.mate.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
@@ -81,9 +81,9 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorSize = ffSettingsGet(instance, "/org/mate/peripherals-mouse/cursor-size", "org.mate.peripherals-mouse", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
     }
     else if(
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Gnome") == 0 ||
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Unity") == 0 ||
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Budgie") == 0
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME) == 0 ||
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_UNITY) == 0 ||
+        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_BUDGIE) == 0
     ) {
         themeName = ffSettingsGet(instance, "/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGet(instance, "/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;

@@ -1,8 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "common/parsing.h"
-#include "detection/qt.h"
-#include "detection/gtk.h"
+#include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 
 #define FF_ICONS_MODULE_NAME "Icons"
@@ -20,7 +19,7 @@ void ffPrintIcons(FFinstance* instance)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, "TTY") == 0)
+    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
     {
         ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &instance->config.icons, "Icons aren't supported in TTY");
         return;

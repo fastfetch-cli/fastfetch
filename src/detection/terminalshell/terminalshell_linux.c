@@ -1,9 +1,9 @@
-#include "fastfetch.h"
-#include "common/io.h"
+#include "terminalshell.h"
+#include "common/io/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
 #include "common/thread.h"
-#include "terminalshell.h"
+#include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -53,7 +53,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     size_t size = exe->allocated;
     if(!sysctl(
         (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
-       exe->chars, &size,
+        exe->chars, &size,
         NULL, 0
     ))
         exe->length = (uint32_t)size;
@@ -162,6 +162,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
     ) {
         if (result->shellProcessName.length == 0)
         {
+            result->shellPid = (uint32_t) pid;
             ffStrbufSetS(&result->shellProcessName, name);
             getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
         }
@@ -170,6 +171,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         return;
     }
 
+    result->terminalPid = (uint32_t) pid;
     ffStrbufSetS(&result->terminalProcessName, name);
     getProcessInformation(pid, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);
 }
@@ -336,10 +338,12 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     ffStrbufInitA(&result.shellExe, exePathLen);
     result.shellExeName = result.shellExe.chars;
     ffStrbufInit(&result.shellVersion);
+    result.shellPid = 0;
 
     ffStrbufInit(&result.terminalProcessName);
     ffStrbufInitA(&result.terminalExe, exePathLen);
     result.terminalExeName = result.terminalExe.chars;
+    result.terminalPid = 0;
 
     ffStrbufInit(&result.userShellExe);
     result.userShellExeName = result.userShellExe.chars;

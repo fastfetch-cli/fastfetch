@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
-#include "detection/vulkan.h"
+#include "detection/vulkan/vulkan.h"
 
 #define FF_VULKAN_MODULE_NAME "Vulkan"
 #define FF_VULKAN_NUM_FORMAT_ARGS 3

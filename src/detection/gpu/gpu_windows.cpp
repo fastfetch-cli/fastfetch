@@ -1,12 +1,89 @@
 extern "C" {
 #include "gpu.h"
 #include "util/windows/unicode.h"
+#include "util/windows/registry.h"
 }
-
-#ifdef FF_USE_WIN_GPU_DXGI
+#include "util/windows/wmi.hpp"
 
 #include <dxgi.h>
 #include <wchar.h>
+#include <inttypes.h>
+
+static const char* detectWithRegistry(FFlist* gpus)
+{
+    // Ref: https://github.com/lptstr/winfetch/pull/155
+
+    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\DirectX", &hKey, nullptr))
+        return "Open \"HKLM\\SOFTWARE\\Microsoft\\DirectX\" failed";
+
+    uint64_t lastSeen;
+    if(!ffRegReadUint64(hKey, L"LastSeen", &lastSeen, nullptr))
+        return "Read \"HKLM\\SOFTWARE\\Microsoft\\DirectX\\LastSeen\" failed";
+
+    DWORD index = 0;
+    wchar_t subKeyName[64];
+    while(true)
+    {
+        DWORD subKeySize = sizeof(subKeyName) / sizeof(*subKeyName);
+        if(RegEnumKeyExW(hKey, index++, subKeyName, &subKeySize, nullptr, nullptr, nullptr, nullptr) != ERROR_SUCCESS)
+            break;
+
+        FF_HKEY_AUTO_DESTROY hSubKey = NULL;
+        if(!ffRegOpenKeyForRead(hKey, subKeyName, &hSubKey, nullptr))
+            continue;
+
+        uint64_t adapterLastSeen;
+        if(!ffRegReadUint64(hSubKey, L"LastSeen", &adapterLastSeen, nullptr) || lastSeen != adapterLastSeen)
+            continue;
+
+        uint32_t softwareAdapter;
+        if(!ffRegReadUint(hSubKey, L"SoftwareAdapter", &softwareAdapter, nullptr) || softwareAdapter)
+            continue;
+
+        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+        ffStrbufInit(&gpu->vendor);
+        ffStrbufInit(&gpu->name);
+        ffStrbufInit(&gpu->driver);
+        gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+        gpu->id = 0;
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+
+        ffRegReadUint64(hSubKey, L"AdapterLuid", &gpu->id, nullptr);
+
+        ffRegReadStrbuf(hSubKey, L"Description", &gpu->name, nullptr);
+
+        uint32_t vendorId;
+        if(ffRegReadUint(hSubKey, L"VendorId", &vendorId, nullptr))
+            ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(vendorId));
+
+        uint64_t dedicatedVideoMemory = 0;
+        if(ffRegReadUint64(hSubKey, L"DedicatedVideoMemory", &dedicatedVideoMemory, nullptr))
+            gpu->type = dedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+
+        uint64_t dedicatedSystemMemory, sharedSystemMemory;
+        if(ffRegReadUint64(hSubKey, L"DedicatedSystemMemory", &dedicatedSystemMemory, nullptr) &&
+           ffRegReadUint64(hSubKey, L"SharedSystemMemory", &sharedSystemMemory, nullptr))
+        {
+            gpu->dedicated.total = dedicatedVideoMemory + dedicatedSystemMemory;
+            gpu->shared.total = sharedSystemMemory;
+        }
+
+        uint64_t driverVersion;
+        if(ffRegReadUint64(hSubKey, L"DriverVersion", &driverVersion, nullptr))
+        {
+            ffStrbufSetF(&gpu->driver, "%" PRIu64 ".%" PRIu64 ".%" PRIu64 ".%" PRIu64,
+                (driverVersion >> 48) & 0xFFFF,
+                (driverVersion >> 32) & 0xFFFF,
+                (driverVersion >> 16) & 0xFFFF,
+                (driverVersion >>  0) & 0xFFFF);
+        }
+    }
+
+    return nullptr;
+}
 
 static const char* detectWithDxgi(FFlist* gpus)
 {
@@ -25,15 +102,12 @@ static const char* detectWithDxgi(FFlist* gpus)
             continue;
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+        gpu->dedicated.total = gpu->dedicated.total = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
-        if(wmemchr((const wchar_t[]) {0x1002, 0x1022}, (wchar_t)desc.VendorId, 2))
-            ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-        else if(wmemchr((const wchar_t[]) {0x03e7, 0x8086, 0x8087}, (wchar_t)desc.VendorId, 3))
-            ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-        else if(wmemchr((const wchar_t[]) {0x0955, 0x10de, 0x12d2}, (wchar_t)desc.VendorId, 3))
-            ffStrbufInitS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
-        else
-            ffStrbufInit(&gpu->vendor);
+        ffStrbufInit(&gpu->vendor);
+        ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(desc.VendorId));
+
+        gpu->id = (uint64_t&)desc.AdapterLuid;
 
         ffStrbufInit(&gpu->name);
         ffStrbufSetWS(&gpu->name, desc.Description);
@@ -41,6 +115,8 @@ static const char* detectWithDxgi(FFlist* gpus)
         ffStrbufInit(&gpu->driver);
 
         gpu->type = desc.DedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        gpu->dedicated.total = desc.DedicatedVideoMemory + desc.DedicatedSystemMemory;
+        gpu->shared.total = desc.SharedSystemMemory;
 
         adapter->Release();
 
@@ -50,56 +126,47 @@ static const char* detectWithDxgi(FFlist* gpus)
 
     pFactory->Release();
 
-    return NULL;
+    return nullptr;
 }
 
-#else
-
-#include "util/windows/wmi.hpp"
-
-static const char* detectWithWmi(FFlist* gpus)
+static const char* detectMemoryUsage(FFlist* gpus)
 {
-    FFWmiQuery query(L"SELECT Name, AdapterCompatibility, DriverVersion FROM Win32_VideoController", nullptr);
+    FFWmiQuery query(L"SELECT Name, DedicatedUsage, SharedUsage FROM Win32_PerfRawData_GPUPerformanceCounters_GPUAdapterMemory", nullptr);
     if(!query)
         return "Query WMI service failed";
 
+    FF_STRBUF_AUTO_DESTROY name;
+    ffStrbufInit(&name);
+
     while(FFWmiRecord record = query.next())
     {
-        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+        record.getString(L"Name", &name); // luid_0x00000000_0x000146E8_phys_0
+        assert(name.length == strlen("luid_0x00000000_0x000146E8_phys_0"));
+        ffStrbufSubstrBefore(&name, strlen("luid_0x00000000_0x000146E8")); // luid_0x00000000_0x000146E8
+        ffStrbufSubstrAfter(&name, strlen("luid_0x00000000_0x") - 1); // 000146E8
+        uint64_t luid = strtoull(name.chars, nullptr, 16);
 
-        gpu->type = FF_GPU_TYPE_UNKNOWN;
-
-        ffStrbufInit(&gpu->vendor);
-        record.getString(L"AdapterCompatibility", &gpu->vendor);
-        if(ffStrbufStartsWithS(&gpu->vendor, "Intel "))
+        FF_LIST_FOR_EACH(FFGPUResult, gpu, *gpus)
         {
-            //Intel returns "Intel Corporation", not sure about AMD
-            ffStrbufSetS(&gpu->vendor, "Intel");
+            if (gpu->id != luid) continue;
+            record.getUnsigned(L"DedicatedUsage", &gpu->dedicated.used);
+            record.getUnsigned(L"SharedUsage", &gpu->shared.used);
+            break;
         }
-
-        ffStrbufInit(&gpu->name);
-        record.getString(L"Name", &gpu->name);
-
-        ffStrbufInit(&gpu->driver);
-        record.getString(L"DriverVersion", &gpu->driver);
-
-        gpu->temperature = FF_GPU_TEMP_UNSET;
-        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     }
 
     return nullptr;
 }
 
-#endif
-
 extern "C"
-const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
 {
-    FF_UNUSED(instance);
+    const char* error = detectWithRegistry(gpus);
+    if (error)
+        error = detectWithDxgi(gpus);
 
-    #ifdef FF_USE_WIN_GPU_DXGI
-    return detectWithDxgi(gpus);
-    #else
-    return detectWithWmi(gpus);
-    #endif
+    if (!error && gpus->length > 0 && instance->config.allowSlowOperations)
+        detectMemoryUsage(gpus);
+
+    return error;
 }

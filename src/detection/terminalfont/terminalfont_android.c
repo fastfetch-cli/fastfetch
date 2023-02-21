@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "terminalfont.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "common/io.h"
+#include "common/io/io.h"
 
 #ifdef FF_HAVE_FREETYPE
     #include "common/library.h"
@@ -42,14 +42,13 @@ const char* detectTermux(const FFinstance* instance, FFTerminalFontResult* termi
 exit:
     if(face) ffFT_Done_Face(face);
     if(library) ffFT_Done_FreeType(library);
-    dlclose(freetype);
 
     return error;
 
     #else
 
     FF_UNUSED(terminalFont);
-    return "fastfetch is built without freetype2 support";
+    return "Fastfetch was built without freetype2 support";
 
     #endif
 }
@@ -62,7 +61,7 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         return;
     }
 
-    if(!ffFileExists(FF_TERMUX_FONT_PATH, S_IFREG))
+    if(!ffPathExists(FF_TERMUX_FONT_PATH, FF_PATHTYPE_FILE))
     {
         ffFontInitCopy(&terminalFont->font, "monospace");
         return;

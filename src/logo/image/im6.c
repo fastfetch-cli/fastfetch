@@ -17,15 +17,10 @@ FFLogoImageResult ffLogoPrintImageIM6(FFinstance* instance, FFLogoRequestData* r
     FF_LIBRARY_LOAD(imageMagick, &instance->config.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR, "libMagickCore-6.Q16HDRI" FF_LIBRARY_EXTENSION, 8, "libMagickCore-6.Q16" FF_LIBRARY_EXTENSION, 8)
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
 
-    FFIMData imData;
-    imData.resizeFunc = logoResize;
-    imData.library = imageMagick;
-
-    FFLogoImageResult result = ffLogoPrintImageImpl(instance, requestData, &imData);
-
-    dlclose(imageMagick);
-
-    return result;
+    return ffLogoPrintImageImpl(instance, requestData, &(FFIMData) {
+        .resizeFunc = logoResize,
+        .library = imageMagick,
+    });
 }
 
 #endif

@@ -1,6 +1,5 @@
-#include "detection/qt.h"
-#include "detection/gtk.h"
 #include "common/font.h"
+#include "detection/gtk_qt/gtk_qt.h"
 #include "font.h"
 
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)

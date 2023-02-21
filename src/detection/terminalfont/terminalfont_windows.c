@@ -1,5 +1,5 @@
 #include "common/properties.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
 #include "util/windows/unicode.h"

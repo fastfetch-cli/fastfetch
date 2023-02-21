@@ -3,16 +3,22 @@
 #include "common/processing.h"
 #include "common/properties.h"
 
+#define FF_TERMUX_API_PATH FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api"
+#define FF_TERMUX_API_PARAM "WifiConnectionInfo"
+
 const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
 {
     FF_STRBUF_AUTO_DESTROY buffer;
     ffStrbufInit(&buffer);
 
     if(ffProcessAppendStdOut(&buffer, (char* const[]){
-        FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api",
+        FF_TERMUX_API_PATH,
         "WifiConnectionInfo"
     }))
-        return "Starting `" FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api" " WifiConnectionInfo` failed";
+        return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
+
+    if(buffer.length == 0)
+        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints empty";
 
     FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
     ffStrbufInit(&item->inf.description);

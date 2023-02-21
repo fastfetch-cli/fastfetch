@@ -1,4 +1,6 @@
 #include "fastfetch.h"
+#include "common/bar.h"
+#include "common/parsing.h"
 #include "common/printing.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
@@ -14,7 +16,7 @@ static void printGPUResult(FFinstance* instance, uint8_t index, const FFGPUResul
     {
         ffPrintLogoAndKey(instance, FF_GPU_MODULE_NAME, index, &instance->config.gpu.key);
 
-        FFstrbuf output;
+        FF_STRBUF_AUTO_DESTROY output;
         ffStrbufInitA(&output, gpu->vendor.length + 1 + gpu->name.length);
 
         if(gpu->vendor.length > 0 && !ffStrbufStartsWith(&gpu->name, &gpu->vendor))
@@ -31,9 +33,25 @@ static void printGPUResult(FFinstance* instance, uint8_t index, const FFGPUResul
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
             ffStrbufAppendF(&output, " - %.1f°C", gpu->temperature);
 
-        ffStrbufPutTo(&output, stdout);
+        if(gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.total != 0)
+        {
+            ffStrbufAppendS(&output, " (");
 
-        ffStrbufDestroy(&output);
+            if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+            {
+                ffParseSize(gpu->dedicated.used, instance->config.binaryPrefixType, &output);
+                ffStrbufAppendS(&output, " / ");
+            }
+            ffParseSize(gpu->dedicated.total, instance->config.binaryPrefixType, &output);
+            if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+            {
+                ffStrbufAppendS(&output, ", ");
+                ffAppendPercentNum(instance, &output, (uint8_t) (gpu->dedicated.used * 100 / gpu->dedicated.total), 50, 80, false);
+            }
+            ffStrbufAppendC(&output, ')');
+        }
+
+        ffStrbufPutTo(&output, stdout);
     }
     else
     {

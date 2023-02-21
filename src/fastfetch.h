@@ -34,6 +34,20 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_NONE,        //--logo none
 } FFLogoType;
 
+typedef enum FFSoundType
+{
+    FF_SOUND_TYPE_MAIN,
+    FF_SOUND_TYPE_ACTIVE,
+    FF_SOUND_TYPE_ALL,
+} FFSoundType;
+
+typedef enum FFLocalIpCompactType
+{
+    FF_LOCALIP_COMPACT_TYPE_NONE,
+    FF_LOCALIP_COMPACT_TYPE_MULTILINE,
+    FF_LOCALIP_COMPACT_TYPE_ONELINE,
+} FFLocalIpCompactType;
+
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -139,6 +153,9 @@ typedef struct FFconfig
     FFModuleArgs openGL;
     FFModuleArgs openCL;
     FFModuleArgs users;
+    FFModuleArgs bluetooth;
+    FFModuleArgs sound;
+    FFModuleArgs gamepad;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -162,6 +179,7 @@ typedef struct FFconfig
     FFstrbuf libOpenCL;
     FFstrbuf libcJSON;
     FFstrbuf libfreetype;
+    FFstrbuf libPulse;
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
 
@@ -183,20 +201,26 @@ typedef struct FFconfig
     bool diskShowUnknown;
     bool diskShowSubvolumes;
 
+    bool bluetoothShowDisconnected;
+
     FFstrbuf batteryDir;
 
     FFstrbuf separatorString;
 
     bool localIpShowLoop;
+    bool localIpV6First;
     bool localIpShowIpV4;
     bool localIpShowIpV6;
     FFstrbuf localIpNamePrefix;
+    FFLocalIpCompactType localIpCompactType;
 
     FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;
 
     FFstrbuf weatherOutputFormat;
     uint32_t weatherTimeout;
+
+    FFSoundType soundType;
 
     FFstrbuf osFile;
 
@@ -310,5 +334,8 @@ void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 void ffPrintCommand(FFinstance* instance);
+void ffPrintBluetooth(FFinstance* instance);
+void ffPrintSound(FFinstance* instance);
+void ffPrintGamepad(FFinstance* instance);
 
 #endif

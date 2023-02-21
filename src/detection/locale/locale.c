@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <locale.h>
 
-__attribute__((__unused__))
+FF_MAYBE_UNUSED
 static void getLocaleFromEnv(FFstrbuf* locale)
 {
     ffStrbufAppendS(locale, getenv("LANG"));

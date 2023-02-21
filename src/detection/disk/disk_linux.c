@@ -1,5 +1,7 @@
 #include "disk.h"
 
+#include "util/stringUtils.h"
+
 #include <limits.h>
 #include <ctype.h>
 #include <dirent.h>
@@ -13,24 +15,35 @@
     #define readdir readdir64
 #endif
 
-static bool isPhysicalDevice(const char* device)
+static bool isPhysicalDevice(FFstrbuf* device)
 {
+    struct stat deviceStat;
+    if(stat(device->chars, &deviceStat) != 0)
+        return false;
+
+    //Ignore all devices that are not block devices
+    if(!S_ISBLK(deviceStat.st_mode))
+        return false;
+
+    //Ignore all devices that are not physical devices
+
+
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
-    if(strcmp(device, "drvfs") == 0)
+    if(ffStrbufEqualS(device, "drvfs"))
+        return true;
+
+    //ZFS root pool. The format is rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>
+    if(ffStrbufStartsWithS(device, "rpool/"))
         return true;
 
     //Pseudo filesystems don't have a device in /dev
-    const char* devPrefix = "/dev/";
-    if(strncmp(device, devPrefix, strlen(devPrefix)) != 0)
+    if(!ffStrbufStartsWithS(device, "/dev/"))
         return false;
 
-    //Skip /dev/ prefix
-    device += strlen(devPrefix);
-
     if(
-        strncmp(device, "loop", 4) == 0 || //Ignore loop devices
-        strncmp(device, "ram", 3) == 0 ||  //Ignore ram devices
-        strncmp(device, "fd", 2) == 0      //Ignore fd devices
+        ffStrbufStartsWithS(device, "/dev/loop") || //Ignore loop devices
+        ffStrbufStartsWithS(device, "/dev/ram")  || //Ignore ram devices
+        ffStrbufStartsWithS(device, "/dev/fd")      //Ignore fd devices
     ) return false;
 
     return true;
@@ -141,6 +154,7 @@ static bool isSubvolume(const FFlist* devices)
 {
     const FFstrbuf* currentDevie = ffListGet(devices, devices->length - 1);
 
+    //Filter all disks which device was already found. This catches BTRFS subvolumes.
     for(uint32_t i = 0; i < devices->length - 1; i++)
     {
         const FFstrbuf* otherDevice = ffListGet(devices, i);
@@ -148,6 +162,11 @@ static bool isSubvolume(const FFlist* devices)
         if(ffStrbufEqual(currentDevie, otherDevice))
             return true;
     }
+
+    //ZFS subvolumes: rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>.
+    //Test if the third slash is present.
+    if(strncmp(currentDevie->chars, "rpool/", 6) == 0 && ffStrHasNChars(currentDevie->chars, '/', 3))
+        return true;
 
     return false;
 }
@@ -196,12 +215,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
 
     while(getline(&line, &len, mountsFile) != EOF)
     {
-        if(!isPhysicalDevice(line))
-            continue;
-
-        //We have a valid device, add it to the list
-        FFDisk* disk = ffListAdd(&disks->disks);
-
         //Format of the file: "<device> <mountpoint> <filesystem> <options> ..." (Same as fstab)
         char* currentPos = line;
 
@@ -209,6 +222,16 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         FFstrbuf* device = ffListAdd(&devices);
         ffStrbufInit(device);
         appendNextEntry(device, &currentPos);
+
+        if(!isPhysicalDevice(device))
+        {
+            ffStrbufDestroy(device);
+            devices.length--;
+            continue;
+        }
+
+        //We have a valid device, add it to the list
+        FFDisk* disk = ffListAdd(&disks->disks);
 
         //detect mountpoint
         ffStrbufInit(&disk->mountpoint);

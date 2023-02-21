@@ -29,7 +29,7 @@ void ffPrintCPUUsage(FFinstance* instance)
         {
             if(str.length > 0)
                 ffStrbufAppendC(&str, ' ');
-            ffStrbufAppendF(&str, "%.2lf%%", percentage);
+            ffAppendPercentNum(instance, &str, (uint8_t) percentage, 50, 80, str.length > 0);
         }
         ffStrbufPutTo(&str, stdout);
         ffStrbufDestroy(&str);

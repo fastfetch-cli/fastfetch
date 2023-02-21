@@ -1,3 +1,37 @@
+# 1.10.0
+
+Notable Changes:
+
+* With the support of Win32 platform, original Windows 64bit artifact file is renamed to Win64 to avoid possible confusion
+
+Features:
+* Bluetooth module
+* Sound module
+* Gamepad module
+* Support colored percentage numbers output (#409)
+* Support `--localip-compact-type` option (#408)
+* Terminator terminal font detection (@Zerogiven, #415)
+* Windows 32bit compatibility
+* Support global configuration in MSYS2 environment (Windows)
+* Support GPU driver version detection on Windows 11
+* Support scaled resolution detection for wayland (Linux)
+
+Bugfixes:
+
+* Fix build with older libnm versions
+* Fix a rare case that fails to detect terminal
+* Fix Muffin detection (@Zerogiven, #411)
+* Fix IPv6 detection (Windows)
+* Fix scoop package count detection when scoop is installed in non-default path (Windows, #417)
+* Fix UB reported by clang
+* Honor $SCOOP when detecting scoop packages (#417)
+
+Other:
+
+* Simplified wmtheme output format (Windows)
+* Improved GPU detection performance on Windows 11
+* Lastest Mac model identifier support (macOS)
+
 # 1.9.1
 
 Bugfixes:

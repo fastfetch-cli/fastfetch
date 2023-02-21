@@ -1,9 +1,10 @@
 #include "fastfetch.h"
-#include "util/FFvaluestore.h"
 #include "common/printing.h"
 #include "common/parsing.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "common/time.h"
+#include "util/FFvaluestore.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -12,9 +13,6 @@
 
 #ifdef WIN32
     #include "util/windows/getline.h"
-    #include <fileapi.h>
-#else
-    #include <dirent.h>
 #endif
 
 typedef struct CustomValue
@@ -176,11 +174,12 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "display-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 4,
+        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 5,
             "Screen width",
             "Screen height",
             "Screen refresh rate",
-            "Screen brightness"
+            "Screen scaled width",
+            "Screen scaled height"
         );
     }
     else if(strcasecmp(command, "de-format") == 0)
@@ -448,87 +447,50 @@ static inline void printCommandHelp(const char* command)
             "vendor"
         );
     }
+    else if(strcasecmp(command, "bluetooth-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("bluetooth", "{1} (4%)", 4,
+            "Name",
+            "Address",
+            "Type",
+            "Battery percentage"
+        );
+    }
+    else if(strcasecmp(command, "sound-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("sound", "{2} (3%)", 4,
+            "Main",
+            "Name",
+            "Volume",
+            "Identifier"
+        );
+    }
+    else if(strcasecmp(command, "gamepad-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("gamepad", "{1}", 1,
+            "Name",
+            "Identifier"
+        );
+    }
     else
         fprintf(stderr, "No specific help for command %s provided\n", command);
 }
 
-static inline void listAvailablePresetsFromFolder(FFstrbuf* folder, uint8_t indentation, const char* folderName)
-{
-    #ifndef _WIN32
-    DIR* dir = opendir(folder->chars);
-    if(dir == NULL)
-        return;
-
-    uint32_t folderLength = folder->length;
-
-    if(folderName != NULL)
-        printf("%s/\n", folderName);
-
-    struct dirent* entry;
-
-    while((entry = readdir(dir)) != NULL)
-    {
-        if(entry->d_type == DT_DIR)
-        {
-            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-                continue;
-
-            ffStrbufAppendS(folder, entry->d_name);
-            ffStrbufAppendC(folder, '/');
-            listAvailablePresetsFromFolder(folder, (uint8_t) (indentation + 1), entry->d_name);
-            ffStrbufSubstrBefore(folder, folderLength);
-            continue;
-        }
-
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
-
-        puts(entry->d_name);
-    }
-
-    closedir(dir);
-    #else
-    uint32_t folderLength = folder->length;
-
-    if(folderName != NULL)
-        printf("%s/\n", folderName);
-
-    ffStrbufAppendC(folder, '*');
-    WIN32_FIND_DATAA entry;
-    HANDLE hFind = FindFirstFileA(folder->chars, &entry);
-    if(hFind == INVALID_HANDLE_VALUE)
-        return;
-
-    do
-    {
-        if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        {
-            if(strcmp(entry.cFileName, ".") == 0 || strcmp(entry.cFileName, "..") == 0)
-                continue;
-
-            ffStrbufSubstrBefore(folder, folderLength);
-            ffStrbufAppendS(folder, entry.cFileName);
-            ffStrbufAppendC(folder, '/');
-            listAvailablePresetsFromFolder(folder, (uint8_t) (indentation + 1), entry.cFileName);
-            ffStrbufSubstrBefore(folder, folderLength);
-            continue;
-        }
-
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
-
-        puts(entry.cFileName);
-    } while (FindNextFileA(hFind, &entry));
-    FindClose(hFind);
-    #endif
-}
-
-static inline void listAvailablePresets(FFinstance* instance)
+static void listAvailablePresets(FFinstance* instance)
 {
     FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/presets/");
-        listAvailablePresetsFromFolder(path, 0, NULL);
+        ffListFilesRecursively(path->chars);
+    }
+}
+
+static void listAvailableLogos(FFinstance* instance)
+{
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
+    {
+        ffStrbufAppendS(path, "fastfetch/logos/");
+        ffListFilesRecursively(path->chars);
     }
 }
 
@@ -537,7 +499,7 @@ static void listConfigPaths(FFinstance* instance)
     FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.configDirs)
     {
         ffStrbufAppendS(folder, "fastfetch/config.conf");
-        printf("%s%s\n", folder->chars, ffFileExists(folder->chars, S_IFREG) ? " (*)" : "");
+        printf("%s%s\n", folder->chars, ffPathExists(folder->chars, FF_PATHTYPE_FILE) ? " (*)" : "");
     }
 }
 
@@ -621,7 +583,7 @@ static void generateConfigFile(FFinstance* instance, bool force)
     // Paths generated in `init.c/initConfigDirs` end with `/`
     ffStrbufAppendS(filename, "fastfetch/config.conf");
 
-    if (!force && ffFileExists(filename->chars, S_IFREG))
+    if (!force && ffPathExists(filename->chars, FF_PATHTYPE_FILE))
     {
         fprintf(stderr, "Config file exists in `%s`, use `--gen-config-force` to overwrite\n", filename->chars);
         exit(1);
@@ -953,7 +915,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         }
         else if(strcasecmp(subkey, "-logos") == 0)
         {
+            puts("Builtin logos:");
             ffLogoBuiltinList();
+            puts("\nCustom logos:");
+            listAvailableLogos(instance);
             exit(0);
         }
         else if(strcasecmp(subkey, "-logos-autocompletion") == 0)
@@ -971,8 +936,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
         instance->config.recache = optionParseBoolean(value);
-    else if(strcasecmp(key, "--nocache") == 0)
-        fputs("`--nocache` are obsoleted. Caching functions other than image caching are removed.\n\n", stderr);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--gen-config") == 0)
@@ -1210,6 +1173,9 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
+    else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
+    else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
+    else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
 
     ///////////////////
     //Library options//
@@ -1264,6 +1230,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             optionParseString(key, value, &instance->config.libcJSON);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
             optionParseString(key, value, &instance->config.libwlanapi);
+        else if(strcasecmp(key, "-pulse") == 0)
+            optionParseString(key, value, &instance->config.libPulse);
         else if(strcasecmp(subkey, "-nm") == 0)
             optionParseString(key, value, &instance->config.libnm);
         else
@@ -1300,10 +1268,23 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowSubvolumes = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-show-unknown") == 0)
         instance->config.diskShowUnknown = optionParseBoolean(value);
+    else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
+        instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
+    else if(strcasecmp(key, "--sound-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.soundType,
+            "main", FF_SOUND_TYPE_MAIN,
+            "active", FF_SOUND_TYPE_ACTIVE,
+            "all", FF_SOUND_TYPE_ALL,
+            NULL
+        );
+    }
     else if(strcasecmp(key, "--battery-dir") == 0)
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
+    else if(strcasecmp(key, "--localip-v6first") == 0)
+        instance->config.localIpV6First = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         instance->config.localIpShowIpV4 = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)
@@ -1312,6 +1293,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.localIpShowLoop = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-name-prefix") == 0)
         optionParseString(key, value, &instance->config.localIpNamePrefix);
+    else if(strcasecmp(key, "--localip-compact-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.localIpCompactType,
+            "none", FF_LOCALIP_COMPACT_TYPE_NONE,
+            "oneline", FF_LOCALIP_COMPACT_TYPE_ONELINE,
+            "multiline", FF_LOCALIP_COMPACT_TYPE_MULTILINE,
+            NULL
+        );
+    }
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
@@ -1505,6 +1495,12 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintUsers(instance);
     else if(strcasecmp(line, "command") == 0)
         ffPrintCommand(instance);
+    else if(strcasecmp(line, "bluetooth") == 0)
+        ffPrintBluetooth(instance);
+    else if(strcasecmp(line, "sound") == 0)
+        ffPrintSound(instance);
+    else if(strcasecmp(line, "gamepad") == 0)
+        ffPrintGamepad(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }

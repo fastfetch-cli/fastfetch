@@ -3,6 +3,7 @@
 #ifdef FF_HAVE_X11
 #include "common/library.h"
 #include "common/parsing.h"
+#include "util/stringUtils.h"
 #include <X11/Xlib.h>
 
 typedef struct X11PropertyData
@@ -39,7 +40,7 @@ static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Wi
 
 static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
 {
-    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_WAYLAND) == 0)
+    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
         return;
 
     Window* wmWindow = (Window*) x11GetProperty(data, display, DefaultRootWindow(display), "_NET_SUPPORTING_WM_CHECK");
@@ -68,10 +69,7 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 
     Display* display = ffXOpenDisplay(x11);
     if(display == NULL)
-    {
-        dlclose(x11);
         return;
-    }
 
     if(propertyDataInitialized && ScreenCount(display) > 0)
         x11DetectWMFromEWMH(&propertyData, display, result);
@@ -81,20 +79,19 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
         Screen* screen = ScreenOfDisplay(display, i);
         ffdsAppendDisplay(
             result,
-            (uint32_t) screen->width,
-            (uint32_t) screen->height,
+            (uint32_t) WidthOfScreen(screen),
+            (uint32_t) HeightOfScreen(screen),
             0,
-            0,
-            0
+            (uint32_t) WidthOfScreen(screen),
+            (uint32_t) HeightOfScreen(screen)
         );
     }
 
     ffXCloseDisplay(display);
-    dlclose(x11);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
 }
 
 #else
@@ -145,8 +142,8 @@ static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
         refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
-        0,
-        0
+        (uint32_t) modeInfo->width,
+        (uint32_t) modeInfo->height
     );
 }
 
@@ -176,8 +173,8 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
         data->defaultRefreshRate,
-        0,
-        0
+        (uint32_t) crtcInfo->width,
+        (uint32_t) crtcInfo->height
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
@@ -212,8 +209,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
         data->defaultRefreshRate,
-        0,
-        0
+        (uint32_t) monitorInfo->width,
+        (uint32_t) monitorInfo->height
     );
 }
 
@@ -266,8 +263,8 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
         data->defaultRefreshRate,
-        0,
-        0
+        (uint32_t) WidthOfScreen(screen),
+        (uint32_t) HeightOfScreen(screen)
     );
 }
 
@@ -297,10 +294,7 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)
-    {
-        dlclose(xrandr);
         return;
-    }
 
     if(propertyDataInitialized && ScreenCount(data.display) > 0)
         x11DetectWMFromEWMH(&propertyData, data.display, result);
@@ -311,11 +305,10 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
         xrandrHandleScreen(&data, ScreenOfDisplay(data.display, i));
 
     ffXCloseDisplay(data.display);
-    dlclose(xrandr);
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_DISPLAYSERVER_PROTOCOL_X11);
+        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
 }
 
 #else

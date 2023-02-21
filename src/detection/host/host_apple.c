@@ -8,7 +8,13 @@ static inline bool strEqual(const char* a, const char* b)
 
 static const char* getProductName(const FFstrbuf* hwModel)
 {
-    //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L1386
+    // Macbook Pro: https://support.apple.com/en-us/HT201300
+    // Macbook Air: https://support.apple.com/en-us/HT201862
+    // Mac mini:    https://support.apple.com/en-us/HT201894
+    // iMac:        https://support.apple.com/en-us/HT201634
+    // Mac Pro:     https://support.apple.com/en-us/HT202888
+    // Mac Studio:  https://support.apple.com/en-us/HT213073
+
     if(ffStrbufStartsWithS(hwModel, "MacBookPro"))
     {
         const char* version = hwModel->chars + strlen("MacBookPro");
@@ -106,20 +112,26 @@ static const char* getProductName(const FFstrbuf* hwModel)
     else if(ffStrbufStartsWithS(hwModel, "Mac"))
     {
         const char* version = hwModel->chars + strlen("Mac");
+        if(strEqual(version, "14,6") ||
+           strEqual(version, "14,10"))       return "MacBook Pro (16-inch, 2023)";
+        if(strEqual(version, "14,5") ||
+           strEqual(version, "14,9"))        return "MacBook Pro (14-inch, 2023)";
+        if(strEqual(version, "14,3"))        return "Mac mini (M2, 2023, Two Thunderbolt 4 ports)";
+        if(strEqual(version, "14,12"))       return "Mac mini (M2, 2023, Four Thunderbolt 4 ports)";
         if(strEqual(version, "14,7"))        return "MacBook Pro (13-inch, M2, 2022)";
         if(strEqual(version, "14,2"))        return "MacBook Air (M2, 2022)";
-        if(strEqual(version, "13,1"))        return "Mac Studio (2022, Two USB-C front ports)";
-        if(strEqual(version, "13,2"))        return "Mac Studio (2022, Two Thunderbolt 4 front ports)";
+        if(strEqual(version, "13,1"))        return "Mac Studio (M1 Max, 2022, Two USB-C front ports)";
+        if(strEqual(version, "13,2"))        return "Mac Studio (M1 Ultra, 2022, Two Thunderbolt 4 front ports)";
     }
     else if(ffStrbufStartsWithS(hwModel, "iMac"))
     {
         const char* version = hwModel->chars + strlen("iMac");
-        if(strEqual(version, "21,1") ||
-           strEqual(version, "21,2"))        return "iMac (24-inch, M1, 2021)";
+        if(strEqual(version, "21,1"))        return "iMac (24-inch, M1, 2021, Two Thunderbolt / USB 4 ports, Two USB 3 ports)";
+        if(strEqual(version, "21,2"))        return "iMac (24-inch, M1, 2021, Two Thunderbolt / USB 4 ports)";
         if(strEqual(version, "20,1") ||
            strEqual(version, "20,2"))        return "iMac (Retina 5K, 27-inch, 2020)";
-        if(strEqual(version, "19,1") ||
-           strEqual(version, "19,2"))        return "iMac (Retina 4K, 21.5-inch, 2019)";
+        if(strEqual(version, "19,1"))        return "iMac (Retina 5K, 27-inch, 2019)";
+        if(strEqual(version, "19,2"))        return "iMac (Retina 4K, 21.5-inch, 2019)";
         if(strEqual(version, "Pro1,1"))      return "iMac Pro (2017)";
         if(strEqual(version, "18,3"))        return "iMac (Retina 5K, 27-inch, 2017)";
         if(strEqual(version, "18,2"))        return "iMac (Retina 4K, 21.5-inch, 2017)";

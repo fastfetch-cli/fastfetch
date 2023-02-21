@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "detection/datetime.h"
+#include "detection/datetime/datetime.h"
 #include "common/thread.h"
 
 #include <time.h>

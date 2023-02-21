@@ -1,5 +1,6 @@
 Battery
 Bios
+Bluetooth
 Board
 Break
 Chassis

@@ -2,7 +2,7 @@
 #include "common/settings.h"
 #include "common/library.h"
 #include "common/thread.h"
-#include "common/io.h"
+#include "common/io/io.h"
 
 #include <string.h>
 
@@ -309,7 +309,7 @@ static const SQLiteData* getSQLiteData(const FFinstance* instance)
 
 int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
 {
-    if(!ffFileExists(dbPath, S_IFREG))
+    if(!ffPathExists(dbPath, FF_PATHTYPE_FILE))
         return 0;
 
     const SQLiteData* data = getSQLiteData(instance);

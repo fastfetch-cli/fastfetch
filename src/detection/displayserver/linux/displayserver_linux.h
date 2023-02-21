@@ -5,10 +5,6 @@
 
 #include "detection/displayserver/displayserver.h"
 
-#define FF_DISPLAYSERVER_PROTOCOL_WAYLAND "Wayland"
-#define FF_DISPLAYSERVER_PROTOCOL_X11 "X11"
-#define FF_DISPLAYSERVER_PROTOCOL_TTY "TTY"
-
 void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result);
 
 void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* result);

@@ -53,7 +53,8 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
 
             if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffStrbufAppendF(&str, str.length > 0 ? "(%u%%) " : "%u%% ", bytesPercentage);
+                ffAppendPercentNum(instance, &str, (uint8_t) bytesPercentage, 50, 80, str.length > 0);
+                ffStrbufAppendC(&str, ' ');
             }
         }
         else

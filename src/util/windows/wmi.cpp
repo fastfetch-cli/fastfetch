@@ -1,4 +1,5 @@
 #include "wmi.hpp"
+#include "util/windows/com.hpp"
 
 #include <synchapi.h>
 #include <wchar.h>
@@ -19,39 +20,9 @@ namespace
     };
 }
 
-//https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
-//https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes
-static void CoUninitializeWrap()
-{
-    CoUninitialize();
-}
-
 static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lpContext)
 {
     HRESULT hres;
-
-    // Initialize COM
-    hres = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-
-    // Set general COM security levels
-    hres = CoInitializeSecurity(
-        nullptr,
-        -1,                          // COM authentication
-        nullptr,                     // Authentication services
-        nullptr,                     // Reserved
-        RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
-        RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-        nullptr,                     // Authentication info
-        EOAC_NONE,                   // Additional capabilities
-        nullptr                      // Reserved
-        );
-
-    if (FAILED(hres))
-    {
-        CoUninitialize();
-        *((const char**)lpContext) = "Failed to initialize security";
-        return FALSE;
-    }
 
     // Obtain the initial locator to WMI
     IWbemLocator* pLoc = nullptr;
@@ -64,7 +35,6 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
 
     if (FAILED(hres))
     {
-        CoUninitialize();
         *((const char**)lpContext) = "Failed to create IWbemLocator object";
         return FALSE;
     }
@@ -90,7 +60,6 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
 
     if (FAILED(hres))
     {
-        CoUninitialize();
         *((const char**)lpContext) = "Could not connect WMI server";
         return FALSE;
     }
@@ -110,21 +79,26 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
     if (FAILED(hres))
     {
         pSvc->Release();
-        CoUninitialize();
         *((const char**)lpContext) = "Could not set proxy blanket";
         return FALSE;
     }
 
     *((IWbemServices**)lpContext) = pSvc;
-    atexit(CoUninitializeWrap);
     return TRUE;
 }
 
 FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace wmiNs)
     : pEnumerator(nullptr)
 {
+    const char* context = ffInitCom();
+    if (context)
+    {
+        if (error)
+            ffStrbufAppendS(error, context);
+        return;
+    }
+
     static INIT_ONCE s_InitOnce[(int) FFWmiNamespace::LAST] = {};
-    const char* context;
     if (InitOnceExecuteOnce(
         &s_InitOnce[(int)wmiNs],
         &InitHandleFunction,
@@ -137,9 +111,7 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace 
     }
 
     // Use the IWbemServices pointer to make requests of WMI
-    HRESULT hres;
-
-    hres = ((IWbemServices*)context)->ExecQuery(
+    HRESULT hres = ((IWbemServices*)context)->ExecQuery(
         bstr_t(L"WQL"),
         bstr_t(queryStr),
         WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,

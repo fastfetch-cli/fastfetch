@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "common/io.h"
+#include "common/io/io.h"
 #include "battery.h"
 
 #include <dirent.h>

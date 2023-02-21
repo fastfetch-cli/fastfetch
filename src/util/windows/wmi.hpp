@@ -9,12 +9,17 @@ extern "C" {
     #include "util/FFstrbuf.h"
 }
 
+#include <initguid.h>
 #include <Wbemidl.h>
 
 enum class FFWmiNamespace {
     CIMV2,
     WMI,
     LAST,
+};
+
+enum {
+    FF_WMI_QUERY_TIMEOUT = 5000
 };
 
 struct FFWmiRecord
@@ -25,7 +30,7 @@ struct FFWmiRecord
         if(!pEnumerator) return;
 
         ULONG ret;
-        bool ok = SUCCEEDED(pEnumerator->Next((LONG)WBEM_INFINITE, 1, &obj, &ret)) && ret;
+        bool ok = SUCCEEDED(pEnumerator->Next(FF_WMI_QUERY_TIMEOUT, 1, &obj, &ret)) && ret;
         if(!ok) obj = nullptr;
     }
     FFWmiRecord(const FFWmiRecord&) = delete;
