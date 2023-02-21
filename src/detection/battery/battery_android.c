@@ -18,8 +18,8 @@ const char* ffDetectBatteryImpl(FF_MAYBE_UNUSED FFinstance* instance, FFlist* re
     }))
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
 
-    if(buffer.length == 0)
-        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints empty";
+    if(buffer.chars[0] != '{')
+        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints invalid result (not a JSON object)";
 
     BatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;

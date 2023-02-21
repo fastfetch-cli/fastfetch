@@ -276,13 +276,13 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-$(./fastfetch --version-raw)-win32.zip *.dll fastfetch.exe flashfetch.exe
+        run: zip fastfetch-$(./fastfetch --version-raw)-Win32.zip *.dll fastfetch.exe flashfetch.exe
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: fastfetch-win32
-          path: ./fastfetch-*-win32.zip
+          name: fastfetch-Win32
+          path: ./fastfetch-*-Win32.zip
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'

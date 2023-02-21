@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.10.0
+    VERSION 1.10.1
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -160,6 +160,8 @@ endif()
 if(NOT TARGET_DIR_ETC)
     set(TARGET_DIR_ETC "${TARGET_DIR_ROOT}/etc")
 endif()
+
+message(STATUS "Target dirs: ROOT=\"${TARGET_DIR_ROOT}\" USR=\"${TARGET_DIR_USR}\" HOME=\"${TARGET_DIR_HOME}\" ETC=\"${TARGET_DIR_ETC}\"")
 
 #https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT.html
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

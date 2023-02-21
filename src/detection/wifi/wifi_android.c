@@ -13,12 +13,12 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
 
     if(ffProcessAppendStdOut(&buffer, (char* const[]){
         FF_TERMUX_API_PATH,
-        "WifiConnectionInfo"
+        FF_TERMUX_API_PARAM
     }))
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
 
-    if(buffer.length == 0)
-        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints empty";
+    if(buffer.chars[0] != '{')
+        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints invalid result (not a JSON object)";
 
     FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
     ffStrbufInit(&item->inf.description);
