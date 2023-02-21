@@ -1,4 +1,4 @@
-# dev
+# 1.10.0
 
 Notable Changes:
 
@@ -14,13 +14,17 @@ Features:
 * Windows 32bit compatibility
 * Support global configuration in MSYS2 environment (Windows)
 * Support GPU driver version detection on Windows 11
+* Support scaled resolution detection for wayland (Linux)
 
 Bugfixes:
 
+* Fix build with older libnm versions
 * Fix a rare case that fails to detect terminal
 * Fix Muffin detection (@Zerogiven, #411)
 * Fix IPv6 detection (Windows)
 * Fix scoop package count detection when scoop is installed in non-default path (Windows, #417)
+* Fix UB reported by clang
+* Honor $SCOOP when detecting scoop packages (#417)
 
 Other:
 
