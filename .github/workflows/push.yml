@@ -281,7 +281,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: fastfetch-Win32
+          name: fastfetch-win32
           path: ./fastfetch-*-Win32.zip
 
   release:
