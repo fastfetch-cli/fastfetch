@@ -2,6 +2,11 @@
 #include "util/apple/cf_helpers.h"
 
 #include <CoreAudio/CoreAudio.h>
+#include <AvailabilityMacros.h>
+
+#ifndef MAC_OS_VERSION_12_0
+#define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
+#endif
 
 const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFSoundDevice */)
 {
