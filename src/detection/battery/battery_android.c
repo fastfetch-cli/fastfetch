@@ -14,7 +14,8 @@ const char* ffDetectBatteryImpl(FF_MAYBE_UNUSED FFinstance* instance, FFlist* re
 
     if(ffProcessAppendStdOut(&buffer, (char* const[]){
         FF_TERMUX_API_PATH,
-        FF_TERMUX_API_PARAM
+        FF_TERMUX_API_PARAM,
+        NULL
     }))
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
 
