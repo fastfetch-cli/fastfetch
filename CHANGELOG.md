@@ -1,3 +1,9 @@
+# 1.10.2
+
+Bugfixes:
+* Handle `kAudioObjectPropertyElementMain` for macOS **SDK** < 12 (#425, @nandahkrishna)
+* Add missing `NULL` for `ffProcessAppendStdOut` (#421)
+
 # 1.10.1
 
 New release for debugging #421
