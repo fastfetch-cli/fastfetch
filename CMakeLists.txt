@@ -519,6 +519,7 @@ elseif(WIN32)
         src/detection/swap/swap_windows.cpp
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.cpp
+        src/detection/temps/temps_windows.cpp
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
         src/detection/wifi/wifi_windows.c
