@@ -30,9 +30,20 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
 
     //Parent
     close(pipes[1]);
-    waitpid(childPid, NULL, 0);
-    bool ok = ffAppendFDBuffer(pipes[0], buffer);
-    close(pipes[0]);
 
-    return ok ? NULL : "ffAppendFDBuffer() failed";
+    int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
+    int status = -1;
+    if(waitpid(childPid, &status, 0) < 0)
+        return "waitpid(childPid, &status, 0) failed";
+
+    if (!WIFEXITED(status))
+        return "WIFEXITED(status) == false";
+
+    if(WEXITSTATUS(status) == 901)
+        return "WEXITSTATUS(status) == 901 ( execvp failed )";
+
+    if(!ffAppendFDBuffer(childPipeFd, buffer))
+        return "ffAppendFDBuffer(childPipeFd, buffer) failed";
+
+    return NULL;
 }
