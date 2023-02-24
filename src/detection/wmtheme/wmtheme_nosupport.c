@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "detection/displayserver/displayserver.h"
 #include "wmtheme.h"
 
 bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)

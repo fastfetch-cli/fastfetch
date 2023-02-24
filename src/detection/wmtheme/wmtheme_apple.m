@@ -1,13 +1,10 @@
 #include "fastfetch.h"
-#include "detection/displayserver/displayserver.h"
 #include "wmtheme.h"
 
 #import <Foundation/Foundation.h>
 
-static bool detectQuartzCompositor(FFinstance* instance, FFstrbuf* themeOrError)
+bool ffDetectWmTheme(FF_MAYBE_UNUSED FFinstance* instance, FFstrbuf* themeOrError)
 {
-    FF_UNUSED(instance);
-
     NSError* error;
     NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/.GlobalPreferences.plist", instance->state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
@@ -40,22 +37,4 @@ static bool detectQuartzCompositor(FFinstance* instance, FFstrbuf* themeOrError)
     NSString* wmTheme = [dict valueForKey:@"AppleInterfaceStyle"];
     ffStrbufAppendF(themeOrError, " (%s)", wmTheme ? wmTheme.UTF8String : "Light");
     return true;
-}
-
-bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
-{
-    const FFDisplayServerResult* wm = ffConnectDisplayServer(instance);
-
-    if(wm->wmPrettyName.length == 0)
-    {
-        ffStrbufAppendS(themeOrError, "WM Theme needs sucessfull WM detection");
-        return false;
-    }
-
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, "Quartz Compositor") == 0)
-        return detectQuartzCompositor(instance, themeOrError);
-
-    ffStrbufAppendS(themeOrError, "Unknown WM: ");
-    ffStrbufAppend(themeOrError, &wm->dePrettyName);
-    return false;
 }
