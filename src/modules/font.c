@@ -75,14 +75,6 @@ void ffPrintFont(FFinstance* instance)
 {
     assert(FF_DETECT_FONT_NUM_FONTS == FF_FONT_NUM_FORMAT_ARGS);
 
-    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
-
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
-    {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font, "Font isn't supported in TTY");
-        return;
-    }
-
     const FFFontResult* font = ffDetectFont(instance);
 
     if(font->error.length > 0)
