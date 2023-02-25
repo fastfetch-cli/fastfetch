@@ -2,7 +2,7 @@
 
 static void createSubfolders(const char* fileName)
 {
-    FFstrbuf path;
+    FF_STRBUF_AUTO_DESTROY path;
     ffStrbufInit(&path);
 
     while(*fileName != '\0')
@@ -12,13 +12,11 @@ static void createSubfolders(const char* fileName)
             CreateDirectoryA(path.chars, NULL);
         ++fileName;
     }
-
-    ffStrbufDestroy(&path);
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
-    HANDLE handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if(handle == INVALID_HANDLE_VALUE)
     {
         createSubfolders(fileName);
@@ -28,11 +26,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     }
 
     DWORD written;
-    bool ret = !!WriteFile(handle, data, (DWORD)dataSize, &written, NULL);
-
-    CloseHandle(handle);
-
-    return ret;
+    return !!WriteFile(handle, data, (DWORD)dataSize, &written, NULL);
 }
 
 bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
@@ -69,28 +63,20 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
-    HANDLE handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(handle == INVALID_HANDLE_VALUE)
         return -1;
 
-    ssize_t readed = ffReadFDData(handle, dataSize, data);
-
-    CloseHandle(handle);
-
-    return readed;
+    return ffReadFDData(handle, dataSize, data);
 }
 
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
-    HANDLE handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(handle == INVALID_HANDLE_VALUE)
         return false;
 
-    bool ret = ffAppendFDBuffer(handle, buffer);
-
-    CloseHandle(handle);
-
-    return ret;
+    return ffAppendFDBuffer(handle, buffer);
 }
 
 bool ffPathExists(const char* path, FFPathType type)

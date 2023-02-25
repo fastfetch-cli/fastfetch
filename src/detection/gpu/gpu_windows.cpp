@@ -102,7 +102,7 @@ static const char* detectWithDxgi(FFlist* gpus)
             continue;
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        gpu->dedicated.total = gpu->dedicated.total = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
         ffStrbufInit(&gpu->vendor);
         ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(desc.VendorId));

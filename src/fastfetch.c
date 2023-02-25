@@ -1527,11 +1527,14 @@ int main(int argc, const char** argv)
     if(ffStrbufContainIgnCaseS(&data.structure, "CPUUsage"))
         ffPrepareCPUUsage();
 
-    if(ffStrbufContainIgnCaseS(&data.structure, "PublicIp"))
-        ffPreparePublicIp(&instance);
+    if(instance.config.multithreading)
+    {
+        if(ffStrbufContainIgnCaseS(&data.structure, "PublicIp"))
+            ffPreparePublicIp(&instance);
 
-    if(ffStrbufContainIgnCaseS(&data.structure, "Weather"))
-        ffPrepareWeather(&instance);
+        if(ffStrbufContainIgnCaseS(&data.structure, "Weather"))
+            ffPrepareWeather(&instance);
+    }
 
     ffStart(&instance);
 

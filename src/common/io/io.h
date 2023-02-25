@@ -101,4 +101,23 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 void ffListFilesRecursively(const char* path);
 
+static inline bool wrapClose(FFNativeFD* pfd)
+{
+    assert(pfd);
+
+    #ifndef WIN32
+        if (*pfd < 0)
+            return false;
+        close(*pfd);
+    #else
+        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
+        if (*pfd == NULL || *pfd == INVALID_HANDLE_VALUE)
+            return false;
+        CloseHandle(*pfd);
+    #endif
+
+    return true;
+}
+#define FF_AUTO_CLOSE_FD __attribute__((__cleanup__(wrapClose)))
+
 #endif // FF_INCLUDED_common_io_io

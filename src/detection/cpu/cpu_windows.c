@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "detection/temps/temps_windows.h"
 #include "util/windows/registry.h"
 #include "util/mallocHelper.h"
 
@@ -46,4 +47,7 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
     ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
+
+    if(instance->config.cpuTemp)
+        ffDetectSmbiosTemp(&cpu->temperature, NULL);
 }

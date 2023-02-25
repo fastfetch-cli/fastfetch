@@ -27,7 +27,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
-    int fd = open(fileName, openFlagsModes, openFlagsRights);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, openFlagsModes, openFlagsRights);
     if(fd == -1)
     {
         createSubfolders(fileName);
@@ -36,11 +36,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
             return false;
     }
 
-    bool ret = write(fd, data, dataSize) != -1;
-
-    close(fd);
-
-    return ret;
+    return write(fd, data, dataSize) > 0;
 }
 
 bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
@@ -77,28 +73,20 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
-    int fd = open(fileName, O_RDONLY);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return -1;
 
-    ssize_t readed = ffReadFDData(fd, dataSize, data);
-
-    close(fd);
-
-    return readed;
+    return ffReadFDData(fd, dataSize, data);
 }
 
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
-    int fd = open(fileName, O_RDONLY);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY);
     if(fd == -1)
         return false;
 
-    bool ret = ffAppendFDBuffer(fd, buffer);
-
-    close(fd);
-
-    return ret;
+    return ffAppendFDBuffer(fd, buffer);
 }
 
 bool ffPathExists(const char* path, FFPathType type)

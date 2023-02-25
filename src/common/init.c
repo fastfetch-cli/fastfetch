@@ -212,41 +212,28 @@ void ffInitInstance(FFinstance* instance)
     defaultConfig(instance);
 }
 
-#ifdef FF_HAVE_THREADS
-
-FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
-
-#if !(defined(__APPLE__) || defined(_WIN32))
+#if defined(FF_HAVE_THREADS) && !(defined(__APPLE__) || defined(_WIN32) || defined(__ANDROID__))
 
 #include "detection/gtk_qt/gtk_qt.h"
 
-#define FF_DETECT_QT_GTK 1
+#define FF_START_DETECTION_THREADS
 
+FF_THREAD_ENTRY_DECL_WRAPPER(ffConnectDisplayServer, FFinstance*)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectQt, FFinstance*)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK2, FFinstance*)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK3, FFinstance*)
 FF_THREAD_ENTRY_DECL_WRAPPER(ffDetectGTK4, FFinstance*)
 
-#endif //!(defined(__APPLE__) || defined(_WIN32))
-
-#endif //FF_HAVE_THREADS
-
 void startDetectionThreads(FFinstance* instance)
 {
-    #ifdef FF_HAVE_THREADS
     ffThreadDetach(ffThreadCreate(ffConnectDisplayServerThreadMain, instance));
-
-    #ifdef FF_DETECT_QT_GTK
     ffThreadDetach(ffThreadCreate(ffDetectQtThreadMain, instance));
     ffThreadDetach(ffThreadCreate(ffDetectGTK2ThreadMain, instance));
     ffThreadDetach(ffThreadCreate(ffDetectGTK3ThreadMain, instance));
     ffThreadDetach(ffThreadCreate(ffDetectGTK4ThreadMain, instance));
-    #endif
-
-    #else
-    FF_UNUSED(instance);
-    #endif
 }
+
+#endif //FF_HAVE_THREADS
 
 static volatile bool ffDisableLinewrap = true;
 static volatile bool ffHideCursor = true;
@@ -268,7 +255,7 @@ static void resetConsole()
 BOOL WINAPI consoleHandler(DWORD signal)
 {
     FF_UNUSED(signal);
-        resetConsole();
+    resetConsole();
     exit(0);
 }
 #else
@@ -282,8 +269,10 @@ static void exitSignalHandler(int signal)
 
 void ffStart(FFinstance* instance)
 {
-    if(instance->config.multithreading)
-        startDetectionThreads(instance);
+    #ifdef FF_START_DETECTION_THREADS
+        if(instance->config.multithreading)
+            startDetectionThreads(instance);
+    #endif
 
     ffDisableLinewrap = instance->config.disableLinewrap && !instance->config.pipe;
     ffHideCursor = instance->config.hideCursor && !instance->config.pipe;
@@ -450,6 +439,9 @@ void ffDestroyInstance(FFinstance* instance)
 void ffListFeatures()
 {
     fputs(
+        #ifdef FF_HAVE_THREADS
+            "threads\n"
+        #endif
         #ifdef FF_HAVE_LIBPCI
             "libpci\n"
         #endif
