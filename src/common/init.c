@@ -439,6 +439,9 @@ void ffDestroyInstance(FFinstance* instance)
 void ffListFeatures()
 {
     fputs(
+        #ifdef FF_HAVE_THREADS
+            "threads\n"
+        #endif
         #ifdef FF_HAVE_LIBPCI
             "libpci\n"
         #endif
