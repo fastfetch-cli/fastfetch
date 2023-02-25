@@ -1,3 +1,12 @@
+# 1.10.3
+Bugfixes:
+* Fix uninitialized variables (GPU, Windows)
+* Fix compiling errors (Windows)
+
+Improvements:
+* Improve preformance (WmTheme amd Font, Windows and macOS)
+* Enable nonblocking public-ip / weather detection (Android)
+
 # 1.10.2
 
 Bugfixes:
