@@ -84,7 +84,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 {
     FF_UNUSED(instance);
 
-    ffStrbufInitS(&ds->wmProcessName, "quartz");
+    ffStrbufInitS(&ds->wmProcessName, "WindowServer");
     ffStrbufInitS(&ds->wmPrettyName, "Quartz Compositor");
     ffStrbufInit(&ds->wmProtocolName);
 
@@ -99,7 +99,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
     ffStrbufInit(&ds->deVersion);
-    ffStrbufAppendS(&ds->deProcessName, "aqua");
+    ffStrbufInit(&ds->deProcessName);
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
