@@ -17,8 +17,8 @@ static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC h
     DataBundle* data = (DataBundle*) lparam;
     if(GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi) && wcscmp(mi.szDevice, data->deviceName) == 0)
     {
-        data->width = (uint32_t) mi.rcMonitor.right;
-        data->height = (uint32_t) mi.rcMonitor.bottom;
+        data->width = (uint32_t) (mi.rcMonitor.right - mi.rcMonitor.left);
+        data->height = (uint32_t) (mi.rcMonitor.bottom - mi.rcMonitor.top);
         return FALSE;
     }
     return TRUE;
