@@ -25,9 +25,6 @@ static bool isPhysicalDevice(FFstrbuf* device)
     if(!S_ISBLK(deviceStat.st_mode))
         return false;
 
-    //Ignore all devices that are not physical devices
-
-
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(ffStrbufEqualS(device, "drvfs"))
         return true;
