@@ -1,5 +1,8 @@
 # dev
 
+Bugfixes:
+* Fix date time format
+
 Changes:
 * Use yyjson to parse JSON strings for comments support, instead of using unmaintained cJSON
 
