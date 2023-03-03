@@ -1,4 +1,10 @@
+# dev
+
+Changes:
+* Use yyjson to parse JSON strings for comments support, instead of using unmaintained cJSON
+
 # 1.10.3
+
 Bugfixes:
 * Fix uninitialized variables (GPU, Windows)
 * Fix compiling errors (Windows)

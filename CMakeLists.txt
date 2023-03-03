@@ -67,7 +67,6 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
@@ -237,6 +236,7 @@ set(LIBFASTFETCH_SRC
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/common/yyjson.c
     src/detection/bluetooth/bluetooth.c
     src/detection/cpu/cpu.c
     src/detection/cpuUsage/cpuUsage.c
@@ -542,6 +542,7 @@ add_library(libfastfetch OBJECT
 )
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+target_compile_definitions(libfastfetch PUBLIC YYJSON_DISABLE_WRITER=1)
 
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)
@@ -667,10 +668,6 @@ ff_lib_enable(OSMESA
 ff_lib_enable(OPENCL
     "OpenCL"
     "OpenCL"
-)
-ff_lib_enable(LIBCJSON
-    "libcjson"
-    "CJson"
 )
 ff_lib_enable(LIBNM
     "libnm"
