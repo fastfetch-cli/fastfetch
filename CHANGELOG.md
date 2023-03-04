@@ -2,6 +2,7 @@
 
 Bugfixes:
 * Fix date time format
+* Fix compiling with musl (Wifi, Linux, #429)
 
 Changes:
 * Use yyjson to parse JSON strings for comments support, instead of using unmaintained cJSON

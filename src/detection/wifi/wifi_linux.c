@@ -207,6 +207,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 #include <net/if.h>
 #include <linux/wireless.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
