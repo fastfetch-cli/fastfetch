@@ -5,7 +5,7 @@ Bugfixes:
 * Fix compiling with musl (Wifi, Linux, #429)
 
 Changes:
-* Use yyjson to parse JSON strings for comments support, instead of using unmaintained cJSON
+* Use json-c to parse JSON strings for comments support, instead of using unmaintained cJSON
 
 # 1.10.3
 
