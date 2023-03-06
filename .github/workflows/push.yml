@@ -203,7 +203,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: copy necessary dlls
-        run: cp /clang64/bin/{OpenCL,vulkan-1}.dll .
+        run: cp /clang64/bin/{libjson-c*,OpenCL,vulkan-1}.dll .
 
       - name: list features
         run: ./fastfetch --list-features
@@ -264,7 +264,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
 
       - name: copy necessary dlls
-        run: cp /clang32/bin/{OpenCL,vulkan-1}.dll .
+        run: cp /clang32/bin/{libjson-c*,OpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
         run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
