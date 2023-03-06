@@ -78,8 +78,7 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 typedef struct JSONCData
 {
     FF_LIBRARY_SYMBOL(json_tokener_parse)
-    FF_LIBRARY_SYMBOL(json_object_array_length)
-    FF_LIBRARY_SYMBOL(json_object_array_get_idx)
+    FF_LIBRARY_SYMBOL(json_object_get_array)
     FF_LIBRARY_SYMBOL(json_object_is_type)
     FF_LIBRARY_SYMBOL(json_object_get_double)
     FF_LIBRARY_SYMBOL(json_object_get_string_len)
@@ -92,10 +91,10 @@ typedef struct JSONCData
 
 static const char* detectWTProfile(JSONCData* data, json_object* profile, FFstrbuf* name, double* size)
 {
-    if (!data->ffjson_object_is_type(profile, json_type_object))
-        return "json_object_is_type(profile, json_type_object) returns false";
-
     json_object* font = data->ffjson_object_object_get(profile, "font");
+    if (!font)
+        return "json_object_object_get(profile, \"font\"); failed";
+
     if (!data->ffjson_object_is_type(font, json_type_object))
         return "json_object_is_type(font, json_type_object) returns false";
 
@@ -133,9 +132,8 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     )
     JSONCData __attribute__((__cleanup__(wrapJsoncFree))) data = {};
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_tokener_parse)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_array_length)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_array_get_idx)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_is_type)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_array)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_double)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string_len)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string)
@@ -155,16 +153,14 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     ffStrbufTrim(&wtProfileId, '\'');
     if (wtProfileId.length > 0)
     {
-        json_object* list = data.ffjson_object_object_get(profiles, "list");
-        if (list && data.ffjson_object_is_type(list, json_type_array))
+        array_list* list = data.ffjson_object_get_array(data.ffjson_object_object_get(profiles, "list"));
+        if (list)
         {
-            for (size_t idx = 0, length = data.ffjson_object_array_length(list); idx < length; ++idx)
+            for (size_t idx = 0; idx < list->length; ++idx)
             {
-                json_object* profile = data.ffjson_object_array_get_idx(list, idx);
-                if (!data.ffjson_object_is_type(profile, json_type_object))
-                    continue;
-
+                json_object* profile = (json_object*) list->array[idx];
                 json_object* guid = data.ffjson_object_object_get(profile, "guid");
+
                 if (!data.ffjson_object_is_type(guid, json_type_string))
                     continue;
 
