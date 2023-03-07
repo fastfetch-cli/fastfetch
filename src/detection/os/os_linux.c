@@ -96,9 +96,9 @@ static void getUbuntuFlavour(FFOSResult* result)
 
 static void detectOS(FFOSResult* os, const FFinstance* instance)
 {
-    if(instance->config.osFile.length > 0)
+    if(instance->config.os.file.length > 0)
     {
-        parseFile(instance->config.osFile.chars, os);
+        parseFile(instance->config.os.file.chars, os);
         return;
     }
 

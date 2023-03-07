@@ -17,6 +17,8 @@
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
+#include "modules/os/os.h"
+
 typedef struct CustomValue
 {
     bool printKey;
@@ -1129,7 +1131,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module args options//
     ///////////////////////
 
-    else if(optionParseModuleArgs(key, value, "os", &instance->config.os)) {}
+    else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
     else if(optionParseModuleArgs(key, value, "host", &instance->config.host)) {}
     else if(optionParseModuleArgs(key, value, "bios", &instance->config.bios)) {}
     else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
@@ -1311,8 +1313,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_COMPACT_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_COMPACT_BIT);
     else if(strcasecmp(key, "--localip-name-prefix") == 0)
         optionParseString(key, value, &instance->config.localIpNamePrefix);
-    else if(strcasecmp(key, "--os-file") == 0)
-        optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--publicip-url") == 0)
@@ -1415,7 +1415,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "separator") == 0)
         ffPrintSeparator(instance);
     else if(strcasecmp(line, "os") == 0)
-        ffPrintOS(instance);
+        ffPrintOS(instance, &instance->config.os);
     else if(strcasecmp(line, "host") == 0)
         ffPrintHost(instance);
     else if(strcasecmp(line, "bios") == 0)

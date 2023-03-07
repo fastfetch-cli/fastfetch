@@ -1,6 +1,8 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "common/option.h"
 #include "detection/os/os.h"
+#include "modules/os/os.h"
 
 #include <ctype.h>
 
@@ -94,17 +96,17 @@ static void buildOutputNixOS(const FFinstance* instance, const FFOSResult* os, F
     }
 }
 
-void ffPrintOS(FFinstance* instance)
+void ffPrintOS(FFinstance* instance, FFOSOptions* options)
 {
     const FFOSResult* os = ffDetectOS(instance);
 
     if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0)
     {
-        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, "Could not detect OS");
+        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs, "Could not detect OS");
         return;
     }
 
-    if(instance->config.os.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
         FFstrbuf result;
         ffStrbufInit(&result);
@@ -114,13 +116,13 @@ void ffPrintOS(FFinstance* instance)
         else
             buildOutputDefault(instance, os, &result);
 
-        ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &instance->config.os.key);
+        ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs.key);
         ffStrbufPutTo(&result, stdout);
         ffStrbufDestroy(&result);
     }
     else
     {
-        ffPrintFormat(instance, FF_OS_MODULE_NAME, 0, &instance->config.os, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.platform.systemName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName},
@@ -135,4 +137,40 @@ void ffPrintOS(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.platform.systemArchitecture}
         });
     }
+}
+
+void ffInitOSOptions(FFOSOptions* options)
+{
+    options->moduleName = FF_OS_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+    ffStrbufInit(&options->file);
+    #endif
+}
+
+bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_OS_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+        if (strcasecmp(subKey, "file") == 0)
+        {
+            ffOptionParseString(key, value, &options->file);
+            return true;
+        }
+    #endif
+
+    return false;
+}
+
+void ffDestroyOSOptions(FFOSOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    #if defined(__linux__) || defined(__FreeBSD__)
+        ffStrbufDestroy(&options->file);
+    #endif
 }

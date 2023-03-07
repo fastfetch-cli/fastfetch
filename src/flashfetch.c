@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#include "modules/os/os.h"
+
 int main(int argc, char** argv)
 {
     //Disable compiler warnings
@@ -20,7 +22,7 @@ int main(int argc, char** argv)
     //Printing
     ffPrintTitle(&instance);
     ffPrintSeparator(&instance);
-    ffPrintOS(&instance);
+    ffPrintOS(&instance, &instance.config.os);
     ffPrintHost(&instance);
     //ffPrintBios(&instance);
     //ffPrintBoard(&instance);

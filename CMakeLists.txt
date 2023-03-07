@@ -232,6 +232,7 @@ set(LIBFASTFETCH_SRC
     src/common/format.c
     src/common/init.c
     src/common/library.c
+    src/common/option.c
     src/common/parsing.c
     src/common/printing.c
     src/common/properties.c
@@ -286,7 +287,7 @@ set(LIBFASTFETCH_SRC
     src/modules/memory.c
     src/modules/opencl.c
     src/modules/opengl.c
-    src/modules/os.c
+    src/modules/os/os.c
     src/modules/packages.c
     src/modules/player.c
     src/modules/poweradapter.c

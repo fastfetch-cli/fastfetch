@@ -15,6 +15,8 @@
     #include <signal.h>
 #endif
 
+#include "modules/os/os.h"
+
 static void initState(FFstate* state)
 {
     state->logoWidth = 0;
@@ -69,7 +71,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.multithreading = true;
     instance->config.stat = false;
 
-    initModuleArg(&instance->config.os);
+    ffInitOSOptions(&instance->config.os);
     initModuleArg(&instance->config.host);
     initModuleArg(&instance->config.bios);
     initModuleArg(&instance->config.board);
@@ -179,8 +181,6 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.weatherTimeout = 0;
     ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
-
-    ffStrbufInitA(&instance->config.osFile, 0);
 
     ffStrbufInitA(&instance->config.playerName, 0);
 
@@ -333,7 +333,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.colorTitle);
     ffStrbufDestroy(&instance->config.separator);
 
-    destroyModuleArg(&instance->config.os);
+    ffDestroyOSOptions(&instance->config.os);
     destroyModuleArg(&instance->config.host);
     destroyModuleArg(&instance->config.bios);
     destroyModuleArg(&instance->config.board);
@@ -412,7 +412,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.localIpNamePrefix);
     ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
-    ffStrbufDestroy(&instance->config.osFile);
     ffStrbufDestroy(&instance->config.playerName);
 
     ffStrbufDestroy(&instance->config.commandShell);

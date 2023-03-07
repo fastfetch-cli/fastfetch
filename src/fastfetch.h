@@ -18,6 +18,8 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
+#include "modules/os/option.h"
+
 typedef enum FFLogoType
 {
     FF_LOGO_TYPE_AUTO,        //if something is given, first try builtin, then file. Otherwise detect logo
@@ -80,13 +82,6 @@ typedef enum FFGLType
     FF_GL_TYPE_OSMESA
 } FFGLType;
 
-typedef struct FFModuleArgs
-{
-    FFstrbuf key;
-    FFstrbuf outputFormat;
-    FFstrbuf errorFormat;
-} FFModuleArgs;
-
 typedef enum FFLocalIpType
 {
     FF_LOCALIP_TYPE_NONE,
@@ -138,7 +133,7 @@ typedef struct FFconfig
     bool multithreading;
     bool stat;
 
-    FFModuleArgs os;
+    FFOSOptions os;
     FFModuleArgs host;
     FFModuleArgs bios;
     FFModuleArgs board;
@@ -249,8 +244,6 @@ typedef struct FFconfig
 
     FFSoundType soundType;
 
-    FFstrbuf osFile;
-
     FFstrbuf playerName;
 
     uint32_t percentType;
@@ -316,7 +309,6 @@ void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
 void ffPrintTitle(FFinstance* instance);
 void ffPrintSeparator(FFinstance* instance);
-void ffPrintOS(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
 void ffPrintBios(FFinstance* instance);
 void ffPrintBoard(FFinstance* instance);
