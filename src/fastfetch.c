@@ -1137,6 +1137,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "bios", &instance->config.bios)) {}
     else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
     else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
+    else if(ffParseCommandCommandOptions(&instance->config.command, key, value)) {}
     else if(optionParseModuleArgs(key, value, "kernel", &instance->config.kernel)) {}
     else if(optionParseModuleArgs(key, value, "uptime", &instance->config.uptime)) {}
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
@@ -1332,20 +1333,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--percent-type") == 0)
         instance->config.percentType = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--command-shell") == 0)
-        optionParseString(key, value, &instance->config.commandShell);
-    else if(strcasecmp(key, "--command-key") == 0)
-    {
-        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandKeys);
-        ffStrbufInit(result);
-        optionParseString(key, value, result);
-    }
-    else if(strcasecmp(key, "--command-text") == 0)
-    {
-        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandTexts);
-        ffStrbufInit(result);
-        optionParseString(key, value, result);
-    }
 
     //////////////////
     //Unknown option//
@@ -1502,7 +1489,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "users") == 0)
         ffPrintUsers(instance);
     else if(strcasecmp(line, "command") == 0)
-        ffPrintCommand(instance);
+        ffPrintCommand(instance, &instance->config.command);
     else if(strcasecmp(line, "bluetooth") == 0)
         ffPrintBluetooth(instance);
     else if(strcasecmp(line, "sound") == 0)

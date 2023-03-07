@@ -139,6 +139,7 @@ typedef struct FFconfig
     FFModuleArgs board;
     FFModuleArgs brightness;
     FFModuleArgs chassis;
+    FFCommandOptions command;
     FFModuleArgs kernel;
     FFModuleArgs uptime;
     FFModuleArgs processes;
@@ -244,10 +245,6 @@ typedef struct FFconfig
     FFstrbuf playerName;
 
     uint32_t percentType;
-
-    FFstrbuf commandShell;
-    FFlist commandKeys;
-    FFlist commandTexts;
 } FFconfig;
 
 typedef struct FFstate
@@ -349,7 +346,6 @@ void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
-void ffPrintCommand(FFinstance* instance);
 void ffPrintBluetooth(FFinstance* instance);
 void ffPrintSound(FFinstance* instance);
 void ffPrintGamepad(FFinstance* instance);

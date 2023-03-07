@@ -77,6 +77,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.board);
     initModuleArg(&instance->config.brightness);
     initModuleArg(&instance->config.chassis);
+    ffInitCommandOptions(&instance->config.command);
     initModuleArg(&instance->config.kernel);
     initModuleArg(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
@@ -182,18 +183,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInitA(&instance->config.playerName, 0);
 
     instance->config.percentType = 1;
-
-    ffStrbufInitS(&instance->config.commandShell,
-        #ifdef _WIN32
-        "cmd"
-        #elif defined(__FreeBSD__)
-        "csh"
-        #else
-        "bash"
-        #endif
-    );
-    ffListInit(&instance->config.commandKeys, sizeof(FFstrbuf));
-    ffListInit(&instance->config.commandTexts, sizeof(FFstrbuf));
 }
 
 void ffInitInstance(FFinstance* instance)
@@ -335,6 +324,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.bios);
     destroyModuleArg(&instance->config.board);
     destroyModuleArg(&instance->config.chassis);
+    ffDestroyCommandOptions(&instance->config.command);
     destroyModuleArg(&instance->config.kernel);
     destroyModuleArg(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);
@@ -409,14 +399,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
     ffStrbufDestroy(&instance->config.playerName);
-
-    ffStrbufDestroy(&instance->config.commandShell);
-    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandKeys)
-        ffStrbufDestroy(item);
-    ffListDestroy(&instance->config.commandKeys);
-    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandTexts)
-        ffStrbufDestroy(item);
-    ffListDestroy(&instance->config.commandTexts);
 }
 
 static void destroyState(FFinstance* instance)

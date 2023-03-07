@@ -108,7 +108,7 @@ void ffPrintOS(FFinstance* instance, FFOSOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        FFstrbuf result;
+        FF_STRBUF_AUTO_DESTROY result;
         ffStrbufInit(&result);
 
         if(ffStrbufIgnCaseCompS(&os->id, "nixos") == 0)
@@ -118,7 +118,6 @@ void ffPrintOS(FFinstance* instance, FFOSOptions* options)
 
         ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs.key);
         ffStrbufPutTo(&result, stdout);
-        ffStrbufDestroy(&result);
     }
     else
     {
