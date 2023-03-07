@@ -14,5 +14,6 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* pkey, const ch
 void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer);
 uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value);
 void ffOptionParseEnum(const char* argumentKey, const char* requestedKey, void* result, ...);
+bool ffOptionParseBoolean(const char* str);
 void ffOptionInitModuleArg(FFModuleArgs* args);
 void ffOptionDestroyModuleArg(FFModuleArgs* args);

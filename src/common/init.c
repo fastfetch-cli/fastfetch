@@ -15,7 +15,7 @@
     #include <signal.h>
 #endif
 
-#include "modules/os/os.h"
+#include "modules/modules.h"
 
 static void initState(FFstate* state)
 {
@@ -98,7 +98,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.memory);
     initModuleArg(&instance->config.swap);
     initModuleArg(&instance->config.disk);
-    initModuleArg(&instance->config.battery);
+    ffInitBatteryOptions(&instance->config.battery);
     initModuleArg(&instance->config.powerAdapter);
     initModuleArg(&instance->config.locale);
     initModuleArg(&instance->config.localIP);
@@ -148,7 +148,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
     instance->config.gpuForceVulkan = false;
-    instance->config.batteryTemp = false;
 
     instance->config.gpuHideIntegrated = false;
     instance->config.gpuHideDiscrete = false;
@@ -168,8 +167,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.bluetoothShowDisconnected = false;
 
     instance->config.soundType = FF_SOUND_TYPE_MAIN;
-
-    ffStrbufInitA(&instance->config.batteryDir, 0);
 
     ffStrbufInitA(&instance->config.separatorString, 0);
 
@@ -359,7 +356,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.memory);
     destroyModuleArg(&instance->config.swap);
     destroyModuleArg(&instance->config.disk);
-    destroyModuleArg(&instance->config.battery);
+    ffDestroyBatteryOptions(&instance->config.battery);
     destroyModuleArg(&instance->config.powerAdapter);
     destroyModuleArg(&instance->config.locale);
     destroyModuleArg(&instance->config.localIP);
@@ -407,7 +404,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libnm);
 
     ffStrbufDestroy(&instance->config.diskFolders);
-    ffStrbufDestroy(&instance->config.batteryDir);
     ffStrbufDestroy(&instance->config.separatorString);
     ffStrbufDestroy(&instance->config.localIpNamePrefix);
     ffStrbufDestroy(&instance->config.publicIpUrl);

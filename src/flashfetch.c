@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-#include "modules/os/os.h"
+#include "modules/modules.h"
 
 int main(int argc, char** argv)
 {
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     ffPrintMemory(&instance);
     //ffPrintSwap(&instance);
     ffPrintDisk(&instance);
-    ffPrintBattery(&instance);
+    ffPrintBattery(&instance, &instance.config.battery);
     ffPrintPowerAdapter(&instance);
     //ffPrintPlayer(&instance);
     //ffPrintMedia(&instance);

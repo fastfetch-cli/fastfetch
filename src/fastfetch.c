@@ -18,6 +18,7 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 #include "modules/os/os.h"
+#include "modules/modules.h"
 
 typedef struct CustomValue
 {
@@ -1160,7 +1161,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
     else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
     else if(optionParseModuleArgs(key, value, "disk", &instance->config.disk)) {}
-    else if(optionParseModuleArgs(key, value, "battery", &instance->config.battery)) {}
+    else if(ffParseBatteryCommandOptions(&instance->config.battery, key, value)) {}
     else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
     else if(optionParseModuleArgs(key, value, "locale", &instance->config.locale)) {}
     else if(optionParseModuleArgs(key, value, "localip", &instance->config.localIP)) {}
@@ -1250,8 +1251,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.gpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-force-vulkan") == 0)
         instance->config.gpuForceVulkan = optionParseBoolean(value);
-    else if(strcasecmp(key, "--battery-temp") == 0)
-        instance->config.batteryTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
         instance->config.gpuHideIntegrated = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-hide-discrete") == 0)
@@ -1297,8 +1296,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             NULL
         );
     }
-    else if(strcasecmp(key, "--battery-dir") == 0)
-        optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
@@ -1471,7 +1468,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "disk") == 0)
         ffPrintDisk(instance);
     else if(strcasecmp(line, "battery") == 0)
-        ffPrintBattery(instance);
+        ffPrintBattery(instance, &instance->config.battery);
     else if(strcasecmp(line, "poweradapter") == 0)
         ffPrintPowerAdapter(instance);
     else if(strcasecmp(line, "locale") == 0)

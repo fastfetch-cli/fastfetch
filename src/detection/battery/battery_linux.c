@@ -74,12 +74,13 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     result->temperature = FF_BATTERY_TEMP_UNSET;
 }
 
-const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {
+const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
+{
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 64);
-    if(instance->config.batteryDir.length > 0)
+    if(instance->config.battery.dir.length > 0)
     {
-        ffStrbufAppend(&baseDir, &instance->config.batteryDir);
+        ffStrbufAppend(&baseDir, &instance->config.battery.dir);
         ffStrbufEnsureEndsWithC(&baseDir, '/');
     }
     else

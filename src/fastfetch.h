@@ -18,7 +18,7 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
-#include "modules/os/option.h"
+#include "modules/options.h"
 
 typedef enum FFLogoType
 {
@@ -162,7 +162,7 @@ typedef struct FFconfig
     FFModuleArgs memory;
     FFModuleArgs swap;
     FFModuleArgs disk;
-    FFModuleArgs battery;
+    FFBatteryOptions battery;
     FFModuleArgs powerAdapter;
     FFModuleArgs locale;
     FFModuleArgs localIP;
@@ -210,7 +210,6 @@ typedef struct FFconfig
     bool cpuTemp;
     bool gpuTemp;
     bool gpuForceVulkan;
-    bool batteryTemp;
 
     bool gpuHideIntegrated;
     bool gpuHideDiscrete;
@@ -228,8 +227,6 @@ typedef struct FFconfig
     bool displayPreciseRefreshRate;
 
     bool bluetoothShowDisconnected;
-
-    FFstrbuf batteryDir;
 
     FFstrbuf separatorString;
 
@@ -336,7 +333,6 @@ void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
 void ffPrintSwap(FFinstance* instance);
 void ffPrintDisk(FFinstance* instance);
-void ffPrintBattery(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);

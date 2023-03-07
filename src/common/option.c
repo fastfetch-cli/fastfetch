@@ -105,6 +105,17 @@ void ffOptionParseEnum(const char* argumentKey, const char* requestedKey, void* 
     exit(478);
 }
 
+bool ffOptionParseBoolean(const char* str)
+{
+    return (
+        !ffStrSet(str) ||
+        strcasecmp(str, "true") == 0 ||
+        strcasecmp(str, "yes")  == 0 ||
+        strcasecmp(str, "on")   == 0 ||
+        strcasecmp(str, "1")    == 0
+    );
+}
+
 void ffOptionInitModuleArg(FFModuleArgs* args)
 {
     ffStrbufInit(&args->key);
