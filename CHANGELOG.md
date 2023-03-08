@@ -1,5 +1,8 @@
 # dev
 
+Features:
+* Support linuxbrew (Packages, Linux)
+
 Bugfixes:
 * Fix date time format
 * Fix compiling with musl (Wifi, Linux, #429)
