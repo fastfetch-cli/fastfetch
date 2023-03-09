@@ -18,6 +18,7 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 #include "modules/os/os.h"
+#include "common/config.h"
 #include "modules/modules.h"
 
 typedef struct CustomValue
@@ -1537,34 +1538,41 @@ int main(int argc, const char** argv)
         fflush(stdout);
     #endif
 
-    //Parse the structure and call the modules
-    uint32_t startIndex = 0;
-    while (startIndex < data.structure.length)
+    if (ffStrbufIgnCaseEqualS(&data.structure, "Config"))
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
-        data.structure.chars[colonIndex] = '\0';
-
-        uint64_t ms = 0;
-        if(__builtin_expect(instance.config.stat, false))
-            ms = ffTimeGetTick();
-
-        parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
-
-        if(__builtin_expect(instance.config.stat, false))
+        ffJsonConfigParse(&instance);
+    }
+    else
+    {
+        //Parse the structure and call the modules
+        uint32_t startIndex = 0;
+        while (startIndex < data.structure.length)
         {
-            char str[32];
-            int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-            if(instance.config.pipe)
-                puts(str);
-            else
-                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
+            data.structure.chars[colonIndex] = '\0';
+
+            uint64_t ms = 0;
+            if(__builtin_expect(instance.config.stat, false))
+                ms = ffTimeGetTick();
+
+            parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
+
+            if(__builtin_expect(instance.config.stat, false))
+            {
+                char str[32];
+                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
+                if(instance.config.pipe)
+                    puts(str);
+                else
+                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            }
+
+            #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+                fflush(stdout);
+            #endif
+
+            startIndex = colonIndex + 1;
         }
-
-        #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
-            fflush(stdout);
-        #endif
-
-        startIndex = colonIndex + 1;
     }
 
     ffFinish(&instance);

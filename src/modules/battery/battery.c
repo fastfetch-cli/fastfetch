@@ -146,3 +146,48 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
         ffStrbufDestroy(&options->dir);
     #endif
 }
+
+#ifdef FF_HAVE_JSONC
+bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+{
+    if (strcasecmp(type, FF_BATTERY_MODULE_NAME) != 0)
+        return false;
+
+    FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
+    ffInitBatteryOptions(&options);
+
+    if (module)
+    {
+        struct lh_entry* entry;
+        lh_foreach(data->ffjson_object_get_object(module), entry)
+        {
+            const char* key = (const char *)lh_entry_k(entry);
+            if (strcasecmp(key, "type") == 0)
+                continue;
+            json_object* val = (struct json_object *)lh_entry_v(entry);
+
+            if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
+                continue;
+
+            #ifdef __linux__
+            if (strcasecmp(key, "dir") == 0)
+            {
+                ffStrbufSetS(&options.dir, data->ffjson_object_get_string(val));
+                continue;
+            }
+            #endif
+
+            if (strcasecmp(key, "temp") == 0)
+            {
+                options.temp = (bool) data->ffjson_object_get_boolean(val);
+                continue;
+            }
+
+            ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintBattery(instance, &options);
+    return true;
+}
+#endif

@@ -70,7 +70,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_JSONC "Enable json-c" ON "LINUX OR WIN32" OFF)
+cmake_dependent_option(ENABLE_JSONC "Enable json-c" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
@@ -228,6 +228,7 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
 set(LIBFASTFETCH_SRC
     src/common/bar.c
+    src/common/config.c
     src/common/font.c
     src/common/format.c
     src/common/init.c
