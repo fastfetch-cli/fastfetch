@@ -193,6 +193,34 @@ static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResul
     ffStrbufDestroy(&fontSize);
 }
 
+static void detectFootTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY font;
+    ffStrbufInit(&font);
+
+    if (!ffParsePropFileConfig(instance, "foot/foot.ini", "font=", &font) || !ffStrSet(font.chars))
+    {
+        ffFontInitValues(&terminalFont->font, "monospace", "8");
+        return;
+    }
+
+    //Sarasa Term SC Nerd:size=8
+    uint32_t colon = ffStrbufFirstIndexC(&font, ':');
+    if(colon == font.length)
+    {
+        ffFontInitValues(&terminalFont->font, font.chars, "8");
+        return;
+    }
+    uint32_t equal = ffStrbufNextIndexS(&font, colon, "size=");
+    font.chars[colon] = 0;
+    if (equal == font.length)
+    {
+        ffFontInitValues(&terminalFont->font, font.chars, "8");
+        return;
+    }
+    ffFontInitValues(&terminalFont->font, font.chars, &font.chars[equal + strlen("size=")]);
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0)
@@ -207,4 +235,6 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "deepin-terminal") == 0)
         detectDeepinTerminal(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "foot") == 0)
+        detectFootTerminal(instance, terminalFont);
 }
