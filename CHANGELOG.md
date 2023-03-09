@@ -2,6 +2,7 @@
 
 Features:
 * Support linuxbrew (Packages, Linux)
+* Support foot terminal (#431, Linux)
 
 Bugfixes:
 * Fix date time format
