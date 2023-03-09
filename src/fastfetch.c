@@ -1171,9 +1171,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
     else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
     else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
-    else if(optionParseModuleArgs(key, value, "datetime", &instance->config.dateTime)) {}
-    else if(optionParseModuleArgs(key, value, "date", &instance->config.date)) {}
-    else if(optionParseModuleArgs(key, value, "time", &instance->config.time)) {}
+    else if(ffParseDateTimeCommandOptions(&instance->config.dateTime, key, value)) {}
     else if(optionParseModuleArgs(key, value, "vulkan", &instance->config.vulkan)) {}
     else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
@@ -1471,11 +1469,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "media") == 0)
         ffPrintMedia(instance);
     else if(strcasecmp(line, "datetime") == 0)
-        ffPrintDateTime(instance);
-    else if(strcasecmp(line, "date") == 0)
-        ffPrintDate(instance);
-    else if(strcasecmp(line, "time") == 0)
-        ffPrintTime(instance);
+        ffPrintDateTime(instance, &instance->config.dateTime);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
     else if(strcasecmp(line, "vulkan") == 0)

@@ -273,8 +273,7 @@ set(LIBFASTFETCH_SRC
     src/modules/cursor.c
     src/modules/custom.c
     src/modules/command/command.c
-    src/modules/date.c
-    src/modules/datetime.c
+    src/modules/datetime/datetime.c
     src/modules/de.c
     src/modules/disk.c
     src/modules/font.c
@@ -303,7 +302,6 @@ set(LIBFASTFETCH_SRC
     src/modules/terminal.c
     src/modules/terminalfont.c
     src/modules/theme.c
-    src/modules/time.c
     src/modules/title/title.c
     src/modules/uptime.c
     src/modules/users.c

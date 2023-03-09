@@ -110,9 +110,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.wifi);
     initModuleArg(&instance->config.player);
     initModuleArg(&instance->config.media);
-    initModuleArg(&instance->config.dateTime);
-    initModuleArg(&instance->config.date);
-    initModuleArg(&instance->config.time);
+    ffInitDateTimeOptions(&instance->config.dateTime);
     initModuleArg(&instance->config.vulkan);
     initModuleArg(&instance->config.wallpaper);
     initModuleArg(&instance->config.openGL);
@@ -356,9 +354,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);
     destroyModuleArg(&instance->config.media);
-    destroyModuleArg(&instance->config.dateTime);
-    destroyModuleArg(&instance->config.date);
-    destroyModuleArg(&instance->config.time);
+    ffDestroyDateTimeOptions(&instance->config.dateTime);
     destroyModuleArg(&instance->config.vulkan);
     destroyModuleArg(&instance->config.openGL);
     destroyModuleArg(&instance->config.openCL);

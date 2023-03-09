@@ -172,9 +172,7 @@ typedef struct FFconfig
     FFModuleArgs weather;
     FFModuleArgs player;
     FFModuleArgs media;
-    FFModuleArgs dateTime;
-    FFModuleArgs date;
-    FFModuleArgs time;
+    FFDateTimeOptions dateTime;
     FFModuleArgs vulkan;
     FFModuleArgs openGL;
     FFModuleArgs openCL;
@@ -291,7 +289,6 @@ void ffLogoBuiltinListAutocompletion();
 
 //Common
 
-void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs);
 void ffPrepareCPUUsage();
 void ffPreparePublicIp(FFinstance* instance);
 void ffPrepareWeather(FFinstance* instance);
@@ -331,7 +328,7 @@ void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);
-void ffPrintDateTime(FFinstance* instance);
+void ffPrintDateTime(FFinstance* instance, FFDateTimeOptions* options);
 void ffPrintDate(FFinstance* instance);
 void ffPrintTime(FFinstance* instance);
 void ffPrintLocalIp(FFinstance* instance);
