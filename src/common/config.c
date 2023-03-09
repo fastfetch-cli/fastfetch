@@ -38,6 +38,7 @@ static const char* parseModules(FFinstance* instance, JSONCData* data, json_obje
             return "modules must be an array of strings or objects";
 
         if(!ffParseBatteryJsonObject(instance, type, data, module))
+        if(!ffParseCommandJsonObject(instance, type, data, module))
             return "Unknown module type";
     }
 

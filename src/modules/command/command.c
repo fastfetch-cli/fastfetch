@@ -83,3 +83,46 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
     ffStrbufDestroy(&options->shell);
     ffStrbufDestroy(&options->text);
 }
+
+#ifdef FF_HAVE_JSONC
+bool ffParseCommandJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+{
+    if (strcasecmp(type, FF_COMMAND_MODULE_NAME) != 0)
+        return false;
+
+    FFCommandOptions __attribute__((__cleanup__(ffDestroyCommandOptions))) options;
+    ffInitCommandOptions(&options);
+
+    if (module)
+    {
+        struct lh_entry* entry;
+        lh_foreach(data->ffjson_object_get_object(module), entry)
+        {
+            const char* key = (const char *)lh_entry_k(entry);
+            if (strcasecmp(key, "type") == 0)
+                continue;
+            json_object* val = (struct json_object *)lh_entry_v(entry);
+
+            if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
+                continue;
+
+            if (strcasecmp(key, "shell") == 0)
+            {
+                ffStrbufSetS(&options.shell, data->ffjson_object_get_string(val));
+                continue;
+            }
+
+            if (strcasecmp(key, "text") == 0)
+            {
+                ffStrbufSetS(&options.text, data->ffjson_object_get_string(val));
+                continue;
+            }
+
+            ffPrintError(instance, FF_COMMAND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintCommand(instance, &options);
+    return true;
+}
+#endif
