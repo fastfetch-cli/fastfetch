@@ -1494,6 +1494,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintSound(instance);
     else if(strcasecmp(line, "gamepad") == 0)
         ffPrintGamepad(instance);
+    else if(strcasecmp(line, "jsonconfig") == 0)
+        ffPrintJsonConfig(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
@@ -1535,41 +1537,34 @@ int main(int argc, const char** argv)
         fflush(stdout);
     #endif
 
-    if (ffStrbufIgnCaseEqualS(&data.structure, "Config"))
+    //Parse the structure and call the modules
+    uint32_t startIndex = 0;
+    while (startIndex < data.structure.length)
     {
-        ffJsonConfigParse(&instance);
-    }
-    else
-    {
-        //Parse the structure and call the modules
-        uint32_t startIndex = 0;
-        while (startIndex < data.structure.length)
+        uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
+        data.structure.chars[colonIndex] = '\0';
+
+        uint64_t ms = 0;
+        if(__builtin_expect(instance.config.stat, false))
+            ms = ffTimeGetTick();
+
+        parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
+
+        if(__builtin_expect(instance.config.stat, false))
         {
-            uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
-            data.structure.chars[colonIndex] = '\0';
-
-            uint64_t ms = 0;
-            if(__builtin_expect(instance.config.stat, false))
-                ms = ffTimeGetTick();
-
-            parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
-
-            if(__builtin_expect(instance.config.stat, false))
-            {
-                char str[32];
-                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-                if(instance.config.pipe)
-                    puts(str);
-                else
-                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
-            }
-
-            #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
-                fflush(stdout);
-            #endif
-
-            startIndex = colonIndex + 1;
+            char str[32];
+            int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
+            if(instance.config.pipe)
+                puts(str);
+            else
+                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
         }
+
+        #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+            fflush(stdout);
+        #endif
+
+        startIndex = colonIndex + 1;
     }
 
     ffFinish(&instance);

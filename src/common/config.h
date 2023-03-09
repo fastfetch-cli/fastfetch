@@ -25,5 +25,3 @@ typedef struct JSONCData
 bool ffJsonConfigParseModuleArgs(JSONCData* data, const char* key, json_object* val, FFModuleArgs* moduleArgs);
 
 #endif
-
-const char* ffJsonConfigParse(FFinstance* instance);
