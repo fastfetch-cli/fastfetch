@@ -22,6 +22,7 @@ static void initState(FFstate* state)
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
+    state->titleLength = 0;
 
     ffPlatformInit(&state->platform);
 }
@@ -71,6 +72,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.multithreading = true;
     instance->config.stat = false;
 
+    ffInitTitleOptions(&instance->config.title);
     ffInitOSOptions(&instance->config.os);
     initModuleArg(&instance->config.host);
     initModuleArg(&instance->config.bios);
@@ -156,8 +158,6 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.shellVersion = true;
     instance->config.terminalVersion = true;
-
-    instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
     instance->config.diskShowTypes = FF_DISK_TYPE_REGULAR_BIT | FF_DISK_TYPE_EXTERNAL_BIT;
@@ -318,6 +318,7 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.colorTitle);
     ffStrbufDestroy(&instance->config.keyValueSeparator);
 
+    ffDestroyTitleOptions(&instance->config.title);
     ffDestroyOSOptions(&instance->config.os);
     destroyModuleArg(&instance->config.host);
     destroyModuleArg(&instance->config.bios);

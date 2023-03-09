@@ -6,3 +6,4 @@
 #include "modules/battery/battery.h"
 #include "modules/command/command.h"
 #include "modules/separator/separator.h"
+#include "modules/title/title.h"

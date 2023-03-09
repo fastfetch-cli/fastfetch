@@ -11,6 +11,7 @@
 static inline bool parseModuleJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
 {
     return
+        ffParseTitleJsonObject(instance, type, data, module) ||
         ffParseBatteryJsonObject(instance, type, data, module) ||
         ffParseCommandJsonObject(instance, type, data, module) ||
         ffParseOSJsonObject(instance, type, data, module) ||

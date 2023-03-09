@@ -1258,8 +1258,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.gpuHideIntegrated = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-hide-discrete") == 0)
         instance->config.gpuHideDiscrete = optionParseBoolean(value);
-    else if(strcasecmp(key, "--title-fqdn") == 0)
-        instance->config.titleFQDN = optionParseBoolean(value);
     else if(strcasecmp(key, "--shell-version") == 0)
         instance->config.shellVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--terminal-version") == 0)
@@ -1395,7 +1393,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     if(strcasecmp(line, "break") == 0)
         ffPrintBreak(instance);
     else if(strcasecmp(line, "title") == 0)
-        ffPrintTitle(instance);
+        ffPrintTitle(instance, &instance->config.title);
     else if(strcasecmp(line, "separator") == 0)
         ffPrintSeparator(instance, &instance->config.separator);
     else if(strcasecmp(line, "os") == 0)

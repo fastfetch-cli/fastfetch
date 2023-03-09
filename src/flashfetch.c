@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     ffStart(&instance);
 
     //Printing
-    ffPrintTitle(&instance);
+    ffPrintTitle(&instance, &instance.config.title);
     ffPrintSeparator(&instance, &instance.config.separator);
     ffPrintOS(&instance, &instance.config.os);
     ffPrintHost(&instance);

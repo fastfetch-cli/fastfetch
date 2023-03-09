@@ -133,6 +133,7 @@ typedef struct FFconfig
     bool multithreading;
     bool stat;
 
+    FFTitleOptions title;
     FFOSOptions os;
     FFModuleArgs host;
     FFModuleArgs bios;
@@ -216,8 +217,6 @@ typedef struct FFconfig
     bool gpuHideIntegrated;
     bool gpuHideDiscrete;
 
-    bool titleFQDN;
-
     bool shellVersion;
     bool terminalVersion;
 
@@ -251,6 +250,7 @@ typedef struct FFstate
     uint32_t logoWidth;
     uint32_t logoHeight;
     uint32_t keysHeight;
+    uint32_t titleLength;
 
     FFPlatform platform;
 } FFstate;
@@ -300,7 +300,6 @@ void ffPrepareWeather(FFinstance* instance);
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
-void ffPrintTitle(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
 void ffPrintBios(FFinstance* instance);
 void ffPrintBoard(FFinstance* instance);

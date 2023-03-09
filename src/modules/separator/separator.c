@@ -6,10 +6,15 @@
 
 void ffPrintSeparator(FFinstance* instance, FFSeparatorOptions* options)
 {
-    uint32_t titleLength = instance->state.platform.userName.length + 1 + (instance->config.titleFQDN ?
-        instance->state.platform.domainName.length :
-        instance->state.platform.hostName.length
-    );
+    uint32_t titleLength = instance->state.titleLength;
+    if (titleLength == 0)
+    {
+        // Title was not printed, should we support this case?
+        titleLength = instance->state.platform.userName.length + 1 + (instance->config.title.fdqn ?
+            instance->state.platform.domainName.length :
+            instance->state.platform.hostName.length
+        );
+    }
 
     ffLogoPrintLine(instance);
 
