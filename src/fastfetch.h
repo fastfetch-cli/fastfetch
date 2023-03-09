@@ -119,7 +119,7 @@ typedef struct FFconfig
     FFstrbuf colorKeys;
     FFstrbuf colorTitle;
 
-    FFstrbuf separator;
+    FFstrbuf keyValueSeparator;
 
     bool showErrors;
     bool recache;

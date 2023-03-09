@@ -1105,7 +1105,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "--separator") == 0)
-        optionParseString(key, value, &instance->config.separator);
+        optionParseString(key, value, &instance->config.keyValueSeparator);
     else if(strcasecmp(key, "--color-keys") == 0)
         optionParseColor(key, value, &instance->config.colorKeys);
     else if(strcasecmp(key, "--color-title") == 0)

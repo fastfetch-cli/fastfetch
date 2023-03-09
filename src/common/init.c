@@ -56,8 +56,8 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);
 
-    ffStrbufInit(&instance->config.separator);
-    ffStrbufAppendS(&instance->config.separator, ": ");
+    ffStrbufInit(&instance->config.keyValueSeparator);
+    ffStrbufAppendS(&instance->config.keyValueSeparator, ": ");
 
     instance->config.showErrors = false;
     instance->config.recache = false;
@@ -317,7 +317,7 @@ static void destroyConfig(FFinstance* instance)
         ffStrbufDestroy(&instance->config.logo.colors[i]);
     ffStrbufDestroy(&instance->config.colorKeys);
     ffStrbufDestroy(&instance->config.colorTitle);
-    ffStrbufDestroy(&instance->config.separator);
+    ffStrbufDestroy(&instance->config.keyValueSeparator);
 
     ffDestroyOSOptions(&instance->config.os);
     destroyModuleArg(&instance->config.host);

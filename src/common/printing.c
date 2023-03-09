@@ -38,7 +38,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     if(!instance->config.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
-    ffStrbufWriteTo(&instance->config.separator, stdout);
+    ffStrbufWriteTo(&instance->config.keyValueSeparator, stdout);
 
     if(!instance->config.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
