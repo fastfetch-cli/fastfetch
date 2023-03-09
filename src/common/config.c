@@ -8,6 +8,16 @@
 
 #include <assert.h>
 
+static inline bool parseModuleJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+{
+    return
+        ffParseBatteryJsonObject(instance, type, data, module) ||
+        ffParseCommandJsonObject(instance, type, data, module) ||
+        ffParseOSJsonObject(instance, type, data, module) ||
+        ffParseSeparatorJsonObject(instance, type, data, module) ||
+        false;
+}
+
 static inline void wrapJsoncFree(JSONCData* data)
 {
     assert(data);
@@ -37,9 +47,7 @@ static const char* parseModules(FFinstance* instance, JSONCData* data, json_obje
         else
             return "modules must be an array of strings or objects";
 
-        if(!ffParseBatteryJsonObject(instance, type, data, module))
-        if(!ffParseCommandJsonObject(instance, type, data, module))
-        if(!ffParseOSJsonObject(instance, type, data, module))
+        if(!parseModuleJsonObject(instance, type, data, module))
             return "Unknown module type";
     }
 

@@ -1179,6 +1179,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
     else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
+    else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
     else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
     else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
 
@@ -1298,8 +1299,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             NULL
         );
     }
-    else if(strcasecmp(key, "--separator-string") == 0)
-        optionParseString(key, value, &instance->config.separatorString);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
         optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV4_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV4_BIT);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)
@@ -1398,7 +1397,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "title") == 0)
         ffPrintTitle(instance);
     else if(strcasecmp(line, "separator") == 0)
-        ffPrintSeparator(instance);
+        ffPrintSeparator(instance, &instance->config.separator);
     else if(strcasecmp(line, "os") == 0)
         ffPrintOS(instance, &instance->config.os);
     else if(strcasecmp(line, "host") == 0)

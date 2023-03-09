@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     //Printing
     ffPrintTitle(&instance);
-    ffPrintSeparator(&instance);
+    ffPrintSeparator(&instance, &instance.config.separator);
     ffPrintOS(&instance, &instance.config.os);
     ffPrintHost(&instance);
     //ffPrintBios(&instance);

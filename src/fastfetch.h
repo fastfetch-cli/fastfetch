@@ -179,6 +179,7 @@ typedef struct FFconfig
     FFModuleArgs openCL;
     FFModuleArgs users;
     FFModuleArgs bluetooth;
+    FFSeparatorOptions separator;
     FFModuleArgs sound;
     FFModuleArgs gamepad;
 
@@ -228,8 +229,6 @@ typedef struct FFconfig
     bool displayPreciseRefreshRate;
 
     bool bluetoothShowDisconnected;
-
-    FFstrbuf separatorString;
 
     FFstrbuf localIpNamePrefix;
     FFLocalIpType localIpShowType;
@@ -302,7 +301,6 @@ void ffPrepareWeather(FFinstance* instance);
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
 void ffPrintTitle(FFinstance* instance);
-void ffPrintSeparator(FFinstance* instance);
 void ffPrintHost(FFinstance* instance);
 void ffPrintBios(FFinstance* instance);
 void ffPrintBoard(FFinstance* instance);

@@ -118,6 +118,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.users);
     initModuleArg(&instance->config.bluetooth);
     initModuleArg(&instance->config.sound);
+    ffInitSeparatorOptions(&instance->config.separator);
     initModuleArg(&instance->config.gamepad);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
@@ -168,8 +169,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.bluetoothShowDisconnected = false;
 
     instance->config.soundType = FF_SOUND_TYPE_MAIN;
-
-    ffStrbufInitA(&instance->config.separatorString, 0);
 
     instance->config.localIpShowType = FF_LOCALIP_TYPE_IPV4_BIT;
     ffStrbufInit(&instance->config.localIpNamePrefix);
@@ -364,6 +363,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
     destroyModuleArg(&instance->config.bluetooth);
+    ffDestroySeparatorOptions(&instance->config.separator);
     destroyModuleArg(&instance->config.sound);
     destroyModuleArg(&instance->config.gamepad);
 
@@ -394,7 +394,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libnm);
 
     ffStrbufDestroy(&instance->config.diskFolders);
-    ffStrbufDestroy(&instance->config.separatorString);
     ffStrbufDestroy(&instance->config.localIpNamePrefix);
     ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
