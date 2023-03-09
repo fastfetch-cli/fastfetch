@@ -173,3 +173,42 @@ void ffDestroyOSOptions(FFOSOptions* options)
         ffStrbufDestroy(&options->file);
     #endif
 }
+
+#ifdef FF_HAVE_JSONC
+bool ffParseOSJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+{
+    if (strcasecmp(type, FF_OS_MODULE_NAME) != 0)
+        return false;
+
+    FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
+    ffInitOSOptions(&options);
+
+    if (module)
+    {
+        struct lh_entry* entry;
+        lh_foreach(data->ffjson_object_get_object(module), entry)
+        {
+            const char* key = (const char *)lh_entry_k(entry);
+            if (strcasecmp(key, "type") == 0)
+                continue;
+            json_object* val = (struct json_object *)lh_entry_v(entry);
+
+            if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
+                continue;
+
+            #if defined(__linux__) || defined(__FreeBSD__)
+                if (strcasecmp(key, "file") == 0)
+                {
+                    ffStrbufSetS(&options.file, data->ffjson_object_get_string(val));
+                    continue;
+                }
+            #endif
+
+            ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintOS(instance, &options);
+    return true;
+}
+#endif
