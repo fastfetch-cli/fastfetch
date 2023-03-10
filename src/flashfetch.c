@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     ffPrintSeparator(&instance, &instance.config.separator);
     ffPrintOS(&instance, &instance.config.os);
     ffPrintHost(&instance, &instance.config.host);
-    //ffPrintBios(&instance);
+    //ffPrintBios(&instance, &instance.config.bios);
     //ffPrintBoard(&instance);
     //ffPrintChassis(&instance);
     ffPrintKernel(&instance, &instance.config.kernel);

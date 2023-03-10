@@ -3,6 +3,7 @@
 // For "fastfetch.h"
 
 #include "modules/battery/option.h"
+#include "modules/bios/option.h"
 #include "modules/command/option.h"
 #include "modules/datetime/option.h"
 #include "modules/display/option.h"

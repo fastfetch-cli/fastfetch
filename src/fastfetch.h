@@ -129,7 +129,7 @@ typedef struct FFconfig
     FFTitleOptions title;
     FFOSOptions os;
     FFHostOptions host;
-    FFModuleArgs bios;
+    FFBiosOptions bios;
     FFModuleArgs board;
     FFModuleArgs brightness;
     FFModuleArgs chassis;
@@ -286,7 +286,6 @@ void ffPrepareWeather(FFinstance* instance);
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintBreak(FFinstance* instance);
-void ffPrintBios(FFinstance* instance);
 void ffPrintBoard(FFinstance* instance);
 void ffPrintChassis(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
