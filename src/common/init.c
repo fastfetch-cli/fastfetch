@@ -85,7 +85,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.processes);
     initModuleArg(&instance->config.packages);
     initModuleArg(&instance->config.shell);
-    initModuleArg(&instance->config.display);
+    ffInitDisplayOptions(&instance->config.display);
     initModuleArg(&instance->config.de);
     initModuleArg(&instance->config.wm);
     initModuleArg(&instance->config.wmTheme);
@@ -159,10 +159,6 @@ static void defaultConfig(FFinstance* instance)
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
     instance->config.diskShowTypes = FF_DISK_TYPE_REGULAR_BIT | FF_DISK_TYPE_EXTERNAL_BIT;
-
-    instance->config.displayCompactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    instance->config.displayDetectName = false;
-    instance->config.displayPreciseRefreshRate = false;
 
     instance->config.bluetoothShowDisconnected = false;
 
@@ -328,7 +324,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.processes);
     destroyModuleArg(&instance->config.packages);
     destroyModuleArg(&instance->config.shell);
-    destroyModuleArg(&instance->config.display);
+    ffDestroyDisplayOptions(&instance->config.display);
     destroyModuleArg(&instance->config.de);
     destroyModuleArg(&instance->config.wm);
     destroyModuleArg(&instance->config.wmTheme);

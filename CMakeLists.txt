@@ -293,7 +293,7 @@ set(LIBFASTFETCH_SRC
     src/modules/poweradapter.c
     src/modules/processes.c
     src/modules/publicip.c
-    src/modules/display.c
+    src/modules/display/display.c
     src/modules/separator/separator.c
     src/modules/shell.c
     src/modules/sound.c

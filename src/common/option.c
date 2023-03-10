@@ -72,7 +72,7 @@ uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value)
     return num;
 }
 
-void ffOptionParseEnum(const char* argumentKey, const char* requestedKey, void* result, ...)
+int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[])
 {
     if(requestedKey == NULL)
     {
@@ -80,26 +80,11 @@ void ffOptionParseEnum(const char* argumentKey, const char* requestedKey, void* 
         exit(476);
     }
 
-    va_list args;
-    va_start(args, result);
-
-    while(true)
+    for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
     {
-        const char* key = va_arg(args, const char*);
-        if(key == NULL)
-            break;
-
-        int value = va_arg(args, int); //C standard guarantees that enumeration constants are presented as ints
-
-        if(strcasecmp(requestedKey, key) == 0)
-        {
-            *(int*)result = value;
-            va_end(args);
-            return;
-        }
+        if(strcasecmp(requestedKey, pPair->key) == 0)
+            return pPair->value;
     }
-
-    va_end(args);
 
     fprintf(stderr, "Error: unknown %s value: %s\n", argumentKey, requestedKey);
     exit(478);

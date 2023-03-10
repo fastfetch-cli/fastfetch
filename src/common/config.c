@@ -23,4 +23,39 @@ bool ffJsonConfigParseModuleArgs(JSONCData* data, const char* key, json_object* 
     return false;
 }
 
+const char* ffJsonConfigParseEnum(JSONCData* data, json_object* val, int* result, FFKeyValuePair pairs[])
+{
+    if (data->ffjson_object_is_type(val, json_type_int))
+    {
+        int intVal = data->ffjson_object_get_int(val);
+
+        for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
+        {
+            if (intVal == pPair->value)
+            {
+                *result = pPair->value;
+                return NULL;
+            }
+        }
+
+        return "Invalid enum integer";
+    }
+    else if (data->ffjson_object_is_type(val, json_type_string))
+    {
+        const char* strVal = data->ffjson_object_get_string(val);
+        for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
+        {
+            if (strcasecmp(strVal, pPair->key) == 0)
+            {
+                *result = pPair->value;
+                return NULL;
+            }
+        }
+
+        return "Invalid enum string";
+    }
+    else
+        return "Invalid enum value type; must be a string or integer";
+}
+
 #endif

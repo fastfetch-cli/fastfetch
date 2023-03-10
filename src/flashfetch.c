@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     //ffPrintProcesses(&instance);
     ffPrintPackages(&instance);
     ffPrintShell(&instance);
-    ffPrintDisplay(&instance);
+    ffPrintDisplay(&instance, &instance.config.display);
     // ffPrintBrightness(&instance);
     ffPrintDesktopEnvironment(&instance);
     ffPrintWM(&instance);

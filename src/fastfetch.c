@@ -1144,7 +1144,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
     else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
     else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
-    else if(optionParseModuleArgs(key, value, "display", &instance->config.display)) {}
+    else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
     else if(optionParseModuleArgs(key, value, "brightness", &instance->config.brightness)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
     else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
@@ -1272,18 +1272,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_SUBVOLUME_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT);
     else if(strcasecmp(key, "--disk-show-unknown") == 0)
         optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_UNKNOWN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT);
-    else if(strcasecmp(key, "--display-compact-type") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.displayCompactType,
-            "none", FF_DISPLAY_COMPACT_TYPE_NONE,
-            "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT,
-            "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT,
-            NULL);
-    }
-    else if(strcasecmp(key, "--display-precise-refresh-rate") == 0)
-        instance->config.displayPreciseRefreshRate = optionParseBoolean(value);
-    else if(strcasecmp(key, "--display-detect-name") == 0)
-        instance->config.displayDetectName = optionParseBoolean(value);
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
     else if(strcasecmp(key, "--sound-type") == 0)
@@ -1417,7 +1405,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "shell") == 0)
         ffPrintShell(instance);
     else if(strcasecmp(line, "display") == 0)
-        ffPrintDisplay(instance);
+        ffPrintDisplay(instance, &instance->config.display);
     else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
         ffPrintDesktopEnvironment(instance);
     else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)

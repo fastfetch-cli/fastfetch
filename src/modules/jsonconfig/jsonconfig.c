@@ -16,6 +16,7 @@ static inline bool parseModuleJsonObject(FFinstance* instance, const char* type,
         ffParseBatteryJsonObject(instance, type, data, module) ||
         ffParseCommandJsonObject(instance, type, data, module) ||
         ffParseDateTimeJsonObject(instance, type, data, module) ||
+        ffParseDisplayJsonObject(instance, type, data, module) ||
         ffParseOSJsonObject(instance, type, data, module) ||
         ffParseSeparatorJsonObject(instance, type, data, module) ||
         false;
@@ -72,6 +73,7 @@ static const char* printJsonConfig(FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_array)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_boolean)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_double)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_int)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string_len)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_object)

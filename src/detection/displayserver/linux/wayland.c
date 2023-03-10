@@ -225,7 +225,7 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     if(data.display == NULL)
         return false;
 
-    data.detectName = instance->config.displayDetectName;
+    data.detectName = instance->config.display.detectName;
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 

@@ -13,6 +13,7 @@ typedef struct JSONCData
     FF_LIBRARY_SYMBOL(json_object_get_array)
     FF_LIBRARY_SYMBOL(json_object_get_boolean)
     FF_LIBRARY_SYMBOL(json_object_get_double)
+    FF_LIBRARY_SYMBOL(json_object_get_int)
     FF_LIBRARY_SYMBOL(json_object_get_string_len)
     FF_LIBRARY_SYMBOL(json_object_get_string)
     FF_LIBRARY_SYMBOL(json_object_get_object)
@@ -23,5 +24,6 @@ typedef struct JSONCData
 } JSONCData;
 
 bool ffJsonConfigParseModuleArgs(JSONCData* data, const char* key, json_object* val, FFModuleArgs* moduleArgs);
+const char* ffJsonConfigParseEnum(JSONCData* data, json_object* val, int* result, FFKeyValuePair pairs[]);
 
 #endif

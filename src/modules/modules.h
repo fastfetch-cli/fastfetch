@@ -6,6 +6,7 @@
 #include "modules/battery/battery.h"
 #include "modules/command/command.h"
 #include "modules/datetime/datetime.h"
+#include "modules/display/display.h"
 #include "modules/separator/separator.h"
 #include "modules/title/title.h"
 #include "modules/jsonconfig/jsonconfig.h"
