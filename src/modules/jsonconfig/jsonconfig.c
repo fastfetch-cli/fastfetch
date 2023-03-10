@@ -87,7 +87,7 @@ static const char* printJsonConfig(FFinstance* instance)
     FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.platform.configDirs)
     {
         uint32_t oldLength = filename->length;
-        ffStrbufAppendS(filename, "fastfetch/config.json");
+        ffStrbufAppendS(filename, "fastfetch/config.jsonc");
         bool success = ffAppendFileBuffer(filename->chars, &content);
         ffStrbufSubstrBefore(filename, oldLength);
         if (success) break;
