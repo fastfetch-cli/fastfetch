@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "modules/display/option.h"
 
 void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options);
 void ffInitDisplayOptions(FFDisplayOptions* options);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "modules/datetime/option.h"
 
 void ffPrintDateTime(FFinstance* instance, FFDateTimeOptions* options);
 void ffInitDateTimeOptions(FFDateTimeOptions* options);

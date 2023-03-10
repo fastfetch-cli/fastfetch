@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "modules/host/option.h"
 
 void ffPrintHost(FFinstance* instance, FFHostOptions* options);
 void ffInitHostOptions(FFHostOptions* options);
