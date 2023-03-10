@@ -5,6 +5,7 @@
 #include "common/time.h"
 #include "util/FFvaluestore.h"
 #include "util/stringUtils.h"
+#include "logo/logo.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -965,132 +966,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Logo options//
     ////////////////
 
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-
-        //this is usally wanted when using the none logo
-        if(strcasecmp(value, "none") == 0)
-        {
-            instance->config.logo.paddingTop = 0;
-            instance->config.logo.paddingRight = 0;
-            instance->config.logo.paddingLeft = 0;
-            instance->config.logo.type = FF_LOGO_TYPE_NONE;
-        }
-    }
-    else if(startsWith(key, "--logo"))
-    {
-        const char* subkey = key + strlen("--logo");
-        if(strcasecmp(subkey, "-type") == 0)
-        {
-            optionParseEnum(key, value, &instance->config.logo.type,
-                "auto", FF_LOGO_TYPE_AUTO,
-                "builtin", FF_LOGO_TYPE_BUILTIN,
-                "file", FF_LOGO_TYPE_FILE,
-                "file-raw", FF_LOGO_TYPE_FILE_RAW,
-                "data", FF_LOGO_TYPE_DATA,
-                "data-raw", FF_LOGO_TYPE_DATA_RAW,
-                "sixel", FF_LOGO_TYPE_IMAGE_SIXEL,
-                "kitty", FF_LOGO_TYPE_IMAGE_KITTY,
-                "iterm", FF_LOGO_TYPE_IMAGE_ITERM,
-                "chafa", FF_LOGO_TYPE_IMAGE_CHAFA,
-                "raw", FF_LOGO_TYPE_IMAGE_RAW,
-                "none", FF_LOGO_TYPE_NONE,
-                NULL
-            );
-        }
-        else if(startsWith(subkey, "-color-") && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
-        {
-            //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-            int index = (int)key[13] - 49;
-
-            //Match only --logo-color-[1-9]
-            if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
-            {
-                fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
-                exit(472);
-            }
-
-            optionParseColor(key, value, &instance->config.logo.colors[index]);
-        }
-        else if(strcasecmp(subkey, "-width") == 0)
-            instance->config.logo.width = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-height") == 0)
-            instance->config.logo.height = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-padding") == 0)
-        {
-            uint32_t padding = optionParseUInt32(key, value);
-            instance->config.logo.paddingLeft = padding;
-            instance->config.logo.paddingRight = padding;
-        }
-        else if(strcasecmp(subkey, "-padding-top") == 0)
-            instance->config.logo.paddingTop = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-padding-left") == 0)
-            instance->config.logo.paddingLeft = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-padding-right") == 0)
-            instance->config.logo.paddingRight = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-print-remaining") == 0)
-            instance->config.logo.printRemaining = optionParseBoolean(value);
-        else if(strcasecmp(subkey, "-preserve-aspect-radio") == 0)
-            instance->config.logo.preserveAspectRadio = optionParseBoolean(value);
-        else
-            goto error;
-    }
-    else if(strcasecmp(key, "--file") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_FILE;
-    }
-    else if(strcasecmp(key, "--file-raw") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_FILE_RAW;
-    }
-    else if(strcasecmp(key, "--data") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_DATA;
-    }
-    else if(strcasecmp(key, "--data-raw") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_DATA_RAW;
-    }
-    else if(strcasecmp(key, "--sixel") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_SIXEL;
-    }
-    else if(strcasecmp(key, "--kitty") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_KITTY;
-    }
-    else if(strcasecmp(key, "--chafa") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_CHAFA;
-    }
-    else if(strcasecmp(key, "--iterm") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_ITERM;
-    }
-    else if(strcasecmp(key, "--raw") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_RAW;
-    }
-    else if(strcasecmp(key, "--chafa-fg-only") == 0)
-        instance->config.logo.chafaFgOnly = optionParseBoolean(value);
-    else if(strcasecmp(key, "--chafa-symbols") == 0)
-        optionParseString(key, value, &instance->config.logo.chafaSymbols);
-    else if(strcasecmp(key, "--chafa-canvas-mode") == 0)
-        instance->config.logo.chafaCanvasMode = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--chafa-color-space") == 0)
-        instance->config.logo.chafaColorSpace = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--chafa-dither-mode") == 0)
-        instance->config.logo.chafaDitherMode = optionParseUInt32(key, value);
+    else if(ffParseLogoCommandOptions(&instance->config.logo, key, value)) {}
 
     ///////////////////
     //Display options//

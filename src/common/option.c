@@ -14,6 +14,10 @@ const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName)
         return NULL;
 
     subKey += moduleNameLen;
+
+    if(subKey[0] == '\0')
+        return subKey;
+
     if(subKey[0] != '-')
         return NULL;
 
@@ -99,6 +103,40 @@ bool ffOptionParseBoolean(const char* str)
         strcasecmp(str, "on")   == 0 ||
         strcasecmp(str, "1")    == 0
     );
+}
+
+void ffOptionParseColor(const char* key, const char* value, FFstrbuf* buffer)
+{
+    if(value == NULL)
+    {
+        fprintf(stderr, "Error: usage: %s <str>\n", key);
+        exit(477);
+    }
+    ffStrbufEnsureFree(buffer, 63);
+
+    while(*value != '\0')
+    {
+        #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
+            if(strncasecmp(value, #prefix, strlen(#prefix))) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
+
+        FF_APPEND_COLOR_CODE_COND(reset_, "0;")
+        else FF_APPEND_COLOR_CODE_COND(bright_, "1;")
+        else FF_APPEND_COLOR_CODE_COND(black, "30")
+        else FF_APPEND_COLOR_CODE_COND(red, "31")
+        else FF_APPEND_COLOR_CODE_COND(green, "32")
+        else FF_APPEND_COLOR_CODE_COND(yellow, "33")
+        else FF_APPEND_COLOR_CODE_COND(blue, "34")
+        else FF_APPEND_COLOR_CODE_COND(magenta, "35")
+        else FF_APPEND_COLOR_CODE_COND(cyan, "36")
+        else FF_APPEND_COLOR_CODE_COND(white, "37")
+        else
+        {
+            ffStrbufAppendC(buffer, *value);
+            ++value;
+        }
+
+        #undef FF_APPEND_COLOR_CODE_COND
+    }
 }
 
 void ffOptionInitModuleArg(FFModuleArgs* args)

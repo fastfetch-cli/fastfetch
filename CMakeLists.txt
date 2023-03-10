@@ -260,6 +260,7 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im7.c
     src/logo/image/image.c
     src/logo/logo.c
+    src/logo/option.c
     src/modules/battery/battery.c
     src/modules/bios/bios.c
     src/modules/bluetooth.c

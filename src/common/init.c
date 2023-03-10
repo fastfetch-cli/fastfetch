@@ -3,6 +3,7 @@
 #include "common/thread.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/textModifier.h"
+#include "logo/logo.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,23 +37,7 @@ static void initModuleArg(FFModuleArgs* args)
 
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInitA(&instance->config.logo.source, 0);
-    instance->config.logo.type = FF_LOGO_TYPE_AUTO;
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufInit(&instance->config.logo.colors[i]);
-    instance->config.logo.width = 0;
-    instance->config.logo.height = 0; //preserve aspect ratio
-    instance->config.logo.paddingTop = 0;
-    instance->config.logo.paddingLeft = 0;
-    instance->config.logo.paddingRight = 4;
-    instance->config.logo.printRemaining = true;
-    instance->config.logo.preserveAspectRadio = false;
-
-    instance->config.logo.chafaFgOnly = false;
-    ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
-    instance->config.logo.chafaCanvasMode = UINT32_MAX;
-    instance->config.logo.chafaColorSpace = UINT32_MAX;
-    instance->config.logo.chafaDitherMode = UINT32_MAX;
+    ffInitLogoOptions(&instance->config.logo);
 
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);
@@ -304,10 +289,8 @@ static void destroyModuleArg(FFModuleArgs* args)
 
 static void destroyConfig(FFinstance* instance)
 {
-    ffStrbufDestroy(&instance->config.logo.source);
-    ffStrbufDestroy(&instance->config.logo.chafaSymbols);
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufDestroy(&instance->config.logo.colors[i]);
+    ffDestroyLogoOptions(&instance->config.logo);
+
     ffStrbufDestroy(&instance->config.colorKeys);
     ffStrbufDestroy(&instance->config.colorTitle);
     ffStrbufDestroy(&instance->config.keyValueSeparator);
