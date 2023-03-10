@@ -6,6 +6,7 @@ Features:
 * Support cursor size detection on Windows (Cursor, Windows)
 * Support cursor detection on macOS (Cursor, macOS)
 * Support display name, display type and decimal refresh rate detection (Display, macOS / Windows)
+* Support `--display-compact-type` to display multiple resolutions in one line (Display)
 
 Bugfixes:
 * Fix date time format
