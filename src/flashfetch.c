@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     ffPrintTitle(&instance, &instance.config.title);
     ffPrintSeparator(&instance, &instance.config.separator);
     ffPrintOS(&instance, &instance.config.os);
-    ffPrintHost(&instance);
+    ffPrintHost(&instance, &instance.config.host);
     //ffPrintBios(&instance);
     //ffPrintBoard(&instance);
     //ffPrintChassis(&instance);

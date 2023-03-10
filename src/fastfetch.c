@@ -1134,7 +1134,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     ///////////////////////
 
     else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "host", &instance->config.host)) {}
+    else if(ffParseHostCommandOptions(&instance->config.host, key, value)) {}
     else if(optionParseModuleArgs(key, value, "bios", &instance->config.bios)) {}
     else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
     else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
@@ -1385,7 +1385,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "os") == 0)
         ffPrintOS(instance, &instance->config.os);
     else if(strcasecmp(line, "host") == 0)
-        ffPrintHost(instance);
+        ffPrintHost(instance, &instance->config.host);
     else if(strcasecmp(line, "bios") == 0)
         ffPrintBios(instance);
     else if(strcasecmp(line, "board") == 0)
