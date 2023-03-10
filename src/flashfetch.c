@@ -27,7 +27,7 @@ int main(int argc, char** argv)
     //ffPrintBios(&instance);
     //ffPrintBoard(&instance);
     //ffPrintChassis(&instance);
-    ffPrintKernel(&instance);
+    ffPrintKernel(&instance, &instance.config.kernel);
     ffPrintUptime(&instance);
     //ffPrintProcesses(&instance);
     ffPrintPackages(&instance);

@@ -134,7 +134,7 @@ typedef struct FFconfig
     FFModuleArgs brightness;
     FFModuleArgs chassis;
     FFCommandOptions command;
-    FFModuleArgs kernel;
+    FFKernelOptions kernel;
     FFModuleArgs uptime;
     FFModuleArgs processes;
     FFModuleArgs packages;
@@ -289,7 +289,6 @@ void ffPrintBreak(FFinstance* instance);
 void ffPrintBios(FFinstance* instance);
 void ffPrintBoard(FFinstance* instance);
 void ffPrintChassis(FFinstance* instance);
-void ffPrintKernel(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
 void ffPrintPackages(FFinstance* instance);

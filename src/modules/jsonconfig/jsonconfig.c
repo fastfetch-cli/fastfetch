@@ -18,6 +18,7 @@ static inline bool parseModuleJsonObject(FFinstance* instance, const char* type,
         ffParseDateTimeJsonObject(instance, type, data, module) ||
         ffParseDisplayJsonObject(instance, type, data, module) ||
         ffParseHostJsonObject(instance, type, data, module) ||
+        ffParseKernelJsonObject(instance, type, data, module) ||
         ffParseOSJsonObject(instance, type, data, module) ||
         ffParseSeparatorJsonObject(instance, type, data, module) ||
         false;

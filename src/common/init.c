@@ -80,7 +80,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.brightness);
     initModuleArg(&instance->config.chassis);
     ffInitCommandOptions(&instance->config.command);
-    initModuleArg(&instance->config.kernel);
+    ffInitKernelOptions(&instance->config.kernel);
     initModuleArg(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
     initModuleArg(&instance->config.packages);
@@ -319,7 +319,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.board);
     destroyModuleArg(&instance->config.chassis);
     ffDestroyCommandOptions(&instance->config.command);
-    destroyModuleArg(&instance->config.kernel);
+    ffDestroyKernelOptions(&instance->config.kernel);
     destroyModuleArg(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);
     destroyModuleArg(&instance->config.packages);

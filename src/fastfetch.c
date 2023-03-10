@@ -1139,7 +1139,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
     else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
     else if(ffParseCommandCommandOptions(&instance->config.command, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "kernel", &instance->config.kernel)) {}
+    else if(ffParseKernelCommandOptions(&instance->config.kernel, key, value)) {}
     else if(optionParseModuleArgs(key, value, "uptime", &instance->config.uptime)) {}
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
     else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
@@ -1395,7 +1395,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "chassis") == 0)
         ffPrintChassis(instance);
     else if(strcasecmp(line, "kernel") == 0)
-        ffPrintKernel(instance);
+        ffPrintKernel(instance, &instance->config.kernel);
     else if(strcasecmp(line, "uptime") == 0)
         ffPrintUptime(instance);
     else if(strcasecmp(line, "processes") == 0)

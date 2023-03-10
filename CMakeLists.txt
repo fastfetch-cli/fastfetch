@@ -281,7 +281,7 @@ set(LIBFASTFETCH_SRC
     src/modules/host/host.c
     src/modules/icons.c
     src/modules/gamepad.c
-    src/modules/kernel.c
+    src/modules/kernel/kernel.c
     src/modules/locale.c
     src/modules/localip.c
     src/modules/memory.c
