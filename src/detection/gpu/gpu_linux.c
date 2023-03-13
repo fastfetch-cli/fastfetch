@@ -10,6 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pci/pci.h>
+#include <setjmp.h>
 
 typedef struct PCIData
 {
@@ -220,6 +221,30 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
         pciDetectTemperatur(gpu, device);
 }
 
+jmp_buf pciInitJmpBuf;
+static void  __attribute__((__noreturn__))
+handlePciInitError(FF_MAYBE_UNUSED char *msg, ...)
+{
+    longjmp(pciInitJmpBuf, 1);
+}
+// https://github.com/pciutils/pciutils/blob/bca0412843fa650c749128ade03f35ab3e8fe2b9/lib/init.c#L186
+static void __attribute__((__noreturn__))
+handlePciGenericError(char *msg, ...)
+{
+    va_list args;
+
+    va_start(args, msg);
+    fputs("pcilib: ", stderr);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+    fputc('\n', stderr);
+    exit(1);
+}
+static void handlePciWarning(FF_MAYBE_UNUSED char *msg, ...)
+{
+    // noop
+}
+
 static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 {
     PCIData pci;
@@ -240,7 +265,14 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     #endif
 
     pci.access = ffpci_alloc();
-    ffpci_init(pci.access);
+    pci.access->warning = handlePciWarning;
+    pci.access->error = handlePciInitError;
+    if(setjmp(pciInitJmpBuf) == 0) // https://github.com/pciutils/pciutils/issues/136
+        ffpci_init(pci.access);
+    else
+        return "pcilib: Cannot find any working access method.";
+    pci.access->error = handlePciGenericError; // set back to generic error so we don't mess up error handling in other places
+
     ffpci_scan_bus(pci.access);
 
     struct pci_dev* device = pci.access->devices;
