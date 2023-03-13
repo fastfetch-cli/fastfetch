@@ -101,7 +101,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
-    initModuleArg(&instance->config.bluetooth);
+    ffInitBluetoothOptions(&instance->config.bluetooth);
     initModuleArg(&instance->config.sound);
     ffInitSeparatorOptions(&instance->config.separator);
     initModuleArg(&instance->config.gamepad);
@@ -144,8 +144,6 @@ static void defaultConfig(FFinstance* instance)
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
     instance->config.diskShowTypes = FF_DISK_TYPE_REGULAR_BIT | FF_DISK_TYPE_EXTERNAL_BIT;
-
-    instance->config.bluetoothShowDisconnected = false;
 
     instance->config.soundType = FF_SOUND_TYPE_MAIN;
 
@@ -338,7 +336,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.openGL);
     destroyModuleArg(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
-    destroyModuleArg(&instance->config.bluetooth);
+    ffDestroyBluetoothOptions(&instance->config.bluetooth);
     ffDestroySeparatorOptions(&instance->config.separator);
     destroyModuleArg(&instance->config.sound);
     destroyModuleArg(&instance->config.gamepad);

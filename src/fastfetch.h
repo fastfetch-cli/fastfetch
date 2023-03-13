@@ -135,7 +135,7 @@ typedef struct FFconfig
     FFModuleArgs openGL;
     FFModuleArgs openCL;
     FFModuleArgs users;
-    FFModuleArgs bluetooth;
+    FFBluetoothOptions bluetooth;
     FFSeparatorOptions separator;
     FFModuleArgs sound;
     FFModuleArgs gamepad;
@@ -178,8 +178,6 @@ typedef struct FFconfig
 
     FFstrbuf diskFolders;
     FFDiskType diskShowTypes;
-
-    bool bluetoothShowDisconnected;
 
     FFstrbuf localIpNamePrefix;
     FFLocalIpType localIpShowType;
@@ -292,7 +290,6 @@ void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
-void ffPrintBluetooth(FFinstance* instance);
 void ffPrintSound(FFinstance* instance);
 void ffPrintGamepad(FFinstance* instance);
 

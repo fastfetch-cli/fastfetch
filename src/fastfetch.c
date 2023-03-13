@@ -1052,7 +1052,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
-    else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
+    else if(ffParseBluetoothCommandOptions(&instance->config.bluetooth, key, value)) {}
     else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
     else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
     else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
@@ -1148,8 +1148,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_SUBVOLUME_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT);
     else if(strcasecmp(key, "--disk-show-unknown") == 0)
         optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_UNKNOWN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT);
-    else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
-        instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
     else if(strcasecmp(key, "--sound-type") == 0)
     {
         optionParseEnum(key, value, &instance->config.soundType,
@@ -1347,7 +1345,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "command") == 0)
         ffPrintCommand(instance, &instance->config.command);
     else if(strcasecmp(line, "bluetooth") == 0)
-        ffPrintBluetooth(instance);
+        ffPrintBluetooth(instance, &instance->config.bluetooth);
     else if(strcasecmp(line, "sound") == 0)
         ffPrintSound(instance);
     else if(strcasecmp(line, "gamepad") == 0)

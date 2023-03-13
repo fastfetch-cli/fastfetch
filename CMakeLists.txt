@@ -263,7 +263,7 @@ set(LIBFASTFETCH_SRC
     src/logo/option.c
     src/modules/battery/battery.c
     src/modules/bios/bios.c
-    src/modules/bluetooth.c
+    src/modules/bluetooth/bluetooth.c
     src/modules/board.c
     src/modules/brightness.c
     src/modules/break.c
