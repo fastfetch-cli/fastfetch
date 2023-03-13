@@ -250,7 +250,6 @@ void ffPrepareWeather(FFinstance* instance);
 //Printing
 
 void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
-void ffPrintBreak(FFinstance* instance);
 void ffPrintChassis(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);

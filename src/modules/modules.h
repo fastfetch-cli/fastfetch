@@ -7,6 +7,7 @@
 #include "modules/bios/bios.h"
 #include "modules/bluetooth/bluetooth.h"
 #include "modules/board/board.h"
+#include "modules/break/break.h"
 #include "modules/command/command.h"
 #include "modules/datetime/datetime.h"
 #include "modules/display/display.h"
