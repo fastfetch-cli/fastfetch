@@ -1021,7 +1021,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
     else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
     else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "brightness", &instance->config.brightness)) {}
+    else if(ffParseBrightnessCommandOptions(&instance->config.brightness, key, value)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
     else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
     else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
@@ -1265,7 +1265,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
     else if(strcasecmp(line, "board") == 0)
         ffPrintBoard(instance, &instance->config.board);
     else if(strcasecmp(line, "brightness") == 0)
-        ffPrintBrightness(instance);
+        ffPrintBrightness(instance, &instance->config.brightness);
     else if(strcasecmp(line, "chassis") == 0)
         ffPrintChassis(instance);
     else if(strcasecmp(line, "kernel") == 0)

@@ -6,6 +6,7 @@
 #include "modules/battery/battery.h"
 #include "modules/bios/bios.h"
 #include "modules/bluetooth/bluetooth.h"
+#include "modules/brightness/brightness.h"
 #include "modules/board/board.h"
 #include "modules/break/break.h"
 #include "modules/command/command.h"
