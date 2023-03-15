@@ -269,7 +269,7 @@ set(LIBFASTFETCH_SRC
     src/modules/brightness/brightness.c
     src/modules/break/break.c
     src/modules/chassis.c
-    src/modules/colors.c
+    src/modules/colors/colors.c
     src/modules/cpu.c
     src/modules/cpuUsage.c
     src/modules/cursor.c

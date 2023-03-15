@@ -10,6 +10,7 @@
 #include "modules/board/board.h"
 #include "modules/break/break.h"
 #include "modules/command/command.h"
+#include "modules/colors/colors.h"
 #include "modules/datetime/datetime.h"
 #include "modules/display/display.h"
 #include "modules/host/host.h"

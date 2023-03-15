@@ -1331,7 +1331,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintMedia(instance);
     else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)
         ffPrintDateTime(instance, &instance->config.dateTime);
-    else if(strcasecmp(line, "colors") == 0)
+    else if(strcasecmp(line, FF_COLORS_MODULE_NAME) == 0)
         ffPrintColors(instance);
     else if(strcasecmp(line, "vulkan") == 0)
         ffPrintVulkan(instance);

@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "util/textModifier.h"
+#include "modules/colors/colors.h"
 
 void ffPrintColors(FFinstance* instance)
 {
@@ -28,3 +29,10 @@ void ffPrintColors(FFinstance* instance)
 
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
+
+#ifdef FF_HAVE_JSONC
+void ffParseColorsJsonObject(FFinstance* instance, FF_MAYBE_UNUSED json_object* module)
+{
+    return ffPrintColors(instance);
+}
+#endif
