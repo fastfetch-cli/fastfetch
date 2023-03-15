@@ -3,7 +3,6 @@
 #include "detection/brightness/brightness.h"
 #include "modules/brightness/brightness.h"
 
-#define FF_BRIGHTNESS_MODULE_NAME "Brightness"
 #define FF_BRIGHTNESS_NUM_FORMAT_ARGS 2
 
 void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
@@ -80,11 +79,8 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBrightnessJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseBrightnessJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_BRIGHTNESS_MODULE_NAME) != 0)
-        return false;
-
     FFBrightnessOptions __attribute__((__cleanup__(ffDestroyBrightnessOptions))) options;
     ffInitBrightnessOptions(&options);
 
@@ -92,9 +88,6 @@ bool ffParseBrightnessJsonObject(FFinstance* instance, const char* type, json_ob
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -103,6 +96,5 @@ bool ffParseBrightnessJsonObject(FFinstance* instance, const char* type, json_ob
     }
 
     ffPrintBrightness(instance, &options);
-    return true;
 }
 #endif

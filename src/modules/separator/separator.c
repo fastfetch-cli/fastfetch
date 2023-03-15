@@ -2,8 +2,6 @@
 #include "common/printing.h"
 #include "modules/separator/separator.h"
 
-#define FF_SEPARATOR_MODULE_NAME "Separator"
-
 void ffPrintSeparator(FFinstance* instance, FFSeparatorOptions* options)
 {
     uint32_t titleLength = instance->state.titleLength;
@@ -61,11 +59,8 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseSeparatorJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseSeparatorJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_SEPARATOR_MODULE_NAME) != 0)
-        return false;
-
     FFSeparatorOptions __attribute__((__cleanup__(ffDestroySeparatorOptions))) options;
     ffInitSeparatorOptions(&options);
 
@@ -73,9 +68,6 @@ bool ffParseSeparatorJsonObject(FFinstance* instance, const char* type, json_obj
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (strcasecmp(key, "string") == 0)
             {
                 ffStrbufSetS(&options.string, json_object_get_string(val));
@@ -87,6 +79,5 @@ bool ffParseSeparatorJsonObject(FFinstance* instance, const char* type, json_obj
     }
 
     ffPrintSeparator(instance, &options);
-    return true;
 }
 #endif

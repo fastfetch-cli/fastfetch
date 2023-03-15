@@ -2,6 +2,8 @@
 
 #include "fastfetch.h"
 
+#define FF_BATTERY_MODULE_NAME "Battery"
+
 void ffPrintBattery(FFinstance* instance, FFBatteryOptions* options);
 
 void ffInitBatteryOptions(FFBatteryOptions* options);
@@ -10,5 +12,5 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options);
 
 #ifdef FF_HAVE_JSONC
 #include "common/jsonconfig.h"
-bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, json_object* module);
+void ffParseBatteryJsonObject(FFinstance* instance, json_object* module);
 #endif

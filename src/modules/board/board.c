@@ -3,7 +3,6 @@
 #include "detection/board/board.h"
 #include "modules/board/board.h"
 
-#define FF_BOARD_MODULE_NAME "Board"
 #define FF_BOARD_NUM_FORMAT_ARGS 3
 
 void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
@@ -66,11 +65,8 @@ void ffDestroyBoardOptions(FFBoardOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBoardJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseBoardJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_BOARD_MODULE_NAME) != 0)
-        return false;
-
     FFBoardOptions __attribute__((__cleanup__(ffDestroyBoardOptions))) options;
     ffInitBoardOptions(&options);
 
@@ -78,9 +74,6 @@ bool ffParseBoardJsonObject(FFinstance* instance, const char* type, json_object*
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -89,6 +82,5 @@ bool ffParseBoardJsonObject(FFinstance* instance, const char* type, json_object*
     }
 
     ffPrintBoard(instance, &options);
-    return true;
 }
 #endif

@@ -3,7 +3,6 @@
 #include "detection/host/host.h"
 #include "modules/host/host.h"
 
-#define FF_HOST_MODULE_NAME "Host"
 #define FF_HOST_NUM_FORMAT_ARGS 5
 
 void ffPrintHost(FFinstance* instance, FFHostOptions* options)
@@ -77,11 +76,8 @@ void ffDestroyHostOptions(FFHostOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseHostJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseHostJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_HOST_MODULE_NAME) != 0)
-        return false;
-
     FFHostOptions __attribute__((__cleanup__(ffDestroyHostOptions))) options;
     ffInitHostOptions(&options);
 
@@ -89,9 +85,6 @@ bool ffParseHostJsonObject(FFinstance* instance, const char* type, json_object* 
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -100,6 +93,5 @@ bool ffParseHostJsonObject(FFinstance* instance, const char* type, json_object* 
     }
 
     ffPrintHost(instance, &options);
-    return true;
 }
 #endif

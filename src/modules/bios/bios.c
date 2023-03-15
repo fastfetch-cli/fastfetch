@@ -3,7 +3,6 @@
 #include "detection/bios/bios.h"
 #include "modules/bios/bios.h"
 
-#define FF_BIOS_MODULE_NAME "Bios"
 #define FF_BIOS_NUM_FORMAT_ARGS 4
 
 void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
@@ -68,11 +67,8 @@ void ffDestroyBiosOptions(FFBiosOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBiosJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseBiosJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_BIOS_MODULE_NAME) != 0)
-        return false;
-
     FFBiosOptions __attribute__((__cleanup__(ffDestroyBiosOptions))) options;
     ffInitBiosOptions(&options);
 
@@ -80,9 +76,6 @@ bool ffParseBiosJsonObject(FFinstance* instance, const char* type, json_object* 
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -91,6 +84,5 @@ bool ffParseBiosJsonObject(FFinstance* instance, const char* type, json_object* 
     }
 
     ffPrintBios(instance, &options);
-    return true;
 }
 #endif

@@ -2,7 +2,6 @@
 #include "common/printing.h"
 #include "modules/kernel/kernel.h"
 
-#define FF_KERNEL_MODULE_NAME "Kernel"
 #define FF_KERNEL_NUM_FORMAT_ARGS 4
 
 void ffPrintKernel(FFinstance* instance, FFKernelOptions* options)
@@ -52,11 +51,8 @@ void ffDestroyKernelOptions(FFKernelOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseKernelJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseKernelJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_KERNEL_MODULE_NAME) != 0)
-        return false;
-
     FFKernelOptions __attribute__((__cleanup__(ffDestroyKernelOptions))) options;
     ffInitKernelOptions(&options);
 
@@ -64,9 +60,6 @@ bool ffParseKernelJsonObject(FFinstance* instance, const char* type, json_object
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -75,6 +68,5 @@ bool ffParseKernelJsonObject(FFinstance* instance, const char* type, json_object
     }
 
     ffPrintKernel(instance, &options);
-    return true;
 }
 #endif

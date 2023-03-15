@@ -18,7 +18,9 @@ typedef struct FFJsonLibrary
     FF_LIBRARY_SYMBOL(json_object_get_string_len)
     FF_LIBRARY_SYMBOL(json_object_get_string)
     FF_LIBRARY_SYMBOL(json_object_get_object)
+    FF_LIBRARY_SYMBOL(json_object_object_del)
     FF_LIBRARY_SYMBOL(json_object_object_get)
+    FF_LIBRARY_SYMBOL(json_object_object_length)
     FF_LIBRARY_SYMBOL(json_object_put)
 } FFJsonLibrary;
 
@@ -43,7 +45,9 @@ static const FFJsonLibrary* loadLibSymbols(const FFinstance* instance)
     FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_get_string_len, NULL)
     FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_get_string, NULL)
     FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_get_object, NULL)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_object_del, NULL)
     FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_object_get, NULL)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_object_length, NULL)
     FF_LIBRARY_LOAD_SYMBOL_VAR(libjsonc, lib, json_object_put, NULL)
     libjsonc = NULL; // don't dlclose automatically
     return &lib;
@@ -124,10 +128,22 @@ struct lh_table *json_object_get_object(const json_object *obj)
     return ffJsonLib->ffjson_object_get_object(obj);
 }
 
+void json_object_object_del(struct json_object *obj, const char *key)
+{
+    assert(ffJsonLib);
+    return ffJsonLib->ffjson_object_object_del(obj, key);
+}
+
 struct json_object *json_object_object_get(const json_object *obj, const char *key)
 {
     assert(ffJsonLib);
     return ffJsonLib->ffjson_object_object_get(obj, key);
+}
+
+int json_object_object_length(const json_object *obj)
+{
+    assert(ffJsonLib);
+    return ffJsonLib->ffjson_object_object_length(obj);
 }
 
 int json_object_put(json_object *obj)

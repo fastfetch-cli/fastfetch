@@ -3,8 +3,6 @@
 #include "util/textModifier.h"
 #include "modules/title/title.h"
 
-#define FF_TITLE_MODULE_NAME "Title"
-
 static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
 {
     if(!instance->config.pipe)
@@ -61,11 +59,8 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseTitleJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseTitleJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_TITLE_MODULE_NAME) != 0)
-        return false;
-
     FFTitleOptions __attribute__((__cleanup__(ffDestroyTitleOptions))) options;
     ffInitTitleOptions(&options);
 
@@ -73,9 +68,6 @@ bool ffParseTitleJsonObject(FFinstance* instance, const char* type, json_object*
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (strcasecmp(key, "fdqn") == 0)
             {
                 options.fdqn = json_object_get_boolean(val);
@@ -87,6 +79,5 @@ bool ffParseTitleJsonObject(FFinstance* instance, const char* type, json_object*
     }
 
     ffPrintTitle(instance, &options);
-    return true;
 }
 #endif

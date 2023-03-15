@@ -6,7 +6,6 @@
 
 #include <ctype.h>
 
-#define FF_OS_MODULE_NAME "OS"
 #define FF_OS_NUM_FORMAT_ARGS 12
 
 static void buildOutputDefault(const FFinstance* instance, const FFOSResult* os, FFstrbuf* result)
@@ -175,11 +174,8 @@ void ffDestroyOSOptions(FFOSOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseOSJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseOSJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_OS_MODULE_NAME) != 0)
-        return false;
-
     FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
     ffInitOSOptions(&options);
 
@@ -187,9 +183,6 @@ bool ffParseOSJsonObject(FFinstance* instance, const char* type, json_object* mo
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -206,6 +199,5 @@ bool ffParseOSJsonObject(FFinstance* instance, const char* type, json_object* mo
     }
 
     ffPrintOS(instance, &options);
-    return true;
 }
 #endif

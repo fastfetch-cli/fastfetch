@@ -4,7 +4,6 @@
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
 
-#define FF_BATTERY_MODULE_NAME "Battery"
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
 static void printBattery(FFinstance* instance, FFBatteryOptions* options, BatteryResult* result, uint8_t index)
@@ -148,11 +147,8 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseBatteryJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_BATTERY_MODULE_NAME) != 0)
-        return false;
-
     FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
     ffInitBatteryOptions(&options);
 
@@ -160,9 +156,6 @@ bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, json_objec
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -185,6 +178,5 @@ bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, json_objec
     }
 
     ffPrintBattery(instance, &options);
-    return true;
 }
 #endif

@@ -2,7 +2,6 @@
 #include "detection/bluetooth/bluetooth.h"
 #include "modules/bluetooth/bluetooth.h"
 
-#define FF_BLUETOOTH_MODULE_NAME "Bluetooth"
 #define FF_BLUETOOTH_NUM_FORMAT_ARGS 4
 
 static void printDevice(FFinstance* instance, FFBluetoothOptions* options, const FFBluetoothDevice* device, uint8_t index)
@@ -89,11 +88,8 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseBluetoothJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_BLUETOOTH_MODULE_NAME) != 0)
-        return false;
-
     FFBluetoothOptions __attribute__((__cleanup__(ffDestroyBluetoothOptions))) options;
     ffInitBluetoothOptions(&options);
 
@@ -101,9 +97,6 @@ bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, json_obj
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -118,6 +111,5 @@ bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, json_obj
     }
 
     ffPrintBluetooth(instance, &options);
-    return true;
 }
 #endif

@@ -4,8 +4,6 @@
 #include "common/processing.h"
 #include "modules/command/command.h"
 
-#define FF_COMMAND_MODULE_NAME "Command"
-
 void ffPrintCommand(FFinstance* instance, FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result;
@@ -85,11 +83,8 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseCommandJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseCommandJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_COMMAND_MODULE_NAME) != 0)
-        return false;
-
     FFCommandOptions __attribute__((__cleanup__(ffDestroyCommandOptions))) options;
     ffInitCommandOptions(&options);
 
@@ -97,9 +92,6 @@ bool ffParseCommandJsonObject(FFinstance* instance, const char* type, json_objec
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -120,6 +112,5 @@ bool ffParseCommandJsonObject(FFinstance* instance, const char* type, json_objec
     }
 
     ffPrintCommand(instance, &options);
-    return true;
 }
 #endif

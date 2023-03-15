@@ -9,25 +9,80 @@
 #include "modules/modules.h"
 
 #include <assert.h>
+#include <ctype.h>
 
-static inline bool parseModuleJsonObject(FFinstance* instance, const char* type, json_object* module)
+static inline bool tryModule(FFinstance* instance, const char* type, json_object* module, const char* moduleName, void (*const f)(FFinstance *instance, json_object *module))
 {
-    return
-        ffParseTitleJsonObject(instance, type, module) ||
-        ffParseBatteryJsonObject(instance, type, module) ||
-        ffParseBiosJsonObject(instance, type, module) ||
-        ffParseBluetoothJsonObject(instance, type, module) ||
-        ffParseBoardJsonObject(instance, type, module) ||
-        ffParseBreakJsonObject(instance, type, module) ||
-        ffParseBrightnessJsonObject(instance, type, module) ||
-        ffParseCommandJsonObject(instance, type, module) ||
-        ffParseDateTimeJsonObject(instance, type, module) ||
-        ffParseDisplayJsonObject(instance, type, module) ||
-        ffParseHostJsonObject(instance, type, module) ||
-        ffParseKernelJsonObject(instance, type, module) ||
-        ffParseOSJsonObject(instance, type, module) ||
-        ffParseSeparatorJsonObject(instance, type, module) ||
-        false;
+    if (strcasecmp(type, moduleName) == 0)
+    {
+        if (module) json_object_object_del(module, "type"); // this line frees `type`
+        f(instance, module);
+        return true;
+    }
+    return false;
+}
+
+static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_object* module)
+{
+    switch (toupper(type[0]))
+    {
+        case 'B': {
+            return
+                tryModule(instance, type, module, FF_BATTERY_MODULE_NAME, ffParseBatteryJsonObject) ||
+                tryModule(instance, type, module, FF_BIOS_MODULE_NAME, ffParseBiosJsonObject) ||
+                tryModule(instance, type, module, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothJsonObject) ||
+                tryModule(instance, type, module, FF_BOARD_MODULE_NAME, ffParseBoardJsonObject) ||
+                tryModule(instance, type, module, FF_BREAK_MODULE_NAME, ffParseBreakJsonObject) ||
+                tryModule(instance, type, module, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessJsonObject) ||
+                false;
+        }
+
+        case 'C': {
+            return
+                tryModule(instance, type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
+                false;
+        }
+
+        case 'D': {
+            return
+                tryModule(instance, type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
+                tryModule(instance, type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
+                false;
+        }
+
+        case 'H': {
+            return
+                tryModule(instance, type, module, FF_HOST_MODULE_NAME, ffParseHostJsonObject) ||
+                false;
+        }
+
+        case 'K': {
+            return
+                tryModule(instance, type, module, FF_KERNEL_MODULE_NAME, ffParseKernelJsonObject) ||
+                false;
+        }
+
+        case 'O': {
+            return
+                tryModule(instance, type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
+                false;
+        }
+
+        case 'S': {
+            return
+                tryModule(instance, type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
+                false;
+        }
+
+        case 'T': {
+            return
+                tryModule(instance, type, module, FF_TITLE_MODULE_NAME, ffParseTitleJsonObject) ||
+                false;
+        }
+
+        default:
+            return false;
+    }
 }
 
 static const char* parseModules(FFinstance* instance, json_object* modules)
@@ -48,7 +103,9 @@ static const char* parseModules(FFinstance* instance, json_object* modules)
         {
             json_object* object = json_object_object_get(module, "type");
             type = json_object_get_string(object);
-            if (!type) return "module object must contain a type key";
+            if (!type) return "module object must contain a \"type\" key ( case sensitive )";
+            if (json_object_object_length(module) == 1) // contains only Property type
+                module = NULL;
         }
         else
             return "modules must be an array of strings or objects";

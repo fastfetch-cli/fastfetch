@@ -3,7 +3,6 @@
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
 
-#define FF_DISPLAY_MODULE_NAME "Display"
 #define FF_DISPLAY_NUM_FORMAT_ARGS 7
 
 void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
@@ -159,11 +158,8 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseDisplayJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_DISPLAY_MODULE_NAME) != 0)
-        return false;
-
     FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;
     ffInitDisplayOptions(&options);
 
@@ -171,9 +167,6 @@ bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, json_objec
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -210,6 +203,5 @@ bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, json_objec
     }
 
     ffPrintDisplay(instance, &options);
-    return true;
 }
 #endif

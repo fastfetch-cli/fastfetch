@@ -3,7 +3,6 @@
 #include "detection/datetime/datetime.h"
 #include "modules/datetime/datetime.h"
 
-#define FF_DATETIME_MODULE_NAME "DateTime"
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
 
@@ -71,11 +70,8 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseDateTimeJsonObject(FFinstance* instance, const char* type, json_object* module)
+void ffParseDateTimeJsonObject(FFinstance* instance, json_object* module)
 {
-    if (strcasecmp(type, FF_DATETIME_MODULE_NAME) != 0)
-        return false;
-
     FFDateTimeOptions __attribute__((__cleanup__(ffDestroyDateTimeOptions))) options;
     ffInitDateTimeOptions(&options);
 
@@ -83,9 +79,6 @@ bool ffParseDateTimeJsonObject(FFinstance* instance, const char* type, json_obje
     {
         json_object_object_foreach(module, key, val)
         {
-            if (strcasecmp(key, "type") == 0)
-                continue;
-
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -94,6 +87,5 @@ bool ffParseDateTimeJsonObject(FFinstance* instance, const char* type, json_obje
     }
 
     ffPrintDateTime(instance, &options);
-    return true;
 }
 #endif

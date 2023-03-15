@@ -1251,23 +1251,23 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
 
     if(strcasecmp(line, "break") == 0)
         ffPrintBreak(instance);
-    else if(strcasecmp(line, "title") == 0)
+    else if(strcasecmp(line, FF_TITLE_MODULE_NAME) == 0)
         ffPrintTitle(instance, &instance->config.title);
-    else if(strcasecmp(line, "separator") == 0)
+    else if(strcasecmp(line, FF_SEPARATOR_MODULE_NAME) == 0)
         ffPrintSeparator(instance, &instance->config.separator);
-    else if(strcasecmp(line, "os") == 0)
+    else if(strcasecmp(line, FF_OS_MODULE_NAME) == 0)
         ffPrintOS(instance, &instance->config.os);
-    else if(strcasecmp(line, "host") == 0)
+    else if(strcasecmp(line, FF_HOST_MODULE_NAME) == 0)
         ffPrintHost(instance, &instance->config.host);
-    else if(strcasecmp(line, "bios") == 0)
+    else if(strcasecmp(line, FF_BIOS_MODULE_NAME) == 0)
         ffPrintBios(instance, &instance->config.bios);
-    else if(strcasecmp(line, "board") == 0)
+    else if(strcasecmp(line, FF_BOARD_MODULE_NAME) == 0)
         ffPrintBoard(instance, &instance->config.board);
-    else if(strcasecmp(line, "brightness") == 0)
+    else if(strcasecmp(line, FF_BRIGHTNESS_MODULE_NAME) == 0)
         ffPrintBrightness(instance, &instance->config.brightness);
     else if(strcasecmp(line, "chassis") == 0)
         ffPrintChassis(instance);
-    else if(strcasecmp(line, "kernel") == 0)
+    else if(strcasecmp(line, FF_KERNEL_MODULE_NAME) == 0)
         ffPrintKernel(instance, &instance->config.kernel);
     else if(strcasecmp(line, "uptime") == 0)
         ffPrintUptime(instance);
@@ -1277,7 +1277,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintPackages(instance);
     else if(strcasecmp(line, "shell") == 0)
         ffPrintShell(instance);
-    else if(strcasecmp(line, "display") == 0)
+    else if(strcasecmp(line, FF_DISPLAY_MODULE_NAME) == 0)
         ffPrintDisplay(instance, &instance->config.display);
     else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
         ffPrintDesktopEnvironment(instance);
@@ -1329,7 +1329,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintPlayer(instance);
     else if(strcasecmp(line, "media") == 0)
         ffPrintMedia(instance);
-    else if(strcasecmp(line, "datetime") == 0)
+    else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)
         ffPrintDateTime(instance, &instance->config.dateTime);
     else if(strcasecmp(line, "colors") == 0)
         ffPrintColors(instance);
@@ -1341,7 +1341,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintOpenCL(instance);
     else if(strcasecmp(line, "users") == 0)
         ffPrintUsers(instance);
-    else if(strcasecmp(line, "command") == 0)
+    else if(strcasecmp(line, FF_COMMAND_MODULE_NAME) == 0)
         ffPrintCommand(instance, &instance->config.command);
     else if(strcasecmp(line, "bluetooth") == 0)
         ffPrintBluetooth(instance, &instance->config.bluetooth);
@@ -1349,7 +1349,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintSound(instance);
     else if(strcasecmp(line, "gamepad") == 0)
         ffPrintGamepad(instance);
-    else if(strcasecmp(line, "jsonconfig") == 0)
+    else if(strcasecmp(line, FF_JSONCONFIG_MODULE_NAME) == 0)
         ffPrintJsonConfig(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
