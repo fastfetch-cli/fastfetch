@@ -71,7 +71,7 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseDateTimeJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseDateTimeJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_DATETIME_MODULE_NAME) != 0)
         return false;
@@ -79,15 +79,18 @@ bool ffParseDateTimeJsonObject(FFinstance* instance, const char* type, JSONCData
     FFDateTimeOptions __attribute__((__cleanup__(ffDestroyDateTimeOptions))) options;
     ffInitDateTimeOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
+        json_object_object_foreach(module, key, val)
+        {
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
 
-        ffPrintError(instance, FF_DATETIME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(instance, FF_DATETIME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintDateTime(instance, &options);

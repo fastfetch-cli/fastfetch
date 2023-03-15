@@ -148,7 +148,7 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_BATTERY_MODULE_NAME) != 0)
         return false;
@@ -156,29 +156,32 @@ bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, JSONCData*
     FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
     ffInitBatteryOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
-
-        #ifdef __linux__
-        if (strcasecmp(key, "dir") == 0)
+        json_object_object_foreach(module, key, val)
         {
-            ffStrbufSetS(&options.dir, data->ffjson_object_get_string(val));
-            continue;
-        }
-        #endif
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        if (strcasecmp(key, "temp") == 0)
-        {
-            options.temp = (bool) data->ffjson_object_get_boolean(val);
-            continue;
-        }
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
 
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            #ifdef __linux__
+            if (strcasecmp(key, "dir") == 0)
+            {
+                ffStrbufSetS(&options.dir, json_object_get_string(val));
+                continue;
+            }
+            #endif
+
+            if (strcasecmp(key, "temp") == 0)
+            {
+                options.temp = (bool) json_object_get_boolean(val);
+                continue;
+            }
+
+            ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintBattery(instance, &options);

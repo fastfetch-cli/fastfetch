@@ -8,6 +8,6 @@ bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options);
 
 #ifdef FF_HAVE_JSONC
-#include "common/config.h"
-bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module);
+#include "common/jsonconfig.h"
+bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, json_object* module);
 #endif

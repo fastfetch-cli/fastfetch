@@ -61,7 +61,7 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseTitleJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseTitleJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_TITLE_MODULE_NAME) != 0)
         return false;
@@ -69,18 +69,21 @@ bool ffParseTitleJsonObject(FFinstance* instance, const char* type, JSONCData* d
     FFTitleOptions __attribute__((__cleanup__(ffDestroyTitleOptions))) options;
     ffInitTitleOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (strcasecmp(key, "fdqn") == 0)
+        json_object_object_foreach(module, key, val)
         {
-            options.fdqn = data->ffjson_object_get_boolean(val);
-            continue;
-        }
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        ffPrintErrorString(instance, FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            if (strcasecmp(key, "fdqn") == 0)
+            {
+                options.fdqn = json_object_get_boolean(val);
+                continue;
+            }
+
+            ffPrintErrorString(instance, FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintTitle(instance, &options);

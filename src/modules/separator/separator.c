@@ -61,7 +61,7 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseSeparatorJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseSeparatorJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_SEPARATOR_MODULE_NAME) != 0)
         return false;
@@ -69,18 +69,21 @@ bool ffParseSeparatorJsonObject(FFinstance* instance, const char* type, JSONCDat
     FFSeparatorOptions __attribute__((__cleanup__(ffDestroySeparatorOptions))) options;
     ffInitSeparatorOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (strcasecmp(key, "string") == 0)
+        json_object_object_foreach(module, key, val)
         {
-            ffStrbufSetS(&options.string, data->ffjson_object_get_string(val));
-            continue;
-        }
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        ffPrintErrorString(instance, FF_SEPARATOR_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            if (strcasecmp(key, "string") == 0)
+            {
+                ffStrbufSetS(&options.string, json_object_get_string(val));
+                continue;
+            }
+
+            ffPrintErrorString(instance, FF_SEPARATOR_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintSeparator(instance, &options);

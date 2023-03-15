@@ -9,6 +9,6 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
 void ffDestroyTitleOptions(FFTitleOptions* options);
 
 #ifdef FF_HAVE_JSONC
-#include "common/config.h"
-bool ffParseTitleJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module);
+#include "common/jsonconfig.h"
+bool ffParseTitleJsonObject(FFinstance* instance, const char* type, json_object* module);
 #endif

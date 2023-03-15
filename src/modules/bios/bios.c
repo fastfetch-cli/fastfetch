@@ -68,7 +68,7 @@ void ffDestroyBiosOptions(FFBiosOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBiosJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseBiosJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_BIOS_MODULE_NAME) != 0)
         return false;
@@ -76,15 +76,18 @@ bool ffParseBiosJsonObject(FFinstance* instance, const char* type, JSONCData* da
     FFBiosOptions __attribute__((__cleanup__(ffDestroyBiosOptions))) options;
     ffInitBiosOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
+        json_object_object_foreach(module, key, val)
+        {
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
 
-        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintBios(instance, &options);

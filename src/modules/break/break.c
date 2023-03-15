@@ -11,7 +11,7 @@ void ffPrintBreak(FFinstance* instance)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBreakJsonObject(FFinstance* instance, const char* type, FF_MAYBE_UNUSED JSONCData* data, FF_MAYBE_UNUSED json_object* module)
+bool ffParseBreakJsonObject(FFinstance* instance, const char* type, FF_MAYBE_UNUSED json_object* module)
 {
     if (strcasecmp(type, FF_BREAK_MODULE_NAME) != 0)
         return false;

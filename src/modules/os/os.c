@@ -175,7 +175,7 @@ void ffDestroyOSOptions(FFOSOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseOSJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseOSJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_OS_MODULE_NAME) != 0)
         return false;
@@ -183,23 +183,26 @@ bool ffParseOSJsonObject(FFinstance* instance, const char* type, JSONCData* data
     FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
     ffInitOSOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
-
-        #if defined(__linux__) || defined(__FreeBSD__)
-            if (strcasecmp(key, "file") == 0)
-            {
-                ffStrbufSetS(&options.file, data->ffjson_object_get_string(val));
+        json_object_object_foreach(module, key, val)
+        {
+            if (strcasecmp(key, "type") == 0)
                 continue;
-            }
-        #endif
 
-        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            #if defined(__linux__) || defined(__FreeBSD__)
+                if (strcasecmp(key, "file") == 0)
+                {
+                    ffStrbufSetS(&options.file, json_object_get_string(val));
+                    continue;
+                }
+            #endif
+
+            ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintOS(instance, &options);

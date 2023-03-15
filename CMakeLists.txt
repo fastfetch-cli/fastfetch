@@ -228,10 +228,11 @@ configure_file(src/fastfetch_config.h.in fastfetch_config.h)
 
 set(LIBFASTFETCH_SRC
     src/common/bar.c
-    src/common/config.c
     src/common/font.c
     src/common/format.c
     src/common/init.c
+    src/common/json.c
+    src/common/jsonconfig.c
     src/common/library.c
     src/common/option.c
     src/common/parsing.c

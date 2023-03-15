@@ -85,7 +85,7 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseCommandJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseCommandJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_COMMAND_MODULE_NAME) != 0)
         return false;
@@ -93,27 +93,30 @@ bool ffParseCommandJsonObject(FFinstance* instance, const char* type, JSONCData*
     FFCommandOptions __attribute__((__cleanup__(ffDestroyCommandOptions))) options;
     ffInitCommandOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
-
-        if (strcasecmp(key, "shell") == 0)
+        json_object_object_foreach(module, key, val)
         {
-            ffStrbufSetS(&options.shell, data->ffjson_object_get_string(val));
-            continue;
-        }
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        if (strcasecmp(key, "text") == 0)
-        {
-            ffStrbufSetS(&options.text, data->ffjson_object_get_string(val));
-            continue;
-        }
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
 
-        ffPrintError(instance, FF_COMMAND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            if (strcasecmp(key, "shell") == 0)
+            {
+                ffStrbufSetS(&options.shell, json_object_get_string(val));
+                continue;
+            }
+
+            if (strcasecmp(key, "text") == 0)
+            {
+                ffStrbufSetS(&options.text, json_object_get_string(val));
+                continue;
+            }
+
+            ffPrintError(instance, FF_COMMAND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintCommand(instance, &options);

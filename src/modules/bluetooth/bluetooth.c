@@ -89,7 +89,7 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_BLUETOOTH_MODULE_NAME) != 0)
         return false;
@@ -97,21 +97,24 @@ bool ffParseBluetoothJsonObject(FFinstance* instance, const char* type, JSONCDat
     FFBluetoothOptions __attribute__((__cleanup__(ffDestroyBluetoothOptions))) options;
     ffInitBluetoothOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
-
-        if (strcasecmp(key, "showConnected") == 0)
+        json_object_object_foreach(module, key, val)
         {
-            options.showDisconnected = data->ffjson_object_get_boolean(val);
-            continue;
-        }
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            if (strcasecmp(key, "showConnected") == 0)
+            {
+                options.showDisconnected = json_object_get_boolean(val);
+                continue;
+            }
+
+            ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintBluetooth(instance, &options);

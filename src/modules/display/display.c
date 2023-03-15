@@ -159,7 +159,7 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
 }
 
 #ifdef FF_HAVE_JSONC
-bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module)
+bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, json_object* module)
 {
     if (strcasecmp(type, FF_DISPLAY_MODULE_NAME) != 0)
         return false;
@@ -167,43 +167,46 @@ bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, JSONCData*
     FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;
     ffInitDisplayOptions(&options);
 
-    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
+    if (module)
     {
-        if (strcasecmp(key, "type") == 0)
-            continue;
-
-        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-            continue;
-
-        if (strcasecmp(key, "compactType") == 0)
+        json_object_object_foreach(module, key, val)
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(data, val, &value, (FFKeyValuePair[]) {
-                { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-                { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-                { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-                {},
-            });
-            if (error)
-                ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
-            else
-                options.compactType = (FFDisplayCompactType) value;
-            continue;
-        }
+            if (strcasecmp(key, "type") == 0)
+                continue;
 
-        if (strcasecmp(key, "detectName") == 0)
-        {
-            options.detectName = data->ffjson_object_get_boolean(val);
-            continue;
-        }
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
 
-        if (strcasecmp(key, "preciseRefreshRate") == 0)
-        {
-            options.preciseRefreshRate = data->ffjson_object_get_boolean(val);
-            continue;
-        }
+            if (strcasecmp(key, "compactType") == 0)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
+                    { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
+                    { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                    {},
+                });
+                if (error)
+                    ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                else
+                    options.compactType = (FFDisplayCompactType) value;
+                continue;
+            }
 
-        ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            if (strcasecmp(key, "detectName") == 0)
+            {
+                options.detectName = json_object_get_boolean(val);
+                continue;
+            }
+
+            if (strcasecmp(key, "preciseRefreshRate") == 0)
+            {
+                options.preciseRefreshRate = json_object_get_boolean(val);
+                continue;
+            }
+
+            ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
     }
 
     ffPrintDisplay(instance, &options);

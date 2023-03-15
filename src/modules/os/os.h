@@ -9,6 +9,6 @@ bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* 
 void ffDestroyOSOptions(FFOSOptions* options);
 
 #ifdef FF_HAVE_JSONC
-#include "common/config.h"
-bool ffParseOSJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module);
+#include "common/jsonconfig.h"
+bool ffParseOSJsonObject(FFinstance* instance, const char* type, json_object* module);
 #endif

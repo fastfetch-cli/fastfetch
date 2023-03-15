@@ -9,6 +9,6 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
 void ffDestroyBatteryOptions(FFBatteryOptions* options);
 
 #ifdef FF_HAVE_JSONC
-#include "common/config.h"
-bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module);
+#include "common/jsonconfig.h"
+bool ffParseBatteryJsonObject(FFinstance* instance, const char* type, json_object* module);
 #endif

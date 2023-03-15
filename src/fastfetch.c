@@ -18,8 +18,7 @@
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
-#include "modules/os/os.h"
-#include "common/config.h"
+#include "common/jsonconfig.h"
 #include "modules/modules.h"
 
 typedef struct CustomValue

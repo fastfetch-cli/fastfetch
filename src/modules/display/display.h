@@ -8,6 +8,6 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
 void ffDestroyDisplayOptions(FFDisplayOptions* options);
 
 #ifdef FF_HAVE_JSONC
-#include "common/config.h"
-bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module);
+#include "common/jsonconfig.h"
+bool ffParseDisplayJsonObject(FFinstance* instance, const char* type, json_object* module);
 #endif

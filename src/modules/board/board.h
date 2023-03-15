@@ -8,6 +8,6 @@ bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const 
 void ffDestroyBoardOptions(FFBoardOptions* options);
 
 #ifdef FF_HAVE_JSONC
-#include "common/config.h"
-bool ffParseBoardJsonObject(FFinstance* instance, const char* type, JSONCData* data, json_object* module);
+#include "common/jsonconfig.h"
+bool ffParseBoardJsonObject(FFinstance* instance, const char* type, json_object* module);
 #endif
