@@ -102,7 +102,7 @@ static const char* detectWTProfile(json_object* profile, FFstrbuf* name, double*
 
 static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, double* size)
 {
-    if (ffJsonLoadLibrary(instance))
+    if (!ffJsonLoadLibrary(instance))
         return "Failed to load json-c library";
 
     json_object* __attribute__((__cleanup__(wrapJsoncFree))) root = json_tokener_parse(content->chars);
