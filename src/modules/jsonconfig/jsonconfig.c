@@ -39,6 +39,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
 
         case 'C': {
             return
+                tryModule(instance, type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
                 tryModule(instance, type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
                 tryModule(instance, type, module, FF_COLORS_MODULE_NAME, ffParseColorsJsonObject) ||
                 false;

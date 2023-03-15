@@ -51,6 +51,6 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
     ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
 
-    if(instance->config.cpuTemp)
+    if(instance->config.cpu.temp)
         ffDetectSmbiosTemp(&cpu->temperature, NULL);
 }

@@ -13,7 +13,7 @@ void ffPrintCPUUsage(FFinstance* instance)
 
     if(error)
     {
-        ffPrintError(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpu, "%s", error);
+        ffPrintError(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsage, "%s", error);
         return;
     }
 

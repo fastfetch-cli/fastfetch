@@ -1010,6 +1010,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
     else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
     else if(ffParseHostCommandOptions(&instance->config.host, key, value)) {}
+    else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
     else if(ffParseBiosCommandOptions(&instance->config.bios, key, value)) {}
     else if(ffParseBoardCommandOptions(&instance->config.board, key, value)) {}
     else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
@@ -1032,7 +1033,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "cursor", &instance->config.cursor)) {}
     else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
     else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
-    else if(optionParseModuleArgs(key, value, "cpu", &instance->config.cpu)) {}
+    else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
     else if(optionParseModuleArgs(key, value, "cpu-usage", &instance->config.cpuUsage)) {}
     else if(optionParseModuleArgs(key, value, "gpu", &instance->config.gpu)) {}
     else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
@@ -1121,8 +1122,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--cpu-temp") == 0)
-        instance->config.cpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-temp") == 0)
         instance->config.gpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-force-vulkan") == 0)
@@ -1299,8 +1298,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintTerminal(instance);
     else if(strcasecmp(line, "terminalfont") == 0)
         ffPrintTerminalFont(instance);
-    else if(strcasecmp(line, "cpu") == 0)
-        ffPrintCPU(instance);
+    else if(strcasecmp(line, FF_CPU_MODULE_NAME) == 0)
+        ffPrintCPU(instance, &instance->config.cpu);
     else if(strcasecmp(line, "cpuusage") == 0)
         ffPrintCPUUsage(instance);
     else if(strcasecmp(line, "gpu") == 0)

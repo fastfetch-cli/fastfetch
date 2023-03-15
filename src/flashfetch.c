@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     ffPrintCursor(&instance);
     ffPrintTerminal(&instance);
     ffPrintTerminalFont(&instance);
-    ffPrintCPU(&instance);
+    ffPrintCPU(&instance, &instance.config.cpu);
     ffPrintGPU(&instance);
     ffPrintMemory(&instance);
     //ffPrintSwap(&instance);

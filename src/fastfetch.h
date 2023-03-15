@@ -116,7 +116,7 @@ typedef struct FFconfig
     FFModuleArgs cursor;
     FFModuleArgs terminal;
     FFModuleArgs terminalFont;
-    FFModuleArgs cpu;
+    FFCPUOptions cpu;
     FFModuleArgs cpuUsage;
     FFModuleArgs gpu;
     FFModuleArgs memory;
@@ -166,7 +166,6 @@ typedef struct FFconfig
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
 
-    bool cpuTemp;
     bool gpuTemp;
     bool gpuForceVulkan;
 
@@ -265,7 +264,6 @@ void ffPrintFont(FFinstance* instance);
 void ffPrintCursor(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
-void ffPrintCPU(FFinstance* instance);
 void ffPrintCPUUsage(FFinstance* instance);
 void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);

@@ -270,7 +270,7 @@ set(LIBFASTFETCH_SRC
     src/modules/break/break.c
     src/modules/chassis.c
     src/modules/colors/colors.c
-    src/modules/cpu.c
+    src/modules/cpu/cpu.c
     src/modules/cpuUsage.c
     src/modules/cursor.c
     src/modules/custom.c
