@@ -29,11 +29,17 @@ static inline bool parseModuleJsonObject(FFinstance* instance, const char* type,
         false;
 }
 
-static inline void wrapJsoncFree(JSONCData* data)
+typedef struct JsonConfigData
 {
-    assert(data);
-    if (data->root)
-        data->ffjson_object_put(data->root);
+    JSONCData data;
+    json_object* root;
+} JsonConfigData;
+
+static inline void wrapJsoncFree(JsonConfigData* jsonConfig)
+{
+    assert(jsonConfig);
+    if (jsonConfig->root)
+        jsonConfig->data.ffjson_object_put(jsonConfig->root);
 }
 
 static const char* parseModules(FFinstance* instance, JSONCData* data, json_object* modules)
@@ -52,7 +58,8 @@ static const char* parseModules(FFinstance* instance, JSONCData* data, json_obje
         }
         else if (data->ffjson_object_is_type(module, json_type_object))
         {
-            type = data->ffjson_object_get_string(data->ffjson_object_object_get(module, "type"));
+            json_object* object = data->ffjson_object_object_get(module, "type");
+            type = data->ffjson_object_get_string(object);
             if (!type) return "module object must contain a type key";
         }
         else
@@ -74,18 +81,19 @@ static const char* printJsonConfig(FFinstance* instance)
             "libjson-c" FF_LIBRARY_EXTENSION, 5
         #endif
     )
-    JSONCData __attribute__((__cleanup__(wrapJsoncFree))) data = {};
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_tokener_parse)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_is_type)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_array)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_boolean)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_double)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_int)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string_len)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_object)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_object_get)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_put)
+    JsonConfigData __attribute__((__cleanup__(wrapJsoncFree))) jsonConfig = {};
+    JSONCData* data = &jsonConfig.data;
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_tokener_parse)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_is_type)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_array)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_boolean)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_double)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_int)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_string_len)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_string)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_get_object)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_object_get)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, *data, json_object_put)
 
     FF_STRBUF_AUTO_DESTROY content;
     ffStrbufInit(&content);
@@ -98,11 +106,11 @@ static const char* printJsonConfig(FFinstance* instance)
         if (success) break;
     }
 
-    data.root = data.ffjson_tokener_parse(content.chars);
-    if (!data.root)
+    jsonConfig.root = data->ffjson_tokener_parse(content.chars);
+    if (!jsonConfig.root)
         return "Failed to parse JSON config file";
 
-    lh_table* rootObject = data.ffjson_object_get_object(data.root);
+    lh_table* rootObject = data->ffjson_object_get_object(jsonConfig.root);
     if (!rootObject)
         return "Invalid JSON config format. Root value must be an object";
 
@@ -114,7 +122,7 @@ static const char* printJsonConfig(FFinstance* instance)
 
         if (strcmp(key, "modules") == 0)
         {
-            const char* error = parseModules(instance, &data, val);
+            const char* error = parseModules(instance, data, val);
             if (error) return error;
         }
         else

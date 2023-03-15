@@ -19,11 +19,24 @@ typedef struct JSONCData
     FF_LIBRARY_SYMBOL(json_object_get_object)
     FF_LIBRARY_SYMBOL(json_object_object_get)
     FF_LIBRARY_SYMBOL(json_object_put)
-
-    json_object* root;
 } JSONCData;
 
 bool ffJsonConfigParseModuleArgs(JSONCData* data, const char* key, json_object* val, FFModuleArgs* moduleArgs);
 const char* ffJsonConfigParseEnum(JSONCData* data, json_object* val, int* result, FFKeyValuePair pairs[]);
+
+// Modified from json_object_object_foreach
+#define FF_JSON_OBJECT_OBJECT_FOREACH(data, obj, keyVar, valVar)                                  \
+    const char* keyVar = NULL;                                                                               \
+    json_object* valVar = NULL;                                                                              \
+    for (struct lh_entry* entry##keyVar = (obj) ? lh_table_head(data->ffjson_object_get_object(obj)) : NULL; \
+         ({                                                                                                  \
+             if (entry##keyVar)                                                                              \
+             {                                                                                               \
+                 keyVar = (const char*) lh_entry_k(entry##keyVar);                                           \
+                 valVar = (json_object*) lh_entry_v(entry##keyVar);                                          \
+             };                                                                                              \
+             entry##keyVar;                                                                                  \
+         });                                                                                                 \
+         entry##keyVar = lh_entry_next(entry##keyVar))
 
 #endif

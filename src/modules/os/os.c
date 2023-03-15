@@ -183,29 +183,23 @@ bool ffParseOSJsonObject(FFinstance* instance, const char* type, JSONCData* data
     FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
     ffInitOSOptions(&options);
 
-    if (module)
+    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
     {
-        struct lh_entry* entry;
-        lh_foreach(data->ffjson_object_get_object(module), entry)
-        {
-            const char* key = (const char *)lh_entry_k(entry);
-            if (strcasecmp(key, "type") == 0)
+        if (strcasecmp(key, "type") == 0)
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
+            continue;
+
+        #if defined(__linux__) || defined(__FreeBSD__)
+            if (strcasecmp(key, "file") == 0)
+            {
+                ffStrbufSetS(&options.file, data->ffjson_object_get_string(val));
                 continue;
-            json_object* val = (struct json_object *)lh_entry_v(entry);
+            }
+        #endif
 
-            if (ffJsonConfigParseModuleArgs(data, key, val, &options.moduleArgs))
-                continue;
-
-            #if defined(__linux__) || defined(__FreeBSD__)
-                if (strcasecmp(key, "file") == 0)
-                {
-                    ffStrbufSetS(&options.file, data->ffjson_object_get_string(val));
-                    continue;
-                }
-            #endif
-
-            ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
     }
 
     ffPrintOS(instance, &options);

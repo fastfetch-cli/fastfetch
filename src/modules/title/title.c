@@ -69,24 +69,18 @@ bool ffParseTitleJsonObject(FFinstance* instance, const char* type, JSONCData* d
     FFTitleOptions __attribute__((__cleanup__(ffDestroyTitleOptions))) options;
     ffInitTitleOptions(&options);
 
-    if (module)
+    FF_JSON_OBJECT_OBJECT_FOREACH(data, module, key, val)
     {
-        struct lh_entry* entry;
-        lh_foreach(data->ffjson_object_get_object(module), entry)
+        if (strcasecmp(key, "type") == 0)
+            continue;
+
+        if (strcasecmp(key, "fdqn") == 0)
         {
-            const char* key = (const char *)lh_entry_k(entry);
-            if (strcasecmp(key, "type") == 0)
-                continue;
-            json_object* val = (struct json_object *)lh_entry_v(entry);
-
-            if (strcasecmp(key, "fdqn") == 0)
-            {
-                options.fdqn = data->ffjson_object_get_boolean(val);
-                continue;
-            }
-
-            ffPrintErrorString(instance, FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            options.fdqn = data->ffjson_object_get_boolean(val);
+            continue;
         }
+
+        ffPrintErrorString(instance, FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
     }
 
     ffPrintTitle(instance, &options);
