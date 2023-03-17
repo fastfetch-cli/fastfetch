@@ -1,4 +1,4 @@
-#include "cpuUsage.h"
+#include "detection/cpuusage/cpuusage.h"
 
 #include <sys/types.h>
 #include <sys/user.h>

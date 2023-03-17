@@ -1034,7 +1034,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
     else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
     else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "cpu-usage", &instance->config.cpuUsage)) {}
+    else if(ffParseCPUUsageCommandOptions(&instance->config.cpuUsage, key, value)) {}
     else if(optionParseModuleArgs(key, value, "gpu", &instance->config.gpu)) {}
     else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
     else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
@@ -1300,8 +1300,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintTerminalFont(instance);
     else if(strcasecmp(line, FF_CPU_MODULE_NAME) == 0)
         ffPrintCPU(instance, &instance->config.cpu);
-    else if(strcasecmp(line, "cpuusage") == 0)
-        ffPrintCPUUsage(instance);
+    else if(strcasecmp(line, FF_CPUUSAGE_MODULE_NAME) == 0)
+        ffPrintCPUUsage(instance, &instance->config.cpuUsage);
     else if(strcasecmp(line, "gpu") == 0)
         ffPrintGPU(instance);
     else if(strcasecmp(line, "memory") == 0)
@@ -1373,7 +1373,7 @@ int main(int argc, const char** argv)
     if(data.structure.length == 0)
         ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
 
-    if(ffStrbufContainIgnCaseS(&data.structure, "CPUUsage"))
+    if(ffStrbufContainIgnCaseS(&data.structure, FF_CPUUSAGE_MODULE_NAME))
         ffPrepareCPUUsage();
 
     if(instance.config.multithreading)

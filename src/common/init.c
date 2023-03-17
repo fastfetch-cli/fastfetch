@@ -81,7 +81,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.terminal);
     initModuleArg(&instance->config.terminalFont);
     ffInitCPUOptions(&instance->config.cpu);
-    initModuleArg(&instance->config.cpuUsage);
+    ffInitCPUUsageOptions(&instance->config.cpuUsage);
     initModuleArg(&instance->config.gpu);
     initModuleArg(&instance->config.memory);
     initModuleArg(&instance->config.swap);
@@ -316,7 +316,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.terminal);
     destroyModuleArg(&instance->config.terminalFont);
     ffDestroyCPUOptions(&instance->config.cpu);
-    destroyModuleArg(&instance->config.cpuUsage);
+    ffDestroyCPUUsageOptions(&instance->config.cpuUsage);
     destroyModuleArg(&instance->config.gpu);
     destroyModuleArg(&instance->config.memory);
     destroyModuleArg(&instance->config.swap);

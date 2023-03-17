@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "cpuUsage.h"
+#include "detection/cpuusage/cpuusage.h"
 
 #include <mach/processor_info.h>
 #include <mach/mach_host.h>

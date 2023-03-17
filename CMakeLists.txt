@@ -241,7 +241,7 @@ set(LIBFASTFETCH_SRC
     src/common/settings.c
     src/detection/bluetooth/bluetooth.c
     src/detection/cpu/cpu.c
-    src/detection/cpuUsage/cpuUsage.c
+    src/detection/cpuusage/cpuusage.c
     src/detection/datetime/datetime.c
     src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
@@ -271,7 +271,7 @@ set(LIBFASTFETCH_SRC
     src/modules/chassis.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
-    src/modules/cpuUsage.c
+    src/modules/cpuusage/cpuusage.c
     src/modules/cursor.c
     src/modules/custom.c
     src/modules/command/command.c
@@ -333,7 +333,7 @@ if(LINUX)
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
-        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
@@ -383,7 +383,7 @@ elseif(ANDROID)
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cursor/cursor_nosupport.c
-        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/displayserver_nosupport.c
         src/detection/font/font_nosupport.c
@@ -426,7 +426,7 @@ elseif(BSD)
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c
-        src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -475,7 +475,7 @@ elseif(APPLE)
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
-        src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/cpuusage/cpuUsage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
@@ -520,7 +520,7 @@ elseif(WIN32)
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_windows.c
-        src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c

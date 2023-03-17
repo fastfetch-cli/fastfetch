@@ -10,6 +10,7 @@
 #include "modules/board/board.h"
 #include "modules/break/break.h"
 #include "modules/cpu/cpu.h"
+#include "modules/cpuusage/cpuusage.h"
 #include "modules/command/command.h"
 #include "modules/colors/colors.h"
 #include "modules/datetime/datetime.h"
