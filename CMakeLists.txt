@@ -272,7 +272,7 @@ set(LIBFASTFETCH_SRC
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
     src/modules/cpuusage/cpuusage.c
-    src/modules/cursor.c
+    src/modules/cursor/cursor.c
     src/modules/custom.c
     src/modules/command/command.c
     src/modules/datetime/datetime.c

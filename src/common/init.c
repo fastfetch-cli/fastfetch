@@ -77,7 +77,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.theme);
     initModuleArg(&instance->config.icons);
     initModuleArg(&instance->config.font);
-    initModuleArg(&instance->config.cursor);
+    ffInitCursorOptions(&instance->config.cursor);
     initModuleArg(&instance->config.terminal);
     initModuleArg(&instance->config.terminalFont);
     ffInitCPUOptions(&instance->config.cpu);
@@ -312,7 +312,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.theme);
     destroyModuleArg(&instance->config.icons);
     destroyModuleArg(&instance->config.font);
-    destroyModuleArg(&instance->config.cursor);
+    ffDestroyCursorOptions(&instance->config.cursor);
     destroyModuleArg(&instance->config.terminal);
     destroyModuleArg(&instance->config.terminalFont);
     ffDestroyCPUOptions(&instance->config.cpu);

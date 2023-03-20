@@ -113,7 +113,7 @@ typedef struct FFconfig
     FFModuleArgs theme;
     FFModuleArgs icons;
     FFModuleArgs font;
-    FFModuleArgs cursor;
+    FFCursorOptions cursor;
     FFModuleArgs terminal;
     FFModuleArgs terminalFont;
     FFCPUOptions cpu;
@@ -260,7 +260,6 @@ void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintWallpaper(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);
-void ffPrintCursor(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintGPU(FFinstance* instance);

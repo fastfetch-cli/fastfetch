@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     ffPrintTheme(&instance);
     ffPrintIcons(&instance);
     ffPrintFont(&instance);
-    ffPrintCursor(&instance);
+    ffPrintCursor(&instance, &instance.config.cursor);
     ffPrintTerminal(&instance);
     ffPrintTerminalFont(&instance);
     ffPrintCPU(&instance, &instance.config.cpu);
