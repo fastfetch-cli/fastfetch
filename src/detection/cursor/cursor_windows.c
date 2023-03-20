@@ -8,5 +8,12 @@ void ffDetectCursor(const FFinstance* instance, FFCursorResult* result)
 
     FF_HKEY_AUTO_DESTROY hKey;
     if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Cursors", &hKey, &result->error))
-        ffRegReadStrbuf(hKey, NULL, &result->theme, &result->error);
+    {
+        if (!ffRegReadStrbuf(hKey, NULL, &result->theme, &result->error))
+            return;
+
+        uint32_t cursorBaseSize;
+        ffRegReadUint(hKey, L"CursorBaseSize", &cursorBaseSize, &result->error);
+        ffStrbufAppendF(&result->size, "%u", (unsigned) cursorBaseSize);
+    }
 }
