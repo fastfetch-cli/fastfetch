@@ -3,6 +3,8 @@
 Features:
 * Support linuxbrew (Packages, Linux)
 * Support foot terminal (#431, Linux)
+* Support cursor size detection on Windows (Cursor, Windows)
+* Support cursor detection on macOS (Cursor, macOS)
 
 Bugfixes:
 * Fix date time format
