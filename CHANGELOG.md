@@ -12,6 +12,9 @@ Bugfixes:
 Changes:
 * Use json-c to parse JSON strings for comments support, instead of using unmaintained cJSON
 
+Logo:
+* Small update for nobara logo (#435, @regulargvy13)
+
 # 1.10.3
 
 Bugfixes:
