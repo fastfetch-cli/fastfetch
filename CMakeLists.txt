@@ -462,7 +462,7 @@ elseif(APPLE)
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
-        src/detection/cursor/cursor_nosupport.c
+        src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/displayserver_apple.c
