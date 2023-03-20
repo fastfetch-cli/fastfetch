@@ -273,7 +273,7 @@ set(LIBFASTFETCH_SRC
     src/modules/cpu/cpu.c
     src/modules/cpuusage/cpuusage.c
     src/modules/cursor/cursor.c
-    src/modules/custom.c
+    src/modules/custom/custom.c
     src/modules/command/command.c
     src/modules/datetime/datetime.c
     src/modules/de.c
@@ -316,7 +316,6 @@ set(LIBFASTFETCH_SRC
     src/modules/jsonconfig/jsonconfig.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
-    src/util/FFvaluestore.c
     src/util/platform/FFPlatform.c
     src/util/stringUtils.c
 )

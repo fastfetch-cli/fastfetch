@@ -118,6 +118,7 @@ typedef struct FFconfig
     FFModuleArgs terminalFont;
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
+    FFCustomOptions custom;
     FFModuleArgs gpu;
     FFModuleArgs memory;
     FFModuleArgs swap;
@@ -247,7 +248,6 @@ void ffPrepareWeather(FFinstance* instance);
 
 //Printing
 
-void ffPrintCustom(FFinstance* instance, const char* key, const char* value);
 void ffPrintChassis(FFinstance* instance);
 void ffPrintUptime(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);

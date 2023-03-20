@@ -10,6 +10,7 @@
 #include "modules/cpu/option.h"
 #include "modules/cpuusage/option.h"
 #include "modules/cursor/option.h"
+#include "modules/custom/option.h"
 #include "modules/command/option.h"
 #include "modules/datetime/option.h"
 #include "modules/display/option.h"

@@ -3,7 +3,6 @@
 #include "common/parsing.h"
 #include "common/io/io.h"
 #include "common/time.h"
-#include "util/FFvaluestore.h"
 #include "util/stringUtils.h"
 #include "logo/logo.h"
 
@@ -30,7 +29,6 @@ typedef struct CustomValue
 // Things only needed by fastfetch
 typedef struct FFdata
 {
-    FFvaluestore customValues;
     FFstrbuf structure;
     bool loadUserConfig;
 } FFdata;
@@ -718,32 +716,6 @@ static uint32_t optionParseUInt32(const char* key, const char* value)
     return num;
 }
 
-static void optionParseCustomValue(FFdata* data, const char* key, const char* value, bool printKey)
-{
-    if(value == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <key=value>\n", key);
-        exit(411);
-    }
-
-    char* separator = strchr(value, '=');
-
-    if(separator == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <key=value>, '=' missing\n", key);
-        exit(412);
-    }
-
-    *separator = '\0';
-
-    bool created;
-    CustomValue* customValue = ffValuestoreSet(&data->customValues, value, &created);
-    if(created)
-        ffStrbufInit(&customValue->value);
-    ffStrbufSetS(&customValue->value, separator + 1);
-    customValue->printKey = printKey;
-}
-
 static void optionParseEnum(const char* argumentKey, const char* requestedKey, void* result, ...)
 {
     if(requestedKey == NULL)
@@ -990,10 +962,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseColor(key, value, &instance->config.colorKeys);
         ffStrbufSet(&instance->config.colorTitle, &instance->config.colorKeys);
     }
-    else if(strcasecmp(key, "--set") == 0)
-        optionParseCustomValue(data, key, value, true);
-    else if(strcasecmp(key, "--set-keyless") == 0)
-        optionParseCustomValue(data, key, value, false);
     else if(strcasecmp(key, "--binary-prefix") == 0)
     {
         optionParseEnum(key, value, &instance->config.binaryPrefixType,
@@ -1015,6 +983,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseBoardCommandOptions(&instance->config.board, key, value)) {}
     else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
     else if(ffParseCommandCommandOptions(&instance->config.command, key, value)) {}
+    else if(ffParseCustomCommandOptions(&instance->config.custom, key, value)) {}
     else if(ffParseKernelCommandOptions(&instance->config.kernel, key, value)) {}
     else if(optionParseModuleArgs(key, value, "uptime", &instance->config.uptime)) {}
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
@@ -1239,16 +1208,9 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
     }
 }
 
-static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
+static void parseStructureCommand(FFinstance* instance, const char* line)
 {
-    CustomValue* customValue = ffValuestoreGet(&data->customValues, line);
-    if(customValue != NULL)
-    {
-        ffPrintCustom(instance, customValue->printKey ? line : NULL, customValue->value.chars);
-        return;
-    }
-
-    if(strcasecmp(line, "break") == 0)
+    if(strcasecmp(line, FF_BREAK_MODULE_NAME) == 0)
         ffPrintBreak(instance);
     else if(strcasecmp(line, FF_TITLE_MODULE_NAME) == 0)
         ffPrintTitle(instance, &instance->config.title);
@@ -1302,6 +1264,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintCPU(instance, &instance->config.cpu);
     else if(strcasecmp(line, FF_CPUUSAGE_MODULE_NAME) == 0)
         ffPrintCPUUsage(instance, &instance->config.cpuUsage);
+    else if(strcasecmp(line, FF_CUSTOM_MODULE_NAME) == 0)
+        ffPrintCustom(instance, &instance->config.custom);
     else if(strcasecmp(line, "gpu") == 0)
         ffPrintGPU(instance);
     else if(strcasecmp(line, "memory") == 0)
@@ -1310,7 +1274,7 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintSwap(instance);
     else if(strcasecmp(line, "disk") == 0)
         ffPrintDisk(instance);
-    else if(strcasecmp(line, "battery") == 0)
+    else if(strcasecmp(line, FF_BATTERY_MODULE_NAME) == 0)
         ffPrintBattery(instance, &instance->config.battery);
     else if(strcasecmp(line, "poweradapter") == 0)
         ffPrintPowerAdapter(instance);
@@ -1361,7 +1325,6 @@ int main(int argc, const char** argv)
 
     //Data stores things only needed for the configuration of fastfetch
     FFdata data;
-    ffValuestoreInit(&data.customValues, sizeof(CustomValue));
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
@@ -1402,7 +1365,7 @@ int main(int argc, const char** argv)
         if(__builtin_expect(instance.config.stat, false))
             ms = ffTimeGetTick();
 
-        parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
+        parseStructureCommand(&instance, data.structure.chars + startIndex);
 
         if(__builtin_expect(instance.config.stat, false))
         {
@@ -1424,7 +1387,6 @@ int main(int argc, const char** argv)
     ffFinish(&instance);
 
     ffStrbufDestroy(&data.structure);
-    ffValuestoreDestroy(&data.customValues);
 
     ffDestroyInstance(&instance);
 }

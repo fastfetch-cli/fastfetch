@@ -14,6 +14,7 @@
 #include "modules/command/command.h"
 #include "modules/colors/colors.h"
 #include "modules/cursor/cursor.h"
+#include "modules/custom/custom.h"
 #include "modules/datetime/datetime.h"
 #include "modules/display/display.h"
 #include "modules/host/host.h"
