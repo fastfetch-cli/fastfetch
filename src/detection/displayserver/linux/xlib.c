@@ -83,7 +83,8 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
             0,
             (uint32_t) WidthOfScreen(screen),
             (uint32_t) HeightOfScreen(screen),
-            NULL
+            NULL,
+            FF_DISPLAY_TYPE_UNKNOWN
         );
     }
 
@@ -142,7 +143,8 @@ static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
         refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 
@@ -174,7 +176,8 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
         data->defaultRefreshRate,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
@@ -211,7 +214,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         data->defaultRefreshRate,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 
@@ -266,7 +270,8 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         data->defaultRefreshRate,
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 

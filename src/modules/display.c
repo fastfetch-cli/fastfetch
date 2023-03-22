@@ -3,7 +3,7 @@
 #include "detection/displayserver/displayserver.h"
 
 #define FF_DISPLAY_MODULE_NAME "Display"
-#define FF_DISPLAY_NUM_FORMAT_ARGS 6
+#define FF_DISPLAY_NUM_FORMAT_ARGS 7
 
 void ffPrintDisplay(FFinstance* instance)
 {
@@ -44,20 +44,23 @@ void ffPrintDisplay(FFinstance* instance)
     {
         FFDisplayResult* result = ffListGet(&dsResult->displays, i);
         uint8_t moduleIndex = dsResult->displays.length == 1 ? 0 : (uint8_t) (i + 1);
+        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "built-in" : "external";
 
         if(instance->config.display.outputFormat.length == 0)
         {
-            if(result->name.length)
+            if(result->name.length || (moduleIndex > 0 && displayType))
             {
                 ffStrbufClear(&key);
                 if(instance->config.display.key.length == 0)
                 {
-                    ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
+                    ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.length ? result->name.chars : displayType);
                 }
                 else
                 {
                     ffParseFormatString(&key, &instance->config.display.key, 1, (FFformatarg[]){
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name}
+                        {FF_FORMAT_ARG_TYPE_UINT, &i},
+                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+                        {FF_FORMAT_ARG_TYPE_STRING, displayType},
                     });
                 }
                 ffPrintLogoAndKey(instance, key.chars, 0, NULL);
@@ -93,6 +96,7 @@ void ffPrintDisplay(FFinstance* instance)
                 {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+                {FF_FORMAT_ARG_TYPE_STRING, displayType},
             });
         }
 

@@ -118,7 +118,8 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
             0,
             (uint32_t) iterator.data->width_in_pixels,
             (uint32_t) iterator.data->height_in_pixels,
-            NULL
+            NULL,
+            FF_DISPLAY_TYPE_UNKNOWN
         );
         ffxcb_screen_next(&iterator);
     }
@@ -183,7 +184,8 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 
@@ -221,7 +223,8 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
         data->defaultRefreshRate,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 
     free(crtcInfoReply);
@@ -267,7 +270,8 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         data->defaultRefreshRate,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 
@@ -328,7 +332,8 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         data->defaultRefreshRate,
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 

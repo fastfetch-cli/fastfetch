@@ -126,7 +126,8 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
-        NULL
+        NULL,
+        FF_DISPLAY_TYPE_UNKNOWN
     );
 
     ffThreadMutexUnlock(&mutex);

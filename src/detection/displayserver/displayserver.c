@@ -1,7 +1,15 @@
 #include "displayserver.h"
 #include "detection/internal.h"
 
-bool ffdsAppendDisplay(FFDisplayServerResult* result, uint32_t width, uint32_t height, double refreshRate, uint32_t scaledWidth, uint32_t scaledHeight, FFstrbuf* name)
+bool ffdsAppendDisplay(
+    FFDisplayServerResult* result,
+    uint32_t width,
+    uint32_t height,
+    double refreshRate,
+    uint32_t scaledWidth,
+    uint32_t scaledHeight,
+    FFstrbuf* name,
+    FFDisplayType type)
 {
     if(width == 0 || height == 0)
         return false;
@@ -13,6 +21,7 @@ bool ffdsAppendDisplay(FFDisplayServerResult* result, uint32_t width, uint32_t h
     display->scaledWidth = scaledWidth;
     display->scaledHeight = scaledHeight;
     ffStrbufInitMove(&display->name, name);
+    display->type = type;
 
     return true;
 }

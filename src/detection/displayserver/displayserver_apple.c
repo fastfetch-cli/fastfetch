@@ -58,7 +58,8 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
-                &name
+                &name,
+                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
             );
             CGDisplayModeRelease(mode);
         }

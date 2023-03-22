@@ -5,7 +5,7 @@ Features:
 * Support foot terminal (#431, Linux)
 * Support cursor size detection on Windows (Cursor, Windows)
 * Support cursor detection on macOS (Cursor, macOS)
-* Support display name and decimal refresh rate detection (Display, macOS / Windows)
+* Support display name, display type and decimal refresh rate detection (Display, macOS / Windows)
 
 Bugfixes:
 * Fix date time format

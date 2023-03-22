@@ -93,7 +93,12 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 data.width,
                 data.height,
-                &name);
+                &name,
+                path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL ||
+                path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED ||
+                    path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
+                    ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
+            );
         }
     }
 }
