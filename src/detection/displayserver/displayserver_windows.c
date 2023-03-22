@@ -87,9 +87,19 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 }
             }
 
+            uint32_t width = modes[path->sourceInfo.modeInfoIdx].sourceMode.width;
+            uint32_t height = modes[path->sourceInfo.modeInfoIdx].sourceMode.height;
+            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
+                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
+            {
+                uint32_t temp = width;
+                width = height;
+                height = temp;
+            }
+
             ffdsAppendDisplay(ds,
-                modes[path->sourceInfo.modeInfoIdx].sourceMode.width,
-                modes[path->sourceInfo.modeInfoIdx].sourceMode.height,
+                width,
+                height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 data.width,
                 data.height,
