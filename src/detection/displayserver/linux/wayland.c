@@ -123,7 +123,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
     ffdsAppendDisplay(wldata->result,
         (uint32_t) display.width,
         (uint32_t) display.height,
-        ffdsParseRefreshRate(display.refreshRate / 1000),
+        display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale)
     );

@@ -39,7 +39,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
                 (uint32_t)CGDisplayModeGetPixelHeight(mode),
-                (uint32_t)refreshRate,
+                refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode)
             );

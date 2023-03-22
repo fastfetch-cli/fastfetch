@@ -1,5 +1,6 @@
 #include "displayserver.h"
 #include "detection/os/os.h"
+#include "util/windows/unicode.h"
 
 #include <dwmapi.h>
 #include <WinUser.h>
@@ -10,6 +11,7 @@ typedef struct
     uint32_t width;
     uint32_t height;
 } DataBundle;
+
 
 static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC hDC, FF_MAYBE_UNUSED LPRECT rc, LPARAM lparam)
 {
@@ -45,22 +47,64 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deVersion);
     ffListInit(&ds->displays, sizeof(FFDisplayResult));
 
-    DISPLAY_DEVICEW displayDevice = { .cb = sizeof(DISPLAY_DEVICEW) };
-    for(DWORD devNum = 0; EnumDisplayDevicesW(NULL, devNum, &displayDevice, 0) != 0; ++devNum)
-    {
-        if(!(displayDevice.StateFlags & DISPLAY_DEVICE_ACTIVE))
-            continue;
-        DEVMODEW devMode = { .dmSize = sizeof(DEVMODEW) };
-        if(EnumDisplaySettingsW(displayDevice.DeviceName, ENUM_CURRENT_SETTINGS, &devMode) == 0)
-            continue;
+    DISPLAYCONFIG_PATH_INFO paths[128];
+    uint32_t pathCount = sizeof(paths) / sizeof(paths[0]);
+    DISPLAYCONFIG_MODE_INFO modes[256];
+    uint32_t modeCount = sizeof(modes) / sizeof(modes[0]);
 
-        DataBundle data = {
-            .deviceName = displayDevice.DeviceName,
-            .width = 0,
-            .height = 0,
-        };
-        EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM)&data);
-        ffdsAppendDisplay(ds, devMode.dmPelsWidth, devMode.dmPelsHeight, devMode.dmDisplayFrequency, data.width, data.height);
+    if (SUCCEEDED(QueryDisplayConfig(
+        QDC_ONLY_ACTIVE_PATHS | QDC_VIRTUAL_MODE_AWARE | 0x00000040 /*QDC_VIRTUAL_REFRESH_RATE_AWARE*/,
+        &pathCount,
+        paths,
+        &modeCount,
+        modes,
+        NULL)))
+    {
+        for (uint32_t i = 0; i < modeCount; ++i)
+        {
+            DISPLAYCONFIG_MODE_INFO* mode = &modes[i];
+            if(mode->infoType != DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
+                continue;
+
+            DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
+                .header = {
+                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
+                    .size = sizeof(sourceName),
+                    .adapterId = mode->adapterId,
+                    .id = mode->id,
+                },
+            };
+
+            DataBundle data = {};
+            if(SUCCEEDED(DisplayConfigGetDeviceInfo(&sourceName.header)))
+            {
+                data.deviceName = sourceName.viewGdiDeviceName;
+                EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM) &data);
+            }
+
+            // Find the target (monitor) friendly name
+            DISPLAYCONFIG_TARGET_DEVICE_NAME targetName = {
+                .header = {
+                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
+                    .size = sizeof(targetName),
+                    .adapterId = mode->adapterId,
+                    .id = mode->id,
+                },
+            };
+
+            FFstrbuf name;
+            ffStrbufInit(&name);
+            if(SUCCEEDED(DisplayConfigGetDeviceInfo(&targetName.header)) && targetName.flags.friendlyNameFromEdid)
+                ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
+
+            ffdsAppendDisplay(
+                ds,
+                mode->targetMode.targetVideoSignalInfo.totalSize.cx,
+                mode->targetMode.targetVideoSignalInfo.totalSize.cy,
+                mode->targetMode.targetVideoSignalInfo.vSyncFreq.Numerator / (double) mode->targetMode.targetVideoSignalInfo.vSyncFreq.Denominator,
+                data.width,
+                data.height);
+        }
     }
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067

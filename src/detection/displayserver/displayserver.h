@@ -38,7 +38,7 @@ typedef struct FFDisplayResult
 {
     uint32_t width;
     uint32_t height;
-    uint32_t refreshRate;
+    double refreshRate;
     uint32_t scaledWidth;
     uint32_t scaledHeight;
 } FFDisplayResult;
@@ -55,9 +55,6 @@ typedef struct FFDisplayServerResult
 } FFDisplayServerResult;
 
 const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
-
-//Used internal
-uint32_t ffdsParseRefreshRate(int32_t refreshRate);
-bool ffdsAppendDisplay(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate, uint32_t scaledWidth, uint32_t scaledHeight);
+bool ffdsAppendDisplay(FFDisplayServerResult* result, uint32_t width, uint32_t height, double refreshRate, uint32_t scaledWidth, uint32_t scaledHeight);
 
 #endif

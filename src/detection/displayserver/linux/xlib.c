@@ -133,9 +133,7 @@ typedef struct XrandrData
 
 static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
 {
-    uint32_t refreshRate = ffdsParseRefreshRate((int32_t) (
-        modeInfo->dotClock / (modeInfo->hTotal * modeInfo->vTotal)
-    ));
+    double refreshRate = modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
 
     return ffdsAppendDisplay(
         data->result,
