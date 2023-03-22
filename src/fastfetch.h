@@ -41,6 +41,13 @@ typedef enum FFSoundType
     FF_SOUND_TYPE_ALL,
 } FFSoundType;
 
+typedef enum FFDisplayCompactType
+{
+    FF_DISPLAY_COMPACT_TYPE_NONE = 0,
+    FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT = 1 << 0,
+    FF_DISPLAY_COMPACT_TYPE_SCALED_BIT = 1 << 1,
+} FFDisplayCompactType;
+
 typedef enum FFLocalIpCompactType
 {
     FF_LOCALIP_COMPACT_TYPE_NONE,
@@ -200,6 +207,8 @@ typedef struct FFconfig
     bool diskShowHidden;
     bool diskShowUnknown;
     bool diskShowSubvolumes;
+
+    FFDisplayCompactType displayCompactType;
 
     bool bluetoothShowDisconnected;
 

@@ -1268,6 +1268,14 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowSubvolumes = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-show-unknown") == 0)
         instance->config.diskShowUnknown = optionParseBoolean(value);
+    else if(strcasecmp(key, "--display-compact-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.displayCompactType,
+            "none", FF_DISPLAY_COMPACT_TYPE_NONE,
+            "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT,
+            "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT,
+            NULL);
+    }
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
     else if(strcasecmp(key, "--sound-type") == 0)

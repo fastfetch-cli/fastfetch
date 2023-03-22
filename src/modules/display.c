@@ -14,6 +14,29 @@ void ffPrintDisplay(FFinstance* instance)
 
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer(instance);
 
+    if (instance->config.displayCompactType != FF_DISPLAY_COMPACT_TYPE_NONE)
+    {
+        ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, 0, &instance->config.display.key);
+
+        int index = 0;
+        FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
+        {
+            if (instance->config.displayCompactType & FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT)
+            {
+                if (index++) putchar(' ');
+                printf("%ix%i", result->width, result->height);
+            }
+            if (instance->config.displayCompactType & FF_DISPLAY_COMPACT_TYPE_SCALED_BIT)
+            {
+                if (index++) putchar(' ');
+                printf("%ix%i", result->scaledWidth, result->scaledHeight);
+            }
+            ffStrbufDestroy(&result->name);
+        }
+        putchar('\n');
+        return;
+    }
+
     FF_STRBUF_AUTO_DESTROY key;
     ffStrbufInit(&key);
 

@@ -253,6 +253,12 @@
 # Default is false.
 #--bluetooth-show-disconnected false
 
+# Display compact output
+# Sets if all displays should be printed in one line
+# Must be either original (print pixel resolution) or scaled (print scaled resolution)
+# Default is none.
+#--display-compact-type none
+
 # Sound show all option
 # Sets if all sound devices should be printed
 # Must be either main, active or all. Default is main

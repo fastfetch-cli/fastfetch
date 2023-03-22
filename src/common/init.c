@@ -161,6 +161,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowUnknown = false;
     instance->config.diskShowSubvolumes = false;
 
+    instance->config.displayCompactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+
     instance->config.bluetoothShowDisconnected = false;
 
     instance->config.soundType = FF_SOUND_TYPE_MAIN;
