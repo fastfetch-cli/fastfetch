@@ -92,18 +92,18 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
                 },
             };
 
-            FFstrbuf name;
+            FF_STRBUF_AUTO_DESTROY name;
             ffStrbufInit(&name);
             if(SUCCEEDED(DisplayConfigGetDeviceInfo(&targetName.header)) && targetName.flags.friendlyNameFromEdid)
                 ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
 
-            ffdsAppendDisplay(
-                ds,
+            ffdsAppendDisplay(ds,
                 mode->targetMode.targetVideoSignalInfo.totalSize.cx,
                 mode->targetMode.targetVideoSignalInfo.totalSize.cy,
                 mode->targetMode.targetVideoSignalInfo.vSyncFreq.Numerator / (double) mode->targetMode.targetVideoSignalInfo.vSyncFreq.Denominator,
                 data.width,
-                data.height);
+                data.height,
+                &name);
         }
     }
 

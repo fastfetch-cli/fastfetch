@@ -2,17 +2,20 @@
 #include "common/printing.h"
 #include "detection/displayserver/displayserver.h"
 
-#define FF_RESOLUTION_MODULE_NAME "Display"
-#define FF_RESOLUTION_NUM_FORMAT_ARGS 5
+#define FF_DISPLAY_MODULE_NAME "Display"
+#define FF_DISPLAY_NUM_FORMAT_ARGS 6
 
 void ffPrintDisplay(FFinstance* instance)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.display, "Display detection is not supported on Android");
+        ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &instance->config.display, "Display detection is not supported on Android");
         return;
     #endif
 
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer(instance);
+
+    FF_STRBUF_AUTO_DESTROY key;
+    ffStrbufInit(&key);
 
     for(uint32_t i = 0; i < dsResult->displays.length; i++)
     {
@@ -21,7 +24,26 @@ void ffPrintDisplay(FFinstance* instance)
 
         if(instance->config.display.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.display.key);
+            if(result->name.length)
+            {
+                ffStrbufClear(&key);
+                if(instance->config.display.key.length == 0)
+                {
+                    ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
+                }
+                else
+                {
+                    ffParseFormatString(&key, &instance->config.display.key, 1, (FFformatarg[]){
+                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name}
+                    });
+                }
+                ffPrintLogoAndKey(instance, key.chars, 0, NULL);
+            }
+            else
+            {
+                ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, moduleIndex, &instance->config.display.key);
+            }
+
             printf("%ix%i", result->width, result->height);
 
             if(result->refreshRate > 0)
@@ -36,16 +58,19 @@ void ffPrintDisplay(FFinstance* instance)
         }
         else
         {
-            ffPrintFormat(instance, FF_RESOLUTION_MODULE_NAME, moduleIndex, &instance->config.display, FF_RESOLUTION_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormat(instance, FF_DISPLAY_MODULE_NAME, moduleIndex, &instance->config.display, FF_DISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_UINT, &result->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->height},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight}
+                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
             });
         }
+
+        ffStrbufDestroy(&result->name);
     }
 
     if(dsResult->displays.length == 0)
-        ffPrintError(instance, FF_RESOLUTION_MODULE_NAME, 0, &instance->config.display, "Couldn't detect display");
+        ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &instance->config.display, "Couldn't detect display");
 }

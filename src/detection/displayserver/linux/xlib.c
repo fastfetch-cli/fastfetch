@@ -77,13 +77,13 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
     for(int i = 0; i < ScreenCount(display); i++)
     {
         Screen* screen = ScreenOfDisplay(display, i);
-        ffdsAppendDisplay(
-            result,
+        ffdsAppendDisplay(result,
             (uint32_t) WidthOfScreen(screen),
             (uint32_t) HeightOfScreen(screen),
             0,
             (uint32_t) WidthOfScreen(screen),
-            (uint32_t) HeightOfScreen(screen)
+            (uint32_t) HeightOfScreen(screen),
+            NULL
         );
     }
 
@@ -141,7 +141,8 @@ static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
         (uint32_t) modeInfo->height,
         refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
         (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height
+        (uint32_t) modeInfo->height,
+        NULL
     );
 }
 
@@ -172,7 +173,8 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
         (uint32_t) crtcInfo->height,
         data->defaultRefreshRate,
         (uint32_t) crtcInfo->width,
-        (uint32_t) crtcInfo->height
+        (uint32_t) crtcInfo->height,
+        NULL
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
@@ -208,7 +210,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->height,
         data->defaultRefreshRate,
         (uint32_t) monitorInfo->width,
-        (uint32_t) monitorInfo->height
+        (uint32_t) monitorInfo->height,
+        NULL
     );
 }
 
@@ -262,7 +265,8 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         (uint32_t) HeightOfScreen(screen),
         data->defaultRefreshRate,
         (uint32_t) WidthOfScreen(screen),
-        (uint32_t) HeightOfScreen(screen)
+        (uint32_t) HeightOfScreen(screen),
+        NULL
     );
 }
 
