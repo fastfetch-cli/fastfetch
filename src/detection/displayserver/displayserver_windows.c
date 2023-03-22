@@ -15,8 +15,8 @@ typedef struct
 
 static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC hDC, FF_MAYBE_UNUSED LPRECT rc, LPARAM lparam)
 {
-    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
     DataBundle* data = (DataBundle*) lparam;
+    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
     if(GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi) && wcscmp(mi.szDevice, data->deviceName) == 0)
     {
         data->width = (uint32_t) (mi.rcMonitor.right - mi.rcMonitor.left);
@@ -33,56 +33,64 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
     DISPLAYCONFIG_MODE_INFO modes[256];
     uint32_t modeCount = sizeof(modes) / sizeof(modes[0]);
 
-    if (SUCCEEDED(QueryDisplayConfig(
-        QDC_ONLY_ACTIVE_PATHS | QDC_VIRTUAL_MODE_AWARE | 0x00000040 /*QDC_VIRTUAL_REFRESH_RATE_AWARE*/,
+    if (QueryDisplayConfig(
+        QDC_ONLY_ACTIVE_PATHS,
         &pathCount,
         paths,
         &modeCount,
         modes,
-        NULL)))
+        NULL) == ERROR_SUCCESS)
     {
-        for (uint32_t i = 0; i < modeCount; ++i)
+        for (uint32_t i = 0; i < pathCount; ++i)
         {
-            DISPLAYCONFIG_MODE_INFO* mode = &modes[i];
-            if(mode->infoType != DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
-                continue;
+            DISPLAYCONFIG_PATH_INFO* path = &paths[i];
+
+            DataBundle data = {};
 
             DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
                 .header = {
                     .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
                     .size = sizeof(sourceName),
-                    .adapterId = mode->adapterId,
-                    .id = mode->id,
+                    .adapterId = path->sourceInfo.adapterId,
+                    .id = path->sourceInfo.id,
                 },
             };
-
-            DataBundle data = {};
-            if(SUCCEEDED(DisplayConfigGetDeviceInfo(&sourceName.header)))
+            if (DisplayConfigGetDeviceInfo(&sourceName.header) == ERROR_SUCCESS)
             {
                 data.deviceName = sourceName.viewGdiDeviceName;
                 EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM) &data);
             }
 
-            // Find the target (monitor) friendly name
-            DISPLAYCONFIG_TARGET_DEVICE_NAME targetName = {
-                .header = {
-                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
-                    .size = sizeof(targetName),
-                    .adapterId = mode->adapterId,
-                    .id = mode->id,
-                },
-            };
-
             FF_STRBUF_AUTO_DESTROY name;
             ffStrbufInit(&name);
 
-            if(detectName && SUCCEEDED(DisplayConfigGetDeviceInfo(&targetName.header)) && targetName.flags.friendlyNameFromEdid)
-                ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
+            if (detectName)
+            {
+                DISPLAYCONFIG_TARGET_DEVICE_NAME targetName = {
+                    .header = {
+                        .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME,
+                        .size = sizeof(targetName),
+                        .adapterId = path->targetInfo.adapterId,
+                        .id = path->targetInfo.id,
+                    },
+                };
+                if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
+                {
+                    if (targetName.flags.friendlyNameFromEdid)
+                        ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
+                    else
+                    {
+                        ffStrbufSetWS(&name, targetName.monitorDevicePath);
+                        ffStrbufSubstrAfterFirstC(&name, '#');
+                        ffStrbufSubstrBeforeFirstC(&name, '#');
+                    }
+                }
+            }
 
             ffdsAppendDisplay(ds,
-                mode->targetMode.targetVideoSignalInfo.totalSize.cx,
-                mode->targetMode.targetVideoSignalInfo.totalSize.cy,
-                mode->targetMode.targetVideoSignalInfo.vSyncFreq.Numerator / (double) mode->targetMode.targetVideoSignalInfo.vSyncFreq.Denominator,
+                modes[path->sourceInfo.modeInfoIdx].sourceMode.width,
+                modes[path->sourceInfo.modeInfoIdx].sourceMode.height,
+                path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 data.width,
                 data.height,
                 &name);
