@@ -7,23 +7,23 @@
 
 void ffPrintBrightness(FFinstance* instance)
 {
-    FFlist result;
+    FF_LIST_AUTO_DESTROY result;
     ffListInit(&result, sizeof(FFBrightnessResult));
     const char* error = ffDetectBrightness(&result);
 
     if(error)
     {
         ffPrintError(instance, FF_BRIGHTNESS_MODULE_NAME, 0, &instance->config.brightness, "%s", error);
-        goto exit;
+        return;
     }
 
     if(result.length == 0)
     {
         ffPrintError(instance, FF_BRIGHTNESS_MODULE_NAME, 0, &instance->config.brightness, "No result is detected.");
-        goto exit;
+        return;
     }
 
-    FFstrbuf key;
+    FF_STRBUF_AUTO_DESTROY key;
     ffStrbufInit(&key);
 
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
@@ -52,11 +52,7 @@ void ffPrintBrightness(FFinstance* instance)
             });
         }
 
+        ffStrbufClear(&key);
         ffStrbufDestroy(&item->name);
     }
-
-    ffStrbufDestroy(&key);
-
-exit:
-    ffListDestroy(&result);
 }
