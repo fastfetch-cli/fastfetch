@@ -11,7 +11,7 @@
 
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
 
-static void detectDisplays(FFDisplayServerResult* ds)
+static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
 {
     CGDirectDisplayID screens[128];
     uint32_t screenCount;
@@ -41,7 +41,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             FF_STRBUF_AUTO_DESTROY name;
             ffStrbufInit(&name);
-            if(CoreDisplay_DisplayCreateInfoDictionary)
+            if(detectName && CoreDisplay_DisplayCreateInfoDictionary)
             {
                 CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
                 if(displayInfo)
@@ -120,5 +120,5 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
-    detectDisplays(ds);
+    detectDisplays(ds, instance->config.displayDetectName);
 }

@@ -70,7 +70,12 @@ void ffPrintDisplay(FFinstance* instance)
             printf("%ix%i", result->width, result->height);
 
             if(result->refreshRate > 0)
-                printf(" @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+            {
+                if(instance->config.displayPreciseRefreshRate)
+                    printf(" @ %gHz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
+                else
+                    printf(" @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+            }
 
             if(
                 result->scaledWidth > 0 && result->scaledWidth != result->width &&

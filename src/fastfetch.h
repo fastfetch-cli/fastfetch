@@ -209,6 +209,8 @@ typedef struct FFconfig
     bool diskShowSubvolumes;
 
     FFDisplayCompactType displayCompactType;
+    bool displayDetectName;
+    bool displayPreciseRefreshRate;
 
     bool bluetoothShowDisconnected;
 

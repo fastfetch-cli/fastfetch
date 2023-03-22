@@ -253,11 +253,23 @@
 # Default is false.
 #--bluetooth-show-disconnected false
 
-# Display compact output
+# Display compact output option
 # Sets if all displays should be printed in one line
 # Must be either original (print pixel resolution) or scaled (print scaled resolution)
 # Default is none.
 #--display-compact-type none
+
+# Display detect name option
+# Sets if display name should be detected and printed (if supported)
+# Must be either true of false
+# Default is false.
+#--display-detect-name none
+
+# Display precise refresh rate option
+# Sets if decimal refresh rates should not be rounded into integers when printing
+# Must be either true (keep decimals) of false (round into integers)
+# Default is false.
+#--display-precise-refresh-rate false
 
 # Sound show all option
 # Sets if all sound devices should be printed

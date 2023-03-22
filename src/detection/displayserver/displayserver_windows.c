@@ -26,27 +26,8 @@ static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC h
     return TRUE;
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
 {
-    FF_UNUSED(instance);
-
-    BOOL enabled;
-    if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled == TRUE)
-    {
-        ffStrbufInitS(&ds->wmProcessName, "dwm.exe");
-        ffStrbufInitS(&ds->wmPrettyName, "Desktop Window Manager");
-    }
-    else
-    {
-        ffStrbufInitS(&ds->wmProcessName, "internal");
-        ffStrbufInitS(&ds->wmPrettyName, "internal");
-    }
-    ffStrbufInit(&ds->wmProtocolName);
-    ffStrbufInit(&ds->deProcessName);
-    ffStrbufInit(&ds->dePrettyName);
-    ffStrbufInit(&ds->deVersion);
-    ffListInit(&ds->displays, sizeof(FFDisplayResult));
-
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = sizeof(paths) / sizeof(paths[0]);
     DISPLAYCONFIG_MODE_INFO modes[256];
@@ -94,7 +75,8 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 
             FF_STRBUF_AUTO_DESTROY name;
             ffStrbufInit(&name);
-            if(SUCCEEDED(DisplayConfigGetDeviceInfo(&targetName.header)) && targetName.flags.friendlyNameFromEdid)
+
+            if(detectName && SUCCEEDED(DisplayConfigGetDeviceInfo(&targetName.header)) && targetName.flags.friendlyNameFromEdid)
                 ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
 
             ffdsAppendDisplay(ds,
@@ -106,6 +88,28 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
                 &name);
         }
     }
+}
+
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+{
+    BOOL enabled;
+    if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled == TRUE)
+    {
+        ffStrbufInitS(&ds->wmProcessName, "dwm.exe");
+        ffStrbufInitS(&ds->wmPrettyName, "Desktop Window Manager");
+    }
+    else
+    {
+        ffStrbufInitS(&ds->wmProcessName, "internal");
+        ffStrbufInitS(&ds->wmPrettyName, "internal");
+    }
+    ffStrbufInit(&ds->wmProtocolName);
+    ffStrbufInit(&ds->deProcessName);
+    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInit(&ds->deVersion);
+    ffListInit(&ds->displays, sizeof(FFDisplayResult));
+
+    detectDisplays(ds, instance->config.displayDetectName);
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
     const FFOSResult* os = ffDetectOS(instance);

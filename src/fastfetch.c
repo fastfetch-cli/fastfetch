@@ -1276,6 +1276,10 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT,
             NULL);
     }
+    else if(strcasecmp(key, "--display-precise-refresh-rate") == 0)
+        instance->config.displayPreciseRefreshRate = optionParseBoolean(value);
+    else if(strcasecmp(key, "--display-detect-name") == 0)
+        instance->config.displayDetectName = optionParseBoolean(value);
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
     else if(strcasecmp(key, "--sound-type") == 0)

@@ -162,6 +162,8 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowSubvolumes = false;
 
     instance->config.displayCompactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+    instance->config.displayDetectName = false;
+    instance->config.displayPreciseRefreshRate = false;
 
     instance->config.bluetoothShowDisconnected = false;
 
