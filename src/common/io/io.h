@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
     #include <fileapi.h>
+    #include <handleapi.h>
     #include <io.h>
     typedef HANDLE FFNativeFD;
 #else

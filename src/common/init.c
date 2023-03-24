@@ -8,9 +8,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #ifdef _WIN32
-    #include <wincon.h>
+    #include <windows.h>
     #include <locale.h>
-    #include <shlobj.h>
     #include "util/windows/unicode.h"
 #else
     #include <signal.h>

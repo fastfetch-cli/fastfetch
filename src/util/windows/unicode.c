@@ -1,5 +1,7 @@
 #include "unicode.h"
 
+#include <windows.h>
+
 void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
 {
     if(!length)

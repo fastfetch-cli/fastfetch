@@ -1,7 +1,6 @@
 #include "FFPlatform_private.h"
 #include "util/stringUtils.h"
 
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <shlobj.h>
 

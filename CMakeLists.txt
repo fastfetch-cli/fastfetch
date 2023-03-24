@@ -542,7 +542,9 @@ add_library(libfastfetch OBJECT
 )
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
-target_compile_definitions(libfastfetch PUBLIC YYJSON_DISABLE_WRITER=1)
+if(WIN32)
+    target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
+endif()
 
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)

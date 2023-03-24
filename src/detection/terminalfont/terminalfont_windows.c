@@ -4,7 +4,7 @@
 #include "terminalfont.h"
 #include "util/windows/unicode.h"
 
-#include <wincon.h>
+#include <windows.h>
 
 static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {

@@ -2,6 +2,7 @@
 #include "common/library.h"
 #include "util/windows/unicode.h"
 
+#include <windows.h>
 #include <wlanapi.h>
 
 #pragma GCC diagnostic push

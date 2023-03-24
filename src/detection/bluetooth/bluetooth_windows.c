@@ -1,6 +1,7 @@
 #include "bluetooth.h"
 #include "util/windows/unicode.h"
 
+#include <windows.h>
 #include <bluetoothapis.h>
 
 #pragma GCC diagnostic push

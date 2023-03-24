@@ -1,7 +1,7 @@
 #include "font.h"
 #include "util/windows/unicode.h"
 
-#include <winuser.h>
+#include <windows.h>
 
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {

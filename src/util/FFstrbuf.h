@@ -14,7 +14,8 @@
 #include <assert.h>
 
 #ifdef _WIN32
-    #include <shlwapi.h>
+    // #include <shlwapi.h>
+    __stdcall const char* StrStrIA(const char* lpFirst, const char* lpSrch);
     #define strcasestr StrStrIA
 #endif
 

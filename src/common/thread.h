@@ -20,7 +20,7 @@
         }
         #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType) static __stdcall unsigned fn ## ThreadMain (void* data) { fn((paramType)data); return 0; }
         static inline void ffThreadDetach(FFThreadType thread) { CloseHandle(thread); }
-        static inline void ffThreadJoin(FFThreadType thread) { WaitForSingleObject(thread, INFINITE); }
+        static inline void ffThreadJoin(FFThreadType thread) { WaitForSingleObject(thread, 0xffffffff /*INFINITE*/); }
     #else
         #include <pthread.h>
         #define FF_THREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
