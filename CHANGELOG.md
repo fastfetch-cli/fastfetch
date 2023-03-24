@@ -1,4 +1,4 @@
-# dev
+# 1.11.0
 
 Features:
 * Support linuxbrew (Packages, Linux)
