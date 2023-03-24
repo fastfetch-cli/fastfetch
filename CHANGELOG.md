@@ -7,6 +7,7 @@ Features:
 * Support cursor detection on macOS (Cursor, macOS)
 * Support display name, display type and decimal refresh rate detection (Display, macOS / Windows)
 * Support `--display-compact-type` to display multiple resolutions in one line (Display)
+* Support flatpak-user (Packages, Linux, #436)
 
 Bugfixes:
 * Fix date time format
