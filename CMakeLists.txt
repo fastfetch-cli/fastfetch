@@ -511,7 +511,7 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
         src/detection/localip/localip_windows.c
-        src/detection/gamepad/gamepad_windows.cpp
+        src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
         src/detection/opengl/opengl_windows.c
@@ -729,7 +729,7 @@ elseif(WIN32)
         PRIVATE "version"
         PRIVATE "setupapi"
         PRIVATE "dxgi"
-        PRIVATE "dinput8"
+        PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
     )

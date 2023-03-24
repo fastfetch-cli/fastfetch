@@ -13,6 +13,7 @@ Bugfixes:
 * Fix date time format
 * Fix compiling with musl (Wifi, Linux, #429)
 * Don't exit if libpci is failed to init (GPU, Linux, #433)
+* Names of most well-known gamepads are correctly printed instead of `Wireless Controller` on Windows
 
 Changes:
 * Use json-c to parse JSON strings for comments support, instead of using unmaintained cJSON
