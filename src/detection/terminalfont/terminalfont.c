@@ -67,115 +67,110 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 
 #if defined(_WIN32) || defined(__linux__)
 
-#ifdef FF_HAVE_JSONC
+#ifdef FF_HAVE_LIBCJSON
 
 #include "common/library.h"
 #include "common/processing.h"
 
+#include <cjson/cJSON.h>
 #include <stdlib.h>
-#include <json-c/json.h>
 
-typedef struct JSONCData
+typedef struct CJSONData
 {
-    FF_LIBRARY_SYMBOL(json_tokener_parse)
-    FF_LIBRARY_SYMBOL(json_object_get_array)
-    FF_LIBRARY_SYMBOL(json_object_is_type)
-    FF_LIBRARY_SYMBOL(json_object_get_double)
-    FF_LIBRARY_SYMBOL(json_object_get_string_len)
-    FF_LIBRARY_SYMBOL(json_object_get_string)
-    FF_LIBRARY_SYMBOL(json_object_object_get)
-    FF_LIBRARY_SYMBOL(json_object_put)
+    FF_LIBRARY_SYMBOL(cJSON_Parse)
+    FF_LIBRARY_SYMBOL(cJSON_IsObject)
+    FF_LIBRARY_SYMBOL(cJSON_GetObjectItemCaseSensitive)
+    FF_LIBRARY_SYMBOL(cJSON_IsString)
+    FF_LIBRARY_SYMBOL(cJSON_GetStringValue)
+    FF_LIBRARY_SYMBOL(cJSON_IsNumber)
+    FF_LIBRARY_SYMBOL(cJSON_GetNumberValue)
+    FF_LIBRARY_SYMBOL(cJSON_IsArray)
+    FF_LIBRARY_SYMBOL(cJSON_Delete)
 
-    json_object* root;
-} JSONCData;
+    cJSON* root;
+} CJSONData;
 
-static const char* detectWTProfile(JSONCData* data, json_object* profile, FFstrbuf* name, double* size)
+static const char* detectWTProfile(CJSONData* cjsonData, cJSON* profile, FFstrbuf* name, double* size)
 {
-    json_object* font = data->ffjson_object_object_get(profile, "font");
-    if (!font)
-        return "json_object_object_get(profile, \"font\"); failed";
+    if(!cjsonData->ffcJSON_IsObject(profile))
+        return "cJSON_IsObject(profile) returns false";
 
-    if (!data->ffjson_object_is_type(font, json_type_object))
-        return "json_object_is_type(font, json_type_object) returns false";
+    cJSON* font = cjsonData->ffcJSON_GetObjectItemCaseSensitive(profile, "font");
+    if(!cjsonData->ffcJSON_IsObject(font))
+        return "cJSON_IsObject(font) returns false";
 
-    if (name->length == 0)
+    if(name->length == 0)
     {
-        json_object* pface = data->ffjson_object_object_get(font, "face");
-        if(data->ffjson_object_is_type(pface, json_type_string))
-            ffStrbufAppendNS(name, (uint32_t) data->ffjson_object_get_string_len(pface), data->ffjson_object_get_string(pface));
+        cJSON* pface = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "face");
+        if(cjsonData->ffcJSON_IsString(pface))
+            ffStrbufAppendS(name, cjsonData->ffcJSON_GetStringValue(pface));
     }
-
-    if (*size < 0)
+    if(*size < 0)
     {
-        json_object* psize = data->ffjson_object_object_get(font, "size");
-        if (data->ffjson_object_is_type(psize, json_type_int) || data->ffjson_object_is_type(psize, json_type_double))
-            *size = data->ffjson_object_get_double(psize);
+        cJSON* psize = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "size");
+        if(cjsonData->ffcJSON_IsNumber(psize))
+            *size = cjsonData->ffcJSON_GetNumberValue(psize);
     }
     return NULL;
 }
 
-static inline void wrapJsoncFree(JSONCData* data)
+static inline void wrapCjsonFree(CJSONData* data)
 {
     assert(data);
     if (data->root)
-        data->ffjson_object_put(data->root);
+        data->ffcJSON_Delete(data->root);
 }
 
 static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, double* size)
 {
-    FF_LIBRARY_LOAD(libjsonc, &instance->config.libJSONC, "dlopen libjson-c" FF_LIBRARY_EXTENSION" failed",
-        #ifdef _WIN32
-            "libjson-c-5" FF_LIBRARY_EXTENSION, -1
-        #else
-            "libjson-c" FF_LIBRARY_EXTENSION, 5
-        #endif
-    )
-    JSONCData __attribute__((__cleanup__(wrapJsoncFree))) data = {};
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_tokener_parse)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_is_type)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_array)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_double)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string_len)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_get_string)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_object_get)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libjsonc, data, json_object_put)
+    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson" FF_LIBRARY_EXTENSION " failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
+    CJSONData __attribute__((__cleanup__(wrapCjsonFree))) cjsonData = {}; // Make sure cjsonData is destroyed before libcjson is dlclosed
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Parse, cJSON_Parse@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsObject, cJSON_IsObject@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive, cJSON_GetObjectItemCaseSensitive@8)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsString, cJSON_IsString@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetStringValue, cJSON_GetStringValue@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsNumber, cJSON_IsNumber@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetNumberValue, cJSON_GetNumberValue@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsArray, cJSON_IsArray@4)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Delete, cJSON_Delete@4)
 
-    data.root = data.ffjson_tokener_parse(content->chars);
-    if (!data.root)
-        return "Failed to parse WT JSON config file";
+    cJSON* root = cjsonData.root = cjsonData.ffcJSON_Parse(content->chars);
+    if(!cjsonData.ffcJSON_IsObject(root))
+        return "cJSON_Parse() failed";
 
-    json_object* profiles = data.ffjson_object_object_get(data.root, "profiles");
-    if (!profiles)
-        return "json_object_object_get(root, \"profiles\") failed";
+    cJSON* profiles = cjsonData.ffcJSON_GetObjectItemCaseSensitive(root, "profiles");
+    if(!cjsonData.ffcJSON_IsObject(profiles))
+        return "cJSON_GetObjectItemCaseSensitive(root, \"profiles\") failed";
 
     FF_STRBUF_AUTO_DESTROY wtProfileId;
     ffStrbufInitS(&wtProfileId, getenv("WT_PROFILE_ID"));
     ffStrbufTrim(&wtProfileId, '\'');
-    if (wtProfileId.length > 0)
+    if(wtProfileId.length > 0)
     {
-        array_list* list = data.ffjson_object_get_array(data.ffjson_object_object_get(profiles, "list"));
-        if (list)
+        cJSON* list = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "list");
+        if(cjsonData.ffcJSON_IsArray(list))
         {
-            for (size_t idx = 0; idx < list->length; ++idx)
+            cJSON* profile;
+            cJSON_ArrayForEach(profile, list)
             {
-                json_object* profile = (json_object*) list->array[idx];
-                json_object* guid = data.ffjson_object_object_get(profile, "guid");
-
-                if (!data.ffjson_object_is_type(guid, json_type_string))
+                if(!cjsonData.ffcJSON_IsObject(profile))
                     continue;
-
-                if(ffStrbufEqualS(&wtProfileId, data.ffjson_object_get_string(guid)))
+                cJSON* guid = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profile, "guid");
+                if(!cjsonData.ffcJSON_IsString(guid))
+                    continue;
+                if(ffStrbufCompS(&wtProfileId, cjsonData.ffcJSON_GetStringValue(guid)) == 0)
                 {
-                    detectWTProfile(&data, profile, name, size);
+                    detectWTProfile(&cjsonData, profile, name, size);
                     break;
                 }
             }
         }
     }
 
-    json_object* defaults = data.ffjson_object_object_get(profiles, "defaults");
-    if (defaults)
-        detectWTProfile(&data, defaults, name, size);
+    cJSON* defaults = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "defaults");
+    if(defaults)
+        detectWTProfile(&cjsonData, defaults, name, size);
 
     if(name->length == 0)
         ffStrbufSetS(name, "Cascadia Mono");
@@ -193,7 +188,7 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
-    FFstrbuf json;
+    FF_STRBUF_AUTO_DESTROY json;
     ffStrbufInit(&json);
     const char* error = NULL;
 
@@ -254,22 +249,19 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
     if(error)
     {
         ffStrbufAppendS(&terminalFont->error, error);
-        ffStrbufDestroy(&json);
         return;
     }
     ffStrbufTrimRight(&json, '\n');
     if(json.length == 0)
     {
         ffStrbufAppendS(&terminalFont->error, "Cannot find file \"settings.json\"");
-        ffStrbufDestroy(&json);
         return;
     }
 
-    FFstrbuf name;
+    FF_STRBUF_AUTO_DESTROY name;
     ffStrbufInit(&name);
     double size = -1;
     error = detectFromWTImpl(instance, &json, &name, &size);
-    ffStrbufDestroy(&json);
 
     if(error)
         ffStrbufAppendS(&terminalFont->error, error);
@@ -279,19 +271,17 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
         snprintf(sizeStr, sizeof(sizeStr), "%g", size);
         ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
     }
-
-    ffStrbufDestroy(&name);
 }
 
-#else //FF_HAVE_JSONC
+#else //FF_HAVE_CJSON
 
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     FF_UNUSED(instance, terminalExe, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without json-c support");
+    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without libcJSON support");
 }
 
-#endif //FF_HAVE_JSONC
+#endif //FF_HAVE_CJSON
 
 #endif //defined(_WIN32) || defined(__linux__)
 

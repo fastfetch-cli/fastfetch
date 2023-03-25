@@ -97,7 +97,7 @@ Library options: Set the path of a library to load
     --lib-glx <path>
     --lib-osmesa <path>
     --lib-opencl <path>
-    --lib-jsonc <path>
+    --lib-cjson <path>
     --lib-pulse <path>
     --lib-freetype <path>
 

@@ -70,7 +70,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_JSONC "Enable json-c" ON "LINUX OR WIN32" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
@@ -683,9 +683,9 @@ ff_lib_enable(PULSE
     "libpulse"
     "Pulse"
 )
-ff_lib_enable(JSONC
-    "json-c"
-    "json-c"
+ff_lib_enable(LIBCJSON
+    "libcjson"
+    "CJson"
 )
 
 if(ENABLE_THREADS)
