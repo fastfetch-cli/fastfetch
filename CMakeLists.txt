@@ -508,7 +508,7 @@ elseif(WIN32)
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
-        src/detection/gpu/gpu_windows.cpp
+        src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
@@ -728,7 +728,6 @@ elseif(WIN32)
         PRIVATE "ntdll"
         PRIVATE "version"
         PRIVATE "setupapi"
-        PRIVATE "dxgi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"

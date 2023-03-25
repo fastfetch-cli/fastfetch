@@ -36,11 +36,11 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     pci->ffpci_lookup_name(pci->access, gpu->vendor.chars, (int) gpu->vendor.allocated, PCI_LOOKUP_VENDOR, device->vendor_id);
     ffStrbufRecalculateLength(&gpu->vendor);
 
-    if(ffStrbufFirstIndexS(&gpu->vendor, "AMD") < gpu->vendor.length || ffStrbufFirstIndexS(&gpu->vendor, "ATI") < gpu->vendor.length)
+    if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-    else if(ffStrbufFirstIndexS(&gpu->vendor, "Intel") < gpu->vendor.length)
+    else if(ffStrbufContainS(&gpu->vendor, "Intel"))
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-    else if(ffStrbufFirstIndexS(&gpu->vendor, "NVIDIA") < gpu->vendor.length)
+    else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
