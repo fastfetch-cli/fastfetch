@@ -219,6 +219,13 @@
 #--gpu-hide-integrated
 #--gpu-hide-discrete
 
+# GPU detection options
+# Forces using vulkan to detect GPUs
+# which support video memory usage detection with `--allow-slow-operations`
+# Must be either true or false
+# Default is false.
+#--gpu-force-vulkan
+
 # Shell option
 # Sets if shell version should be detected and printed
 # Must be either true or false

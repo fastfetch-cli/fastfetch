@@ -192,6 +192,7 @@ typedef struct FFconfig
 
     bool cpuTemp;
     bool gpuTemp;
+    bool gpuForceVulkan;
     bool batteryTemp;
 
     bool gpuHideIntegrated;

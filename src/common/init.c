@@ -144,6 +144,7 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
+    instance->config.gpuForceVulkan = false;
     instance->config.batteryTemp = false;
 
     instance->config.gpuHideIntegrated = false;

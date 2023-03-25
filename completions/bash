@@ -201,6 +201,7 @@ __fastfetch_completion()
         "--disk-show-subvolumes"
         "--gpu-hide-integrated"
         "--gpu-hide-discrete"
+        "--gpu-force-vulkan"
         "--disk-show-unknown"
         "--bluetooth-show-disconnected"
     )

@@ -8,6 +8,7 @@ Features:
 * Support display name, display type and decimal refresh rate detection (Display, macOS / Windows)
 * Support `--display-compact-type` to display multiple resolutions in one line (Display)
 * Support flatpak-user (Packages, Linux, #436)
+* Support `--gpu-force-vulkan` to force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations` (GPU)
 
 Bugfixes:
 * Fix date time format

@@ -36,7 +36,7 @@ const FFlist* ffDetectGPU(const FFinstance* instance)
 {
     FF_DETECTION_INTERNAL_GUARD(FFlist,
         ffListInit(&result, sizeof(FFGPUResult));
-        if(ffDetectGPUImpl(&result, instance) != NULL)
+        if(instance->config.gpuForceVulkan || ffDetectGPUImpl(&result, instance) != NULL)
         {
             const FFVulkanResult* vulkan = ffDetectVulkan(instance);
             result = vulkan->gpus;

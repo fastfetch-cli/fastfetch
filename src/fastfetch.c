@@ -1247,6 +1247,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.cpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-temp") == 0)
         instance->config.gpuTemp = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-force-vulkan") == 0)
+        instance->config.gpuForceVulkan = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-temp") == 0)
         instance->config.batteryTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
