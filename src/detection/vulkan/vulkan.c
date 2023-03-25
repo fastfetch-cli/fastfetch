@@ -185,7 +185,6 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
             gpu->type = FF_GPU_TYPE_DISCRETE;
         else
             gpu->type = FF_GPU_TYPE_INTEGRATED;
-        gpu->id = physicalDeviceProperties.properties.deviceID;
         ffStrbufInitS(&gpu->vendor, ffGetGPUVendorString(physicalDeviceProperties.properties.vendorID));
         ffStrbufInitS(&gpu->driver, driverProperties.driverInfo);
 

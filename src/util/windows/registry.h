@@ -5,7 +5,7 @@
 
 #include "fastfetch.h"
 
-#include <winreg.h>
+#include <windows.h>
 
 static inline void wrapRegCloseKey(HKEY* phKey)
 {

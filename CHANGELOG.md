@@ -1,4 +1,26 @@
+# 1.11.0
+
+Features:
+* Support linuxbrew (Packages, Linux)
+* Support foot terminal (#431, Linux)
+* Support cursor size detection on Windows (Cursor, Windows)
+* Support cursor detection on macOS (Cursor, macOS)
+* Support display name, display type and decimal refresh rate detection (Display, macOS / Windows)
+* Support `--display-compact-type` to display multiple resolutions in one line (Display)
+* Support flatpak-user (Packages, Linux, #436)
+* Support `--gpu-force-vulkan` to force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations` (GPU)
+
+Bugfixes:
+* Fix date time format
+* Fix compiling with musl (Wifi, Linux, #429)
+* Don't exit if libpci is failed to init (GPU, Linux, #433)
+* Names of most well-known gamepads are correctly printed instead of `Wireless Controller` on Windows
+
+Logo:
+* Small update for nobara logo (#435, @regulargvy13)
+
 # 1.10.3
+
 Bugfixes:
 * Fix uninitialized variables (GPU, Windows)
 * Fix compiling errors (Windows)

@@ -14,7 +14,8 @@
 #include <assert.h>
 
 #ifdef _WIN32
-    #include <shlwapi.h>
+    // #include <shlwapi.h>
+    __stdcall const char* StrStrIA(const char* lpFirst, const char* lpSrch);
     #define strcasestr StrStrIA
 #endif
 
@@ -31,6 +32,7 @@ typedef struct FFstrbuf
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
+void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src);
 void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
@@ -115,7 +117,10 @@ static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
 
 static inline void ffStrbufInit(FFstrbuf* strbuf)
 {
-    ffStrbufInitA(strbuf, 0);
+    extern char* CHAR_NULL_PTR;
+    strbuf->allocated = 0;
+    strbuf->length = 0;
+    strbuf->chars = CHAR_NULL_PTR;
 }
 
 static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* str)

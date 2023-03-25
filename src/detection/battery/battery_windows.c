@@ -2,11 +2,12 @@
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"
 
+#undef WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <setupapi.h>
 #include <batclass.h>
 #include <devguid.h>
 #include <winternl.h>
-#include <powrprof.h>
 
 #ifdef FF_USE_WIN_NTAPI
     NTSYSCALLAPI

@@ -65,7 +65,7 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, uint8_t p
     long double size = (long double) bytes;
     uint8_t counter = 0;
 
-    while(size > base && counter < prefixesLength - 1)
+    while(size >= base && counter < prefixesLength - 1)
     {
         size /= base;
         counter++;

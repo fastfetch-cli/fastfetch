@@ -188,6 +188,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* v
     return getExeVersionGeneral(exe, version);
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    })) return false;
+
+    //foot version: 1.13.1 -pgo +ime -graphemes -assertions
+    ffStrbufSubstrAfterFirstS(version, "version: ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -239,6 +253,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "deepin-terminal"))
         return getExeVersionGeneral(exe, version);//deepin-terminal 5.4.36
+
+    if(ffStrbufIgnCaseEqualS(processName, "foot"))
+        return getTerminalVersionFoot(exe, version);
 
     #endif
 

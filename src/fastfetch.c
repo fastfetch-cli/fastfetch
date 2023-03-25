@@ -137,7 +137,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "packages-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak), {15} (snap), {16} (brew), {17} (brew-cask), {18} (port), {19} (scoop), {20} (choco)", 20,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco)", 21,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
@@ -151,7 +151,8 @@ static inline void printCommandHelp(const char* command)
             "Number of nix-default packages",
             "Number of apk packages",
             "Number of pkg packages",
-            "Number of flatpak packages",
+            "Number of flatpak-system packages",
+            "Number of flatpak-user packages",
             "Number of snap packages",
             "Number of brew packages",
             "Number of brew-cask packages",
@@ -1246,6 +1247,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.cpuTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-temp") == 0)
         instance->config.gpuTemp = optionParseBoolean(value);
+    else if(strcasecmp(key, "--gpu-force-vulkan") == 0)
+        instance->config.gpuForceVulkan = optionParseBoolean(value);
     else if(strcasecmp(key, "--battery-temp") == 0)
         instance->config.batteryTemp = optionParseBoolean(value);
     else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
@@ -1268,6 +1271,18 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.diskShowSubvolumes = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-show-unknown") == 0)
         instance->config.diskShowUnknown = optionParseBoolean(value);
+    else if(strcasecmp(key, "--display-compact-type") == 0)
+    {
+        optionParseEnum(key, value, &instance->config.displayCompactType,
+            "none", FF_DISPLAY_COMPACT_TYPE_NONE,
+            "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT,
+            "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT,
+            NULL);
+    }
+    else if(strcasecmp(key, "--display-precise-refresh-rate") == 0)
+        instance->config.displayPreciseRefreshRate = optionParseBoolean(value);
+    else if(strcasecmp(key, "--display-detect-name") == 0)
+        instance->config.displayDetectName = optionParseBoolean(value);
     else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
         instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
     else if(strcasecmp(key, "--sound-type") == 0)

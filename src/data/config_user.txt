@@ -219,6 +219,13 @@
 #--gpu-hide-integrated
 #--gpu-hide-discrete
 
+# GPU detection options
+# Forces using vulkan to detect GPUs
+# which support video memory usage detection with `--allow-slow-operations`
+# Must be either true or false
+# Default is false.
+#--gpu-force-vulkan
+
 # Shell option
 # Sets if shell version should be detected and printed
 # Must be either true or false
@@ -252,6 +259,24 @@
 # Must be either true or false
 # Default is false.
 #--bluetooth-show-disconnected false
+
+# Display compact output option
+# Sets if all displays should be printed in one line
+# Must be either original (print pixel resolution) or scaled (print scaled resolution)
+# Default is none.
+#--display-compact-type none
+
+# Display detect name option
+# Sets if display name should be detected and printed (if supported)
+# Must be either true of false
+# Default is false.
+#--display-detect-name none
+
+# Display precise refresh rate option
+# Sets if decimal refresh rates should not be rounded into integers when printing
+# Must be either true (keep decimals) of false (round into integers)
+# Default is false.
+#--display-precise-refresh-rate false
 
 # Sound show all option
 # Sets if all sound devices should be printed
@@ -429,6 +454,5 @@
 #--lib-osmesa /usr/lib/libOSMesa.so
 #--lib-opencl /usr/lib/libOpenCL.so
 #--lib-cjson /usr/lib/libcjson.so
-#--lib-cjson /usr/lib/libasound.so
 #--lib-freetype /data/data/com.termux/files/usr/lib
 #--lib-pulse /usr/lib/libpulse.so

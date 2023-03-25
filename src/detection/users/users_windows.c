@@ -1,6 +1,7 @@
 #include "users.h"
 #include "util/windows/unicode.h"
 
+#include <windows.h>
 #include <wtsapi32.h>
 
 void ffDetectUsers(FFlist* users, FFstrbuf* error)

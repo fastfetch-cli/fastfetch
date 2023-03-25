@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 1.10.3
+    VERSION 1.11.0
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
@@ -67,10 +67,10 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
@@ -462,7 +462,7 @@ elseif(APPLE)
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpuUsage/cpuUsage_apple.c
-        src/detection/cursor/cursor_nosupport.c
+        src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/displayserver_apple.c
@@ -508,10 +508,10 @@ elseif(WIN32)
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
-        src/detection/gpu/gpu_windows.cpp
+        src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/localip/localip_windows.c
-        src/detection/gamepad/gamepad_windows.cpp
+        src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
         src/detection/opengl/opengl_windows.c
@@ -542,6 +542,9 @@ add_library(libfastfetch OBJECT
 )
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+if(WIN32)
+    target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
+endif()
 
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)
@@ -668,10 +671,6 @@ ff_lib_enable(OPENCL
     "OpenCL"
     "OpenCL"
 )
-ff_lib_enable(LIBCJSON
-    "libcjson"
-    "CJson"
-)
 ff_lib_enable(LIBNM
     "libnm"
     "libnm"
@@ -683,6 +682,10 @@ ff_lib_enable(FREETYPE
 ff_lib_enable(PULSE
     "libpulse"
     "Pulse"
+)
+ff_lib_enable(LIBCJSON
+    "libcjson"
+    "CJson"
 )
 
 if(ENABLE_THREADS)
@@ -698,17 +701,18 @@ endif()
 
 if(APPLE)
     target_link_libraries(libfastfetch
+        PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
+        PRIVATE "-framework CoreAudio"
+        PRIVATE "-framework CoreVideo"
+        PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
-        PRIVATE "-framework Cocoa"
-        PRIVATE "-framework CoreWLAN"
-        PRIVATE "-framework CoreAudio"
-        PRIVATE "-framework CoreVideo"
-        PRIVATE "-framework IOBluetooth"
-        PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
+        PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
+        PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)
     target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
@@ -724,8 +728,7 @@ elseif(WIN32)
         PRIVATE "ntdll"
         PRIVATE "version"
         PRIVATE "setupapi"
-        PRIVATE "dxgi"
-        PRIVATE "dinput8"
+        PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
     )

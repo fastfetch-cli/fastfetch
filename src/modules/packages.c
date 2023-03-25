@@ -3,7 +3,7 @@
 #include "detection/packages/packages.h"
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 20
+#define FF_PACKAGES_NUM_FORMAT_ARGS 21
 
 void ffPrintPackages(FFinstance* instance)
 {
@@ -23,7 +23,7 @@ void ffPrintPackages(FFinstance* instance)
         #define FF_PRINT_PACKAGE_NAME(var, name) \
             if(counts->var > 0) \
             { \
-                printf("%u ("name")", counts->var); \
+                printf("%u (%s)", counts->var, (name)); \
                 if((all -= counts->var) > 0) \
                     printf(", "); \
             };
@@ -49,7 +49,8 @@ void ffPrintPackages(FFinstance* instance)
         FF_PRINT_PACKAGE_NAME(nixDefault, "nix-default")
         FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(pkg)
-        FF_PRINT_PACKAGE(flatpak)
+        FF_PRINT_PACKAGE_NAME(flatpakSystem, counts->flatpakUser ? "flatpak-system" : "flatpak")
+        FF_PRINT_PACKAGE_NAME(flatpakUser, "flatpak-user")
         FF_PRINT_PACKAGE(snap)
         FF_PRINT_PACKAGE(brew)
         FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
@@ -78,7 +79,8 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts->nixDefault},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->apk},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->pkg},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->flatpak},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->flatpakSystem},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->flatpakUser},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->snap},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->brew},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->brewCask},

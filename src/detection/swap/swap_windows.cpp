@@ -7,6 +7,7 @@ extern "C" {
 
 #include <winternl.h>
 #include <ntstatus.h>
+#include <windows.h>
 
 extern "C"
 void ffDetectSwap(FFMemoryStorage* swap)

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pci/pci.h>
+#include <setjmp.h>
 
 typedef struct PCIData
 {
@@ -35,11 +36,11 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     pci->ffpci_lookup_name(pci->access, gpu->vendor.chars, (int) gpu->vendor.allocated, PCI_LOOKUP_VENDOR, device->vendor_id);
     ffStrbufRecalculateLength(&gpu->vendor);
 
-    if(ffStrbufFirstIndexS(&gpu->vendor, "AMD") < gpu->vendor.length || ffStrbufFirstIndexS(&gpu->vendor, "ATI") < gpu->vendor.length)
+    if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-    else if(ffStrbufFirstIndexS(&gpu->vendor, "Intel") < gpu->vendor.length)
+    else if(ffStrbufContainS(&gpu->vendor, "Intel"))
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-    else if(ffStrbufFirstIndexS(&gpu->vendor, "NVIDIA") < gpu->vendor.length)
+    else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
@@ -199,8 +200,7 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
 
     FFGPUResult* gpu = ffListAdd(results);
 
-    gpu->id = 0;
-        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+    gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
     ffStrbufInit(&gpu->vendor);
     pciDetectVendorName(gpu, pci, device);
@@ -218,6 +218,30 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     gpu->temperature = FF_GPU_TEMP_UNSET;
     if(instance->config.gpuTemp)
         pciDetectTemperatur(gpu, device);
+}
+
+jmp_buf pciInitJmpBuf;
+static void  __attribute__((__noreturn__))
+handlePciInitError(FF_MAYBE_UNUSED char *msg, ...)
+{
+    longjmp(pciInitJmpBuf, 1);
+}
+// https://github.com/pciutils/pciutils/blob/bca0412843fa650c749128ade03f35ab3e8fe2b9/lib/init.c#L186
+static void __attribute__((__noreturn__))
+handlePciGenericError(char *msg, ...)
+{
+    va_list args;
+
+    va_start(args, msg);
+    fputs("pcilib: ", stderr);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+    fputc('\n', stderr);
+    exit(1);
+}
+static void handlePciWarning(FF_MAYBE_UNUSED char *msg, ...)
+{
+    // noop
 }
 
 static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
@@ -240,7 +264,14 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     #endif
 
     pci.access = ffpci_alloc();
-    ffpci_init(pci.access);
+    pci.access->warning = handlePciWarning;
+    pci.access->error = handlePciInitError;
+    if(setjmp(pciInitJmpBuf) == 0) // https://github.com/pciutils/pciutils/issues/136
+        ffpci_init(pci.access);
+    else
+        return "pcilib: Cannot find any working access method.";
+    pci.access->error = handlePciGenericError; // set back to generic error so we don't mess up error handling in other places
+
     ffpci_scan_bus(pci.access);
 
     struct pci_dev* device = pci.access->devices;

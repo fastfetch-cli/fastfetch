@@ -2,7 +2,6 @@
 #include "common/printing.h"
 #include "opengl.h"
 
-#define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 #include <GL/gl.h>
 #ifndef GL_SHADING_LANGUAGE_VERSION // For WGL

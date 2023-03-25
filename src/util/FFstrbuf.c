@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-static char* CHAR_NULL_PTR = "";
+char* CHAR_NULL_PTR = "";
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
 {
@@ -20,6 +20,19 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
 {
     ffStrbufInitA(strbuf, src->allocated);
     ffStrbufAppend(strbuf, src);
+}
+
+void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
+{
+    if (src)
+    {
+        strbuf->allocated = src->allocated;
+        strbuf->chars = src->chars;
+        strbuf->length = src->length;
+        ffStrbufInit(src);
+    }
+    else
+        ffStrbufInit(strbuf);
 }
 
 void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)

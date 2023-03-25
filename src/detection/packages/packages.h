@@ -14,7 +14,8 @@ typedef struct FFPackagesResult
     uint32_t dpkg;
     uint32_t emerge;
     uint32_t eopkg;
-    uint32_t flatpak;
+    uint32_t flatpakSystem;
+    uint32_t flatpakUser;
     uint32_t nixDefault;
     uint32_t nixSystem;
     uint32_t nixUser;

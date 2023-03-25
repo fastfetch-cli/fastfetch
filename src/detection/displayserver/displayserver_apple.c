@@ -1,5 +1,6 @@
 #include "displayserver.h"
 #include "common/sysctl.h"
+#include "util/apple/cf_helpers.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -8,7 +9,9 @@
 #include <CoreGraphics/CGDirectDisplay.h>
 #include <CoreVideo/CVDisplayLink.h>
 
-static void detectDisplays(FFDisplayServerResult* ds)
+extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
+
+static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
 {
     CGDirectDisplayID screens[128];
     uint32_t screenCount;
@@ -36,12 +39,27 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
             }
 
+            FF_STRBUF_AUTO_DESTROY name;
+            ffStrbufInit(&name);
+            if(detectName && CoreDisplay_DisplayCreateInfoDictionary)
+            {
+                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
+                if(displayInfo)
+                {
+                    CFDictionaryRef productNames;
+                    if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
+                        ffCfDictGetString(productNames, CFSTR("en_US"), &name);
+                }
+            }
+
             ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
                 (uint32_t)CGDisplayModeGetPixelHeight(mode),
-                (uint32_t)refreshRate,
+                refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
-                (uint32_t)CGDisplayModeGetHeight(mode)
+                (uint32_t)CGDisplayModeGetHeight(mode),
+                &name,
+                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
             );
             CGDisplayModeRelease(mode);
         }
@@ -84,7 +102,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 {
     FF_UNUSED(instance);
 
-    ffStrbufInitS(&ds->wmProcessName, "quartz");
+    ffStrbufInitS(&ds->wmProcessName, "WindowServer");
     ffStrbufInitS(&ds->wmPrettyName, "Quartz Compositor");
     ffStrbufInit(&ds->wmProtocolName);
 
@@ -99,9 +117,9 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
     ffStrbufInit(&ds->deVersion);
-    ffStrbufAppendS(&ds->deProcessName, "aqua");
+    ffStrbufInit(&ds->deProcessName);
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
-    detectDisplays(ds);
+    detectDisplays(ds, instance->config.displayDetectName);
 }

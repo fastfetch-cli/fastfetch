@@ -1,5 +1,7 @@
 #include "memory.h"
 
+#include <windows.h>
+
 void ffDetectMemory(FFMemoryStorage* ram)
 {
     MEMORYSTATUSEX statex = {

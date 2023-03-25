@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
     #include <fileapi.h>
+    #include <handleapi.h>
     #include <io.h>
     typedef HANDLE FFNativeFD;
 #else
@@ -119,5 +120,15 @@ static inline bool wrapClose(FFNativeFD* pfd)
     return true;
 }
 #define FF_AUTO_CLOSE_FD __attribute__((__cleanup__(wrapClose)))
+
+static inline bool wrapFclose(FILE** pfile)
+{
+    assert(pfile);
+    if (!*pfile)
+        return false;
+    fclose(*pfile);
+    return true;
+}
+#define FF_AUTO_CLOSE_FILE __attribute__((__cleanup__(wrapFclose)))
 
 #endif // FF_INCLUDED_common_io_io

@@ -4,7 +4,8 @@
 #include "detection/internal.h"
 #include "detection/terminalshell/terminalshell.h"
 
-static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* terminalFont) {
+static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
     FFstrbuf fontName;
     ffStrbufInit(&fontName);
 
@@ -65,6 +66,7 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 }
 
 #if defined(_WIN32) || defined(__linux__)
+
 #ifdef FF_HAVE_LIBCJSON
 
 #include "common/library.h"
@@ -84,9 +86,11 @@ typedef struct CJSONData
     FF_LIBRARY_SYMBOL(cJSON_GetNumberValue)
     FF_LIBRARY_SYMBOL(cJSON_IsArray)
     FF_LIBRARY_SYMBOL(cJSON_Delete)
+
+    cJSON* root;
 } CJSONData;
 
-static const char* detectWTProfile(CJSONData* cjsonData, cJSON* profile, FFstrbuf* name, int* size)
+static const char* detectWTProfile(CJSONData* cjsonData, cJSON* profile, FFstrbuf* name, double* size)
 {
     if(!cjsonData->ffcJSON_IsObject(profile))
         return "cJSON_IsObject(profile) returns false";
@@ -105,16 +109,22 @@ static const char* detectWTProfile(CJSONData* cjsonData, cJSON* profile, FFstrbu
     {
         cJSON* psize = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "size");
         if(cjsonData->ffcJSON_IsNumber(psize))
-            *size = (int)cjsonData->ffcJSON_GetNumberValue(psize);
+            *size = cjsonData->ffcJSON_GetNumberValue(psize);
     }
     return NULL;
 }
 
-static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, int* size)
+static inline void wrapCjsonFree(CJSONData* data)
 {
-    CJSONData cjsonData;
+    assert(data);
+    if (data->root)
+        data->ffcJSON_Delete(data->root);
+}
 
-    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson"FF_LIBRARY_EXTENSION" failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
+static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, double* size)
+{
+    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson" FF_LIBRARY_EXTENSION " failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
+    CJSONData __attribute__((__cleanup__(wrapCjsonFree))) cjsonData = {}; // Make sure cjsonData is destroyed before libcjson is dlclosed
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Parse, cJSON_Parse@4)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsObject, cJSON_IsObject@4)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive, cJSON_GetObjectItemCaseSensitive@8)
@@ -125,23 +135,15 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsArray, cJSON_IsArray@4)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Delete, cJSON_Delete@4)
 
-    const char* error = NULL;
-
-    cJSON* root = cjsonData.ffcJSON_Parse(content->chars);
+    cJSON* root = cjsonData.root = cjsonData.ffcJSON_Parse(content->chars);
     if(!cjsonData.ffcJSON_IsObject(root))
-    {
-        error = "cJSON_Parse() failed";
-        goto exit;
-    }
+        return "cJSON_Parse() failed";
 
     cJSON* profiles = cjsonData.ffcJSON_GetObjectItemCaseSensitive(root, "profiles");
     if(!cjsonData.ffcJSON_IsObject(profiles))
-    {
-        error = "cJSON_GetObjectItemCaseSensitive(root, \"profiles\") failed";
-        goto exit;
-    }
+        return "cJSON_GetObjectItemCaseSensitive(root, \"profiles\") failed";
 
-    FFstrbuf wtProfileId;
+    FF_STRBUF_AUTO_DESTROY wtProfileId;
     ffStrbufInitS(&wtProfileId, getenv("WT_PROFILE_ID"));
     ffStrbufTrim(&wtProfileId, '\'');
     if(wtProfileId.length > 0)
@@ -165,19 +167,16 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
             }
         }
     }
-    ffStrbufDestroy(&wtProfileId);
 
     cJSON* defaults = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "defaults");
-    detectWTProfile(&cjsonData, defaults, name, size);
+    if(defaults)
+        detectWTProfile(&cjsonData, defaults, name, size);
 
     if(name->length == 0)
         ffStrbufSetS(name, "Cascadia Mono");
     if(*size < 0)
         *size = 12;
-
-exit:
-    cjsonData.ffcJSON_Delete(root);
-    return error;
+    return NULL;
 }
 
 #ifdef _WIN32
@@ -189,7 +188,7 @@ exit:
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
-    FFstrbuf json;
+    FF_STRBUF_AUTO_DESTROY json;
     ffStrbufInit(&json);
     const char* error = NULL;
 
@@ -250,44 +249,40 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
     if(error)
     {
         ffStrbufAppendS(&terminalFont->error, error);
-        ffStrbufDestroy(&json);
         return;
     }
     ffStrbufTrimRight(&json, '\n');
     if(json.length == 0)
     {
         ffStrbufAppendS(&terminalFont->error, "Cannot find file \"settings.json\"");
-        ffStrbufDestroy(&json);
         return;
     }
 
-    FFstrbuf name;
+    FF_STRBUF_AUTO_DESTROY name;
     ffStrbufInit(&name);
-    int size = -1;
+    double size = -1;
     error = detectFromWTImpl(instance, &json, &name, &size);
-    ffStrbufDestroy(&json);
 
     if(error)
         ffStrbufAppendS(&terminalFont->error, error);
     else
     {
         char sizeStr[16];
-        snprintf(sizeStr, sizeof(sizeStr), "%d", size);
+        snprintf(sizeStr, sizeof(sizeStr), "%g", size);
         ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
     }
-
-    ffStrbufDestroy(&name);
 }
 
-#else
+#else //FF_HAVE_CJSON
 
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     FF_UNUSED(instance, terminalExe, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without libcjson support");
+    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without libcJSON support");
 }
 
-#endif
+#endif //FF_HAVE_CJSON
+
 #endif //defined(_WIN32) || defined(__linux__)
 
 FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)

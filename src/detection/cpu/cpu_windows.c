@@ -15,25 +15,28 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 
     {
         DWORD length = 0;
-        GetLogicalProcessorInformationEx(RelationProcessorCore, NULL, &length);
+        GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
-            pLogicalInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
+            pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
 
-        if(pLogicalInfo && GetLogicalProcessorInformationEx(RelationProcessorCore, pLogicalInfo, &length))
+        if(pProcessorInfo && GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
         {
             for(
-                SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pLogicalInfo;
-                (uint8_t*)ptr < ((uint8_t*)pLogicalInfo) + length;
+                SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
+                (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
                 ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
             )
             {
                 if(ptr->Relationship == RelationProcessorCore)
                     ++cpu->coresPhysical;
+                else if(ptr->Relationship == RelationGroup)
+                {
+                    cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
+                    cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
+                }
             }
         }
     }
-    cpu->coresOnline = (uint16_t)GetActiveProcessorCount(ALL_PROCESSOR_GROUPS);
-    cpu->coresLogical = (uint16_t)GetMaximumProcessorCount(ALL_PROCESSOR_GROUPS);
 
     FF_HKEY_AUTO_DESTROY hKey;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))

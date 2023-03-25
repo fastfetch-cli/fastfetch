@@ -8,9 +8,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #ifdef _WIN32
-    #include <wincon.h>
+    #include <windows.h>
     #include <locale.h>
-    #include <shlobj.h>
     #include "util/windows/unicode.h"
 #else
     #include <signal.h>
@@ -145,6 +144,7 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.cpuTemp = false;
     instance->config.gpuTemp = false;
+    instance->config.gpuForceVulkan = false;
     instance->config.batteryTemp = false;
 
     instance->config.gpuHideIntegrated = false;
@@ -160,6 +160,10 @@ static void defaultConfig(FFinstance* instance)
     instance->config.diskShowHidden = false;
     instance->config.diskShowUnknown = false;
     instance->config.diskShowSubvolumes = false;
+
+    instance->config.displayCompactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+    instance->config.displayDetectName = false;
+    instance->config.displayPreciseRefreshRate = false;
 
     instance->config.bluetoothShowDisconnected = false;
 

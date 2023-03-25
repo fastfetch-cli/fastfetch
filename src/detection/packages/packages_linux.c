@@ -258,7 +258,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: ");
     packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
-    packageCounts->flatpak += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
+    packageCounts->flatpakSystem += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
     packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
     packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
@@ -266,6 +266,8 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->rpm += getSQLite3Int(instance, baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
     packageCounts->snap += getSnap(baseDir);
     packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
+    packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
+    packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
 }
 
 static void getPackageCountsRegular(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
@@ -314,7 +316,7 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
 
 void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 {
-    FFstrbuf baseDir;
+    FF_STRBUF_AUTO_DESTROY baseDir;
     ffStrbufInitA(&baseDir, 512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
@@ -333,6 +335,5 @@ void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 
     ffStrbufSet(&baseDir, &instance->state.platform.homeDir);
     result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
-
-    ffStrbufDestroy(&baseDir);
+    result->flatpakUser += getNumElements(&baseDir, "/.var/app", DT_DIR);
 }

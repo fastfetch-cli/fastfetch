@@ -18,13 +18,13 @@ void ffPrintChassis(FFinstance* instance)
 
     if(result.chassisType.length == 0)
     {
-        ffPrintError(instance, FF_CHASSIS_MODULE_NAME, 0, &instance->config.host, "chassis_type is not set by O.E.M.");
+        ffPrintError(instance, FF_CHASSIS_MODULE_NAME, 0, &instance->config.chassis, "chassis_type is not set by O.E.M.");
         return;
     }
 
     if(instance->config.chassis.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_CHASSIS_MODULE_NAME, 0, &instance->config.host.key);
+        ffPrintLogoAndKey(instance, FF_CHASSIS_MODULE_NAME, 0, &instance->config.chassis.key);
 
         FFstrbuf output;
         ffStrbufInitCopy(&output, &result.chassisType);

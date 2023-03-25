@@ -5,7 +5,7 @@ extern "C" {
 #include "util/mallocHelper.h"
 }
 
-#include <processthreadsapi.h>
+#include <windows.h>
 #include <wchar.h>
 #include <tlhelp32.h>
 

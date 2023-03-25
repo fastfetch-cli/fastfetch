@@ -29,7 +29,6 @@ typedef struct FFGPUMemory
 
 typedef struct FFGPUResult
 {
-    uint64_t id;
     FFGpuType type;
     FFstrbuf vendor;
     FFstrbuf name;

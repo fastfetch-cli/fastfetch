@@ -34,13 +34,21 @@
 #define FF_WM_PROTOCOL_X11 "X11"
 #define FF_WM_PROTOCOL_WAYLAND "Wayland"
 
+typedef enum FFDisplayType {
+    FF_DISPLAY_TYPE_UNKNOWN,
+    FF_DISPLAY_TYPE_BUILTIN,
+    FF_DISPLAY_TYPE_EXTERNAL,
+} FFDisplayType;
+
 typedef struct FFDisplayResult
 {
     uint32_t width;
     uint32_t height;
-    uint32_t refreshRate;
+    double refreshRate;
     uint32_t scaledWidth;
     uint32_t scaledHeight;
+    FFstrbuf name;
+    FFDisplayType type;
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult
@@ -56,8 +64,14 @@ typedef struct FFDisplayServerResult
 
 const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
 
-//Used internal
-uint32_t ffdsParseRefreshRate(int32_t refreshRate);
-bool ffdsAppendDisplay(FFDisplayServerResult* result, uint32_t width, uint32_t height, uint32_t refreshRate, uint32_t scaledWidth, uint32_t scaledHeight);
+bool ffdsAppendDisplay(
+    FFDisplayServerResult* result,
+    uint32_t width,
+    uint32_t height,
+    double refreshRate,
+    uint32_t scaledWidth,
+    uint32_t scaledHeight,
+    FFstrbuf* name,
+    FFDisplayType type);
 
 #endif
