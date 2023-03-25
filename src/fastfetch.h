@@ -206,7 +206,7 @@ typedef struct FFconfig
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
     FFstrbuf libOpenCL;
-    FFstrbuf libcJSON;
+    FFstrbuf libJSONC;
     FFstrbuf libfreetype;
     FFstrbuf libPulse;
     FFstrbuf libwlanapi;
