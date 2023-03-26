@@ -1004,7 +1004,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
     else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
     else if(ffParseCPUUsageCommandOptions(&instance->config.cpuUsage, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "gpu", &instance->config.gpu)) {}
+    else if(ffParseGPUCommandOptions(&instance->config.gpu, key, value)) {}
     else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
     else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
     else if(optionParseModuleArgs(key, value, "disk", &instance->config.disk)) {}
@@ -1091,14 +1091,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--gpu-temp") == 0)
-        instance->config.gpuTemp = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-force-vulkan") == 0)
-        instance->config.gpuForceVulkan = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
-        instance->config.gpuHideIntegrated = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-hide-discrete") == 0)
-        instance->config.gpuHideDiscrete = optionParseBoolean(value);
     else if(strcasecmp(key, "--shell-version") == 0)
         instance->config.shellVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--terminal-version") == 0)
@@ -1266,8 +1258,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintCPUUsage(instance, &instance->config.cpuUsage);
     else if(strcasecmp(line, FF_CUSTOM_MODULE_NAME) == 0)
         ffPrintCustom(instance, &instance->config.custom);
-    else if(strcasecmp(line, "gpu") == 0)
-        ffPrintGPU(instance);
+    else if(strcasecmp(line, FF_GPU_MODULE_NAME) == 0)
+        ffPrintGPU(instance, &instance->config.gpu);
     else if(strcasecmp(line, "memory") == 0)
         ffPrintMemory(instance);
     else if(strcasecmp(line, "swap") == 0)

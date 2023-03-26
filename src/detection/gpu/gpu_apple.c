@@ -99,7 +99,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
-        if(instance->config.gpuTemp)
+        if(instance->config.gpu.temp)
             gpu->temperature = detectGpuTemp(&gpu->name);
         else
             gpu->temperature = FF_GPU_TEMP_UNSET;

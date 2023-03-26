@@ -83,7 +83,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.terminalFont);
     ffInitCPUOptions(&instance->config.cpu);
     ffInitCPUUsageOptions(&instance->config.cpuUsage);
-    initModuleArg(&instance->config.gpu);
+    ffInitGPUOptions(&instance->config.gpu);
     initModuleArg(&instance->config.memory);
     initModuleArg(&instance->config.swap);
     initModuleArg(&instance->config.disk);
@@ -132,12 +132,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
-
-    instance->config.gpuTemp = false;
-    instance->config.gpuForceVulkan = false;
-
-    instance->config.gpuHideIntegrated = false;
-    instance->config.gpuHideDiscrete = false;
 
     instance->config.shellVersion = true;
     instance->config.terminalVersion = true;
@@ -319,7 +313,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.terminalFont);
     ffDestroyCPUOptions(&instance->config.cpu);
     ffDestroyCPUUsageOptions(&instance->config.cpuUsage);
-    destroyModuleArg(&instance->config.gpu);
+    ffDestroyGPUOptions(&instance->config.gpu);
     destroyModuleArg(&instance->config.memory);
     destroyModuleArg(&instance->config.swap);
     destroyModuleArg(&instance->config.disk);

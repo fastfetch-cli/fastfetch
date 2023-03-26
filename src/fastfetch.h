@@ -119,7 +119,7 @@ typedef struct FFconfig
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
     FFCustomOptions custom;
-    FFModuleArgs gpu;
+    FFGPUOptions gpu;
     FFModuleArgs memory;
     FFModuleArgs swap;
     FFModuleArgs disk;
@@ -166,12 +166,6 @@ typedef struct FFconfig
     FFstrbuf libPulse;
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
-
-    bool gpuTemp;
-    bool gpuForceVulkan;
-
-    bool gpuHideIntegrated;
-    bool gpuHideDiscrete;
 
     bool shellVersion;
     bool terminalVersion;
@@ -262,7 +256,6 @@ void ffPrintWallpaper(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
-void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
 void ffPrintSwap(FFinstance* instance);
 void ffPrintDisk(FFinstance* instance);

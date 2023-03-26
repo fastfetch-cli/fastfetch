@@ -55,6 +55,12 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 false;
         }
 
+        case 'G': {
+            return
+                tryModule(instance, type, module, FF_GPU_MODULE_NAME, ffParseGPUJsonObject) ||
+                false;
+        }
+
         case 'H': {
             return
                 tryModule(instance, type, module, FF_HOST_MODULE_NAME, ffParseHostJsonObject) ||

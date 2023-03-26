@@ -216,7 +216,7 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
-    if(instance->config.gpuTemp)
+    if(instance->config.gpu.temp)
         pciDetectTemperatur(gpu, device);
 }
 

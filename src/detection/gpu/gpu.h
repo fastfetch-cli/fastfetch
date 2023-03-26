@@ -14,13 +14,6 @@ extern const char* FF_GPU_VENDOR_NAME_AMD;
 extern const char* FF_GPU_VENDOR_NAME_INTEL;
 extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
 
-typedef enum FFGpuType
-{
-    FF_GPU_TYPE_UNKNOWN,
-    FF_GPU_TYPE_INTEGRATED,
-    FF_GPU_TYPE_DISCRETE,
-} FFGpuType;
-
 typedef struct FFGPUMemory
 {
     uint64_t total;
@@ -29,7 +22,7 @@ typedef struct FFGPUMemory
 
 typedef struct FFGPUResult
 {
-    FFGpuType type;
+    FFGPUType type;
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
