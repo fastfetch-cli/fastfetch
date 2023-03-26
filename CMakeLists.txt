@@ -474,7 +474,7 @@ elseif(APPLE)
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
-        src/detection/cpuusage/cpuUsage_apple.c
+        src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
