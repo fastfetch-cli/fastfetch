@@ -16,6 +16,7 @@
 #include "modules/cursor/cursor.h"
 #include "modules/custom/custom.h"
 #include "modules/datetime/datetime.h"
+#include "modules/disk/disk.h"
 #include "modules/display/display.h"
 #include "modules/gpu/gpu.h"
 #include "modules/host/host.h"

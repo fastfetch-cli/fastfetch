@@ -13,6 +13,7 @@
 #include "modules/custom/option.h"
 #include "modules/command/option.h"
 #include "modules/datetime/option.h"
+#include "modules/disk/option.h"
 #include "modules/display/option.h"
 #include "modules/host/option.h"
 #include "modules/gpu/option.h"

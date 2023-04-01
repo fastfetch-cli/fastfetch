@@ -86,7 +86,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitGPUOptions(&instance->config.gpu);
     initModuleArg(&instance->config.memory);
     initModuleArg(&instance->config.swap);
-    initModuleArg(&instance->config.disk);
+    ffInitDiskOptions(&instance->config.disk);
     ffInitBatteryOptions(&instance->config.battery);
     initModuleArg(&instance->config.powerAdapter);
     initModuleArg(&instance->config.locale);
@@ -135,9 +135,6 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.shellVersion = true;
     instance->config.terminalVersion = true;
-
-    ffStrbufInitA(&instance->config.diskFolders, 0);
-    instance->config.diskShowTypes = FF_DISK_TYPE_REGULAR_BIT | FF_DISK_TYPE_EXTERNAL_BIT;
 
     instance->config.soundType = FF_SOUND_TYPE_MAIN;
 
@@ -316,7 +313,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyGPUOptions(&instance->config.gpu);
     destroyModuleArg(&instance->config.memory);
     destroyModuleArg(&instance->config.swap);
-    destroyModuleArg(&instance->config.disk);
+    ffDestroyDiskOptions(&instance->config.disk);
     ffDestroyBatteryOptions(&instance->config.battery);
     destroyModuleArg(&instance->config.powerAdapter);
     destroyModuleArg(&instance->config.locale);
@@ -363,7 +360,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
 
-    ffStrbufDestroy(&instance->config.diskFolders);
     ffStrbufDestroy(&instance->config.localIpNamePrefix);
     ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);

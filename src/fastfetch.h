@@ -33,16 +33,6 @@ typedef enum FFLocalIpCompactType
     FF_LOCALIP_COMPACT_TYPE_ONELINE,
 } FFLocalIpCompactType;
 
-typedef enum FFDiskType
-{
-    FF_DISK_TYPE_NONE = 0,
-    FF_DISK_TYPE_REGULAR_BIT = 1 << 0,
-    FF_DISK_TYPE_HIDDEN_BIT = 1 << 1,
-    FF_DISK_TYPE_EXTERNAL_BIT = 1 << 2,
-    FF_DISK_TYPE_SUBVOLUME_BIT = 1 << 3,
-    FF_DISK_TYPE_UNKNOWN_BIT = 1 << 4,
-} FFDiskType;
-
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -122,7 +112,7 @@ typedef struct FFconfig
     FFGPUOptions gpu;
     FFModuleArgs memory;
     FFModuleArgs swap;
-    FFModuleArgs disk;
+    FFDiskOptions disk;
     FFBatteryOptions battery;
     FFModuleArgs powerAdapter;
     FFModuleArgs locale;
@@ -169,9 +159,6 @@ typedef struct FFconfig
 
     bool shellVersion;
     bool terminalVersion;
-
-    FFstrbuf diskFolders;
-    FFDiskType diskShowTypes;
 
     FFstrbuf localIpNamePrefix;
     FFLocalIpType localIpShowType;
@@ -258,7 +245,6 @@ void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
 void ffPrintSwap(FFinstance* instance);
-void ffPrintDisk(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);

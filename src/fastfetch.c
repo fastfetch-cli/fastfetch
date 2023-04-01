@@ -1007,7 +1007,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseGPUCommandOptions(&instance->config.gpu, key, value)) {}
     else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
     else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
-    else if(optionParseModuleArgs(key, value, "disk", &instance->config.disk)) {}
+    else if(ffParseDiskCommandOptions(&instance->config.disk, key, value)) {}
     else if(ffParseBatteryCommandOptions(&instance->config.battery, key, value)) {}
     else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
     else if(optionParseModuleArgs(key, value, "locale", &instance->config.locale)) {}
@@ -1095,18 +1095,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.shellVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--terminal-version") == 0)
         instance->config.terminalVersion = optionParseBoolean(value);
-    else if(strcasecmp(key, "--disk-folders") == 0)
-        optionParseString(key, value, &instance->config.diskFolders);
-    else if(strcasecmp(key, "--disk-show-regular") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_REGULAR_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_REGULAR_BIT);
-    else if(strcasecmp(key, "--disk-show-removable") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_EXTERNAL_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT);
-    else if(strcasecmp(key, "--disk-show-hidden") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_HIDDEN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_HIDDEN_BIT);
-    else if(strcasecmp(key, "--disk-show-subvolumes") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_SUBVOLUME_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT);
-    else if(strcasecmp(key, "--disk-show-unknown") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_UNKNOWN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT);
     else if(strcasecmp(key, "--sound-type") == 0)
     {
         optionParseEnum(key, value, &instance->config.soundType,
@@ -1264,8 +1252,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintMemory(instance);
     else if(strcasecmp(line, "swap") == 0)
         ffPrintSwap(instance);
-    else if(strcasecmp(line, "disk") == 0)
-        ffPrintDisk(instance);
+    else if(strcasecmp(line, FF_DISK_MODULE_NAME) == 0)
+        ffPrintDisk(instance, &instance->config.disk);
     else if(strcasecmp(line, FF_BATTERY_MODULE_NAME) == 0)
         ffPrintBattery(instance, &instance->config.battery);
     else if(strcasecmp(line, "poweradapter") == 0)
