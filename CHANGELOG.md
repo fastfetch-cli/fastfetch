@@ -1,3 +1,11 @@
+# 1.11.1
+Bugfixes:
+* Fix name of Pro Controller (Gamepad, Windows)
+* Fix compile error with imagemagick enabled (Windows)
+
+Logo:
+* Add SteamOS
+
 # 1.11.0
 
 Features:
