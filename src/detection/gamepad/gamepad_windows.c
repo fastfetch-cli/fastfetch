@@ -17,7 +17,7 @@ static const char* detectKnownGamepad(uint32_t vendorId, uint32_t productId)
             {
                 case 0x2006: return "Nintendo Switch Joycon L";
                 case 0x2007: return "Nintendo Switch Joycon R";
-                case 0x2009: return "Nintendo Switch Pro";
+                case 0x2009: return "Nintendo Switch Pro Controller";
                 case 0x200E: return "Nintendo Switch Charging Grip";
                 case 0x2017: return "Nintendo Switch SNES Controller";
 
