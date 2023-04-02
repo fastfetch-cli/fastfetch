@@ -4,6 +4,8 @@
 
 #ifdef __APPLE__
     #include <sys/syslimits.h>
+#elif _WIN32
+    #include <windows.h>
 #endif
 
 static FFstrbuf base64Encode(FFstrbuf* in)
