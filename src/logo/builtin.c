@@ -2217,6 +2217,39 @@ static const FFlogo* getLogoSolus()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoSteamOS()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("steamos")
+    FF_LOGO_LINES(
+        "$1              .,,,,.\n"
+        "        .,'onNMMMMMNNnn',.\n"
+        "     .'oNMANKMMMMMMMMMMMNNn'.\n"
+        "   .'ANMMMMMMMXKNNWWWPFFWNNMNn.\n"
+        "  ;NNMMMMMMMMMMNWW'' ,.., 'WMMM,\n"
+        " ;NMMMMV+##+VNWWW' .+;'':+, 'WMW,\n"
+        ",VNNWP+$2######$1+WW,  $2+:    $1:+, +MMM,\n"
+        "'$2+#############,   +.    ,+' $1+NMMM\n"
+        "$2  '*#########*'     '*,,*' $1.+NMMMM.\n"
+        "$2     `'*###*'          ,.,;###$1+WNM,\n"
+        "$2         .,;;,      .;##########$1+W\n"
+        "$2,',.         ';  ,+##############'\n"
+        " '###+. :,. .,; ,###############'\n"
+        "  '####.. `'' .,###############'\n"
+        "    '#####+++################'\n"
+        "      '*##################*'\n"
+        "         ''*##########*''\n"
+        "              ''''''\n"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntu()
 {
     FF_LOGO_INIT
@@ -2503,6 +2536,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoSlackware,
         getLogoSlackwareSmall,
         getLogoSolus,
+        getLogoSteamOS,
         getLogoUbuntu,
         getLogoUbuntuOld,
         getLogoUbuntuSmall,
