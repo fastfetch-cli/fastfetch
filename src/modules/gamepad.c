@@ -6,14 +6,14 @@
 
 static void printDevice(FFinstance* instance, const FFGamepadDevice* device, uint8_t index)
 {
-    if(instance->config.sound.outputFormat.length == 0)
+    if(instance->config.gamepad.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_GAMEPAD_MODULE_NAME, index, &instance->config.sound.key);
+        ffPrintLogoAndKey(instance, FF_GAMEPAD_MODULE_NAME, index, &instance->config.gamepad.key);
         ffStrbufPutTo(&device->name, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_GAMEPAD_MODULE_NAME, index, &instance->config.sound, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(instance, FF_GAMEPAD_MODULE_NAME, index, &instance->config.gamepad, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier},
         });
@@ -28,13 +28,13 @@ void ffPrintGamepad(FFinstance* instance)
 
     if(error)
     {
-        ffPrintError(instance, FF_GAMEPAD_MODULE_NAME, 0, &instance->config.sound, "%s", error);
+        ffPrintError(instance, FF_GAMEPAD_MODULE_NAME, 0, &instance->config.gamepad, "%s", error);
         return;
     }
 
     if(!result.length)
     {
-        ffPrintError(instance, FF_GAMEPAD_MODULE_NAME, 0, &instance->config.sound, "No devices detected");
+        ffPrintError(instance, FF_GAMEPAD_MODULE_NAME, 0, &instance->config.gamepad, "No devices detected");
         return;
     }
 
