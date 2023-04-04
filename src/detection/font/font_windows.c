@@ -3,6 +3,26 @@
 
 #include <windows.h>
 
+static void generateString(FFFontResult* font)
+{
+    const char* types[] = { "Caption", "Menu", "Message", "Status" };
+    for(uint32_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
+    {
+        if(i == 0 || !ffStrbufEqual(&font->fonts[i - 1], &font->fonts[i]))
+        {
+            if(i > 0)
+                ffStrbufAppendS(&font->display, "], ");
+            ffStrbufAppendF(&font->display, "%s [%s", font->fonts[i].chars, types[i]);
+        }
+        else
+        {
+            ffStrbufAppendS(&font->display, " / ");
+            ffStrbufAppendS(&font->display, types[i]);
+        }
+    }
+    ffStrbufAppendC(&font->display, ']');
+}
+
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
     FF_UNUSED(instance);
@@ -19,4 +39,6 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
         if(fonts[i]->lfHeight < 0)
             ffStrbufAppendF(&result->fonts[i], " (%dpt)", (int)-fonts[i]->lfHeight);
     }
+
+    generateString(result);
 }

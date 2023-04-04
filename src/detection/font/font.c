@@ -9,6 +9,7 @@ static void detectFont(const FFinstance* instance, FFFontResult* font)
 
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufInit(&font->fonts[i]);
+    ffStrbufInit(&font->display);
 
     ffDetectFontImpl(instance, font);
 
