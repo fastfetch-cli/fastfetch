@@ -37,7 +37,7 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
     }
 }
 
-const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
+const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
@@ -51,8 +51,8 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         assert(adapter_addresses);
 
         DWORD error = GetAdaptersAddresses(
-            instance->config.localIpShowType & FF_LOCALIP_TYPE_IPV4_BIT
-                ? instance->config.localIpShowType & FF_LOCALIP_TYPE_IPV6_BIT ? AF_UNSPEC : AF_INET
+            options->showType & FF_LOCALIP_TYPE_IPV4_BIT
+                ? options->showType & FF_LOCALIP_TYPE_IPV6_BIT ? AF_UNSPEC : AF_INET
                 : AF_INET6,
             GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
             NULL,
@@ -71,17 +71,17 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
         bool isLoop = adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK;
-        if (isLoop && !(instance->config.localIpShowType & FF_LOCALIP_TYPE_LOOP_BIT))
+        if (isLoop && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
             continue;
 
         bool newIp = true;
 
         char name[128];
         WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, sizeof(name), NULL, NULL);
-        if (instance->config.localIpNamePrefix.length && strncmp(name, instance->config.localIpNamePrefix.chars, instance->config.localIpNamePrefix.length) != 0)
+        if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        if (instance->config.localIpShowType & FF_LOCALIP_TYPE_MAC_BIT && adapter->PhysicalAddressLength == 6)
+        if (options->showType & FF_LOCALIP_TYPE_MAC_BIT && adapter->PhysicalAddressLength == 6)
         {
             char addressBuffer[32];
             uint8_t* ptr = adapter->PhysicalAddress;

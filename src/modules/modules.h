@@ -24,6 +24,7 @@
 #include "modules/host/host.h"
 #include "modules/kernel/kernel.h"
 #include "modules/locale/locale.h"
+#include "modules/localip/localip.h"
 #include "modules/separator/separator.h"
 #include "modules/title/title.h"
 #include "modules/jsonconfig/jsonconfig.h"

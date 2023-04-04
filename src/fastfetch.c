@@ -1011,7 +1011,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseBatteryCommandOptions(&instance->config.battery, key, value)) {}
     else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
     else if(ffParseLocaleCommandOptions(&instance->config.locale, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "localip", &instance->config.localIP)) {}
+    else if(ffParseLocalIpCommandOptions(&instance->config.localIP, key, value)) {}
     else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
     else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
@@ -1104,18 +1104,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             NULL
         );
     }
-    else if(strcasecmp(key, "--localip-show-ipv4") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV4_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV4_BIT);
-    else if(strcasecmp(key, "--localip-show-ipv6") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV6_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV6_BIT);
-    else if(strcasecmp(key, "--localip-show-mac") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_MAC_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_MAC_BIT);
-    else if(strcasecmp(key, "--localip-show-loop") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_LOOP_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_LOOP_BIT);
-    else if(strcasecmp(key, "--localip-compact") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_COMPACT_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_COMPACT_BIT);
-    else if(strcasecmp(key, "--localip-name-prefix") == 0)
-        optionParseString(key, value, &instance->config.localIpNamePrefix);
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--publicip-url") == 0)
@@ -1261,7 +1249,7 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
     else if(strcasecmp(line, FF_LOCALE_MODULE_NAME) == 0)
         ffPrintLocale(instance, &instance->config.locale);
     else if(strcasecmp(line, "localip") == 0)
-        ffPrintLocalIp(instance);
+        ffPrintLocalIp(instance, &instance->config.localIP);
     else if(strcasecmp(line, "publicip") == 0)
         ffPrintPublicIp(instance);
     else if(strcasecmp(line, "wifi") == 0)

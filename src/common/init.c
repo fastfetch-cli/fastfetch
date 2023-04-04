@@ -90,7 +90,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitBatteryOptions(&instance->config.battery);
     initModuleArg(&instance->config.powerAdapter);
     ffInitLocaleOptions(&instance->config.locale);
-    initModuleArg(&instance->config.localIP);
+    ffInitLocalIpOptions(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
     initModuleArg(&instance->config.wifi);
@@ -137,9 +137,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.terminalVersion = true;
 
     instance->config.soundType = FF_SOUND_TYPE_MAIN;
-
-    instance->config.localIpShowType = FF_LOCALIP_TYPE_IPV4_BIT;
-    ffStrbufInit(&instance->config.localIpNamePrefix);
 
     instance->config.publicIpTimeout = 0;
     ffStrbufInit(&instance->config.publicIpUrl);
@@ -317,7 +314,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyBatteryOptions(&instance->config.battery);
     destroyModuleArg(&instance->config.powerAdapter);
     ffDestroyLocaleOptions(&instance->config.locale);
-    destroyModuleArg(&instance->config.localIP);
+    ffDestroyLocalIpOptions(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);
     destroyModuleArg(&instance->config.wallpaper);
     destroyModuleArg(&instance->config.weather);
@@ -360,7 +357,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
 
-    ffStrbufDestroy(&instance->config.localIpNamePrefix);
     ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
     ffStrbufDestroy(&instance->config.playerName);

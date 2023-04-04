@@ -84,6 +84,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
         case 'L': {
             return
                 tryModule(instance, type, module, FF_LOCALE_MODULE_NAME, ffParseLocaleJsonObject) ||
+                tryModule(instance, type, module, FF_LOCALIP_MODULE_NAME, ffParseLocalIpJsonObject) ||
                 false;
         }
 

@@ -13,6 +13,6 @@ typedef struct FFLocalIpResult
     FFstrbuf mac;
 } FFLocalIpResult;
 
-const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results);
+const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results);
 
 #endif

@@ -46,7 +46,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type)
     }
 }
 
-const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
+const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 {
     struct ifaddrs* ifAddrStruct = NULL;
     if(getifaddrs(&ifAddrStruct) < 0)
@@ -57,15 +57,15 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         if (!ifa->ifa_addr || !(ifa->ifa_flags & IFF_RUNNING))
             continue;
 
-        if ((ifa->ifa_flags & IFF_LOOPBACK) && !(instance->config.localIpShowType & FF_LOCALIP_TYPE_LOOP_BIT))
+        if ((ifa->ifa_flags & IFF_LOOPBACK) && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
             continue;
 
-        if (instance->config.localIpNamePrefix.length && strncmp(ifa->ifa_name, instance->config.localIpNamePrefix.chars, instance->config.localIpNamePrefix.length) != 0)
+        if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
         if (ifa->ifa_addr->sa_family == AF_INET)
         {
-            if (!(instance->config.localIpShowType & FF_LOCALIP_TYPE_IPV4_BIT))
+            if (!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
                 continue;
 
             struct sockaddr_in* ipv4 = (struct sockaddr_in*) ifa->ifa_addr;
@@ -75,7 +75,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
-            if (!(instance->config.localIpShowType & FF_LOCALIP_TYPE_IPV6_BIT))
+            if (!(options->showType & FF_LOCALIP_TYPE_IPV6_BIT))
                 continue;
 
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
@@ -86,7 +86,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         #if defined(__FreeBSD__) || defined(__APPLE__)
         else if (ifa->ifa_addr->sa_family == AF_LINK)
         {
-            if (!(instance->config.localIpShowType & FF_LOCALIP_TYPE_MAC_BIT))
+            if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT))
                 continue;
 
             char addressBuffer[32];
@@ -98,7 +98,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
         {
-            if (!(instance->config.localIpShowType & FF_LOCALIP_TYPE_MAC_BIT))
+            if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT))
                 continue;
 
             char addressBuffer[32];

@@ -26,13 +26,6 @@ typedef enum FFSoundType
     FF_SOUND_TYPE_ALL,
 } FFSoundType;
 
-typedef enum FFLocalIpCompactType
-{
-    FF_LOCALIP_COMPACT_TYPE_NONE,
-    FF_LOCALIP_COMPACT_TYPE_MULTILINE,
-    FF_LOCALIP_COMPACT_TYPE_ONELINE,
-} FFLocalIpCompactType;
-
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -47,17 +40,6 @@ typedef enum FFGLType
     FF_GL_TYPE_GLX,
     FF_GL_TYPE_OSMESA
 } FFGLType;
-
-typedef enum FFLocalIpType
-{
-    FF_LOCALIP_TYPE_NONE,
-    FF_LOCALIP_TYPE_LOOP_BIT = 1 << 0,
-    FF_LOCALIP_TYPE_IPV4_BIT = 1 << 1,
-    FF_LOCALIP_TYPE_IPV6_BIT = 1 << 2,
-    FF_LOCALIP_TYPE_MAC_BIT  = 1 << 3,
-
-    FF_LOCALIP_TYPE_COMPACT_BIT = 1 << 10,
-} FFLocalIpType;
 
 typedef struct FFconfig
 {
@@ -116,7 +98,7 @@ typedef struct FFconfig
     FFBatteryOptions battery;
     FFModuleArgs powerAdapter;
     FFLocaleOptions locale;
-    FFModuleArgs localIP;
+    FFLocalIpOptions localIP;
     FFModuleArgs publicIP;
     FFModuleArgs weather;
     FFModuleArgs player;
@@ -159,9 +141,6 @@ typedef struct FFconfig
 
     bool shellVersion;
     bool terminalVersion;
-
-    FFstrbuf localIpNamePrefix;
-    FFLocalIpType localIpShowType;
 
     FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;
@@ -250,7 +229,6 @@ void ffPrintMedia(FFinstance* instance);
 void ffPrintDateTime(FFinstance* instance, FFDateTimeOptions* options);
 void ffPrintDate(FFinstance* instance);
 void ffPrintTime(FFinstance* instance);
-void ffPrintLocalIp(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
 void ffPrintWifi(FFinstance* instance);
