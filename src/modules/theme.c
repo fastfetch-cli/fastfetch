@@ -36,7 +36,8 @@ void ffPrintTheme(FFinstance* instance)
         return;
     }
 
-    FF_STRBUF_CREATE(plasmaColorPretty);
+    FF_STRBUF_AUTO_DESTROY plasmaColorPretty;
+    ffStrbufInit(&plasmaColorPretty);
     if(ffStrbufStartsWithIgnCase(&plasma->colorScheme, &plasma->widgetStyle))
         ffStrbufAppendNS(&plasmaColorPretty, plasma->colorScheme.length - plasma->widgetStyle.length, &plasma->colorScheme.chars[plasma->widgetStyle.length]);
     else
@@ -44,7 +45,8 @@ void ffPrintTheme(FFinstance* instance)
 
     ffStrbufTrim(&plasmaColorPretty, ' ');
 
-    FF_STRBUF_CREATE(gtkPretty);
+    FF_STRBUF_AUTO_DESTROY gtkPretty;
+    ffStrbufInit(&gtkPretty);
     ffParseGTK(&gtkPretty, gtk2, gtk3, gtk4);
 
     if(instance->config.theme.outputFormat.length == 0)
@@ -97,9 +99,6 @@ void ffPrintTheme(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         });
     }
-
-    ffStrbufDestroy(&plasmaColorPretty);
-    ffStrbufDestroy(&gtkPretty);
 
     #endif
 }
