@@ -56,6 +56,12 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 false;
         }
 
+        case 'F': {
+            return
+                tryModule(instance, type, module, FF_FONT_MODULE_NAME, ffParseFontJsonObject) ||
+                false;
+        }
+
         case 'G': {
             return
                 tryModule(instance, type, module, FF_GAMEPAD_MODULE_NAME, ffParseGamepadJsonObject) ||

@@ -998,7 +998,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
     else if(optionParseModuleArgs(key, value, "icons", &instance->config.icons)) {}
     else if(optionParseModuleArgs(key, value, "wallpaper", &instance->config.wallpaper)) {}
-    else if(optionParseModuleArgs(key, value, "font", &instance->config.font)) {}
+    else if(ffParseFontCommandOptions(&instance->config.font, key, value)) {}
     else if(ffParseCursorCommandOptions(&instance->config.cursor, key, value)) {}
     else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
     else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
@@ -1232,8 +1232,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintIcons(instance);
     else if(strcasecmp(line, "wallpaper") == 0)
         ffPrintWallpaper(instance);
-    else if(strcasecmp(line, "font") == 0)
-        ffPrintFont(instance);
+    else if(strcasecmp(line, FF_FONT_MODULE_NAME) == 0)
+        ffPrintFont(instance, &instance->config.font);
     else if(strcasecmp(line, FF_CURSOR_MODULE_NAME) == 0)
         ffPrintCursor(instance, &instance->config.cursor);
     else if(strcasecmp(line, "terminal") == 0)

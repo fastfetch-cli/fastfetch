@@ -15,6 +15,7 @@
 #include "modules/datetime/option.h"
 #include "modules/disk/option.h"
 #include "modules/display/option.h"
+#include "modules/font/option.h"
 #include "modules/host/option.h"
 #include "modules/gamepad/option.h"
 #include "modules/gpu/option.h"

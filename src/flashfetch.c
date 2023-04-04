@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     ffPrintWMTheme(&instance);
     ffPrintTheme(&instance);
     ffPrintIcons(&instance);
-    ffPrintFont(&instance);
+    ffPrintFont(&instance, &instance.config.font);
     ffPrintCursor(&instance, &instance.config.cursor);
     ffPrintTerminal(&instance);
     ffPrintTerminalFont(&instance);

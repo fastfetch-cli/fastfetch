@@ -102,7 +102,7 @@ typedef struct FFconfig
     FFModuleArgs wmTheme;
     FFModuleArgs theme;
     FFModuleArgs icons;
-    FFModuleArgs font;
+    FFFontOptions font;
     FFCursorOptions cursor;
     FFModuleArgs terminal;
     FFModuleArgs terminalFont;
@@ -240,7 +240,6 @@ void ffPrintWMTheme(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintWallpaper(FFinstance* instance);
-void ffPrintFont(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
