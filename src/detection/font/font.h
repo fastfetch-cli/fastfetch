@@ -18,6 +18,7 @@ typedef struct FFFontResult
      * Other:       Unset,   Unset, Unset,       Unset
      */
     FFstrbuf fonts[FF_DETECT_FONT_NUM_FONTS];
+    FFstrbuf display;
 } FFFontResult;
 
 const FFFontResult* ffDetectFont(const FFinstance* instance);

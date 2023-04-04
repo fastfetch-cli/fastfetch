@@ -4,77 +4,10 @@
 #include "detection/displayserver/displayserver.h"
 
 #define FF_FONT_MODULE_NAME "Font"
-#define FF_FONT_NUM_FORMAT_ARGS 4
-
-#if defined(__linux__) || defined(__FreeBSD__)
-#include "common/parsing.h"
-
-static void printFont(const FFFontResult* font)
-{
-    FFstrbuf gtk;
-    ffStrbufInit(&gtk);
-    ffParseGTK(&gtk, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
-
-    if(font->fonts[0].length > 0)
-    {
-        printf("%s [QT]", font->fonts[0].chars);
-        if(gtk.length > 0)
-            fputs(", ", stdout);
-    }
-
-    ffStrbufWriteTo(&gtk, stdout);
-    ffStrbufDestroy(&gtk);
-}
-
-#elif defined(__APPLE__)
-
-static void printFont(const FFFontResult* font)
-{
-    if(font->fonts[0].length > 0)
-    {
-        printf("%s [System]", font->fonts[0].chars);
-        if(font->fonts[1].length > 0)
-            fputs(", ", stdout);
-    }
-
-    if(font->fonts[1].length > 0)
-        printf("%s [User]", font->fonts[1].chars);
-}
-
-#elif defined(_WIN32)
-
-static void printFont(const FFFontResult* font)
-{
-    const char* types[] = { "Caption", "Menu", "Message", "Status" };
-    for(uint32_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
-    {
-        if(i == 0 || !ffStrbufEqual(&font->fonts[i - 1], &font->fonts[i]))
-        {
-            if(i > 0)
-                fputs("], ", stdout);
-            printf("%s [%s", font->fonts[i].chars, types[i]);
-        }
-        else
-        {
-            printf(" / %s", types[i]);
-        }
-    }
-    putchar(']');
-}
-
-#else
-
-static void printFont(const FFFontResult* font)
-{
-    FF_UNUSED(font);
-}
-
-#endif
+#define FF_FONT_NUM_FORMAT_ARGS (FF_DETECT_FONT_NUM_FONTS + 1)
 
 void ffPrintFont(FFinstance* instance)
 {
-    assert(FF_DETECT_FONT_NUM_FONTS == FF_FONT_NUM_FORMAT_ARGS);
-
     const FFFontResult* font = ffDetectFont(instance);
 
     if(font->error.length > 0)
@@ -86,8 +19,7 @@ void ffPrintFont(FFinstance* instance)
     if(instance->config.font.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &instance->config.font.key);
-        printFont(font);
-        putchar('\n');
+        ffStrbufPutTo(&font->display, stdout);
     }
     else
     {
@@ -95,7 +27,8 @@ void ffPrintFont(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[0]},
             {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[1]},
             {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[2]},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[3]}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[3]},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &font->display},
         });
     }
 }

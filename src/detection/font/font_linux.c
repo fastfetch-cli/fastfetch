@@ -1,7 +1,22 @@
 #include "common/font.h"
+#include "common/parsing.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "font.h"
+
+static void generateString(FFFontResult* font)
+{
+    ffParseGTK(&font->display, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
+
+    if(font->fonts[0].length > 0)
+    {
+        if(font->display.length > 0)
+            ffStrbufAppendS(&font->display, ", ");
+
+        ffStrbufAppend(&font->display, &font->fonts[0]);
+        ffStrbufAppendS(&font->display, " [QT]");
+    }
+}
 
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
@@ -32,4 +47,6 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
     ffFontInitPango(&gtk4, ffDetectGTK4(instance)->font.chars);
     ffStrbufAppend(&result->fonts[3], &gtk4.pretty);
     ffFontDestroy(&gtk4);
+
+    generateString(result);
 }

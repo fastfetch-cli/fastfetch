@@ -3,6 +3,8 @@
 #ifndef FF_INCLUDED_parsing_h
 #define FF_INCLUDED_parsing_h
 
+#include "fastfetch.h"
+
 #include <stdint.h>
 
 typedef struct FFVersion
