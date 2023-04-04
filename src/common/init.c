@@ -89,7 +89,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitDiskOptions(&instance->config.disk);
     ffInitBatteryOptions(&instance->config.battery);
     initModuleArg(&instance->config.powerAdapter);
-    initModuleArg(&instance->config.locale);
+    ffInitLocaleOptions(&instance->config.locale);
     initModuleArg(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
@@ -316,7 +316,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyDiskOptions(&instance->config.disk);
     ffDestroyBatteryOptions(&instance->config.battery);
     destroyModuleArg(&instance->config.powerAdapter);
-    destroyModuleArg(&instance->config.locale);
+    ffDestroyLocaleOptions(&instance->config.locale);
     destroyModuleArg(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);
     destroyModuleArg(&instance->config.wallpaper);

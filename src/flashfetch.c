@@ -56,7 +56,7 @@ int main(int argc, char** argv)
     //ffPrintPublicIp(&instance);
     //ffPrintWifi(&instance);
     //ffPrintCPUUsage(&instance, &instance.config.cpuUsage);
-    ffPrintLocale(&instance);
+    ffPrintLocale(&instance, &instance.config.locale);
     //ffPrintDateTime(&instance);
     //ffPrintDate(&instance);
     //ffPrintTime(&instance);

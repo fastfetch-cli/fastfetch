@@ -115,7 +115,7 @@ typedef struct FFconfig
     FFDiskOptions disk;
     FFBatteryOptions battery;
     FFModuleArgs powerAdapter;
-    FFModuleArgs locale;
+    FFLocaleOptions locale;
     FFModuleArgs localIP;
     FFModuleArgs publicIP;
     FFModuleArgs weather;
@@ -245,7 +245,6 @@ void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
 void ffPrintSwap(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);
-void ffPrintLocale(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);
 void ffPrintDateTime(FFinstance* instance, FFDateTimeOptions* options);
