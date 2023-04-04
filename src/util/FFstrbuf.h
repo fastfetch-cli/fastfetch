@@ -28,8 +28,6 @@ typedef struct FFstrbuf
     char* chars;
 } FFstrbuf;
 
-#define FF_STRBUF_CREATE(name) FFstrbuf name; ffStrbufInit(&name);
-
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
 void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src);

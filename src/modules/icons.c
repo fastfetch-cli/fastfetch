@@ -36,7 +36,8 @@ void ffPrintIcons(FFinstance* instance)
         return;
     }
 
-    FF_STRBUF_CREATE(gtkPretty);
+    FF_STRBUF_AUTO_DESTROY gtkPretty;
+    ffStrbufInit(&gtkPretty);
     ffParseGTK(&gtkPretty, gtk2, gtk3, gtk4);
 
     if(instance->config.icons.outputFormat.length == 0)
@@ -64,8 +65,6 @@ void ffPrintIcons(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &gtkPretty}
         });
     }
-
-    ffStrbufDestroy(&gtkPretty);
 
     #endif
 }
