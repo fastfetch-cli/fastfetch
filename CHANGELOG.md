@@ -2,6 +2,7 @@
 Bugfixes:
 * Fix name of Pro Controller (Gamepad, Windows)
 * Fix compile error with imagemagick enabled (Windows)
+* Fix copy-and-paste errors (Gamepad)
 
 Logo:
 * Add SteamOS
