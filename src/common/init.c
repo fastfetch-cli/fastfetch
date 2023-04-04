@@ -105,7 +105,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitBluetoothOptions(&instance->config.bluetooth);
     initModuleArg(&instance->config.sound);
     ffInitSeparatorOptions(&instance->config.separator);
-    initModuleArg(&instance->config.gamepad);
+    ffInitGamepadOptions(&instance->config.gamepad);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -332,7 +332,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyBluetoothOptions(&instance->config.bluetooth);
     ffDestroySeparatorOptions(&instance->config.separator);
     destroyModuleArg(&instance->config.sound);
-    destroyModuleArg(&instance->config.gamepad);
+    ffDestroyGamepadOptions(&instance->config.gamepad);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);

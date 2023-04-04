@@ -1024,7 +1024,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseBluetoothCommandOptions(&instance->config.bluetooth, key, value)) {}
     else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
     else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
-    else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
+    else if(ffParseGamepadCommandOptions(&instance->config.gamepad, key, value)) {}
 
     ///////////////////
     //Library options//
@@ -1290,8 +1290,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintBluetooth(instance, &instance->config.bluetooth);
     else if(strcasecmp(line, "sound") == 0)
         ffPrintSound(instance);
-    else if(strcasecmp(line, "gamepad") == 0)
-        ffPrintGamepad(instance);
+    else if(strcasecmp(line, FF_GAMEPAD_MODULE_NAME) == 0)
+        ffPrintGamepad(instance, &instance->config.gamepad);
     else if(strcasecmp(line, FF_JSONCONFIG_MODULE_NAME) == 0)
         ffPrintJsonConfig(instance);
     else

@@ -58,6 +58,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
 
         case 'G': {
             return
+                tryModule(instance, type, module, FF_GAMEPAD_MODULE_NAME, ffParseGamepadJsonObject) ||
                 tryModule(instance, type, module, FF_GPU_MODULE_NAME, ffParseGPUJsonObject) ||
                 false;
         }

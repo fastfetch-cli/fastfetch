@@ -129,7 +129,7 @@ typedef struct FFconfig
     FFBluetoothOptions bluetooth;
     FFSeparatorOptions separator;
     FFModuleArgs sound;
-    FFModuleArgs gamepad;
+    FFGamepadOptions gamepad;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -262,6 +262,5 @@ void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 void ffPrintSound(FFinstance* instance);
-void ffPrintGamepad(FFinstance* instance);
 
 #endif
