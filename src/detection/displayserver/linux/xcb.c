@@ -175,7 +175,7 @@ typedef struct XcbRandrData
 
 static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo)
 {
-    double refreshRate = modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
+    double refreshRate = (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
 
     return ffdsAppendDisplay(
         data->result,
