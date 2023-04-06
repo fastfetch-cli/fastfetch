@@ -207,6 +207,19 @@ static uint32_t getSnap(FFstrbuf* baseDir)
     return result > 0 ? result - 1 : 0;
 }
 
+static uint32_t getFlatpak(FFstrbuf* baseDir, const char* dirname)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+
+    uint32_t result =
+        getNumElements(baseDir, "/app", DT_DIR) +
+        getNumElements(baseDir, "/runtime", DT_DIR);
+
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return result;
+}
+
 #ifdef FF_HAVE_RPM
 #include "common/library.h"
 #include <rpm/rpmlib.h>
@@ -258,7 +271,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: ");
     packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
-    packageCounts->flatpakSystem += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
+    packageCounts->flatpakSystem += getFlatpak(baseDir, "/var/lib/flatpak");
     packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
     packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
@@ -320,7 +333,7 @@ void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
     ffStrbufInitA(&baseDir, 512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
-    if(ffStrbufIgnCaseCompS(&(ffDetectOS(instance)->id), "bedrock") == 0)
+    if(ffStrbufIgnCaseEqualS(&ffDetectOS(instance)->id, "bedrock"))
         getPackageCountsBedrock(instance, &baseDir, result);
     else
         getPackageCountsRegular(instance, &baseDir, result);
@@ -335,5 +348,5 @@ void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 
     ffStrbufSet(&baseDir, &instance->state.platform.homeDir);
     result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
-    result->flatpakUser += getNumElements(&baseDir, "/.var/app", DT_DIR);
+    result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
 }

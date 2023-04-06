@@ -3,6 +3,8 @@ Bugfixes:
 * Fix name of Pro Controller (Gamepad, Windows)
 * Fix compile error with imagemagick enabled (Windows)
 * Fix copy-and-paste errors (Gamepad)
+* Flatpak: Fix user package count
+* Flatpak: Count runtime packages too (#441)
 
 Logo:
 * Add SteamOS
