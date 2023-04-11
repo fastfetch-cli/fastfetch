@@ -188,7 +188,7 @@ static const FFlogo* getLogoArch()
     FF_LOGO_INIT
     FF_LOGO_NAMES("arch", "archlinux", "arch-linux")
     FF_LOGO_LINES(
-        "                  -`\n"
+        "$1                  -`\n"
         "                 .o+`\n"
         "                `ooo/\n"
         "               `+oooo:\n"
@@ -197,9 +197,9 @@ static const FFlogo* getLogoArch()
         "            `/:-:++oooo+:\n"
         "           `/++++/+++++++:\n"
         "          `/++++++++++++++:\n"
-        "         `/+++ooooooooooooo/`\n"
-        "        ./ooosssso++osssssso+`\n"
-        "       .oossssso-````/ossssss+`\n"
+        "         `/+++o$2oooooooo$1oooo/`\n"
+        "$1        ./$2ooosssso++osssssso$1+`\n"
+        "$2       .oossssso-````/ossssss+`\n"
         "      -osssssso.      :ssssssso.\n"
         "     :osssssss/        osssso+++.\n"
         "    /ossssssss/        +ssssooo/-\n"
@@ -209,7 +209,8 @@ static const FFlogo* getLogoArch()
         ".`                                 `/";
     )
     FF_LOGO_COLORS(
-        "36" //cyan
+        "31", //purpleish
+        "32" //bluegreen
     )
     FF_LOGO_COLOR_KEYS("36"); //cyan
     FF_LOGO_COLOR_TITLE("36"); //cyan
