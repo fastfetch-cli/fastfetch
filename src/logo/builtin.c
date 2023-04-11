@@ -198,7 +198,7 @@ static const FFlogo* getLogoArch()
         "           `/++++/+++++++:\n"
         "          `/++++++++++++++:\n"
         "         `/+++o$2oooooooo$1oooo/`\n"
-        "$1        ./$2ooosssso++osssssso$1+`\n"
+        "        ./$2ooosssso++osssssso$1+`\n"
         "$2       .oossssso-````/ossssss+`\n"
         "      -osssssso.      :ssssssso.\n"
         "     :osssssss/        osssso+++.\n"
@@ -209,8 +209,8 @@ static const FFlogo* getLogoArch()
         ".`                                 `/";
     )
     FF_LOGO_COLORS(
-        "31", //purpleish
-        "32" //bluegreen
+        "36", //cyan
+        "36" //cyan
     )
     FF_LOGO_COLOR_KEYS("36"); //cyan
     FF_LOGO_COLOR_TITLE("36"); //cyan
