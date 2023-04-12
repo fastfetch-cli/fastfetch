@@ -1023,7 +1023,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
     else if(ffParseBluetoothCommandOptions(&instance->config.bluetooth, key, value)) {}
     else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
+    else if(ffParseSoundCommandOptions(&instance->config.sound, key, value)) {}
     else if(ffParseGamepadCommandOptions(&instance->config.gamepad, key, value)) {}
 
     ///////////////////
@@ -1095,15 +1095,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.shellVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--terminal-version") == 0)
         instance->config.terminalVersion = optionParseBoolean(value);
-    else if(strcasecmp(key, "--sound-type") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.soundType,
-            "main", FF_SOUND_TYPE_MAIN,
-            "active", FF_SOUND_TYPE_ACTIVE,
-            "all", FF_SOUND_TYPE_ALL,
-            NULL
-        );
-    }
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--publicip-url") == 0)
@@ -1274,10 +1265,10 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintUsers(instance);
     else if(strcasecmp(line, FF_COMMAND_MODULE_NAME) == 0)
         ffPrintCommand(instance, &instance->config.command);
-    else if(strcasecmp(line, "bluetooth") == 0)
+    else if(strcasecmp(line, FF_BLUETOOTH_MODULE_NAME) == 0)
         ffPrintBluetooth(instance, &instance->config.bluetooth);
-    else if(strcasecmp(line, "sound") == 0)
-        ffPrintSound(instance);
+    else if(strcasecmp(line, FF_SOUND_MODULE_NAME) == 0)
+        ffPrintSound(instance, &instance->config.sound);
     else if(strcasecmp(line, FF_GAMEPAD_MODULE_NAME) == 0)
         ffPrintGamepad(instance, &instance->config.gamepad);
     else if(strcasecmp(line, FF_JSONCONFIG_MODULE_NAME) == 0)

@@ -97,6 +97,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
         case 'S': {
             return
                 tryModule(instance, type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
+                tryModule(instance, type, module, FF_SOUND_MODULE_NAME, ffParseSoundJsonObject) ||
                 false;
         }
 

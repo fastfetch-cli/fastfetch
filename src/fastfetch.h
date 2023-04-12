@@ -19,13 +19,6 @@ static inline void ffUnused(int dummy, ...) { (void) dummy; }
 #include "modules/options.h"
 #include "logo/option.h"
 
-typedef enum FFSoundType
-{
-    FF_SOUND_TYPE_MAIN,
-    FF_SOUND_TYPE_ACTIVE,
-    FF_SOUND_TYPE_ALL,
-} FFSoundType;
-
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -110,7 +103,7 @@ typedef struct FFconfig
     FFModuleArgs users;
     FFBluetoothOptions bluetooth;
     FFSeparatorOptions separator;
-    FFModuleArgs sound;
+    FFSoundOptions sound;
     FFGamepadOptions gamepad;
 
     FFstrbuf libPCI;
@@ -147,8 +140,6 @@ typedef struct FFconfig
 
     FFstrbuf weatherOutputFormat;
     uint32_t weatherTimeout;
-
-    FFSoundType soundType;
 
     FFstrbuf playerName;
 
@@ -237,6 +228,5 @@ void ffPrintVulkan(FFinstance* instance);
 void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
-void ffPrintSound(FFinstance* instance);
 
 #endif

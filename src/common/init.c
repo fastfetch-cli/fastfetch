@@ -103,7 +103,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
     ffInitBluetoothOptions(&instance->config.bluetooth);
-    initModuleArg(&instance->config.sound);
+    ffInitSoundOptions(&instance->config.sound);
     ffInitSeparatorOptions(&instance->config.separator);
     ffInitGamepadOptions(&instance->config.gamepad);
 
@@ -135,8 +135,6 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.shellVersion = true;
     instance->config.terminalVersion = true;
-
-    instance->config.soundType = FF_SOUND_TYPE_MAIN;
 
     instance->config.publicIpTimeout = 0;
     ffStrbufInit(&instance->config.publicIpUrl);
@@ -328,7 +326,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.users);
     ffDestroyBluetoothOptions(&instance->config.bluetooth);
     ffDestroySeparatorOptions(&instance->config.separator);
-    destroyModuleArg(&instance->config.sound);
+    ffDestroySoundOptions(&instance->config.sound);
     ffDestroyGamepadOptions(&instance->config.gamepad);
 
     ffStrbufDestroy(&instance->config.libPCI);
