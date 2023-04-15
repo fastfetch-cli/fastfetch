@@ -21,7 +21,7 @@ void ffPrintCPUUsage(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, FF_CPU_USAGE_MODULE_NAME, 0, &instance->config.cpuUsage.key);
 
-        FFstrbuf str;
+        FF_STRBUF_AUTO_DESTROY str;
         ffStrbufInit(&str);
         if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffAppendPercentBar(instance, &str, (uint8_t)percentage, 0, 5, 8);
@@ -32,7 +32,6 @@ void ffPrintCPUUsage(FFinstance* instance)
             ffAppendPercentNum(instance, &str, (uint8_t) percentage, 50, 80, str.length > 0);
         }
         ffStrbufPutTo(&str, stdout);
-        ffStrbufDestroy(&str);
     }
     else
     {
