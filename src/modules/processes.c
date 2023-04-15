@@ -7,17 +7,14 @@
 
 void ffPrintProcesses(FFinstance* instance)
 {
-    FFstrbuf error;
-    ffStrbufInit(&error);
-    uint32_t numProcesses = ffDetectProcesses(&error);
+    uint32_t numProcesses = 0;
+    const char* error = ffDetectProcesses(&numProcesses);
 
-    if(error.length > 0)
+    if(error)
     {
-        ffPrintError(instance, FF_PROCESSES_MODULE_NAME, 0, &instance->config.processes, "%*s", error.length, error.chars);
-        ffStrbufDestroy(&error);
+        ffPrintError(instance, FF_PROCESSES_MODULE_NAME, 0, &instance->config.processes, "%s", error);
         return;
     }
-    ffStrbufDestroy(&error);
 
     if(instance->config.processes.outputFormat.length == 0)
     {
