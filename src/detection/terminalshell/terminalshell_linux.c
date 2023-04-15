@@ -281,8 +281,7 @@ static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResul
 
 static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
-    FFstrbuf command;
-    ffStrbufInit(&command);
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreate();
     ffStrbufAppendS(&command, "printf \"%s\" \"$");
     ffStrbufAppendTransformS(&command, exeName, toupper);
     ffStrbufAppendS(&command, "_VERSION\"");
@@ -297,8 +296,6 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
     });
     ffStrbufSubstrBeforeFirstC(version, '(');
     ffStrbufRemoveStrings(version, 2, "-release", "release");
-
-    ffStrbufDestroy(&command);
 }
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);

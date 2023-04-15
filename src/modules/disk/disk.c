@@ -10,8 +10,7 @@
 
 static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk* disk)
 {
-    FF_STRBUF_AUTO_DESTROY key;
-    ffStrbufInit(&key);
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     if(options->moduleArgs.key.length == 0)
     {
@@ -24,12 +23,10 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
         });
     }
 
-    FF_STRBUF_AUTO_DESTROY usedPretty;
-    ffStrbufInit(&usedPretty);
+    FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
     ffParseSize(disk->bytesUsed, instance->config.binaryPrefixType, &usedPretty);
 
-    FF_STRBUF_AUTO_DESTROY totalPretty;
-    ffStrbufInit(&totalPretty);
+    FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffParseSize(disk->bytesTotal, instance->config.binaryPrefixType, &totalPretty);
 
     uint8_t bytesPercentage = disk->bytesTotal > 0 ? (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0) : 0;
@@ -38,8 +35,7 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
     {
         ffPrintLogoAndKey(instance, key.chars, 0, NULL);
 
-        FF_STRBUF_AUTO_DESTROY str;
-        ffStrbufInit(&str);
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
         if(disk->bytesTotal > 0)
         {
@@ -109,8 +105,7 @@ static void printMountpoints(FFinstance* instance, FFDiskOptions* options, const
     const char separator = ':';
     #endif
 
-    FFstrbuf mountpoints;
-    ffStrbufInitCopy(&mountpoints, &options->folders);
+    FF_STRBUF_AUTO_DESTROY mountpoints = ffStrbufCreateCopy(&options->folders);
     ffStrbufTrim(&mountpoints, separator);
 
     uint32_t startIndex = 0;

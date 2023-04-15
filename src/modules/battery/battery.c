@@ -17,8 +17,7 @@ static void printBattery(FFinstance* instance, FFBatteryOptions* options, Batter
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
-        FFstrbuf str;
-        ffStrbufInit(&str);
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
         if(result->capacity >= 0)
         {
@@ -58,7 +57,6 @@ static void printBattery(FFinstance* instance, FFBatteryOptions* options, Batter
         }
 
         ffStrbufPutTo(&str, stdout);
-        ffStrbufDestroy(&str);
     }
     else
     {

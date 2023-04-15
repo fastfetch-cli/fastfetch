@@ -87,8 +87,7 @@ void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
     }
     else
     {
-        FF_STRBUF_AUTO_DESTROY key;
-        ffStrbufInit(&key);
+        FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {

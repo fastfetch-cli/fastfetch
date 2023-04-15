@@ -107,8 +107,7 @@ void ffPrintOS(FFinstance* instance, FFOSOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        FF_STRBUF_AUTO_DESTROY result;
-        ffStrbufInit(&result);
+        FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
 
         if(ffStrbufIgnCaseCompS(&os->id, "nixos") == 0)
             buildOutputNixOS(instance, os, &result);

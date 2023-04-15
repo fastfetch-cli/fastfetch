@@ -17,8 +17,7 @@ void ffPrintPlayer(FFinstance* instance)
         return;
     }
 
-    FFstrbuf playerPretty;
-    ffStrbufInit(&playerPretty);
+    FF_STRBUF_AUTO_DESTROY playerPretty = ffStrbufCreate();
 
     //If we are on a website, prepend the website name
     if(
@@ -70,6 +69,4 @@ void ffPrintPlayer(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
         });
     }
-
-    ffStrbufDestroy(&playerPretty);
 }

@@ -12,8 +12,7 @@ static FFstrbuf base64Encode(FFstrbuf* in)
 {
     const char* base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-    FFstrbuf out;
-    ffStrbufInitA(&out, 8 * (1 + in->length / 6));
+    FFstrbuf out = ffStrbufCreateA(8 * (1 + in->length / 6));
 
     unsigned val = 0;
     int valb = -6;
@@ -41,8 +40,7 @@ static bool printImageIterm(FFinstance* instance)
         return false;
     }
 
-    FFstrbuf buf;
-    ffStrbufInit(&buf);
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     if(!ffAppendFileBuffer(instance->config.logo.source.chars, &buf))
     {
         fputs("Logo: Failed to load image file\n", stderr);
@@ -51,7 +49,8 @@ static bool printImageIterm(FFinstance* instance)
 
     ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     ffPrintCharTimes('\n', instance->config.logo.paddingTop);
-    FFstrbuf base64 = base64Encode(&buf);
+
+    FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&buf);
     instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
     instance->state.logoHeight = instance->config.logo.paddingTop + instance->config.logo.height;
     printf("\033]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\033[9999999D\n\033[%uA",
@@ -61,9 +60,6 @@ static bool printImageIterm(FFinstance* instance)
         base64.chars,
         (unsigned) instance->state.logoHeight
     );
-
-    ffStrbufDestroy(&buf);
-    ffStrbufDestroy(&base64);
 
     return true;
 }
@@ -289,8 +285,7 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
     if(!checkAllocationResult(chars, length))
         return false;
 
-    FFstrbuf result;
-    ffStrbufInitA(&result, (uint32_t) (length + 1024));
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA((uint32_t) (length + 1024));
 
     const char* currentPos = chars;
     size_t remainingLength = length;
@@ -304,7 +299,6 @@ static bool printImageKitty(FFinstance* instance, FFLogoRequestData* requestData
 
     printImagePixels(instance, requestData, &result, isCompressed ? FF_CACHE_FILE_KITTY_COMPRESSED : FF_CACHE_FILE_KITTY_UNCOMPRESSED);
 
-    ffStrbufDestroy(&result);
     free(chars);
     return true;
 }
@@ -532,8 +526,7 @@ static void readCachedStrbuf(FFLogoRequestData* requestData, FFstrbuf* result, c
 
 static uint32_t readCachedUint32(FFLogoRequestData* requestData, const char* cacheFileName)
 {
-    FFstrbuf content;
-    ffStrbufInit(&content);
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     readCachedStrbuf(requestData, &content, cacheFileName);
 
     uint32_t result = 0;
@@ -546,27 +539,20 @@ static uint32_t readCachedUint32(FFLogoRequestData* requestData, const char* cac
 
     memcpy(&result, content.chars, sizeof(result));
 
-    ffStrbufDestroy(&content);
-
     return result;
 }
 
 static bool printCachedChars(FFinstance* instance, FFLogoRequestData* requestData)
 {
-    FFstrbuf content;
-    ffStrbufInitA(&content, 32768);
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreateA(32768);
 
     if(requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA)
         readCachedStrbuf(requestData, &content, FF_CACHE_FILE_CHAFA);
 
     if(content.length == 0)
-    {
-        ffStrbufDestroy(&content);
         return false;
-    }
 
     ffLogoPrintChars(instance, content.chars, false);
-    ffStrbufDestroy(&content);
     return true;
 }
 

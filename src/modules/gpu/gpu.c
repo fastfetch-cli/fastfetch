@@ -16,8 +16,7 @@ static void printGPUResult(FFinstance* instance, FFGPUOptions* options, uint8_t 
     {
         ffPrintLogoAndKey(instance, FF_GPU_MODULE_NAME, index, &options->moduleArgs.key);
 
-        FF_STRBUF_AUTO_DESTROY output;
-        ffStrbufInitA(&output, gpu->vendor.length + 1 + gpu->name.length);
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(gpu->vendor.length + 1 + gpu->name.length);
 
         if(gpu->vendor.length > 0 && !ffStrbufStartsWith(&gpu->name, &gpu->vendor))
         {

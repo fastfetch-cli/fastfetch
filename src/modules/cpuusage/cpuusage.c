@@ -22,8 +22,7 @@ void ffPrintCPUUsage(FFinstance* instance, FFCPUUsageOptions* options)
     {
         ffPrintLogoAndKey(instance, FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs.key);
 
-        FF_STRBUF_AUTO_DESTROY str;
-        ffStrbufInit(&str);
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffAppendPercentBar(instance, &str, (uint8_t)percentage, 0, 5, 8);
         if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)

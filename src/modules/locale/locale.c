@@ -7,8 +7,7 @@
 
 void ffPrintLocale(FFinstance* instance, FFLocaleOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY locale;
-    ffStrbufInit(&locale);
+    FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
 
     ffDetectLocale(&locale);
     if(locale.length == 0)

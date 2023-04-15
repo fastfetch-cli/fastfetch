@@ -10,11 +10,9 @@ static int status = -1;
 
 void ffPrepareWeather(FFinstance* instance)
 {
-    FFstrbuf path;
-    ffStrbufInitS(&path, "/?format=");
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/?format=");
     ffStrbufAppend(&path, &instance->config.weatherOutputFormat);
     status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
-    ffStrbufDestroy(&path);
 }
 
 void ffPrintWeather(FFinstance* instance)
@@ -28,15 +26,13 @@ void ffPrintWeather(FFinstance* instance)
         return;
     }
 
-    FFstrbuf result;
-    ffStrbufInitA(&result, 4096);
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(4096);
     bool success = ffNetworkingRecvHttpResponse(&state, &result, instance->config.weatherTimeout);
     if (success) ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
 
     if(!success || result.length == 0)
     {
         ffPrintError(instance, FF_WEATHER_MODULE_NAME, 0, &instance->config.weather, "Failed to receive the server response");
-        ffStrbufDestroy(&result);
         return;
     }
 
@@ -51,6 +47,4 @@ void ffPrintWeather(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
         });
     }
-
-    ffStrbufDestroy(&result);
 }

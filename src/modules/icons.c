@@ -7,8 +7,7 @@
 
 void ffPrintIcons(FFinstance* instance)
 {
-    FF_STRBUF_AUTO_DESTROY icons;
-    ffStrbufInit(&icons);
+    FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
     const char* error = ffDetectIcons(instance, &icons);
 
     if(error)

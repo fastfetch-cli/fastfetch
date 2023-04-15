@@ -7,8 +7,7 @@
 
 void ffPrintWallpaper(FFinstance* instance)
 {
-    FF_STRBUF_AUTO_DESTROY wallpaper;
-    ffStrbufInit(&wallpaper);
+    FF_STRBUF_AUTO_DESTROY wallpaper = ffStrbufCreate();
     const char* error = ffDetectWallpaper(instance, &wallpaper);
 
     if(error)

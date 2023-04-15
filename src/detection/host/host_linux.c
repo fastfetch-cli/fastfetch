@@ -89,8 +89,7 @@ void ffDetectHostImpl(FFHostResult* host)
         {
             ffStrbufAppendS(&host->productName, "Windows Subsystem for Linux");
 
-            FFstrbuf wslVer; //Wide charactors
-            ffStrbufInit(&wslVer);
+            FF_STRBUF_AUTO_DESTROY wslVer = ffStrbufCreate(); //Wide charactors
             if(!ffProcessAppendStdOut(&wslVer, (char* const[]){
                 "wsl.exe",
                 "--version",
@@ -106,7 +105,6 @@ void ffDetectHostImpl(FFHostResult* host)
                 }
                 ffStrbufAppendC(&host->productName, ')');
             }
-            ffStrbufDestroy(&wslVer);
         }
     }
 }

@@ -41,12 +41,10 @@ static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrb
 
 static double getGHz(const char* file)
 {
-    FFstrbuf content;
-    ffStrbufInit(&content);
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     if(ffAppendFileBuffer(file, &content))
     {
         double herz = ffStrbufToDouble(&content);
-        ffStrbufDestroy(&content);
 
         //ffStrbufToDouble failed
         if(herz != herz)
@@ -111,17 +109,10 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     else
         cpu->temperature = FF_CPU_TEMP_UNSET;
 
-    FFstrbuf physicalCoresBuffer;
-    ffStrbufInit(&physicalCoresBuffer);
-
-    FFstrbuf cpuMHz;
-    ffStrbufInit(&cpuMHz);
-
-    FFstrbuf cpuIsa;
-    ffStrbufInit(&cpuIsa);
-
-    FFstrbuf cpuUarch;
-    ffStrbufInit(&cpuUarch);
+    FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cpuIsa = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cpuUarch = ffStrbufCreate();
 
     parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
 
@@ -155,9 +146,4 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
             ffStrbufAppendC(&cpu->name, ' ');
         ffStrbufAppend(&cpu->name, &cpuIsa);
     }
-
-    ffStrbufDestroy(&physicalCoresBuffer);
-    ffStrbufDestroy(&cpuMHz);
-    ffStrbufDestroy(&cpuIsa);
-    ffStrbufDestroy(&cpuUarch);
 }

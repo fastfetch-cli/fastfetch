@@ -26,13 +26,11 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     }
     else
     {
-        FFstrbuf key;
-        ffStrbufInit(&key);
+        FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
         ffParseFormatString(&key, customKeyFormat, 1, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
         });
         ffPrintUserString(key.chars);
-        ffStrbufDestroy(&key);
     }
 
     if(!instance->config.pipe)
@@ -46,9 +44,7 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
 
 void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments)
 {
-    FFstrbuf buffer;
-    ffStrbufInitA(&buffer, 256);
-
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateA(256);
     ffParseFormatString(&buffer, format, numArgs, arguments);
 
     if(buffer.length > 0)
@@ -57,8 +53,6 @@ void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t m
         ffPrintUserString(buffer.chars);
         putchar('\n');
     }
-
-    ffStrbufDestroy(&buffer);
 }
 
 void ffPrintFormat(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, uint32_t numArgs, const FFformatarg* arguments)
@@ -74,15 +68,10 @@ static void printError(FFinstance* instance, const char* moduleName, uint8_t mod
 
     if(hasCustomErrorFormat)
     {
-        FFstrbuf error;
-        ffStrbufInit(&error);
-        ffStrbufAppendVF(&error, message, arguments);
-
+        FF_STRBUF_AUTO_DESTROY error = ffStrbufCreateVF(message, arguments);
         ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, customErrorFormat, 1, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &error}
         });
-
-        ffStrbufDestroy(&error);
     }
     else
     {

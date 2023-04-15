@@ -14,13 +14,11 @@ void ffPreparePublicIp(FFinstance* instance)
         status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/ip", NULL);
     else
     {
-        FFstrbuf host;
-        ffStrbufInitCopy(&host, &instance->config.publicIpUrl);
+        FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&instance->config.publicIpUrl);
         ffStrbufSubstrAfterFirstS(&host, "://");
         uint32_t pathStartIndex = ffStrbufFirstIndexC(&host, '/');
 
-        FFstrbuf path;
-        ffStrbufInit(&path);
+        FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
         if(pathStartIndex != host.length)
         {
             ffStrbufAppendNS(&path, pathStartIndex, host.chars + (host.length - pathStartIndex));
@@ -29,9 +27,6 @@ void ffPreparePublicIp(FFinstance* instance)
         }
 
         status = ffNetworkingSendHttpRequest(&state, host.chars, path.length == 0 ? "/" : path.chars, NULL);
-
-        ffStrbufDestroy(&path);
-        ffStrbufDestroy(&host);
     }
 }
 
@@ -46,15 +41,13 @@ void ffPrintPublicIp(FFinstance* instance)
         return;
     }
 
-    FFstrbuf result;
-    ffStrbufInitA(&result, 4096);
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(4096);
     bool success = ffNetworkingRecvHttpResponse(&state, &result, instance->config.publicIpTimeout);
     if(success) ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
 
     if(!success || result.length == 0)
     {
         ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &instance->config.publicIP, "Failed to receive the server response");
-        ffStrbufDestroy(&result);
         return;
     }
 
@@ -69,6 +62,4 @@ void ffPrintPublicIp(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
         });
     }
-
-    ffStrbufDestroy(&result);
 }

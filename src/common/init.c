@@ -107,28 +107,28 @@ static void defaultConfig(FFinstance* instance)
     ffInitSeparatorOptions(&instance->config.separator);
     ffInitGamepadOptions(&instance->config.gamepad);
 
-    ffStrbufInitA(&instance->config.libPCI, 0);
-    ffStrbufInitA(&instance->config.libVulkan, 0);
-    ffStrbufInitA(&instance->config.libWayland, 0);
-    ffStrbufInitA(&instance->config.libXcbRandr, 0);
-    ffStrbufInitA(&instance->config.libXcb, 0);
-    ffStrbufInitA(&instance->config.libXrandr, 0);
-    ffStrbufInitA(&instance->config.libX11, 0);
-    ffStrbufInitA(&instance->config.libGIO, 0);
-    ffStrbufInitA(&instance->config.libDConf, 0);
-    ffStrbufInitA(&instance->config.libDBus, 0);
-    ffStrbufInitA(&instance->config.libXFConf, 0);
-    ffStrbufInitA(&instance->config.libSQLite3, 0);
-    ffStrbufInitA(&instance->config.librpm, 0);
-    ffStrbufInitA(&instance->config.libImageMagick, 0);
-    ffStrbufInitA(&instance->config.libZ, 0);
-    ffStrbufInitA(&instance->config.libChafa, 0);
-    ffStrbufInitA(&instance->config.libEGL, 0);
-    ffStrbufInitA(&instance->config.libGLX, 0);
-    ffStrbufInitA(&instance->config.libOSMesa, 0);
-    ffStrbufInitA(&instance->config.libOpenCL, 0);
-    ffStrbufInitA(&instance->config.libJSONC, 0);
-    ffStrbufInitA(&instance->config.libfreetype, 0);
+    ffStrbufInit(&instance->config.libPCI);
+    ffStrbufInit(&instance->config.libVulkan);
+    ffStrbufInit(&instance->config.libWayland);
+    ffStrbufInit(&instance->config.libXcbRandr);
+    ffStrbufInit(&instance->config.libXcb);
+    ffStrbufInit(&instance->config.libXrandr);
+    ffStrbufInit(&instance->config.libX11);
+    ffStrbufInit(&instance->config.libGIO);
+    ffStrbufInit(&instance->config.libDConf);
+    ffStrbufInit(&instance->config.libDBus);
+    ffStrbufInit(&instance->config.libXFConf);
+    ffStrbufInit(&instance->config.libSQLite3);
+    ffStrbufInit(&instance->config.librpm);
+    ffStrbufInit(&instance->config.libImageMagick);
+    ffStrbufInit(&instance->config.libZ);
+    ffStrbufInit(&instance->config.libChafa);
+    ffStrbufInit(&instance->config.libEGL);
+    ffStrbufInit(&instance->config.libGLX);
+    ffStrbufInit(&instance->config.libOSMesa);
+    ffStrbufInit(&instance->config.libOpenCL);
+    ffStrbufInit(&instance->config.libJSONC);
+    ffStrbufInit(&instance->config.libfreetype);
     ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
@@ -142,7 +142,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.weatherTimeout = 0;
     ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
 
-    ffStrbufInitA(&instance->config.playerName, 0);
+    ffStrbufInit(&instance->config.playerName);
 
     instance->config.percentType = 1;
 }

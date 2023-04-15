@@ -42,13 +42,11 @@ static void waylandDetectWM(int fd, FFDisplayServerResult* result)
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
         return;
 
-    FFstrbuf procPath;
-    ffStrbufInit(&procPath);
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreate();
     ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
     ffReadFileBuffer(procPath.chars, &result->wmProcessName);
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
-    ffStrbufDestroy(&procPath);
 }
 #else
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)

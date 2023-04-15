@@ -18,8 +18,7 @@ const char* ffDetectIcons(const FFinstance* instance, FFstrbuf* result)
     if(plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
         return "No icons could be found";
 
-    FF_STRBUF_AUTO_DESTROY gtkPretty;
-    ffStrbufInit(&gtkPretty);
+    FF_STRBUF_AUTO_DESTROY gtkPretty = ffStrbufCreate();
     ffParseGTK(&gtkPretty, gtk2, gtk3, gtk4);
 
     if(plasma->length > 0)

@@ -165,14 +165,9 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
     ffStrbufSetS(&result->deProcessName, "mate-session");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_MATE);
 
-    FFstrbuf major;
-    ffStrbufInit(&major);
-
-    FFstrbuf minor;
-    ffStrbufInit(&minor);
-
-    FFstrbuf micro;
-    ffStrbufInit(&micro);
+    FF_STRBUF_AUTO_DESTROY major = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY micro = ffStrbufCreate();
 
     ffParsePropFileDataValues(instance, "mate-about/mate-version.xml", 3, (FFpropquery[]) {
         {"<platform>", &major},
@@ -181,10 +176,6 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
     });
 
     ffParseSemver(&result->deVersion, &major, &minor, &micro);
-
-    ffStrbufDestroy(&major);
-    ffStrbufDestroy(&minor);
-    ffStrbufDestroy(&micro);
 
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
@@ -244,13 +235,10 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
         ffParsePropLines(result->deVersion.chars , "liblxqt", &result->deVersion);
     }
 
-    FFstrbuf wmProcessNameBuffer;
-    ffStrbufInit(&wmProcessNameBuffer);
+    FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
 
     ffParsePropFileConfig(instance, "lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
     applyBetterWM(result, wmProcessNameBuffer.chars);
-
-    ffStrbufDestroy(&wmProcessNameBuffer);
 }
 
 static void getBudgie(const FFinstance* instance, FFDisplayServerResult* result)
@@ -351,21 +339,14 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
     if(proc == NULL)
         return;
 
-    FFstrbuf procPath;
-    ffStrbufInitA(&procPath, 64);
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
     ffStrbufAppendS(&procPath, "/proc/");
 
     uint32_t procPathLength = procPath.length;
 
-    FFstrbuf userID;
-    ffStrbufInit(&userID);
-    ffStrbufAppendF(&userID, "%i", getuid());
-
-    FFstrbuf loginuid;
-    ffStrbufInit(&loginuid);
-
-    FFstrbuf processName;
-    ffStrbufInitA(&processName, 256); //Some processes have large command lines (looking at you chrome)
+    FF_STRBUF_AUTO_DESTROY userID = ffStrbufCreateF("%i", getuid());
+    FF_STRBUF_AUTO_DESTROY loginuid = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY processName = ffStrbufCreateA(256); //Some processes have large command lines (looking at you chrome)
 
     struct dirent* dirent;
     while((dirent = readdir(proc)) != NULL)
@@ -407,11 +388,6 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
     }
 
     closedir(proc);
-
-    ffStrbufDestroy(&processName);
-    ffStrbufDestroy(&loginuid);
-    ffStrbufDestroy(&userID);
-    ffStrbufDestroy(&procPath);
 }
 
 void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)

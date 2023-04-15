@@ -26,15 +26,12 @@ void ffPrintChassis(FFinstance* instance)
     {
         ffPrintLogoAndKey(instance, FF_CHASSIS_MODULE_NAME, 0, &instance->config.chassis.key);
 
-        FFstrbuf output;
-        ffStrbufInitCopy(&output, &result.chassisType);
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateCopy(&result.chassisType);
 
         if(result.chassisVersion.length > 0)
             ffStrbufAppendF(&output, " (%s)", result.chassisVersion.chars);
 
         ffStrbufPutTo(&output, stdout);
-
-        ffStrbufDestroy(&output);
     }
     else
     {

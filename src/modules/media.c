@@ -52,8 +52,7 @@ void ffPrintMedia(FFinstance* instance)
         return;
     }
 
-    FFstrbuf songPretty;
-    ffStrbufInitCopy(&songPretty, &media->song);
+    FF_STRBUF_AUTO_DESTROY songPretty = ffStrbufCreateCopy(&media->song);
     const char* removeStrings[] = {
         "(Official Music Video)", "(Official Video)", "(Music Video)", "(Official HD Video)",
         "[Official Music Video]", "[Official Video]", "[Music Video]", "[Official HD Video]",
@@ -72,8 +71,7 @@ void ffPrintMedia(FFinstance* instance)
     if(instance->config.media.outputFormat.length == 0)
     {
         //We don't expose artistPretty to the format, as it might be empty (when the think that the artist is already in the song title)
-        FFstrbuf artistPretty;
-        ffStrbufInitCopy(&artistPretty, &media->artist);
+        FF_STRBUF_AUTO_DESTROY artistPretty = ffStrbufCreateCopy(&media->artist);
         ffStrbufRemoveIgnCaseEndS(&artistPretty, " - Topic");
         ffStrbufRemoveIgnCaseEndS(&artistPretty, "VEVO");
         ffStrbufTrimRight(&artistPretty, ' ');
@@ -93,8 +91,6 @@ void ffPrintMedia(FFinstance* instance)
             ffStrbufAppendF(&songPretty, " (%s)", media->status.chars);
 
         ffStrbufPutTo(&songPretty, stdout);
-
-        ffStrbufDestroy(&artistPretty);
     }
     else
     {
@@ -106,6 +102,4 @@ void ffPrintMedia(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->status}
         });
     }
-
-    ffStrbufDestroy(&songPretty);
 }

@@ -29,9 +29,8 @@ typedef struct FFstrbuf
 } FFstrbuf;
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
-void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
+void ffStrbufInitCopy(FFstrbuf* restrict strbuf, const FFstrbuf* restrict src);
 void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src);
-void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
@@ -91,7 +90,55 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
 FF_C_NODISCARD uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
 
-void ffStrbufDestroy(FFstrbuf* strbuf);
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitA(&strbuf, allocate);
+    return strbuf;
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateCopy(const FFstrbuf* src)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitCopy(&strbuf, src);
+    return strbuf;
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateMove(FFstrbuf* src)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitMove(&strbuf, src);
+    return strbuf;
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateVF(const char* format, va_list arguments)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitVF(&strbuf, format, arguments);
+    return strbuf;
+}
+
+FF_C_PRINTF(2, 3)
+static inline void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
+{
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(strbuf, format, arguments);
+    va_end(arguments);
+}
+
+FF_C_PRINTF(1, 2)
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateF(const char* format, ...)
+{
+    FFstrbuf strbuf;
+
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(&strbuf, format, arguments);
+    va_end(arguments);
+
+    return strbuf;
+}
 
 static inline void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 {
@@ -121,10 +168,24 @@ static inline void ffStrbufInit(FFstrbuf* strbuf)
     strbuf->chars = CHAR_NULL_PTR;
 }
 
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreate()
+{
+    FFstrbuf strbuf;
+    ffStrbufInit(&strbuf);
+    return strbuf;
+}
+
 static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* str)
 {
     ffStrbufInit(strbuf);
     ffStrbufAppendNS(strbuf, length, str);
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateNS(uint32_t length, const char* str)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitNS(&strbuf, length, str);
+    return strbuf;
 }
 
 static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
@@ -133,7 +194,14 @@ static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
     ffStrbufAppendS(strbuf, str);
 }
 
-static inline void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateS(const char* str)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitS(&strbuf, str);
+    return strbuf;
+}
+
+static inline void ffStrbufAppend(FFstrbuf* restrict strbuf, const FFstrbuf* restrict value)
 {
     assert(value != strbuf);
     if(value == NULL)
@@ -321,6 +389,17 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCaseS(const FFstrbuf* strbu
 static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* end)
 {
     return ffStrbufEndsWithIgnCaseNS(strbuf, end->length, end->chars);
+}
+
+static inline void ffStrbufDestroy(FFstrbuf* strbuf)
+{
+    if(strbuf->allocated == 0) return;
+
+    extern char* CHAR_NULL_PTR;
+    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
+    strbuf->allocated = strbuf->length = 0;
+    free(strbuf->chars);
+    strbuf->chars = CHAR_NULL_PTR;
 }
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))

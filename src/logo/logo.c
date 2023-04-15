@@ -302,8 +302,7 @@ static void updateLogoPath(FFinstance* instance)
     if(ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
         return;
 
-    FFstrbuf fullPath;
-    ffStrbufInit(&fullPath);
+    FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
 
     FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance->state.platform.dataDirs)
     {
@@ -318,20 +317,16 @@ static void updateLogoPath(FFinstance* instance)
             break;
         }
     }
-
-    ffStrbufDestroy(&fullPath);
 }
 
 static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement, bool raw)
 {
     FFLogoOptions* options = &instance->config.logo;
 
-    FF_STRBUF_AUTO_DESTROY content;
-    ffStrbufInit(&content);
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
 
     if(!ffAppendFileBuffer(options->source.chars, &content))
     {
-        ffStrbufDestroy(&content);
         fputs("Logo: Failed to load file content from logo source\n", stderr);
         return false;
     }
@@ -341,6 +336,7 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement,
         ffLogoPrintCharsRaw(instance, content.chars, content.length);
     else
         ffLogoPrintChars(instance, content.chars, doColorReplacement);
+
     return true;
 }
 

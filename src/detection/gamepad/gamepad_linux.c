@@ -10,8 +10,7 @@ const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* 
     if(dirp == NULL)
         return "opendir(\"/sys/class/input/\") == NULL";
 
-    FF_STRBUF_AUTO_DESTROY path;
-    ffStrbufInitS(&path, "/sys/class/input/");
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/class/input/");
     uint32_t baseLen = path.length;
 
     struct dirent* entry;

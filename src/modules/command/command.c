@@ -6,8 +6,7 @@
 
 void ffPrintCommand(FFinstance* instance, FFCommandOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY result;
-    ffStrbufInit(&result);
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&result, (char* const[]){
         options->shell.chars,
         #ifdef _WIN32

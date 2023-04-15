@@ -4,11 +4,11 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 {
     FF_UNUSED(instance);
 
-    ffStrbufInitA(&ds->wmProcessName, 0);
-    ffStrbufInitA(&ds->wmPrettyName, 0);
-    ffStrbufInitA(&ds->wmProtocolName, 0);
-    ffStrbufInitA(&ds->deProcessName, 0);
-    ffStrbufInitA(&ds->dePrettyName, 0);
-    ffStrbufInitA(&ds->deVersion, 0);
+    ffStrbufInit(&ds->wmProcessName);
+    ffStrbufInit(&ds->wmPrettyName);
+    ffStrbufInit(&ds->wmProtocolName);
+    ffStrbufInit(&ds->deProcessName);
+    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInit(&ds->deVersion);
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 0);
 }

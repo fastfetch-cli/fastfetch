@@ -7,8 +7,7 @@
 
 void ffPrintWMTheme(FFinstance* instance)
 {
-    FFstrbuf themeOrError;
-    ffStrbufInit(&themeOrError);
+    FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
     if(ffDetectWmTheme(instance, &themeOrError))
     {
         if(instance->config.wmTheme.outputFormat.length == 0)
@@ -27,5 +26,4 @@ void ffPrintWMTheme(FFinstance* instance)
     {
         ffPrintError(instance, FF_WMTHEME_MODULE_NAME, 0, &instance->config.wmTheme, "%*s", themeOrError.length, themeOrError.chars);
     }
-    ffStrbufDestroy(&themeOrError);
 }

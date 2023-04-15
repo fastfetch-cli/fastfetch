@@ -43,8 +43,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY key;
-    ffStrbufInit(&key);
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     for(uint32_t i = 0; i < dsResult->displays.length; i++)
     {

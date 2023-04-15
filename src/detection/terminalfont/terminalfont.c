@@ -6,11 +6,8 @@
 
 static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
-
-    FFstrbuf fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"family:", &fontName},
@@ -33,15 +30,11 @@ static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* te
         ffStrbufAppendS(&fontSize, "11");
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
-
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
 }
 
 FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/vconsole.conf", "Font =", &fontName);
 
@@ -61,8 +54,6 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
         ffFontInitCopy(&terminalFont->font, fontName.chars);
     else
         ffStrbufAppendS(&terminalFont->error, "Couldn't find Font in "FASTFETCH_TARGET_DIR_ETC"/vconsole.conf");
-
-    ffStrbufDestroy(&fontName);
 }
 
 #if defined(_WIN32) || defined(__linux__)
@@ -113,8 +104,7 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     if (!profiles)
         return "json_object_object_get(root, \"profiles\") failed";
 
-    FF_STRBUF_AUTO_DESTROY wtProfileId;
-    ffStrbufInitS(&wtProfileId, getenv("WT_PROFILE_ID"));
+    FF_STRBUF_AUTO_DESTROY wtProfileId = ffStrbufCreateS(getenv("WT_PROFILE_ID"));
     ffStrbufTrim(&wtProfileId, '\'');
     if (wtProfileId.length > 0)
     {
@@ -158,8 +148,7 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
 static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
-    FFstrbuf json;
-    ffStrbufInit(&json);
+    FF_STRBUF_AUTO_DESTROY json = ffStrbufCreate();
     const char* error = NULL;
 
     #ifdef _WIN32
@@ -219,22 +208,18 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
     if(error)
     {
         ffStrbufAppendS(&terminalFont->error, error);
-        ffStrbufDestroy(&json);
         return;
     }
     ffStrbufTrimRight(&json, '\n');
     if(json.length == 0)
     {
         ffStrbufAppendS(&terminalFont->error, "Cannot find file \"settings.json\"");
-        ffStrbufDestroy(&json);
         return;
     }
 
-    FFstrbuf name;
-    ffStrbufInit(&name);
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
     double size = -1;
     error = detectFromWTImpl(instance, &json, &name, &size);
-    ffStrbufDestroy(&json);
 
     if(error)
         ffStrbufAppendS(&terminalFont->error, error);
@@ -244,8 +229,6 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
         snprintf(sizeStr, sizeof(sizeStr), "%g", size);
         ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
     }
-
-    ffStrbufDestroy(&name);
 }
 
 #else //FF_HAVE_JSONC
@@ -262,11 +245,8 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 
 FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
-
-    FF_STRBUF_AUTO_DESTROY fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"font_family ", &fontName},
@@ -288,11 +268,8 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
 
 static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY useSystemFont;
-    ffStrbufInit(&useSystemFont);
-
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
+    FF_STRBUF_AUTO_DESTROY useSystemFont = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"use_system_font =", &useSystemFont},
@@ -319,8 +296,7 @@ static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* r
 
 static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){
         "wezterm",
@@ -347,11 +323,8 @@ static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminal
 
 static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
-
-    FF_STRBUF_AUTO_DESTROY fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"font: ", &fontName},
@@ -409,7 +382,7 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
 const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
 {
     FF_DETECTION_INTERNAL_GUARD(FFTerminalFontResult,
-        ffStrbufInitA(&result.error, 0);
+        ffStrbufInit(&result.error);
 
         const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
 

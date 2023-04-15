@@ -13,14 +13,12 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
     if(dirp == NULL)
         return "Failed to open `/sys/class/backlight/`";
 
-    FF_STRBUF_AUTO_DESTROY backlightDir;
-    ffStrbufInitA(&backlightDir, 64);
+    FF_STRBUF_AUTO_DESTROY backlightDir = ffStrbufCreateA(64);
     ffStrbufAppendS(&backlightDir, backlightDirPath);
 
     uint32_t backlightDirLength = backlightDir.length;
 
-    FF_STRBUF_AUTO_DESTROY buffer;
-    ffStrbufInit(&buffer);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)

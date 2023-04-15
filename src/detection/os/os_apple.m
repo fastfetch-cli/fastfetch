@@ -107,10 +107,10 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->versionID);
 
-    ffStrbufInitA(&os->codename, 0);
-    ffStrbufInitA(&os->idLike, 0);
-    ffStrbufInitA(&os->variant, 0);
-    ffStrbufInitA(&os->variantID, 0);
+    ffStrbufInit(&os->codename);
+    ffStrbufInit(&os->idLike);
+    ffStrbufInit(&os->variant);
+    ffStrbufInit(&os->variantID);
 
     parseSystemVersion(os);
 

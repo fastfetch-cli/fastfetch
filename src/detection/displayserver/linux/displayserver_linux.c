@@ -10,8 +10,7 @@ static void parseDRM(FFDisplayServerResult* result)
     if(dirp == NULL)
         return;
 
-    FFstrbuf drmDir;
-    ffStrbufInitA(&drmDir, 64);
+    FF_STRBUF_AUTO_DESTROY drmDir = ffStrbufCreateA(64);
     ffStrbufAppendS(&drmDir, drmDirPath);
 
     uint32_t drmDirLength = drmDir.length;
@@ -48,7 +47,6 @@ static void parseDRM(FFDisplayServerResult* result)
     }
 
     closedir(dirp);
-    ffStrbufDestroy(&drmDir);
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)

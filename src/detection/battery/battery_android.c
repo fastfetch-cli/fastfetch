@@ -9,8 +9,7 @@
 
 const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
 {
-    FF_STRBUF_AUTO_DESTROY buffer;
-    ffStrbufInit(&buffer);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     if(ffProcessAppendStdOut(&buffer, (char* const[]){
         FF_TERMUX_API_PATH,

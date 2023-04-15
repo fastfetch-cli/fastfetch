@@ -25,8 +25,7 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
     {
         ffPrintLogoAndKey(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs.key);
 
-        FFstrbuf output;
-        ffStrbufInit(&output);
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
         if(host->productName.length > 0)
             ffStrbufAppend(&output, &host->productName);
@@ -39,8 +38,6 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
         }
 
         ffStrbufPutTo(&output, stdout);
-
-        ffStrbufDestroy(&output);
     }
     else
     {

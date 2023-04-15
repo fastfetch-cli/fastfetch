@@ -132,12 +132,10 @@ static uint32_t getNixPackagesImpl(char* path)
     if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
         return 0;
 
-    FFstrbuf output;
-    ffStrbufInitA(&output, 128);
+    FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(128);
 
     //https://github.com/LinusDierheimer/fastfetch/issues/195#issuecomment-1191748222
-    FFstrbuf command;
-    ffStrbufInitA(&command, 255);
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(255);
     ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
     ffStrbufAppendS(&command, path);
     ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq | wc -l");
@@ -149,12 +147,7 @@ static uint32_t getNixPackagesImpl(char* path)
         NULL
     });
 
-    int result = (int) strtol(output.chars, NULL, 10);
-
-    ffStrbufDestroy(&command);
-    ffStrbufDestroy(&output);
-
-    return (uint32_t) result;
+    return (uint32_t) strtol(output.chars, NULL, 10);
 }
 
 static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
@@ -329,8 +322,7 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
 
 void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY baseDir;
-    ffStrbufInitA(&baseDir, 512);
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
     if(ffStrbufIgnCaseEqualS(&ffDetectOS(instance)->id, "bedrock"))

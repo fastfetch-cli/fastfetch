@@ -7,8 +7,7 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
 
     if (instance->config.cpu.temp)
     {
-        FF_STRBUF_AUTO_DESTROY cpuTemp;
-        ffStrbufInit(&cpuTemp);
+        FF_STRBUF_AUTO_DESTROY cpuTemp = ffStrbufCreate();
         if(ffSysctlGetString("temperature", &cpuTemp))
             cpu->temperature = FF_CPU_TEMP_UNSET;
         else

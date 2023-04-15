@@ -149,8 +149,7 @@ static const char* printJsonConfig(FFinstance* instance)
     if (!ffJsonLoadLibrary(instance))
         return "Failed to load json-c library";
 
-    FF_STRBUF_AUTO_DESTROY content;
-    ffStrbufInit(&content);
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.platform.configDirs)
     {
         uint32_t oldLength = filename->length;

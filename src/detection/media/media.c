@@ -6,7 +6,7 @@ void ffDetectMediaImpl(const FFinstance* instance, FFMediaResult* media);
 const FFMediaResult* ffDetectMedia(const FFinstance* instance)
 {
     FF_DETECTION_INTERNAL_GUARD(FFMediaResult,
-        ffStrbufInitA(&result.error, 0);
+        ffStrbufInit(&result.error);
         ffStrbufInit(&result.playerId);
         ffStrbufInit(&result.player);
         ffStrbufInit(&result.song);

@@ -107,12 +107,9 @@ static void getCustomBus(FFDBusData* data, const FFinstance* instance, FFMediaRe
         return;
     }
 
-    FFstrbuf busName;
-    ffStrbufInit(&busName);
-    ffStrbufAppendS(&busName, FF_DBUS_MPRIS_PREFIX);
+    FF_STRBUF_AUTO_DESTROY busName = ffStrbufCreateS(FF_DBUS_MPRIS_PREFIX);
     ffStrbufAppend(&busName, &instance->config.playerName);
     getBusProperties(data, busName.chars, result);
-    ffStrbufDestroy(&busName);
 }
 
 static void getBestBus(FFDBusData* data, FFMediaResult* result)

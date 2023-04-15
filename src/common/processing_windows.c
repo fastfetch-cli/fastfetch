@@ -28,8 +28,7 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     BOOL success;
 
     {
-        FF_STRBUF_AUTO_DESTROY cmdline;
-        ffStrbufInitF(&cmdline, "\"%s\"", argv[0]);
+        FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreateF("\"%s\"", argv[0]);
         for(char* const* parg = &argv[1]; *parg; ++parg)
         {
             ffStrbufAppendC(&cmdline, ' ');

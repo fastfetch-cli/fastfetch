@@ -7,24 +7,20 @@
 
 void ffPrintUsers(FFinstance* instance)
 {
-    FFlist users;
+    FF_LIST_AUTO_DESTROY users;
     ffListInit(&users, sizeof(FFstrbuf));
 
-    FFstrbuf error;
-    ffStrbufInit(&error);
+    FF_STRBUF_AUTO_DESTROY error = ffStrbufCreate();
 
     ffDetectUsers(&users, &error);
 
     if(error.length > 0)
     {
         ffPrintError(instance, FF_USERS_MODULE_NAME, 0, &instance->config.users, "%*s", error.length, error.chars);
-        ffListDestroy(&users);
-        ffStrbufDestroy(&error);
         return;
     }
 
-    FFstrbuf result;
-    ffStrbufInit(&result);
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     for(uint32_t i = 0; i < users.length; ++i)
     {
         if(i > 0)
@@ -33,8 +29,6 @@ void ffPrintUsers(FFinstance* instance)
         ffStrbufAppend(&result, user);
         ffStrbufDestroy(user);
     }
-
-    ffListDestroy(&users);
 
     if(instance->config.users.outputFormat.length == 0)
     {
@@ -47,6 +41,4 @@ void ffPrintUsers(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result},
         });
     }
-
-    ffStrbufDestroy(&result);
 }

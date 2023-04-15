@@ -40,8 +40,7 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 }
             }
 
-            FF_STRBUF_AUTO_DESTROY name;
-            ffStrbufInit(&name);
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
             if(detectName && CoreDisplay_DisplayCreateInfoDictionary)
             {
                 CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);

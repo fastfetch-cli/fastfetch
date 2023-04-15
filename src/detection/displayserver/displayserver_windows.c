@@ -42,8 +42,7 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 DeleteDC(hdc);
             }
 
-            FF_STRBUF_AUTO_DESTROY name;
-            ffStrbufInit(&name);
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
             if (detectName)
             {

@@ -32,6 +32,6 @@ void ffDetectHostImpl(FFHostResult* host)
 
     //Not implemented
 
-    ffStrbufInitA(&host->productVersion, 0);
-    ffStrbufInitA(&host->productSku, 0);
+    ffStrbufInit(&host->productVersion);
+    ffStrbufInit(&host->productSku);
 }

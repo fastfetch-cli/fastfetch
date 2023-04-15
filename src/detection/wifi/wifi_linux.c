@@ -144,8 +144,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
         if(instance->config.allowSlowOperations)
         {
-            FF_STRBUF_AUTO_DESTROY output;
-            ffStrbufInit(&output);
+            FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
             if(!ffProcessAppendStdOut(&output, (char* const[]){
                 "iw",
                 "dev",
@@ -216,8 +215,7 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
     if(!infs)
         return "if_nameindex() failed";
 
-    FFstrbuf path;
-    ffStrbufInit(&path);
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
     {
@@ -307,7 +305,6 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
         close(sock);
     }
     if_freenameindex(infs);
-    ffStrbufDestroy(&path);
 
     return NULL;
 }

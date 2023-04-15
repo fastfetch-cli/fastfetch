@@ -18,12 +18,10 @@ void ffPrintMemory(FFinstance* instance)
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY usedPretty;
-    ffStrbufInit(&usedPretty);
+    FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
     ffParseSize(storage.bytesUsed, instance->config.binaryPrefixType, &usedPretty);
 
-    FF_STRBUF_AUTO_DESTROY totalPretty;
-    ffStrbufInit(&totalPretty);
+    FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffParseSize(storage.bytesTotal, instance->config.binaryPrefixType, &totalPretty);
 
     uint8_t percentage = storage.bytesTotal == 0
@@ -37,8 +35,7 @@ void ffPrintMemory(FFinstance* instance)
             puts("Disabled");
         else
         {
-            FF_STRBUF_AUTO_DESTROY str;
-            ffStrbufInit(&str);
+            FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
             if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {

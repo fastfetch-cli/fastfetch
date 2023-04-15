@@ -23,8 +23,7 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY key;
-    ffStrbufInit(&key);
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
     {
