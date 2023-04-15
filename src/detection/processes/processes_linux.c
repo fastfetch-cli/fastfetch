@@ -2,10 +2,12 @@
 
 #include <sys/sysinfo.h>
 
-uint32_t ffDetectProcesses(FFstrbuf* error)
+const char* ffDetectProcesses(uint32_t* result)
 {
     struct sysinfo info;
     if(sysinfo(&info) != 0)
-        ffStrbufAppendS(error, "sysinfo() failed");
-    return (uint32_t) info.procs;
+        return "sysinfo() failed";
+
+    *result = (uint32_t) info.procs;
+    return NULL;
 }
