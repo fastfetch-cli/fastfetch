@@ -5,13 +5,7 @@
 void ffPrintColors(FFinstance* instance)
 {
     if(instance->config.pipe)
-    {
-        ffLogoPrintLine(instance);
-        puts("████████████████████████");
-        ffLogoPrintLine(instance);
-        puts("████████████████████████");
         return;
-    }
 
     ffLogoPrintLine(instance);
 
