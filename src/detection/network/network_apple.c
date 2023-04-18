@@ -29,11 +29,11 @@ const char* ffDetectNetwork(FFinstance* instance, FFlist* result)
         ffStrbufInit(&item->name);
         ffStrbufInit(&item->address);
         item->mtu = 0;
-        item->on = true;
+        item->up = true;
 
         ffCfStrGetString(SCNetworkInterfaceGetLocalizedDisplayName(ni), &item->name);
         ffCfStrGetString(SCNetworkInterfaceGetHardwareAddressString(ni), &item->address);
-        SCNetworkInterfaceCopyMTU(ni, &item->mtu, nil, nil);
+        SCNetworkInterfaceCopyMTU(ni, (int*) &item->mtu, nil, nil);
     }
 
     if (result->length == 0)
