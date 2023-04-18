@@ -44,8 +44,8 @@ const char* ffDetectNetwork(FFinstance* instance, FFlist* result)
         if (adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK)
             continue;
 
-        bool isOn = adapter->OperStatus == IfOperStatusUp;
-        if (!isOn && !instance->config.networkAll)
+        bool isUp = adapter->OperStatus == IfOperStatusUp;
+        if (!isUp && !instance->config.networkAll)
             continue;
 
         const char* strType = NULL;
@@ -87,12 +87,12 @@ const char* ffDetectNetwork(FFinstance* instance, FFlist* result)
         ffStrbufInitS(&item->type, strType);
         ffStrbufInit(&item->name);
         ffStrbufInit(&item->address);
-        item->mtu = (int32_t) adapter->Mtu;
-        item->on = isOn;
+        item->mtu = adapter->Mtu;
+        item->up = isUp;
 
         ffStrbufSetWS(&item->name, adapter->FriendlyName);
         for (ULONG i = 0; i < adapter->PhysicalAddressLength; i++)
-            ffStrbufAppendF(&item->address, "%.2X-", (int) adapter->PhysicalAddress[i]);
+            ffStrbufAppendF(&item->address, "%.2x-", (int) adapter->PhysicalAddress[i]);
         ffStrbufTrimRight(&item->address, '-');
     }
 

@@ -92,14 +92,14 @@ const char* ffDetectNetwork(FFinstance* instance, FFlist* result)
         ffStrbufInitS(&item->name, i->if_name);
         ffStrbufInit(&item->address);
         item->mtu = 0;
-        item->on = isUp;
+        item->up = isUp;
 
         ffStrbufSetF(&path, "/sys/class/net/%s/address", i->if_name);
         ffReadFileBuffer(path.chars, &item->address);
 
         ffStrbufSetF(&path, "/sys/class/net/%s/mtu", i->if_name);
         if (ffReadFileBuffer(path.chars, &fileContent))
-            item->mtu = (int32_t) ffStrbufToUInt16(&fileContent, 0);
+            item->mtu = ffStrbufToUInt16(&fileContent, 0);
     }
 
     if_freenameindex(infs);

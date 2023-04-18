@@ -24,7 +24,10 @@ void ffPrintNetwork(FFinstance* instance)
     {
         if(instance->config.network.key.length == 0)
         {
-            ffStrbufSetF(&key, "%s (%s)", FF_NETWORK_MODULE_NAME, network->type.chars);
+            if (network->type.length > 0)
+                ffStrbufSetF(&key, "%s (%s)", FF_NETWORK_MODULE_NAME, network->type.chars);
+            else
+                ffStrbufSetS(&key, FF_NETWORK_MODULE_NAME);
         }
         else
         {
@@ -42,12 +45,16 @@ void ffPrintNetwork(FFinstance* instance)
         else
         {
             ffPrintFormatString(instance, key.chars, 0, NULL, &instance->config.network.outputFormat, FF_NETWORK_NUM_FORMAT_ARGS, (FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRING, network->on ? "ON" : "OFF"},
+                {FF_FORMAT_ARG_TYPE_STRING, network->up ? "UP" : "DOWN"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &network->type},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &network->name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &network->address},
                 {FF_FORMAT_ARG_TYPE_INT, &network->mtu},
             });
         }
+
+        ffStrbufDestroy(&network->type);
+        ffStrbufDestroy(&network->name);
+        ffStrbufDestroy(&network->address);
     }
 }
