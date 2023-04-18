@@ -29,7 +29,7 @@ typedef struct FFstrbuf
 } FFstrbuf;
 
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
-void ffStrbufInitCopy(FFstrbuf* restrict strbuf, const FFstrbuf* restrict src);
+void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src);
 void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
@@ -201,7 +201,7 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateS(const char* str)
     return strbuf;
 }
 
-static inline void ffStrbufAppend(FFstrbuf* restrict strbuf, const FFstrbuf* restrict value)
+static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value)
 {
     assert(value != strbuf);
     if(value == NULL)
