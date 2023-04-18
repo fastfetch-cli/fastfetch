@@ -204,9 +204,19 @@ static inline FF_C_NODISCARD bool ffStrbufContainS(const FFstrbuf* strbuf, const
     return strstr(strbuf->chars, str) != NULL;
 }
 
+static inline FF_C_NODISCARD bool ffStrbufContain(const FFstrbuf* strbuf, const FFstrbuf* str)
+{
+    return ffStrbufContainS(strbuf, str->chars);
+}
+
 static inline FF_C_NODISCARD bool ffStrbufContainIgnCaseS(const FFstrbuf* strbuf, const char* str)
 {
     return strcasestr(strbuf->chars, str) != NULL;
+}
+
+static inline FF_C_NODISCARD bool ffStrbufContainIgnCase(const FFstrbuf* strbuf, const FFstrbuf* str)
+{
+    return ffStrbufContainIgnCaseS(strbuf, str->chars);
 }
 
 static inline FF_C_NODISCARD uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c)

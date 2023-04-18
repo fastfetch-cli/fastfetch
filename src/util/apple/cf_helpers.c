@@ -2,6 +2,12 @@
 
 const char* ffCfStrGetString(CFStringRef str, FFstrbuf* result)
 {
+    if (!str)
+    {
+        ffStrbufClear(result);
+        return NULL;
+    }
+
     uint32_t length = (uint32_t)CFStringGetLength(str);
     //CFString stores UTF16 characters, therefore may require larger buffer to convert to UTF8 string
     ffStrbufEnsureFree(result, length * 2);
