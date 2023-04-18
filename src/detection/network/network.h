@@ -11,6 +11,7 @@ typedef struct FFNetworkResult
     FFstrbuf type;
     FFstrbuf address;
     int32_t mtu;
+    bool on;
 } FFNetworkResult;
 
 const char* ffDetectNetwork(FFinstance* instance, FFlist* result);

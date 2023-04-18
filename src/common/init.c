@@ -206,6 +206,7 @@ static void defaultConfig(FFinstance* instance)
     ffListInit(&instance->config.commandTexts, sizeof(FFstrbuf));
 
     ffStrbufInit(&instance->config.networkType);
+    instance->config.networkAll = false;
 }
 
 void ffInitInstance(FFinstance* instance)

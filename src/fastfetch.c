@@ -1343,6 +1343,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.percentType = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--network-type") == 0)
         optionParseString(key, value, &instance->config.networkType);
+    else if(strcasecmp(key, "--network-all") == 0)
+        instance->config.networkAll = optionParseBoolean(value);
     else if(strcasecmp(key, "--command-shell") == 0)
         optionParseString(key, value, &instance->config.commandShell);
     else if(strcasecmp(key, "--command-key") == 0)

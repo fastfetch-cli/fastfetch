@@ -29,6 +29,7 @@ const char* ffDetectNetwork(FFinstance* instance, FFlist* result)
         ffStrbufInit(&item->name);
         ffStrbufInit(&item->address);
         item->mtu = 0;
+        item->on = true;
 
         ffCfStrGetString(SCNetworkInterfaceGetLocalizedDisplayName(ni), &item->name);
         ffCfStrGetString(SCNetworkInterfaceGetHardwareAddressString(ni), &item->address);
