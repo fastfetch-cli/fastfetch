@@ -1,4 +1,18 @@
+# 1.11.2
+
+Features:
+* Network module (#451)
+
+Bugfixes:
+* Fix flatpak package count (#441)
+* Don't print white color blocks with `--pipe` (#450)
+
+Logo:
+* Update Windows 11 ASCII logo to look more visually consistent (#445)
+* Adds another font color index to arch icon (#446)
+
 # 1.11.1
+
 Bugfixes:
 * Fix name of Pro Controller (Gamepad, Windows)
 * Fix compile error with imagemagick enabled (Windows)
