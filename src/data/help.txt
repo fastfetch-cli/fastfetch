@@ -132,6 +132,8 @@ Module specific options:
     --localip-v6first <?value>:              Set if ipv6 should be printed first. Default is false
     --public-ip-timeout:                     Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --public-ip-url:                         The URL of public IP detection server to be used.
+    --network-all:                           Set if all interfaces (including down) should be printed. Default is false
+    --network-type:                          Set which type of interfaces should be printed. Default is empty
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use
