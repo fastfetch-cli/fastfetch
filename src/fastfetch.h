@@ -246,6 +246,7 @@ typedef struct FFconfig
     FFlist commandTexts;
 
     FFstrbuf networkType;
+    bool networkAll;
 } FFconfig;
 
 typedef struct FFstate

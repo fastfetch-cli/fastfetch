@@ -3,7 +3,7 @@
 #include "detection/network/network.h"
 
 #define FF_NETWORK_MODULE_NAME "Network"
-#define FF_NETWORK_NUM_FORMAT_ARGS 4
+#define FF_NETWORK_NUM_FORMAT_ARGS 5
 
 void ffPrintNetwork(FFinstance* instance)
 {
@@ -42,6 +42,7 @@ void ffPrintNetwork(FFinstance* instance)
         else
         {
             ffPrintFormatString(instance, key.chars, 0, NULL, &instance->config.network.outputFormat, FF_NETWORK_NUM_FORMAT_ARGS, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_STRING, network->on ? "ON" : "OFF"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &network->type},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &network->name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &network->address},
