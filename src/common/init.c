@@ -115,6 +115,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.bluetooth);
     initModuleArg(&instance->config.sound);
     initModuleArg(&instance->config.gamepad);
+    initModuleArg(&instance->config.network);
 
     ffStrbufInitA(&instance->config.libPCI, 0);
     ffStrbufInitA(&instance->config.libVulkan, 0);
@@ -203,6 +204,8 @@ static void defaultConfig(FFinstance* instance)
     );
     ffListInit(&instance->config.commandKeys, sizeof(FFstrbuf));
     ffListInit(&instance->config.commandTexts, sizeof(FFstrbuf));
+
+    ffStrbufInit(&instance->config.networkType);
 }
 
 void ffInitInstance(FFinstance* instance)
@@ -383,6 +386,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.bluetooth);
     destroyModuleArg(&instance->config.sound);
     destroyModuleArg(&instance->config.gamepad);
+    destroyModuleArg(&instance->config.network);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);
@@ -426,6 +430,8 @@ static void destroyConfig(FFinstance* instance)
     FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandTexts)
         ffStrbufDestroy(item);
     ffListDestroy(&instance->config.commandTexts);
+
+    ffStrbufDestroy(&instance->config.networkType);
 }
 
 static void destroyState(FFinstance* instance)

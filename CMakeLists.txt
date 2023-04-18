@@ -284,6 +284,7 @@ set(LIBFASTFETCH_SRC
     src/modules/locale.c
     src/modules/localip.c
     src/modules/memory.c
+    src/modules/network.c
     src/modules/opencl.c
     src/modules/opengl.c
     src/modules/os.c
@@ -473,6 +474,7 @@ elseif(APPLE)
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
+        src/detection/network/network_apple.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
@@ -710,6 +712,7 @@ if(APPLE)
         PRIVATE "-framework IOKit"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
+        PRIVATE "-framework SystemConfiguration"
         PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
