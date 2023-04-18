@@ -55,7 +55,7 @@ const char* ffDetectNetwork(FFinstance* instance, FFlist* result)
                 strType = "Ethernet";
                 break;
             case IF_TYPE_ISO88025_TOKENRING:
-                strType = "ISO88025";
+                strType = "TokenRing";
                 break;
             case IF_TYPE_PPP:
                 strType = "PPP";

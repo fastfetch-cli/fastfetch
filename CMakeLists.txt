@@ -346,6 +346,7 @@ if(LINUX)
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/network/network_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -386,6 +387,7 @@ elseif(ANDROID)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
+        src/detection/network/network_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
