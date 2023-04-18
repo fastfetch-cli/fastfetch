@@ -2,14 +2,10 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <net/if.h>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <net/if.h>
-
-#ifdef __FreeBSD__
-    #include <sys/socket.h> // FreeBSD needs this for AF_INET
-#endif
 
 static void addNewIp(FFlist* list, const char* name, const char* addr, bool ipv6)
 {
@@ -31,7 +27,7 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
             continue;
 
         // loop back
-        if (strncmp(ifa->ifa_name, "lo", 2) == 0 && (ifa->ifa_name[2] == '\0' || isdigit(ifa->ifa_name[2])) && !instance->config.localIpShowLoop)
+        if ((ifa->ifa_flags & IFF_LOOPBACK) && !instance->config.localIpShowLoop)
             continue;
 
         if (instance->config.localIpNamePrefix.length && strncmp(ifa->ifa_name, instance->config.localIpNamePrefix.chars, instance->config.localIpNamePrefix.length) != 0)
