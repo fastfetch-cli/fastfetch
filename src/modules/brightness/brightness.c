@@ -7,8 +7,8 @@
 
 void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
 {
-    FF_LIST_AUTO_DESTROY result;
-    ffListInit(&result, sizeof(FFBrightnessResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
+
     const char* error = ffDetectBrightness(&result);
 
     if(error)

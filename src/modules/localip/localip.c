@@ -55,8 +55,7 @@ static void printIp(FFLocalIpResult* ip)
 
 void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
 {
-    FF_LIST_AUTO_DESTROY results;
-    ffListInit(&results, sizeof(FFLocalIpResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
 
     const char* error = ffDetectLocalIps(options, &results);
 

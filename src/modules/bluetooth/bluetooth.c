@@ -37,8 +37,7 @@ void ffPrintBluetooth(FFinstance* instance, FFBluetoothOptions* options)
         return;
     }
 
-    FFlist filtered;
-    ffListInit(&filtered, sizeof(FFBluetoothDevice*));
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothDevice*));
 
     FF_LIST_FOR_EACH(FFBluetoothDevice, device, bluetooth->devices)
     {
@@ -59,8 +58,6 @@ void ffPrintBluetooth(FFinstance* instance, FFBluetoothOptions* options)
         uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
         printDevice(instance, options, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
     }
-
-    ffListDestroy(&filtered);
 }
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)

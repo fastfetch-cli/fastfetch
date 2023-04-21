@@ -201,8 +201,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         return;
     }
 
-    FF_LIST_AUTO_DESTROY devices;
-    ffListInit(&devices, sizeof(FFstrbuf));
+    FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
     char* line = NULL;
     size_t len = 0;

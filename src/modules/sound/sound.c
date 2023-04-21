@@ -37,8 +37,8 @@ static void printDevice(FFinstance* instance, FFSoundOptions* options, const FFS
 
 void ffPrintSound(FFinstance* instance, FFSoundOptions* options)
 {
-    FF_LIST_AUTO_DESTROY result;
-    ffListInit(&result, sizeof(FFSoundDevice));
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
+
     const char* error = ffDetectSound(instance, &result);
 
     if(error)
@@ -47,8 +47,7 @@ void ffPrintSound(FFinstance* instance, FFSoundOptions* options)
         return;
     }
 
-    FF_LIST_AUTO_DESTROY filtered;
-    ffListInit(&filtered, sizeof(FFSoundDevice*));
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFSoundDevice*));
 
     FF_LIST_FOR_EACH(FFSoundDevice, device, result)
     {

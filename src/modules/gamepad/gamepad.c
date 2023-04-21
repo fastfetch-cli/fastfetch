@@ -22,8 +22,8 @@ static void printDevice(FFinstance* instance, FFGamepadOptions* options, const F
 
 void ffPrintGamepad(FFinstance* instance, FFGamepadOptions* options)
 {
-    FF_LIST_AUTO_DESTROY result;
-    ffListInit(&result, sizeof(FFGamepadDevice));
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFGamepadDevice));
+
     const char* error = ffDetectGamepad(instance, &result);
 
     if(error)

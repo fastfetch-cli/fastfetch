@@ -108,6 +108,13 @@ int main(void)
     VERIFY(list.capacity == 0);
     VERIFY(list.length == 0);
 
+    {
+        FF_LIST_AUTO_DESTROY test = ffListCreate(1);
+        VERIFY(test.elementSize = 1);
+        VERIFY(test.capacity == 0);
+        VERIFY(test.length == 0);
+    }
+
     //Success
     puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);
 }

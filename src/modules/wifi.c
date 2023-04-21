@@ -7,8 +7,7 @@
 
 void ffPrintWifi(FFinstance* instance)
 {
-    FF_LIST_AUTO_DESTROY result;
-    ffListInit(&result, sizeof(FFWifiResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
 
     const char* error = ffDetectWifi(instance, &result);
     if(error)

@@ -9,8 +9,7 @@
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
-    FF_LIST_AUTO_DESTROY temps;
-    ffListInit(&temps, sizeof(FFTempValue));
+    FF_LIST_AUTO_DESTROY temps = ffListCreate(sizeof(FFTempValue));
 
     if(ffStrbufStartsWithS(gpuName, "Apple M1"))
         ffDetectCoreTemps(FF_TEMP_GPU_M1X, &temps);

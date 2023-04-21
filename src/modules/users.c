@@ -7,8 +7,7 @@
 
 void ffPrintUsers(FFinstance* instance)
 {
-    FF_LIST_AUTO_DESTROY users;
-    ffListInit(&users, sizeof(FFstrbuf));
+    FF_LIST_AUTO_DESTROY users = ffListCreate(sizeof(FFstrbuf));
 
     FF_STRBUF_AUTO_DESTROY error = ffStrbufCreate();
 
