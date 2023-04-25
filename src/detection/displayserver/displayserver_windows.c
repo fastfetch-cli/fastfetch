@@ -5,27 +5,6 @@
 #include <dwmapi.h>
 #include <WinUser.h>
 
-typedef struct
-{
-    WCHAR* deviceName;
-    uint32_t width;
-    uint32_t height;
-} DataBundle;
-
-
-static CALLBACK WINBOOL enumMonitorProc(HMONITOR hMonitor, FF_MAYBE_UNUSED HDC hDC, FF_MAYBE_UNUSED LPRECT rc, LPARAM lparam)
-{
-    DataBundle* data = (DataBundle*) lparam;
-    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
-    if(GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi) && wcscmp(mi.szDevice, data->deviceName) == 0)
-    {
-        data->width = (uint32_t) (mi.rcMonitor.right - mi.rcMonitor.left);
-        data->height = (uint32_t) (mi.rcMonitor.bottom - mi.rcMonitor.top);
-        return FALSE;
-    }
-    return TRUE;
-}
-
 static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
 {
     DISPLAYCONFIG_PATH_INFO paths[128];
@@ -45,8 +24,6 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
         {
             DISPLAYCONFIG_PATH_INFO* path = &paths[i];
 
-            DataBundle data = {};
-
             DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
                 .header = {
                     .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
@@ -55,10 +32,14 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                     .id = path->sourceInfo.id,
                 },
             };
+
+            uint32_t scaledWidth = 0, scaledHeight = 0;
             if (DisplayConfigGetDeviceInfo(&sourceName.header) == ERROR_SUCCESS)
             {
-                data.deviceName = sourceName.viewGdiDeviceName;
-                EnumDisplayMonitors(NULL, NULL, enumMonitorProc, (LPARAM) &data);
+                HDC hdc = CreateICW(sourceName.viewGdiDeviceName, NULL, NULL, NULL);
+                scaledWidth = (uint32_t) GetDeviceCaps(hdc, HORZRES);
+                scaledHeight = (uint32_t) GetDeviceCaps(hdc, VERTRES);
+                DeleteDC(hdc);
             }
 
             FF_STRBUF_AUTO_DESTROY name;
@@ -101,8 +82,8 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                data.width,
-                data.height,
+                scaledWidth,
+                scaledHeight,
                 &name,
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL ||
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED ||
