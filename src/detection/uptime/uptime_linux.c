@@ -2,10 +2,11 @@
 
 #include <sys/sysinfo.h>
 
-uint64_t ffDetectUptime()
+const char* ffDetectUptime(uint64_t* result)
 {
     struct sysinfo info;
     if(sysinfo(&info) != 0)
-        return 0;
-    return (uint32_t) info.uptime;
+        return "sysinfo() failed";
+    *result = info.uptime;
+    return NULL;
 }

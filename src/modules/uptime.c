@@ -7,11 +7,13 @@
 
 void ffPrintUptime(FFinstance* instance)
 {
-    uint64_t uptime = ffDetectUptime();
+    uint64_t uptime;
 
-    if(uptime == 0)
+    const char* error = ffDetectUptime(&uptime);
+
+    if(error)
     {
-        ffPrintError(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptime, "Uptime could't be detected");
+        ffPrintError(instance, FF_UPTIME_MODULE_NAME, 0, &instance->config.uptime, "%s", error);
         return;
     }
 
