@@ -29,3 +29,4 @@
 #include "modules/sound/sound.h"
 #include "modules/title/title.h"
 #include "modules/jsonconfig/jsonconfig.h"
+#include "modules/uptime/uptime.h"

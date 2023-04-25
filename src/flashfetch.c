@@ -28,8 +28,8 @@ int main(int argc, char** argv)
     //ffPrintBoard(&instance, &instance.config.board);
     //ffPrintChassis(&instance);
     ffPrintKernel(&instance, &instance.config.kernel);
-    ffPrintUptime(&instance);
     //ffPrintProcesses(&instance);
+    ffPrintUptime(&instance, &instance.config.uptime);
     ffPrintPackages(&instance);
     ffPrintShell(&instance);
     ffPrintDisplay(&instance, &instance.config.display);
