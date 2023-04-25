@@ -248,6 +248,7 @@ set(LIBFASTFETCH_SRC
     src/detection/host/host.c
     src/detection/locale/locale.c
     src/detection/media/media.c
+    src/detection/opencl/opencl.c
     src/detection/os/os.c
     src/detection/packages/packages.c
     src/detection/terminalfont/terminalfont.c
