@@ -735,7 +735,7 @@ static const FFlogo* getLogoEndeavour()
         "$2`-////+$1ssssssssssssssssssssssssssso$3++++-\n"
         " $2`..-+$1oosssssssssssssssssssssssso$3+++++/`\n"
         "   $3./++++++++++++++++++++++++++++++/:.\n"
-        "    `:::::::::::::::::::::::::------``"
+        "  `:::::::::::::::::::::::::------``"
     )
     FF_LOGO_COLORS(
         "35", //magenta
