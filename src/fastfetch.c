@@ -991,7 +991,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
     else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
     else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
-    else if(optionParseModuleArgs(key, value, "wm-theme", &instance->config.wmTheme)) {}
+    else if(ffParseWMThemeCommandOptions(&instance->config.wmTheme, key, value)) {}
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
     else if(optionParseModuleArgs(key, value, "icons", &instance->config.icons)) {}
     else if(optionParseModuleArgs(key, value, "wallpaper", &instance->config.wallpaper)) {}
@@ -1202,8 +1202,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintWM(instance);
     else if(strcasecmp(line, "theme") == 0)
         ffPrintTheme(instance);
-    else if(strcasecmp(line, "wmtheme") == 0)
-        ffPrintWMTheme(instance);
+    else if(strcasecmp(line, FF_WMTHEME_MODULE_NAME) == 0)
+        ffPrintWMTheme(instance, &instance->config.wmTheme);
     else if(strcasecmp(line, "icons") == 0)
         ffPrintIcons(instance);
     else if(strcasecmp(line, "wallpaper") == 0)

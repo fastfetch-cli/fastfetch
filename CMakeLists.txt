@@ -312,7 +312,7 @@ set(LIBFASTFETCH_SRC
     src/modules/weather.c
     src/modules/wifi.c
     src/modules/wm.c
-    src/modules/wmtheme.c
+    src/modules/wmtheme/wmtheme.c
     src/modules/jsonconfig/jsonconfig.c
     src/util/FFlist.c
     src/util/FFstrbuf.c

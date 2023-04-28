@@ -27,3 +27,4 @@
 #include "modules/sound/option.h"
 #include "modules/title/option.h"
 #include "modules/uptime/option.h"
+#include "modules/wmtheme/option.h"

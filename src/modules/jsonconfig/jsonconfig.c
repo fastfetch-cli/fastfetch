@@ -113,6 +113,12 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 false;
         }
 
+        case 'W': {
+            return
+                tryModule(instance, type, module, FF_WMTHEME_MODULE_NAME, ffParseWMThemeJsonObject) ||
+                false;
+        }
+
         default:
             return false;
     }
