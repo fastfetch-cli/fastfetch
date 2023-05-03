@@ -1,8 +1,5 @@
 # 1.11.2
 
-Features:
-* Network module (#451)
-
 Bugfixes:
 * Fix flatpak package count (#441)
 * Don't print white color blocks with `--pipe` (#450)

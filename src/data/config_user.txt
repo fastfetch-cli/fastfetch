@@ -176,18 +176,6 @@
 # Default is 0 (disabled).
 #--public-ip-timeout 0
 
-# Network show all interfaces option
-# Sets if all interfaces (including down) should be printed
-# Must be either true or false
-# Default is false.
-#--network-all false
-
-# Network show interface type option
-# Sets which type of interfaces should be printed
-# Must be a string
-# Default is empty.
-#--network-type
-
 # Weather output format option:
 # Sets the weather format to be used. It must be URI encoded.
 # See: https://github.com/chubin/wttr.in#one-line-output
