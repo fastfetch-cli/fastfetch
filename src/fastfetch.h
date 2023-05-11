@@ -326,7 +326,7 @@ void ffPrintCPU(FFinstance* instance);
 void ffPrintCPUUsage(FFinstance* instance);
 void ffPrintGPU(FFinstance* instance);
 void ffPrintMemory(FFinstance* instance);
-void ffPrintSwap(FFinstance* instance); //Also in modules/memory.c
+void ffPrintSwap(FFinstance* instance);
 void ffPrintDisk(FFinstance* instance);
 void ffPrintBattery(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);

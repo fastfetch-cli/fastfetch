@@ -2,19 +2,19 @@
 #include "common/printing.h"
 #include "common/parsing.h"
 #include "common/bar.h"
-#include "detection/memory/memory.h"
+#include "detection/swap/swap.h"
 
-#define FF_MEMORY_MODULE_NAME "Memory"
-#define FF_MEMORY_NUM_FORMAT_ARGS 3
+#define FF_SWAP_MODULE_NAME "Swap"
+#define FF_SWAP_NUM_FORMAT_ARGS 3
 
-void ffPrintMemory(FFinstance* instance)
+void ffPrintSwap(FFinstance* instance)
 {
-    FFMemoryResult storage;
-    const char* error = ffDetectMemory(&storage);
+    FFSwapResult storage;
+    const char* error = ffDetectSwap(&storage);
 
     if(error)
     {
-        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory, "%s", error);
+        ffPrintError(instance, FF_SWAP_MODULE_NAME, 0, &instance->config.swap, "%s", error);
         return;
     }
 
@@ -30,9 +30,9 @@ void ffPrintMemory(FFinstance* instance)
         ? 0
         : (uint8_t) (((long double) storage.bytesUsed / (long double) storage.bytesTotal) * 100.0);
 
-    if(instance->config.memory.outputFormat.length == 0)
+    if(instance->config.swap.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory.key);
+        ffPrintLogoAndKey(instance, FF_SWAP_MODULE_NAME, 0, &instance->config.swap.key);
         if (storage.bytesTotal == 0)
             puts("Disabled");
         else
@@ -58,7 +58,7 @@ void ffPrintMemory(FFinstance* instance)
     }
     else
     {
-        ffPrintFormat(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_SWAP_MODULE_NAME, 0, &instance->config.swap, FF_SWAP_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage},

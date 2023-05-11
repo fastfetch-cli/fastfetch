@@ -296,6 +296,7 @@ set(LIBFASTFETCH_SRC
     src/modules/separator.c
     src/modules/shell.c
     src/modules/sound.c
+    src/modules/swap.c
     src/modules/media.c
     src/modules/terminal.c
     src/modules/terminalfont.c

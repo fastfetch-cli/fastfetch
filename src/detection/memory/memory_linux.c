@@ -1,18 +1,16 @@
 #include "memory.h"
+#include "util/mallocHelper.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-void ffDetectMemory(FFMemoryStorage* ram)
+const char* ffDetectMemory(FFMemoryResult* ram)
 {
     FILE* meminfo = fopen("/proc/meminfo", "r");
     if(meminfo == NULL)
-    {
-        ffStrbufAppendS(&ram->error, "Failed to open /proc/meminfo");
-        return;
-    }
+        return "Failed to open /proc/meminfo";
 
-    char* line = NULL;
+    char* FF_AUTO_FREE line = NULL;
     size_t len = 0;
 
     uint32_t memTotal = 0,
@@ -32,14 +30,13 @@ void ffDetectMemory(FFMemoryStorage* ram)
             sscanf(line, "SReclaimable: %u", &sReclaimable);
     }
 
-    if(line != NULL)
-        free(line);
-
     fclose(meminfo);
 
     ram->bytesTotal = memTotal * (uint64_t) 1024;
     if(ram->bytesTotal == 0)
-        ffStrbufAppendS(&ram->error, "Failed to read MemTotal");
+        return "Failed to read MemTotal";
     else
         ram->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
+
+    return NULL;
 }
