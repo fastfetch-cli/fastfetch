@@ -3,8 +3,14 @@
 #ifndef FF_INCLUDED_detection_memory_memory
 #define FF_INCLUDED_detection_memory_memory
 
-#include "detection/storage.h"
+#include "fastfetch.h"
 
-void ffDetectMemory(FFMemoryStorage* result);
+typedef struct FFMemoryResult
+{
+    uint64_t bytesUsed;
+    uint64_t bytesTotal;
+} FFMemoryResult;
+
+const char* ffDetectMemory(FFMemoryResult* result);
 
 #endif

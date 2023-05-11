@@ -5,7 +5,7 @@
 #include <ntstatus.h>
 #include <windows.h>
 
-void ffDetectSwap(FFMemoryStorage* swap)
+const char* ffDetectSwap(FFSwapResult* swap)
 {
     SYSTEM_INFO sysInfo;
     GetNativeSystemInfo(&sysInfo);
@@ -18,16 +18,10 @@ void ffDetectSwap(FFMemoryStorage* swap)
         if(status == STATUS_INFO_LENGTH_MISMATCH)
         {
             if(!(pstart = (SYSTEM_PAGEFILE_INFORMATION*)realloc(pstart, size)))
-            {
-                ffStrbufAppendF(&swap->error, "realloc(pstart, %lu) failed", size);
-                return;
-            }
+                return "realloc(pstart, size) failed";
         }
         else if(!NT_SUCCESS(status))
-        {
-            ffStrbufAppendF(&swap->error, "NtQuerySystemInformation(SystemPagefileInformation, %lu) failed", size);
-            return;
-        }
+            return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
         break;
     }
     swap->bytesUsed = (uint64_t)pstart->TotalUsed * sysInfo.dwPageSize;
