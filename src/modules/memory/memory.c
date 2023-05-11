@@ -3,18 +3,18 @@
 #include "common/parsing.h"
 #include "common/bar.h"
 #include "detection/memory/memory.h"
+#include "modules/memory/memory.h"
 
-#define FF_MEMORY_MODULE_NAME "Memory"
 #define FF_MEMORY_NUM_FORMAT_ARGS 3
 
-void ffPrintMemory(FFinstance* instance)
+void ffPrintMemory(FFinstance* instance, FFMemoryOptions* options)
 {
     FFMemoryResult storage;
     const char* error = ffDetectMemory(&storage);
 
     if(error)
     {
-        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory, "%s", error);
+        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -28,9 +28,9 @@ void ffPrintMemory(FFinstance* instance)
         ? 0
         : (uint8_t) (((long double) storage.bytesUsed / (long double) storage.bytesTotal) * 100.0);
 
-    if(instance->config.memory.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory.key);
+        ffPrintLogoAndKey(instance, FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs.key);
         if (storage.bytesTotal == 0)
             puts("Disabled");
         else
@@ -55,10 +55,52 @@ void ffPrintMemory(FFinstance* instance)
     }
     else
     {
-        ffPrintFormat(instance, FF_MEMORY_MODULE_NAME, 0, &instance->config.memory, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
         });
     }
 }
+
+void ffInitMemoryOptions(FFMemoryOptions* options)
+{
+    options->moduleName = FF_MEMORY_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_MEMORY_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    return false;
+}
+
+void ffDestroyMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+#ifdef FF_HAVE_JSONC
+void ffParseMemoryJsonObject(FFinstance* instance, json_object* module)
+{
+    FFMemoryOptions __attribute__((__cleanup__(ffDestroyMemoryOptions))) options;
+    ffInitMemoryOptions(&options);
+
+    if (module)
+    {
+        json_object_object_foreach(module, key, val)
+        {
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintMemory(instance, &options);
+}
+#endif

@@ -88,6 +88,12 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 false;
         }
 
+        case 'M': {
+            return
+                tryModule(instance, type, module, FF_MEMORY_MODULE_NAME, ffParseMemoryJsonObject) ||
+                false;
+        }
+
         case 'O': {
             return
                 tryModule(instance, type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
@@ -98,6 +104,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
             return
                 tryModule(instance, type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
                 tryModule(instance, type, module, FF_SOUND_MODULE_NAME, ffParseSoundJsonObject) ||
+                tryModule(instance, type, module, FF_SWAP_MODULE_NAME, ffParseSwapJsonObject) ||
                 false;
         }
 

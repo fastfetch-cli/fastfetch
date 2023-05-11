@@ -45,8 +45,8 @@ int main(int argc, char** argv)
     ffPrintTerminalFont(&instance);
     ffPrintCPU(&instance, &instance.config.cpu);
     ffPrintGPU(&instance, &instance.config.gpu);
-    ffPrintMemory(&instance);
-    //ffPrintSwap(&instance);
+    ffPrintMemory(&instance, &instance.config.memory);
+    ffPrintSwap(&instance, &instance.config.swap);
     ffPrintDisk(&instance, &instance.config.disk);
     ffPrintBattery(&instance, &instance.config.battery);
     ffPrintPowerAdapter(&instance);

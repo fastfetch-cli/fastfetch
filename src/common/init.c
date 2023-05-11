@@ -84,8 +84,8 @@ static void defaultConfig(FFinstance* instance)
     ffInitCPUOptions(&instance->config.cpu);
     ffInitCPUUsageOptions(&instance->config.cpuUsage);
     ffInitGPUOptions(&instance->config.gpu);
-    initModuleArg(&instance->config.memory);
-    initModuleArg(&instance->config.swap);
+    ffInitMemoryOptions(&instance->config.memory);
+    ffInitSwapOptions(&instance->config.swap);
     ffInitDiskOptions(&instance->config.disk);
     ffInitBatteryOptions(&instance->config.battery);
     initModuleArg(&instance->config.powerAdapter);
@@ -306,8 +306,8 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyCPUOptions(&instance->config.cpu);
     ffDestroyCPUUsageOptions(&instance->config.cpuUsage);
     ffDestroyGPUOptions(&instance->config.gpu);
-    destroyModuleArg(&instance->config.memory);
-    destroyModuleArg(&instance->config.swap);
+    ffDestroyMemoryOptions(&instance->config.memory);
+    ffDestroySwapOptions(&instance->config.swap);
     ffDestroyDiskOptions(&instance->config.disk);
     ffDestroyBatteryOptions(&instance->config.battery);
     destroyModuleArg(&instance->config.powerAdapter);

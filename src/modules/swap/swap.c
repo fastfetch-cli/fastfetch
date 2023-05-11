@@ -3,18 +3,18 @@
 #include "common/parsing.h"
 #include "common/bar.h"
 #include "detection/swap/swap.h"
+#include "modules/swap/swap.h"
 
-#define FF_SWAP_MODULE_NAME "Swap"
 #define FF_SWAP_NUM_FORMAT_ARGS 3
 
-void ffPrintSwap(FFinstance* instance)
+void ffPrintSwap(FFinstance* instance, FFSwapOptions* options)
 {
     FFSwapResult storage;
     const char* error = ffDetectSwap(&storage);
 
     if(error)
     {
-        ffPrintError(instance, FF_SWAP_MODULE_NAME, 0, &instance->config.swap, "%s", error);
+        ffPrintError(instance, FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -28,9 +28,9 @@ void ffPrintSwap(FFinstance* instance)
         ? 0
         : (uint8_t) (((long double) storage.bytesUsed / (long double) storage.bytesTotal) * 100.0);
 
-    if(instance->config.swap.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_SWAP_MODULE_NAME, 0, &instance->config.swap.key);
+        ffPrintLogoAndKey(instance, FF_SWAP_MODULE_NAME, 0, &options->moduleArgs.key);
         if (storage.bytesTotal == 0)
             puts("Disabled");
         else
@@ -55,10 +55,52 @@ void ffPrintSwap(FFinstance* instance)
     }
     else
     {
-        ffPrintFormat(instance, FF_SWAP_MODULE_NAME, 0, &instance->config.swap, FF_SWAP_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_SWAP_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
         });
     }
 }
+
+void ffInitSwapOptions(FFSwapOptions* options)
+{
+    options->moduleName = FF_SWAP_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_SWAP_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    return false;
+}
+
+void ffDestroySwapOptions(FFSwapOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+#ifdef FF_HAVE_JSONC
+void ffParseSwapJsonObject(FFinstance* instance, json_object* module)
+{
+    FFSwapOptions __attribute__((__cleanup__(ffDestroySwapOptions))) options;
+    ffInitSwapOptions(&options);
+
+    if (module)
+    {
+        json_object_object_foreach(module, key, val)
+        {
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            ffPrintError(instance, FF_SWAP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintSwap(instance, &options);
+}
+#endif

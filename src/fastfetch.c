@@ -1002,8 +1002,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
     else if(ffParseCPUUsageCommandOptions(&instance->config.cpuUsage, key, value)) {}
     else if(ffParseGPUCommandOptions(&instance->config.gpu, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
-    else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
+    else if(ffParseMemoryCommandOptions(&instance->config.memory, key, value)) {}
+    else if(ffParseSwapCommandOptions(&instance->config.swap, key, value)) {}
     else if(ffParseDiskCommandOptions(&instance->config.disk, key, value)) {}
     else if(ffParseBatteryCommandOptions(&instance->config.battery, key, value)) {}
     else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
@@ -1224,10 +1224,10 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintCustom(instance, &instance->config.custom);
     else if(strcasecmp(line, FF_GPU_MODULE_NAME) == 0)
         ffPrintGPU(instance, &instance->config.gpu);
-    else if(strcasecmp(line, "memory") == 0)
-        ffPrintMemory(instance);
-    else if(strcasecmp(line, "swap") == 0)
-        ffPrintSwap(instance);
+    else if(strcasecmp(line, FF_MEMORY_MODULE_NAME) == 0)
+        ffPrintMemory(instance, &instance->config.memory);
+    else if(strcasecmp(line, FF_SWAP_MODULE_NAME) == 0)
+        ffPrintSwap(instance, &instance->config.swap);
     else if(strcasecmp(line, FF_DISK_MODULE_NAME) == 0)
         ffPrintDisk(instance, &instance->config.disk);
     else if(strcasecmp(line, FF_BATTERY_MODULE_NAME) == 0)

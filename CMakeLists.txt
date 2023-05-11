@@ -286,7 +286,7 @@ set(LIBFASTFETCH_SRC
     src/modules/kernel/kernel.c
     src/modules/locale/locale.c
     src/modules/localip/localip.c
-    src/modules/memory.c
+    src/modules/memory/memory.c
     src/modules/opencl.c
     src/modules/opengl.c
     src/modules/os/os.c
@@ -299,7 +299,7 @@ set(LIBFASTFETCH_SRC
     src/modules/separator/separator.c
     src/modules/shell.c
     src/modules/sound/sound.c
-    src/modules/swap.c
+    src/modules/swap/swap.c
     src/modules/media.c
     src/modules/terminal.c
     src/modules/terminalfont.c
