@@ -9,18 +9,15 @@
 #include <devguid.h>
 #include <winternl.h>
 
-#ifdef FF_USE_WIN_NTAPI
-    NTSYSCALLAPI
-    NTSTATUS
-    NTAPI
-    NtPowerInformation(
-        IN POWER_INFORMATION_LEVEL InformationLevel,
-        IN PVOID InputBuffer OPTIONAL,
-        IN ULONG InputBufferLength,
-        OUT PVOID OutputBuffer OPTIONAL,
-        IN ULONG OutputBufferLength);
-    #define CallNtPowerInformation NtPowerInformation
-#endif
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtPowerInformation(
+    IN POWER_INFORMATION_LEVEL InformationLevel,
+    IN PVOID InputBuffer OPTIONAL,
+    IN ULONG InputBufferLength,
+    OUT PVOID OutputBuffer OPTIONAL,
+    IN ULONG OutputBufferLength);
 
 static inline void wrapCloseHandle(HANDLE* handle)
 {
@@ -147,7 +144,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
     else
     {
         SYSTEM_BATTERY_STATE info;
-        if (NT_SUCCESS(CallNtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) && info.BatteryPresent)
+        if (NT_SUCCESS(NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) && info.BatteryPresent)
         {
             BatteryResult* battery = (BatteryResult*)ffListAdd(results);
             ffStrbufInit(&battery->modelName);
