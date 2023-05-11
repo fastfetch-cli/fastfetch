@@ -73,7 +73,6 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
-cmake_dependent_option(USE_WIN_NTAPI "Allow using internal NTAPI" ON "WIN32" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -519,11 +518,11 @@ elseif(WIN32)
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_windows.cpp
+        src/detection/processes/processes_windows.c
         src/detection/sound/sound_windows.cpp
-        src/detection/swap/swap_windows.cpp
+        src/detection/swap/swap_windows.c
         src/detection/terminalfont/terminalfont_windows.c
-        src/detection/terminalshell/terminalshell_windows.cpp
+        src/detection/terminalshell/terminalshell_windows.c
         src/detection/temps/temps_windows.cpp
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
@@ -734,9 +733,6 @@ elseif(WIN32)
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
     )
-    if(USE_WIN_NTAPI)
-        target_compile_definitions(libfastfetch PRIVATE FF_USE_WIN_NTAPI)
-    endif()
 endif()
 
 target_include_directories(libfastfetch

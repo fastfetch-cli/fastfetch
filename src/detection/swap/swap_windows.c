@@ -1,15 +1,10 @@
-extern "C" {
 #include "swap.h"
 #include "util/mallocHelper.h"
-}
-
-#ifdef FF_USE_WIN_NTAPI
 
 #include <winternl.h>
 #include <ntstatus.h>
 #include <windows.h>
 
-extern "C"
 void ffDetectSwap(FFMemoryStorage* swap)
 {
     SYSTEM_INFO sysInfo;
@@ -38,28 +33,3 @@ void ffDetectSwap(FFMemoryStorage* swap)
     swap->bytesUsed = (uint64_t)pstart->TotalUsed * sysInfo.dwPageSize;
     swap->bytesTotal = (uint64_t)pstart->CurrentSize * sysInfo.dwPageSize;
 }
-
-#else
-
-#include "util/windows/wmi.hpp"
-
-extern "C"
-void ffDetectSwapImpl(FFMemoryStorage* swap)
-{
-    FFWmiQuery query(L"SELECT AllocatedBaseSize, CurrentUsage FROM Win32_PageFileUsage", &swap->error);
-    if(!query)
-        return;
-
-    if(FFWmiRecord record = query.next())
-    {
-        //MB
-        record.getUnsigned(L"AllocatedBaseSize", &swap->bytesTotal);
-        record.getUnsigned(L"CurrentUsage", &swap->bytesUsed);
-        swap->bytesTotal *= 1024 * 1024;
-        swap->bytesUsed *= 1024 * 1024;
-    }
-    else
-        ffStrbufInitS(&swap->error, "No Wmi result returned");
-}
-
-#endif

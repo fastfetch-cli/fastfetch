@@ -1,16 +1,11 @@
-extern "C" {
 #include "terminalshell.h"
 #include "common/processing.h"
 #include "common/thread.h"
 #include "util/mallocHelper.h"
-}
 
 #include <windows.h>
 #include <wchar.h>
 #include <tlhelp32.h>
-
-#ifdef FF_USE_WIN_NTAPI
-
 #include <ntstatus.h>
 #include <winternl.h>
 
@@ -59,7 +54,7 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
 static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* result, uint32_t ppid)
 {
     ULONG size = 0;
-    if(NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
+    if(NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
         return false;
 
     size += sizeof(SystemProcessInformation) * 5; //What if new processes are created during two syscalls?
@@ -68,12 +63,12 @@ static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* re
     if(!pstart)
         return false;
 
-    if(!NT_SUCCESS(NtQuerySystemInformation(SystemProcessInformation, pstart, size, nullptr)))
+    if(!NT_SUCCESS(NtQuerySystemInformation(SystemProcessInformation, pstart, size, NULL)))
         return false;
 
     uint32_t currentProcessId = (uint32_t) GetCurrentProcessId();
 
-    for (auto ptr = pstart; ptr->NextEntryOffset; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
+    for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ptr->NextEntryOffset; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
     {
         if ((uint32_t)(uintptr_t) ptr->InheritedFromUniqueProcessId != ppid)
             continue;
@@ -82,7 +77,7 @@ static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* re
         if (pid == currentProcessId)
             continue;
 
-        if(!getProcessInfo(pid, nullptr, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName))
+        if(!getProcessInfo(pid, NULL, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName))
             return false;
 
         result->terminalPid = pid;
@@ -95,77 +90,7 @@ static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* re
     return false;
 }
 
-#else
-
-#include "util/windows/wmi.hpp"
-#include <inttypes.h>
-
-static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName)
-{
-    if(pid == 0)
-        pid = GetCurrentProcessId();
-
-    wchar_t sql[256] = {};
-    swprintf(sql, 256, L"SELECT %ls %ls ParentProcessId FROM Win32_Process WHERE ProcessId = %" PRIu32,
-        pname ? L"Name," : L"",
-        pname ? L"ExecutablePath," : L"",
-    pid);
-
-    FFWmiQuery query(sql);
-    if(!query)
-        return false;
-
-    if(FFWmiRecord record = query.next())
-    {
-        if(ppid)
-        {
-            uint64_t value;
-            record.getUnsigned(L"ParentProcessId", &value);
-            *ppid = (uint32_t) value;
-        }
-
-        if(pname)
-            record.getString(L"Name", pname);
-
-        if(exe)
-            record.getString(L"ExecutablePath", exe);
-
-        if(exeName)
-            *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
-    }
-    return true;
-}
-
-static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* result, uint32_t ppid)
-{
-    wchar_t sql[256] = {};
-    swprintf(sql, 256, L"SELECT Name, ExecutablePath, ProcessId FROM Win32_Process WHERE ProcessId <> %" PRIu32 " AND ParentProcessId = %" PRIu32,
-        (uint32_t) GetCurrentProcessId(),
-        ppid);
-
-    FFWmiQuery query(sql);
-    if(!query)
-        return false;
-
-    if(FFWmiRecord record = query.next())
-    {
-        record.getString(L"Name", &result->terminalProcessName);
-        record.getString(L"ExecutablePath", &result->terminalExe);
-        result->terminalExeName = result->terminalExe.chars + ffStrbufLastIndexC(&result->terminalExe, '\\') + 1;
-        uint64_t pid;
-        record.getUnsigned(L"ProcessId", &pid);
-        result->terminalPid = (uint32_t) pid;
-        ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
-        if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
-            ffStrbufSubstrBefore(&result->terminalPrettyName, result->terminalPrettyName.length - 4);
-        return true;
-    }
-    return false;
-}
-
-#endif
-
-extern "C" bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* result, uint32_t pid)
 {
@@ -195,7 +120,7 @@ static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* 
         ffStrbufClear(&result->shellProcessName);
         ffStrbufClear(&result->shellPrettyName);
         ffStrbufClear(&result->shellExe);
-        result->shellExeName = nullptr;
+        result->shellExeName = NULL;
         return getShellInfo(instance, result, ppid);
     }
 
@@ -316,23 +241,23 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         ffStrbufIgnCaseCompS(&result->terminalProcessName, "explorer") != 0
     ) return;
 
-    const char* term = nullptr;
+    const char* term = NULL;
 
     //SSH
-    if(getenv("SSH_CONNECTION") != nullptr)
+    if(getenv("SSH_CONNECTION") != NULL)
         term = getenv("SSH_TTY");
 
     //Windows Terminal
     if(!term && (
-        getenv("WT_SESSION") != nullptr ||
-        getenv("WT_PROFILE_ID") != nullptr
+        getenv("WT_SESSION") != NULL ||
+        getenv("WT_PROFILE_ID") != NULL
     )) term = "Windows Terminal";
 
     //Alacritty
     if(!term && (
-        getenv("ALACRITTY_SOCKET") != nullptr ||
-        getenv("ALACRITTY_LOG") != nullptr ||
-        getenv("ALACRITTY_WINDOW_ID") != nullptr
+        getenv("ALACRITTY_SOCKET") != NULL ||
+        getenv("ALACRITTY_LOG") != NULL ||
+        getenv("ALACRITTY_WINDOW_ID") != NULL
     )) term = "Alacritty";
 
     if(!term)
@@ -351,7 +276,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     }
 }
 
-extern "C" bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
+bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
 const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 {
@@ -386,7 +311,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     ffStrbufInit(&result.userShellVersion);
 
     uint32_t ppid;
-    if(!getProcessInfo(0, &ppid, nullptr, nullptr, nullptr))
+    if(!getProcessInfo(0, &ppid, NULL, NULL, NULL))
         goto exit;
 
     ppid = getShellInfo(instance, &result, ppid);
