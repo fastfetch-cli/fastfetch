@@ -37,6 +37,7 @@ typedef struct FFGPUResult
     int coreCount;
     FFGPUMemory dedicated;
     FFGPUMemory shared;
+    uint32_t vulkanDeviceId; // Only used for vulkan
 } FFGPUResult;
 
 const FFlist* ffDetectGPU(const FFinstance* instance);
