@@ -176,7 +176,16 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
             continue;
 
+        // #456
+        FF_LIST_FOR_EACH(FFGPUResult, gpu, result->gpus)
+        {
+            if (gpu->vulkanDeviceId == physicalDeviceProperties.properties.deviceID)
+                goto next;
+        }
+
         FFGPUResult* gpu = ffListAdd(&result->gpus);
+
+        gpu->vulkanDeviceId = physicalDeviceProperties.properties.deviceID;
 
         ffStrbufInit(&gpu->name);
         ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
@@ -215,6 +224,9 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
         //No way to detect those using vulkan
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
+
+    next:
+        continue;
     }
 
     //If the highest device version is lower than the instance version, use it as our vulkan version
