@@ -26,4 +26,6 @@ const char* ffDetectSwap(FFSwapResult* swap)
     }
     swap->bytesUsed = (uint64_t)pstart->TotalUsed * sysInfo.dwPageSize;
     swap->bytesTotal = (uint64_t)pstart->CurrentSize * sysInfo.dwPageSize;
+
+    return NULL;
 }
