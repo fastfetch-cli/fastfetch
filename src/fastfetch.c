@@ -989,7 +989,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
     else if(ffParseBrightnessCommandOptions(&instance->config.brightness, key, value)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
-    else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
+    else if(ffParseWifiCommandOptions(&instance->config.wifi, key, value)) {}
     else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
     else if(ffParseWMThemeCommandOptions(&instance->config.wmTheme, key, value)) {}
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
@@ -1240,8 +1240,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintLocalIp(instance, &instance->config.localIP);
     else if(strcasecmp(line, "publicip") == 0)
         ffPrintPublicIp(instance);
-    else if(strcasecmp(line, "wifi") == 0)
-        ffPrintWifi(instance);
+    else if(strcasecmp(line, FF_WIFI_MODULE_NAME) == 0)
+        ffPrintWifi(instance, &instance->config.wifi);
     else if(strcasecmp(line, "weather") == 0)
         ffPrintWeather(instance);
     else if(strcasecmp(line, "player") == 0)

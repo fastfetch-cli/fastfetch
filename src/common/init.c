@@ -93,7 +93,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitLocalIpOptions(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
-    initModuleArg(&instance->config.wifi);
+    ffInitWifiOptions(&instance->config.wifi);
     initModuleArg(&instance->config.player);
     initModuleArg(&instance->config.media);
     ffInitDateTimeOptions(&instance->config.dateTime);
@@ -316,7 +316,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.publicIP);
     destroyModuleArg(&instance->config.wallpaper);
     destroyModuleArg(&instance->config.weather);
-    destroyModuleArg(&instance->config.wifi);
+    ffDestroyWifiOptions(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);
     destroyModuleArg(&instance->config.media);
     ffDestroyDateTimeOptions(&instance->config.dateTime);

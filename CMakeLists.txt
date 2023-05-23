@@ -310,7 +310,7 @@ set(LIBFASTFETCH_SRC
     src/modules/vulkan.c
     src/modules/wallpaper.c
     src/modules/weather.c
-    src/modules/wifi.c
+    src/modules/wifi/wifi.c
     src/modules/wm.c
     src/modules/wmtheme/wmtheme.c
     src/modules/jsonconfig/jsonconfig.c
