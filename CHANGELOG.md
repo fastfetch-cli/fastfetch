@@ -6,6 +6,7 @@ Features:
 Bugfixes:
 * Fix flatpak package count (#441)
 * Don't print white color blocks with `--pipe` (#450)
+* Fix iTerm being detected as iTermServer-* sometimes
 
 Logo:
 * Update Windows 11 ASCII logo to look more visually consistent (#445)

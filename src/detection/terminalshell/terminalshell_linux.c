@@ -378,7 +378,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
     }
 
-    if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app"))
+    if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result.terminalProcessName, "iTermServer-"))
         ffStrbufInitS(&result.terminalPrettyName, "iTerm");
     else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
         ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");

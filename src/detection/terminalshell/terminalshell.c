@@ -291,7 +291,8 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         if(termProgram)
         {
             if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
-                (strcmp(termProgram, "vscode") == 0 && ffStrbufStartsWithIgnCaseS(processName, "code"))
+                (strcmp(termProgram, "vscode") == 0 && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
+                (strcmp(termProgram, "iTerm.app") == 0 && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
             ) {
                 ffStrbufSetS(version, termProgramVersion);
                 return true;
