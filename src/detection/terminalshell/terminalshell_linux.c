@@ -148,7 +148,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
     }
 
     //Known shells
-    if(
+    if (
         strcasecmp(name, "bash")      == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
@@ -158,7 +158,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "dash")      == 0 ||
         strcasecmp(name, "pwsh")      == 0 ||
         strcasecmp(name, "nu")        == 0 ||
-        strcasecmp(name, "git-shell") == 0
+        strcasecmp(name, "git-shell") == 0 ||
+        (strcasecmp(name, "python") == 0 && getenv("XONSH_VERSION"))
     ) {
         if (result->shellProcessName.length == 0)
         {
@@ -369,6 +370,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.shellPrettyName, "PowerShell");
     else if(ffStrbufEqualS(&result.shellProcessName, "nu"))
         ffStrbufInitS(&result.shellPrettyName, "nushell");
+    else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
+        ffStrbufInitS(&result.shellPrettyName, "xonsh");
     else
     {
         // https://github.com/LinusDierheimer/fastfetch/discussions/280#discussioncomment-3831734
