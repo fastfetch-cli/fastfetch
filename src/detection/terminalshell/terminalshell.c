@@ -136,6 +136,11 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(strcasecmp(exeName, "nu") == 0)
         return getExeVersionRaw(exe, version); //0.73.0
+    if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
+    {
+        ffStrbufSetS(version, getenv("XONSH_VERSION"));
+        return true;
+    }
 
     #ifdef _WIN32
     if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
