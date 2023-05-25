@@ -55,6 +55,9 @@ Improvements:
 * Improve preformance (WmTheme amd Font, Windows and macOS)
 * Enable nonblocking public-ip / weather detection (Android)
 
+Logos:
+* macOS small / small2
+
 # 1.10.2
 
 Bugfixes:
