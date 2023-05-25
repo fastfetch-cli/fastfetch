@@ -1187,6 +1187,56 @@ static const FFlogo* getLogoMacOS()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoMacOSSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("macos_small", "mac_small", "apple_small", "darwin_small", "osx_small")
+    FF_LOGO_LINES(
+        "$1        .:'\n"
+        "    __ :'__\n"
+        "$2 .'`__`-'__``.\n"
+        "$3:__________.-'\n"
+        "$4:_________:\n"
+        " :_________`-;\n"
+        "$5  `.__.-.__.'"
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "33", //yellow
+        "31", //red
+        "35", //magenta
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("33"); //yellow
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoMacOSSmall2()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("macos_small2", "mac_small2", "apple_small2", "darwin_small2", "osx_small2")
+    FF_LOGO_LINES(
+        "$1        .:'\n"
+        "    __ :'__\n"
+        "$2 .'`  `-'  ``.\n"
+        "$3:          .-'\n"
+        "$4:         :\n"
+        " :         `-;\n"
+        "$5  `.__.-.__.'"
+    )
+    FF_LOGO_COLORS(
+        "32", //green
+        "33", //yellow
+        "31", //red
+        "35", //magenta
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("33"); //yellow
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoManjaro()
 {
     FF_LOGO_INIT
@@ -2503,6 +2553,8 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoLangitKetujuh,
         getLogoLinux,
         getLogoMacOS,
+        getLogoMacOSSmall,
+        getLogoMacOSSmall2,
         getLogoManjaro,
         getLogoManjaroSmall,
         getLogoMint,
