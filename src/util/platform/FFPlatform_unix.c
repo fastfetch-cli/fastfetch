@@ -35,6 +35,7 @@ static void getConfigDirs(FFPlatform* platform)
 
     #if defined(__APPLE__)
         ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Preferences/");
+        ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Application Support/");
     #endif
 
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
