@@ -300,6 +300,13 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         }
     }
 
+    if (ffStrbufIgnCaseEqualS(processName, "Tabby") && !ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    }))
+        return true;
+
     #ifdef _WIN32
 
     return getFileVersion(exe->chars, version);
