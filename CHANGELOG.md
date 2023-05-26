@@ -2,6 +2,7 @@
 
 Features:
 * Support xonsh detection (TerminalShell)
+* Support Tabby version / terminal font detection
 
 Bugfixes:
 * Fix flatpak package count (#441)

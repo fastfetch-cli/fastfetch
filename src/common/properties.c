@@ -166,10 +166,10 @@ bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uin
     FFstrbuf baseDir;
     ffStrbufInitA(&baseDir, 64);
 
-    for(uint32_t i = 0; i < list->length; i++)
+    FF_LIST_FOR_EACH(FFstrbuf, dirPrefix, *list)
     {
         //We need to copy the dir each time, because it used by multiple threads, so we can't directly write to it.
-        ffStrbufSet(&baseDir, ffListGet(list, i));
+        ffStrbufSet(&baseDir, dirPrefix);
         ffStrbufAppendS(&baseDir, relativeFile);
 
         if(ffParsePropFileValues(baseDir.chars, numQueries, queries))

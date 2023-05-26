@@ -287,10 +287,10 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 
 FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FFstrbuf fontName;
+    FF_STRBUF_AUTO_DESTROY fontName;
     ffStrbufInit(&fontName);
 
-    FFstrbuf fontSize;
+    FF_STRBUF_AUTO_DESTROY fontSize;
     ffStrbufInit(&fontSize);
 
     FFpropquery fontQuery[] = {
@@ -307,9 +307,6 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
         ffStrbufSetS(&fontSize, "11.0");
 
     ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
-
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
 
     return true;
 }
@@ -373,6 +370,32 @@ static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminal
     return true;
 }
 
+static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
+{
+    FF_STRBUF_AUTO_DESTROY fontName;
+    ffStrbufInit(&fontName);
+
+    FF_STRBUF_AUTO_DESTROY fontSize;
+    ffStrbufInit(&fontSize);
+
+    FFpropquery fontQuery[] = {
+        {"font: ", &fontName},
+        {"fontSize: ", &fontSize},
+    };
+
+    if(!ffParsePropFileConfigValues(instance, "tabby/config.yaml", 2, fontQuery))
+        return false;
+
+    if(fontName.length == 0)
+        ffStrbufSetS(&fontName, "monospace");
+    if(fontSize.length == 0)
+        ffStrbufSetS(&fontSize, "14");
+
+    ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
+
+    return true;
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
 static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
@@ -383,6 +406,8 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
         detectTerminator(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
         detectWezterm(instance, terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "tabby"))
+        detectTabby(instance, terminalFont);
 
     #ifndef _WIN32
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
