@@ -5,6 +5,8 @@
 
 #include "fastfetch.h"
 
+#define FF_SOUND_VOLUME_UNKNOWN 255
+
 typedef struct FFSoundDevice
 {
     FFstrbuf identifier;

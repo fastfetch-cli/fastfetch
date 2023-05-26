@@ -11,10 +11,13 @@ static void printDevice(FFinstance* instance, const FFSoundDevice* device, uint8
         ffPrintLogoAndKey(instance, FF_SOUND_MODULE_NAME, index, &instance->config.sound.key);
         ffStrbufWriteTo(&device->name, stdout);
 
-        if(device->volume > 0)
-            printf(" (%d%%)", device->volume);
-        else
-            fputs(" (muted)", stdout);
+        if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
+        {
+            if(device->volume > 0)
+                printf(" (%d%%)", device->volume);
+            else
+                fputs(" (muted)", stdout);
+        }
 
         if(device->main && index > 0)
             fputs(" (*)", stdout);
