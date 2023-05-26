@@ -44,7 +44,7 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* de
         FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
         device->main = deviceId == mainDeviceId;
         device->active = false;
-        device->volume = 0;
+        device->volume = FF_SOUND_VOLUME_UNKNOWN;
         ffStrbufInitF(&device->identifier, "%u", (unsigned) deviceId);
         ffStrbufInit(&device->name);
 
@@ -67,6 +67,34 @@ const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* de
                 kAudioObjectPropertyElementMain
             }, 0, NULL, &dataSize, &volume) == kAudioHardwareNoError)
                 device->volume = (uint8_t) (volume * 100 + 0.5);
+            else
+            {
+                // Try detecting volume from channels
+                uint32_t channels[2];
+                dataSize = sizeof(channels);
+                if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+                    kAudioDevicePropertyPreferredChannelsForStereo,
+                    kAudioObjectPropertyScopeOutput,
+                    kAudioObjectPropertyElementMain
+                }, 0, NULL, &dataSize, channels) == kAudioHardwareNoError)
+                {
+                    dataSize = sizeof(volume);
+                    if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+                        kAudioDevicePropertyVolumeScalar,
+                        kAudioObjectPropertyScopeOutput,
+                        channels[0]
+                    }, 0, NULL, &dataSize, &volume) == kAudioHardwareNoError)
+                    {
+                        float temp;
+                        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+                            kAudioDevicePropertyVolumeScalar,
+                            kAudioObjectPropertyScopeOutput,
+                            channels[1]
+                        }, 0, NULL, &dataSize, &temp) == kAudioHardwareNoError)
+                            device->volume = (uint8_t) ((volume + temp) / 2 * 100 + 0.5);
+                    }
+                }
+            }
         }
 
         CFStringRef name;
