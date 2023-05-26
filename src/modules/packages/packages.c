@@ -1,24 +1,24 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "detection/packages/packages.h"
+#include "modules/packages/packages.h"
 
-#define FF_PACKAGES_MODULE_NAME "Packages"
 #define FF_PACKAGES_NUM_FORMAT_ARGS 21
 
-void ffPrintPackages(FFinstance* instance)
+void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
 {
     const FFPackagesResult* counts = ffDetectPackages(instance);
     uint32_t all = counts->all; //Copy it, so we can substract from it in FF_PRINT_PACKAGE
 
     if(all == 0)
     {
-        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, "No packages from known package managers found");
+        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "No packages from known package managers found");
         return;
     }
 
-    if(instance->config.packages.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages.key);
+        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key);
 
         #define FF_PRINT_PACKAGE_NAME(var, name) \
             if(counts->var > 0) \
@@ -65,7 +65,7 @@ void ffPrintPackages(FFinstance* instance)
     }
     else
     {
-        ffPrintFormat(instance, FF_PACKAGES_MODULE_NAME, 0, &instance->config.packages, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &all},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->pacman},
             {FF_FORMAT_ARG_TYPE_STRBUF, &counts->pacmanBranch},
@@ -90,3 +90,45 @@ void ffPrintPackages(FFinstance* instance)
         });
     }
 }
+
+void ffInitPackagesOptions(FFPackagesOptions* options)
+{
+    options->moduleName = FF_PACKAGES_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_PACKAGES_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    return false;
+}
+
+void ffDestroyPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+#ifdef FF_HAVE_JSONC
+void ffParsePackagesJsonObject(FFinstance* instance, json_object* module)
+{
+    FFPackagesOptions __attribute__((__cleanup__(ffDestroyPackagesOptions))) options;
+    ffInitPackagesOptions(&options);
+
+    if (module)
+    {
+        json_object_object_foreach(module, key, val)
+        {
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintPackages(instance, &options);
+}
+#endif

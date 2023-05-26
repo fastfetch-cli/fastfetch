@@ -2,7 +2,6 @@
 
 // For "fastfetch.c" and "flashfetch.c"
 
-#include "modules/os/os.h"
 #include "modules/battery/battery.h"
 #include "modules/bios/bios.h"
 #include "modules/bluetooth/bluetooth.h"
@@ -26,6 +25,8 @@
 #include "modules/locale/locale.h"
 #include "modules/localip/localip.h"
 #include "modules/memory/memory.h"
+#include "modules/os/os.h"
+#include "modules/packages/packages.h"
 #include "modules/separator/separator.h"
 #include "modules/sound/sound.h"
 #include "modules/swap/swap.h"

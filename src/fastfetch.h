@@ -67,7 +67,7 @@ typedef struct FFconfig
     FFKernelOptions kernel;
     FFUptimeOptions uptime;
     FFModuleArgs processes;
-    FFModuleArgs packages;
+    FFPackagesOptions packages;
     FFModuleArgs shell;
     FFDisplayOptions display;
     FFModuleArgs de;
@@ -201,7 +201,6 @@ void ffPrepareWeather(FFinstance* instance);
 
 void ffPrintChassis(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
-void ffPrintPackages(FFinstance* instance);
 void ffPrintShell(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);

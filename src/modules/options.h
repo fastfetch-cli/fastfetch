@@ -24,6 +24,7 @@
 #include "modules/localip/option.h"
 #include "modules/memory/option.h"
 #include "modules/os/option.h"
+#include "modules/packages/option.h"
 #include "modules/separator/option.h"
 #include "modules/sound/option.h"
 #include "modules/swap/option.h"

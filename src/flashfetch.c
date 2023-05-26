@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     ffPrintKernel(&instance, &instance.config.kernel);
     //ffPrintProcesses(&instance);
     ffPrintUptime(&instance, &instance.config.uptime);
-    ffPrintPackages(&instance);
+    ffPrintPackages(&instance, &instance.config.packages);
     ffPrintShell(&instance);
     ffPrintDisplay(&instance, &instance.config.display);
     // ffPrintBrightness(&instance);

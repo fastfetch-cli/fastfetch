@@ -290,7 +290,7 @@ set(LIBFASTFETCH_SRC
     src/modules/opencl.c
     src/modules/opengl.c
     src/modules/os/os.c
-    src/modules/packages.c
+    src/modules/packages/packages.c
     src/modules/player.c
     src/modules/poweradapter.c
     src/modules/processes.c

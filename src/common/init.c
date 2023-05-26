@@ -69,7 +69,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitKernelOptions(&instance->config.kernel);
     ffInitUptimeOptions(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
-    initModuleArg(&instance->config.packages);
+    ffInitPackagesOptions(&instance->config.packages);
     initModuleArg(&instance->config.shell);
     ffInitDisplayOptions(&instance->config.display);
     initModuleArg(&instance->config.de);
@@ -291,7 +291,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyKernelOptions(&instance->config.kernel);
     ffDestroyUptimeOptions(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);
-    destroyModuleArg(&instance->config.packages);
+    ffDestroyPackagesOptions(&instance->config.packages);
     destroyModuleArg(&instance->config.shell);
     ffDestroyDisplayOptions(&instance->config.display);
     destroyModuleArg(&instance->config.de);

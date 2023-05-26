@@ -984,7 +984,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseKernelCommandOptions(&instance->config.kernel, key, value)) {}
     else if(ffParseUptimeCommandOptions(&instance->config.uptime, key, value)) {}
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
-    else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
+    else if(ffParsePackagesCommandOptions(&instance->config.packages, key, value)) {}
     else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
     else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
     else if(ffParseBrightnessCommandOptions(&instance->config.brightness, key, value)) {}
@@ -1190,8 +1190,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintProcesses(instance);
     else if(strcasecmp(line, FF_UPTIME_MODULE_NAME) == 0)
         ffPrintUptime(instance, &instance->config.uptime);
-    else if(strcasecmp(line, "packages") == 0)
-        ffPrintPackages(instance);
+    else if(strcasecmp(line, FF_PACKAGES_MODULE_NAME) == 0)
+        ffPrintPackages(instance, &instance->config.packages);
     else if(strcasecmp(line, "shell") == 0)
         ffPrintShell(instance);
     else if(strcasecmp(line, FF_DISPLAY_MODULE_NAME) == 0)
