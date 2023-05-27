@@ -17,20 +17,17 @@ void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
     result->chars[size_needed] = '\0';
 }
 
-FFstrbuf ffStrbufCreateNWS(uint32_t length, const wchar_t* source)
+void ffStrbufInitNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
 {
-    FFstrbuf result;
-
-    if(length == 0)
-        ffStrbufInit(&result);
-    else
+    if(!length)
     {
-        int size_needed = WideCharToMultiByte(CP_UTF8, 0, source, (int)length, NULL, 0, NULL, NULL);
-        ffStrbufInitA(&result, (uint32_t)size_needed);
-        WideCharToMultiByte(CP_UTF8, 0, source, (int)length, result.chars, size_needed, NULL, NULL);
-        result.length = (uint32_t)size_needed;
-        result.chars[size_needed] = '\0';
+        ffStrbufInit(result);
+        return;
     }
 
-    return result;
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, source, (int)length, NULL, 0, NULL, NULL);
+    ffStrbufInitA(result, (uint32_t)size_needed + 1);
+    WideCharToMultiByte(CP_UTF8, 0, source, (int)length, result->chars, size_needed, NULL, NULL);
+    result->length = (uint32_t)size_needed;
+    result->chars[size_needed] = '\0';
 }

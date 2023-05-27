@@ -10,6 +10,7 @@ Bugfixes:
 * Fix iTerm being detected as iTermServer-* sometimes
 * Fix sound device volume being incorrectly detected as muted sometimes (Sound)
 * Fix memleaks reported by LeakSanitizer (Linux)
+* Fix potential memory curruption bug in unicode.c (Windows)
 
 Logo:
 * Update Windows 11 ASCII logo to look more visually consistent (#445)

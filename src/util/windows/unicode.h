@@ -13,7 +13,19 @@ static inline void ffStrbufSetWS(FFstrbuf* result, const wchar_t* source)
     return ffStrbufSetNWS(result, (uint32_t)wcslen(source), source);
 }
 
-FFstrbuf ffStrbufCreateNWS(uint32_t length, const wchar_t* source);
+void ffStrbufInitNWS(FFstrbuf* result, uint32_t length, const wchar_t* source);
+
+static inline void ffStrbufInitWS(FFstrbuf* result, const wchar_t* source)
+{
+    return ffStrbufInitNWS(result, (uint32_t)wcslen(source), source);
+}
+
+static inline FFstrbuf ffStrbufCreateNWS(uint32_t length, const wchar_t* source)
+{
+    FFstrbuf result;
+    ffStrbufInitNWS(&result, length, source);
+    return result;
+}
 
 static inline FFstrbuf ffStrbufCreateWS(const wchar_t* source)
 {
