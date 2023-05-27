@@ -5,6 +5,8 @@
 
 #ifdef _WIN32
 
+#include "util/mallocHelper.h"
+
 #include <winver.h>
 
 static bool getFileVersion(const char* exePath, FFstrbuf* version)
@@ -13,7 +15,7 @@ static bool getFileVersion(const char* exePath, FFstrbuf* version)
     DWORD size = GetFileVersionInfoSizeA(exePath, &handle);
     if(size > 0)
     {
-        void* versionData = malloc(size);
+        FF_AUTO_FREE void* versionData = malloc(size);
         if(GetFileVersionInfoA(exePath, handle, size, versionData))
         {
             VS_FIXEDFILEINFO* verInfo;
@@ -26,11 +28,9 @@ static bool getFileVersion(const char* exePath, FFstrbuf* version)
                     (unsigned)(( verInfo->dwFileVersionLS >> 16 ) & 0xffff),
                     (unsigned)(( verInfo->dwFileVersionLS >>  0 ) & 0xffff)
                 );
-                free(versionData);
                 return true;
             }
         }
-        free(versionData);
     }
 
     return false;
@@ -195,11 +195,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* v
 
 FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* version)
 {
-    if(ffProcessAppendStdOut(version, (char* const[]){
-        exe->chars,
-        "--version",
-        NULL
-    })) return false;
+    if(!getExeVersionRaw(exe, version)) return false;
 
     //foot version: 1.13.1 -pgo +ime -graphemes -assertions
     ffStrbufSubstrAfterFirstS(version, "version: ");
@@ -279,11 +275,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "kitty"))
         return getExeVersionGeneral(exe, version); //kitty 0.21.2 created by Kovid Goyal
 
-    if (ffStrbufIgnCaseEqualS(processName, "Tabby") && !ffProcessAppendStdOut(version, (char* const[]){
-        exe->chars,
-        "--version",
-        NULL
-    }))
+    if (ffStrbufIgnCaseEqualS(processName, "Tabby") && getExeVersionRaw(exe, version))
         return true;
 
     #endif
