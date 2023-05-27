@@ -57,23 +57,31 @@ typedef enum FFInitState
 
 typedef struct GVariantGetters
 {
-    FF_LIBRARY_SYMBOL(g_variant_get_string)
+    FF_LIBRARY_SYMBOL(g_variant_dup_string)
     FF_LIBRARY_SYMBOL(g_variant_get_boolean)
     FF_LIBRARY_SYMBOL(g_variant_get_int32)
+    FF_LIBRARY_SYMBOL(g_variant_unref)
 } GVariantGetters;
 
 static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, const GVariantGetters* variantGetters)
 {
+    FFvariant result;
+
     if(variant == NULL)
-        return FF_VARIANT_NULL;
+        result = FF_VARIANT_NULL;
     else if(type == FF_VARIANT_TYPE_STRING)
-        return (FFvariant) {.strValue = variantGetters->ffg_variant_get_string(variant, NULL)};
+        result = (FFvariant) {.strValue = variantGetters->ffg_variant_dup_string(variant, NULL)}; // Dup string, so that variant itself can be freed
     else if(type == FF_VARIANT_TYPE_BOOL)
-        return (FFvariant) {.boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true};
+        result = (FFvariant) {.boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true};
     else if(type == FF_VARIANT_TYPE_INT)
-        return (FFvariant) {.intValue = variantGetters->ffg_variant_get_int32(variant)};
+        result = (FFvariant) {.intValue = variantGetters->ffg_variant_get_int32(variant)};
     else
-        return FF_VARIANT_NULL;
+        result = FF_VARIANT_NULL;
+
+    if(variant)
+        variantGetters->ffg_variant_unref(variant);
+
+    return result;
 }
 
 typedef struct GSettingsData
@@ -102,9 +110,10 @@ static const GSettingsData* getGSettingsData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_get_default)
 
     #define data data.variantGetters
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_string)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_dup_string)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_unref);
     #undef data
 
     data.schemaSource = data.ffg_settings_schema_source_get_default();
@@ -169,7 +178,7 @@ static const DConfData* getDConfData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
 
     #define data data.variantGetters
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_string)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_dup_string)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
     #undef data

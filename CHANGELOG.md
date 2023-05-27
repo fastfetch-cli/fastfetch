@@ -9,6 +9,7 @@ Bugfixes:
 * Don't print white color blocks with `--pipe` (#450)
 * Fix iTerm being detected as iTermServer-* sometimes
 * Fix sound device volume being incorrectly detected as muted sometimes (Sound)
+* Fix memleaks reported by LeakSanitizer (Linux)
 
 Logo:
 * Update Windows 11 ASCII logo to look more visually consistent (#445)
