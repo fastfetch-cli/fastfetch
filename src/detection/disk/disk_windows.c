@@ -1,35 +1,31 @@
 #include "disk.h"
+#include "util/windows/unicode.h"
 
 #include <windows.h>
+#include <assert.h>
 
 void ffDetectDisksImpl(FFDiskResult* disks)
 {
-    uint32_t length = GetLogicalDriveStringsA(0, NULL);
-    if(length == 0)
-    {
-        ffStrbufAppendS(&disks->error, "GetLogicalDriveStringsA failed");
-        return;
-    }
-
-    char* buf = malloc(length + 1);
-    GetLogicalDriveStringsA(length, buf);
+    wchar_t buf[MAX_PATH + 1];
+    uint32_t length = GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf);
+    assert(length < sizeof(buf) / sizeof(*buf));
 
     for(uint32_t i = 0; i < length; i++)
     {
-        const char* mountpoint = buf + i;
+        const wchar_t* mountpoint = buf + i;
 
-        UINT driveType = GetDriveTypeA(mountpoint);
+        UINT driveType = GetDriveTypeW(mountpoint);
         if(driveType == DRIVE_NO_ROOT_DIR)
         {
-            i += (uint32_t)strlen(mountpoint);
+            i += (uint32_t)wcslen(mountpoint);
             continue;
         }
 
         FFDisk* disk = ffListAdd(&disks->disks);
-        ffStrbufInitS(&disk->mountpoint, mountpoint);
+        ffStrbufInitWS(&disk->mountpoint, mountpoint);
 
         uint64_t bytesFree;
-        if(!GetDiskFreeSpaceExA(mountpoint, NULL, (PULARGE_INTEGER)&disk->bytesTotal, (PULARGE_INTEGER)&bytesFree))
+        if(!GetDiskFreeSpaceExW(mountpoint, NULL, (PULARGE_INTEGER)&disk->bytesTotal, (PULARGE_INTEGER)&bytesFree))
         {
             disk->bytesTotal = 0;
             bytesFree = 0;
@@ -43,20 +39,27 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         else
             disk->type = FF_DISK_TYPE_HIDDEN;
 
-        ffStrbufInitA(&disk->filesystem, MAX_PATH + 1);
-        ffStrbufInitA(&disk->name, MAX_PATH + 1);
+        ffStrbufInit(&disk->filesystem);
+        ffStrbufInit(&disk->name);
+        wchar_t diskName[MAX_PATH + 1], diskFileSystem[MAX_PATH + 1];
+
         //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationa#remarks
         UINT errorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-        GetVolumeInformationA(mountpoint,
-            disk->name.chars, disk->name.allocated, //Volume name
+
+        BOOL result = GetVolumeInformationW(mountpoint,
+            diskName, sizeof(diskName) / sizeof(*diskName), //Volume name
             NULL, //Serial number
             NULL, //Max component length
             NULL, //File system flags
-            disk->filesystem.chars, disk->filesystem.allocated
+            diskFileSystem, sizeof(diskFileSystem) / sizeof(*diskFileSystem)
         );
         SetErrorMode(errorMode);
-        ffStrbufRecalculateLength(&disk->name);
-        ffStrbufRecalculateLength(&disk->filesystem);
+
+        if(result)
+        {
+            ffStrbufSetWS(&disk->filesystem, diskFileSystem);
+            ffStrbufSetWS(&disk->name, diskName);
+        }
 
         //TODO: implement
         disk->filesUsed = 0;
@@ -64,6 +67,4 @@ void ffDetectDisksImpl(FFDiskResult* disks)
 
         i += disk->mountpoint.length;
     }
-
-    free(buf);
 }
