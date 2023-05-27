@@ -1,10 +1,15 @@
-# 1.11.2
+# 1.11.1
 
 Features:
 * Support xonsh detection (TerminalShell)
-* Support Tabby version / terminal font detection
+* Support Tabby version / terminal font detection (TerminalFont)
 
 Bugfixes:
+* Fix name of Pro Controller (Gamepad, Windows)
+* Fix compile error with imagemagick enabled (Windows)
+* Fix copy-and-paste errors (Gamepad)
+* Flatpak: Fix user package count
+* Flatpak: Count runtime packages too (#441)
 * Fix flatpak package count (#441)
 * Don't print white color blocks with `--pipe` (#450)
 * Fix iTerm being detected as iTermServer-* sometimes
@@ -14,19 +19,9 @@ Bugfixes:
 
 Logo:
 * Update Windows 11 ASCII logo to look more visually consistent (#445)
-* Adds another font color index to arch icon (#446)
-
-# 1.11.1
-
-Bugfixes:
-* Fix name of Pro Controller (Gamepad, Windows)
-* Fix compile error with imagemagick enabled (Windows)
-* Fix copy-and-paste errors (Gamepad)
-* Flatpak: Fix user package count
-* Flatpak: Count runtime packages too (#441)
-
-Logo:
+* Add another font color index to arch icon (#446)
 * Add SteamOS
+* Add macOS small / small2
 
 # 1.11.0
 
@@ -58,9 +53,6 @@ Bugfixes:
 Improvements:
 * Improve preformance (WmTheme amd Font, Windows and macOS)
 * Enable nonblocking public-ip / weather detection (Android)
-
-Logos:
-* macOS small / small2
 
 # 1.10.2
 
