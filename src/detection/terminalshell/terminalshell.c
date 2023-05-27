@@ -279,6 +279,13 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "kitty"))
         return getExeVersionGeneral(exe, version); //kitty 0.21.2 created by Kovid Goyal
 
+    if (ffStrbufIgnCaseEqualS(processName, "Tabby") && !ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    }))
+        return true;
+
     #endif
 
     if(ffStrbufStartsWithIgnCaseS(processName, "alacritty"))
@@ -299,13 +306,6 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
             }
         }
     }
-
-    if (ffStrbufIgnCaseEqualS(processName, "Tabby") && !ffProcessAppendStdOut(version, (char* const[]){
-        exe->chars,
-        "--version",
-        NULL
-    }))
-        return true;
 
     #ifdef _WIN32
 
