@@ -72,7 +72,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
         WLAN_INTERFACE_INFO* ifInfo = (WLAN_INTERFACE_INFO*)&ifList->InterfaceInfo[index];
 
         FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
-        ffStrbufInit(&item->inf.description);
+        ffStrbufInitWS(&item->inf.description, ifInfo->strInterfaceDescription);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
@@ -83,7 +83,6 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
 
-        ffStrbufSetWS(&item->inf.description, ifInfo->strInterfaceDescription);
         convertIfStateToString(ifInfo->isState, &item->inf.status);
 
         if(ifInfo->isState != wlan_interface_state_connected)

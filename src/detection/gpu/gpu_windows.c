@@ -20,14 +20,12 @@ const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* inst
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInit(&gpu->vendor);
-        ffStrbufInit(&gpu->name);
+        ffStrbufInitWS(&gpu->name, displayDevice.DeviceString);
         ffStrbufInit(&gpu->driver);
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-
-        ffStrbufSetWS(&gpu->name, displayDevice.DeviceString);
 
         if (deviceKeyLength == 100 && displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
         {
