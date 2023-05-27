@@ -1,3 +1,8 @@
+# 1.11.2
+
+Bugfixes:
+* Fix Gnome version detection on Fedora
+
 # 1.11.1
 
 Features:

@@ -141,6 +141,16 @@ static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
     ffParsePropFileData(instance, "gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
+
+    if (result->deVersion.length == 0)
+    {
+        if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
+            "gnome-shell",
+            "--version",
+            NULL
+        }) == NULL) // GNOME Shell 44.1
+            ffStrbufSubstrAfterLastC(&result->deVersion, ' ');
+    }
 }
 
 static void getCinnamon(const FFinstance* instance, FFDisplayServerResult* result)
