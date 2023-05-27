@@ -1,6 +1,7 @@
 #include "displayserver.h"
 #include "common/sysctl.h"
 #include "util/apple/cf_helpers.h"
+#include "util/mallocHelper.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -73,7 +74,7 @@ static void detectWMPlugin(FFstrbuf* name)
     u_int requestLength = sizeof(request) / sizeof(*request);
 
     size_t length = 0;
-    struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
+    FF_AUTO_FREE struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
     if(processes == NULL)
         return;
 
@@ -94,8 +95,6 @@ static void detectWMPlugin(FFstrbuf* name)
         name->chars[0] = (char) toupper(name->chars[0]);
         break;
     }
-
-    free(processes);
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
