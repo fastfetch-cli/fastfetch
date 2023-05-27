@@ -1,11 +1,9 @@
 #include "FFPlatform_private.h"
 #include "util/stringUtils.h"
+#include "util/windows/unicode.h"
 
 #include <Windows.h>
 #include <shlobj.h>
-
-#include "util/windows/unicode.h"
-
 static void getHomeDir(FFPlatform* platform)
 {
     PWSTR pPath;
@@ -41,8 +39,7 @@ static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
     if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
     {
         FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
-        ffStrbufInit(buffer);
-        ffStrbufSetWS(buffer, pPath);
+        ffStrbufInitWS(buffer, pPath);
         ffStrbufReplaceAllC(buffer, '\\', '/');
         ffStrbufEnsureEndsWithC(buffer, '/');
         FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
@@ -159,7 +156,7 @@ static void getSystemReleaseAndVersion(FFPlatform* platform)
 
     DWORD ubr;
     bufSize = sizeof(ubr);
-    if(RegGetValueA(hKey, NULL, "UBR", RRF_RT_REG_DWORD, NULL, &ubr, &bufSize) != ERROR_SUCCESS || bufSize != sizeof(ubr))
+    if(RegGetValueW(hKey, NULL, L"UBR", RRF_RT_REG_DWORD, NULL, &ubr, &bufSize) != ERROR_SUCCESS || bufSize != sizeof(ubr))
         ubr = 0;
 
     ffStrbufAppendF(&platform->systemRelease, "%s.%s.%u", currentVersion, currentBuildNumber, (unsigned)ubr);

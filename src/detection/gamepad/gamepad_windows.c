@@ -117,8 +117,7 @@ const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* 
             continue;
 
         FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
-        ffStrbufInit(&device->identifier);
-        ffStrbufSetWS(&device->identifier, devName);
+        ffStrbufInitWS(&device->identifier, devName);
         ffStrbufInit(&device->name);
 
         const char* knownGamepad = detectKnownGamepad(rdi.hid.dwVendorId, rdi.hid.dwProductId);
