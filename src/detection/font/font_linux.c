@@ -6,16 +6,22 @@
 
 static void generateString(FFFontResult* font)
 {
-    ffParseGTK(&font->display, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
-
     if(font->fonts[0].length > 0)
     {
-        if(font->display.length > 0)
-            ffStrbufAppendS(&font->display, ", ");
-
         ffStrbufAppend(&font->display, &font->fonts[0]);
         ffStrbufAppendS(&font->display, " [QT]");
+
+        for(uint8_t i = 1; i < sizeof(font->fonts) / sizeof(font->fonts[0]); i++)
+        {
+            if(font->fonts[i].length > 0)
+            {
+                ffStrbufAppendS(&font->display, ", ");
+                break;
+            }
+        }
     }
+
+    ffParseGTK(&font->display, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
 }
 
 void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
