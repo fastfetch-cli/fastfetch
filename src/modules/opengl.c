@@ -7,36 +7,29 @@
 
 void ffPrintOpenGL(FFinstance* instance)
 {
-    FFOpenGLResult result;
-    ffStrbufInit(&result.version);
-    ffStrbufInit(&result.renderer);
-    ffStrbufInit(&result.vendor);
-    ffStrbufInit(&result.slv);
+    FFOpenGLResult result = { 0 };
 
     const char* error = ffDetectOpenGL(instance, &result);
-    if(error)
+    if (error)
     {
         ffPrintError(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, "%s", error);
         return;
     }
 
-    if(instance->config.openGL.outputFormat.length == 0)
+    if (instance->config.openGL.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL.key);
         puts(result.version.chars);
     }
     else
     {
-        ffPrintFormat(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, FF_OPENGL_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv}
-        });
-    }
+        FFformatarg formatArgs[FF_OPENGL_NUM_FORMAT_ARGS] = {
+            { FF_FORMAT_ARG_TYPE_STRBUF, &result.version },
+            { FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer },
+            { FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor },
+            { FF_FORMAT_ARG_TYPE_STRBUF, &result.slv }
+        };
 
-    ffStrbufDestroy(&result.version);
-    ffStrbufDestroy(&result.renderer);
-    ffStrbufDestroy(&result.vendor);
-    ffStrbufDestroy(&result.slv);
+        ffPrintFormat(instance, FF_OPENGL_MODULE_NAME, 0, &instance->config.openGL, FF_OPENGL_NUM_FORMAT_ARGS, formatArgs);
+    }
 }
