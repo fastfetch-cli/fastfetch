@@ -29,19 +29,19 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
 
     instance->state.logoHeight = instance->config.logo.paddingTop;
 
-    //Use logoColor[0] as the default color
-    if(doColorReplacement)
+    // Use logoColor[0] as the default color
+    if (doColorReplacement)
         ffPrintColor(&instance->config.logo.colors[0]);
 
-    while(*data != '\0')
+    while (*data != '\0')
     {
-        //We are at the end of a line. Print paddings and update max line length
-        if(*data == '\n' || (*data == '\r' && *(data + 1) == '\n'))
+        // We are at the end of a line. Print paddings and update max line length
+        if (*data == '\n' || (*data == '\r' && *(data + 1) == '\n'))
         {
             ffPrintCharTimes(' ', instance->config.logo.paddingRight);
 
-            //We have \r\n, skip the \r
-            if(*data == '\r')
+            // We have \r\n, skip the \r
+            if (*data == '\r')
                 ++data;
 
             putchar('\n');
@@ -49,7 +49,7 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
 
             ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
 
-            if(currentlineLength > instance->state.logoWidth)
+            if (currentlineLength > instance->state.logoWidth)
                 instance->state.logoWidth = currentlineLength;
 
             currentlineLength = 0;
@@ -57,45 +57,45 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
             continue;
         }
 
-        //Always print tabs as 4 spaces, to have consistent spacing
-        if(*data == '\t')
+        // Always print tabs as 4 spaces, to have consistent spacing
+        if (*data == '\t')
         {
             ffPrintCharTimes(' ', 4);
             ++data;
             continue;
         }
 
-        //We have an escape sequence direclty as bytes. We print it, but don't increase the line length
-        if(*data == '\033' && *(data + 1) == '[')
+        // We have an escape sequence directly as bytes. We print it, but don't increase the line length
+        if (*data == '\033' && *(data + 1) == '[')
         {
             const char* start = data;
 
             fputs("\033[", stdout);
             data += 2;
 
-            while(isdigit(*data) || *data == ';')
+            while (isdigit(*data) || *data == ';')
                 putchar(*data++); // number
 
-            //We have a valid control sequence, print it and continue with next char
-            if(isascii(*data))
+            // We have a valid control sequence, print it and continue with the next char
+            if (isascii(*data))
             {
                 putchar(*data++); // single letter, end of control sequence
                 continue;
             }
 
-            //Invalid control sequence, try to get most accurate length
-            currentlineLength += (uint32_t) (data - start - 1); //-1 for \033 which for sure doesn't take any space
+            // Invalid control sequence, try to get the most accurate length
+            currentlineLength += (uint32_t)(data - start - 1); //-1 for \033 which for sure doesn't take any space
 
-            //Don't continue here, print the char after the letters with the unicode printing
+            // Don't continue here, print the char after the letters with the Unicode printing
         }
 
-        //We have a fastfetch color placeholder. Replace it with the esacape sequence, don't increase the line length
-        if(doColorReplacement && *data == '$')
+        // We have a fastfetch color placeholder. Replace it with the escape sequence, don't increase the line length
+        if (doColorReplacement && *data == '$')
         {
             ++data;
 
-            //If we have $$, or $\0, print it as single $
-            if(*data == '$' || *data == '\0')
+            // If we have $$, or $\0, print it as a single $
+            if (*data == '$' || *data == '\0')
             {
                 putchar('$');
                 ++currentlineLength;
@@ -103,15 +103,15 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
                 continue;
             }
 
-            //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-            int index = ((int) *data) - 49;
+            // Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
+            int index = ((int)*data) - 49;
 
-            //If the index is valid, print the color. Otherwise continue as normal
-            if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
+            // If the index is valid, print the color. Otherwise, continue as normal
+            if (index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
             {
                 putchar('$');
                 ++currentlineLength;
-                //Don't continue here, we want to print the current char as unicode
+                // Don't continue here, we want to print the current char as Unicode
             }
             else
             {
@@ -121,27 +121,27 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
             }
         }
 
-        //Do the printing, respecting unicode
+        // Do the printing, respecting Unicode
 
         ++currentlineLength;
 
-        int codepoint = (unsigned char) *data;
+        int codepoint = (unsigned char)*data;
         uint8_t bytes;
 
-        if(codepoint <= 127)
+        if (codepoint <= 127)
             bytes = 1;
-        else if((codepoint & 0xE0) == 0xC0)
+        else if ((codepoint & 0xE0) == 0xC0)
             bytes = 2;
-        else if((codepoint & 0xF0) == 0xE0)
+        else if ((codepoint & 0xF0) == 0xE0)
             bytes = 3;
-        else if((codepoint & 0xF8) == 0xF0)
+        else if ((codepoint & 0xF8) == 0xF0)
             bytes = 4;
         else
-            bytes = 1; //Invalid utf8, print it as is, byte by byte
+            bytes = 1; // Invalid UTF-8, print it as is, byte by byte
 
-        for(uint8_t i = 0; i < bytes; ++i)
+        for (uint8_t i = 0; i < bytes; ++i)
         {
-            if(*data == '\0')
+            if (*data == '\0')
                 break;
 
             putchar(*data++);
@@ -151,90 +151,18 @@ void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplac
     ffPrintCharTimes(' ', instance->config.logo.paddingRight);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
-    //Happens if the last line is the longest
-    if(currentlineLength > instance->state.logoWidth)
+    // Happens if the last line is the longest
+    if (currentlineLength > instance->state.logoWidth)
         instance->state.logoWidth = currentlineLength;
 
     instance->state.logoWidth += instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
 
-    //Go to the leftmost position
+    // Go to the leftmost position
     fputs("\033[9999999D", stdout);
 
-    //If the logo height is > 1, go up the height
-    if(instance->state.logoHeight > 0)
+    // If the logo height is > 1, go up the height
+    if (instance->state.logoHeight > 0)
         printf("\033[%uA", instance->state.logoHeight);
-}
-
-static void logoApplyColors(FFinstance* instance, const FFlogo* logo)
-{
-    if(instance->config.colorKeys.length == 0)
-        ffStrbufAppendS(&instance->config.colorKeys, logo->colorKeys);
-
-    if(instance->config.colorTitle.length == 0)
-        ffStrbufAppendS(&instance->config.colorTitle, logo->colorTitle);
-}
-
-static bool logoHasName(const FFlogo* logo, const char* name)
-{
-    const char** logoName = logo->names;
-
-    while(*logoName != NULL)
-    {
-        if(strcasecmp(*logoName, name) == 0)
-            return true;
-        ++logoName;
-    }
-
-    return false;
-}
-
-static const FFlogo* logoGetBuiltin(const char* name)
-{
-    GetLogoMethod* methods = ffLogoBuiltinGetAll();
-
-    while(*methods != NULL)
-    {
-        const FFlogo* logo = (*methods)();
-
-        if(logoHasName(logo, name))
-            return logo;
-
-        ++methods;
-    }
-
-    return NULL;
-}
-
-static const FFlogo* logoGetBuiltinDetected(const FFinstance* instance)
-{
-    const FFOSResult* os = ffDetectOS(instance);
-
-    const FFlogo* logo = logoGetBuiltin(os->id.chars);
-    if(logo != NULL)
-        return logo;
-
-    logo = logoGetBuiltin(os->name.chars);
-    if(logo != NULL)
-        return logo;
-
-    logo = logoGetBuiltin(os->prettyName.chars);
-    if(logo != NULL)
-        return logo;
-
-    logo = logoGetBuiltin(os->idLike.chars);
-    if(logo != NULL)
-        return logo;
-
-    logo = logoGetBuiltin(instance->state.platform.systemName.chars);
-    if(logo != NULL)
-        return logo;
-
-    return ffLogoBuiltinGetUnknown();
-}
-
-static inline void logoApplyColorsDetected(FFinstance* instance)
-{
-    logoApplyColors(instance, logoGetBuiltinDetected(instance));
 }
 
 static void logoPrintStruct(FFinstance* instance, const FFlogo* logo)
@@ -242,9 +170,9 @@ static void logoPrintStruct(FFinstance* instance, const FFlogo* logo)
     logoApplyColors(instance, logo);
 
     const char** colors = logo->builtinColors;
-    for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
+    for (int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
     {
-        if(instance->config.logo.colors[i].length == 0)
+        if (instance->config.logo.colors[i].length == 0)
             ffStrbufAppendS(&instance->config.logo.colors[i], *colors);
     }
 
@@ -260,14 +188,14 @@ static void logoPrintNone(FFinstance* instance)
 
 static bool logoPrintBuiltinIfExists(FFinstance* instance, const char* name)
 {
-    if(strcasecmp(name, "none") == 0)
+    if (strcasecmp(name, "none") == 0)
     {
         logoPrintNone(instance);
         return true;
     }
 
     const FFlogo* logo = logoGetBuiltin(name);
-    if(logo == NULL)
+    if (logo == NULL)
         return false;
 
     logoPrintStruct(instance, logo);
@@ -280,8 +208,9 @@ static inline void logoPrintDetected(FFinstance* instance)
     logoPrintStruct(instance, logoGetBuiltinDetected(instance));
 }
 
-static bool logoPrintData(FFinstance* instance, bool doColorReplacement) {
-    if(instance->config.logo.source.length == 0)
+static bool logoPrintData(FFinstance* instance, bool doColorReplacement)
+{
+    if (instance->config.logo.source.length == 0)
         return false;
 
     ffLogoPrintChars(instance, instance->config.logo.source.chars, doColorReplacement);
@@ -291,7 +220,7 @@ static bool logoPrintData(FFinstance* instance, bool doColorReplacement) {
 
 static void updateLogoPath(FFinstance* instance)
 {
-    if(ffPathExists(instance->config.logo.source.chars, FF_PATHTYPE_FILE))
+    if (ffPathExists(instance->config.logo.source.chars, FF_PATHTYPE_FILE))
         return;
 
     FFstrbuf fullPath;
@@ -299,12 +228,12 @@ static void updateLogoPath(FFinstance* instance)
 
     FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance->state.platform.dataDirs)
     {
-        //We need to copy it, because multiple threads might be using dataDirs at the same time
+        // We need to copy it because multiple threads might be using dataDirs at the same time
         ffStrbufSet(&fullPath, dataDir);
         ffStrbufAppendS(&fullPath, "fastfetch/logos/");
         ffStrbufAppend(&fullPath, &instance->config.logo.source);
 
-        if(ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
+        if (ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
         {
             ffStrbufSet(&instance->config.logo.source, &fullPath);
             break;
@@ -319,15 +248,15 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement,
     FFstrbuf content;
     ffStrbufInit(&content);
 
-    if(!ffAppendFileBuffer(instance->config.logo.source.chars, &content))
+    if (!ffAppendFileBuffer(instance->config.logo.source.chars, &content))
     {
         ffStrbufDestroy(&content);
-        fputs("Logo: Failed to load file content from logo source\n", stderr);
+        fputs("Logo: Failed to load file content from the logo source\n", stderr);
         return false;
     }
 
     logoApplyColorsDetected(instance);
-    if(raw)
+    if (raw)
         ffLogoPrintCharsRaw(instance, content.chars, content.length);
     else
         ffLogoPrintChars(instance, content.chars, doColorReplacement);
@@ -337,7 +266,7 @@ static bool logoPrintFileIfExists(FFinstance* instance, bool doColorReplacement,
 
 static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo, bool printError)
 {
-    if(!ffLogoPrintImageIfExists(instance, logo, printError))
+    if (!ffLogoPrintImageIfExists(instance, logo, printError))
         return false;
 
     logoApplyColorsDetected(instance);
@@ -346,32 +275,32 @@ static bool logoPrintImageIfExists(FFinstance* instance, FFLogoType logo, bool p
 
 static bool logoTryKnownType(FFinstance* instance)
 {
-    if(instance->config.logo.type == FF_LOGO_TYPE_NONE)
+    if (instance->config.logo.type == FF_LOGO_TYPE_NONE)
     {
         logoApplyColorsDetected(instance);
         return true;
     }
 
-    if(instance->config.logo.type == FF_LOGO_TYPE_BUILTIN)
+    if (instance->config.logo.type == FF_LOGO_TYPE_BUILTIN)
         return logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars);
 
-    if(instance->config.logo.type == FF_LOGO_TYPE_DATA)
+    if (instance->config.logo.type == FF_LOGO_TYPE_DATA)
         return logoPrintData(instance, true);
 
-    if(instance->config.logo.type == FF_LOGO_TYPE_DATA_RAW)
+    if (instance->config.logo.type == FF_LOGO_TYPE_DATA_RAW)
         return logoPrintData(instance, false);
 
-    updateLogoPath(instance); //We sure have a file, resolve relative paths
+    updateLogoPath(instance); // We sure have a file, resolve relative paths
 
-    if(instance->config.logo.type == FF_LOGO_TYPE_FILE)
+    if (instance->config.logo.type == FF_LOGO_TYPE_FILE)
         return logoPrintFileIfExists(instance, true, false);
 
-    if(instance->config.logo.type == FF_LOGO_TYPE_FILE_RAW)
+    if (instance->config.logo.type == FF_LOGO_TYPE_FILE_RAW)
         return logoPrintFileIfExists(instance, false, false);
 
-    if(instance->config.logo.type == FF_LOGO_TYPE_IMAGE_RAW)
+    if (instance->config.logo.type == FF_LOGO_TYPE_IMAGE_RAW)
     {
-        if(instance->config.logo.width == 0 || instance->config.logo.height == 0)
+        if (instance->config.logo.width == 0 || instance->config.logo.height == 0)
         {
             fputs("both `--logo-width` and `--logo-height` must be specified\n", stderr);
             return false;
@@ -383,97 +312,74 @@ static bool logoTryKnownType(FFinstance* instance)
     return logoPrintImageIfExists(instance, instance->config.logo.type, true);
 }
 
-static void logoPrintKnownType(FFinstance* instance)
-{
-    if(!logoTryKnownType(instance))
-        logoPrintDetected(instance);
-}
-
 void ffLogoPrint(FFinstance* instance)
 {
-    //In pipe mode, we don't have a logo or padding.
-    //We also don't need to set main color, because it won't be printed anyway.
-    //So we can return quickly here.
-    if(instance->config.pipe)
+    // In pipe mode, we don't have a logo or padding.
+    // We also don't need to set the main color because it won't be printed anyway.
+    // So we can return quickly here.
+    if (instance->config.pipe)
     {
         instance->state.logoHeight = 0;
         instance->state.logoWidth = 0;
         return;
     }
 
-    //If the source is not set, we can directly print the detected logo.
-    if(instance->config.logo.source.length == 0)
+    // If the source is not set, we can directly print the detected logo.
+    if (instance->config.logo.source.length == 0)
     {
         logoPrintDetected(instance);
         return;
     }
 
-    //If the source and source type is set to something else than auto, always print with the set type.
-    if(instance->config.logo.source.length > 0 && instance->config.logo.type != FF_LOGO_TYPE_AUTO)
+    // If the source and source type are set to something other than auto, always print with the set type.
+    if (instance->config.logo.source.length > 0 && instance->config.logo.type != FF_LOGO_TYPE_AUTO)
     {
         logoPrintKnownType(instance);
         return;
     }
 
-    //If source matches the name of a builtin logo, print it and return.
-    if(logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars))
+    // If the source matches the name of a builtin logo, print it and return.
+    if (logoPrintBuiltinIfExists(instance, instance->config.logo.source.chars))
         return;
 
-    //Make sure the logo path is set correctly.
+    // Make sure the logo path is set correctly.
     updateLogoPath(instance);
 
     const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
 
-    //Terminal emulators that support kitty graphics protocol.
+    // Terminal emulators that support the kitty graphics protocol.
     bool supportsKitty =
         ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0 ||
         ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0 ||
         ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wezterm") == 0 ||
         ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wayst") == 0;
 
-    //Try to load the logo as an image. If it succeeds, print it and return.
-    if(logoPrintImageIfExists(instance, supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
+    // Try to load the logo as an image. If it succeeds, print it and return.
+    if (logoPrintImageIfExists(instance, supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
         return;
 
-    //Try to load the logo as a file. If it succeeds, print it and return.
-    if(logoPrintFileIfExists(instance, true, false))
+    // Try to load the logo as a file. If it succeeds, print it and return.
+    if (logoPrintFileIfExists(instance, true, false))
         return;
 
     logoPrintDetected(instance);
-}
-
-void ffLogoPrintLine(FFinstance* instance)
-{
-    if(instance->state.logoWidth > 0)
-        printf("\033[%uC", instance->state.logoWidth);
-
-    ++instance->state.keysHeight;
-}
-
-void ffLogoPrintRemaining(FFinstance* instance)
-{
-    while(instance->state.keysHeight <= instance->state.logoHeight)
-    {
-        ffLogoPrintLine(instance);
-        putchar('\n');
-    }
 }
 
 void ffLogoBuiltinPrint(FFinstance* instance)
 {
     GetLogoMethod* methods = ffLogoBuiltinGetAll();
 
-    while(*methods != NULL)
+    while (*methods != NULL)
     {
         const FFlogo* logo = (*methods)();
         printf("\033[%sm%s:\033[0m\n", logo->builtinColors[0], logo->names[0]);
         logoPrintStruct(instance, logo);
         ffLogoPrintRemaining(instance);
 
-        //reset everything
+        // Reset everything
         instance->state.logoHeight = 0;
         instance->state.keysHeight = 0;
-        for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
+        for (uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
             ffStrbufClear(&instance->config.logo.colors[i]);
 
         puts("\n");
@@ -487,7 +393,7 @@ void ffLogoBuiltinList()
 
     uint32_t counter = 0;
 
-    while(*methods != NULL)
+    while (*methods != NULL)
     {
         const FFlogo* logo = (*methods)();
         const char** names = logo->names;
@@ -495,7 +401,7 @@ void ffLogoBuiltinList()
         printf("%u)%s ", counter, counter < 10 ? " " : "");
         ++counter;
 
-        while(*names != NULL)
+        while (*names != NULL)
         {
             printf("\"%s\" ", *names);
             ++names;
@@ -510,7 +416,7 @@ void ffLogoBuiltinListAutocompletion()
 {
     GetLogoMethod* methods = ffLogoBuiltinGetAll();
 
-    while(*methods != NULL)
+    while (*methods != NULL)
     {
         printf("%s\n", (*methods)()->names[0]);
         ++methods;
