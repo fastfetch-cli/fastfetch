@@ -72,7 +72,7 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
     display->refreshRate = refreshRate;
 }
 
-#if WAYLAND_VERSION_MINOR >= 2
+#ifdef WL_OUTPUT_SCALE_SINCE_VERSION
 static void waylandOutputScaleListener(void* data, struct wl_output* output, int32_t scale)
 {
     FF_UNUSED(output);
@@ -82,7 +82,7 @@ static void waylandOutputScaleListener(void* data, struct wl_output* output, int
 }
 #endif
 
-#if WAYLAND_VERSION_MINOR >= 20
+#ifdef WL_OUTPUT_NAME_SINCE_VERSION
 static void waylandOutputNameListener(void *data, struct wl_output* output, const char *name)
 {
     FF_UNUSED(output);
@@ -110,15 +110,19 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         .mode = waylandOutputModeListener,
         .geometry = (void*) stubListener,
 
-        //https://lists.freedesktop.org/archives/wayland-devel/2013-July/010278.html
-        #if WAYLAND_VERSION_MINOR >= 2
+        #ifdef WL_OUTPUT_DONE_SINCE_VERSION
             .done = (void*) stubListener,
+        #endif
+
+        #ifdef WL_OUTPUT_SCALE_SINCE_VERSION
             .scale = waylandOutputScaleListener,
         #endif
 
-        //https://lists.freedesktop.org/archives/wayland-devel/2021-December/042064.html
-        #if WAYLAND_VERSION_MINOR >= 20
+        #ifdef WL_OUTPUT_NAME_SINCE_VERSION
             .name = wldata->detectName ? waylandOutputNameListener : (void*) stubListener,
+        #endif
+
+        #ifdef WL_OUTPUT_DESCRIPTION_SINCE_VERSION
             .description = (void*) stubListener,
         #endif
     };
