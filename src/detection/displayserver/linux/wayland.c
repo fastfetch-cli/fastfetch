@@ -19,6 +19,7 @@ typedef struct WaylandData
     FF_LIBRARY_SYMBOL(wl_display_roundtrip)
     struct wl_display* display;
     const struct wl_interface* ffwl_output_interface;
+    bool detectName;
 } WaylandData;
 
 typedef struct WaylandDisplay
@@ -27,6 +28,7 @@ typedef struct WaylandDisplay
     int32_t height;
     int32_t refreshRate;
     int32_t scale;
+    FFstrbuf name;
 } WaylandDisplay;
 
 #ifndef __FreeBSD__
@@ -80,6 +82,16 @@ static void waylandOutputScaleListener(void* data, struct wl_output* output, int
 }
 #endif
 
+#if WAYLAND_VERSION_MINOR >= 20
+static void waylandOutputNameListener(void *data, struct wl_output* output, const char *name)
+{
+    FF_UNUSED(output);
+
+    WaylandDisplay* display = data;
+    ffStrbufAppendS(&display->name, name);
+}
+#endif
+
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
@@ -92,6 +104,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         .refreshRate = 0,
         .scale = 1,
     };
+    ffStrbufInit(&display.name);
 
     struct wl_output_listener outputListener = {
         .mode = waylandOutputModeListener,
@@ -105,7 +118,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
 
         //https://lists.freedesktop.org/archives/wayland-devel/2021-December/042064.html
         #if WAYLAND_VERSION_MINOR >= 20
-            .name = (void*) stubListener,
+            .name = wldata->detectName ? waylandOutputNameListener : (void*) stubListener,
             .description = (void*) stubListener,
         #endif
     };
@@ -126,7 +139,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
-        NULL,
+        &display.name,
         FF_DISPLAY_TYPE_UNKNOWN
     );
 
@@ -163,6 +176,8 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     data.display = ffwl_display_connect(NULL);
     if(data.display == NULL)
         return false;
+
+    data.detectName = instance->config.displayDetectName;
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
