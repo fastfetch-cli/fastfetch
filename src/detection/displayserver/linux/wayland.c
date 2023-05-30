@@ -29,6 +29,7 @@ typedef struct WaylandDisplay
     int32_t refreshRate;
     int32_t scale;
     enum wl_output_transform transform;
+    FFDisplayType type;
     FFstrbuf name;
     bool detectName;
 } WaylandDisplay;
@@ -108,6 +109,17 @@ static void waylandOutputGeometryListener(void *data,
     }
 }
 
+#ifdef WL_OUTPUT_NAME_SINCE_VERSION
+static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
+{
+    WaylandDisplay* display = data;
+    if(strncmp(name, "eDP-", strlen("eDP-")) == 0)
+        display->type = FF_DISPLAY_TYPE_BUILTIN;
+    else if(strncmp(name, "HDMI-", strlen("HDMI-")) == 0 || strncmp(name, "DP-", strlen("DP-")) == 0)
+        display->type = FF_DISPLAY_TYPE_EXTERNAL;
+}
+#endif
+
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
@@ -121,6 +133,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         .refreshRate = 0,
         .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
+        .type = FF_DISPLAY_TYPE_UNKNOWN,
     };
     ffStrbufInit(&display.name);
 
@@ -137,7 +150,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         #endif
 
         #ifdef WL_OUTPUT_NAME_SINCE_VERSION
-            .name = (void*) stubListener,
+            .name = waylandOutputNameListener,
         #endif
 
         #ifdef WL_OUTPUT_DESCRIPTION_SINCE_VERSION
@@ -177,7 +190,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
         &display.name,
-        FF_DISPLAY_TYPE_UNKNOWN
+        display.type
     );
 
     ffThreadMutexUnlock(&mutex);
