@@ -61,10 +61,8 @@ static void stubListener(void* data, ...)
     (void) data;
 }
 
-static void waylandOutputModeListener(void* data, struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
+static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
-    FF_UNUSED(output);
-
     if(!(flags & WL_OUTPUT_MODE_CURRENT))
         return;
 
@@ -75,22 +73,20 @@ static void waylandOutputModeListener(void* data, struct wl_output* output, uint
 }
 
 #ifdef WL_OUTPUT_SCALE_SINCE_VERSION
-static void waylandOutputScaleListener(void* data, struct wl_output* output, int32_t scale)
+static void waylandOutputScaleListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, int32_t scale)
 {
-    FF_UNUSED(output);
-
     WaylandDisplay* display = data;
     display->scale = scale;
 }
 #endif
 
 static void waylandOutputGeometryListener(void *data,
-    struct wl_output *output,
-    int32_t x,
-    int32_t y,
-    int32_t physical_width,
-    int32_t physical_height,
-    int32_t subpixel,
+    FF_MAYBE_UNUSED struct wl_output *output,
+    FF_MAYBE_UNUSED int32_t x,
+    FF_MAYBE_UNUSED int32_t y,
+    FF_MAYBE_UNUSED int32_t physical_width,
+    FF_MAYBE_UNUSED int32_t physical_height,
+    FF_MAYBE_UNUSED int32_t subpixel,
     const char *make,
     const char *model,
     int32_t transform)
@@ -124,6 +120,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         .height = 0,
         .refreshRate = 0,
         .scale = 1,
+        .transform = WL_OUTPUT_TRANSFORM_NORMAL,
     };
     ffStrbufInit(&display.name);
 
