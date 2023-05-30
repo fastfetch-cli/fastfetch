@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 
 #include <dirent.h>
+#include <ctype.h>
 
 const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
 {
@@ -12,13 +13,13 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
     if(dirp == NULL)
         return "Failed to open `/sys/class/backlight/`";
 
-    FFstrbuf backlightDir;
+    FF_STRBUF_AUTO_DESTROY backlightDir;
     ffStrbufInitA(&backlightDir, 64);
     ffStrbufAppendS(&backlightDir, backlightDirPath);
 
     uint32_t backlightDirLength = backlightDir.length;
 
-    FFstrbuf buffer;
+    FF_STRBUF_AUTO_DESTROY buffer;
     ffStrbufInit(&buffer);
 
     struct dirent* entry;
@@ -38,18 +39,26 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
             if(ffReadFileBuffer(backlightDir.chars, &buffer))
             {
                 FFBrightnessResult* display = (FFBrightnessResult*) ffListAdd(result);
-                ffStrbufInitS(&display->name, entry->d_name);
+                ffStrbufSubstrBeforeLastC(&backlightDir, '/');
+                ffStrbufAppendS(&backlightDir, "/device");
+                ffStrbufInitA(&display->name, PATH_MAX + 1);
+                if(realpath(backlightDir.chars, display->name.chars))
+                {
+                    ffStrbufRecalculateLength(&display->name);
+                    ffStrbufSubstrAfterLastC(&display->name, '/');
+                    if(ffStrbufStartsWithS(&display->name, "card") && isdigit(display->name.chars[4]))
+                        ffStrbufSubstrAfterFirstC(&display->name, '-');
+                }
+                else
+                    ffStrbufInitS(&display->name, entry->d_name);
                 double maxBrightness = ffStrbufToDouble(&buffer);
                 display->value = (float) (actualBrightness * 100 / maxBrightness);
             }
-
-            break;
         }
+        ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
     }
 
     closedir(dirp);
-    ffStrbufDestroy(&backlightDir);
-    ffStrbufDestroy(&buffer);
 
     return NULL;
 }
