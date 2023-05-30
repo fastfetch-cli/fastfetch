@@ -28,7 +28,9 @@ typedef struct WaylandDisplay
     int32_t height;
     int32_t refreshRate;
     int32_t scale;
+    enum wl_output_transform transform;
     FFstrbuf name;
+    bool detectName;
 } WaylandDisplay;
 
 #ifndef __FreeBSD__
@@ -82,15 +84,33 @@ static void waylandOutputScaleListener(void* data, struct wl_output* output, int
 }
 #endif
 
-#ifdef WL_OUTPUT_NAME_SINCE_VERSION
-static void waylandOutputNameListener(void *data, struct wl_output* output, const char *name)
+static void waylandOutputGeometryListener(void *data,
+    struct wl_output *output,
+    int32_t x,
+    int32_t y,
+    int32_t physical_width,
+    int32_t physical_height,
+    int32_t subpixel,
+    const char *make,
+    const char *model,
+    int32_t transform)
 {
     FF_UNUSED(output);
 
     WaylandDisplay* display = data;
-    ffStrbufAppendS(&display->name, name);
+    display->transform = transform;
+    if(display->detectName)
+    {
+        if(make && strcmp(make, "unknown") != 0)
+            ffStrbufAppendS(&display->name, make);
+        if(model && strcmp(model, "unknown") != 0)
+        {
+            if(display->name.length > 0)
+                ffStrbufAppendC(&display->name, '-');
+            ffStrbufAppendS(&display->name, model);
+        }
+    }
 }
-#endif
 
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
@@ -99,6 +119,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         return;
 
     WaylandDisplay display = {
+        .detectName = wldata->detectName,
         .width = 0,
         .height = 0,
         .refreshRate = 0,
@@ -108,7 +129,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
 
     struct wl_output_listener outputListener = {
         .mode = waylandOutputModeListener,
-        .geometry = (void*) stubListener,
+        .geometry = waylandOutputGeometryListener,
 
         #ifdef WL_OUTPUT_DONE_SINCE_VERSION
             .done = (void*) stubListener,
@@ -119,7 +140,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         #endif
 
         #ifdef WL_OUTPUT_NAME_SINCE_VERSION
-            .name = wldata->detectName ? waylandOutputNameListener : (void*) stubListener,
+            .name = (void*) stubListener,
         #endif
 
         #ifdef WL_OUTPUT_DESCRIPTION_SINCE_VERSION
@@ -136,6 +157,21 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
 
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     ffThreadMutexLock(&mutex);
+
+    switch(display.transform)
+    {
+        case WL_OUTPUT_TRANSFORM_90:
+        case WL_OUTPUT_TRANSFORM_270:
+        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        case WL_OUTPUT_TRANSFORM_FLIPPED_270: {
+            int32_t temp = display.width;
+            display.width = display.height;
+            display.height = temp;
+            break;
+        }
+        default:
+            break;
+    }
 
     ffdsAppendDisplay(wldata->result,
         (uint32_t) display.width,
