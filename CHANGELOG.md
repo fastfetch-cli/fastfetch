@@ -1,5 +1,9 @@
 # 1.11.2
 
+Features:
+* Support display name, type, rotation detection on Wayland (Linux, Display)
+* Print more useful display name instead of intel_backlight (Linux, Brightness)
+
 Bugfixes:
 * Fix Gnome version detection on Fedora
 
