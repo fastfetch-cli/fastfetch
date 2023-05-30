@@ -92,8 +92,6 @@ static void waylandOutputGeometryListener(void *data,
     const char *model,
     int32_t transform)
 {
-    FF_UNUSED(output);
-
     WaylandDisplay* display = data;
     display->transform = transform;
     if(display->detectName)
