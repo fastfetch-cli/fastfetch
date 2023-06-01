@@ -410,6 +410,8 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
         detectTabby(instance, terminalFont);
 
     #ifndef _WIN32
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/pts/"))
+        ffStrbufAppendS(&terminalFont->error, "Terminal font detection is not supported on PTS");
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
         detectKitty(instance, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
