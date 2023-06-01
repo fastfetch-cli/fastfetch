@@ -297,7 +297,7 @@ set(LIBFASTFETCH_SRC
     src/modules/publicip.c
     src/modules/display/display.c
     src/modules/separator/separator.c
-    src/modules/shell.c
+    src/modules/shell/shell.c
     src/modules/sound/sound.c
     src/modules/swap/swap.c
     src/modules/media.c

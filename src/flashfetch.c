@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     //ffPrintProcesses(&instance);
     ffPrintUptime(&instance, &instance.config.uptime);
     ffPrintPackages(&instance, &instance.config.packages);
-    ffPrintShell(&instance);
+    ffPrintShell(&instance, &instance.config.shell);
     ffPrintDisplay(&instance, &instance.config.display);
     // ffPrintBrightness(&instance);
     ffPrintDesktopEnvironment(&instance);

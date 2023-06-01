@@ -68,7 +68,7 @@ typedef struct FFconfig
     FFUptimeOptions uptime;
     FFModuleArgs processes;
     FFPackagesOptions packages;
-    FFModuleArgs shell;
+    FFShellOptions shell;
     FFDisplayOptions display;
     FFModuleArgs de;
     FFModuleArgs wallpaper;
@@ -132,7 +132,6 @@ typedef struct FFconfig
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
 
-    bool shellVersion;
     bool terminalVersion;
 
     FFstrbuf publicIpUrl;
@@ -201,7 +200,6 @@ void ffPrepareWeather(FFinstance* instance);
 
 void ffPrintChassis(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
-void ffPrintShell(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);

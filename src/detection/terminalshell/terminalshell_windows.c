@@ -152,7 +152,7 @@ static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* 
     }
 
     ffStrbufClear(&result->shellVersion);
-    if(instance->config.shellVersion)
+    if(instance->config.shell.version)
         fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
 
     result->shellPid = pid;

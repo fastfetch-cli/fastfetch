@@ -353,7 +353,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getUserShellFromEnv(instance, &result);
 
     ffStrbufClear(&result.shellVersion);
-    if(instance->config.shellVersion)
+    if(instance->config.shell.version)
     {
         getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 

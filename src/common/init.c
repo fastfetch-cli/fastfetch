@@ -70,7 +70,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitUptimeOptions(&instance->config.uptime);
     initModuleArg(&instance->config.processes);
     ffInitPackagesOptions(&instance->config.packages);
-    initModuleArg(&instance->config.shell);
+    ffInitShellOptions(&instance->config.shell);
     ffInitDisplayOptions(&instance->config.display);
     initModuleArg(&instance->config.de);
     initModuleArg(&instance->config.wm);
@@ -133,7 +133,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
 
-    instance->config.shellVersion = true;
     instance->config.terminalVersion = true;
 
     instance->config.publicIpTimeout = 0;
@@ -292,7 +291,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyUptimeOptions(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);
     ffDestroyPackagesOptions(&instance->config.packages);
-    destroyModuleArg(&instance->config.shell);
+    ffDestroyShellOptions(&instance->config.shell);
     ffDestroyDisplayOptions(&instance->config.display);
     destroyModuleArg(&instance->config.de);
     destroyModuleArg(&instance->config.wm);

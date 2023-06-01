@@ -28,6 +28,7 @@
 #include "modules/os/os.h"
 #include "modules/packages/packages.h"
 #include "modules/separator/separator.h"
+#include "modules/shell/shell.h"
 #include "modules/sound/sound.h"
 #include "modules/swap/swap.h"
 #include "modules/title/title.h"

@@ -985,7 +985,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseUptimeCommandOptions(&instance->config.uptime, key, value)) {}
     else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
     else if(ffParsePackagesCommandOptions(&instance->config.packages, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
+    else if(ffParseShellCommandOptions(&instance->config.shell, key, value)) {}
     else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
     else if(ffParseBrightnessCommandOptions(&instance->config.brightness, key, value)) {}
     else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
@@ -1088,8 +1088,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--shell-version") == 0)
-        instance->config.shellVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--terminal-version") == 0)
         instance->config.terminalVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--player-name") == 0)
@@ -1192,8 +1190,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintUptime(instance, &instance->config.uptime);
     else if(strcasecmp(line, FF_PACKAGES_MODULE_NAME) == 0)
         ffPrintPackages(instance, &instance->config.packages);
-    else if(strcasecmp(line, "shell") == 0)
-        ffPrintShell(instance);
+    else if(strcasecmp(line, FF_SHELL_MODULE_NAME) == 0)
+        ffPrintShell(instance, &instance->config.shell);
     else if(strcasecmp(line, FF_DISPLAY_MODULE_NAME) == 0)
         ffPrintDisplay(instance, &instance->config.display);
     else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)

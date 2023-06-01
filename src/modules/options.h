@@ -26,6 +26,7 @@
 #include "modules/os/option.h"
 #include "modules/packages/option.h"
 #include "modules/separator/option.h"
+#include "modules/shell/option.h"
 #include "modules/sound/option.h"
 #include "modules/swap/option.h"
 #include "modules/title/option.h"
