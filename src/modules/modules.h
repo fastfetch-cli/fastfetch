@@ -31,6 +31,7 @@
 #include "modules/shell/shell.h"
 #include "modules/sound/sound.h"
 #include "modules/swap/swap.h"
+#include "modules/terminal/terminal.h"
 #include "modules/title/title.h"
 #include "modules/jsonconfig/jsonconfig.h"
 #include "modules/uptime/uptime.h"

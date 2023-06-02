@@ -351,7 +351,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         getTerminalFromEnv(&result);
 
     ffStrbufInit(&result.terminalVersion);
-    if(instance->config.terminalVersion)
+    if(instance->config.terminal.version)
         fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
 exit:

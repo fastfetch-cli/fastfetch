@@ -301,7 +301,7 @@ set(LIBFASTFETCH_SRC
     src/modules/sound/sound.c
     src/modules/swap/swap.c
     src/modules/media.c
-    src/modules/terminal.c
+    src/modules/terminal/terminal.c
     src/modules/terminalfont.c
     src/modules/theme.c
     src/modules/title/title.c

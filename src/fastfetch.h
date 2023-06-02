@@ -79,7 +79,7 @@ typedef struct FFconfig
     FFModuleArgs icons;
     FFFontOptions font;
     FFCursorOptions cursor;
-    FFModuleArgs terminal;
+    FFTerminalOptions terminal;
     FFModuleArgs terminalFont;
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
@@ -131,8 +131,6 @@ typedef struct FFconfig
     FFstrbuf libPulse;
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
-
-    bool terminalVersion;
 
     FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;
@@ -205,7 +203,6 @@ void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintWallpaper(FFinstance* instance);
-void ffPrintTerminal(FFinstance* instance);
 void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);

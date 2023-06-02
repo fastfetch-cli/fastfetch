@@ -79,7 +79,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.icons);
     ffInitFontOptions(&instance->config.font);
     ffInitCursorOptions(&instance->config.cursor);
-    initModuleArg(&instance->config.terminal);
+    ffInitTerminalOptions(&instance->config.terminal);
     initModuleArg(&instance->config.terminalFont);
     ffInitCPUOptions(&instance->config.cpu);
     ffInitCPUUsageOptions(&instance->config.cpuUsage);
@@ -132,8 +132,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
-
-    instance->config.terminalVersion = true;
 
     instance->config.publicIpTimeout = 0;
     ffStrbufInit(&instance->config.publicIpUrl);
@@ -300,7 +298,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.icons);
     ffDestroyFontOptions(&instance->config.font);
     ffDestroyCursorOptions(&instance->config.cursor);
-    destroyModuleArg(&instance->config.terminal);
+    ffDestroyTerminalOptions(&instance->config.terminal);
     destroyModuleArg(&instance->config.terminalFont);
     ffDestroyCPUOptions(&instance->config.cpu);
     ffDestroyCPUUsageOptions(&instance->config.cpuUsage);

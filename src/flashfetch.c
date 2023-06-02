@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     ffPrintIcons(&instance);
     ffPrintFont(&instance, &instance.config.font);
     ffPrintCursor(&instance, &instance.config.cursor);
-    ffPrintTerminal(&instance);
+    ffPrintTerminal(&instance, &instance.config.terminal);
     ffPrintTerminalFont(&instance);
     ffPrintCPU(&instance, &instance.config.cpu);
     ffPrintGPU(&instance, &instance.config.gpu);

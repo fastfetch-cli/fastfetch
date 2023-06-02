@@ -997,7 +997,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "wallpaper", &instance->config.wallpaper)) {}
     else if(ffParseFontCommandOptions(&instance->config.font, key, value)) {}
     else if(ffParseCursorCommandOptions(&instance->config.cursor, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
+    else if(ffParseTerminalCommandOptions(&instance->config.terminal, key, value)) {}
     else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
     else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
     else if(ffParseCPUUsageCommandOptions(&instance->config.cpuUsage, key, value)) {}
@@ -1088,8 +1088,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--terminal-version") == 0)
-        instance->config.terminalVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--publicip-url") == 0)
@@ -1210,8 +1208,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintFont(instance, &instance->config.font);
     else if(strcasecmp(line, FF_CURSOR_MODULE_NAME) == 0)
         ffPrintCursor(instance, &instance->config.cursor);
-    else if(strcasecmp(line, "terminal") == 0)
-        ffPrintTerminal(instance);
+    else if(strcasecmp(line, FF_TERMINAL_MODULE_NAME) == 0)
+        ffPrintTerminal(instance, &instance->config.terminal);
     else if(strcasecmp(line, "terminalfont") == 0)
         ffPrintTerminalFont(instance);
     else if(strcasecmp(line, FF_CPU_MODULE_NAME) == 0)
