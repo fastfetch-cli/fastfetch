@@ -80,7 +80,7 @@ typedef struct FFconfig
     FFFontOptions font;
     FFCursorOptions cursor;
     FFTerminalOptions terminal;
-    FFModuleArgs terminalFont;
+    FFTerminalFontOptions terminalFont;
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
     FFCustomOptions custom;
@@ -203,7 +203,6 @@ void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintWallpaper(FFinstance* instance);
-void ffPrintTerminalFont(FFinstance* instance);
 void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);

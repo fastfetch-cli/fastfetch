@@ -30,6 +30,7 @@
 #include "modules/sound/option.h"
 #include "modules/swap/option.h"
 #include "modules/terminal/option.h"
+#include "modules/terminalfont/option.h"
 #include "modules/title/option.h"
 #include "modules/uptime/option.h"
 #include "modules/wifi/option.h"

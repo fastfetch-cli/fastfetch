@@ -998,7 +998,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseFontCommandOptions(&instance->config.font, key, value)) {}
     else if(ffParseCursorCommandOptions(&instance->config.cursor, key, value)) {}
     else if(ffParseTerminalCommandOptions(&instance->config.terminal, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
+    else if(ffParseTerminalFontCommandOptions(&instance->config.terminalFont, key, value)) {}
     else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
     else if(ffParseCPUUsageCommandOptions(&instance->config.cpuUsage, key, value)) {}
     else if(ffParseGPUCommandOptions(&instance->config.gpu, key, value)) {}
@@ -1210,8 +1210,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintCursor(instance, &instance->config.cursor);
     else if(strcasecmp(line, FF_TERMINAL_MODULE_NAME) == 0)
         ffPrintTerminal(instance, &instance->config.terminal);
-    else if(strcasecmp(line, "terminalfont") == 0)
-        ffPrintTerminalFont(instance);
+    else if(strcasecmp(line, FF_TERMINALFONT_MODULE_NAME) == 0)
+        ffPrintTerminalFont(instance, &instance->config.terminalFont);
     else if(strcasecmp(line, FF_CPU_MODULE_NAME) == 0)
         ffPrintCPU(instance, &instance->config.cpu);
     else if(strcasecmp(line, FF_CPUUSAGE_MODULE_NAME) == 0)

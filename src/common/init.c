@@ -80,7 +80,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitFontOptions(&instance->config.font);
     ffInitCursorOptions(&instance->config.cursor);
     ffInitTerminalOptions(&instance->config.terminal);
-    initModuleArg(&instance->config.terminalFont);
+    ffInitTerminalFontOptions(&instance->config.terminalFont);
     ffInitCPUOptions(&instance->config.cpu);
     ffInitCPUUsageOptions(&instance->config.cpuUsage);
     ffInitGPUOptions(&instance->config.gpu);
@@ -299,7 +299,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyFontOptions(&instance->config.font);
     ffDestroyCursorOptions(&instance->config.cursor);
     ffDestroyTerminalOptions(&instance->config.terminal);
-    destroyModuleArg(&instance->config.terminalFont);
+    ffDestroyTerminalFontOptions(&instance->config.terminalFont);
     ffDestroyCPUOptions(&instance->config.cpu);
     ffDestroyCPUUsageOptions(&instance->config.cpuUsage);
     ffDestroyGPUOptions(&instance->config.gpu);

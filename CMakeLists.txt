@@ -302,7 +302,7 @@ set(LIBFASTFETCH_SRC
     src/modules/swap/swap.c
     src/modules/media.c
     src/modules/terminal/terminal.c
-    src/modules/terminalfont.c
+    src/modules/terminalfont/terminalfont.c
     src/modules/theme.c
     src/modules/title/title.c
     src/modules/uptime/uptime.c

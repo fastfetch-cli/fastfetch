@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     ffPrintFont(&instance, &instance.config.font);
     ffPrintCursor(&instance, &instance.config.cursor);
     ffPrintTerminal(&instance, &instance.config.terminal);
-    ffPrintTerminalFont(&instance);
+    ffPrintTerminalFont(&instance, &instance.config.terminalFont);
     ffPrintCPU(&instance, &instance.config.cpu);
     ffPrintGPU(&instance, &instance.config.gpu);
     ffPrintMemory(&instance, &instance.config.memory);
