@@ -77,7 +77,7 @@ static const char* detectSound(const FFinstance* instance, FFlist* devices)
         return "Failed to connect to pulseaudio context";
     }
 
-    int state;
+    pa_context_state_t state;
     while((state = ffpa_context_get_state(context)) != PA_CONTEXT_READY)
     {
         if(!PA_CONTEXT_IS_GOOD(state))

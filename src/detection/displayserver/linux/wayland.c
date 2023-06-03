@@ -93,7 +93,7 @@ static void waylandOutputGeometryListener(void *data,
     int32_t transform)
 {
     WaylandDisplay* display = data;
-    display->transform = transform;
+    display->transform = (enum wl_output_transform) transform;
     if(display->detectName)
     {
         if(make && strcmp(make, "unknown") != 0)
