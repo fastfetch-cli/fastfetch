@@ -32,14 +32,14 @@ const char* ffDetectPowerAdapterImpl(FFinstance* instance, FFlist* results)
         ffStrbufInit(&adapter->description);
         ffStrbufInit(&adapter->manufacturer);
         ffStrbufInit(&adapter->modelName);
-        adapter->watts = FF_POWER_ADAPTER_UNSET;
+        adapter->watts = FF_POWERADAPTER_UNSET;
 
         CFDictionaryRef adapterDict;
         if(!ffCfDictGetDict(properties, CFSTR("AdapterDetails"), &adapterDict))
         {
             if (ffCfDictGetInt(adapterDict, CFSTR("Watts"), &adapter->watts))
             {
-                adapter->watts = FF_POWER_ADAPTER_NOT_CONNECTED;
+                adapter->watts = FF_POWERADAPTER_NOT_CONNECTED;
                 continue;
             }
             ffCfDictGetString(adapterDict, CFSTR("Name"), &adapter->name);

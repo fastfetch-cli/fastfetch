@@ -103,6 +103,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
         case 'P': {
             return
                 tryModule(instance, type, module, FF_PACKAGES_MODULE_NAME, ffParsePackagesJsonObject) ||
+                tryModule(instance, type, module, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterJsonObject) ||
                 false;
         }
 

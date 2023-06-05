@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     ffPrintSwap(&instance, &instance.config.swap);
     ffPrintDisk(&instance, &instance.config.disk);
     ffPrintBattery(&instance, &instance.config.battery);
-    ffPrintPowerAdapter(&instance);
+    ffPrintPowerAdapter(&instance, &instance.config.powerAdapter);
     //ffPrintPlayer(&instance);
     //ffPrintMedia(&instance);
     //ffPrintLocalIp(&instance);

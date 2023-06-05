@@ -25,6 +25,7 @@
 #include "modules/memory/option.h"
 #include "modules/os/option.h"
 #include "modules/packages/option.h"
+#include "modules/poweradapter/option.h"
 #include "modules/separator/option.h"
 #include "modules/shell/option.h"
 #include "modules/sound/option.h"

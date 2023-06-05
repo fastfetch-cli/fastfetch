@@ -27,6 +27,7 @@
 #include "modules/memory/memory.h"
 #include "modules/os/os.h"
 #include "modules/packages/packages.h"
+#include "modules/poweradapter/poweradapter.h"
 #include "modules/separator/separator.h"
 #include "modules/shell/shell.h"
 #include "modules/sound/sound.h"

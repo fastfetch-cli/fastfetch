@@ -1006,7 +1006,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseSwapCommandOptions(&instance->config.swap, key, value)) {}
     else if(ffParseDiskCommandOptions(&instance->config.disk, key, value)) {}
     else if(ffParseBatteryCommandOptions(&instance->config.battery, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
+    else if(ffParsePowerAdapterCommandOptions(&instance->config.powerAdapter, key, value)) {}
     else if(ffParseLocaleCommandOptions(&instance->config.locale, key, value)) {}
     else if(ffParseLocalIpCommandOptions(&instance->config.localIP, key, value)) {}
     else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
@@ -1228,8 +1228,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintDisk(instance, &instance->config.disk);
     else if(strcasecmp(line, FF_BATTERY_MODULE_NAME) == 0)
         ffPrintBattery(instance, &instance->config.battery);
-    else if(strcasecmp(line, "poweradapter") == 0)
-        ffPrintPowerAdapter(instance);
+    else if(strcasecmp(line, FF_POWERADAPTER_MODULE_NAME) == 0)
+        ffPrintPowerAdapter(instance, &instance->config.powerAdapter);
     else if(strcasecmp(line, FF_LOCALE_MODULE_NAME) == 0)
         ffPrintLocale(instance, &instance->config.locale);
     else if(strcasecmp(line, "localip") == 0)

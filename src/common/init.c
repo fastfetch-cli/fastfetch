@@ -88,7 +88,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitSwapOptions(&instance->config.swap);
     ffInitDiskOptions(&instance->config.disk);
     ffInitBatteryOptions(&instance->config.battery);
-    initModuleArg(&instance->config.powerAdapter);
+    ffInitPowerAdapterOptions(&instance->config.powerAdapter);
     ffInitLocaleOptions(&instance->config.locale);
     ffInitLocalIpOptions(&instance->config.localIP);
     initModuleArg(&instance->config.publicIP);
@@ -307,7 +307,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroySwapOptions(&instance->config.swap);
     ffDestroyDiskOptions(&instance->config.disk);
     ffDestroyBatteryOptions(&instance->config.battery);
-    destroyModuleArg(&instance->config.powerAdapter);
+    ffDestroyPowerAdapterOptions(&instance->config.powerAdapter);
     ffDestroyLocaleOptions(&instance->config.locale);
     ffDestroyLocalIpOptions(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);

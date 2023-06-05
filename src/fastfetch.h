@@ -89,7 +89,7 @@ typedef struct FFconfig
     FFSwapOptions swap;
     FFDiskOptions disk;
     FFBatteryOptions battery;
-    FFModuleArgs powerAdapter;
+    FFPowerAdapterOptions powerAdapter;
     FFLocaleOptions locale;
     FFLocalIpOptions localIP;
     FFModuleArgs publicIP;
@@ -203,7 +203,6 @@ void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
 void ffPrintWallpaper(FFinstance* instance);
-void ffPrintPowerAdapter(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
