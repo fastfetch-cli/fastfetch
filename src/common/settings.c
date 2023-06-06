@@ -297,6 +297,7 @@ typedef struct SQLiteData
     FF_LIBRARY_SYMBOL(sqlite3_step)
     FF_LIBRARY_SYMBOL(sqlite3_data_count)
     FF_LIBRARY_SYMBOL(sqlite3_column_int)
+    FF_LIBRARY_SYMBOL(sqlite3_column_text)
     FF_LIBRARY_SYMBOL(sqlite3_finalize)
     FF_LIBRARY_SYMBOL(sqlite3_close)
 } SQLiteData;
@@ -310,6 +311,7 @@ static const SQLiteData* getSQLiteData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_step)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_data_count)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_column_int)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_column_text)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_finalize)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_close)
 
@@ -350,11 +352,51 @@ int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, cons
 
     return result;
 }
+
+bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, const char* query, FFstrbuf* result)
+{
+    if(!ffPathExists(dbPath, FF_PATHTYPE_FILE))
+        return false;
+
+    const SQLiteData* data = getSQLiteData(instance);
+    if(data == NULL)
+        return false;
+
+    sqlite3* db;
+    if(data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
+        return false;
+
+    sqlite3_stmt* stmt;
+    if(data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, NULL) != SQLITE_OK)
+    {
+        data->ffsqlite3_close(db);
+        return false;
+    }
+
+    if(data->ffsqlite3_step(stmt) != SQLITE_ROW || data->ffsqlite3_data_count(stmt) < 1)
+    {
+        data->ffsqlite3_finalize(stmt);
+        data->ffsqlite3_close(db);
+        return false;
+    }
+
+    ffStrbufSetS(result, (const char *) data->ffsqlite3_column_text(stmt, 0));
+
+    data->ffsqlite3_finalize(stmt);
+    data->ffsqlite3_close(db);
+
+    return true;
+}
 #else //FF_HAVE_SQLITE3
 int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
 {
     FF_UNUSED(instance, dbPath, query)
     return 0;
+}
+bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, const char* query, FFstrbuf* result)
+{
+    FF_UNUSED(instance, dbPath, query, result)
+    return false;
 }
 #endif //FF_HAVE_SQLITE3
 

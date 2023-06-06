@@ -31,6 +31,7 @@ FFvariant ffSettingsGet(const FFinstance* instance, const char* dconfKey, const 
 FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type);
 
 int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query);
+bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, const char* query, FFstrbuf* result);
 
 #ifdef __ANDROID__
 void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);

@@ -64,6 +64,7 @@ The following libraries are used if present at runtime:
 * [`MoltenVK`](https://github.com/KhronosGroup/MoltenVK): Vulkan driver for macOS. [`molten-vk`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/molten-vk.rb)
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel graphics protocol. [`imagemagick`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/imagemagick.rb)
 * [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art. [`chafa`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/chafa.rb)
+* [`libsqlite3`](https://www.sqlite.org/index.html): Used for fast wallpaper detection ( fallback to AppleScript )
 
 For the image logo, iTerm with iterm image protocol should work. Apple Terminal is not supported.
 
