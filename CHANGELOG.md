@@ -3,9 +3,13 @@
 Features:
 * Support display name, type, rotation detection on Wayland (Linux, Display)
 * Print more useful display name instead of intel_backlight (Linux, Brightness)
+* Icons module supports Windows (Windows, Icons)
 
 Bugfixes:
 * Fix Gnome version detection on Fedora
+
+Changes:
+* In order to make Icons module consistant between different platforms, `--icons-format` no longer supports individual GTK / QT icon params.
 
 # 1.11.1
 
