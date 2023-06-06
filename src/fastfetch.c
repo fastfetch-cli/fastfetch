@@ -219,12 +219,8 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "icons-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("icons", "{} [Plasma], {5}", 5,
-            "Plasma icons",
-            "GTK2 icons",
-            "GTK3 icons",
-            "GTK4 icons",
-            "Combined GTK icons"
+        constructAndPrintCommandHelpFormat("icons", "{}", 1,
+            "Combined icons"
         );
     }
     else if(strcasecmp(command, "font-format") == 0)
