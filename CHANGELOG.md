@@ -4,6 +4,7 @@ Features:
 * Support display name, type, rotation detection on Wayland (Linux, Display)
 * Print more useful display name instead of intel_backlight (Linux, Brightness)
 * Icons module supports Windows (Windows, Icons)
+* Add Wallpaper module
 
 Bugfixes:
 * Fix Gnome version detection on Fedora

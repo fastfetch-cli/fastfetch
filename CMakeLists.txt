@@ -306,6 +306,7 @@ set(LIBFASTFETCH_SRC
     src/modules/uptime.c
     src/modules/users.c
     src/modules/vulkan.c
+    src/modules/wallpaper.c
     src/modules/weather.c
     src/modules/wifi.c
     src/modules/wm.c
@@ -360,6 +361,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_nosupport.c
         src/detection/wifi/wifi_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
@@ -400,6 +402,7 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_nosupport.c
         src/detection/wifi/wifi_android.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/util/platform/FFPlatform_unix.c
@@ -448,6 +451,7 @@ elseif(BSD)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_nosupport.c
         src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
@@ -490,6 +494,7 @@ elseif(APPLE)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_nosupport.c
         src/detection/wifi/wifi_apple.m
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
@@ -532,6 +537,7 @@ elseif(WIN32)
         src/detection/temps/temps_windows.cpp
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
+        src/detection/wallpaper/wallpaper_windows.c
         src/detection/wifi/wifi_windows.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c

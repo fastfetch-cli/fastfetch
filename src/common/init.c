@@ -109,6 +109,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.date);
     initModuleArg(&instance->config.time);
     initModuleArg(&instance->config.vulkan);
+    initModuleArg(&instance->config.wallpaper);
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
@@ -369,6 +370,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.locale);
     destroyModuleArg(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);
+    destroyModuleArg(&instance->config.wallpaper);
     destroyModuleArg(&instance->config.weather);
     destroyModuleArg(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);

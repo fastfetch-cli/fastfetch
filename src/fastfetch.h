@@ -130,6 +130,7 @@ typedef struct FFconfig
     FFModuleArgs shell;
     FFModuleArgs display;
     FFModuleArgs de;
+    FFModuleArgs wallpaper;
     FFModuleArgs wifi;
     FFModuleArgs wm;
     FFModuleArgs wmTheme;
@@ -318,6 +319,7 @@ void ffPrintWM(FFinstance* instance);
 void ffPrintWMTheme(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
 void ffPrintIcons(FFinstance* instance);
+void ffPrintWallpaper(FFinstance* instance);
 void ffPrintFont(FFinstance* instance);
 void ffPrintCursor(FFinstance* instance);
 void ffPrintTerminal(FFinstance* instance);

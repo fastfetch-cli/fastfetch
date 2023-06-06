@@ -223,6 +223,12 @@ static inline void printCommandHelp(const char* command)
             "Combined icons"
         );
     }
+    else if(strcasecmp(command, "wallpaper-format") == 0)
+    {
+        constructAndPrintCommandHelpFormat("wallpaper", "{}", 1,
+            "Wallpaper image file"
+        );
+    }
     else if(strcasecmp(command, "font-format") == 0)
     {
         constructAndPrintCommandHelpFormat("font", "{} [QT], {} [GTK2], {} [GTK3], {} [GTK4]", 4,
@@ -1145,6 +1151,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "wm-theme", &instance->config.wmTheme)) {}
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
     else if(optionParseModuleArgs(key, value, "icons", &instance->config.icons)) {}
+    else if(optionParseModuleArgs(key, value, "wallpaper", &instance->config.wallpaper)) {}
     else if(optionParseModuleArgs(key, value, "font", &instance->config.font)) {}
     else if(optionParseModuleArgs(key, value, "cursor", &instance->config.cursor)) {}
     else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
@@ -1450,6 +1457,8 @@ static void parseStructureCommand(FFinstance* instance, FFdata* data, const char
         ffPrintWMTheme(instance);
     else if(strcasecmp(line, "icons") == 0)
         ffPrintIcons(instance);
+    else if(strcasecmp(line, "wallpaper") == 0)
+        ffPrintWallpaper(instance);
     else if(strcasecmp(line, "font") == 0)
         ffPrintFont(instance);
     else if(strcasecmp(line, "cursor") == 0)
