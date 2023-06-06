@@ -12,6 +12,7 @@ typedef struct FFGTKResult
     FFstrbuf font;
     FFstrbuf cursor;
     FFstrbuf cursorSize;
+    FFstrbuf wallpaper;
 } FFGTKResult;
 
 typedef struct FFQtResult

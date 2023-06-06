@@ -361,7 +361,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
-        src/detection/wallpaper/wallpaper_nosupport.c
+        src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
@@ -451,7 +451,7 @@ elseif(BSD)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
-        src/detection/wallpaper/wallpaper_nosupport.c
+        src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_nosupport.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c

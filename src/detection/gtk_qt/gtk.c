@@ -13,7 +13,7 @@ static inline bool allPropertiesSet(FFGTKResult* result)
         result->font.length > 0;
 }
 
-static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, const char* iconsName, const char* fontName, const char* cursorTheme, int cursorSize)
+static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, const char* iconsName, const char* fontName, const char* cursorTheme, int cursorSize, const char* wallpaper)
 {
     if(result->theme.length == 0)
         ffStrbufAppendS(&result->theme, themeName);
@@ -29,6 +29,9 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
 
     if(result->cursorSize.length == 0 && cursorSize > 0)
         ffStrbufAppendF(&result->cursorSize, "%i", cursorSize);
+
+    if(result->wallpaper.length == 0)
+        ffStrbufAppendS(&result->wallpaper, wallpaper);
 }
 
 static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* result)
@@ -40,6 +43,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
     static const char* fontName = NULL;
     static const char* cursorTheme = NULL;
     static int cursorSize = 0;
+    static const char* wallpaper = NULL;
 
     static bool init = false;
 
@@ -48,7 +52,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
     if(init)
     {
         ffThreadMutexUnlock(&mutex);
-        applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize);
+        applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);
         return;
     }
 
@@ -90,10 +94,12 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         fontName = ffSettingsGet(instance, "/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
         cursorTheme = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+        wallpaper = ffSettingsGet(instance, "/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
+        // TODO: support other DEs for wallpaper
     }
 
     ffThreadMutexUnlock(&mutex);
-    applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize);
+    applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);
 }
 
 static void detectGTKFromConfigFile(const char* filename, FFGTKResult* result)
@@ -184,6 +190,7 @@ static void detectGTK(const FFinstance* instance, const char* version, FFGTKResu
     ffStrbufInit(&result.font); \
     ffStrbufInit(&result.cursor); \
     ffStrbufInit(&result.cursorSize); \
+    ffStrbufInit(&result.wallpaper); \
     detectGTK(instance, #version, &result); \
     ffThreadMutexUnlock(&mutex); \
     return &result;
