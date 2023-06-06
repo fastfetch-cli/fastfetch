@@ -515,7 +515,7 @@ elseif(WIN32)
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
-        src/detection/icons/icons_nosupport.c
+        src/detection/icons/icons_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
