@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     ffPrintDisplay(&instance, &instance.config.display);
     // ffPrintBrightness(&instance);
     ffPrintDE(&instance, &instance.config.de);
-    ffPrintWM(&instance);
+    ffPrintWM(&instance, &instance.config.wm);
     ffPrintWMTheme(&instance, &instance.config.wmTheme);
     ffPrintTheme(&instance);
     ffPrintIcons(&instance, &instance.config.icons);

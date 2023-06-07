@@ -38,4 +38,5 @@
 #include "modules/uptime/option.h"
 #include "modules/wallpaper/option.h"
 #include "modules/wifi/option.h"
+#include "modules/wm/option.h"
 #include "modules/wmtheme/option.h"

@@ -41,4 +41,5 @@
 #include "modules/uptime/uptime.h"
 #include "modules/wallpaper/wallpaper.h"
 #include "modules/wifi/wifi.h"
+#include "modules/wm/wm.h"
 #include "modules/wmtheme/wmtheme.h"

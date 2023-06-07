@@ -311,7 +311,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wallpaper/wallpaper.c
     src/modules/weather.c
     src/modules/wifi/wifi.c
-    src/modules/wm.c
+    src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
     src/modules/jsonconfig/jsonconfig.c
     src/util/FFlist.c

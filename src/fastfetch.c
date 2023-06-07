@@ -990,7 +990,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseBrightnessCommandOptions(&instance->config.brightness, key, value)) {}
     else if(ffParseDECommandOptions(&instance->config.de, key, value)) {}
     else if(ffParseWifiCommandOptions(&instance->config.wifi, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
+    else if(ffParseWMCommandOptions(&instance->config.wm, key, value)) {}
     else if(ffParseWMThemeCommandOptions(&instance->config.wmTheme, key, value)) {}
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
     else if(ffParseIconsCommandOptions(&instance->config.icons, key, value)) {}
@@ -1194,8 +1194,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintDisplay(instance, &instance->config.display);
     else if(strcasecmp(line, FF_DE_MODULE_NAME) == 0)
         ffPrintDE(instance, &instance->config.de);
-    else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)
-        ffPrintWM(instance);
+    else if(strcasecmp(line, FF_WM_MODULE_NAME) == 0)
+        ffPrintWM(instance, &instance->config.wm);
     else if(strcasecmp(line, "theme") == 0)
         ffPrintTheme(instance);
     else if(strcasecmp(line, FF_WMTHEME_MODULE_NAME) == 0)

@@ -140,6 +140,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
         case 'W': {
             return
                 tryModule(instance, type, module, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperJsonObject) ||
+                tryModule(instance, type, module, FF_WM_MODULE_NAME, ffParseWMJsonObject) ||
                 tryModule(instance, type, module, FF_WIFI_MODULE_NAME, ffParseWifiJsonObject) ||
                 tryModule(instance, type, module, FF_WMTHEME_MODULE_NAME, ffParseWMThemeJsonObject) ||
                 false;
