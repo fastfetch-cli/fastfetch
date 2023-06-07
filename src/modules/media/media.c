@@ -1,13 +1,13 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "detection/media/media.h"
+#include "modules/media/media.h"
 
 #include <ctype.h>
 
-#define FF_MEDIA_MODULE_NAME "Media"
 #define FF_MEDIA_NUM_FORMAT_ARGS 5
 
-static bool shouldIgoreChar(char c)
+static inline bool shouldIgnoreChar(char c)
 {
     return isblank(c) || c == '-' || c == '.';
 }
@@ -19,10 +19,10 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
 
     while(true)
     {
-        while(shouldIgoreChar(song->chars[songIndex]))
+        while(shouldIgnoreChar(song->chars[songIndex]))
             ++songIndex;
 
-        while(shouldIgoreChar(artist->chars[artistIndex]))
+        while(shouldIgnoreChar(artist->chars[artistIndex]))
             ++artistIndex;
 
         if(artist->chars[artistIndex] == '\0')
@@ -42,13 +42,13 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
     return false;
 }
 
-void ffPrintMedia(FFinstance* instance)
+void ffPrintMedia(FFinstance* instance, FFMediaOptions* options)
 {
     const FFMediaResult* media = ffDetectMedia(instance);
 
     if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &instance->config.media, "%s", media->error.chars);
+        ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
         return;
     }
 
@@ -68,7 +68,7 @@ void ffPrintMedia(FFinstance* instance)
     if(songPretty.length == 0)
         ffStrbufAppend(&songPretty, &media->song);
 
-    if(instance->config.media.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
         //We don't expose artistPretty to the format, as it might be empty (when the think that the artist is already in the song title)
         FF_STRBUF_AUTO_DESTROY artistPretty = ffStrbufCreateCopy(&media->artist);
@@ -79,7 +79,7 @@ void ffPrintMedia(FFinstance* instance)
         if(artistInSongTitle(&songPretty, &artistPretty))
             ffStrbufClear(&artistPretty);
 
-        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &instance->config.media.key);
+        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key);
 
         if(artistPretty.length > 0)
         {
@@ -94,7 +94,7 @@ void ffPrintMedia(FFinstance* instance)
     }
     else
     {
-        ffPrintFormat(instance, FF_MEDIA_MODULE_NAME, 0, &instance->config.media, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
@@ -103,3 +103,45 @@ void ffPrintMedia(FFinstance* instance)
         });
     }
 }
+
+void ffInitMediaOptions(FFMediaOptions* options)
+{
+    options->moduleName = FF_MEDIA_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_MEDIA_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    return false;
+}
+
+void ffDestroyMediaOptions(FFMediaOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+#ifdef FF_HAVE_JSONC
+void ffParseMediaJsonObject(FFinstance* instance, json_object* module)
+{
+    FFMediaOptions __attribute__((__cleanup__(ffDestroyMediaOptions))) options;
+    ffInitMediaOptions(&options);
+
+    if (module)
+    {
+        json_object_object_foreach(module, key, val)
+        {
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintMedia(instance, &options);
+}
+#endif

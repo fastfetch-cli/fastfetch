@@ -24,6 +24,7 @@
 #include "modules/kernel/option.h"
 #include "modules/locale/option.h"
 #include "modules/localip/option.h"
+#include "modules/media/option.h"
 #include "modules/memory/option.h"
 #include "modules/opengl/option.h"
 #include "modules/opencl/option.h"

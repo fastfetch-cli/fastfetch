@@ -1012,7 +1012,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
     else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
-    else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
+    else if(ffParseMediaCommandOptions(&instance->config.media, key, value)) {}
     else if(ffParseDateTimeCommandOptions(&instance->config.dateTime, key, value)) {}
     else if(ffParseVulkanCommandOptions(&instance->config.vulkan, key, value)) {}
     else if(ffParseOpenGLCommandOptions(&instance->config.openGL, key, value)) {}
@@ -1232,8 +1232,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintWeather(instance);
     else if(strcasecmp(line, "player") == 0)
         ffPrintPlayer(instance);
-    else if(strcasecmp(line, "media") == 0)
-        ffPrintMedia(instance);
+    else if(strcasecmp(line, FF_MEDIA_MODULE_NAME) == 0)
+        ffPrintMedia(instance, &instance->config.media);
     else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)
         ffPrintDateTime(instance, &instance->config.dateTime);
     else if(strcasecmp(line, FF_COLORS_MODULE_NAME) == 0)

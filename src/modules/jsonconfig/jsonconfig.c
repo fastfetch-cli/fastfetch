@@ -97,6 +97,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
 
         case 'M': {
             return
+                tryModule(instance, type, module, FF_MEDIA_MODULE_NAME, ffParseMediaJsonObject) ||
                 tryModule(instance, type, module, FF_MEMORY_MODULE_NAME, ffParseMemoryJsonObject) ||
                 false;
         }

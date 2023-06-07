@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     ffPrintBattery(&instance, &instance.config.battery);
     ffPrintPowerAdapter(&instance, &instance.config.powerAdapter);
     //ffPrintPlayer(&instance);
-    //ffPrintMedia(&instance);
+    //ffPrintMedia(&instance, &instance.config.media);
     //ffPrintLocalIp(&instance);
     //ffPrintPublicIp(&instance);
     //ffPrintWifi(&instance);
