@@ -194,6 +194,5 @@ void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
-void ffPrintColors(FFinstance* instance);
 
 #endif
