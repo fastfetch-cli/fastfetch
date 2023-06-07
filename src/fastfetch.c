@@ -1015,7 +1015,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
     else if(ffParseDateTimeCommandOptions(&instance->config.dateTime, key, value)) {}
     else if(optionParseModuleArgs(key, value, "vulkan", &instance->config.vulkan)) {}
-    else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
+    else if(ffParseOpenGLCommandOptions(&instance->config.openGL, key, value)) {}
     else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
     else if(ffParseBluetoothCommandOptions(&instance->config.bluetooth, key, value)) {}
@@ -1098,16 +1098,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.weatherOutputFormat);
     else if(strcasecmp(key, "--weather-timeout") == 0)
         instance->config.weatherTimeout = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--gl") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.glType,
-            "auto", FF_GL_TYPE_AUTO,
-            "egl", FF_GL_TYPE_EGL,
-            "glx", FF_GL_TYPE_GLX,
-            "osmesa", FF_GL_TYPE_OSMESA,
-            NULL
-        );
-    }
     else if(strcasecmp(key, "--percent-type") == 0)
         instance->config.percentType = optionParseUInt32(key, value);
 
@@ -1250,8 +1240,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintColors(instance);
     else if(strcasecmp(line, "vulkan") == 0)
         ffPrintVulkan(instance);
-    else if(strcasecmp(line, "opengl") == 0)
-        ffPrintOpenGL(instance);
+    else if(strcasecmp(line, FF_OPENGL_MODULE_NAME) == 0)
+        ffPrintOpenGL(instance, &instance->config.openGL);
     else if(strcasecmp(line, "opencl") == 0)
         ffPrintOpenCL(instance);
     else if(strcasecmp(line, "users") == 0)

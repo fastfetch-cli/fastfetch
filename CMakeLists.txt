@@ -288,7 +288,7 @@ set(LIBFASTFETCH_SRC
     src/modules/localip/localip.c
     src/modules/memory/memory.c
     src/modules/opencl.c
-    src/modules/opengl.c
+    src/modules/opengl/opengl.c
     src/modules/os/os.c
     src/modules/packages/packages.c
     src/modules/player.c

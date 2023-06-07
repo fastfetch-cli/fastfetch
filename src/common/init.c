@@ -52,7 +52,6 @@ static void defaultConfig(FFinstance* instance)
     instance->config.hideCursor = true;
     instance->config.escapeBedrock = true;
     instance->config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
-    instance->config.glType = FF_GL_TYPE_AUTO;
     instance->config.pipe = false;
     instance->config.multithreading = true;
     instance->config.stat = false;
@@ -99,7 +98,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitDateTimeOptions(&instance->config.dateTime);
     initModuleArg(&instance->config.vulkan);
     ffInitWallpaperOptions(&instance->config.wallpaper);
-    initModuleArg(&instance->config.openGL);
+    ffInitOpenGLOptions(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
     ffInitBluetoothOptions(&instance->config.bluetooth);
@@ -318,7 +317,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.media);
     ffDestroyDateTimeOptions(&instance->config.dateTime);
     destroyModuleArg(&instance->config.vulkan);
-    destroyModuleArg(&instance->config.openGL);
+    ffDestroyOpenGLOptions(&instance->config.openGL);
     destroyModuleArg(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
     ffDestroyBluetoothOptions(&instance->config.bluetooth);

@@ -26,14 +26,6 @@ typedef enum FFBinaryPrefixType
     FF_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 kB, 1024 K = 1 MB, ...
 } FFBinaryPrefixType;
 
-typedef enum FFGLType
-{
-    FF_GL_TYPE_AUTO,
-    FF_GL_TYPE_EGL,
-    FF_GL_TYPE_GLX,
-    FF_GL_TYPE_OSMESA
-} FFGLType;
-
 typedef struct FFconfig
 {
     FFLogoOptions logo;
@@ -51,7 +43,6 @@ typedef struct FFconfig
     bool hideCursor;
     bool escapeBedrock;
     FFBinaryPrefixType binaryPrefixType;
-    FFGLType glType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;
@@ -98,7 +89,7 @@ typedef struct FFconfig
     FFModuleArgs media;
     FFDateTimeOptions dateTime;
     FFModuleArgs vulkan;
-    FFModuleArgs openGL;
+    FFOpenGLOptions openGL;
     FFModuleArgs openCL;
     FFModuleArgs users;
     FFBluetoothOptions bluetooth;
@@ -205,7 +196,6 @@ void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
-void ffPrintOpenGL(FFinstance* instance);
 void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 
