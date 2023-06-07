@@ -1011,7 +1011,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseLocalIpCommandOptions(&instance->config.localIP, key, value)) {}
     else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
-    else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
+    else if(ffParsePlayerCommandOptions(&instance->config.player, key, value)) {}
     else if(ffParseMediaCommandOptions(&instance->config.media, key, value)) {}
     else if(ffParseDateTimeCommandOptions(&instance->config.dateTime, key, value)) {}
     else if(ffParseVulkanCommandOptions(&instance->config.vulkan, key, value)) {}
@@ -1088,8 +1088,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--player-name") == 0)
-        optionParseString(key, value, &instance->config.playerName);
     else if(strcasecmp(key, "--publicip-url") == 0)
         optionParseString(key, value, &instance->config.publicIpUrl);
     else if(strcasecmp(key, "--publicip-timeout") == 0)
@@ -1230,8 +1228,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintWifi(instance, &instance->config.wifi);
     else if(strcasecmp(line, "weather") == 0)
         ffPrintWeather(instance);
-    else if(strcasecmp(line, "player") == 0)
-        ffPrintPlayer(instance);
+    else if(strcasecmp(line, FF_PLAYER_MODULE_NAME) == 0)
+        ffPrintPlayer(instance, &instance->config.player);
     else if(strcasecmp(line, FF_MEDIA_MODULE_NAME) == 0)
         ffPrintMedia(instance, &instance->config.media);
     else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)

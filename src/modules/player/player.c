@@ -1,19 +1,20 @@
 #include "fastfetch.h"
 #include "common/printing.h"
 #include "detection/media/media.h"
+#include "modules/player/player.h"
 
 #include <ctype.h>
 
-#define FF_PLAYER_MODULE_NAME "Media Player"
+#define FF_PLAYER_DISPLAY_NAME "Media Player"
 #define FF_PLAYER_NUM_FORMAT_ARGS 4
 
-void ffPrintPlayer(FFinstance* instance)
+void ffPrintPlayer(FFinstance* instance, FFPlayerOptions* options)
 {
     const FFMediaResult* media = ffDetectMedia(instance);
 
     if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player, "%s", media->error.chars);
+        ffPrintError(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
         return;
     }
 
@@ -55,14 +56,14 @@ void ffPrintPlayer(FFinstance* instance)
     if(playerPrettyIsCustom)
         ffStrbufAppendC(&playerPretty, ')');
 
-    if(instance->config.player.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player.key);
+        ffPrintLogoAndKey(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs.key);
         ffStrbufPutTo(&playerPretty, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->player},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId},
@@ -70,3 +71,49 @@ void ffPrintPlayer(FFinstance* instance)
         });
     }
 }
+
+void ffInitPlayerOptions(FFPlayerOptions* options)
+{
+    options->moduleName = FF_PLAYER_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->name);
+}
+
+bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_PLAYER_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    return false;
+}
+
+void ffDestroyPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    ffStrbufDestroy(&options->name);
+}
+
+#ifdef FF_HAVE_JSONC
+void ffParsePlayerJsonObject(FFinstance* instance, json_object* module)
+{
+    FFPlayerOptions __attribute__((__cleanup__(ffDestroyPlayerOptions))) options;
+    ffInitPlayerOptions(&options);
+
+    if (module)
+    {
+        json_object_object_foreach(module, key, val)
+        {
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            ffPrintError(instance, FF_PLAYER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintPlayer(instance, &options);
+}
+#endif

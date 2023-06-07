@@ -93,7 +93,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
     ffInitWifiOptions(&instance->config.wifi);
-    initModuleArg(&instance->config.player);
+    ffInitPlayerOptions(&instance->config.player);
     ffInitMediaOptions(&instance->config.media);
     ffInitDateTimeOptions(&instance->config.dateTime);
     ffInitVulkanOptions(&instance->config.vulkan);
@@ -137,8 +137,6 @@ static void defaultConfig(FFinstance* instance)
 
     instance->config.weatherTimeout = 0;
     ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
-
-    ffStrbufInit(&instance->config.playerName);
 
     instance->config.percentType = 1;
 }
@@ -313,7 +311,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyWallpaperOptions(&instance->config.wallpaper);
     destroyModuleArg(&instance->config.weather);
     ffDestroyWifiOptions(&instance->config.wifi);
-    destroyModuleArg(&instance->config.player);
+    ffDestroyPlayerOptions(&instance->config.player);
     ffDestroyMediaOptions(&instance->config.media);
     ffDestroyDateTimeOptions(&instance->config.dateTime);
     ffDestroyVulkanOptions(&instance->config.vulkan);
@@ -353,7 +351,6 @@ static void destroyConfig(FFinstance* instance)
 
     ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
-    ffStrbufDestroy(&instance->config.playerName);
 }
 
 static void destroyState(FFinstance* instance)

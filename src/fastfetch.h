@@ -85,7 +85,7 @@ typedef struct FFconfig
     FFLocalIpOptions localIP;
     FFModuleArgs publicIP;
     FFModuleArgs weather;
-    FFModuleArgs player;
+    FFPlayerOptions player;
     FFMediaOptions media;
     FFDateTimeOptions dateTime;
     FFVulkanOptions vulkan;
@@ -128,8 +128,6 @@ typedef struct FFconfig
 
     FFstrbuf weatherOutputFormat;
     uint32_t weatherTimeout;
-
-    FFstrbuf playerName;
 
     uint32_t percentType;
 
@@ -190,7 +188,6 @@ void ffPrepareWeather(FFinstance* instance);
 void ffPrintChassis(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
-void ffPrintPlayer(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
 

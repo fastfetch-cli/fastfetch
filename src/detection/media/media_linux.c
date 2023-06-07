@@ -101,14 +101,14 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
 
 static void getCustomBus(FFDBusData* data, const FFinstance* instance, FFMediaResult* result)
 {
-    if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
+    if(ffStrbufStartsWithS(&instance->config.player.name, FF_DBUS_MPRIS_PREFIX))
     {
-        getBusProperties(data, instance->config.playerName.chars, result);
+        getBusProperties(data, instance->config.player.name.chars, result);
         return;
     }
 
     FF_STRBUF_AUTO_DESTROY busName = ffStrbufCreateS(FF_DBUS_MPRIS_PREFIX);
-    ffStrbufAppend(&busName, &instance->config.playerName);
+    ffStrbufAppend(&busName, &instance->config.player.name);
     getBusProperties(data, busName.chars, result);
 }
 
@@ -158,7 +158,7 @@ static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
     if(error != NULL)
         return error;
 
-    if(instance->config.playerName.length > 0)
+    if(instance->config.player.name.length > 0)
         getCustomBus(&data, instance, result);
     else
         getBestBus(&data, result);
