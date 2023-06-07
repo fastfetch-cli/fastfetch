@@ -71,7 +71,7 @@ typedef struct FFconfig
     FFShellOptions shell;
     FFDisplayOptions display;
     FFModuleArgs de;
-    FFModuleArgs wallpaper;
+    FFWallpaperOptions wallpaper;
     FFWifiOptions wifi;
     FFModuleArgs wm;
     FFWMThemeOptions wmTheme;
@@ -201,7 +201,6 @@ void ffPrintProcesses(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
-void ffPrintWallpaper(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);

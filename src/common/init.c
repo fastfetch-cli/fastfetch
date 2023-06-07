@@ -98,7 +98,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.media);
     ffInitDateTimeOptions(&instance->config.dateTime);
     initModuleArg(&instance->config.vulkan);
-    initModuleArg(&instance->config.wallpaper);
+    ffInitWallpaperOptions(&instance->config.wallpaper);
     initModuleArg(&instance->config.openGL);
     initModuleArg(&instance->config.openCL);
     initModuleArg(&instance->config.users);
@@ -311,7 +311,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyLocaleOptions(&instance->config.locale);
     ffDestroyLocalIpOptions(&instance->config.localIP);
     destroyModuleArg(&instance->config.publicIP);
-    destroyModuleArg(&instance->config.wallpaper);
+    ffDestroyWallpaperOptions(&instance->config.wallpaper);
     destroyModuleArg(&instance->config.weather);
     ffDestroyWifiOptions(&instance->config.wifi);
     destroyModuleArg(&instance->config.player);

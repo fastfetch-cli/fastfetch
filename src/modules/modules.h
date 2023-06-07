@@ -38,5 +38,6 @@
 #include "modules/title/title.h"
 #include "modules/jsonconfig/jsonconfig.h"
 #include "modules/uptime/uptime.h"
+#include "modules/wallpaper/wallpaper.h"
 #include "modules/wifi/wifi.h"
 #include "modules/wmtheme/wmtheme.h"
