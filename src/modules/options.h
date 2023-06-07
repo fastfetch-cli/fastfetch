@@ -38,6 +38,7 @@
 #include "modules/terminalfont/option.h"
 #include "modules/title/option.h"
 #include "modules/uptime/option.h"
+#include "modules/vulkan/option.h"
 #include "modules/wallpaper/option.h"
 #include "modules/wifi/option.h"
 #include "modules/wm/option.h"

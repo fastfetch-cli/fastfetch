@@ -96,7 +96,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.player);
     initModuleArg(&instance->config.media);
     ffInitDateTimeOptions(&instance->config.dateTime);
-    initModuleArg(&instance->config.vulkan);
+    ffInitVulkanOptions(&instance->config.vulkan);
     ffInitWallpaperOptions(&instance->config.wallpaper);
     ffInitOpenGLOptions(&instance->config.openGL);
     ffInitOpenCLOptions(&instance->config.openCL);
@@ -316,7 +316,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.player);
     destroyModuleArg(&instance->config.media);
     ffDestroyDateTimeOptions(&instance->config.dateTime);
-    destroyModuleArg(&instance->config.vulkan);
+    ffDestroyVulkanOptions(&instance->config.vulkan);
     ffDestroyOpenGLOptions(&instance->config.openGL);
     ffDestroyOpenCLOptions(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);

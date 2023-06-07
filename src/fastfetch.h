@@ -88,7 +88,7 @@ typedef struct FFconfig
     FFModuleArgs player;
     FFModuleArgs media;
     FFDateTimeOptions dateTime;
-    FFModuleArgs vulkan;
+    FFVulkanOptions vulkan;
     FFOpenGLOptions openGL;
     FFOpenCLOptions openCL;
     FFModuleArgs users;
@@ -195,7 +195,6 @@ void ffPrintMedia(FFinstance* instance);
 void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
-void ffPrintVulkan(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 
 #endif

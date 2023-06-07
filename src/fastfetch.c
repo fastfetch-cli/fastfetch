@@ -1014,7 +1014,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
     else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
     else if(ffParseDateTimeCommandOptions(&instance->config.dateTime, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "vulkan", &instance->config.vulkan)) {}
+    else if(ffParseVulkanCommandOptions(&instance->config.vulkan, key, value)) {}
     else if(ffParseOpenGLCommandOptions(&instance->config.openGL, key, value)) {}
     else if(ffParseOpenCLCommandOptions(&instance->config.openCL, key, value)) {}
     else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
@@ -1238,8 +1238,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintDateTime(instance, &instance->config.dateTime);
     else if(strcasecmp(line, FF_COLORS_MODULE_NAME) == 0)
         ffPrintColors(instance);
-    else if(strcasecmp(line, "vulkan") == 0)
-        ffPrintVulkan(instance);
+    else if(strcasecmp(line, FF_VULKAN_MODULE_NAME) == 0)
+        ffPrintVulkan(instance, &instance->config.vulkan);
     else if(strcasecmp(line, FF_OPENGL_MODULE_NAME) == 0)
         ffPrintOpenGL(instance, &instance->config.openGL);
     else if(strcasecmp(line, FF_OPENCL_MODULE_NAME) == 0)

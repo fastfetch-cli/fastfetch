@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     //ffPrintDateTime(&instance);
     //ffPrintDate(&instance);
     //ffPrintTime(&instance);
-    //ffPrintVulkan(&instance);
+    //ffPrintVulkan(&instance, &instance.config.vulkan);
     //ffPrintOpenGL(&instance, &instance.config.openGL);
     //ffPrintOpenCL(&instance, &instance.config.openCL);
     //ffPrintUsers(&instance);

@@ -139,6 +139,12 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 false;
         }
 
+        case 'V': {
+            return
+                tryModule(instance, type, module, FF_VULKAN_MODULE_NAME, ffParseVulkanJsonObject) ||
+                false;
+        }
+
         case 'W': {
             return
                 tryModule(instance, type, module, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperJsonObject) ||
