@@ -21,6 +21,7 @@
 #include "modules/gamepad/gamepad.h"
 #include "modules/gpu/gpu.h"
 #include "modules/host/host.h"
+#include "modules/icons/icons.h"
 #include "modules/kernel/kernel.h"
 #include "modules/locale/locale.h"
 #include "modules/localip/localip.h"

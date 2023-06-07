@@ -19,6 +19,7 @@
 #include "modules/host/option.h"
 #include "modules/gamepad/option.h"
 #include "modules/gpu/option.h"
+#include "modules/icons/option.h"
 #include "modules/kernel/option.h"
 #include "modules/locale/option.h"
 #include "modules/localip/option.h"

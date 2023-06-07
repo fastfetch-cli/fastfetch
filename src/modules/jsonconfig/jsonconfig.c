@@ -75,6 +75,12 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 false;
         }
 
+        case 'I': {
+            return
+                tryModule(instance, type, module, FF_ICONS_MODULE_NAME, ffParseIconsJsonObject) ||
+                false;
+        }
+
         case 'K': {
             return
                 tryModule(instance, type, module, FF_KERNEL_MODULE_NAME, ffParseKernelJsonObject) ||

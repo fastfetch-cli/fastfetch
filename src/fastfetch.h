@@ -76,7 +76,7 @@ typedef struct FFconfig
     FFModuleArgs wm;
     FFWMThemeOptions wmTheme;
     FFModuleArgs theme;
-    FFModuleArgs icons;
+    FFIconsOptions icons;
     FFFontOptions font;
     FFCursorOptions cursor;
     FFTerminalOptions terminal;
@@ -201,7 +201,6 @@ void ffPrintProcesses(FFinstance* instance);
 void ffPrintDesktopEnvironment(FFinstance* instance);
 void ffPrintWM(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
-void ffPrintIcons(FFinstance* instance);
 void ffPrintWallpaper(FFinstance* instance);
 void ffPrintPlayer(FFinstance* instance);
 void ffPrintMedia(FFinstance* instance);

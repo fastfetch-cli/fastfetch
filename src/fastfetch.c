@@ -993,7 +993,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
     else if(ffParseWMThemeCommandOptions(&instance->config.wmTheme, key, value)) {}
     else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
-    else if(optionParseModuleArgs(key, value, "icons", &instance->config.icons)) {}
+    else if(ffParseIconsCommandOptions(&instance->config.icons, key, value)) {}
     else if(optionParseModuleArgs(key, value, "wallpaper", &instance->config.wallpaper)) {}
     else if(ffParseFontCommandOptions(&instance->config.font, key, value)) {}
     else if(ffParseCursorCommandOptions(&instance->config.cursor, key, value)) {}
@@ -1200,8 +1200,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintTheme(instance);
     else if(strcasecmp(line, FF_WMTHEME_MODULE_NAME) == 0)
         ffPrintWMTheme(instance, &instance->config.wmTheme);
-    else if(strcasecmp(line, "icons") == 0)
-        ffPrintIcons(instance);
+    else if(strcasecmp(line, FF_ICONS_MODULE_NAME) == 0)
+        ffPrintIcons(instance, &instance->config.icons);
     else if(strcasecmp(line, "wallpaper") == 0)
         ffPrintWallpaper(instance);
     else if(strcasecmp(line, FF_FONT_MODULE_NAME) == 0)
