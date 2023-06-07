@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     //ffPrintTime(&instance);
     //ffPrintVulkan(&instance);
     //ffPrintOpenGL(&instance, &instance.config.openGL);
-    //ffPrintOpenCL(&instance);
+    //ffPrintOpenCL(&instance, &instance.config.openCL);
     //ffPrintUsers(&instance);
     //ffPrintWeather(&instance);
     //ffPrintBluetooth(&instance);

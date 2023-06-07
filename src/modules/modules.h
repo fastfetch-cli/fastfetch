@@ -28,6 +28,7 @@
 #include "modules/localip/localip.h"
 #include "modules/memory/memory.h"
 #include "modules/opengl/opengl.h"
+#include "modules/opencl/opencl.h"
 #include "modules/os/os.h"
 #include "modules/packages/packages.h"
 #include "modules/poweradapter/poweradapter.h"

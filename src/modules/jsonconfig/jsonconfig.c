@@ -103,6 +103,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
 
         case 'O': {
             return
+                tryModule(instance, type, module, FF_OPENCL_MODULE_NAME, ffParseOpenCLJsonObject) ||
                 tryModule(instance, type, module, FF_OPENGL_MODULE_NAME, ffParseOpenGLJsonObject) ||
                 tryModule(instance, type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
                 false;

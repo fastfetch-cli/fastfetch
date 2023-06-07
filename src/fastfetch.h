@@ -90,7 +90,7 @@ typedef struct FFconfig
     FFDateTimeOptions dateTime;
     FFModuleArgs vulkan;
     FFOpenGLOptions openGL;
-    FFModuleArgs openCL;
+    FFOpenCLOptions openCL;
     FFModuleArgs users;
     FFBluetoothOptions bluetooth;
     FFSeparatorOptions separator;
@@ -196,7 +196,6 @@ void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
 void ffPrintColors(FFinstance* instance);
 void ffPrintVulkan(FFinstance* instance);
-void ffPrintOpenCL(FFinstance* instance);
 void ffPrintUsers(FFinstance* instance);
 
 #endif

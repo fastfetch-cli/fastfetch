@@ -99,7 +99,7 @@ static void defaultConfig(FFinstance* instance)
     initModuleArg(&instance->config.vulkan);
     ffInitWallpaperOptions(&instance->config.wallpaper);
     ffInitOpenGLOptions(&instance->config.openGL);
-    initModuleArg(&instance->config.openCL);
+    ffInitOpenCLOptions(&instance->config.openCL);
     initModuleArg(&instance->config.users);
     ffInitBluetoothOptions(&instance->config.bluetooth);
     ffInitSoundOptions(&instance->config.sound);
@@ -318,7 +318,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyDateTimeOptions(&instance->config.dateTime);
     destroyModuleArg(&instance->config.vulkan);
     ffDestroyOpenGLOptions(&instance->config.openGL);
-    destroyModuleArg(&instance->config.openCL);
+    ffDestroyOpenCLOptions(&instance->config.openCL);
     destroyModuleArg(&instance->config.users);
     ffDestroyBluetoothOptions(&instance->config.bluetooth);
     ffDestroySeparatorOptions(&instance->config.separator);
