@@ -276,7 +276,7 @@ set(LIBFASTFETCH_SRC
     src/modules/custom/custom.c
     src/modules/command/command.c
     src/modules/datetime/datetime.c
-    src/modules/de.c
+    src/modules/de/de.c
     src/modules/disk/disk.c
     src/modules/font/font.c
     src/modules/gpu/gpu.c

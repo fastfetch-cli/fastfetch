@@ -53,6 +53,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 tryModule(instance, type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
                 tryModule(instance, type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
                 tryModule(instance, type, module, FF_DISK_MODULE_NAME, ffParseDiskJsonObject) ||
+                tryModule(instance, type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
                 false;
         }
 
