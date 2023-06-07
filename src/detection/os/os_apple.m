@@ -24,7 +24,52 @@ static void parseSystemVersion(FFOSResult* os)
         ffStrbufInitS(&os->buildID, value.UTF8String);
 }
 
-void parseOSXSoftwareLicense(FFOSResult* os)
+static bool detectOSCodeName(FFOSResult* os)
+{
+    // https://en.wikipedia.org/wiki/MacOS_version_history
+    char* str_end;
+    const char* version = os->version.chars;
+    unsigned long num = strtoul(version, &str_end, 10);
+    if (str_end == version) return false;
+
+    switch (num)
+    {
+        case 14: ffStrbufAppendS(&os->codename, "Sonoma"); return true;
+        case 13: ffStrbufAppendS(&os->codename, "Ventura"); return true;
+        case 12: ffStrbufAppendS(&os->codename, "Monterey"); return true;
+        case 11: ffStrbufAppendS(&os->codename, "Big Sur"); return true;
+        case 10: {
+            version = str_end + 1;
+            num = strtoul(version, &str_end, 10);
+            if (str_end == version) return false;
+
+            switch (num)
+            {
+                case 16: ffStrbufAppendS(&os->codename, "Big Sur"); return true;
+                case 15: ffStrbufAppendS(&os->codename, "Catalina"); return true;
+                case 14: ffStrbufAppendS(&os->codename, "Mojave"); return true;
+                case 13: ffStrbufAppendS(&os->codename, "High Sierra"); return true;
+                case 12: ffStrbufAppendS(&os->codename, "Sierra"); return true;
+                case 11: ffStrbufAppendS(&os->codename, "El Capitan"); return true;
+                case 10: ffStrbufAppendS(&os->codename, "Yosemite"); return true;
+                case 9: ffStrbufAppendS(&os->codename, "Mavericks"); return true;
+                case 8: ffStrbufAppendS(&os->codename, "Mountain Lion"); return true;
+                case 7: ffStrbufAppendS(&os->codename, "Lion"); return true;
+                case 6: ffStrbufAppendS(&os->codename, "Snow Leopard"); return true;
+                case 5: ffStrbufAppendS(&os->codename, "Leopard"); return true;
+                case 4: ffStrbufAppendS(&os->codename, "Tiger"); return true;
+                case 3: ffStrbufAppendS(&os->codename, "Panther"); return true;
+                case 2: ffStrbufAppendS(&os->codename, "Jaguar"); return true;
+                case 1: ffStrbufAppendS(&os->codename, "Puma"); return true;
+                case 0: ffStrbufAppendS(&os->codename, "Cheetah"); return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+static void parseOSXSoftwareLicense(FFOSResult* os)
 {
     FILE* rtf = fopen("/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf", "r");
     if(rtf == NULL)
@@ -81,5 +126,6 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufAppend(&os->prettyName, &os->name);
     ffStrbufAppend(&os->versionID, &os->version);
 
-    parseOSXSoftwareLicense(os);
+    if(!detectOSCodeName(os))
+        parseOSXSoftwareLicense(os);
 }
