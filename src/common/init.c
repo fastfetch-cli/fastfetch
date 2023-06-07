@@ -100,7 +100,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitWallpaperOptions(&instance->config.wallpaper);
     ffInitOpenGLOptions(&instance->config.openGL);
     ffInitOpenCLOptions(&instance->config.openCL);
-    initModuleArg(&instance->config.users);
+    ffInitUsersOptions(&instance->config.users);
     ffInitBluetoothOptions(&instance->config.bluetooth);
     ffInitSoundOptions(&instance->config.sound);
     ffInitSeparatorOptions(&instance->config.separator);
@@ -319,7 +319,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyVulkanOptions(&instance->config.vulkan);
     ffDestroyOpenGLOptions(&instance->config.openGL);
     ffDestroyOpenCLOptions(&instance->config.openCL);
-    destroyModuleArg(&instance->config.users);
+    ffDestroyUsersOptions(&instance->config.users);
     ffDestroyBluetoothOptions(&instance->config.bluetooth);
     ffDestroySeparatorOptions(&instance->config.separator);
     ffDestroySoundOptions(&instance->config.sound);

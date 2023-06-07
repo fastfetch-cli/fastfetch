@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     //ffPrintVulkan(&instance, &instance.config.vulkan);
     //ffPrintOpenGL(&instance, &instance.config.openGL);
     //ffPrintOpenCL(&instance, &instance.config.openCL);
-    //ffPrintUsers(&instance);
+    //ffPrintUsers(&instance, &instance.config.users);
     //ffPrintWeather(&instance);
     //ffPrintBluetooth(&instance);
     //ffPrintSound(&instance, &instance.config.sound);

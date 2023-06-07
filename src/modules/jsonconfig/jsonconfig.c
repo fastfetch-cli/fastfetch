@@ -136,6 +136,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
         case 'U': {
             return
                 tryModule(instance, type, module, FF_UPTIME_MODULE_NAME, ffParseUptimeJsonObject) ||
+                tryModule(instance, type, module, FF_USERS_MODULE_NAME, ffParseUsersJsonObject) ||
                 false;
         }
 

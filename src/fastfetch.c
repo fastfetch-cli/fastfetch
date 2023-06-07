@@ -1017,7 +1017,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseVulkanCommandOptions(&instance->config.vulkan, key, value)) {}
     else if(ffParseOpenGLCommandOptions(&instance->config.openGL, key, value)) {}
     else if(ffParseOpenCLCommandOptions(&instance->config.openCL, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
+    else if(ffParseUsersCommandOptions(&instance->config.users, key, value)) {}
     else if(ffParseBluetoothCommandOptions(&instance->config.bluetooth, key, value)) {}
     else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
     else if(ffParseSoundCommandOptions(&instance->config.sound, key, value)) {}
@@ -1244,8 +1244,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintOpenGL(instance, &instance->config.openGL);
     else if(strcasecmp(line, FF_OPENCL_MODULE_NAME) == 0)
         ffPrintOpenCL(instance, &instance->config.openCL);
-    else if(strcasecmp(line, "users") == 0)
-        ffPrintUsers(instance);
+    else if(strcasecmp(line, FF_USERS_MODULE_NAME) == 0)
+        ffPrintUsers(instance, &instance->config.users);
     else if(strcasecmp(line, FF_COMMAND_MODULE_NAME) == 0)
         ffPrintCommand(instance, &instance->config.command);
     else if(strcasecmp(line, FF_BLUETOOTH_MODULE_NAME) == 0)

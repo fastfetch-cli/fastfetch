@@ -306,7 +306,7 @@ set(LIBFASTFETCH_SRC
     src/modules/theme.c
     src/modules/title/title.c
     src/modules/uptime/uptime.c
-    src/modules/users.c
+    src/modules/users/users.c
     src/modules/vulkan/vulkan.c
     src/modules/wallpaper/wallpaper.c
     src/modules/weather.c
