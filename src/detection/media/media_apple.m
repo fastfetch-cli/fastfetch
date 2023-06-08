@@ -57,17 +57,17 @@ static const char* getMedia(FFMediaResult* result)
             if (identifier == nil)
                 identifier = MRNowPlayingClientGetParentAppBundleIdentifier(clientObj);
             if (identifier != nil)
-                ffCfStrGetString(identifier, &result->busNameShort);
+                ffCfStrGetString(identifier, &result->playerId);
         }
         dispatch_group_leave(group);
     });
 
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
 
-    if(result->busNameShort.length > 0)
+    if(result->playerId.length > 0)
     {
         char buf[128];
-        snprintf(buf, sizeof(buf), "name of app id \"%s\"", result->busNameShort.chars);
+        snprintf(buf, sizeof(buf), "name of app id \"%s\"", result->playerId.chars);
         ffOsascript(buf, &result->player);
     }
 

@@ -87,14 +87,14 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
     }
 
     //Set short bus name
-    ffStrbufAppendS(&result->busNameShort, busName + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
+    ffStrbufAppendS(&result->playerId, busName + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
 
     //We found a song, get the player name
     ffDBusGetPropertyString(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", "Identity", &result->player);
     if(result->player.length == 0)
         ffDBusGetPropertyString(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", "DesktopEntry", &result->player);
     if(result->player.length == 0)
-        ffStrbufAppend(&result->player, &result->busNameShort);
+        ffStrbufAppend(&result->player, &result->playerId);
 
     return true;
 }

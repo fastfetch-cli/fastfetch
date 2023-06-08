@@ -381,7 +381,7 @@ static inline void printCommandHelp(const char* command)
         constructAndPrintCommandHelpFormat("player", "{}", 4,
             "Pretty player name",
             "Player name",
-            "DBus bus name",
+            "Player Identifier",
             "URL name"
         );
     }

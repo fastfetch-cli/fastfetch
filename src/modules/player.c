@@ -22,8 +22,8 @@ void ffPrintPlayer(FFinstance* instance)
 
     //If we are on a website, prepend the website name
     if(
-        ffStrbufIgnCaseCompS(&media->busNameShort, "spotify") == 0 ||
-        ffStrbufIgnCaseCompS(&media->busNameShort, "vlc") == 0
+        ffStrbufIgnCaseCompS(&media->playerId, "spotify") == 0 ||
+        ffStrbufIgnCaseCompS(&media->playerId, "vlc") == 0
     ) {} // do noting, surely not a website, even if the url is set
     else if(ffStrbufStartsWithS(&media->url, "https://www."))
         ffStrbufAppendS(&playerPretty, media->url.chars + 12);
@@ -66,7 +66,7 @@ void ffPrintPlayer(FFinstance* instance)
         ffPrintFormat(instance, FF_PLAYER_MODULE_NAME, 0, &instance->config.player, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->player},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->busNameShort},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
         });
     }

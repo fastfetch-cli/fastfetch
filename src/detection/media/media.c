@@ -7,7 +7,7 @@ const FFMediaResult* ffDetectMedia(const FFinstance* instance)
 {
     FF_DETECTION_INTERNAL_GUARD(FFMediaResult,
         ffStrbufInitA(&result.error, 0);
-        ffStrbufInit(&result.busNameShort);
+        ffStrbufInit(&result.playerId);
         ffStrbufInit(&result.player);
         ffStrbufInit(&result.song);
         ffStrbufInit(&result.artist);
