@@ -207,14 +207,8 @@ static inline void printCommandHelp(const char* command)
     }
     else if(strcasecmp(command, "theme-format") == 0)
     {
-        constructAndPrintCommandHelpFormat("theme", "{} ({3}) [Plasma], {7}", 7,
-            "Plasma theme",
-            "Plasma color scheme",
-            "Plasma color scheme pretty",
-            "GTK2 theme",
-            "GTK3 theme",
-            "GTK4 theme",
-            "Combined GTK themes"
+        constructAndPrintCommandHelpFormat("theme", "{}", 1,
+            "Combined themes"
         );
     }
     else if(strcasecmp(command, "icons-format") == 0)

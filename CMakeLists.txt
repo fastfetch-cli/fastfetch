@@ -359,6 +359,7 @@ if(LINUX)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/theme/theme_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -400,6 +401,7 @@ elseif(ANDROID)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_nosupport.c
@@ -449,6 +451,7 @@ elseif(BSD)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/theme/theme_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -492,6 +495,7 @@ elseif(APPLE)
         src/detection/temps/temps_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.c
@@ -535,6 +539,7 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/temps/temps_windows.cpp
+        src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
