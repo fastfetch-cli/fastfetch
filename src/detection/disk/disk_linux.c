@@ -17,14 +17,6 @@
 
 static bool isPhysicalDevice(FFstrbuf* device)
 {
-    struct stat deviceStat;
-    if(stat(device->chars, &deviceStat) != 0)
-        return false;
-
-    //Ignore all devices that are not block devices
-    if(!S_ISBLK(deviceStat.st_mode))
-        return false;
-
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(ffStrbufEqualS(device, "drvfs"))
         return true;
@@ -32,6 +24,14 @@ static bool isPhysicalDevice(FFstrbuf* device)
     //ZFS root pool. The format is rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>
     if(ffStrbufStartsWithS(device, "rpool/"))
         return true;
+
+    struct stat deviceStat;
+    if(stat(device->chars, &deviceStat) != 0)
+        return false;
+
+    //Ignore all devices that are not block devices
+    if(!S_ISBLK(deviceStat.st_mode))
+        return false;
 
     //Pseudo filesystems don't have a device in /dev
     if(!ffStrbufStartsWithS(device, "/dev/"))
