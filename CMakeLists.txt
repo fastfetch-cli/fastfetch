@@ -309,7 +309,7 @@ set(LIBFASTFETCH_SRC
     src/modules/users/users.c
     src/modules/vulkan/vulkan.c
     src/modules/wallpaper/wallpaper.c
-    src/modules/weather.c
+    src/modules/weather/weather.c
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c

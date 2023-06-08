@@ -47,6 +47,7 @@
 #include "modules/users/users.h"
 #include "modules/vulkan/vulkan.h"
 #include "modules/wallpaper/wallpaper.h"
+#include "modules/weather/weather.h"
 #include "modules/wifi/wifi.h"
 #include "modules/wm/wm.h"
 #include "modules/wmtheme/wmtheme.h"

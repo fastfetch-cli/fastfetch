@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     //ffPrintOpenGL(&instance, &instance.config.openGL);
     //ffPrintOpenCL(&instance, &instance.config.openCL);
     //ffPrintUsers(&instance, &instance.config.users);
-    //ffPrintWeather(&instance);
+    //ffPrintWeather(&instance, &instance.config.weather);
     //ffPrintBluetooth(&instance);
     //ffPrintSound(&instance, &instance.config.sound);
     //ffPrintGamepad(&instance);
