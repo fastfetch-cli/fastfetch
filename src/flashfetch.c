@@ -13,7 +13,7 @@ int main(int argc, char** argv)
     //Modify instance.config here
 
     // ffPrepareCPUUsage();
-    // ffPreparePublicIp(&instance);
+    // ffPreparePublicIp(&instance.config.publicIP);
     // ffPrepareWeather(&instance);
 
     //Does things like starting detection threads, disabling line wrap, etc
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     //ffPrintPlayer(&instance, &instance.config.player);
     //ffPrintMedia(&instance, &instance.config.media);
     //ffPrintLocalIp(&instance);
-    //ffPrintPublicIp(&instance);
+    //ffPrintPublicIp(&instance, &instance.config.publicIp);
     //ffPrintWifi(&instance);
     //ffPrintCPUUsage(&instance, &instance.config.cpuUsage);
     ffPrintLocale(&instance, &instance.config.locale);

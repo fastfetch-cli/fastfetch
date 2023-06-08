@@ -90,7 +90,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitPowerAdapterOptions(&instance->config.powerAdapter);
     ffInitLocaleOptions(&instance->config.locale);
     ffInitLocalIpOptions(&instance->config.localIP);
-    initModuleArg(&instance->config.publicIP);
+    ffInitPublicIpOptions(&instance->config.publicIP);
     initModuleArg(&instance->config.weather);
     ffInitWifiOptions(&instance->config.wifi);
     ffInitPlayerOptions(&instance->config.player);
@@ -131,9 +131,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
-
-    instance->config.publicIpTimeout = 0;
-    ffStrbufInit(&instance->config.publicIpUrl);
 
     instance->config.weatherTimeout = 0;
     ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
@@ -307,7 +304,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyPowerAdapterOptions(&instance->config.powerAdapter);
     ffDestroyLocaleOptions(&instance->config.locale);
     ffDestroyLocalIpOptions(&instance->config.localIP);
-    destroyModuleArg(&instance->config.publicIP);
+    ffDestroyPublicIpOptions(&instance->config.publicIP);
     ffDestroyWallpaperOptions(&instance->config.wallpaper);
     destroyModuleArg(&instance->config.weather);
     ffDestroyWifiOptions(&instance->config.wifi);
@@ -349,7 +346,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
 
-    ffStrbufDestroy(&instance->config.publicIpUrl);
     ffStrbufDestroy(&instance->config.weatherOutputFormat);
 }
 

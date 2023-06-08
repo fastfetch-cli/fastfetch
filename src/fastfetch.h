@@ -83,7 +83,7 @@ typedef struct FFconfig
     FFPowerAdapterOptions powerAdapter;
     FFLocaleOptions locale;
     FFLocalIpOptions localIP;
-    FFModuleArgs publicIP;
+    FFPublicIpOptions publicIP;
     FFModuleArgs weather;
     FFPlayerOptions player;
     FFMediaOptions media;
@@ -122,9 +122,6 @@ typedef struct FFconfig
     FFstrbuf libPulse;
     FFstrbuf libwlanapi;
     FFstrbuf libnm;
-
-    FFstrbuf publicIpUrl;
-    uint32_t publicIpTimeout;
 
     FFstrbuf weatherOutputFormat;
     uint32_t weatherTimeout;
@@ -180,7 +177,6 @@ void ffLogoBuiltinListAutocompletion();
 
 //Common
 
-void ffPreparePublicIp(FFinstance* instance);
 void ffPrepareWeather(FFinstance* instance);
 
 //Printing
@@ -188,7 +184,6 @@ void ffPrepareWeather(FFinstance* instance);
 void ffPrintChassis(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
 void ffPrintTheme(FFinstance* instance);
-void ffPrintPublicIp(FFinstance* instance);
 void ffPrintWeather(FFinstance* instance);
 
 #endif

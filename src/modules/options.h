@@ -32,6 +32,7 @@
 #include "modules/packages/option.h"
 #include "modules/player/option.h"
 #include "modules/poweradapter/option.h"
+#include "modules/publicip/option.h"
 #include "modules/separator/option.h"
 #include "modules/shell/option.h"
 #include "modules/sound/option.h"

@@ -1009,7 +1009,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParsePowerAdapterCommandOptions(&instance->config.powerAdapter, key, value)) {}
     else if(ffParseLocaleCommandOptions(&instance->config.locale, key, value)) {}
     else if(ffParseLocalIpCommandOptions(&instance->config.localIP, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
+    else if(ffParsePublicIpCommandOptions(&instance->config.publicIP, key, value)) {}
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
     else if(ffParsePlayerCommandOptions(&instance->config.player, key, value)) {}
     else if(ffParseMediaCommandOptions(&instance->config.media, key, value)) {}
@@ -1088,10 +1088,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--publicip-url") == 0)
-        optionParseString(key, value, &instance->config.publicIpUrl);
-    else if(strcasecmp(key, "--publicip-timeout") == 0)
-        instance->config.publicIpTimeout = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--weather-output-format") == 0)
         optionParseString(key, value, &instance->config.weatherOutputFormat);
     else if(strcasecmp(key, "--weather-timeout") == 0)
@@ -1222,8 +1218,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintLocale(instance, &instance->config.locale);
     else if(strcasecmp(line, "localip") == 0)
         ffPrintLocalIp(instance, &instance->config.localIP);
-    else if(strcasecmp(line, "publicip") == 0)
-        ffPrintPublicIp(instance);
+    else if(strcasecmp(line, FF_PUBLICIP_MODULE_NAME) == 0)
+        ffPrintPublicIp(instance, &instance->config.publicIP);
     else if(strcasecmp(line, FF_WIFI_MODULE_NAME) == 0)
         ffPrintWifi(instance, &instance->config.wifi);
     else if(strcasecmp(line, "weather") == 0)
@@ -1281,8 +1277,8 @@ int main(int argc, const char** argv)
 
     if(instance.config.multithreading)
     {
-        if(ffStrbufContainIgnCaseS(&data.structure, "PublicIp"))
-            ffPreparePublicIp(&instance);
+        if(ffStrbufContainIgnCaseS(&data.structure, FF_PUBLICIP_MODULE_NAME))
+            ffPreparePublicIp(&instance.config.publicIP);
 
         if(ffStrbufContainIgnCaseS(&data.structure, "Weather"))
             ffPrepareWeather(&instance);
