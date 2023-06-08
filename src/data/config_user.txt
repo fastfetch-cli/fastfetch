@@ -335,6 +335,7 @@
 #--bluetooth-key Bluetooth
 #--sound-key Sound
 #--gamepad-key Gamepad
+#--wallpaper-key Wallpaper
 
 # Format options:
 # Sets the format string for module values.
@@ -382,6 +383,7 @@
 #--bluetooth-format
 #--sound-format
 #--gamepad-format
+#--wallpaper-format
 
 # Error options:
 # Sets the format string to use if an error occured
@@ -429,6 +431,7 @@
 #--bluetooth-error
 #--sound-error
 #--gamepad-error
+#--wallpaper-error
 
 # Library options:
 # Sets an user specific path to a library to load.
