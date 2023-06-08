@@ -55,6 +55,16 @@ typedef enum FFLocalIpCompactType
     FF_LOCALIP_COMPACT_TYPE_ONELINE,
 } FFLocalIpCompactType;
 
+typedef enum FFDiskType
+{
+    FF_DISK_TYPE_NONE = 0,
+    FF_DISK_TYPE_REGULAR_BIT = 1 << 0,
+    FF_DISK_TYPE_HIDDEN_BIT = 1 << 1,
+    FF_DISK_TYPE_EXTERNAL_BIT = 1 << 2,
+    FF_DISK_TYPE_SUBVOLUME_BIT = 1 << 3,
+    FF_DISK_TYPE_UNKNOWN_BIT = 1 << 4,
+} FFDiskType;
+
 typedef enum FFBinaryPrefixType
 {
     FF_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
@@ -217,10 +227,7 @@ typedef struct FFconfig
     bool terminalVersion;
 
     FFstrbuf diskFolders;
-    bool diskShowRemovable;
-    bool diskShowHidden;
-    bool diskShowUnknown;
-    bool diskShowSubvolumes;
+    FFDiskType diskShowTypes;
 
     FFDisplayCompactType displayCompactType;
     bool displayDetectName;

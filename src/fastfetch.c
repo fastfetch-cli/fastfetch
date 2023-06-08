@@ -1262,14 +1262,16 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         instance->config.terminalVersion = optionParseBoolean(value);
     else if(strcasecmp(key, "--disk-folders") == 0)
         optionParseString(key, value, &instance->config.diskFolders);
+    else if(strcasecmp(key, "--disk-show-regular") == 0)
+        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_REGULAR_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_REGULAR_BIT);
     else if(strcasecmp(key, "--disk-show-removable") == 0)
-        instance->config.diskShowRemovable = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_EXTERNAL_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT);
     else if(strcasecmp(key, "--disk-show-hidden") == 0)
-        instance->config.diskShowHidden = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_HIDDEN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_HIDDEN_BIT);
     else if(strcasecmp(key, "--disk-show-subvolumes") == 0)
-        instance->config.diskShowSubvolumes = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_SUBVOLUME_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT);
     else if(strcasecmp(key, "--disk-show-unknown") == 0)
-        instance->config.diskShowUnknown = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_UNKNOWN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT);
     else if(strcasecmp(key, "--display-compact-type") == 0)
     {
         optionParseEnum(key, value, &instance->config.displayCompactType,

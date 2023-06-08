@@ -112,7 +112,7 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
     if(stat(device->chars, &deviceStat) != 0)
         return;
 
-    FFstrbuf basePath;
+    FF_STRBUF_AUTO_DESTROY basePath;
     ffStrbufInit(&basePath);
 
     //Try partlabel first
@@ -129,8 +129,6 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
     //Use the mountpoint as a last resort
     if(disk->name.length == 0)
         ffStrbufAppend(&disk->name, &disk->mountpoint);
-
-    ffStrbufDestroy(&basePath);
 }
 
 #ifdef __ANDROID__
@@ -138,11 +136,11 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
 static void detectType(FF_MAYBE_UNUSED const FFlist* devices, FFDisk* currentDisk, FF_MAYBE_UNUSED const char* options)
 {
     if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
-        currentDisk->type = FF_DISK_TYPE_REGULAR;
+        currentDisk->type = FF_DISK_TYPE_REGULAR_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/mnt/media_rw/"))
-        currentDisk->type = FF_DISK_TYPE_EXTERNAL;
+        currentDisk->type = FF_DISK_TYPE_EXTERNAL_BIT;
     else
-        currentDisk->type = FF_DISK_TYPE_HIDDEN;
+        currentDisk->type = FF_DISK_TYPE_HIDDEN_BIT;
 }
 
 #else
@@ -171,13 +169,13 @@ static bool isSubvolume(const FFlist* devices)
 static void detectType(const FFlist* devices, FFDisk* currentDisk, const char* options)
 {
     if(isSubvolume(devices))
-        currentDisk->type = FF_DISK_TYPE_SUBVOLUME;
+        currentDisk->type = FF_DISK_TYPE_SUBVOLUME_BIT;
     else if(strstr(options, "nosuid") != NULL || strstr(options, "nodev") != NULL)
-        currentDisk->type = FF_DISK_TYPE_EXTERNAL;
+        currentDisk->type = FF_DISK_TYPE_EXTERNAL_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
-        currentDisk->type = FF_DISK_TYPE_HIDDEN;
+        currentDisk->type = FF_DISK_TYPE_HIDDEN_BIT;
     else
-        currentDisk->type = FF_DISK_TYPE_REGULAR;
+        currentDisk->type = FF_DISK_TYPE_REGULAR_BIT;
 }
 
 #endif
@@ -204,7 +202,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         return;
     }
 
-    FFlist devices;
+    FF_LIST_AUTO_DESTROY devices;
     ffListInit(&devices, sizeof(FFstrbuf));
 
     char* line = NULL;
@@ -254,7 +252,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
 
     FF_LIST_FOR_EACH(FFstrbuf, device, devices)
         ffStrbufDestroy(device);
-    ffListDestroy(&devices);
 
     fclose(mountsFile);
 }

@@ -9,7 +9,7 @@
 
 static void printDisk(FFinstance* instance, const FFDisk* disk)
 {
-    FFstrbuf key;
+    FF_STRBUF_AUTO_DESTROY key;
     ffStrbufInit(&key);
 
     if(instance->config.disk.key.length == 0)
@@ -23,11 +23,11 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
         });
     }
 
-    FFstrbuf usedPretty;
+    FF_STRBUF_AUTO_DESTROY usedPretty;
     ffStrbufInit(&usedPretty);
     ffParseSize(disk->bytesUsed, instance->config.binaryPrefixType, &usedPretty);
 
-    FFstrbuf totalPretty;
+    FF_STRBUF_AUTO_DESTROY totalPretty;
     ffStrbufInit(&totalPretty);
     ffParseSize(disk->bytesTotal, instance->config.binaryPrefixType, &totalPretty);
 
@@ -37,7 +37,7 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
     {
         ffPrintLogoAndKey(instance, key.chars, 0, NULL);
 
-        FFstrbuf str;
+        FF_STRBUF_AUTO_DESTROY str;
         ffStrbufInit(&str);
 
         if(disk->bytesTotal > 0)
@@ -60,12 +60,11 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
         else
             ffStrbufAppendS(&str, "Unknown ");
 
-        if(disk->type == FF_DISK_TYPE_EXTERNAL && !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        if(disk->type & FF_DISK_TYPE_EXTERNAL_BIT && !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
             ffStrbufAppendS(&str, "[Removable]");
 
         ffStrbufTrimRight(&str, ' ');
         ffStrbufPutTo(&str, stdout);
-        ffStrbufDestroy(&str);
     }
     else
     {
@@ -78,16 +77,12 @@ static void printDisk(FFinstance* instance, const FFDisk* disk)
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed},
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal},
             {FF_FORMAT_ARG_TYPE_UINT8, &filesPercentage},
-            {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type == FF_DISK_TYPE_EXTERNAL)},
-            {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type == FF_DISK_TYPE_HIDDEN)},
+            {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type & FF_DISK_TYPE_EXTERNAL_BIT)},
+            {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type & FF_DISK_TYPE_HIDDEN_BIT)},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name}
         });
     }
-
-    ffStrbufDestroy(&totalPretty);
-    ffStrbufDestroy(&usedPretty);
-    ffStrbufDestroy(&key);
 }
 
 static void printMountpoint(FFinstance* instance, const FFlist* disks, const char* mountpoint)
@@ -113,7 +108,7 @@ static void printMountpoints(FFinstance* instance, const FFlist* disks)
     const char separator = ':';
     #endif
 
-    FFstrbuf mountpoints;
+    FF_STRBUF_AUTO_DESTROY mountpoints;
     ffStrbufInitCopy(&mountpoints, &instance->config.diskFolders);
     ffStrbufTrim(&mountpoints, separator);
 
@@ -131,24 +126,19 @@ static void printMountpoints(FFinstance* instance, const FFlist* disks)
 
 static void printAutodetected(FFinstance* instance, const FFlist* disks)
 {
-    for(uint32_t i = 0; i < disks->length; i++)
+    bool found = false;
+
+    FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
-        const FFDisk* disk = ffListGet(disks, i);
-
-        if(disk->type == FF_DISK_TYPE_EXTERNAL && !instance->config.diskShowRemovable)
-            continue;
-
-        if(disk->type == FF_DISK_TYPE_SUBVOLUME && !instance->config.diskShowSubvolumes)
-            continue;
-
-        if(disk->type == FF_DISK_TYPE_HIDDEN && !instance->config.diskShowHidden)
-            continue;
-
-        if(disk->bytesTotal == 0 && !instance->config.diskShowUnknown)
+        if(!(disk->type & instance->config.diskShowTypes))
             continue;
 
         printDisk(instance, disk);
+        found = true;
     }
+
+    if (!found)
+        ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &instance->config.disk, "No disk found");
 }
 
 void ffPrintDisk(FFinstance* instance)

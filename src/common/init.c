@@ -157,10 +157,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.titleFQDN = false;
 
     ffStrbufInitA(&instance->config.diskFolders, 0);
-    instance->config.diskShowRemovable = true;
-    instance->config.diskShowHidden = false;
-    instance->config.diskShowUnknown = false;
-    instance->config.diskShowSubvolumes = false;
+    instance->config.diskShowTypes = FF_DISK_TYPE_REGULAR_BIT | FF_DISK_TYPE_EXTERNAL_BIT;
 
     instance->config.displayCompactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     instance->config.displayDetectName = false;

@@ -18,11 +18,18 @@ const FFDiskResult* ffDetectDisks()
 
         if(result.disks.length == 0 && result.error.length == 0)
             ffStrbufAppendS(&result.error, "No disks found");
-
-        //We need to sort the disks, so that we can detect, which disk a path resides on
-        // For example for /boot/efi/bootmgr we need to check /boot/efi before /boot
-        //Note that we sort alphabetically here for a better ordering when printing the list,
-        // so the check must be done in reverse order
-        ffListSort(&result.disks, compareDisks);
+        else
+        {
+            //We need to sort the disks, so that we can detect, which disk a path resides on
+            // For example for /boot/efi/bootmgr we need to check /boot/efi before /boot
+            //Note that we sort alphabetically here for a better ordering when printing the list,
+            // so the check must be done in reverse order
+            ffListSort(&result.disks, compareDisks);
+            FF_LIST_FOR_EACH(FFDisk, disk, result.disks)
+            {
+                if(disk->bytesTotal == 0)
+                    disk->type |= FF_DISK_TYPE_UNKNOWN_BIT;
+            }
+        }
     );
 }

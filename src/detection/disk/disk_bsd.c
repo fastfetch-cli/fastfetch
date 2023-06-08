@@ -13,11 +13,11 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         ffStrbufStartsWithS(&disk->mountpoint, "/proc") ||
         ffStrbufStartsWithS(&disk->mountpoint, "/zroot")
     )
-        disk->type = FF_DISK_TYPE_HIDDEN;
+        disk->type = FF_DISK_TYPE_HIDDEN_BIT;
     else if((fs->f_flags & MNT_NOSUID) || !(fs->f_flags & MNT_LOCAL))
-        disk->type = FF_DISK_TYPE_EXTERNAL;
+        disk->type = FF_DISK_TYPE_EXTERNAL_BIT;
     else
-        disk->type = FF_DISK_TYPE_REGULAR;
+        disk->type = FF_DISK_TYPE_REGULAR_BIT;
 
     ffStrbufInit(&disk->name);
 }
