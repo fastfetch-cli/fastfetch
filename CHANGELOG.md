@@ -1,16 +1,24 @@
 # 1.11.2
 
+This release should be the last version of fastfetch 1.x (if no serious bugs found, hopefully)
+
 Features:
 * Support display name, type, rotation detection on Wayland (Linux, Display)
 * Print more useful display name instead of intel_backlight (Linux, Brightness)
 * Icons module supports Windows (Windows, Icons)
-* Add Wallpaper module
+* Add Wallpaper module which shows the current wallpaper image path
+* Add mac address detection `--localip-show-mac` (LocalIP, #451)
 
 Bugfixes:
-* Fix Gnome version detection on Fedora
+* Fix Gnome version detection on Fedora (DE)
+* Fix Windows drives detection in WSL (Disk)
 
 Changes:
 * In order to make Icons module consistant between different platforms, `--icons-format` no longer supports individual GTK / QT icon params.
+* `--theme-format` no longer supports individual GTK / plasma theme params.
+* `--local-ip-*` and `--public-ip-*` have been changed to `--localip-*` and `--publicip-*`
+* `--localip-compact-type` is no longer supported. Fastfetch now display IPs as `--localip-compat-type multiline` by default, with `--local-compact true` can be set as an alias of `--localip-compact-type oneline`
+* `--localip-v6first` is no longer supported.
 
 # 1.11.1
 
