@@ -8,8 +8,9 @@
 typedef struct FFLocalIpResult
 {
     FFstrbuf name;
-    FFstrbuf addr;
-    bool ipv6;
+    FFstrbuf ipv4;
+    FFstrbuf ipv6;
+    FFstrbuf mac;
 } FFLocalIpResult;
 
 const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results);

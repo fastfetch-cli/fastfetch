@@ -15,6 +15,8 @@
     #include "util/windows/getline.h"
 #endif
 
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+
 typedef struct CustomValue
 {
     bool printKey;
@@ -1159,8 +1161,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(optionParseModuleArgs(key, value, "battery", &instance->config.battery)) {}
     else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
     else if(optionParseModuleArgs(key, value, "locale", &instance->config.locale)) {}
-    else if(optionParseModuleArgs(key, value, "local-ip", &instance->config.localIP)) {}
-    else if(optionParseModuleArgs(key, value, "public-ip", &instance->config.publicIP)) {}
+    else if(optionParseModuleArgs(key, value, "localip", &instance->config.localIP)) {}
+    else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
     else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
     else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
     else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
@@ -1295,32 +1297,25 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseString(key, value, &instance->config.batteryDir);
     else if(strcasecmp(key, "--separator-string") == 0)
         optionParseString(key, value, &instance->config.separatorString);
-    else if(strcasecmp(key, "--localip-v6first") == 0)
-        instance->config.localIpV6First = optionParseBoolean(value);
     else if(strcasecmp(key, "--localip-show-ipv4") == 0)
-        instance->config.localIpShowIpV4 = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV4_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV4_BIT);
     else if(strcasecmp(key, "--localip-show-ipv6") == 0)
-        instance->config.localIpShowIpV6 = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV6_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV6_BIT);
+    else if(strcasecmp(key, "--localip-show-mac") == 0)
+        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_MAC_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_MAC_BIT);
     else if(strcasecmp(key, "--localip-show-loop") == 0)
-        instance->config.localIpShowLoop = optionParseBoolean(value);
+        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_LOOP_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_LOOP_BIT);
+    else if(strcasecmp(key, "--localip-compact") == 0)
+        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_COMPACT_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_COMPACT_BIT);
     else if(strcasecmp(key, "--localip-name-prefix") == 0)
         optionParseString(key, value, &instance->config.localIpNamePrefix);
-    else if(strcasecmp(key, "--localip-compact-type") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.localIpCompactType,
-            "none", FF_LOCALIP_COMPACT_TYPE_NONE,
-            "oneline", FF_LOCALIP_COMPACT_TYPE_ONELINE,
-            "multiline", FF_LOCALIP_COMPACT_TYPE_MULTILINE,
-            NULL
-        );
-    }
     else if(strcasecmp(key, "--os-file") == 0)
         optionParseString(key, value, &instance->config.osFile);
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
-    else if(strcasecmp(key, "--public-ip-url") == 0)
+    else if(strcasecmp(key, "--publicip-url") == 0)
         optionParseString(key, value, &instance->config.publicIpUrl);
-    else if(strcasecmp(key, "--public-ip-timeout") == 0)
+    else if(strcasecmp(key, "--publicip-timeout") == 0)
         instance->config.publicIpTimeout = optionParseUInt32(key, value);
     else if(strcasecmp(key, "--weather-output-format") == 0)
         optionParseString(key, value, &instance->config.weatherOutputFormat);

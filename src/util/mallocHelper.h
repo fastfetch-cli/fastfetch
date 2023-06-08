@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <assert.h>
 
 static inline void ffWrapFree(void* pPtr)
 {

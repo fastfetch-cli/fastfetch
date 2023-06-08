@@ -168,13 +168,13 @@
 # Sets the URL of public IP detection server to be used.
 # Only HTTP protocol is supported, and the value should not contain "http://" prefix.
 # Default is "ipinfo.io/ip".
-#--public-ip-url "ipinfo.io/ip"
+#--publicip-url "ipinfo.io/ip"
 
 # Public IP timeout option:
 # Sets the time to wait for the public ip server to respond.
 # Must be a positive integer.
 # Default is 0 (disabled).
-#--public-ip-timeout 0
+#--publicip-timeout 0
 
 # Weather output format option:
 # Sets the weather format to be used. It must be URI encoded.
@@ -321,8 +321,8 @@
 #--battery-key Battery {1}
 #--poweradapter-key Power Adapter {1}
 #--locale-key Locale
-#--local-ip-key Local IP ({1})
-#--public-ip-key Public IP
+#--localip-key Local IP ({1})
+#--publicip-key Public IP
 #--wifi-key Wifi
 #--weather-key Weather
 #--player-key Media Player
@@ -369,8 +369,8 @@
 #--battery-format
 #--poweradapter-format
 #--locale-format
-#--local-ip-format
-#--public-ip-format
+#--localip-format
+#--publicip-format
 #--weather-format
 #--player-format
 #--media-format
@@ -416,8 +416,8 @@
 #--battery-error
 #--poweradapter-error
 #--locale-error
-#--local-ip-error
-#--public-ip-error
+#--localip-error
+#--publicip-error
 #--weather-error
 #--player-error
 #--media-error

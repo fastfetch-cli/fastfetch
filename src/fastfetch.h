@@ -77,6 +77,18 @@ typedef struct FFModuleArgs
     FFstrbuf errorFormat;
 } FFModuleArgs;
 
+typedef enum FFLocalIpType
+{
+    FF_LOCALIP_TYPE_NONE,
+    FF_LOCALIP_TYPE_LOOP_BIT = 1 << 0,
+    FF_LOCALIP_TYPE_IPV4_BIT = 1 << 1,
+    FF_LOCALIP_TYPE_IPV6_BIT = 1 << 2,
+    FF_LOCALIP_TYPE_MAC_BIT  = 1 << 3,
+    FF_LOCALIP_TYPE_TYPE_BIT = 1 << 4,
+
+    FF_LOCALIP_TYPE_COMPACT_BIT = 1 << 10,
+} FFLocalIpType;
+
 typedef struct FFconfig
 {
     struct
@@ -220,12 +232,8 @@ typedef struct FFconfig
 
     FFstrbuf separatorString;
 
-    bool localIpShowLoop;
-    bool localIpV6First;
-    bool localIpShowIpV4;
-    bool localIpShowIpV6;
     FFstrbuf localIpNamePrefix;
-    FFLocalIpCompactType localIpCompactType;
+    FFLocalIpType localIpShowType;
 
     FFstrbuf publicIpUrl;
     uint32_t publicIpTimeout;

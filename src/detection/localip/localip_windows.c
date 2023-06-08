@@ -1,21 +1,45 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
-#include <wchar.h>
 
+#include "util/mallocHelper.h"
+#include "util/windows/unicode.h"
 #include "localip.h"
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, bool ipv6)
+static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp)
 {
-    FFLocalIpResult* ip = (FFLocalIpResult*) ffListAdd(list);
-    ffStrbufInitS(&ip->name, name);
-    ffStrbufInitS(&ip->addr, addr);
-    ip->ipv6 = ipv6;
+    FFLocalIpResult* ip = NULL;
+
+    if (newIp)
+    {
+        ip = (FFLocalIpResult*) ffListAdd(list);
+        ffStrbufInitS(&ip->name, name);
+        ffStrbufInit(&ip->ipv4);
+        ffStrbufInit(&ip->ipv6);
+        ffStrbufInit(&ip->mac);
+    }
+    else
+    {
+        ip = ffListGet(list, list->length - 1);
+    }
+
+    switch (type)
+    {
+        case AF_INET:
+            ffStrbufSetS(&ip->ipv4, value);
+            break;
+        case AF_INET6:
+            ffStrbufSetS(&ip->ipv6, value);
+            break;
+        case -1:
+            ffStrbufSetS(&ip->mac, value);
+            break;
+    }
 }
 
 const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
 {
-    IP_ADAPTER_ADDRESSES* adapter_addresses = NULL;
+    IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
     // Start with a 16 KB buffer and resize if needed -
     // multiple attempts in case interfaces change while
@@ -27,11 +51,10 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
         assert(adapter_addresses);
 
         DWORD error = GetAdaptersAddresses(
-            AF_UNSPEC,
-            GAA_FLAG_SKIP_ANYCAST |
-            GAA_FLAG_SKIP_MULTICAST |
-            GAA_FLAG_SKIP_DNS_SERVER |
-            GAA_FLAG_SKIP_FRIENDLY_NAME,
+            instance->config.localIpShowType & FF_LOCALIP_TYPE_IPV4_BIT
+                ? instance->config.localIpShowType & FF_LOCALIP_TYPE_IPV6_BIT ? AF_UNSPEC : AF_INET
+                : AF_INET6,
+            GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
             NULL,
             adapter_addresses,
             &adapter_addresses_buffer_size);
@@ -47,41 +70,47 @@ const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results)
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
-        if (adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK && !instance->config.localIpShowLoop)
+        bool isLoop = adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK;
+        if (isLoop && !(instance->config.localIpShowType & FF_LOCALIP_TYPE_LOOP_BIT))
             continue;
+
+        bool newIp = true;
 
         char name[128];
         WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, sizeof(name), NULL, NULL);
         if (instance->config.localIpNamePrefix.length && strncmp(name, instance->config.localIpNamePrefix.chars, instance->config.localIpNamePrefix.length) != 0)
             continue;
 
+        if (instance->config.localIpShowType & FF_LOCALIP_TYPE_MAC_BIT && adapter->PhysicalAddressLength == 6)
+        {
+            char addressBuffer[32];
+            uint8_t* ptr = adapter->PhysicalAddress;
+            snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
+                        ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
+            addNewIp(results, name, addressBuffer, -1, newIp);
+            newIp = false;
+        }
+
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
         {
             if (ifa->Address.lpSockaddr->sa_family == AF_INET)
             {
-                // IPv4
-                if (!instance->config.localIpShowIpV4)
-                    continue;
-
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, false);
+                addNewIp(results, name, addressBuffer, AF_INET, newIp);
+                newIp = false;
             }
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
             {
-                // IPv6
-                if (!instance->config.localIpShowIpV6)
-                    continue;
-
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, true);
+                addNewIp(results, name, addressBuffer, AF_INET6, newIp);
+                newIp = false;
             }
         }
     }
 
-    free(adapter_addresses);
     return NULL;
 }

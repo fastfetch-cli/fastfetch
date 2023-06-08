@@ -126,12 +126,12 @@ Module specific options:
     --battery-temp  <?value>:                Detect and display Battery temperature if supported. Default is false
     --localip-show-ipv4 <?value>:            Show IPv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
+    --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
     --localip-show-loop <?value>:            Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --localip-name-prefix <str>:             Show IPs with given name prefix only. Default is empty
-    --localip-compact-type <str>:            Show IPs in one line. Should be either none, oneline, multiline. Default is none
-    --localip-v6first <?value>:              Set if ipv6 should be printed first. Default is false
-    --public-ip-timeout:                     Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
-    --public-ip-url:                         The URL of public IP detection server to be used.
+    --localip-compact <?value>:              Show all IPs in one line. Default is false
+    --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
+    --publicip-url:                          The URL of public IP detection server to be used.
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use

@@ -5,28 +5,9 @@
 #define FF_LOCALIP_MODULE_NAME "Local IP"
 #define FF_LOCALIP_NUM_FORMAT_ARGS 2
 
-static int sortIpsV4First(const FFLocalIpResult* left, const FFLocalIpResult* right)
+static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
 {
-    int name = ffStrbufComp(&left->name, &right->name);
-    if (name != 0)
-        return name;
-
-    if (left->ipv6 != right->ipv6)
-        return left->ipv6 == false ? -1 : 1;
-
-    return ffStrbufComp(&left->addr, &right->addr);
-}
-
-static int sortIpsV6First(const FFLocalIpResult* left, const FFLocalIpResult* right)
-{
-    int name = ffStrbufComp(&left->name, &right->name);
-    if (name != 0)
-        return name;
-
-    if (left->ipv6 != right->ipv6)
-        return left->ipv6 == true ? -1 : 1;
-
-    return ffStrbufComp(&left->addr, &right->addr);
+    return ffStrbufComp(&left->name, &right->name);
 }
 
 static void formatKey(const FFinstance* instance, const FFLocalIpResult* ip, FFstrbuf* key)
@@ -47,32 +28,27 @@ static void formatKey(const FFinstance* instance, const FFLocalIpResult* ip, FFs
     }
 }
 
-static void printIpsOneline(FFlist* ips)
+static void printIp(FFLocalIpResult* ip)
 {
-    uint32_t index = 0;
-    FF_LIST_FOR_EACH(FFLocalIpResult, ip, *ips)
+    bool flag = false;
+    if (ip->ipv4.length)
     {
-        if (index++ > 0)
-            putchar(' ');
-        ffStrbufWriteTo(&ip->addr, stdout);
+        ffStrbufWriteTo(&ip->ipv4, stdout);
+        flag = true;
     }
-}
-
-static void printIpsWithKey(FFinstance* instance, FFlist* ips)
-{
-    FFLocalIpResult* ip = (FFLocalIpResult*) ffListGet(ips, 0);
-    if (instance->config.localIpCompactType == FF_LOCALIP_COMPACT_TYPE_MULTILINE)
+    if (ip->ipv6.length)
     {
-        FF_STRBUF_AUTO_DESTROY key;
-        ffStrbufInit(&key);
-        formatKey(instance, ip, &key);
-        ffPrintLogoAndKey(instance, key.chars, 0, NULL);
+        if (flag) putchar(' ');
+        ffStrbufWriteTo(&ip->ipv6, stdout);
+        flag = true;
     }
-    printIpsOneline(ips);
-    if (instance->config.localIpCompactType == FF_LOCALIP_COMPACT_TYPE_ONELINE)
-        printf(" (%s) ", ip->name.chars);
-    else
-        putchar('\n');
+    if (ip->mac.length)
+    {
+        if (flag)
+            printf(" (%s)", ip->mac.chars);
+        else
+            ffStrbufWriteTo(&ip->mac, stdout);
+    }
 }
 
 void ffPrintLocalIp(FFinstance* instance)
@@ -94,26 +70,18 @@ void ffPrintLocalIp(FFinstance* instance)
         return;
     }
 
-    ffListSort(&results, instance->config.localIpV6First ? (void*) sortIpsV6First : (void*) sortIpsV4First);
+    ffListSort(&results, (void*) sortIps);
 
-    if (instance->config.localIpCompactType != FF_LOCALIP_COMPACT_TYPE_NONE)
+    if (instance->config.localIpShowType & FF_LOCALIP_TYPE_COMPACT_BIT)
     {
-        if (instance->config.localIpCompactType == FF_LOCALIP_COMPACT_TYPE_ONELINE)
-            ffPrintLogoAndKey(instance, FF_LOCALIP_MODULE_NAME, 0, &instance->config.localIP.key);
-
-        FF_LIST_AUTO_DESTROY ips;
-        ffListInit(&ips, sizeof(FFLocalIpResult)); // weak references
+        ffPrintLogoAndKey(instance, FF_LOCALIP_MODULE_NAME, 0, &instance->config.localIP.key);
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
-            if (ips.length > 0 && !ffStrbufEqual(&ip->name, &ip[-1].name))
-            {
-                printIpsWithKey(instance, &ips);
-                ips.length = 0;
-            }
-            *(FFLocalIpResult*)ffListAdd(&ips) = *ip;
+            if ((void*) ip != (void*) results.data)
+                fputs(" - ", stdout);
+            printIp(ip);
         }
-        printIpsWithKey(instance, &ips);
     }
     else
     {
@@ -126,18 +94,26 @@ void ffPrintLocalIp(FFinstance* instance)
             if(instance->config.localIP.outputFormat.length == 0)
             {
                 ffPrintLogoAndKey(instance, key.chars, 0, NULL);
-                ffStrbufPutTo(&ip->addr, stdout);
+                printIp(ip);
+                putchar('\n');
             }
             else
             {
                 ffPrintFormatString(instance, key.chars, 0, NULL, &instance->config.localIP.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->addr},
-                    {FF_FORMAT_ARG_TYPE_STRING, ip->ipv6 ? "IPv6" : "IPv4"}
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name},
                 });
             }
-
-            ffStrbufDestroy(&ip->name);
-            ffStrbufDestroy(&ip->addr);
         }
+    }
+
+    FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
+    {
+        ffStrbufDestroy(&ip->name);
+        ffStrbufDestroy(&ip->ipv4);
+        ffStrbufDestroy(&ip->ipv6);
+        ffStrbufDestroy(&ip->mac);
     }
 }
