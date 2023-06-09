@@ -82,7 +82,7 @@ option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by gith
 ####################
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
