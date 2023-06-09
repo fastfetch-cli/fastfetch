@@ -181,6 +181,7 @@ static const DConfData* getDConfData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_dup_string)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
+    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_unref)
     #undef data
 
     data.client = data.ffdconf_client_new();
