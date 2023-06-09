@@ -1,3 +1,8 @@
+# 1.11.3
+
+Bugfixes:
+* Fix a segfault bug, regression of `1.11.1` (Linux, wmtheme, #467)
+
 # 1.11.2
 
 This release should be the last version of fastfetch 1.x (if no serious bugs found, hopefully)
