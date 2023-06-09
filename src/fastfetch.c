@@ -746,40 +746,6 @@ static void optionParseEnum(const char* argumentKey, const char* requestedKey, v
     exit(478);
 }
 
-static bool optionParseModuleArgs(const char* argumentKey, const char* value, const char* moduleName, struct FFModuleArgs* result)
-{
-    const char* pkey = argumentKey;
-    if(!(pkey[0] == '-' && pkey[1] == '-'))
-        return false;
-
-    pkey += 2;
-    uint32_t moduleNameLen = (uint32_t)strlen(moduleName);
-    if(strncasecmp(pkey, moduleName, moduleNameLen) != 0)
-        return false;
-
-    pkey += moduleNameLen;
-    if(pkey[0] != '-')
-        return false;
-
-    pkey += 1;
-    if(strcasecmp(pkey, "key") == 0)
-    {
-        optionParseString(argumentKey, value, &result->key);
-        return true;
-    }
-    else if(strcasecmp(pkey, "format") == 0)
-    {
-        optionParseString(argumentKey, value, &result->outputFormat);
-        return true;
-    }
-    else if(strcasecmp(pkey, "error") == 0)
-    {
-        optionParseString(argumentKey, value, &result->errorFormat);
-        return true;
-    }
-    return false;
-}
-
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
     ///////////////////////
@@ -983,7 +949,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseCustomCommandOptions(&instance->config.custom, key, value)) {}
     else if(ffParseKernelCommandOptions(&instance->config.kernel, key, value)) {}
     else if(ffParseUptimeCommandOptions(&instance->config.uptime, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
+    else if(ffParseProcessesCommandOptions(&instance->config.processes, key, value)) {}
     else if(ffParsePackagesCommandOptions(&instance->config.packages, key, value)) {}
     else if(ffParseShellCommandOptions(&instance->config.shell, key, value)) {}
     else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
@@ -1162,8 +1128,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintChassis(instance, &instance->config.chassis);
     else if(strcasecmp(line, FF_KERNEL_MODULE_NAME) == 0)
         ffPrintKernel(instance, &instance->config.kernel);
-    else if(strcasecmp(line, "processes") == 0)
-        ffPrintProcesses(instance);
+    else if(strcasecmp(line, FF_PROCESSES_MODULE_NAME) == 0)
+        ffPrintProcesses(instance, &instance->config.processes);
     else if(strcasecmp(line, FF_UPTIME_MODULE_NAME) == 0)
         ffPrintUptime(instance, &instance->config.uptime);
     else if(strcasecmp(line, FF_PACKAGES_MODULE_NAME) == 0)

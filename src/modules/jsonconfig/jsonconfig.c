@@ -116,6 +116,7 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
                 tryModule(instance, type, module, FF_PACKAGES_MODULE_NAME, ffParsePackagesJsonObject) ||
                 tryModule(instance, type, module, FF_PLAYER_MODULE_NAME, ffParsePlayerJsonObject) ||
                 tryModule(instance, type, module, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterJsonObject) ||
+                tryModule(instance, type, module, FF_PROCESSES_MODULE_NAME, ffParseProcessesJsonObject) ||
                 tryModule(instance, type, module, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpJsonObject) ||
                 false;
         }

@@ -28,13 +28,6 @@ static void initState(FFstate* state)
     ffPlatformInit(&state->platform);
 }
 
-static void initModuleArg(FFModuleArgs* args)
-{
-    ffStrbufInit(&args->key);
-    ffStrbufInit(&args->outputFormat);
-    ffStrbufInit(&args->errorFormat);
-}
-
 static void defaultConfig(FFinstance* instance)
 {
     ffInitLogoOptions(&instance->config.logo);
@@ -67,7 +60,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitCustomOptions(&instance->config.custom);
     ffInitKernelOptions(&instance->config.kernel);
     ffInitUptimeOptions(&instance->config.uptime);
-    initModuleArg(&instance->config.processes);
+    ffInitProcessesOptions(&instance->config.processes);
     ffInitPackagesOptions(&instance->config.packages);
     ffInitShellOptions(&instance->config.shell);
     ffInitDisplayOptions(&instance->config.display);
@@ -252,13 +245,6 @@ void ffFinish(FFinstance* instance)
     resetConsole();
 }
 
-static void destroyModuleArg(FFModuleArgs* args)
-{
-    ffStrbufDestroy(&args->key);
-    ffStrbufDestroy(&args->outputFormat);
-    ffStrbufDestroy(&args->errorFormat);
-}
-
 static void destroyConfig(FFinstance* instance)
 {
     ffDestroyLogoOptions(&instance->config.logo);
@@ -278,7 +264,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyCustomOptions(&instance->config.custom);
     ffDestroyKernelOptions(&instance->config.kernel);
     ffDestroyUptimeOptions(&instance->config.uptime);
-    destroyModuleArg(&instance->config.processes);
+    ffDestroyProcessesOptions(&instance->config.processes);
     ffDestroyPackagesOptions(&instance->config.packages);
     ffDestroyShellOptions(&instance->config.shell);
     ffDestroyDisplayOptions(&instance->config.display);

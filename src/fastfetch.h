@@ -57,7 +57,7 @@ typedef struct FFconfig
     FFCommandOptions command;
     FFKernelOptions kernel;
     FFUptimeOptions uptime;
-    FFModuleArgs processes;
+    FFProcessesOptions processes;
     FFPackagesOptions packages;
     FFShellOptions shell;
     FFDisplayOptions display;
@@ -167,13 +167,5 @@ void ffLogoPrintLine(FFinstance* instance);
 void ffLogoBuiltinPrint(FFinstance* instance);
 void ffLogoBuiltinList();
 void ffLogoBuiltinListAutocompletion();
-
-//////////////////////
-// Module functions //
-//////////////////////
-
-//Printing
-
-void ffPrintProcesses(FFinstance* instance);
 
 #endif
