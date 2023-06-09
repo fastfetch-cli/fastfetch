@@ -108,6 +108,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     if(instance->config.allowSlowOperations)
     {
         FF_STRBUF_AUTO_DESTROY name;
+        ffStrbufInit(&name);
         detectWMPlugin(&name);
         if(name.length)
             ffStrbufAppendF(&ds->wmPrettyName, " (with %s)", name.chars);
