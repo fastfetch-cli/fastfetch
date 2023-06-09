@@ -94,7 +94,6 @@ typedef enum FFLocalIpType
     FF_LOCALIP_TYPE_IPV4_BIT = 1 << 1,
     FF_LOCALIP_TYPE_IPV6_BIT = 1 << 2,
     FF_LOCALIP_TYPE_MAC_BIT  = 1 << 3,
-    FF_LOCALIP_TYPE_TYPE_BIT = 1 << 4,
 
     FF_LOCALIP_TYPE_COMPACT_BIT = 1 << 10,
 } FFLocalIpType;
