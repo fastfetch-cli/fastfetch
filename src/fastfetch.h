@@ -53,7 +53,7 @@ typedef struct FFconfig
     FFBiosOptions bios;
     FFBoardOptions board;
     FFBrightnessOptions brightness;
-    FFModuleArgs chassis;
+    FFChassisOptions chassis;
     FFCommandOptions command;
     FFKernelOptions kernel;
     FFUptimeOptions uptime;
@@ -174,7 +174,6 @@ void ffLogoBuiltinListAutocompletion();
 
 //Printing
 
-void ffPrintChassis(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
 
 #endif

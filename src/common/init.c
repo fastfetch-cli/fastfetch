@@ -62,7 +62,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitBiosOptions(&instance->config.bios);
     ffInitBoardOptions(&instance->config.board);
     ffInitBrightnessOptions(&instance->config.brightness);
-    initModuleArg(&instance->config.chassis);
+    ffInitChassisOptions(&instance->config.chassis);
     ffInitCommandOptions(&instance->config.command);
     ffInitCustomOptions(&instance->config.custom);
     ffInitKernelOptions(&instance->config.kernel);
@@ -273,7 +273,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyBiosOptions(&instance->config.bios);
     ffDestroyBoardOptions(&instance->config.board);
     ffDestroyBrightnessOptions(&instance->config.brightness);
-    destroyModuleArg(&instance->config.chassis);
+    ffDestroyChassisOptions(&instance->config.chassis);
     ffDestroyCommandOptions(&instance->config.command);
     ffDestroyCustomOptions(&instance->config.custom);
     ffDestroyKernelOptions(&instance->config.kernel);

@@ -978,7 +978,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
     else if(ffParseBiosCommandOptions(&instance->config.bios, key, value)) {}
     else if(ffParseBoardCommandOptions(&instance->config.board, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
+    else if(ffParseChassisCommandOptions(&instance->config.chassis, key, value)) {}
     else if(ffParseCommandCommandOptions(&instance->config.command, key, value)) {}
     else if(ffParseCustomCommandOptions(&instance->config.custom, key, value)) {}
     else if(ffParseKernelCommandOptions(&instance->config.kernel, key, value)) {}
@@ -1158,8 +1158,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintBoard(instance, &instance->config.board);
     else if(strcasecmp(line, FF_BRIGHTNESS_MODULE_NAME) == 0)
         ffPrintBrightness(instance, &instance->config.brightness);
-    else if(strcasecmp(line, "chassis") == 0)
-        ffPrintChassis(instance);
+    else if(strcasecmp(line, FF_CHASSIS_MODULE_NAME) == 0)
+        ffPrintChassis(instance, &instance->config.chassis);
     else if(strcasecmp(line, FF_KERNEL_MODULE_NAME) == 0)
         ffPrintKernel(instance, &instance->config.kernel);
     else if(strcasecmp(line, "processes") == 0)

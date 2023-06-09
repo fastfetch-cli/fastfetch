@@ -8,6 +8,7 @@
 #include "modules/brightness/brightness.h"
 #include "modules/board/board.h"
 #include "modules/break/break.h"
+#include "modules/chassis/chassis.h"
 #include "modules/cpu/cpu.h"
 #include "modules/cpuusage/cpuusage.h"
 #include "modules/command/command.h"

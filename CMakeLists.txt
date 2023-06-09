@@ -268,7 +268,7 @@ set(LIBFASTFETCH_SRC
     src/modules/board/board.c
     src/modules/brightness/brightness.c
     src/modules/break/break.c
-    src/modules/chassis.c
+    src/modules/chassis/chassis.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
     src/modules/cpuusage/cpuusage.c
