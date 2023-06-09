@@ -66,7 +66,7 @@ typedef struct FFconfig
     FFWifiOptions wifi;
     FFWMOptions wm;
     FFWMThemeOptions wmTheme;
-    FFModuleArgs theme;
+    FFThemeOptions theme;
     FFIconsOptions icons;
     FFFontOptions font;
     FFCursorOptions cursor;
@@ -176,6 +176,5 @@ void ffLogoBuiltinListAutocompletion();
 
 void ffPrintChassis(FFinstance* instance);
 void ffPrintProcesses(FFinstance* instance);
-void ffPrintTheme(FFinstance* instance);
 
 #endif

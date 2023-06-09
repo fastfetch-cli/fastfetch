@@ -992,7 +992,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseWifiCommandOptions(&instance->config.wifi, key, value)) {}
     else if(ffParseWMCommandOptions(&instance->config.wm, key, value)) {}
     else if(ffParseWMThemeCommandOptions(&instance->config.wmTheme, key, value)) {}
-    else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
+    else if(ffParseThemeCommandOptions(&instance->config.theme, key, value)) {}
     else if(ffParseIconsCommandOptions(&instance->config.icons, key, value)) {}
     else if(ffParseWallpaperCommandOptions(&instance->config.wallpaper, key, value)) {}
     else if(ffParseFontCommandOptions(&instance->config.font, key, value)) {}
@@ -1176,8 +1176,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintDE(instance, &instance->config.de);
     else if(strcasecmp(line, FF_WM_MODULE_NAME) == 0)
         ffPrintWM(instance, &instance->config.wm);
-    else if(strcasecmp(line, "theme") == 0)
-        ffPrintTheme(instance);
+    else if(strcasecmp(line, FF_THEME_MODULE_NAME) == 0)
+        ffPrintTheme(instance, &instance->config.theme);
     else if(strcasecmp(line, FF_WMTHEME_MODULE_NAME) == 0)
         ffPrintWMTheme(instance, &instance->config.wmTheme);
     else if(strcasecmp(line, FF_ICONS_MODULE_NAME) == 0)

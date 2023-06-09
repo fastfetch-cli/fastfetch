@@ -74,7 +74,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitDEOptions(&instance->config.de);
     ffInitWMOptions(&instance->config.wm);
     ffInitWMThemeOptions(&instance->config.wmTheme);
-    initModuleArg(&instance->config.theme);
+    ffInitThemeOptions(&instance->config.theme);
     ffInitIconsOptions(&instance->config.icons);
     ffInitFontOptions(&instance->config.font);
     ffInitCursorOptions(&instance->config.cursor);
@@ -285,7 +285,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroyDEOptions(&instance->config.de);
     ffDestroyWMOptions(&instance->config.wm);
     ffDestroyWMThemeOptions(&instance->config.wmTheme);
-    destroyModuleArg(&instance->config.theme);
+    ffDestroyThemeOptions(&instance->config.theme);
     ffDestroyIconsOptions(&instance->config.icons);
     ffDestroyFontOptions(&instance->config.font);
     ffDestroyCursorOptions(&instance->config.cursor);

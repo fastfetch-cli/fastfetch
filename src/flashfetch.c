@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     ffPrintDE(&instance, &instance.config.de);
     ffPrintWM(&instance, &instance.config.wm);
     ffPrintWMTheme(&instance, &instance.config.wmTheme);
-    ffPrintTheme(&instance);
+    ffPrintTheme(&instance, &instance.config.theme);
     ffPrintIcons(&instance, &instance.config.icons);
     ffPrintFont(&instance, &instance.config.font);
     ffPrintCursor(&instance, &instance.config.cursor);
