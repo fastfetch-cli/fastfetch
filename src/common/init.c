@@ -337,6 +337,7 @@ static void destroyConfig(FFinstance* instance)
     destroyModuleArg(&instance->config.host);
     destroyModuleArg(&instance->config.bios);
     destroyModuleArg(&instance->config.board);
+    destroyModuleArg(&instance->config.chassis);
     destroyModuleArg(&instance->config.kernel);
     destroyModuleArg(&instance->config.uptime);
     destroyModuleArg(&instance->config.processes);
