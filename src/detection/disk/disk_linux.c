@@ -112,8 +112,7 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
     if(stat(device->chars, &deviceStat) != 0)
         return;
 
-    FF_STRBUF_AUTO_DESTROY basePath;
-    ffStrbufInit(&basePath);
+    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
 
     //Try partlabel first
     ffStrbufSetS(&basePath, "/dev/disk/by-partlabel/");
@@ -202,8 +201,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         return;
     }
 
-    FF_LIST_AUTO_DESTROY devices;
-    ffListInit(&devices, sizeof(FFstrbuf));
+    FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
     char* line = NULL;
     size_t len = 0;

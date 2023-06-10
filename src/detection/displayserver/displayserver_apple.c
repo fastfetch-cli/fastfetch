@@ -40,8 +40,7 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 }
             }
 
-            FF_STRBUF_AUTO_DESTROY name;
-            ffStrbufInit(&name);
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
             if(detectName && CoreDisplay_DisplayCreateInfoDictionary)
             {
                 CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
@@ -121,5 +120,5 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
-    detectDisplays(ds, instance->config.displayDetectName);
+    detectDisplays(ds, instance->config.display.detectName);
 }

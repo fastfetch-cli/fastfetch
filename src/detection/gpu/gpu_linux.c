@@ -64,13 +64,8 @@ static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PC
         #endif
     }
 
-    FFstrbuf query;
-    ffStrbufInit(&query);
-    ffStrbufAppendF(&query, "%X, %X,", device->device_id, revId);
-
+    FF_STRBUF_AUTO_DESTROY query = ffStrbufCreateF("%X, %X,", device->device_id, revId);
     ffParsePropFileData(instance, "libdrm/amdgpu.ids", query.chars, &gpu->name);
-
-    ffStrbufDestroy(&query);
 
     const char* removeStrings[] = {
         "AMD ", "ATI ",
@@ -116,10 +111,7 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     if(!ffStrSet(base))
         return;
 
-    FFstrbuf path;
-    ffStrbufInitA(&path, 64);
-    ffStrbufAppendF(&path, "%s/devices/%04x:%02x:%02x.%d/driver", base, device->domain, device->bus, device->dev, device->func);
-
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateF("%s/devices/%04x:%02x:%02x.%d/driver", base, device->domain, device->bus, device->dev, device->func);
     ffStrbufEnsureFree(&gpu->driver, 1023);
     ssize_t resultLength = readlink(path.chars, gpu->driver.chars, gpu->driver.allocated - 1); //-1 for null terminator
     if(resultLength > 0)
@@ -128,8 +120,6 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
         gpu->driver.chars[resultLength] = '\0';
         ffStrbufSubstrAfterLastC(&gpu->driver, '/');
     }
-
-    ffStrbufDestroy(&path);
 }
 
 static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
@@ -216,7 +206,7 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
-    if(instance->config.gpuTemp)
+    if(instance->config.gpu.temp)
         pciDetectTemperatur(gpu, device);
 }
 

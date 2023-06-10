@@ -10,7 +10,7 @@ static bool detectWMThemeFromConfigFile(FFinstance* instance, const char* config
 {
     if(!ffParsePropFileConfig(instance, configFile, themeRegex, themeOrError))
     {
-        ffStrbufInitF(themeOrError, "Config file %s doesn't exist", configFile);
+        ffStrbufAppendF(themeOrError, "Config file %s doesn't exist", configFile);
         return false;
     }
 
@@ -131,8 +131,7 @@ static bool detectXFWM4(FFinstance* instance, FFstrbuf* themeOrError)
 
 static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
 {
-    FFstrbuf absolutePath;
-    ffStrbufInitA(&absolutePath, 64);
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(64);
     ffStrbufAppend(&absolutePath, &instance->state.platform.homeDir);
 
     //TODO: use config dirs
@@ -150,7 +149,6 @@ static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FF
     if(file == NULL)
     {
         ffStrbufAppendF(themeOrError, "Couldn't open \"%s\"", absolutePath.chars);
-        ffStrbufDestroy(&absolutePath);
 
         return false;
     }
@@ -184,11 +182,9 @@ static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FF
     if(themeOrError->length == 0)
     {
         ffStrbufAppendF(themeOrError, "Couldn't find theme name in \"%s\"", absolutePath.chars);
-        ffStrbufDestroy(&absolutePath);
         return false;
     }
 
-    ffStrbufDestroy(&absolutePath);
     return true;
 }
 

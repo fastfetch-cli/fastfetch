@@ -26,4 +26,9 @@ GetLogoMethod* ffLogoBuiltinGetAll();
 //image/image.c
 bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type, bool printError);
 
+//option.c
+void ffInitLogoOptions(FFLogoOptions* options);
+bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const char* value);
+void ffDestroyLogoOptions(FFLogoOptions* options);
+
 #endif

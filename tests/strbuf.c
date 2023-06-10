@@ -28,12 +28,12 @@ int main(void)
     FFstrbuf strbuf;
 
     //destroy 0
-    ffStrbufInitA(&strbuf, 0);
+    ffStrbufInit(&strbuf);
     ffStrbufDestroy(&strbuf);
 
     //initA
 
-    ffStrbufInitA(&strbuf, 0);
+    ffStrbufInit(&strbuf);
 
     VERIFY(strbuf.chars[0] == 0);
     VERIFY(strbuf.allocated == 0);
@@ -215,6 +215,11 @@ int main(void)
     VERIFY(ffStrbufEqualS(&strbuf, "-234567890-234567890-234567890-"));
 
     ffStrbufDestroy(&strbuf);
+
+    {
+        FF_STRBUF_AUTO_DESTROY testCreate = ffStrbufCreateS("TEST");
+        VERIFY(ffStrbufEqualS(&testCreate, "TEST"));
+    }
 
     //Success
     puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);

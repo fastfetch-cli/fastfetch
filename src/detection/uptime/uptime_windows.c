@@ -2,7 +2,8 @@
 
 #include <sysinfoapi.h>
 
-uint64_t ffDetectUptime()
+const char* ffDetectUptime(uint64_t* result)
 {
-    return GetTickCount64() / 1000;
+    *result = GetTickCount64() / 1000;
+    return NULL;
 }

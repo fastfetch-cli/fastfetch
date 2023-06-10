@@ -42,8 +42,7 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 DeleteDC(hdc);
             }
 
-            FF_STRBUF_AUTO_DESTROY name;
-            ffStrbufInit(&name);
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
             if (detectName)
             {
@@ -113,7 +112,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deVersion);
     ffListInit(&ds->displays, sizeof(FFDisplayResult));
 
-    detectDisplays(ds, instance->config.displayDetectName);
+    detectDisplays(ds, instance->config.display.detectName);
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
     const FFOSResult* os = ffDetectOS(instance);

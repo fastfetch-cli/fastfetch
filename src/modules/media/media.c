@@ -1,0 +1,147 @@
+#include "fastfetch.h"
+#include "common/printing.h"
+#include "detection/media/media.h"
+#include "modules/media/media.h"
+
+#include <ctype.h>
+
+#define FF_MEDIA_NUM_FORMAT_ARGS 5
+
+static inline bool shouldIgnoreChar(char c)
+{
+    return isblank(c) || c == '-' || c == '.';
+}
+
+static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
+{
+    uint32_t artistIndex = 0;
+    uint32_t songIndex = 0;
+
+    while(true)
+    {
+        while(shouldIgnoreChar(song->chars[songIndex]))
+            ++songIndex;
+
+        while(shouldIgnoreChar(artist->chars[artistIndex]))
+            ++artistIndex;
+
+        if(artist->chars[artistIndex] == '\0')
+            return true;
+
+        if(song->chars[songIndex] == '\0')
+            return false;
+
+        if(tolower(song->chars[songIndex]) != tolower(artist->chars[artistIndex]))
+            return false;
+
+        ++artistIndex;
+        ++songIndex;
+    }
+
+    //Unreachable
+    return false;
+}
+
+void ffPrintMedia(FFinstance* instance, FFMediaOptions* options)
+{
+    const FFMediaResult* media = ffDetectMedia(instance);
+
+    if(media->error.length > 0)
+    {
+        ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
+        return;
+    }
+
+    FF_STRBUF_AUTO_DESTROY songPretty = ffStrbufCreateCopy(&media->song);
+    const char* removeStrings[] = {
+        "(Official Music Video)", "(Official Video)", "(Music Video)", "(Official HD Video)",
+        "[Official Music Video]", "[Official Video]", "[Music Video]", "[Official HD Video]",
+        "| Official Music Video", "| Official Video", "| Music Video", "| Official HD Video",
+        "[Official Audio]", "[Audio]", "(Audio)", "| Official Audio", "| Audio", "| OFFICIAL AUDIO",
+        "(Lyric Video)", "(Official Lyric Video)", "(Lyrics)",
+        "[Lyric Video]", "[Official Lyric Video]", "[Lyrics]",
+        "| Lyric Video", "| Official Lyric Video", "| Lyrics",
+    };
+    ffStrbufRemoveStringsA(&songPretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
+    ffStrbufTrimRight(&songPretty, ' ');
+
+    if(songPretty.length == 0)
+        ffStrbufAppend(&songPretty, &media->song);
+
+    if(options->moduleArgs.outputFormat.length == 0)
+    {
+        //We don't expose artistPretty to the format, as it might be empty (when the think that the artist is already in the song title)
+        FF_STRBUF_AUTO_DESTROY artistPretty = ffStrbufCreateCopy(&media->artist);
+        ffStrbufRemoveIgnCaseEndS(&artistPretty, " - Topic");
+        ffStrbufRemoveIgnCaseEndS(&artistPretty, "VEVO");
+        ffStrbufTrimRight(&artistPretty, ' ');
+
+        if(artistInSongTitle(&songPretty, &artistPretty))
+            ffStrbufClear(&artistPretty);
+
+        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key);
+
+        if(artistPretty.length > 0)
+        {
+            ffStrbufWriteTo(&artistPretty, stdout);
+            fputs(" - ", stdout);
+        }
+
+        if (media->status.length > 0)
+            ffStrbufAppendF(&songPretty, " (%s)", media->status.chars);
+
+        ffStrbufPutTo(&songPretty, stdout);
+    }
+    else
+    {
+        ffPrintFormat(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->status}
+        });
+    }
+}
+
+void ffInitMediaOptions(FFMediaOptions* options)
+{
+    options->moduleName = FF_MEDIA_MODULE_NAME;
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_MEDIA_MODULE_NAME);
+    if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    return false;
+}
+
+void ffDestroyMediaOptions(FFMediaOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+#ifdef FF_HAVE_JSONC
+void ffParseMediaJsonObject(FFinstance* instance, json_object* module)
+{
+    FFMediaOptions __attribute__((__cleanup__(ffDestroyMediaOptions))) options;
+    ffInitMediaOptions(&options);
+
+    if (module)
+    {
+        json_object_object_foreach(module, key, val)
+        {
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintMedia(instance, &options);
+}
+#endif

@@ -8,8 +8,7 @@ const char* ffDetectWallpaper(FF_MAYBE_UNUSED const FFinstance* instance, FFstrb
 
     #ifdef FF_HAVE_SQLITE3
 
-    FF_STRBUF_AUTO_DESTROY path;
-    ffStrbufInitCopy(&path, &instance->state.platform.homeDir);
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(&instance->state.platform.homeDir);
     ffStrbufAppendS(&path, "Library/Application Support/Dock/desktoppicture.db");
     if (ffSettingsGetSQLite3String(instance, path.chars,
         "SELECT value\n"

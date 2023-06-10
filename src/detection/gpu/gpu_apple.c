@@ -9,8 +9,7 @@
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
-    FF_LIST_AUTO_DESTROY temps;
-    ffListInit(&temps, sizeof(FFTempValue));
+    FF_LIST_AUTO_DESTROY temps = ffListCreate(sizeof(FFTempValue));
 
     if(ffStrbufStartsWithS(gpuName, "Apple M1"))
         ffDetectCoreTemps(FF_TEMP_GPU_M1X, &temps);
@@ -99,7 +98,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
-        if(instance->config.gpuTemp)
+        if(instance->config.gpu.temp)
             gpu->temperature = detectGpuTemp(&gpu->name);
         else
             gpu->temperature = FF_GPU_TEMP_UNSET;

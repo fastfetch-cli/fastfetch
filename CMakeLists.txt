@@ -70,7 +70,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
+cmake_dependent_option(ENABLE_JSONC "Enable json-c" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
@@ -231,14 +231,17 @@ set(LIBFASTFETCH_SRC
     src/common/font.c
     src/common/format.c
     src/common/init.c
+    src/common/json.c
+    src/common/jsonconfig.c
     src/common/library.c
+    src/common/option.c
     src/common/parsing.c
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
     src/detection/bluetooth/bluetooth.c
     src/detection/cpu/cpu.c
-    src/detection/cpuUsage/cpuUsage.c
+    src/detection/cpuusage/cpuusage.c
     src/detection/datetime/datetime.c
     src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
@@ -258,62 +261,61 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im7.c
     src/logo/image/image.c
     src/logo/logo.c
-    src/modules/battery.c
-    src/modules/bios.c
-    src/modules/bluetooth.c
-    src/modules/board.c
-    src/modules/brightness.c
-    src/modules/break.c
-    src/modules/chassis.c
-    src/modules/colors.c
-    src/modules/cpu.c
-    src/modules/cpuUsage.c
-    src/modules/cursor.c
-    src/modules/custom.c
-    src/modules/command.c
-    src/modules/date.c
-    src/modules/datetime.c
-    src/modules/de.c
-    src/modules/disk.c
-    src/modules/font.c
-    src/modules/gpu.c
-    src/modules/host.c
-    src/modules/icons.c
-    src/modules/gamepad.c
-    src/modules/kernel.c
-    src/modules/locale.c
-    src/modules/localip.c
-    src/modules/memory.c
-    src/modules/opencl.c
-    src/modules/opengl.c
-    src/modules/os.c
-    src/modules/packages.c
-    src/modules/player.c
-    src/modules/poweradapter.c
-    src/modules/processes.c
-    src/modules/publicip.c
-    src/modules/display.c
-    src/modules/separator.c
-    src/modules/shell.c
-    src/modules/sound.c
-    src/modules/swap.c
-    src/modules/media.c
-    src/modules/terminal.c
-    src/modules/terminalfont.c
-    src/modules/theme.c
-    src/modules/time.c
-    src/modules/title.c
-    src/modules/uptime.c
-    src/modules/users.c
-    src/modules/vulkan.c
-    src/modules/wallpaper.c
-    src/modules/weather.c
-    src/modules/wifi.c
-    src/modules/wm.c
-    src/modules/wmtheme.c
+    src/logo/option.c
+    src/modules/battery/battery.c
+    src/modules/bios/bios.c
+    src/modules/bluetooth/bluetooth.c
+    src/modules/board/board.c
+    src/modules/brightness/brightness.c
+    src/modules/break/break.c
+    src/modules/chassis/chassis.c
+    src/modules/colors/colors.c
+    src/modules/cpu/cpu.c
+    src/modules/cpuusage/cpuusage.c
+    src/modules/cursor/cursor.c
+    src/modules/custom/custom.c
+    src/modules/command/command.c
+    src/modules/datetime/datetime.c
+    src/modules/de/de.c
+    src/modules/disk/disk.c
+    src/modules/font/font.c
+    src/modules/gpu/gpu.c
+    src/modules/host/host.c
+    src/modules/icons/icons.c
+    src/modules/gamepad/gamepad.c
+    src/modules/kernel/kernel.c
+    src/modules/locale/locale.c
+    src/modules/localip/localip.c
+    src/modules/memory/memory.c
+    src/modules/opencl/opencl.c
+    src/modules/opengl/opengl.c
+    src/modules/os/os.c
+    src/modules/packages/packages.c
+    src/modules/processes/processes.c
+    src/modules/player/player.c
+    src/modules/poweradapter/poweradapter.c
+    src/modules/publicip/publicip.c
+    src/modules/display/display.c
+    src/modules/separator/separator.c
+    src/modules/shell/shell.c
+    src/modules/sound/sound.c
+    src/modules/swap/swap.c
+    src/modules/media/media.c
+    src/modules/terminal/terminal.c
+    src/modules/terminalfont/terminalfont.c
+    src/modules/theme/theme.c
+    src/modules/title/title.c
+    src/modules/uptime/uptime.c
+    src/modules/users/users.c
+    src/modules/vulkan/vulkan.c
+    src/modules/wallpaper/wallpaper.c
+    src/modules/weather/weather.c
+    src/modules/wifi/wifi.c
+    src/modules/wm/wm.c
+    src/modules/wmtheme/wmtheme.c
+    src/modules/jsonconfig/jsonconfig.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
-    src/util/FFvaluestore.c
     src/util/platform/FFPlatform.c
     src/util/stringUtils.c
 )
@@ -330,7 +332,7 @@ if(LINUX)
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
-        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
@@ -380,7 +382,7 @@ elseif(ANDROID)
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cursor/cursor_nosupport.c
-        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/displayserver_nosupport.c
         src/detection/font/font_nosupport.c
@@ -423,7 +425,7 @@ elseif(BSD)
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c
-        src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -472,7 +474,7 @@ elseif(APPLE)
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
-        src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
@@ -517,7 +519,7 @@ elseif(WIN32)
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_windows.c
-        src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c
@@ -700,9 +702,9 @@ ff_lib_enable(PULSE
     "libpulse"
     "Pulse"
 )
-ff_lib_enable(LIBCJSON
-    "libcjson"
-    "CJson"
+ff_lib_enable(JSONC
+    "json-c"
+    "json-c"
 )
 
 if(ENABLE_THREADS)

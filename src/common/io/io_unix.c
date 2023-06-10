@@ -8,8 +8,7 @@
 
 static void createSubfolders(const char* fileName)
 {
-    FFstrbuf path;
-    ffStrbufInit(&path);
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     while(*fileName != '\0')
     {
@@ -18,8 +17,6 @@ static void createSubfolders(const char* fileName)
             mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
         ++fileName;
     }
-
-    ffStrbufDestroy(&path);
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
@@ -218,9 +215,7 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
 void ffListFilesRecursively(const char* path)
 {
-    FFstrbuf folder;
-    ffStrbufInitS(&folder, path);
+    FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
     listFilesRecursively(&folder, 0, NULL);
-    ffStrbufDestroy(&folder);
 }

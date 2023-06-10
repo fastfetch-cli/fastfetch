@@ -111,7 +111,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             }
 
             battery->temperature = 0.0/0.0;
-            if(instance->config.batteryTemp)
+            if(instance->config.battery.temp)
             {
                 bqi.InformationLevel = BatteryTemperature;
                 ULONG temp;

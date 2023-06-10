@@ -3,8 +3,8 @@
 #include "common/parsing.h"
 #include "common/io/io.h"
 #include "common/time.h"
-#include "util/FFvaluestore.h"
 #include "util/stringUtils.h"
+#include "logo/logo.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -17,6 +17,9 @@
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
+#include "common/jsonconfig.h"
+#include "modules/modules.h"
+
 typedef struct CustomValue
 {
     bool printKey;
@@ -26,7 +29,6 @@ typedef struct CustomValue
 // Things only needed by fastfetch
 typedef struct FFdata
 {
-    FFvaluestore customValues;
     FFstrbuf structure;
     bool loadUserConfig;
 } FFdata;
@@ -610,8 +612,7 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
 
     //Try to load as a relative path
 
-    FFstrbuf absolutePath;
-    ffStrbufInitA(&absolutePath, 128);
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
 
     FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
     {
@@ -625,8 +626,6 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
         if(success)
             return;
     }
-
-    ffStrbufDestroy(&absolutePath);
 
     //File not found
 
@@ -714,32 +713,6 @@ static uint32_t optionParseUInt32(const char* key, const char* value)
     return num;
 }
 
-static void optionParseCustomValue(FFdata* data, const char* key, const char* value, bool printKey)
-{
-    if(value == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <key=value>\n", key);
-        exit(411);
-    }
-
-    char* separator = strchr(value, '=');
-
-    if(separator == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <key=value>, '=' missing\n", key);
-        exit(412);
-    }
-
-    *separator = '\0';
-
-    bool created;
-    CustomValue* customValue = ffValuestoreSet(&data->customValues, value, &created);
-    if(created)
-        ffStrbufInit(&customValue->value);
-    ffStrbufSetS(&customValue->value, separator + 1);
-    customValue->printKey = printKey;
-}
-
 static void optionParseEnum(const char* argumentKey, const char* requestedKey, void* result, ...)
 {
     if(requestedKey == NULL)
@@ -771,40 +744,6 @@ static void optionParseEnum(const char* argumentKey, const char* requestedKey, v
 
     fprintf(stderr, "Error: unknown %s value: %s\n", argumentKey, requestedKey);
     exit(478);
-}
-
-static bool optionParseModuleArgs(const char* argumentKey, const char* value, const char* moduleName, struct FFModuleArgs* result)
-{
-    const char* pkey = argumentKey;
-    if(!(pkey[0] == '-' && pkey[1] == '-'))
-        return false;
-
-    pkey += 2;
-    uint32_t moduleNameLen = (uint32_t)strlen(moduleName);
-    if(strncasecmp(pkey, moduleName, moduleNameLen) != 0)
-        return false;
-
-    pkey += moduleNameLen;
-    if(pkey[0] != '-')
-        return false;
-
-    pkey += 1;
-    if(strcasecmp(pkey, "key") == 0)
-    {
-        optionParseString(argumentKey, value, &result->key);
-        return true;
-    }
-    else if(strcasecmp(pkey, "format") == 0)
-    {
-        optionParseString(argumentKey, value, &result->outputFormat);
-        return true;
-    }
-    else if(strcasecmp(pkey, "error") == 0)
-    {
-        optionParseString(argumentKey, value, &result->errorFormat);
-        return true;
-    }
-    return false;
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -961,132 +900,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Logo options//
     ////////////////
 
-    else if(strcasecmp(key, "-l") == 0 || strcasecmp(key, "--logo") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-
-        //this is usally wanted when using the none logo
-        if(strcasecmp(value, "none") == 0)
-        {
-            instance->config.logo.paddingTop = 0;
-            instance->config.logo.paddingRight = 0;
-            instance->config.logo.paddingLeft = 0;
-            instance->config.logo.type = FF_LOGO_TYPE_NONE;
-        }
-    }
-    else if(startsWith(key, "--logo"))
-    {
-        const char* subkey = key + strlen("--logo");
-        if(strcasecmp(subkey, "-type") == 0)
-        {
-            optionParseEnum(key, value, &instance->config.logo.type,
-                "auto", FF_LOGO_TYPE_AUTO,
-                "builtin", FF_LOGO_TYPE_BUILTIN,
-                "file", FF_LOGO_TYPE_FILE,
-                "file-raw", FF_LOGO_TYPE_FILE_RAW,
-                "data", FF_LOGO_TYPE_DATA,
-                "data-raw", FF_LOGO_TYPE_DATA_RAW,
-                "sixel", FF_LOGO_TYPE_IMAGE_SIXEL,
-                "kitty", FF_LOGO_TYPE_IMAGE_KITTY,
-                "iterm", FF_LOGO_TYPE_IMAGE_ITERM,
-                "chafa", FF_LOGO_TYPE_IMAGE_CHAFA,
-                "raw", FF_LOGO_TYPE_IMAGE_RAW,
-                "none", FF_LOGO_TYPE_NONE,
-                NULL
-            );
-        }
-        else if(startsWith(subkey, "-color-") && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
-        {
-            //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-            int index = (int)key[13] - 49;
-
-            //Match only --logo-color-[1-9]
-            if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
-            {
-                fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
-                exit(472);
-            }
-
-            optionParseColor(key, value, &instance->config.logo.colors[index]);
-        }
-        else if(strcasecmp(subkey, "-width") == 0)
-            instance->config.logo.width = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-height") == 0)
-            instance->config.logo.height = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-padding") == 0)
-        {
-            uint32_t padding = optionParseUInt32(key, value);
-            instance->config.logo.paddingLeft = padding;
-            instance->config.logo.paddingRight = padding;
-        }
-        else if(strcasecmp(subkey, "-padding-top") == 0)
-            instance->config.logo.paddingTop = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-padding-left") == 0)
-            instance->config.logo.paddingLeft = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-padding-right") == 0)
-            instance->config.logo.paddingRight = optionParseUInt32(key, value);
-        else if(strcasecmp(subkey, "-print-remaining") == 0)
-            instance->config.logo.printRemaining = optionParseBoolean(value);
-        else if(strcasecmp(subkey, "-preserve-aspect-radio") == 0)
-            instance->config.logo.preserveAspectRadio = optionParseBoolean(value);
-        else
-            goto error;
-    }
-    else if(strcasecmp(key, "--file") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_FILE;
-    }
-    else if(strcasecmp(key, "--file-raw") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_FILE_RAW;
-    }
-    else if(strcasecmp(key, "--data") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_DATA;
-    }
-    else if(strcasecmp(key, "--data-raw") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_DATA_RAW;
-    }
-    else if(strcasecmp(key, "--sixel") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_SIXEL;
-    }
-    else if(strcasecmp(key, "--kitty") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_KITTY;
-    }
-    else if(strcasecmp(key, "--chafa") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_CHAFA;
-    }
-    else if(strcasecmp(key, "--iterm") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_ITERM;
-    }
-    else if(strcasecmp(key, "--raw") == 0)
-    {
-        optionParseString(key, value, &instance->config.logo.source);
-        instance->config.logo.type = FF_LOGO_TYPE_IMAGE_RAW;
-    }
-    else if(strcasecmp(key, "--chafa-fg-only") == 0)
-        instance->config.logo.chafaFgOnly = optionParseBoolean(value);
-    else if(strcasecmp(key, "--chafa-symbols") == 0)
-        optionParseString(key, value, &instance->config.logo.chafaSymbols);
-    else if(strcasecmp(key, "--chafa-canvas-mode") == 0)
-        instance->config.logo.chafaCanvasMode = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--chafa-color-space") == 0)
-        instance->config.logo.chafaColorSpace = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--chafa-dither-mode") == 0)
-        instance->config.logo.chafaDitherMode = optionParseUInt32(key, value);
+    else if(ffParseLogoCommandOptions(&instance->config.logo, key, value)) {}
 
     ///////////////////
     //Display options//
@@ -1101,7 +915,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--structure") == 0)
         optionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "--separator") == 0)
-        optionParseString(key, value, &instance->config.separator);
+        optionParseString(key, value, &instance->config.keyValueSeparator);
     else if(strcasecmp(key, "--color-keys") == 0)
         optionParseColor(key, value, &instance->config.colorKeys);
     else if(strcasecmp(key, "--color-title") == 0)
@@ -1111,10 +925,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         optionParseColor(key, value, &instance->config.colorKeys);
         ffStrbufSet(&instance->config.colorTitle, &instance->config.colorKeys);
     }
-    else if(strcasecmp(key, "--set") == 0)
-        optionParseCustomValue(data, key, value, true);
-    else if(strcasecmp(key, "--set-keyless") == 0)
-        optionParseCustomValue(data, key, value, false);
     else if(strcasecmp(key, "--binary-prefix") == 0)
     {
         optionParseEnum(key, value, &instance->config.binaryPrefixType,
@@ -1129,53 +939,55 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module args options//
     ///////////////////////
 
-    else if(optionParseModuleArgs(key, value, "os", &instance->config.os)) {}
-    else if(optionParseModuleArgs(key, value, "host", &instance->config.host)) {}
-    else if(optionParseModuleArgs(key, value, "bios", &instance->config.bios)) {}
-    else if(optionParseModuleArgs(key, value, "board", &instance->config.board)) {}
-    else if(optionParseModuleArgs(key, value, "chassis", &instance->config.chassis)) {}
-    else if(optionParseModuleArgs(key, value, "kernel", &instance->config.kernel)) {}
-    else if(optionParseModuleArgs(key, value, "uptime", &instance->config.uptime)) {}
-    else if(optionParseModuleArgs(key, value, "processes", &instance->config.processes)) {}
-    else if(optionParseModuleArgs(key, value, "packages", &instance->config.packages)) {}
-    else if(optionParseModuleArgs(key, value, "shell", &instance->config.shell)) {}
-    else if(optionParseModuleArgs(key, value, "display", &instance->config.display)) {}
-    else if(optionParseModuleArgs(key, value, "brightness", &instance->config.brightness)) {}
-    else if(optionParseModuleArgs(key, value, "de", &instance->config.de)) {}
-    else if(optionParseModuleArgs(key, value, "wifi", &instance->config.wifi)) {}
-    else if(optionParseModuleArgs(key, value, "wm", &instance->config.wm)) {}
-    else if(optionParseModuleArgs(key, value, "wm-theme", &instance->config.wmTheme)) {}
-    else if(optionParseModuleArgs(key, value, "theme", &instance->config.theme)) {}
-    else if(optionParseModuleArgs(key, value, "icons", &instance->config.icons)) {}
-    else if(optionParseModuleArgs(key, value, "wallpaper", &instance->config.wallpaper)) {}
-    else if(optionParseModuleArgs(key, value, "font", &instance->config.font)) {}
-    else if(optionParseModuleArgs(key, value, "cursor", &instance->config.cursor)) {}
-    else if(optionParseModuleArgs(key, value, "terminal", &instance->config.terminal)) {}
-    else if(optionParseModuleArgs(key, value, "terminal-font", &instance->config.terminalFont)) {}
-    else if(optionParseModuleArgs(key, value, "cpu", &instance->config.cpu)) {}
-    else if(optionParseModuleArgs(key, value, "cpu-usage", &instance->config.cpuUsage)) {}
-    else if(optionParseModuleArgs(key, value, "gpu", &instance->config.gpu)) {}
-    else if(optionParseModuleArgs(key, value, "memory", &instance->config.memory)) {}
-    else if(optionParseModuleArgs(key, value, "swap", &instance->config.swap)) {}
-    else if(optionParseModuleArgs(key, value, "disk", &instance->config.disk)) {}
-    else if(optionParseModuleArgs(key, value, "battery", &instance->config.battery)) {}
-    else if(optionParseModuleArgs(key, value, "poweradapter", &instance->config.powerAdapter)) {}
-    else if(optionParseModuleArgs(key, value, "locale", &instance->config.locale)) {}
-    else if(optionParseModuleArgs(key, value, "localip", &instance->config.localIP)) {}
-    else if(optionParseModuleArgs(key, value, "publicip", &instance->config.publicIP)) {}
-    else if(optionParseModuleArgs(key, value, "weather", &instance->config.weather)) {}
-    else if(optionParseModuleArgs(key, value, "player", &instance->config.player)) {}
-    else if(optionParseModuleArgs(key, value, "media", &instance->config.media)) {}
-    else if(optionParseModuleArgs(key, value, "datetime", &instance->config.dateTime)) {}
-    else if(optionParseModuleArgs(key, value, "date", &instance->config.date)) {}
-    else if(optionParseModuleArgs(key, value, "time", &instance->config.time)) {}
-    else if(optionParseModuleArgs(key, value, "vulkan", &instance->config.vulkan)) {}
-    else if(optionParseModuleArgs(key, value, "opengl", &instance->config.openGL)) {}
-    else if(optionParseModuleArgs(key, value, "opencl", &instance->config.openCL)) {}
-    else if(optionParseModuleArgs(key, value, "users", &instance->config.users)) {}
-    else if(optionParseModuleArgs(key, value, "bluetooth", &instance->config.bluetooth)) {}
-    else if(optionParseModuleArgs(key, value, "sound", &instance->config.sound)) {}
-    else if(optionParseModuleArgs(key, value, "gamepad", &instance->config.gamepad)) {}
+    else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
+    else if(ffParseHostCommandOptions(&instance->config.host, key, value)) {}
+    else if(ffParseOSCommandOptions(&instance->config.os, key, value)) {}
+    else if(ffParseBiosCommandOptions(&instance->config.bios, key, value)) {}
+    else if(ffParseBoardCommandOptions(&instance->config.board, key, value)) {}
+    else if(ffParseChassisCommandOptions(&instance->config.chassis, key, value)) {}
+    else if(ffParseCommandCommandOptions(&instance->config.command, key, value)) {}
+    else if(ffParseCustomCommandOptions(&instance->config.custom, key, value)) {}
+    else if(ffParseKernelCommandOptions(&instance->config.kernel, key, value)) {}
+    else if(ffParseUptimeCommandOptions(&instance->config.uptime, key, value)) {}
+    else if(ffParseProcessesCommandOptions(&instance->config.processes, key, value)) {}
+    else if(ffParsePackagesCommandOptions(&instance->config.packages, key, value)) {}
+    else if(ffParseShellCommandOptions(&instance->config.shell, key, value)) {}
+    else if(ffParseDisplayCommandOptions(&instance->config.display, key, value)) {}
+    else if(ffParseBrightnessCommandOptions(&instance->config.brightness, key, value)) {}
+    else if(ffParseDECommandOptions(&instance->config.de, key, value)) {}
+    else if(ffParseWifiCommandOptions(&instance->config.wifi, key, value)) {}
+    else if(ffParseWMCommandOptions(&instance->config.wm, key, value)) {}
+    else if(ffParseWMThemeCommandOptions(&instance->config.wmTheme, key, value)) {}
+    else if(ffParseThemeCommandOptions(&instance->config.theme, key, value)) {}
+    else if(ffParseIconsCommandOptions(&instance->config.icons, key, value)) {}
+    else if(ffParseWallpaperCommandOptions(&instance->config.wallpaper, key, value)) {}
+    else if(ffParseFontCommandOptions(&instance->config.font, key, value)) {}
+    else if(ffParseCursorCommandOptions(&instance->config.cursor, key, value)) {}
+    else if(ffParseTerminalCommandOptions(&instance->config.terminal, key, value)) {}
+    else if(ffParseTerminalFontCommandOptions(&instance->config.terminalFont, key, value)) {}
+    else if(ffParseCPUCommandOptions(&instance->config.cpu, key, value)) {}
+    else if(ffParseCPUUsageCommandOptions(&instance->config.cpuUsage, key, value)) {}
+    else if(ffParseGPUCommandOptions(&instance->config.gpu, key, value)) {}
+    else if(ffParseMemoryCommandOptions(&instance->config.memory, key, value)) {}
+    else if(ffParseSwapCommandOptions(&instance->config.swap, key, value)) {}
+    else if(ffParseDiskCommandOptions(&instance->config.disk, key, value)) {}
+    else if(ffParseBatteryCommandOptions(&instance->config.battery, key, value)) {}
+    else if(ffParsePowerAdapterCommandOptions(&instance->config.powerAdapter, key, value)) {}
+    else if(ffParseLocaleCommandOptions(&instance->config.locale, key, value)) {}
+    else if(ffParseLocalIpCommandOptions(&instance->config.localIP, key, value)) {}
+    else if(ffParsePublicIpCommandOptions(&instance->config.publicIP, key, value)) {}
+    else if(ffParseWeatherCommandOptions(&instance->config.weather, key, value)) {}
+    else if(ffParsePlayerCommandOptions(&instance->config.player, key, value)) {}
+    else if(ffParseMediaCommandOptions(&instance->config.media, key, value)) {}
+    else if(ffParseDateTimeCommandOptions(&instance->config.dateTime, key, value)) {}
+    else if(ffParseVulkanCommandOptions(&instance->config.vulkan, key, value)) {}
+    else if(ffParseOpenGLCommandOptions(&instance->config.openGL, key, value)) {}
+    else if(ffParseOpenCLCommandOptions(&instance->config.openCL, key, value)) {}
+    else if(ffParseUsersCommandOptions(&instance->config.users, key, value)) {}
+    else if(ffParseBluetoothCommandOptions(&instance->config.bluetooth, key, value)) {}
+    else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
+    else if(ffParseSoundCommandOptions(&instance->config.sound, key, value)) {}
+    else if(ffParseGamepadCommandOptions(&instance->config.gamepad, key, value)) {}
 
     ///////////////////
     //Library options//
@@ -1226,8 +1038,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             optionParseString(key, value, &instance->config.libOSMesa);
         else if(strcasecmp(subkey, "-opencl") == 0)
             optionParseString(key, value, &instance->config.libOpenCL);
-        else if(strcasecmp(subkey, "-cjson") == 0)
-            optionParseString(key, value, &instance->config.libcJSON);
+        else if(strcasecmp(subkey, "-jsonc") == 0)
+            optionParseString(key, value, &instance->config.libJSONC);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
             optionParseString(key, value, &instance->config.libwlanapi);
         else if(strcasecmp(key, "-pulse") == 0)
@@ -1242,113 +1054,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Module options//
     //////////////////
 
-    else if(strcasecmp(key, "--cpu-temp") == 0)
-        instance->config.cpuTemp = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-temp") == 0)
-        instance->config.gpuTemp = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-force-vulkan") == 0)
-        instance->config.gpuForceVulkan = optionParseBoolean(value);
-    else if(strcasecmp(key, "--battery-temp") == 0)
-        instance->config.batteryTemp = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-hide-integrated") == 0)
-        instance->config.gpuHideIntegrated = optionParseBoolean(value);
-    else if(strcasecmp(key, "--gpu-hide-discrete") == 0)
-        instance->config.gpuHideDiscrete = optionParseBoolean(value);
-    else if(strcasecmp(key, "--title-fqdn") == 0)
-        instance->config.titleFQDN = optionParseBoolean(value);
-    else if(strcasecmp(key, "--shell-version") == 0)
-        instance->config.shellVersion = optionParseBoolean(value);
-    else if(strcasecmp(key, "--terminal-version") == 0)
-        instance->config.terminalVersion = optionParseBoolean(value);
-    else if(strcasecmp(key, "--disk-folders") == 0)
-        optionParseString(key, value, &instance->config.diskFolders);
-    else if(strcasecmp(key, "--disk-show-regular") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_REGULAR_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_REGULAR_BIT);
-    else if(strcasecmp(key, "--disk-show-removable") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_EXTERNAL_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT);
-    else if(strcasecmp(key, "--disk-show-hidden") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_HIDDEN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_HIDDEN_BIT);
-    else if(strcasecmp(key, "--disk-show-subvolumes") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_SUBVOLUME_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT);
-    else if(strcasecmp(key, "--disk-show-unknown") == 0)
-        optionParseBoolean(value) ? (instance->config.diskShowTypes |= FF_DISK_TYPE_UNKNOWN_BIT) : (instance->config.diskShowTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT);
-    else if(strcasecmp(key, "--display-compact-type") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.displayCompactType,
-            "none", FF_DISPLAY_COMPACT_TYPE_NONE,
-            "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT,
-            "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT,
-            NULL);
-    }
-    else if(strcasecmp(key, "--display-precise-refresh-rate") == 0)
-        instance->config.displayPreciseRefreshRate = optionParseBoolean(value);
-    else if(strcasecmp(key, "--display-detect-name") == 0)
-        instance->config.displayDetectName = optionParseBoolean(value);
-    else if(strcasecmp(key, "--bluetooth-show-disconnected") == 0)
-        instance->config.bluetoothShowDisconnected = optionParseBoolean(value);
-    else if(strcasecmp(key, "--sound-type") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.soundType,
-            "main", FF_SOUND_TYPE_MAIN,
-            "active", FF_SOUND_TYPE_ACTIVE,
-            "all", FF_SOUND_TYPE_ALL,
-            NULL
-        );
-    }
-    else if(strcasecmp(key, "--battery-dir") == 0)
-        optionParseString(key, value, &instance->config.batteryDir);
-    else if(strcasecmp(key, "--separator-string") == 0)
-        optionParseString(key, value, &instance->config.separatorString);
-    else if(strcasecmp(key, "--localip-show-ipv4") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV4_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV4_BIT);
-    else if(strcasecmp(key, "--localip-show-ipv6") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_IPV6_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_IPV6_BIT);
-    else if(strcasecmp(key, "--localip-show-mac") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_MAC_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_MAC_BIT);
-    else if(strcasecmp(key, "--localip-show-loop") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_LOOP_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_LOOP_BIT);
-    else if(strcasecmp(key, "--localip-compact") == 0)
-        optionParseBoolean(value) ? (instance->config.localIpShowType |= FF_LOCALIP_TYPE_COMPACT_BIT) : (instance->config.localIpShowType &= ~FF_LOCALIP_TYPE_COMPACT_BIT);
-    else if(strcasecmp(key, "--localip-name-prefix") == 0)
-        optionParseString(key, value, &instance->config.localIpNamePrefix);
-    else if(strcasecmp(key, "--os-file") == 0)
-        optionParseString(key, value, &instance->config.osFile);
-    else if(strcasecmp(key, "--player-name") == 0)
-        optionParseString(key, value, &instance->config.playerName);
-    else if(strcasecmp(key, "--publicip-url") == 0)
-        optionParseString(key, value, &instance->config.publicIpUrl);
-    else if(strcasecmp(key, "--publicip-timeout") == 0)
-        instance->config.publicIpTimeout = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--weather-output-format") == 0)
-        optionParseString(key, value, &instance->config.weatherOutputFormat);
-    else if(strcasecmp(key, "--weather-timeout") == 0)
-        instance->config.weatherTimeout = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--gl") == 0)
-    {
-        optionParseEnum(key, value, &instance->config.glType,
-            "auto", FF_GL_TYPE_AUTO,
-            "egl", FF_GL_TYPE_EGL,
-            "glx", FF_GL_TYPE_GLX,
-            "osmesa", FF_GL_TYPE_OSMESA,
-            NULL
-        );
-    }
     else if(strcasecmp(key, "--percent-type") == 0)
         instance->config.percentType = optionParseUInt32(key, value);
-    else if(strcasecmp(key, "--command-shell") == 0)
-        optionParseString(key, value, &instance->config.commandShell);
-    else if(strcasecmp(key, "--command-key") == 0)
-    {
-        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandKeys);
-        ffStrbufInit(result);
-        optionParseString(key, value, result);
-    }
-    else if(strcasecmp(key, "--command-text") == 0)
-    {
-        FFstrbuf* result = (FFstrbuf*) ffListAdd(&instance->config.commandTexts);
-        ffStrbufInit(result);
-        optionParseString(key, value, result);
-    }
 
     //////////////////
     //Unknown option//
@@ -1399,119 +1106,112 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
     }
 }
 
-static void parseStructureCommand(FFinstance* instance, FFdata* data, const char* line)
+static void parseStructureCommand(FFinstance* instance, const char* line)
 {
-    CustomValue* customValue = ffValuestoreGet(&data->customValues, line);
-    if(customValue != NULL)
-    {
-        ffPrintCustom(instance, customValue->printKey ? line : NULL, customValue->value.chars);
-        return;
-    }
-
-    if(strcasecmp(line, "break") == 0)
+    if(strcasecmp(line, FF_BREAK_MODULE_NAME) == 0)
         ffPrintBreak(instance);
-    else if(strcasecmp(line, "title") == 0)
-        ffPrintTitle(instance);
-    else if(strcasecmp(line, "separator") == 0)
-        ffPrintSeparator(instance);
-    else if(strcasecmp(line, "os") == 0)
-        ffPrintOS(instance);
-    else if(strcasecmp(line, "host") == 0)
-        ffPrintHost(instance);
-    else if(strcasecmp(line, "bios") == 0)
-        ffPrintBios(instance);
-    else if(strcasecmp(line, "board") == 0)
-        ffPrintBoard(instance);
-    else if(strcasecmp(line, "brightness") == 0)
-        ffPrintBrightness(instance);
-    else if(strcasecmp(line, "chassis") == 0)
-        ffPrintChassis(instance);
-    else if(strcasecmp(line, "kernel") == 0)
-        ffPrintKernel(instance);
-    else if(strcasecmp(line, "uptime") == 0)
-        ffPrintUptime(instance);
-    else if(strcasecmp(line, "processes") == 0)
-        ffPrintProcesses(instance);
-    else if(strcasecmp(line, "packages") == 0)
-        ffPrintPackages(instance);
-    else if(strcasecmp(line, "shell") == 0)
-        ffPrintShell(instance);
-    else if(strcasecmp(line, "display") == 0)
-        ffPrintDisplay(instance);
-    else if(strcasecmp(line, "desktopenvironment") == 0 || strcasecmp(line, "de") == 0)
-        ffPrintDesktopEnvironment(instance);
-    else if(strcasecmp(line, "windowmanager") == 0 || strcasecmp(line, "wm") == 0)
-        ffPrintWM(instance);
-    else if(strcasecmp(line, "theme") == 0)
-        ffPrintTheme(instance);
-    else if(strcasecmp(line, "wmtheme") == 0)
-        ffPrintWMTheme(instance);
-    else if(strcasecmp(line, "icons") == 0)
-        ffPrintIcons(instance);
-    else if(strcasecmp(line, "wallpaper") == 0)
-        ffPrintWallpaper(instance);
-    else if(strcasecmp(line, "font") == 0)
-        ffPrintFont(instance);
-    else if(strcasecmp(line, "cursor") == 0)
-        ffPrintCursor(instance);
-    else if(strcasecmp(line, "terminal") == 0)
-        ffPrintTerminal(instance);
-    else if(strcasecmp(line, "terminalfont") == 0)
-        ffPrintTerminalFont(instance);
-    else if(strcasecmp(line, "cpu") == 0)
-        ffPrintCPU(instance);
-    else if(strcasecmp(line, "cpuusage") == 0)
-        ffPrintCPUUsage(instance);
-    else if(strcasecmp(line, "gpu") == 0)
-        ffPrintGPU(instance);
-    else if(strcasecmp(line, "memory") == 0)
-        ffPrintMemory(instance);
-    else if(strcasecmp(line, "swap") == 0)
-        ffPrintSwap(instance);
-    else if(strcasecmp(line, "disk") == 0)
-        ffPrintDisk(instance);
-    else if(strcasecmp(line, "battery") == 0)
-        ffPrintBattery(instance);
-    else if(strcasecmp(line, "poweradapter") == 0)
-        ffPrintPowerAdapter(instance);
-    else if(strcasecmp(line, "locale") == 0)
-        ffPrintLocale(instance);
+    else if(strcasecmp(line, FF_TITLE_MODULE_NAME) == 0)
+        ffPrintTitle(instance, &instance->config.title);
+    else if(strcasecmp(line, FF_SEPARATOR_MODULE_NAME) == 0)
+        ffPrintSeparator(instance, &instance->config.separator);
+    else if(strcasecmp(line, FF_OS_MODULE_NAME) == 0)
+        ffPrintOS(instance, &instance->config.os);
+    else if(strcasecmp(line, FF_HOST_MODULE_NAME) == 0)
+        ffPrintHost(instance, &instance->config.host);
+    else if(strcasecmp(line, FF_BIOS_MODULE_NAME) == 0)
+        ffPrintBios(instance, &instance->config.bios);
+    else if(strcasecmp(line, FF_BOARD_MODULE_NAME) == 0)
+        ffPrintBoard(instance, &instance->config.board);
+    else if(strcasecmp(line, FF_BRIGHTNESS_MODULE_NAME) == 0)
+        ffPrintBrightness(instance, &instance->config.brightness);
+    else if(strcasecmp(line, FF_CHASSIS_MODULE_NAME) == 0)
+        ffPrintChassis(instance, &instance->config.chassis);
+    else if(strcasecmp(line, FF_KERNEL_MODULE_NAME) == 0)
+        ffPrintKernel(instance, &instance->config.kernel);
+    else if(strcasecmp(line, FF_PROCESSES_MODULE_NAME) == 0)
+        ffPrintProcesses(instance, &instance->config.processes);
+    else if(strcasecmp(line, FF_UPTIME_MODULE_NAME) == 0)
+        ffPrintUptime(instance, &instance->config.uptime);
+    else if(strcasecmp(line, FF_PACKAGES_MODULE_NAME) == 0)
+        ffPrintPackages(instance, &instance->config.packages);
+    else if(strcasecmp(line, FF_SHELL_MODULE_NAME) == 0)
+        ffPrintShell(instance, &instance->config.shell);
+    else if(strcasecmp(line, FF_DISPLAY_MODULE_NAME) == 0)
+        ffPrintDisplay(instance, &instance->config.display);
+    else if(strcasecmp(line, FF_DE_MODULE_NAME) == 0)
+        ffPrintDE(instance, &instance->config.de);
+    else if(strcasecmp(line, FF_WM_MODULE_NAME) == 0)
+        ffPrintWM(instance, &instance->config.wm);
+    else if(strcasecmp(line, FF_THEME_MODULE_NAME) == 0)
+        ffPrintTheme(instance, &instance->config.theme);
+    else if(strcasecmp(line, FF_WMTHEME_MODULE_NAME) == 0)
+        ffPrintWMTheme(instance, &instance->config.wmTheme);
+    else if(strcasecmp(line, FF_ICONS_MODULE_NAME) == 0)
+        ffPrintIcons(instance, &instance->config.icons);
+    else if(strcasecmp(line, FF_WALLPAPER_MODULE_NAME) == 0)
+        ffPrintWallpaper(instance, &instance->config.wallpaper);
+    else if(strcasecmp(line, FF_FONT_MODULE_NAME) == 0)
+        ffPrintFont(instance, &instance->config.font);
+    else if(strcasecmp(line, FF_CURSOR_MODULE_NAME) == 0)
+        ffPrintCursor(instance, &instance->config.cursor);
+    else if(strcasecmp(line, FF_TERMINAL_MODULE_NAME) == 0)
+        ffPrintTerminal(instance, &instance->config.terminal);
+    else if(strcasecmp(line, FF_TERMINALFONT_MODULE_NAME) == 0)
+        ffPrintTerminalFont(instance, &instance->config.terminalFont);
+    else if(strcasecmp(line, FF_CPU_MODULE_NAME) == 0)
+        ffPrintCPU(instance, &instance->config.cpu);
+    else if(strcasecmp(line, FF_CPUUSAGE_MODULE_NAME) == 0)
+        ffPrintCPUUsage(instance, &instance->config.cpuUsage);
+    else if(strcasecmp(line, FF_CUSTOM_MODULE_NAME) == 0)
+        ffPrintCustom(instance, &instance->config.custom);
+    else if(strcasecmp(line, FF_GPU_MODULE_NAME) == 0)
+        ffPrintGPU(instance, &instance->config.gpu);
+    else if(strcasecmp(line, FF_MEMORY_MODULE_NAME) == 0)
+        ffPrintMemory(instance, &instance->config.memory);
+    else if(strcasecmp(line, FF_SWAP_MODULE_NAME) == 0)
+        ffPrintSwap(instance, &instance->config.swap);
+    else if(strcasecmp(line, FF_DISK_MODULE_NAME) == 0)
+        ffPrintDisk(instance, &instance->config.disk);
+    else if(strcasecmp(line, FF_BATTERY_MODULE_NAME) == 0)
+        ffPrintBattery(instance, &instance->config.battery);
+    else if(strcasecmp(line, FF_POWERADAPTER_MODULE_NAME) == 0)
+        ffPrintPowerAdapter(instance, &instance->config.powerAdapter);
+    else if(strcasecmp(line, FF_LOCALE_MODULE_NAME) == 0)
+        ffPrintLocale(instance, &instance->config.locale);
     else if(strcasecmp(line, "localip") == 0)
-        ffPrintLocalIp(instance);
-    else if(strcasecmp(line, "publicip") == 0)
-        ffPrintPublicIp(instance);
-    else if(strcasecmp(line, "wifi") == 0)
-        ffPrintWifi(instance);
-    else if(strcasecmp(line, "weather") == 0)
-        ffPrintWeather(instance);
-    else if(strcasecmp(line, "player") == 0)
-        ffPrintPlayer(instance);
-    else if(strcasecmp(line, "media") == 0)
-        ffPrintMedia(instance);
-    else if(strcasecmp(line, "datetime") == 0)
-        ffPrintDateTime(instance);
-    else if(strcasecmp(line, "date") == 0)
-        ffPrintDate(instance);
-    else if(strcasecmp(line, "time") == 0)
-        ffPrintTime(instance);
-    else if(strcasecmp(line, "colors") == 0)
+        ffPrintLocalIp(instance, &instance->config.localIP);
+    else if(strcasecmp(line, FF_PUBLICIP_MODULE_NAME) == 0)
+        ffPrintPublicIp(instance, &instance->config.publicIP);
+    else if(strcasecmp(line, FF_WIFI_MODULE_NAME) == 0)
+        ffPrintWifi(instance, &instance->config.wifi);
+    else if(strcasecmp(line, FF_WEATHER_MODULE_NAME) == 0)
+        ffPrintWeather(instance, &instance->config.weather);
+    else if(strcasecmp(line, FF_PLAYER_MODULE_NAME) == 0)
+        ffPrintPlayer(instance, &instance->config.player);
+    else if(strcasecmp(line, FF_MEDIA_MODULE_NAME) == 0)
+        ffPrintMedia(instance, &instance->config.media);
+    else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)
+        ffPrintDateTime(instance, &instance->config.dateTime);
+    else if(strcasecmp(line, FF_COLORS_MODULE_NAME) == 0)
         ffPrintColors(instance);
-    else if(strcasecmp(line, "vulkan") == 0)
-        ffPrintVulkan(instance);
-    else if(strcasecmp(line, "opengl") == 0)
-        ffPrintOpenGL(instance);
-    else if(strcasecmp(line, "opencl") == 0)
-        ffPrintOpenCL(instance);
-    else if(strcasecmp(line, "users") == 0)
-        ffPrintUsers(instance);
-    else if(strcasecmp(line, "command") == 0)
-        ffPrintCommand(instance);
-    else if(strcasecmp(line, "bluetooth") == 0)
-        ffPrintBluetooth(instance);
-    else if(strcasecmp(line, "sound") == 0)
-        ffPrintSound(instance);
-    else if(strcasecmp(line, "gamepad") == 0)
-        ffPrintGamepad(instance);
+    else if(strcasecmp(line, FF_VULKAN_MODULE_NAME) == 0)
+        ffPrintVulkan(instance, &instance->config.vulkan);
+    else if(strcasecmp(line, FF_OPENGL_MODULE_NAME) == 0)
+        ffPrintOpenGL(instance, &instance->config.openGL);
+    else if(strcasecmp(line, FF_OPENCL_MODULE_NAME) == 0)
+        ffPrintOpenCL(instance, &instance->config.openCL);
+    else if(strcasecmp(line, FF_USERS_MODULE_NAME) == 0)
+        ffPrintUsers(instance, &instance->config.users);
+    else if(strcasecmp(line, FF_COMMAND_MODULE_NAME) == 0)
+        ffPrintCommand(instance, &instance->config.command);
+    else if(strcasecmp(line, FF_BLUETOOTH_MODULE_NAME) == 0)
+        ffPrintBluetooth(instance, &instance->config.bluetooth);
+    else if(strcasecmp(line, FF_SOUND_MODULE_NAME) == 0)
+        ffPrintSound(instance, &instance->config.sound);
+    else if(strcasecmp(line, FF_GAMEPAD_MODULE_NAME) == 0)
+        ffPrintGamepad(instance, &instance->config.gamepad);
+    else if(strcasecmp(line, FF_JSONCONFIG_MODULE_NAME) == 0)
+        ffPrintJsonConfig(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
@@ -1523,7 +1223,6 @@ int main(int argc, const char** argv)
 
     //Data stores things only needed for the configuration of fastfetch
     FFdata data;
-    ffValuestoreInit(&data.customValues, sizeof(CustomValue));
     ffStrbufInitA(&data.structure, 256);
     data.loadUserConfig = true;
 
@@ -1535,16 +1234,16 @@ int main(int argc, const char** argv)
     if(data.structure.length == 0)
         ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
 
-    if(ffStrbufContainIgnCaseS(&data.structure, "CPUUsage"))
+    if(ffStrbufContainIgnCaseS(&data.structure, FF_CPUUSAGE_MODULE_NAME))
         ffPrepareCPUUsage();
 
     if(instance.config.multithreading)
     {
-        if(ffStrbufContainIgnCaseS(&data.structure, "PublicIp"))
-            ffPreparePublicIp(&instance);
+        if(ffStrbufContainIgnCaseS(&data.structure, FF_PUBLICIP_MODULE_NAME))
+            ffPreparePublicIp(&instance.config.publicIP);
 
-        if(ffStrbufContainIgnCaseS(&data.structure, "Weather"))
-            ffPrepareWeather(&instance);
+        if(ffStrbufContainIgnCaseS(&data.structure, FF_WEATHER_MODULE_NAME))
+            ffPrepareWeather(&instance.config.weather);
     }
 
     ffStart(&instance);
@@ -1564,7 +1263,7 @@ int main(int argc, const char** argv)
         if(__builtin_expect(instance.config.stat, false))
             ms = ffTimeGetTick();
 
-        parseStructureCommand(&instance, &data, data.structure.chars + startIndex);
+        parseStructureCommand(&instance, data.structure.chars + startIndex);
 
         if(__builtin_expect(instance.config.stat, false))
         {
@@ -1586,7 +1285,6 @@ int main(int argc, const char** argv)
     ffFinish(&instance);
 
     ffStrbufDestroy(&data.structure);
-    ffValuestoreDestroy(&data.customValues);
 
     ffDestroyInstance(&instance);
 }

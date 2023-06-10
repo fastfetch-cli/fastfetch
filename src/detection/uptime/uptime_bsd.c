@@ -4,7 +4,7 @@
 #include <sys/sysctl.h>
 #include <sys/time.h>
 
-uint64_t ffDetectUptime()
+const char* ffDetectUptime(uint64_t* result)
 {
     struct timeval bootTime;
     size_t bootTimeSize = sizeof(bootTime);
@@ -12,8 +12,10 @@ uint64_t ffDetectUptime()
         (int[]) {CTL_KERN, KERN_BOOTTIME}, 2,
         &bootTime, &bootTimeSize,
         NULL, 0
-    ) == 0)
-        return (uint64_t) difftime(time(NULL), bootTime.tv_sec);
+    ) != 0)
+        return "sysctl({CTL_KERN, KERN_BOOTTIME}) failed";
 
-    return 0;
+    *result = (uint64_t) difftime(time(NULL), bootTime.tv_sec);
+
+    return NULL;
 }

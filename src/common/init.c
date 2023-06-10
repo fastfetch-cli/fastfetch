@@ -3,6 +3,7 @@
 #include "common/thread.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/textModifier.h"
+#include "logo/logo.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,47 +16,27 @@
     #include <signal.h>
 #endif
 
+#include "modules/modules.h"
+
 static void initState(FFstate* state)
 {
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
+    state->titleLength = 0;
 
     ffPlatformInit(&state->platform);
 }
 
-static void initModuleArg(FFModuleArgs* args)
-{
-    ffStrbufInit(&args->key);
-    ffStrbufInit(&args->outputFormat);
-    ffStrbufInit(&args->errorFormat);
-}
-
 static void defaultConfig(FFinstance* instance)
 {
-    ffStrbufInitA(&instance->config.logo.source, 0);
-    instance->config.logo.type = FF_LOGO_TYPE_AUTO;
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufInit(&instance->config.logo.colors[i]);
-    instance->config.logo.width = 0;
-    instance->config.logo.height = 0; //preserve aspect ratio
-    instance->config.logo.paddingTop = 0;
-    instance->config.logo.paddingLeft = 0;
-    instance->config.logo.paddingRight = 4;
-    instance->config.logo.printRemaining = true;
-    instance->config.logo.preserveAspectRadio = false;
-
-    instance->config.logo.chafaFgOnly = false;
-    ffStrbufInitS(&instance->config.logo.chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
-    instance->config.logo.chafaCanvasMode = UINT32_MAX;
-    instance->config.logo.chafaColorSpace = UINT32_MAX;
-    instance->config.logo.chafaDitherMode = UINT32_MAX;
+    ffInitLogoOptions(&instance->config.logo);
 
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);
 
-    ffStrbufInit(&instance->config.separator);
-    ffStrbufAppendS(&instance->config.separator, ": ");
+    ffStrbufInit(&instance->config.keyValueSeparator);
+    ffStrbufAppendS(&instance->config.keyValueSeparator, ": ");
 
     instance->config.showErrors = false;
     instance->config.recache = false;
@@ -64,139 +45,87 @@ static void defaultConfig(FFinstance* instance)
     instance->config.hideCursor = true;
     instance->config.escapeBedrock = true;
     instance->config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
-    instance->config.glType = FF_GL_TYPE_AUTO;
     instance->config.pipe = false;
     instance->config.multithreading = true;
     instance->config.stat = false;
 
-    initModuleArg(&instance->config.os);
-    initModuleArg(&instance->config.host);
-    initModuleArg(&instance->config.bios);
-    initModuleArg(&instance->config.board);
-    initModuleArg(&instance->config.brightness);
-    initModuleArg(&instance->config.chassis);
-    initModuleArg(&instance->config.kernel);
-    initModuleArg(&instance->config.uptime);
-    initModuleArg(&instance->config.processes);
-    initModuleArg(&instance->config.packages);
-    initModuleArg(&instance->config.shell);
-    initModuleArg(&instance->config.display);
-    initModuleArg(&instance->config.de);
-    initModuleArg(&instance->config.wm);
-    initModuleArg(&instance->config.wmTheme);
-    initModuleArg(&instance->config.theme);
-    initModuleArg(&instance->config.icons);
-    initModuleArg(&instance->config.font);
-    initModuleArg(&instance->config.cursor);
-    initModuleArg(&instance->config.terminal);
-    initModuleArg(&instance->config.terminalFont);
-    initModuleArg(&instance->config.cpu);
-    initModuleArg(&instance->config.cpuUsage);
-    initModuleArg(&instance->config.gpu);
-    initModuleArg(&instance->config.memory);
-    initModuleArg(&instance->config.swap);
-    initModuleArg(&instance->config.disk);
-    initModuleArg(&instance->config.battery);
-    initModuleArg(&instance->config.powerAdapter);
-    initModuleArg(&instance->config.locale);
-    initModuleArg(&instance->config.localIP);
-    initModuleArg(&instance->config.publicIP);
-    initModuleArg(&instance->config.weather);
-    initModuleArg(&instance->config.wifi);
-    initModuleArg(&instance->config.player);
-    initModuleArg(&instance->config.media);
-    initModuleArg(&instance->config.dateTime);
-    initModuleArg(&instance->config.date);
-    initModuleArg(&instance->config.time);
-    initModuleArg(&instance->config.vulkan);
-    initModuleArg(&instance->config.wallpaper);
-    initModuleArg(&instance->config.openGL);
-    initModuleArg(&instance->config.openCL);
-    initModuleArg(&instance->config.users);
-    initModuleArg(&instance->config.bluetooth);
-    initModuleArg(&instance->config.sound);
-    initModuleArg(&instance->config.gamepad);
+    ffInitTitleOptions(&instance->config.title);
+    ffInitOSOptions(&instance->config.os);
+    ffInitHostOptions(&instance->config.host);
+    ffInitBiosOptions(&instance->config.bios);
+    ffInitBoardOptions(&instance->config.board);
+    ffInitBrightnessOptions(&instance->config.brightness);
+    ffInitChassisOptions(&instance->config.chassis);
+    ffInitCommandOptions(&instance->config.command);
+    ffInitCustomOptions(&instance->config.custom);
+    ffInitKernelOptions(&instance->config.kernel);
+    ffInitUptimeOptions(&instance->config.uptime);
+    ffInitProcessesOptions(&instance->config.processes);
+    ffInitPackagesOptions(&instance->config.packages);
+    ffInitShellOptions(&instance->config.shell);
+    ffInitDisplayOptions(&instance->config.display);
+    ffInitDEOptions(&instance->config.de);
+    ffInitWMOptions(&instance->config.wm);
+    ffInitWMThemeOptions(&instance->config.wmTheme);
+    ffInitThemeOptions(&instance->config.theme);
+    ffInitIconsOptions(&instance->config.icons);
+    ffInitFontOptions(&instance->config.font);
+    ffInitCursorOptions(&instance->config.cursor);
+    ffInitTerminalOptions(&instance->config.terminal);
+    ffInitTerminalFontOptions(&instance->config.terminalFont);
+    ffInitCPUOptions(&instance->config.cpu);
+    ffInitCPUUsageOptions(&instance->config.cpuUsage);
+    ffInitGPUOptions(&instance->config.gpu);
+    ffInitMemoryOptions(&instance->config.memory);
+    ffInitSwapOptions(&instance->config.swap);
+    ffInitDiskOptions(&instance->config.disk);
+    ffInitBatteryOptions(&instance->config.battery);
+    ffInitPowerAdapterOptions(&instance->config.powerAdapter);
+    ffInitLocaleOptions(&instance->config.locale);
+    ffInitLocalIpOptions(&instance->config.localIP);
+    ffInitPublicIpOptions(&instance->config.publicIP);
+    ffInitWeatherOptions(&instance->config.weather);
+    ffInitWifiOptions(&instance->config.wifi);
+    ffInitPlayerOptions(&instance->config.player);
+    ffInitMediaOptions(&instance->config.media);
+    ffInitDateTimeOptions(&instance->config.dateTime);
+    ffInitVulkanOptions(&instance->config.vulkan);
+    ffInitWallpaperOptions(&instance->config.wallpaper);
+    ffInitOpenGLOptions(&instance->config.openGL);
+    ffInitOpenCLOptions(&instance->config.openCL);
+    ffInitUsersOptions(&instance->config.users);
+    ffInitBluetoothOptions(&instance->config.bluetooth);
+    ffInitSoundOptions(&instance->config.sound);
+    ffInitSeparatorOptions(&instance->config.separator);
+    ffInitGamepadOptions(&instance->config.gamepad);
 
-    ffStrbufInitA(&instance->config.libPCI, 0);
-    ffStrbufInitA(&instance->config.libVulkan, 0);
-    ffStrbufInitA(&instance->config.libWayland, 0);
-    ffStrbufInitA(&instance->config.libXcbRandr, 0);
-    ffStrbufInitA(&instance->config.libXcb, 0);
-    ffStrbufInitA(&instance->config.libXrandr, 0);
-    ffStrbufInitA(&instance->config.libX11, 0);
-    ffStrbufInitA(&instance->config.libGIO, 0);
-    ffStrbufInitA(&instance->config.libDConf, 0);
-    ffStrbufInitA(&instance->config.libDBus, 0);
-    ffStrbufInitA(&instance->config.libXFConf, 0);
-    ffStrbufInitA(&instance->config.libSQLite3, 0);
-    ffStrbufInitA(&instance->config.librpm, 0);
-    ffStrbufInitA(&instance->config.libImageMagick, 0);
-    ffStrbufInitA(&instance->config.libZ, 0);
-    ffStrbufInitA(&instance->config.libChafa, 0);
-    ffStrbufInitA(&instance->config.libEGL, 0);
-    ffStrbufInitA(&instance->config.libGLX, 0);
-    ffStrbufInitA(&instance->config.libOSMesa, 0);
-    ffStrbufInitA(&instance->config.libOpenCL, 0);
-    ffStrbufInitA(&instance->config.libcJSON, 0);
-    ffStrbufInitA(&instance->config.libfreetype, 0);
+    ffStrbufInit(&instance->config.libPCI);
+    ffStrbufInit(&instance->config.libVulkan);
+    ffStrbufInit(&instance->config.libWayland);
+    ffStrbufInit(&instance->config.libXcbRandr);
+    ffStrbufInit(&instance->config.libXcb);
+    ffStrbufInit(&instance->config.libXrandr);
+    ffStrbufInit(&instance->config.libX11);
+    ffStrbufInit(&instance->config.libGIO);
+    ffStrbufInit(&instance->config.libDConf);
+    ffStrbufInit(&instance->config.libDBus);
+    ffStrbufInit(&instance->config.libXFConf);
+    ffStrbufInit(&instance->config.libSQLite3);
+    ffStrbufInit(&instance->config.librpm);
+    ffStrbufInit(&instance->config.libImageMagick);
+    ffStrbufInit(&instance->config.libZ);
+    ffStrbufInit(&instance->config.libChafa);
+    ffStrbufInit(&instance->config.libEGL);
+    ffStrbufInit(&instance->config.libGLX);
+    ffStrbufInit(&instance->config.libOSMesa);
+    ffStrbufInit(&instance->config.libOpenCL);
+    ffStrbufInit(&instance->config.libJSONC);
+    ffStrbufInit(&instance->config.libfreetype);
     ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
 
-    instance->config.cpuTemp = false;
-    instance->config.gpuTemp = false;
-    instance->config.gpuForceVulkan = false;
-    instance->config.batteryTemp = false;
-
-    instance->config.gpuHideIntegrated = false;
-    instance->config.gpuHideDiscrete = false;
-
-    instance->config.shellVersion = true;
-    instance->config.terminalVersion = true;
-
-    instance->config.titleFQDN = false;
-
-    ffStrbufInitA(&instance->config.diskFolders, 0);
-    instance->config.diskShowTypes = FF_DISK_TYPE_REGULAR_BIT | FF_DISK_TYPE_EXTERNAL_BIT;
-
-    instance->config.displayCompactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    instance->config.displayDetectName = false;
-    instance->config.displayPreciseRefreshRate = false;
-
-    instance->config.bluetoothShowDisconnected = false;
-
-    instance->config.soundType = FF_SOUND_TYPE_MAIN;
-
-    ffStrbufInitA(&instance->config.batteryDir, 0);
-
-    ffStrbufInitA(&instance->config.separatorString, 0);
-
-    instance->config.localIpShowType = FF_LOCALIP_TYPE_IPV4_BIT;
-    ffStrbufInit(&instance->config.localIpNamePrefix);
-
-    instance->config.publicIpTimeout = 0;
-    ffStrbufInit(&instance->config.publicIpUrl);
-
-    instance->config.weatherTimeout = 0;
-    ffStrbufInitS(&instance->config.weatherOutputFormat, "%t+-+%C+(%l)");
-
-    ffStrbufInitA(&instance->config.osFile, 0);
-
-    ffStrbufInitA(&instance->config.playerName, 0);
-
     instance->config.percentType = 1;
-
-    ffStrbufInitS(&instance->config.commandShell,
-        #ifdef _WIN32
-        "cmd"
-        #elif defined(__FreeBSD__)
-        "csh"
-        #else
-        "bash"
-        #endif
-    );
-    ffListInit(&instance->config.commandKeys, sizeof(FFstrbuf));
-    ffListInit(&instance->config.commandTexts, sizeof(FFstrbuf));
 }
 
 void ffInitInstance(FFinstance* instance)
@@ -316,69 +245,63 @@ void ffFinish(FFinstance* instance)
     resetConsole();
 }
 
-static void destroyModuleArg(FFModuleArgs* args)
-{
-    ffStrbufDestroy(&args->key);
-    ffStrbufDestroy(&args->outputFormat);
-    ffStrbufDestroy(&args->errorFormat);
-}
-
 static void destroyConfig(FFinstance* instance)
 {
-    ffStrbufDestroy(&instance->config.logo.source);
-    ffStrbufDestroy(&instance->config.logo.chafaSymbols);
-    for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
-        ffStrbufDestroy(&instance->config.logo.colors[i]);
+    ffDestroyLogoOptions(&instance->config.logo);
+
     ffStrbufDestroy(&instance->config.colorKeys);
     ffStrbufDestroy(&instance->config.colorTitle);
-    ffStrbufDestroy(&instance->config.separator);
+    ffStrbufDestroy(&instance->config.keyValueSeparator);
 
-    destroyModuleArg(&instance->config.os);
-    destroyModuleArg(&instance->config.host);
-    destroyModuleArg(&instance->config.bios);
-    destroyModuleArg(&instance->config.board);
-    destroyModuleArg(&instance->config.chassis);
-    destroyModuleArg(&instance->config.kernel);
-    destroyModuleArg(&instance->config.uptime);
-    destroyModuleArg(&instance->config.processes);
-    destroyModuleArg(&instance->config.packages);
-    destroyModuleArg(&instance->config.shell);
-    destroyModuleArg(&instance->config.display);
-    destroyModuleArg(&instance->config.de);
-    destroyModuleArg(&instance->config.wm);
-    destroyModuleArg(&instance->config.wmTheme);
-    destroyModuleArg(&instance->config.theme);
-    destroyModuleArg(&instance->config.icons);
-    destroyModuleArg(&instance->config.font);
-    destroyModuleArg(&instance->config.cursor);
-    destroyModuleArg(&instance->config.terminal);
-    destroyModuleArg(&instance->config.terminalFont);
-    destroyModuleArg(&instance->config.cpu);
-    destroyModuleArg(&instance->config.cpuUsage);
-    destroyModuleArg(&instance->config.gpu);
-    destroyModuleArg(&instance->config.memory);
-    destroyModuleArg(&instance->config.swap);
-    destroyModuleArg(&instance->config.disk);
-    destroyModuleArg(&instance->config.battery);
-    destroyModuleArg(&instance->config.powerAdapter);
-    destroyModuleArg(&instance->config.locale);
-    destroyModuleArg(&instance->config.localIP);
-    destroyModuleArg(&instance->config.publicIP);
-    destroyModuleArg(&instance->config.wallpaper);
-    destroyModuleArg(&instance->config.weather);
-    destroyModuleArg(&instance->config.wifi);
-    destroyModuleArg(&instance->config.player);
-    destroyModuleArg(&instance->config.media);
-    destroyModuleArg(&instance->config.dateTime);
-    destroyModuleArg(&instance->config.date);
-    destroyModuleArg(&instance->config.time);
-    destroyModuleArg(&instance->config.vulkan);
-    destroyModuleArg(&instance->config.openGL);
-    destroyModuleArg(&instance->config.openCL);
-    destroyModuleArg(&instance->config.users);
-    destroyModuleArg(&instance->config.bluetooth);
-    destroyModuleArg(&instance->config.sound);
-    destroyModuleArg(&instance->config.gamepad);
+    ffDestroyTitleOptions(&instance->config.title);
+    ffDestroyOSOptions(&instance->config.os);
+    ffDestroyHostOptions(&instance->config.host);
+    ffDestroyBiosOptions(&instance->config.bios);
+    ffDestroyBoardOptions(&instance->config.board);
+    ffDestroyBrightnessOptions(&instance->config.brightness);
+    ffDestroyChassisOptions(&instance->config.chassis);
+    ffDestroyCommandOptions(&instance->config.command);
+    ffDestroyCustomOptions(&instance->config.custom);
+    ffDestroyKernelOptions(&instance->config.kernel);
+    ffDestroyUptimeOptions(&instance->config.uptime);
+    ffDestroyProcessesOptions(&instance->config.processes);
+    ffDestroyPackagesOptions(&instance->config.packages);
+    ffDestroyShellOptions(&instance->config.shell);
+    ffDestroyDisplayOptions(&instance->config.display);
+    ffDestroyDEOptions(&instance->config.de);
+    ffDestroyWMOptions(&instance->config.wm);
+    ffDestroyWMThemeOptions(&instance->config.wmTheme);
+    ffDestroyThemeOptions(&instance->config.theme);
+    ffDestroyIconsOptions(&instance->config.icons);
+    ffDestroyFontOptions(&instance->config.font);
+    ffDestroyCursorOptions(&instance->config.cursor);
+    ffDestroyTerminalOptions(&instance->config.terminal);
+    ffDestroyTerminalFontOptions(&instance->config.terminalFont);
+    ffDestroyCPUOptions(&instance->config.cpu);
+    ffDestroyCPUUsageOptions(&instance->config.cpuUsage);
+    ffDestroyGPUOptions(&instance->config.gpu);
+    ffDestroyMemoryOptions(&instance->config.memory);
+    ffDestroySwapOptions(&instance->config.swap);
+    ffDestroyDiskOptions(&instance->config.disk);
+    ffDestroyBatteryOptions(&instance->config.battery);
+    ffDestroyPowerAdapterOptions(&instance->config.powerAdapter);
+    ffDestroyLocaleOptions(&instance->config.locale);
+    ffDestroyLocalIpOptions(&instance->config.localIP);
+    ffDestroyPublicIpOptions(&instance->config.publicIP);
+    ffDestroyWallpaperOptions(&instance->config.wallpaper);
+    ffDestroyWeatherOptions(&instance->config.weather);
+    ffDestroyWifiOptions(&instance->config.wifi);
+    ffDestroyPlayerOptions(&instance->config.player);
+    ffDestroyMediaOptions(&instance->config.media);
+    ffDestroyDateTimeOptions(&instance->config.dateTime);
+    ffDestroyVulkanOptions(&instance->config.vulkan);
+    ffDestroyOpenGLOptions(&instance->config.openGL);
+    ffDestroyOpenCLOptions(&instance->config.openCL);
+    ffDestroyUsersOptions(&instance->config.users);
+    ffDestroyBluetoothOptions(&instance->config.bluetooth);
+    ffDestroySeparatorOptions(&instance->config.separator);
+    ffDestroySoundOptions(&instance->config.sound);
+    ffDestroyGamepadOptions(&instance->config.gamepad);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);
@@ -400,28 +323,11 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libGLX);
     ffStrbufDestroy(&instance->config.libOSMesa);
     ffStrbufDestroy(&instance->config.libOpenCL);
-    ffStrbufDestroy(&instance->config.libcJSON);
+    ffStrbufDestroy(&instance->config.libJSONC);
     ffStrbufDestroy(&instance->config.libfreetype);
     ffStrbufDestroy(&instance->config.libPulse);
     ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
-
-    ffStrbufDestroy(&instance->config.diskFolders);
-    ffStrbufDestroy(&instance->config.batteryDir);
-    ffStrbufDestroy(&instance->config.separatorString);
-    ffStrbufDestroy(&instance->config.localIpNamePrefix);
-    ffStrbufDestroy(&instance->config.publicIpUrl);
-    ffStrbufDestroy(&instance->config.weatherOutputFormat);
-    ffStrbufDestroy(&instance->config.osFile);
-    ffStrbufDestroy(&instance->config.playerName);
-
-    ffStrbufDestroy(&instance->config.commandShell);
-    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandKeys)
-        ffStrbufDestroy(item);
-    ffListDestroy(&instance->config.commandKeys);
-    FF_LIST_FOR_EACH(FFstrbuf, item, instance->config.commandTexts)
-        ffStrbufDestroy(item);
-    ffListDestroy(&instance->config.commandTexts);
 }
 
 static void destroyState(FFinstance* instance)
@@ -505,8 +411,8 @@ void ffListFeatures()
         #ifdef FF_HAVE_OPENCL
             "opencl\n"
         #endif
-        #ifdef FF_HAVE_LIBCJSON
-            "libcjson\n"
+        #ifdef FF_HAVE_LIBJSONC
+            "json-c\n"
         #endif
         #ifdef FF_HAVE_FREETYPE
             "freetype\n"

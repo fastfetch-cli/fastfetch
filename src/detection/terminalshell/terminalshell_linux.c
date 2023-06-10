@@ -281,8 +281,7 @@ static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResul
 
 static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
-    FFstrbuf command;
-    ffStrbufInit(&command);
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreate();
     ffStrbufAppendS(&command, "printf \"%s\" \"$");
     ffStrbufAppendTransformS(&command, exeName, toupper);
     ffStrbufAppendS(&command, "_VERSION\"");
@@ -297,8 +296,6 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
     });
     ffStrbufSubstrBeforeFirstC(version, '(');
     ffStrbufRemoveStrings(version, 2, "-release", "release");
-
-    ffStrbufDestroy(&command);
 }
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
@@ -356,7 +353,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getUserShellFromEnv(instance, &result);
 
     ffStrbufClear(&result.shellVersion);
-    if(instance->config.shellVersion)
+    if(instance->config.shell.version)
     {
         getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
@@ -393,7 +390,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 
     ffStrbufInit(&result.terminalVersion);
 
-    if(instance->config.terminalVersion)
+    if(instance->config.terminal.version)
         fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
     ffThreadMutexUnlock(&mutex);

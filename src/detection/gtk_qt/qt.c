@@ -85,8 +85,7 @@ static void detectPlasma(const FFinstance* instance, FFQtResult* result)
     bool foundAFile = false;
 
     //We need to do this because we use multiple threads on configDirs
-    FFstrbuf baseDir;
-    ffStrbufInitA(&baseDir, 64);
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
 
     FF_LIST_FOR_EACH(FFstrbuf, configDir, instance->state.platform.configDirs)
     {
@@ -97,13 +96,9 @@ static void detectPlasma(const FFinstance* instance, FFQtResult* result)
             foundAFile = true;
 
         if(allValuesSet(result))
-        {
-            ffStrbufDestroy(&baseDir);
             return;
-        }
     }
 
-    ffStrbufDestroy(&baseDir);
     if(!foundAFile)
         return;
 

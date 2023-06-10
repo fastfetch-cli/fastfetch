@@ -46,8 +46,7 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
 
 static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 {
-    FF_STRBUF_AUTO_DESTROY font;
-    ffStrbufInit(&font);
+    FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
     ffOsascript("tell application \"Terminal\" to font name of window frontmost & \" \" & font size of window frontmost", &font);
 
     if(font.length == 0)

@@ -162,8 +162,7 @@ static void detectGTK(const FFinstance* instance, const char* version, FFGTKResu
         return;
 
     //We need to do this because we use multiple threads on configDirs
-    FFstrbuf baseDir;
-    ffStrbufInitA(&baseDir, 64);
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
 
     FF_LIST_FOR_EACH(FFstrbuf, configDir, instance->state.platform.configDirs)
     {
@@ -172,8 +171,6 @@ static void detectGTK(const FFinstance* instance, const char* version, FFGTKResu
         if(allPropertiesSet(result))
             break;
     }
-
-    ffStrbufDestroy(&baseDir);
 }
 
 #define FF_DETECT_GTK_IMPL(version) \

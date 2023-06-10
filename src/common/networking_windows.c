@@ -75,8 +75,7 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
         }
     }
 
-    FF_STRBUF_AUTO_DESTROY command;
-    ffStrbufInitA(&command, 64);
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(64);
     ffStrbufAppendS(&command, "GET ");
     ffStrbufAppendS(&command, path);
     ffStrbufAppendS(&command, " HTTP/1.1\nHost: ");

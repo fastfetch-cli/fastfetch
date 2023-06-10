@@ -35,16 +35,6 @@ void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
         ffStrbufInit(strbuf);
 }
 
-void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
-{
-    assert(format != NULL);
-
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufInitVF(strbuf, format, arguments);
-    va_end(arguments);
-}
-
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 {
     assert(format != NULL);
@@ -457,14 +447,4 @@ uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
     char* str_end;
     unsigned long result = strtoul(strbuf->chars, &str_end, 10);
     return str_end == strbuf->chars || result > UINT16_MAX ? defaultValue : (uint16_t)result;
-}
-
-void ffStrbufDestroy(FFstrbuf* strbuf)
-{
-    if(strbuf->allocated == 0) return;
-
-    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
-    strbuf->allocated = strbuf->length = 0;
-    free(strbuf->chars);
-    strbuf->chars = CHAR_NULL_PTR;
 }

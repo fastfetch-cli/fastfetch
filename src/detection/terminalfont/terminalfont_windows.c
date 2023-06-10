@@ -8,11 +8,8 @@
 
 static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
-
-    FF_STRBUF_AUTO_DESTROY fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     if(!ffParsePropFileConfigValues(instance, "mintty/config", 2, (FFpropquery[]) {
         {"Font=", &fontName},
@@ -54,14 +51,9 @@ static void detectConEmu(const FFinstance* instance, FFTerminalFontResult* termi
     FF_UNUSED(instance)
 
     //https://conemu.github.io/en/ConEmuXml.html#search-sequence
-    FFstrbuf path;
-    ffStrbufInit(&path);
-
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
-
-    FFstrbuf fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     const char* paths[] = { "ConEmuDir", "ConEmuBaseDir", "APPDATA" };
     for (uint32_t i = 0; i < sizeof(paths) / sizeof(paths[0]); ++i)
@@ -77,7 +69,6 @@ static void detectConEmu(const FFinstance* instance, FFTerminalFontResult* termi
                 break;
         }
     }
-    ffStrbufDestroy(&path);
 
     if(fontName.length == 0 && fontSize.length == 0)
     {
@@ -96,9 +87,6 @@ static void detectConEmu(const FFinstance* instance, FFTerminalFontResult* termi
         ffStrbufAppendS(&fontSize, "14");
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
-
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
 }
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)

@@ -32,8 +32,7 @@ static void* libraryLoad(const char* path, int maxVersion)
     if(result != NULL || maxVersion < 0)
         return result;
 
-    FFstrbuf pathbuf;
-    ffStrbufInitA(&pathbuf, 64);
+    FF_STRBUF_AUTO_DESTROY pathbuf = ffStrbufCreateA(64);
     ffStrbufAppendS(&pathbuf, path);
     ffStrbufAppendC(&pathbuf, '.');
 
@@ -48,8 +47,6 @@ static void* libraryLoad(const char* path, int maxVersion)
 
         ffStrbufSubstrBefore(&pathbuf, originalLength);
     }
-
-    ffStrbufDestroy(&pathbuf);
 
     #endif
 

@@ -7,7 +7,7 @@ static void fontInit(FFfont* font)
 {
     ffStrbufInit(&font->pretty);
     ffStrbufInit(&font->name);
-    ffStrbufInitA(&font->size, 4);
+    ffStrbufInitA(&font->size, 8);
     ffListInitA(&font->styles, sizeof(FFstrbuf), 4);
 }
 

@@ -34,8 +34,7 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
 
 static void detectScoop(const FFinstance* instance, FFPackagesResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY scoopPath;
-    ffStrbufInitA(&scoopPath, MAX_PATH + 3);
+    FF_STRBUF_AUTO_DESTROY scoopPath = ffStrbufCreateA(MAX_PATH + 3);
 
     const char* scoopEnv = getenv("SCOOP");
     if(ffStrSet(scoopEnv))
