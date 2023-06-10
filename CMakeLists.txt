@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
+cmake_minimum_required(VERSION 3.14.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
 
 project(fastfetch
     VERSION 1.11.3
@@ -39,6 +39,14 @@ if(NOT PKG_CONFIG_FOUND)
 endif()
 
 include(CheckIncludeFile)
+
+include(FetchContent)
+FetchContent_Declare(
+    yyjson
+    GIT_REPOSITORY https://github.com/ibireme/yyjson
+    GIT_TAG 0.7.0
+)
+FetchContent_MakeAvailable(yyjson)
 
 #####################
 # Configure options #
@@ -761,6 +769,7 @@ target_include_directories(libfastfetch
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
+    PRIVATE yyjson
 )
 
 ######################

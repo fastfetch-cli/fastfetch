@@ -58,68 +58,71 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 
 #if defined(_WIN32) || defined(__linux__)
 
-#ifdef FF_HAVE_JSONC
-
 #include "common/library.h"
 #include "common/processing.h"
-#include "common/json.h"
 
 #include <stdlib.h>
+#include <yyjson.h>
 
-static const char* detectWTProfile(json_object* profile, FFstrbuf* name, double* size)
+static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* size)
 {
-    json_object* font = json_object_object_get(profile, "font");
+    yyjson_val* font = yyjson_obj_get(profile, "font");
     if (!font)
-        return "json_object_object_get(profile, \"font\"); failed";
+        return "yyjson_obj_get(profile, \"font\"); failed";
 
-    if (!json_object_is_type(font, json_type_object))
-        return "json_object_is_type(font, json_type_object) returns false";
+    if (!yyjson_is_obj(font))
+        return "yyjson_is_obj(font) returns false";
 
     if (name->length == 0)
     {
-        json_object* pface = json_object_object_get(font, "face");
-        if(json_object_is_type(pface, json_type_string))
-            ffStrbufAppendNS(name, (uint32_t) json_object_get_string_len(pface), json_object_get_string(pface));
+        yyjson_val* pface = yyjson_obj_get(font, "face");
+        if(yyjson_is_str(pface))
+            ffStrbufAppendS(name, unsafe_yyjson_get_str(pface));
     }
 
     if (*size < 0)
     {
-        json_object* psize = json_object_object_get(font, "size");
-        if (json_object_is_type(psize, json_type_int) || json_object_is_type(psize, json_type_double))
-            *size = json_object_get_double(psize);
+        yyjson_val* psize = yyjson_obj_get(font, "size");
+        if (yyjson_is_num(psize))
+            *size = yyjson_get_num(psize);
     }
     return NULL;
 }
 
-static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, double* size)
+static inline void wrapYyjsonFree(yyjson_doc** doc)
 {
-    if (!ffJsonLoadLibrary(instance))
-        return "Failed to load json-c library";
+    assert(doc);
+    if (*doc)
+        yyjson_doc_free(*doc);
+}
 
-    json_object* __attribute__((__cleanup__(wrapJsoncFree))) root = json_tokener_parse(content->chars);
-    if (!root)
+static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* size)
+{
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    if (!doc)
         return "Failed to parse WT JSON config file";
 
-    json_object* profiles = json_object_object_get(root, "profiles");
+    yyjson_val* const root = yyjson_doc_get_root(doc);
+    assert(root);
+
+    yyjson_val* profiles = yyjson_obj_get(root, "profiles");
     if (!profiles)
-        return "json_object_object_get(root, \"profiles\") failed";
+        return "yyjson_obj_get(root, \"profiles\") failed";
 
     FF_STRBUF_AUTO_DESTROY wtProfileId = ffStrbufCreateS(getenv("WT_PROFILE_ID"));
     ffStrbufTrim(&wtProfileId, '\'');
     if (wtProfileId.length > 0)
     {
-        array_list* list = json_object_get_array(json_object_object_get(profiles, "list"));
-        if (list)
+        yyjson_val* list = yyjson_obj_get(profiles, "list");
+        if (yyjson_is_arr(list))
         {
-            for (size_t idx = 0; idx < list->length; ++idx)
+            yyjson_val* profile;
+            size_t idx, max;
+            yyjson_arr_foreach(list, idx, max, profile)
             {
-                json_object* profile = (json_object*) list->array[idx];
-                json_object* guid = json_object_object_get(profile, "guid");
+                yyjson_val* guid = yyjson_obj_get(profile, "guid");
 
-                if (!json_object_is_type(guid, json_type_string))
-                    continue;
-
-                if(ffStrbufEqualS(&wtProfileId, json_object_get_string(guid)))
+                if(ffStrbufEqualS(&wtProfileId, yyjson_get_str(guid)))
                 {
                     detectWTProfile(profile, name, size);
                     break;
@@ -128,7 +131,7 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
         }
     }
 
-    json_object* defaults = json_object_object_get(profiles, "defaults");
+    yyjson_val* defaults = yyjson_obj_get(profiles, "defaults");
     if (defaults)
         detectWTProfile(defaults, name, size);
 
@@ -145,7 +148,7 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     #include <shlobj.h>
 #endif
 
-static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
+static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
     FF_STRBUF_AUTO_DESTROY json = ffStrbufCreate();
@@ -219,7 +222,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
 
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
     double size = -1;
-    error = detectFromWTImpl(instance, &json, &name, &size);
+    error = detectFromWTImpl(&json, &name, &size);
 
     if(error)
         ffStrbufAppendS(&terminalFont->error, error);
@@ -231,15 +234,7 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
     }
 }
 
-#else //FF_HAVE_JSONC
 
-static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
-{
-    FF_UNUSED(instance, terminalExe, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without json-c support");
-}
-
-#endif //FF_HAVE_JSONC
 
 #endif //defined(_WIN32) || defined(__linux__)
 
@@ -370,7 +365,7 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
     //Used by both Linux (WSL) and Windows
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "Windows Terminal") ||
         ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "WindowsTerminal.exe"))
-        detectFromWindowsTeriminal(instance, &terminalShell->terminalExe, terminalFont);
+        detectFromWindowsTeriminal(&terminalShell->terminalExe, terminalFont);
     #endif
 
     else
