@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include <yyjson.h>
 
 #define FF_PROCESSES_MODULE_NAME "Processes"
 

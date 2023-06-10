@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include <yyjson.h>
 
 #define FF_WEATHER_MODULE_NAME "Weather"
 

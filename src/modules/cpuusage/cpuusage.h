@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include <yyjson.h>
 
 #define FF_CPUUSAGE_MODULE_NAME "CPUUsage"
 

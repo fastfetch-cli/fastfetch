@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include <yyjson.h>
 
 #define FF_COMMAND_MODULE_NAME "Command"
 

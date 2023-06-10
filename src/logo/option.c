@@ -1,5 +1,7 @@
 #include "logo/logo.h"
 
+#include "common/jsonconfig.h"
+
 void ffInitLogoOptions(FFLogoOptions* options)
 {
     ffStrbufInit(&options->source);
@@ -72,8 +74,12 @@ logoType:
                 fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
                 exit(472);
             }
-
-            ffOptionParseColor(key, value, &options->colors[index]);
+            if(value == NULL)
+            {
+                fprintf(stderr, "Error: usage: %s <str>\n", key);
+                exit(477);
+            }
+            ffOptionParseColor(value, &options->colors[index]);
         }
         else if(strcasecmp(subKey, "width") == 0)
             options->width = ffOptionParseUInt32(key, value);
@@ -180,4 +186,148 @@ void ffDestroyLogoOptions(FFLogoOptions* options)
     ffStrbufDestroy(&options->chafaSymbols);
     for(uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i)
         ffStrbufDestroy(&options->colors[i]);
+}
+
+const char* ffParseLogoJsonConfig(FFinstance* instance)
+{
+    FFLogoOptions* options = &instance->config.logo;
+
+    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    assert(root);
+
+    if (!yyjson_is_obj(root))
+        return "Invalid JSON config format. Root value must be an object";
+
+    yyjson_val* object = yyjson_obj_get(root, "logo");
+    if (!object) return NULL;
+    if (!yyjson_is_obj(object)) return "Property 'logo' must be an object";
+
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(object, idx, max, key_, val)
+    {
+        const char* key = yyjson_get_str(key_);
+
+        if (strcasecmp(key, "type") == 0)
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "auto", FF_LOGO_TYPE_AUTO },
+                { "builtin", FF_LOGO_TYPE_BUILTIN },
+                { "file", FF_LOGO_TYPE_FILE },
+                { "file-raw", FF_LOGO_TYPE_FILE_RAW },
+                { "data", FF_LOGO_TYPE_DATA },
+                { "data-raw", FF_LOGO_TYPE_DATA_RAW },
+                { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
+                { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
+                { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
+                { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
+                { "raw", FF_LOGO_TYPE_IMAGE_RAW },
+                { "none", FF_LOGO_TYPE_NONE },
+                {},
+            });
+
+            if (error) return error;
+            options->type = (FFLogoType) value;
+            continue;
+        }
+        else if (strcasecmp(key, "source") == 0)
+        {
+            ffStrbufSetS(&options->source, yyjson_get_str(val));
+            continue;
+        }
+        else if (strcasecmp(key, "color") == 0)
+        {
+            if (!yyjson_is_obj(val))
+                return "Property 'color' must be an object";
+
+            yyjson_val *key_c, *valc;
+            size_t idxc, maxc;
+            yyjson_obj_foreach(val, idxc, maxc, key_c, valc)
+            {
+                const char* keyc = yyjson_get_str(key_c);
+                uint32_t index = (uint32_t) strtoul(keyc, NULL, 10);
+                if (index < 1 || index > 9)
+                    return "Keys of property 'color' must be a number between 1 to 9";
+
+                ffOptionParseColor(yyjson_get_str(valc), &options->colors[index - 1]);
+            }
+            continue;
+        }
+        else if (strcasecmp(key, "width") == 0)
+        {
+            uint32_t value = (uint32_t) yyjson_get_uint(val);
+            if (value == 0)
+                return "Logo width must be a possitive integer";
+            options->width = value;
+            continue;
+        }
+        else if (strcasecmp(key, "height") == 0)
+        {
+            uint32_t value = (uint32_t) yyjson_get_uint(val);
+            if (value == 0)
+                return "Logo height must be a possitive integer";
+            options->height = value;
+            continue;
+        }
+        else if (strcasecmp(key, "padding") == 0)
+        {
+            if (!yyjson_is_obj(val))
+                return "Logo padding must be an object";
+
+            #define FF_PARSE_PADDING_POSITON(pos, paddingPos) \
+                yyjson_val* pos = yyjson_obj_get(val, #pos); \
+                if (pos) \
+                { \
+                    if (!yyjson_is_uint(pos)) \
+                        return "Logo padding values must be possitive integers"; \
+                    options->paddingPos = (uint32_t) yyjson_get_uint(pos); \
+                }
+            FF_PARSE_PADDING_POSITON(left, paddingLeft);
+            FF_PARSE_PADDING_POSITON(top, paddingTop);
+            FF_PARSE_PADDING_POSITON(right, paddingRight);
+            #undef FF_PARSE_PADDING_POSITON
+            continue;
+        }
+        else if (strcasecmp(key, "printRemaining"))
+        {
+            options->printRemaining = yyjson_get_bool(val);
+            continue;
+        }
+        else if (strcasecmp(key, "preserveAspectRadio"))
+        {
+            options->preserveAspectRadio = yyjson_get_bool(val);
+            continue;
+        }
+        else if (strcasecmp(key, "chafa"))
+        {
+            if (!yyjson_is_obj(val))
+                return "Chafa config must be an object";
+
+            yyjson_val* fgOnly = yyjson_obj_get(val, "fgOnly");
+            if (fgOnly)
+                options->chafaFgOnly = yyjson_get_bool(fgOnly);
+
+            yyjson_val* symbols = yyjson_obj_get(val, "symbols");
+            if (symbols)
+                ffStrbufAppendS(&options->chafaSymbols, yyjson_get_str(symbols));
+
+            yyjson_val* canvasMode = yyjson_obj_get(val, "canvasMode");
+            if (canvasMode)
+                options->chafaCanvasMode = (uint32_t) yyjson_get_uint(canvasMode);
+
+            yyjson_val* colorSpace = yyjson_obj_get(val, "colorSpace");
+            if (colorSpace)
+                options->chafaColorSpace = (uint32_t) yyjson_get_uint(colorSpace);
+
+            yyjson_val* ditherMode = yyjson_obj_get(val, "ditherMode");
+            if (ditherMode)
+                options->chafaDitherMode = (uint32_t) yyjson_get_uint(ditherMode);
+            continue;
+        }
+        else
+            return "Unknown logo key";
+    }
+
+    return NULL;
 }

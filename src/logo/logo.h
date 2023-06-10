@@ -30,5 +30,6 @@ bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type, bool printE
 void ffInitLogoOptions(FFLogoOptions* options);
 bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const char* value);
 void ffDestroyLogoOptions(FFLogoOptions* options);
+const char* ffParseLogoJsonConfig(FFinstance* instance);
 
 #endif

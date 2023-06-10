@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <yyjson.h>
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
@@ -135,6 +136,7 @@ typedef struct FFstate
     uint32_t titleLength;
 
     FFPlatform platform;
+    yyjson_doc* configDoc;
 } FFstate;
 
 typedef struct FFinstance

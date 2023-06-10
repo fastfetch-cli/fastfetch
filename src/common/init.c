@@ -331,6 +331,7 @@ static void destroyConfig(FFinstance* instance)
 static void destroyState(FFinstance* instance)
 {
     ffPlatformDestroy(&instance->state.platform);
+    yyjson_doc_free(instance->state.configDoc);
 }
 
 void ffDestroyInstance(FFinstance* instance)

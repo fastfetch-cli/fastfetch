@@ -162,30 +162,9 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, yyjson
     }
 }
 
-static inline void wrapYyjsonFree(yyjson_doc** doc)
-{
-    assert(doc);
-    if (*doc)
-        yyjson_doc_free(*doc);
-}
-
 static const char* printJsonConfig(FFinstance* instance)
 {
-    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-    FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.platform.configDirs)
-    {
-        uint32_t oldLength = filename->length;
-        ffStrbufAppendS(filename, "fastfetch/config.jsonc");
-        bool success = ffAppendFileBuffer(filename->chars, &content);
-        ffStrbufSubstrBefore(filename, oldLength);
-        if (success) break;
-    }
-
-    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content.chars, content.length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
-    if (!doc)
-        return "Failed to parse JSON config file";
-
-    yyjson_val* const root = yyjson_doc_get_root(doc);
+    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))
@@ -193,7 +172,7 @@ static const char* printJsonConfig(FFinstance* instance)
 
     yyjson_val* modules = yyjson_obj_get(root, "modules");
     if (!modules) return "Property 'modules' is not found";
-    if (!yyjson_is_arr(modules)) return "modules must be an array of strings or objects";
+    if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
 
     yyjson_val* item;
     size_t idx, max;

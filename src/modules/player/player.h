@@ -2,7 +2,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include <yyjson.h>
 
 #define FF_PLAYER_MODULE_NAME "Player"
 

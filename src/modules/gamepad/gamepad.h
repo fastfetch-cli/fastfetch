@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include <yyjson.h>
 
 #define FF_GAMEPAD_MODULE_NAME "Gamepad"
 

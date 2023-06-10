@@ -496,8 +496,16 @@ static void listConfigPaths(FFinstance* instance)
 {
     FF_LIST_FOR_EACH(FFstrbuf, folder, instance->state.platform.configDirs)
     {
-        ffStrbufAppendS(folder, "fastfetch/config.conf");
-        printf("%s%s\n", folder->chars, ffPathExists(folder->chars, FF_PATHTYPE_FILE) ? " (*)" : "");
+        bool exists = false;
+        ffStrbufAppendS(folder, "fastfetch/config.jsonc");
+        exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
+        if (!exists)
+        {
+            ffStrbufSubstrBefore(folder, folder->length - (uint32_t) strlen("jsonc"));
+            ffStrbufAppendS(folder, "conf");
+            exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
+        }
+        printf("%s%s\n", folder->chars, exists ? " (*)" : "");
     }
 }
 
@@ -511,6 +519,23 @@ static void listDataPaths(FFinstance* instance)
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value);
+
+static bool parseJsoncFile(FFinstance* instance, const char* path)
+{
+    yyjson_doc* doc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    if (doc)
+    {
+        instance->state.configDoc = doc;
+        const char* error = ffParseLogoJsonConfig(instance);
+        if (error)
+        {
+            fputs(error, stderr);
+            exit(477);
+        }
+        return true;
+    }
+    return false;
+}
 
 static bool parseConfigFile(FFinstance* instance, FFdata* data, const char* path)
 {
@@ -660,35 +685,6 @@ static void optionParseString(const char* key, const char* value, FFstrbuf* buff
 static inline bool startsWith(const char* str, const char* compareTo)
 {
     return strncasecmp(str, compareTo, strlen(compareTo)) == 0;
-}
-
-static void optionParseColor(const char* key, const char* value, FFstrbuf* buffer)
-{
-    optionCheckString(key, value, buffer);
-
-    while(*value != '\0')
-    {
-        #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
-            if(startsWith(value, #prefix)) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
-
-        FF_APPEND_COLOR_CODE_COND(reset_, "0;")
-        else FF_APPEND_COLOR_CODE_COND(bright_, "1;")
-        else FF_APPEND_COLOR_CODE_COND(black, "30")
-        else FF_APPEND_COLOR_CODE_COND(red, "31")
-        else FF_APPEND_COLOR_CODE_COND(green, "32")
-        else FF_APPEND_COLOR_CODE_COND(yellow, "33")
-        else FF_APPEND_COLOR_CODE_COND(blue, "34")
-        else FF_APPEND_COLOR_CODE_COND(magenta, "35")
-        else FF_APPEND_COLOR_CODE_COND(cyan, "36")
-        else FF_APPEND_COLOR_CODE_COND(white, "37")
-        else
-        {
-            ffStrbufAppendC(buffer, *value);
-            ++value;
-        }
-
-        #undef FF_APPEND_COLOR_CODE_COND
-    }
 }
 
 static uint32_t optionParseUInt32(const char* key, const char* value)
@@ -914,12 +910,19 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--separator") == 0)
         optionParseString(key, value, &instance->config.keyValueSeparator);
     else if(strcasecmp(key, "--color-keys") == 0)
-        optionParseColor(key, value, &instance->config.colorKeys);
+    {
+        optionCheckString(key, value, &instance->config.colorKeys);
+        ffOptionParseColor(value, &instance->config.colorKeys);
+    }
     else if(strcasecmp(key, "--color-title") == 0)
-        optionParseColor(key, value, &instance->config.colorTitle);
+    {
+        optionCheckString(key, value, &instance->config.colorTitle);
+        ffOptionParseColor(value, &instance->config.colorTitle);
+    }
     else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
     {
-        optionParseColor(key, value, &instance->config.colorKeys);
+        optionCheckString(key, value, &instance->config.colorKeys);
+        ffOptionParseColor(value, &instance->config.colorKeys);
         ffStrbufSet(&instance->config.colorTitle, &instance->config.colorKeys);
     }
     else if(strcasecmp(key, "--binary-prefix") == 0)
@@ -1066,6 +1069,17 @@ error:
 
 static void parseConfigFiles(FFinstance* instance, FFdata* data)
 {
+    for(uint32_t i = instance->state.platform.configDirs.length; i > 0; --i)
+    {
+        FFstrbuf* dir = ffListGet(&instance->state.platform.configDirs, i - 1);
+        uint32_t dirLength = dir->length;
+
+        ffStrbufAppendS(dir, "fastfetch/config.jsonc");
+        bool success = parseJsoncFile(instance, dir->chars);
+        ffStrbufSubstrBefore(dir, dirLength);
+        if (success) return;
+    }
+
     for(uint32_t i = instance->state.platform.configDirs.length; i > 0; --i)
     {
         if(!data->loadUserConfig)
@@ -1225,20 +1239,23 @@ int main(int argc, const char** argv)
         parseConfigFiles(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
-    //If we don't have a custom structure, use the default one
-    if(data.structure.length == 0)
-        ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
-
-    if(ffStrbufContainIgnCaseS(&data.structure, FF_CPUUSAGE_MODULE_NAME))
-        ffPrepareCPUUsage();
-
-    if(instance.config.multithreading)
+    if(!instance.state.configDoc)
     {
-        if(ffStrbufContainIgnCaseS(&data.structure, FF_PUBLICIP_MODULE_NAME))
-            ffPreparePublicIp(&instance.config.publicIP);
+        //If we don't have a custom structure, use the default one
+        if(data.structure.length == 0)
+            ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
 
-        if(ffStrbufContainIgnCaseS(&data.structure, FF_WEATHER_MODULE_NAME))
-            ffPrepareWeather(&instance.config.weather);
+        if(ffStrbufContainIgnCaseS(&data.structure, FF_CPUUSAGE_MODULE_NAME))
+            ffPrepareCPUUsage();
+
+        if(instance.config.multithreading)
+        {
+            if(ffStrbufContainIgnCaseS(&data.structure, FF_PUBLICIP_MODULE_NAME))
+                ffPreparePublicIp(&instance.config.publicIP);
+
+            if(ffStrbufContainIgnCaseS(&data.structure, FF_WEATHER_MODULE_NAME))
+                ffPrepareWeather(&instance.config.weather);
+        }
     }
 
     ffStart(&instance);

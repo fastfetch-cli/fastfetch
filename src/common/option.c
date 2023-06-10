@@ -105,19 +105,14 @@ bool ffOptionParseBoolean(const char* str)
     );
 }
 
-void ffOptionParseColor(const char* key, const char* value, FFstrbuf* buffer)
+void ffOptionParseColor(const char* value, FFstrbuf* buffer)
 {
-    if(value == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <str>\n", key);
-        exit(477);
-    }
     ffStrbufEnsureFree(buffer, 63);
 
     while(*value != '\0')
     {
         #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
-            if(strncasecmp(value, #prefix, strlen(#prefix))) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
+            if(strncasecmp(value, #prefix, strlen(#prefix)) == 0) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
 
         FF_APPEND_COLOR_CODE_COND(reset_, "0;")
         else FF_APPEND_COLOR_CODE_COND(bright_, "1;")
