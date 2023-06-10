@@ -319,7 +319,6 @@ set(LIBFASTFETCH_SRC
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
-    src/modules/jsonconfig/jsonconfig.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
     src/util/platform/FFPlatform.c

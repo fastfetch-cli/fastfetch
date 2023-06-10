@@ -26,6 +26,7 @@ static void initState(FFstate* state)
     state->titleLength = 0;
 
     ffPlatformInit(&state->platform);
+    state->configDoc = NULL;
 }
 
 static void defaultConfig(FFinstance* instance)

@@ -3,6 +3,7 @@
 #include "common/parsing.h"
 #include "common/io/io.h"
 #include "common/time.h"
+#include "common/jsonconfig.h"
 #include "util/stringUtils.h"
 #include "logo/logo.h"
 
@@ -1187,7 +1188,7 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintPowerAdapter(instance, &instance->config.powerAdapter);
     else if(strcasecmp(line, FF_LOCALE_MODULE_NAME) == 0)
         ffPrintLocale(instance, &instance->config.locale);
-    else if(strcasecmp(line, "localip") == 0)
+    else if(strcasecmp(line, FF_LOCALIP_MODULE_NAME) == 0)
         ffPrintLocalIp(instance, &instance->config.localIP);
     else if(strcasecmp(line, FF_PUBLICIP_MODULE_NAME) == 0)
         ffPrintPublicIp(instance, &instance->config.publicIP);
@@ -1219,8 +1220,6 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintSound(instance, &instance->config.sound);
     else if(strcasecmp(line, FF_GAMEPAD_MODULE_NAME) == 0)
         ffPrintGamepad(instance, &instance->config.gamepad);
-    else if(strcasecmp(line, FF_JSONCONFIG_MODULE_NAME) == 0)
-        ffPrintJsonConfig(instance);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");
 }
@@ -1264,34 +1263,41 @@ int main(int argc, const char** argv)
         fflush(stdout);
     #endif
 
-    //Parse the structure and call the modules
-    uint32_t startIndex = 0;
-    while (startIndex < data.structure.length)
+    if (instance.state.configDoc)
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
-        data.structure.chars[colonIndex] = '\0';
-
-        uint64_t ms = 0;
-        if(__builtin_expect(instance.config.stat, false))
-            ms = ffTimeGetTick();
-
-        parseStructureCommand(&instance, data.structure.chars + startIndex);
-
-        if(__builtin_expect(instance.config.stat, false))
+        ffPrintJsonConfig(&instance);
+    }
+    else
+    {
+        //Parse the structure and call the modules
+        uint32_t startIndex = 0;
+        while (startIndex < data.structure.length)
         {
-            char str[32];
-            int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-            if(instance.config.pipe)
-                puts(str);
-            else
-                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
+            data.structure.chars[colonIndex] = '\0';
+
+            uint64_t ms = 0;
+            if(__builtin_expect(instance.config.stat, false))
+                ms = ffTimeGetTick();
+
+            parseStructureCommand(&instance, data.structure.chars + startIndex);
+
+            if(__builtin_expect(instance.config.stat, false))
+            {
+                char str[32];
+                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
+                if(instance.config.pipe)
+                    puts(str);
+                else
+                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            }
+
+            #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+                fflush(stdout);
+            #endif
+
+            startIndex = colonIndex + 1;
         }
-
-        #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
-            fflush(stdout);
-        #endif
-
-        startIndex = colonIndex + 1;
     }
 
     ffFinish(&instance);
