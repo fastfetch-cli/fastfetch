@@ -1,4 +1,5 @@
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/bluetooth/bluetooth.h"
 #include "modules/bluetooth/bluetooth.h"
 
@@ -84,22 +85,27 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseBluetoothJsonObject(FFinstance* instance, json_object* module)
+void ffParseBluetoothJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFBluetoothOptions __attribute__((__cleanup__(ffDestroyBluetoothOptions))) options;
     ffInitBluetoothOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "showConnected") == 0)
             {
-                options.showDisconnected = json_object_get_boolean(val);
+                options.showDisconnected = yyjson_get_bool(val);
                 continue;
             }
 
@@ -109,4 +115,3 @@ void ffParseBluetoothJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintBluetooth(instance, &options);
 }
-#endif

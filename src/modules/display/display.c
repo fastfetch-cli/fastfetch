@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
 
@@ -155,17 +155,21 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
-
-#ifdef FF_HAVE_JSONC
-void ffParseDisplayJsonObject(FFinstance* instance, json_object* module)
+void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;
     ffInitDisplayOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -187,13 +191,13 @@ void ffParseDisplayJsonObject(FFinstance* instance, json_object* module)
 
             if (strcasecmp(key, "detectName") == 0)
             {
-                options.detectName = json_object_get_boolean(val);
+                options.detectName = yyjson_get_bool(val);
                 continue;
             }
 
             if (strcasecmp(key, "preciseRefreshRate") == 0)
             {
-                options.preciseRefreshRate = json_object_get_boolean(val);
+                options.preciseRefreshRate = yyjson_get_bool(val);
                 continue;
             }
 
@@ -203,4 +207,3 @@ void ffParseDisplayJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintDisplay(instance, &options);
 }
-#endif

@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/font/font.h"
 #include "modules/font/font.h"
 
@@ -53,16 +53,21 @@ void ffDestroyFontOptions(FFFontOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseFontJsonObject(FFinstance* instance, json_object* module)
+void ffParseFontJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFFontOptions __attribute__((__cleanup__(ffDestroyFontOptions))) options;
     ffInitFontOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -72,4 +77,3 @@ void ffParseFontJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintFont(instance, &options);
 }
-#endif

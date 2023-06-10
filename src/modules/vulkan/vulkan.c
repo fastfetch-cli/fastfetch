@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/vulkan/vulkan.h"
 #include "modules/vulkan/vulkan.h"
 
@@ -63,16 +63,21 @@ void ffDestroyVulkanOptions(FFVulkanOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseVulkanJsonObject(FFinstance* instance, json_object* module)
+void ffParseVulkanJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFVulkanOptions __attribute__((__cleanup__(ffDestroyVulkanOptions))) options;
     ffInitVulkanOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -82,4 +87,3 @@ void ffParseVulkanJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintVulkan(instance, &options);
 }
-#endif

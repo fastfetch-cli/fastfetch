@@ -1,9 +1,8 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "common/networking.h"
 #include "modules/weather/weather.h"
 
-#define FF_WEATHER_MODULE_NAME "Weather"
 #define FF_WEATHER_NUM_FORMAT_ARGS 1
 
 static FFNetworkingState state;
@@ -88,28 +87,33 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options)
     ffStrbufDestroy(&options->outputFormat);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseWeatherJsonObject(FFinstance* instance, json_object* module)
+void ffParseWeatherJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFWeatherOptions __attribute__((__cleanup__(ffDestroyWeatherOptions))) options;
     ffInitWeatherOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "outputFormat") == 0)
             {
-                ffStrbufSetS(&options.outputFormat, json_object_get_string(val));
+                ffStrbufSetS(&options.outputFormat, yyjson_get_str(val));
                 continue;
             }
 
             if (strcasecmp(key, "timeout") == 0)
             {
-                options.timeout = (uint32_t) json_object_get_int(val);
+                options.timeout = (uint32_t) yyjson_get_uint(val);
                 continue;
             }
 
@@ -119,4 +123,3 @@ void ffParseWeatherJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintWeather(instance, &options);
 }
-#endif

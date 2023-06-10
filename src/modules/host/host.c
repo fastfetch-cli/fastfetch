@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/host/host.h"
 #include "modules/host/host.h"
 
@@ -72,16 +72,21 @@ void ffDestroyHostOptions(FFHostOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseHostJsonObject(FFinstance* instance, json_object* module)
+void ffParseHostJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFHostOptions __attribute__((__cleanup__(ffDestroyHostOptions))) options;
     ffInitHostOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -91,4 +96,3 @@ void ffParseHostJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintHost(instance, &options);
 }
-#endif

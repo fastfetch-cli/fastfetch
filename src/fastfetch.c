@@ -15,9 +15,6 @@
     #include "util/windows/getline.h"
 #endif
 
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-
-#include "common/jsonconfig.h"
 #include "modules/modules.h"
 
 typedef struct CustomValue
@@ -1038,8 +1035,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             optionParseString(key, value, &instance->config.libOSMesa);
         else if(strcasecmp(subkey, "-opencl") == 0)
             optionParseString(key, value, &instance->config.libOpenCL);
-        else if(strcasecmp(subkey, "-jsonc") == 0)
-            optionParseString(key, value, &instance->config.libJSONC);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
             optionParseString(key, value, &instance->config.libwlanapi);
         else if(strcasecmp(key, "-pulse") == 0)

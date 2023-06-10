@@ -1,33 +1,31 @@
 #include "fastfetch.h"
 #include "common/jsonconfig.h"
 
-#ifdef FF_HAVE_JSONC
-
-bool ffJsonConfigParseModuleArgs(const char* key, json_object* val, FFModuleArgs* moduleArgs)
+bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs* moduleArgs)
 {
     if(strcasecmp(key, "key") == 0)
     {
-        ffStrbufSetNS(&moduleArgs->key, (uint32_t) json_object_get_string_len(val), json_object_get_string(val));
+        ffStrbufSetNS(&moduleArgs->key, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
     else if(strcasecmp(key, "format") == 0)
     {
-        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) json_object_get_string_len(val), json_object_get_string(val));
+        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
     else if(strcasecmp(key, "error") == 0)
     {
-        ffStrbufSetNS(&moduleArgs->errorFormat, (uint32_t) json_object_get_string_len(val), json_object_get_string(val));
+        ffStrbufSetNS(&moduleArgs->errorFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
     return false;
 }
 
-const char* ffJsonConfigParseEnum(json_object* val, int* result, FFKeyValuePair pairs[])
+const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair pairs[])
 {
-    if (json_object_is_type(val, json_type_int))
+    if (yyjson_is_int(val))
     {
-        int intVal = json_object_get_int(val);
+        int intVal = yyjson_get_int(val);
 
         for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
         {
@@ -40,9 +38,9 @@ const char* ffJsonConfigParseEnum(json_object* val, int* result, FFKeyValuePair 
 
         return "Invalid enum integer";
     }
-    else if (json_object_is_type(val, json_type_string))
+    else if (yyjson_is_str(val))
     {
-        const char* strVal = json_object_get_string(val);
+        const char* strVal = yyjson_get_str(val);
         for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
         {
             if (strcasecmp(strVal, pPair->key) == 0)
@@ -57,5 +55,3 @@ const char* ffJsonConfigParseEnum(json_object* val, int* result, FFKeyValuePair 
     else
         return "Invalid enum value type; must be a string or integer";
 }
-
-#endif

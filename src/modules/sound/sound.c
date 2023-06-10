@@ -1,4 +1,5 @@
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/sound/sound.h"
 #include "modules/sound/sound.h"
 
@@ -115,16 +116,21 @@ void ffDestroySoundOptions(FFSoundOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseSoundJsonObject(FFinstance* instance, json_object* module)
+void ffParseSoundJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFSoundOptions __attribute__((__cleanup__(ffDestroySoundOptions))) options;
     ffInitSoundOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -150,4 +156,3 @@ void ffParseSoundJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintSound(instance, &options);
 }
-#endif

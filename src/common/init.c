@@ -119,7 +119,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.libGLX);
     ffStrbufInit(&instance->config.libOSMesa);
     ffStrbufInit(&instance->config.libOpenCL);
-    ffStrbufInit(&instance->config.libJSONC);
     ffStrbufInit(&instance->config.libfreetype);
     ffStrbufInit(&instance->config.libPulse);
     ffStrbufInit(&instance->config.libwlanapi);
@@ -323,7 +322,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libGLX);
     ffStrbufDestroy(&instance->config.libOSMesa);
     ffStrbufDestroy(&instance->config.libOpenCL);
-    ffStrbufDestroy(&instance->config.libJSONC);
     ffStrbufDestroy(&instance->config.libfreetype);
     ffStrbufDestroy(&instance->config.libPulse);
     ffStrbufDestroy(&instance->config.libwlanapi);
@@ -410,9 +408,6 @@ void ffListFeatures()
         #endif
         #ifdef FF_HAVE_OPENCL
             "opencl\n"
-        #endif
-        #ifdef FF_HAVE_LIBJSONC
-            "json-c\n"
         #endif
         #ifdef FF_HAVE_FREETYPE
             "freetype\n"

@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/shell/shell.h"
 
@@ -71,22 +71,27 @@ void ffDestroyShellOptions(FFShellOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseShellJsonObject(FFinstance* instance, json_object* module)
+void ffParseShellJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFShellOptions __attribute__((__cleanup__(ffDestroyShellOptions))) options;
     ffInitShellOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "version") == 0)
             {
-                options.version = (bool) json_object_get_boolean(val);
+                options.version = yyjson_get_bool(val);
                 continue;
             }
 
@@ -96,4 +101,3 @@ void ffParseShellJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintShell(instance, &options);
 }
-#endif

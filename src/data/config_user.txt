@@ -456,6 +456,5 @@
 #--lib-glx /usr/lib/libGLX.so
 #--lib-osmesa /usr/lib/libOSMesa.so
 #--lib-opencl /usr/lib/libOpenCL.so
-#--lib-jsonc /usr/lib/libjson-c.so
 #--lib-freetype /data/data/com.termux/files/usr/lib
 #--lib-pulse /usr/lib/libpulse.so

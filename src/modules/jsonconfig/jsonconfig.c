@@ -1,28 +1,23 @@
-#include "modules/jsonconfig/jsonconfig.h"
-#include "common/jsonconfig.h"
 #include "common/printing.h"
-
-#ifdef FF_HAVE_JSONC
-
+#include "common/jsonconfig.h"
 #include "common/io/io.h"
-#include "common/json.h"
+#include "modules/jsonconfig/jsonconfig.h"
 #include "modules/modules.h"
 
 #include <assert.h>
 #include <ctype.h>
 
-static inline bool tryModule(FFinstance* instance, const char* type, json_object* module, const char* moduleName, void (*const f)(FFinstance *instance, json_object *module))
+static inline bool tryModule(FFinstance* instance, const char* type, yyjson_val* module, const char* moduleName, void (*const f)(FFinstance *instance, yyjson_val *module))
 {
     if (strcasecmp(type, moduleName) == 0)
     {
-        if (module) json_object_object_del(module, "type"); // this line frees `type`
         f(instance, module);
         return true;
     }
     return false;
 }
 
-static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_object* module)
+static bool parseModuleJsonObject(FFinstance* instance, const char* type, yyjson_val* module)
 {
     switch (toupper(type[0]))
     {
@@ -167,26 +162,52 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, json_o
     }
 }
 
-static const char* parseModules(FFinstance* instance, json_object* modules)
+static inline void wrapYyjsonFree(yyjson_doc** doc)
 {
-    array_list* list = json_object_get_array(modules);
-    if (!list) return "modules must be an array of strings or objects";
+    assert(doc);
+    if (*doc)
+        yyjson_doc_free(*doc);
+}
 
-    for (size_t idx = 0; idx < list->length; ++idx)
+static const char* printJsonConfig(FFinstance* instance)
+{
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.platform.configDirs)
     {
-        json_object* module = (json_object*) list->array[idx];
-        const char* type = NULL;
-        if (json_object_is_type(module, json_type_string))
-        {
-            type = json_object_get_string(module);
+        uint32_t oldLength = filename->length;
+        ffStrbufAppendS(filename, "fastfetch/config.jsonc");
+        bool success = ffAppendFileBuffer(filename->chars, &content);
+        ffStrbufSubstrBefore(filename, oldLength);
+        if (success) break;
+    }
+
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content.chars, content.length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    if (!doc)
+        return "Failed to parse JSON config file";
+
+    yyjson_val* const root = yyjson_doc_get_root(doc);
+    assert(root);
+
+    if (!yyjson_is_obj(root))
+        return "Invalid JSON config format. Root value must be an object";
+
+    yyjson_val* modules = yyjson_obj_get(root, "modules");
+    if (!modules) return "Property 'modules' is not found";
+    if (!yyjson_is_arr(modules)) return "modules must be an array of strings or objects";
+
+    yyjson_val* item;
+    size_t idx, max;
+    yyjson_arr_foreach(modules, idx, max, item)
+    {
+        yyjson_val* module = item;
+        const char* type = yyjson_get_str(module);
+        if (type)
             module = NULL;
-        }
-        else if (json_object_is_type(module, json_type_object))
+        else if (yyjson_is_obj(module))
         {
-            json_object* object = json_object_object_get(module, "type");
-            type = json_object_get_string(object);
+            type = yyjson_get_str(yyjson_obj_get(module, "type"));
             if (!type) return "module object must contain a \"type\" key ( case sensitive )";
-            if (json_object_object_length(module) == 1) // contains only Property type
+            if (yyjson_obj_size(module) == 1) // contains only Property type
                 module = NULL;
         }
         else
@@ -198,56 +219,6 @@ static const char* parseModules(FFinstance* instance, json_object* modules)
 
     return NULL;
 }
-
-static const char* printJsonConfig(FFinstance* instance)
-{
-    if (!ffJsonLoadLibrary(instance))
-        return "Failed to load json-c library";
-
-    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-    FF_LIST_FOR_EACH(FFstrbuf, filename, instance->state.platform.configDirs)
-    {
-        uint32_t oldLength = filename->length;
-        ffStrbufAppendS(filename, "fastfetch/config.jsonc");
-        bool success = ffAppendFileBuffer(filename->chars, &content);
-        ffStrbufSubstrBefore(filename, oldLength);
-        if (success) break;
-    }
-
-    json_object* __attribute__((__cleanup__(wrapJsoncFree))) root = json_tokener_parse(content.chars);
-    if (!root)
-        return "Failed to parse JSON config file";
-
-    lh_table* rootObject = json_object_get_object(root);
-    if (!rootObject)
-        return "Invalid JSON config format. Root value must be an object";
-
-    struct lh_entry* entry;
-    lh_foreach(rootObject, entry)
-    {
-        const char* key = (const char *)lh_entry_k(entry);
-        json_object* val = (json_object *)lh_entry_v(entry);
-
-        if (strcmp(key, "modules") == 0)
-        {
-            const char* error = parseModules(instance, val);
-            if (error) return error;
-        }
-        else
-            return "Unknown JSON config key in root object";
-    }
-
-    return NULL;
-}
-
-#else
-
-static const char* printJsonConfig(FF_MAYBE_UNUSED FFinstance* instance)
-{
-    return "Fastfetch was compiled without json-c support";
-}
-
-#endif
 
 void ffPrintJsonConfig(FFinstance* instance)
 {

@@ -1,12 +1,9 @@
 #pragma once
 
 #include "fastfetch.h"
+#include <yyjson.h>
 
 #define FF_COLORS_MODULE_NAME "Colors"
 
 void ffPrintColors(FFinstance* instance);
-
-#ifdef FF_HAVE_JSONC
-#include "common/jsonconfig.h"
-void ffParseColorsJsonObject(FFinstance* instance, json_object* module);
-#endif
+void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module);

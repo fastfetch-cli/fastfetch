@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/terminal/terminal.h"
 
@@ -72,22 +72,27 @@ void ffDestroyTerminalOptions(FFTerminalOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseTerminalJsonObject(FFinstance* instance, json_object* module)
+void ffParseTerminalJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFTerminalOptions __attribute__((__cleanup__(ffDestroyTerminalOptions))) options;
     ffInitTerminalOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "version") == 0)
             {
-                options.version = (bool) json_object_get_boolean(val);
+                options.version = yyjson_get_bool(val);
                 continue;
             }
 
@@ -97,4 +102,3 @@ void ffParseTerminalJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintTerminal(instance, &options);
 }
-#endif

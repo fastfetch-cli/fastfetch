@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "common/option.h"
 #include "detection/os/os.h"
 #include "modules/os/os.h"
@@ -172,23 +172,28 @@ void ffDestroyOSOptions(FFOSOptions* options)
     #endif
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseOSJsonObject(FFinstance* instance, json_object* module)
+void ffParseOSJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
     ffInitOSOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             #if defined(__linux__) || defined(__FreeBSD__)
                 if (strcasecmp(key, "file") == 0)
                 {
-                    ffStrbufSetS(&options.file, json_object_get_string(val));
+                    ffStrbufSetS(&options.file, yyjson_get_str(val));
                     continue;
                 }
             #endif
@@ -199,4 +204,3 @@ void ffParseOSJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintOS(instance, &options);
 }
-#endif

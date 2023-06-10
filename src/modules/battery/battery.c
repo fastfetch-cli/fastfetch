@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "common/bar.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
@@ -139,35 +139,41 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
 void ffDestroyBatteryOptions(FFBatteryOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+
     #ifdef __linux__
         ffStrbufDestroy(&options->dir);
     #endif
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseBatteryJsonObject(FFinstance* instance, json_object* module)
+void ffParseBatteryJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
     ffInitBatteryOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             #ifdef __linux__
             if (strcasecmp(key, "dir") == 0)
             {
-                ffStrbufSetS(&options.dir, json_object_get_string(val));
+                ffStrbufSetS(&options.dir, yyjson_get_str(val));
                 continue;
             }
             #endif
 
             if (strcasecmp(key, "temp") == 0)
             {
-                options.temp = (bool) json_object_get_boolean(val);
+                options.temp = yyjson_get_bool(val);
                 continue;
             }
 
@@ -177,4 +183,3 @@ void ffParseBatteryJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintBattery(instance, &options);
 }
-#endif

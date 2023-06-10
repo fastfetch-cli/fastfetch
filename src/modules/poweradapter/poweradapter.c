@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/poweradapter/poweradapter.h"
 #include "modules/poweradapter/poweradapter.h"
 
@@ -83,16 +83,21 @@ void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParsePowerAdapterJsonObject(FFinstance* instance, json_object* module)
+void ffParsePowerAdapterJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFPowerAdapterOptions __attribute__((__cleanup__(ffDestroyPowerAdapterOptions))) options;
     ffInitPowerAdapterOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -102,4 +107,3 @@ void ffParsePowerAdapterJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintPowerAdapter(instance, &options);
 }
-#endif

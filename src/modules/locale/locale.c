@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/locale/locale.h"
 #include "modules/locale/locale.h"
 
@@ -50,16 +50,21 @@ void ffDestroyLocaleOptions(FFLocaleOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseLocaleJsonObject(FFinstance* instance, json_object* module)
+void ffParseLocaleJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFLocaleOptions __attribute__((__cleanup__(ffDestroyLocaleOptions))) options;
     ffInitLocaleOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -69,4 +74,3 @@ void ffParseLocaleJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintLocale(instance, &options);
 }
-#endif

@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/chassis/chassis.h"
 #include "modules/chassis/chassis.h"
 
@@ -70,16 +70,21 @@ void ffDestroyChassisOptions(FFChassisOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseChassisJsonObject(FFinstance* instance, json_object* module)
+void ffParseChassisJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFChassisOptions __attribute__((__cleanup__(ffDestroyChassisOptions))) options;
     ffInitChassisOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -89,4 +94,3 @@ void ffParseChassisJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintChassis(instance, &options);
 }
-#endif

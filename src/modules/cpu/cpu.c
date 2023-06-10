@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
 
@@ -83,22 +83,27 @@ void ffDestroyCPUOptions(FFCPUOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseCPUJsonObject(FFinstance* instance, json_object* module)
+void ffParseCPUJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFCPUOptions __attribute__((__cleanup__(ffDestroyCPUOptions))) options;
     ffInitCPUOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "temp") == 0)
             {
-                options.temp = (bool) json_object_get_boolean(val);
+                options.temp = yyjson_get_bool(val);
                 continue;
             }
 
@@ -108,4 +113,3 @@ void ffParseCPUJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintCPU(instance, &options);
 }
-#endif

@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/localip/localip.h"
 #include "modules/localip/localip.h"
 
@@ -194,22 +194,27 @@ void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
     ffStrbufDestroy(&options->namePrefix);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
+void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFLocalIpOptions __attribute__((__cleanup__(ffDestroyLocalIpOptions))) options;
     ffInitLocalIpOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "showIpv4") == 0)
             {
-                if (json_object_get_boolean(val))
+                if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_IPV4_BIT;
                 else
                     options.showType &= ~FF_LOCALIP_TYPE_IPV4_BIT;
@@ -218,7 +223,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
 
             if (strcasecmp(key, "showIpv6") == 0)
             {
-                if (json_object_get_boolean(val))
+                if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_IPV6_BIT;
                 else
                     options.showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
@@ -227,7 +232,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
 
             if (strcasecmp(key, "showMac") == 0)
             {
-                if (json_object_get_boolean(val))
+                if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_MAC_BIT;
                 else
                     options.showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
@@ -236,7 +241,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
 
             if (strcasecmp(key, "showLoop") == 0)
             {
-                if (json_object_get_boolean(val))
+                if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_LOOP_BIT;
                 else
                     options.showType &= ~FF_LOCALIP_TYPE_LOOP_BIT;
@@ -245,7 +250,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
 
             if (strcasecmp(key, "compact") == 0)
             {
-                if (json_object_get_boolean(val))
+                if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
                 else
                     options.showType &= ~FF_LOCALIP_TYPE_COMPACT_BIT;
@@ -254,7 +259,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
 
             if (strcasecmp(key, "namePrefix") == 0)
             {
-                ffStrbufSetS(&options.namePrefix, json_object_get_string(val));
+                ffStrbufSetS(&options.namePrefix, yyjson_get_str(val));
                 continue;
             }
 
@@ -264,4 +269,3 @@ void ffParseLocalIpJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintLocalIp(instance, &options);
 }
-#endif

@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "common/parsing.h"
 #include "common/bar.h"
 #include "detection/swap/swap.h"
@@ -84,16 +84,21 @@ void ffDestroySwapOptions(FFSwapOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseSwapJsonObject(FFinstance* instance, json_object* module)
+void ffParseSwapJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFSwapOptions __attribute__((__cleanup__(ffDestroySwapOptions))) options;
     ffInitSwapOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -103,4 +108,3 @@ void ffParseSwapJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintSwap(instance, &options);
 }
-#endif

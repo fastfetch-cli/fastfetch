@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/wmtheme/wmtheme.h"
 #include "modules/wmtheme/wmtheme.h"
 
@@ -50,16 +50,21 @@ void ffDestroyWMThemeOptions(FFWMThemeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseWMThemeJsonObject(FFinstance* instance, json_object* module)
+void ffParseWMThemeJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFWMThemeOptions __attribute__((__cleanup__(ffDestroyWMThemeOptions))) options;
     ffInitWMThemeOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -69,4 +74,3 @@ void ffParseWMThemeJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintWMTheme(instance, &options);
 }
-#endif

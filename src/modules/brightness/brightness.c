@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/brightness/brightness.h"
 #include "modules/brightness/brightness.h"
 
@@ -77,16 +77,21 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseBrightnessJsonObject(FFinstance* instance, json_object* module)
+void ffParseBrightnessJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFBrightnessOptions __attribute__((__cleanup__(ffDestroyBrightnessOptions))) options;
     ffInitBrightnessOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -96,4 +101,3 @@ void ffParseBrightnessJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintBrightness(instance, &options);
 }
-#endif

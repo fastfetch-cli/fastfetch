@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/wm/wm.h"
 
@@ -61,16 +61,21 @@ void ffDestroyWMOptions(FFWMOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseWMJsonObject(FFinstance* instance, json_object* module)
+void ffParseWMJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFWMOptions __attribute__((__cleanup__(ffDestroyWMOptions))) options;
     ffInitWMOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -80,4 +85,3 @@ void ffParseWMJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintWM(instance, &options);
 }
-#endif

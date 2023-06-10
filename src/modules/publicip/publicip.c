@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "common/networking.h"
 #include "modules/publicip/publicip.h"
 
@@ -103,28 +103,33 @@ void ffDestroyPublicIpOptions(FFPublicIpOptions* options)
     ffStrbufDestroy(&options->url);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParsePublicIpJsonObject(FFinstance* instance, json_object* module)
+void ffParsePublicIpJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFPublicIpOptions __attribute__((__cleanup__(ffDestroyPublicIpOptions))) options;
     ffInitPublicIpOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "url") == 0)
             {
-                ffStrbufSetS(&options.url, json_object_get_string(val));
+                ffStrbufSetS(&options.url, yyjson_get_str(val));
                 continue;
             }
 
             if (strcasecmp(key, "timeout") == 0)
             {
-                options.timeout = (uint32_t) json_object_get_int(val);
+                options.timeout = (uint32_t) yyjson_get_uint(val);
                 continue;
             }
 
@@ -134,4 +139,3 @@ void ffParsePublicIpJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintPublicIp(instance, &options);
 }
-#endif

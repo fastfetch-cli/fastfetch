@@ -1,6 +1,5 @@
-#include "fastfetch.h"
-
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "common/processing.h"
 #include "modules/command/command.h"
 
@@ -81,28 +80,33 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
     ffStrbufDestroy(&options->text);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseCommandJsonObject(FFinstance* instance, json_object* module)
+void ffParseCommandJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFCommandOptions __attribute__((__cleanup__(ffDestroyCommandOptions))) options;
     ffInitCommandOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             if (strcasecmp(key, "shell") == 0)
             {
-                ffStrbufSetS(&options.shell, json_object_get_string(val));
+                ffStrbufSetS(&options.shell, yyjson_get_str(val));
                 continue;
             }
 
             if (strcasecmp(key, "text") == 0)
             {
-                ffStrbufSetS(&options.text, json_object_get_string(val));
+                ffStrbufSetS(&options.text, yyjson_get_str(val));
                 continue;
             }
 
@@ -112,4 +116,3 @@ void ffParseCommandJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintCommand(instance, &options);
 }
-#endif

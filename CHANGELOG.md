@@ -1,3 +1,10 @@
+# 2.0.0
+
+This release introduces a new configuration file format: JSON config
+
+Changes:
+* Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
+
 # 1.11.3
 
 Bugfixes:
@@ -67,9 +74,6 @@ Bugfixes:
 * Fix compiling with musl (Wifi, Linux, #429)
 * Don't exit if libpci is failed to init (GPU, Linux, #433)
 * Names of most well-known gamepads are correctly printed instead of `Wireless Controller` on Windows
-
-Changes:
-* Use json-c to parse JSON strings for comments support, instead of using unmaintained cJSON
 
 Logo:
 * Small update for nobara logo (#435, @regulargvy13)

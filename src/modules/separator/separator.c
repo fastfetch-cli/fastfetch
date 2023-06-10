@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "modules/separator/separator.h"
 
 void ffPrintSeparator(FFinstance* instance, FFSeparatorOptions* options)
@@ -58,19 +58,24 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
     ffStrbufDestroy(&options->string);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseSeparatorJsonObject(FFinstance* instance, json_object* module)
+void ffParseSeparatorJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFSeparatorOptions __attribute__((__cleanup__(ffDestroySeparatorOptions))) options;
     ffInitSeparatorOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (strcasecmp(key, "string") == 0)
             {
-                ffStrbufSetS(&options.string, json_object_get_string(val));
+                ffStrbufSetS(&options.string, yyjson_get_str(val));
                 continue;
             }
 
@@ -80,4 +85,3 @@ void ffParseSeparatorJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintSeparator(instance, &options);
 }
-#endif

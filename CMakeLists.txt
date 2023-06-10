@@ -78,7 +78,6 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_JSONC "Enable json-c" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
@@ -239,7 +238,6 @@ set(LIBFASTFETCH_SRC
     src/common/font.c
     src/common/format.c
     src/common/init.c
-    src/common/json.c
     src/common/jsonconfig.c
     src/common/library.c
     src/common/option.c
@@ -710,10 +708,6 @@ ff_lib_enable(PULSE
     "libpulse"
     "Pulse"
 )
-ff_lib_enable(JSONC
-    "json-c"
-    "json-c"
-)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
@@ -784,6 +778,7 @@ target_compile_definitions(fastfetch
 )
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
+    PRIVATE yyjson
 )
 
 add_executable(flashfetch
@@ -794,6 +789,7 @@ target_compile_definitions(flashfetch
 )
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
+    PRIVATE yyjson
 )
 
 if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c

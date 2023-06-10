@@ -1,10 +1,6 @@
 #pragma once
 
-#ifdef FF_HAVE_JSONC
+#include <yyjson.h>
 
-#include "common/json.h"
-
-bool ffJsonConfigParseModuleArgs(const char* key, json_object* val, FFModuleArgs* moduleArgs);
-const char* ffJsonConfigParseEnum(json_object* val, int* result, FFKeyValuePair pairs[]);
-
-#endif
+bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs* moduleArgs);
+const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair pairs[]);

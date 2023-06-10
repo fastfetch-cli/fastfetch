@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "common/printing.h"
+#include "common/jsonconfig.h"
 #include "detection/theme/theme.h"
 #include "modules/theme/theme.h"
 
@@ -50,16 +50,21 @@ void ffDestroyThemeOptions(FFThemeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-#ifdef FF_HAVE_JSONC
-void ffParseThemeJsonObject(FFinstance* instance, json_object* module)
+void ffParseThemeJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFThemeOptions __attribute__((__cleanup__(ffDestroyThemeOptions))) options;
     ffInitThemeOptions(&options);
 
     if (module)
     {
-        json_object_object_foreach(module, key, val)
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
         {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
@@ -69,4 +74,3 @@ void ffParseThemeJsonObject(FFinstance* instance, json_object* module)
 
     ffPrintTheme(instance, &options);
 }
-#endif
