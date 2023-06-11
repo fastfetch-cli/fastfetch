@@ -130,6 +130,8 @@ static void detectLXQt(const FFinstance* instance, FFQtResult* result)
         {"icon_theme = ", &result->icons},
         {"font = ", &result->font}
     });
+
+    ffParsePropFileConfig(instance, "pcmanfm-qt/lxqt/settings.conf", "Wallpaper=", &result->wallpaper);
 }
 
 const FFQtResult* ffDetectQt(const FFinstance* instance)
