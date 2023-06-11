@@ -1,7 +1,7 @@
 # 1.11.4
 
 Features:
-* Support KDE wallpaper detection (Wallpaper, Linux)
+* Support KDE / LXQT wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 
 # 1.11.3
