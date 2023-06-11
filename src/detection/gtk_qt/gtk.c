@@ -78,6 +78,7 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         fontName = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/font-name", "org.cinnamon.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
         cursorTheme = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/cursor-theme", "org.cinnamon.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/cursor-size", "org.cinnamon.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+        wallpaper = ffSettingsGet(instance, "/org/cinnamon/desktop/background/picture-uri", "org.cinnamon.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
     }
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_MATE) == 0)
     {
@@ -99,7 +100,6 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorTheme = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGet(instance, "/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
         wallpaper = ffSettingsGet(instance, "/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
-        // TODO: support other DEs for wallpaper
     }
 
     ffThreadMutexUnlock(&mutex);
