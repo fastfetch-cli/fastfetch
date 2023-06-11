@@ -49,8 +49,8 @@ static bool printImageIterm(FFinstance* instance)
         return false;
     }
 
-    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     ffPrintCharTimes('\n', instance->config.logo.paddingTop);
+    ffPrintCharTimes(' ', instance->config.logo.paddingLeft);
     FFstrbuf base64 = base64Encode(&buf);
     instance->state.logoWidth = instance->config.logo.width + instance->config.logo.paddingLeft + instance->config.logo.paddingRight;
     instance->state.logoHeight = instance->config.logo.paddingTop + instance->config.logo.height;
