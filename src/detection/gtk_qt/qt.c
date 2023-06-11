@@ -13,7 +13,8 @@ static inline bool allValuesSet(const FFQtResult* result)
         result->widgetStyle.length > 0 &&
         result->colorScheme.length > 0 &&
         result->icons.length > 0 &&
-        result->font.length > 0;
+        result->font.length > 0 &&
+        result->wallpaper.length > 0;
 }
 
 typedef enum PlasmaCategory
@@ -95,6 +96,11 @@ static void detectPlasma(const FFinstance* instance, FFQtResult* result)
         if(detectPlasmaFromFile(baseDir.chars, result))
             foundAFile = true;
 
+        ffStrbufSet(&baseDir, configDir);
+        ffStrbufAppendS(&baseDir, "plasma-org.kde.plasma.desktop-appletsrc");
+
+        ffParsePropFile(baseDir.chars, "Image=", &result->wallpaper);
+
         if(allValuesSet(result))
             return;
     }
@@ -144,6 +150,7 @@ const FFQtResult* ffDetectQt(const FFinstance* instance)
     ffStrbufInit(&result.colorScheme);
     ffStrbufInit(&result.icons);
     ffStrbufInit(&result.font);
+    ffStrbufInit(&result.wallpaper);
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 

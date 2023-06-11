@@ -21,6 +21,7 @@ typedef struct FFQtResult
     FFstrbuf colorScheme;
     FFstrbuf icons;
     FFstrbuf font;
+    FFstrbuf wallpaper;
 } FFQtResult;
 
 const FFGTKResult* ffDetectGTK2(const FFinstance* instance);
