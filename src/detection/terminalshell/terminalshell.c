@@ -258,6 +258,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "foot"))
         return getTerminalVersionFoot(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "qterminal"))
+        return getExeVersionRaw(exe, version); //1.2.0
+
     #endif
 
     #ifdef _WIN32
