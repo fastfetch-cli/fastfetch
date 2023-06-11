@@ -10,13 +10,13 @@ static const char* getSystemMonospaceFont(const FFinstance* instance)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Cinnamon") == 0)
+    if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, "Cinnamon"))
     {
         const char* systemMonospaceFont = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/monospace-font-name", "org.cinnamon.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemMonospaceFont))
             return systemMonospaceFont;
     }
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, "Mate") == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, "Mate"))
     {
         const char* systemMonospaceFont = ffSettingsGet(instance, "/org/mate/interface/monospace-font-name", "org.mate.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemMonospaceFont))
@@ -26,9 +26,9 @@ static const char* getSystemMonospaceFont(const FFinstance* instance)
     return ffSettingsGet(instance, "/org/gnome/desktop/interface/monospace-font-name", "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 }
 
-static void detectFromGSettings(const FFinstance* instance, char* profilePath, char* profileList, char* profile, FFTerminalFontResult* terminalFont)
+static void detectFromGSettings(const FFinstance* instance, const char* profilePath, const char* profileList, const char* profile, const char* defaultProfileKey, FFTerminalFontResult* terminalFont)
 {
-    const char* defaultProfile = ffSettingsGetGSettings(instance, profileList, NULL, "default", FF_VARIANT_TYPE_STRING).strValue;
+    const char* defaultProfile = ffSettingsGetGSettings(instance, profileList, NULL, defaultProfileKey, FF_VARIANT_TYPE_STRING).strValue;
     if(!ffStrSet(defaultProfile))
     {
         ffStrbufAppendF(&terminalFont->error, "Could not get default profile from gsettings: %s", profileList);
@@ -240,20 +240,22 @@ static void detectQTerminal(const FFinstance* instance, FFTerminalFontResult* te
 
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
-    if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0)
+    if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "konsole"))
         detectKonsole(instance, terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "xfce4-terminal") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "xfce4-terminal"))
         detectXFCETerminal(instance, terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "lxterminal") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "lxterminal"))
         detectFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =", terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "tilix") == 0)
-        detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "gnome-terminal-") == 0)
-        detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "deepin-terminal") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "tilix"))
+        detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", "default", terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "gnome-terminal-"))
+        detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", "default", terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "mate-terminal"))
+        detectFromGSettings(instance, "/org/mate/terminal/profiles/", "org.mate.terminal.global", "org.mate.terminal.profile", "default-profile", terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "deepin-terminal"))
         detectDeepinTerminal(instance, terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "foot") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "foot"))
         detectFootTerminal(instance, terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "qterminal") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "qterminal"))
         detectQTerminal(instance, terminalFont);
 }
