@@ -6,7 +6,7 @@ Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
 
 Features:
-* Support KDE / LXQT wallpaper detection (Wallpaper, Linux)
+* Support KDE / LXQT / MATE wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
 
