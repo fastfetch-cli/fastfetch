@@ -1,7 +1,7 @@
 # 1.11.4
 
 Features:
-* Support KDE / LXQT / MATE wallpaper detection (Wallpaper, Linux)
+* Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
 
