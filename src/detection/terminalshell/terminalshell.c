@@ -203,6 +203,15 @@ FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* vers
     return true;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionMateTerminal(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version)) return false;
+
+    //MATE Terminal 1.26.1
+    ffStrbufSubstrAfterLastC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -260,6 +269,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "qterminal"))
         return getExeVersionRaw(exe, version); //1.2.0
+
+    if(ffStrbufIgnCaseEqualS(processName, "mate-terminal"))
+        return getTerminalVersionMateTerminal(exe, version);
 
     #endif
 
