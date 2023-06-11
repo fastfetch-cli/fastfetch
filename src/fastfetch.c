@@ -527,9 +527,15 @@ static bool parseJsoncFile(FFinstance* instance, const char* path)
     if (doc)
     {
         instance->state.configDoc = doc;
-        const char* error = ffParseLogoJsonConfig(instance);
-        if (error)
-        {
+        const char* error = NULL;
+
+        if (
+            (error = ffParseLogoJsonConfig(instance)) ||
+            (error = ffParseGeneralJsonConfig(instance)) ||
+            (error = ffParseDisplayJsonConfig(instance)) ||
+            (error = ffParseLibraryJsonConfig(instance)) ||
+            false
+        ) {
             fputs(error, stderr);
             exit(477);
         }
@@ -935,6 +941,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             NULL
         );
     }
+    else if(strcasecmp(key, "--percent-type") == 0)
+        instance->config.percentType = optionParseUInt32(key, value);
 
     ///////////////////////
     //Module args options//
@@ -1048,13 +1056,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else
             goto error;
     }
-
-    //////////////////
-    //Module options//
-    //////////////////
-
-    else if(strcasecmp(key, "--percent-type") == 0)
-        instance->config.percentType = optionParseUInt32(key, value);
 
     //////////////////
     //Unknown option//

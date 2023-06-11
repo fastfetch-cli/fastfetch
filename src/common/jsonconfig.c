@@ -274,6 +274,186 @@ static const char* printJsonConfig(FFinstance* instance)
     return NULL;
 }
 
+const char* ffParseGeneralJsonConfig(FFinstance* instance)
+{
+    FFconfig* config = &instance->config;
+
+    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    assert(root);
+
+    if (!yyjson_is_obj(root))
+        return "Invalid JSON config format. Root value must be an object";
+
+    yyjson_val* object = yyjson_obj_get(root, "general");
+    if (!object) return NULL;
+    if (!yyjson_is_obj(object)) return "Property 'general' must be an object";
+
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(object, idx, max, key_, val)
+    {
+        const char* key = yyjson_get_str(key_);
+
+        if (strcasecmp(key, "allowSlowOperations") == 0)
+            config->allowSlowOperations = yyjson_get_bool(val);
+        else if (strcasecmp(key, "thread") == 0 || strcasecmp(key, "multithreading") == 0)
+            config->multithreading = yyjson_get_bool(val);
+        else if (strcasecmp(key, "stat") == 0)
+            config->stat = yyjson_get_bool(val);
+        else if (strcasecmp(key, "escapeBedrock") == 0)
+            config->escapeBedrock = yyjson_get_bool(val);
+        else if (strcasecmp(key, "pipe") == 0)
+            config->pipe = yyjson_get_bool(val);
+        else
+            return "Unknown general property";
+    }
+
+    return NULL;
+}
+
+const char* ffParseDisplayJsonConfig(FFinstance* instance)
+{
+    FFconfig* config = &instance->config;
+
+    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    assert(root);
+
+    if (!yyjson_is_obj(root))
+        return "Invalid JSON config format. Root value must be an object";
+
+    yyjson_val* object = yyjson_obj_get(root, "display");
+    if (!object) return NULL;
+    if (!yyjson_is_obj(object)) return "Property 'display' must be an object";
+
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(object, idx, max, key_, val)
+    {
+        const char* key = yyjson_get_str(key_);
+
+        if (strcasecmp(key, "showErrors") == 0)
+            config->showErrors = yyjson_get_bool(val);
+        else if (strcasecmp(key, "disableLinewrap") == 0)
+            config->disableLinewrap = yyjson_get_bool(val);
+        else if (strcasecmp(key, "hideCursor") == 0)
+            config->hideCursor = yyjson_get_bool(val);
+        else if (strcasecmp(key, "separator") == 0)
+            ffStrbufAppendS(&config->keyValueSeparator, yyjson_get_str(val));
+        else if (strcasecmp(key, "color") == 0)
+        {
+            if (yyjson_is_str(val))
+            {
+                ffOptionParseColor(yyjson_get_str(val), &config->colorKeys);
+                ffStrbufAppend(&config->colorTitle, &config->colorKeys);
+            }
+            else if (yyjson_is_obj(val))
+            {
+                const char* colorKeys = yyjson_get_str(yyjson_obj_get(val, "keys"));
+                if (colorKeys)
+                    ffOptionParseColor(colorKeys, &config->colorKeys);
+                const char* colorTitle = yyjson_get_str(yyjson_obj_get(val, "title"));
+                if (colorTitle)
+                    ffOptionParseColor(colorTitle, &config->colorTitle);
+            }
+            else
+                return "display.color must be either a string or an object";
+        }
+        else if (strcasecmp(key, "binaryPrefix") == 0)
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "iec", FF_BINARY_PREFIX_TYPE_IEC },
+                { "si", FF_BINARY_PREFIX_TYPE_SI },
+                { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
+                {},
+            });
+            if (error) return error;
+            config->binaryPrefixType = (FFBinaryPrefixType) value;
+        }
+        else if (strcasecmp(key, "percentType") == 0)
+            config->percentType = (uint32_t) yyjson_get_uint(val);
+        else
+            return "Unknown display property";
+    }
+
+    return NULL;
+}
+
+const char* ffParseLibraryJsonConfig(FFinstance* instance)
+{
+    FFconfig* config = &instance->config;
+
+    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    assert(root);
+
+    if (!yyjson_is_obj(root))
+        return "Invalid JSON config format. Root value must be an object";
+
+    yyjson_val* object = yyjson_obj_get(root, "library");
+    if (!object) return NULL;
+    if (!yyjson_is_obj(object)) return "Property 'library' must be an object";
+
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(object, idx, max, key_, val)
+    {
+        const char* key = yyjson_get_str(key_);
+
+        if (strcasecmp(key, "pci") == 0)
+            ffStrbufAppendS(&config->libPCI, yyjson_get_str(val));
+        else if (strcasecmp(key, "vulkan") == 0)
+            ffStrbufAppendS(&config->libVulkan, yyjson_get_str(val));
+        else if (strcasecmp(key, "freetype") == 0)
+            ffStrbufAppendS(&config->libfreetype, yyjson_get_str(val));
+        else if (strcasecmp(key, "wayland") == 0)
+            ffStrbufAppendS(&config->libWayland, yyjson_get_str(val));
+        else if (strcasecmp(key, "xcbRandr") == 0)
+            ffStrbufAppendS(&config->libXcbRandr, yyjson_get_str(val));
+        else if (strcasecmp(key, "xcb") == 0)
+            ffStrbufAppendS(&config->libXcb, yyjson_get_str(val));
+        else if (strcasecmp(key, "Xrandr") == 0)
+            ffStrbufAppendS(&config->libXrandr, yyjson_get_str(val));
+        else if (strcasecmp(key, "X11") == 0)
+            ffStrbufAppendS(&config->libX11, yyjson_get_str(val));
+        else if (strcasecmp(key, "gio") == 0)
+            ffStrbufAppendS(&config->libGIO, yyjson_get_str(val));
+        else if (strcasecmp(key, "DConf") == 0)
+            ffStrbufAppendS(&config->libDConf, yyjson_get_str(val));
+        else if (strcasecmp(key, "dbus") == 0)
+            ffStrbufAppendS(&config->libDBus, yyjson_get_str(val));
+        else if (strcasecmp(key, "XFConf") == 0)
+            ffStrbufAppendS(&config->libXFConf, yyjson_get_str(val));
+        else if (strcasecmp(key, "sqlite") == 0 || strcasecmp(key, "sqlite3") == 0)
+            ffStrbufAppendS(&config->libSQLite3, yyjson_get_str(val));
+        else if (strcasecmp(key, "rpm") == 0)
+            ffStrbufAppendS(&config->librpm, yyjson_get_str(val));
+        else if (strcasecmp(key, "imagemagick") == 0)
+            ffStrbufAppendS(&config->libImageMagick, yyjson_get_str(val));
+        else if (strcasecmp(key, "z") == 0)
+            ffStrbufAppendS(&config->libZ, yyjson_get_str(val));
+        else if (strcasecmp(key, "chafa") == 0)
+            ffStrbufAppendS(&config->libChafa, yyjson_get_str(val));
+        else if (strcasecmp(key, "egl") == 0)
+            ffStrbufAppendS(&config->libEGL, yyjson_get_str(val));
+        else if (strcasecmp(key, "glx") == 0)
+            ffStrbufAppendS(&config->libGLX, yyjson_get_str(val));
+        else if (strcasecmp(key, "osmesa") == 0)
+            ffStrbufAppendS(&config->libOSMesa, yyjson_get_str(val));
+        else if (strcasecmp(key, "opencl") == 0)
+            ffStrbufAppendS(&config->libOpenCL, yyjson_get_str(val));
+        else if (strcasecmp(key, "wlanapi") == 0)
+            ffStrbufAppendS(&config->libwlanapi, yyjson_get_str(val));
+        else if (strcasecmp(key, "pulse") == 0)
+            ffStrbufAppendS(&config->libPulse, yyjson_get_str(val));
+        else if (strcasecmp(key, "nm") == 0)
+            ffStrbufAppendS(&config->libnm, yyjson_get_str(val));
+        else
+            return "Unknown library property";
+    }
+
+    return NULL;
+}
+
 void ffPrintJsonConfig(FFinstance* instance)
 {
     const char* error = printJsonConfig(instance);
