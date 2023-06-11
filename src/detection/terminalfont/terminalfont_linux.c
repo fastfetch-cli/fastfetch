@@ -221,6 +221,23 @@ static void detectFootTerminal(const FFinstance* instance, FFTerminalFontResult*
     ffFontInitValues(&terminalFont->font, font.chars, &font.chars[equal + strlen("size=")]);
 }
 
+static void detectQTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    ffParsePropFileConfigValues(instance, "qterminal.org/qterminal.ini", 2, (FFpropquery[]) {
+        {"fontFamily=", &fontName},
+        {"fontSize=", &fontSize},
+    });
+
+    if (fontName.length == 0)
+        ffStrbufAppendS(&fontName, "monospace");
+    if (fontSize.length == 0)
+        ffStrbufAppendS(&fontSize, "12");
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
+
 void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0)
@@ -237,4 +254,6 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectDeepinTerminal(instance, terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "foot") == 0)
         detectFootTerminal(instance, terminalFont);
+    else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "qterminal") == 0)
+        detectQTerminal(instance, terminalFont);
 }
