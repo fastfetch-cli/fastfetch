@@ -149,7 +149,12 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
 static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
+    const char* sessionMode = getenv("GNOME_SHELL_SESSION_MODE");
+    if (sessionMode && strcmp(sessionMode, "classic") == 0)
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC);
+    else
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
+
     ffParsePropFileData(instance, "gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
 
     if (result->deVersion.length == 0)

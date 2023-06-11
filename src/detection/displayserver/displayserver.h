@@ -7,6 +7,7 @@
 
 #define FF_DE_PRETTY_PLASMA "KDE Plasma"
 #define FF_DE_PRETTY_GNOME "Gnome"
+#define FF_DE_PRETTY_GNOME_CLASSIC "Gnome Classic"
 #define FF_DE_PRETTY_XFCE4 "Xfce4"
 #define FF_DE_PRETTY_CINNAMON "Cinnamon"
 #define FF_DE_PRETTY_MATE "Mate"

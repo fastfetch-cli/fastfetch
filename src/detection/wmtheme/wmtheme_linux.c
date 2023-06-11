@@ -206,7 +206,10 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUTTER) == 0)
     {
-        if(ffStrbufIgnCaseCompS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) == 0)
+        if(
+            ffStrbufIgnCaseCompS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) == 0 ||
+            ffStrbufIgnCaseEqualS(&wm->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC)
+        )
             return detectMutter(instance, themeOrError);
         else
             return detectGTKThemeAsWMTheme(instance, themeOrError);
