@@ -1,3 +1,8 @@
+# 1.11.4
+
+Features:
+* Support KDE wallpaper detection (Wallpaper, Linux)
+
 # 1.11.3
 
 Bugfixes:

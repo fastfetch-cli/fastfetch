@@ -22,9 +22,9 @@ next:
         if(n->ut_type != USER_PROCESS)
             continue;
 
-        for(uint32_t i = 0; i < users->length; ++i)
+        FF_LIST_FOR_EACH(FFstrbuf, user, *users)
         {
-            if(ffStrbufCompS((FFstrbuf*)ffListGet(users, i), n->ut_user) == 0)
+            if(ffStrbufCompS(user, n->ut_user) == 0)
                 goto next;
         }
 
