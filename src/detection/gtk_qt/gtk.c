@@ -68,6 +68,8 @@ static void detectGTKFromSettings(const FFinstance* instance, FFGTKResult* resul
         cursorTheme = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeName", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
         wallpaper = ffSettingsGetXFConf(instance, "xfce4-desktop", "/backdrop/screen0/monitor0/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
+        if (!wallpaper) // FIXME: find a way to enumerate possible properties
+            wallpaper = ffSettingsGetXFConf(instance, "xfce4-desktop", "/backdrop/screen0/monitoreDP-1/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
     }
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_CINNAMON) == 0)
     {
