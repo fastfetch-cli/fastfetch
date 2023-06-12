@@ -899,6 +899,11 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--load-user-config") == 0)
         data->loadUserConfig = optionParseBoolean(value);
 
+    #if defined(__linux__) || defined(__FreeBSD__)
+    else if(strcasecmp(key, "--player-name") == 0)
+        optionParseString(key, value, &instance->config.playerName);
+    #endif
+
     ////////////////
     //Logo options//
     ////////////////

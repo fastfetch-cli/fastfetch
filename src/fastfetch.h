@@ -48,6 +48,10 @@ typedef struct FFconfig
     bool multithreading;
     bool stat;
 
+    #if defined(__linux__) || defined(__FreeBSD__)
+    FFstrbuf playerName;
+    #endif
+
     FFTitleOptions title;
     FFOSOptions os;
     FFHostOptions host;

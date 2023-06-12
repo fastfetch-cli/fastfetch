@@ -8,6 +8,4 @@ typedef struct FFPlayerOptions
 {
     const char* moduleName;
     FFModuleArgs moduleArgs;
-
-    FFstrbuf name;
 } FFPlayerOptions;

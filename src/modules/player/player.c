@@ -76,8 +76,6 @@ void ffInitPlayerOptions(FFPlayerOptions* options)
 {
     options->moduleName = FF_PLAYER_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->name);
 }
 
 bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, const char* value)
@@ -93,8 +91,6 @@ bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, cons
 void ffDestroyPlayerOptions(FFPlayerOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    ffStrbufDestroy(&options->name);
 }
 
 void ffParsePlayerJsonObject(FFinstance* instance, yyjson_val* module)

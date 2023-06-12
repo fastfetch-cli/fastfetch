@@ -160,8 +160,8 @@ static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
 
     // FIXME: This is shared for both player and media module.
     // However it uses an option in one specific module
-    if(instance->config.player.name.length > 0)
-        getCustomBus(&data, &instance->config.player.name, result);
+    if(instance->config.playerName.length > 0)
+        getCustomBus(&data, &instance->config.playerName, result);
     else
         getBestBus(&data, result);
 
