@@ -11,6 +11,8 @@
     #define getutxent getutent
 #endif
 
+#pragma GCC diagnostic ignored "-Wstringop-overread"
+
 void ffDetectUsers(FFlist* users, FFstrbuf* error)
 {
     struct utmpx* n = NULL;
