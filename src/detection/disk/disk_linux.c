@@ -192,14 +192,11 @@ static void detectStats(FFDisk* disk)
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
 }
 
-void ffDetectDisksImpl(FFDiskResult* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     FILE* mountsFile = fopen("/proc/mounts", "r");
     if(mountsFile == NULL)
-    {
-        ffStrbufAppendS(&disks->error, "fopen(\"/proc/mounts\", \"r\") == NULL");
-        return;
-    }
+        return "fopen(\"/proc/mounts\", \"r\") == NULL";
 
     FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
@@ -224,7 +221,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         }
 
         //We have a valid device, add it to the list
-        FFDisk* disk = ffListAdd(&disks->disks);
+        FFDisk* disk = ffListAdd(disks);
 
         //detect mountpoint
         ffStrbufInit(&disk->mountpoint);
@@ -252,4 +249,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ffStrbufDestroy(device);
 
     fclose(mountsFile);
+
+    return NULL;
 }

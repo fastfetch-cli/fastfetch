@@ -133,17 +133,27 @@ static void printAutodetected(FFinstance* instance, FFDiskOptions* options, cons
 
 void ffPrintDisk(FFinstance* instance, FFDiskOptions* options)
 {
-    const FFDiskResult* disks = ffDetectDisks();
-    if(disks->error.length > 0)
+    FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
+    const char* error = ffDetectDisks(&disks);
+
+    if(error)
     {
-        ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", disks->error.chars);
-        return;
+        ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+    }
+    else
+    {
+        if(options->folders.length == 0)
+            printAutodetected(instance, options, &disks);
+        else
+            printMountpoints(instance, options, &disks);
     }
 
-    if(options->folders.length == 0)
-        printAutodetected(instance, options, &disks->disks);
-    else
-        printMountpoints(instance, options, &disks->disks);
+    FF_LIST_FOR_EACH(FFDisk, disk, disks)
+    {
+        ffStrbufDestroy(&disk->mountpoint);
+        ffStrbufDestroy(&disk->filesystem);
+        ffStrbufDestroy(&disk->name);
+    }
 }
 
 
