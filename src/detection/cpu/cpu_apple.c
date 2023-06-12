@@ -40,11 +40,10 @@ static double detectCpuTemp(const FFstrbuf* cpuName)
     return result;
 }
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    FF_UNUSED(instance);
-
-    ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
+    if (ffSysctlGetString("machdep.cpu.brand_string", &cpu->name) != NULL)
+        return "sysctlbyname(machdep.cpu.brand_string) failed";
     ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
@@ -64,8 +63,10 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     if(cpu->frequencyMax == 0.0)
         cpu->frequencyMax = getFrequency("hw.cpufrequency");
 
-    if (instance->config.cpu.temp)
+    if (options->temp)
         cpu->temperature = detectCpuTemp(&cpu->name);
     else
         cpu->temperature = FF_CPU_TEMP_UNSET;
+
+    return NULL;
 }

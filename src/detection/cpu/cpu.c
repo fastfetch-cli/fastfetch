@@ -1,13 +1,12 @@
 #include "cpu.h"
 #include "detection/internal.h"
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu);
-static void detectCPU(const FFinstance* instance, FFCPUResult* cpu)
-{
-    ffStrbufInit(&cpu->name);
-    ffStrbufInit(&cpu->vendor);
+const char* ffDetectCPUImpl(const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu);
 
-    ffDetectCPUImpl(instance, cpu);
+const char* ffDetectCPU(const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
+{
+    const char* error = ffDetectCPUImpl(instance, options, cpu);
+    if (error) return error;
 
     const char* removeStrings[] = {
         " CPU", " FPU", " APU", " Processor",
@@ -18,11 +17,5 @@ static void detectCPU(const FFinstance* instance, FFCPUResult* cpu)
     ffStrbufRemoveStringsA(&cpu->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
     ffStrbufSubstrBeforeFirstC(&cpu->name, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&cpu->name, ' '); //If we removed the @ in previous step there was most likely a space before it
-}
-
-const FFCPUResult* ffDetectCPU(const FFinstance* instance)
-{
-    FF_DETECTION_INTERNAL_GUARD(FFCPUResult,
-        detectCPU(instance, &result);
-    );
+    return NULL;
 }

@@ -7,11 +7,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
+static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
 {
     FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
-        return;
+        return "fopen(\"/proc/cpuinfo\", \"r\") failed";
 
     char* line = NULL;
     size_t len = 0;
@@ -37,6 +37,8 @@ static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrb
         free(line);
 
     fclose(cpuinfo);
+
+    return NULL;
 }
 
 static double getGHz(const char* file)
@@ -102,19 +104,17 @@ static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    if(instance->config.cpu.temp)
-        cpu->temperature = detectCPUTemp();
-    else
-        cpu->temperature = FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
 
     FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuIsa = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuUarch = ffStrbufCreate();
 
-    parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
+    const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
+    if (error) return error;
 
     cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
 
@@ -146,4 +146,6 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
             ffStrbufAppendC(&cpu->name, ' ');
         ffStrbufAppend(&cpu->name, &cpuIsa);
     }
+
+    return NULL;
 }
