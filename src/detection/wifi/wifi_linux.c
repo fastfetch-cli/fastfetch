@@ -201,13 +201,16 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
 #endif
 
+#if __has_include(<linux/wireless.h>)
+#define FF_DETECT_WIFI_WITH_IOCTLS
+
 #include "common/io/io.h"
 
 #include <net/if.h>
-#include <linux/wireless.h> //TODO: don't use kernel headers in userspace
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <linux/wireless.h> //TODO: Don't depend on kernel headers
 
 static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
 {
@@ -309,6 +312,8 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
     return NULL;
 }
 
+#endif
+
 const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
 {
     #ifdef FF_HAVE_LIBNM
@@ -316,5 +321,9 @@ const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
         return NULL;
     #endif
 
-    return detectWifiWithIoctls(instance, result);
+    #ifdef FF_DETECT_WIFI_WITH_IOCTLS
+        detectWifiWithIoctls(instance, result);
+    #endif
+
+    return "linux/wireless.h not found during compilation";
 }
