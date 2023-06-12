@@ -7,29 +7,39 @@
 
 void ffPrintFont(FFinstance* instance, FFFontOptions* options)
 {
-    const FFFontResult* font = ffDetectFont(instance);
+    FFFontResult font;
+    for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
+        ffStrbufInit(&font.fonts[i]);
+    ffStrbufInit(&font.display);
 
-    if(font->error.length > 0)
-    {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "%s", font->error.chars);
-        return;
-    }
+    const char* error = ffDetectFont(instance, &font);
 
-    if(options->moduleArgs.outputFormat.length == 0)
+    if(error)
     {
-        ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs.key);
-        ffStrbufPutTo(&font->display, stdout);
+        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
     }
     else
     {
-        ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[0]},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[1]},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[2]},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &font->fonts[3]},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &font->display},
-        });
+        if(options->moduleArgs.outputFormat.length == 0)
+        {
+            ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs.key);
+            ffStrbufPutTo(&font.display, stdout);
+        }
+        else
+        {
+            ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]) {
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[0]},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[1]},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[2]},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[3]},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.display},
+            });
+        }
     }
+
+    ffStrbufDestroy(&font.display);
+    for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
+        ffStrbufDestroy(&font.fonts[i]);
 }
 
 void ffInitFontOptions(FFFontOptions* options)
