@@ -30,7 +30,7 @@ static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
         SetupDiDestroyDeviceInfoList(*hdev);
 }
 
-const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
+const char* ffDetectBattery(FFinstance* instance, FFBatteryOptions* options, FFlist* results)
 {
     if(instance->config.allowSlowOperations)
     {
@@ -111,7 +111,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             }
 
             battery->temperature = 0.0/0.0;
-            if(instance->config.battery.temp)
+            if(options->temp)
             {
                 bqi.InformationLevel = BatteryTemperature;
                 ULONG temp;

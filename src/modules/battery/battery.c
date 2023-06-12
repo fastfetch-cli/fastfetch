@@ -76,7 +76,7 @@ void ffPrintBattery(FFinstance* instance, FFBatteryOptions* options)
     FFlist results;
     ffListInitA(&results, sizeof(BatteryResult), 0);
 
-    const char* error = ffDetectBatteryImpl(instance, &results);
+    const char* error = ffDetectBattery(instance, options, &results);
 
     if (error)
     {

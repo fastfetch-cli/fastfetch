@@ -27,7 +27,7 @@ static double detectBatteryTemp()
     return result;
 }
 
-const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
+const char* ffDetectBattery(FF_MAYBE_UNUSED FFinstance* instance, FFBatteryOptions* options, FFlist* results)
 {
     CFMutableDictionaryRef matchDict = IOServiceMatching("AppleSmartBattery");
     if (matchDict == NULL)
@@ -90,7 +90,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         else
             ffStrbufAppendS(&battery->status, "");
 
-        if(instance->config.battery.temp)
+        if(options->temp)
             battery->temperature = detectBatteryTemp();
         else
             battery->temperature = FF_BATTERY_TEMP_UNSET;
