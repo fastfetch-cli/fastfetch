@@ -99,16 +99,16 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
     return true;
 }
 
-static void getCustomBus(FFDBusData* data, const FFinstance* instance, FFMediaResult* result)
+static void getCustomBus(FFDBusData* data, const FFstrbuf* playerName, FFMediaResult* result)
 {
-    if(ffStrbufStartsWithS(&instance->config.player.name, FF_DBUS_MPRIS_PREFIX))
+    if(ffStrbufStartsWithS(playerName, FF_DBUS_MPRIS_PREFIX))
     {
-        getBusProperties(data, instance->config.player.name.chars, result);
+        getBusProperties(data, playerName->chars, result);
         return;
     }
 
     FF_STRBUF_AUTO_DESTROY busName = ffStrbufCreateS(FF_DBUS_MPRIS_PREFIX);
-    ffStrbufAppend(&busName, &instance->config.player.name);
+    ffStrbufAppend(&busName, playerName);
     getBusProperties(data, busName.chars, result);
 }
 
@@ -158,8 +158,10 @@ static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
     if(error != NULL)
         return error;
 
+    // FIXME: This is shared for both player and media module.
+    // However it uses an option in one specific module
     if(instance->config.player.name.length > 0)
-        getCustomBus(&data, instance, result);
+        getCustomBus(&data, &instance->config.player.name, result);
     else
         getBestBus(&data, result);
 
