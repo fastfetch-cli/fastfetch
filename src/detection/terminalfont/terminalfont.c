@@ -374,20 +374,18 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
     return true;
 }
 
-const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
+bool ffDetectTerminalFont(const FFinstance* instance, FFTerminalFontResult* result)
 {
-    FF_DETECTION_INTERNAL_GUARD(FFTerminalFontResult,
-        ffStrbufInit(&result.error);
+    const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
 
-        const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
+    if(terminalShell->terminalProcessName.length == 0)
+        ffStrbufAppendS(&result->error, "Terminal font needs successful terminal detection");
 
-        if(terminalShell->terminalProcessName.length == 0)
-            ffStrbufAppendS(&result.error, "Terminal font needs successful terminal detection");
+    else if(!detectTerminalFontCommon(instance, terminalShell, result))
+        ffDetectTerminalFontPlatform(instance, terminalShell, result);
 
-        else if(!detectTerminalFontCommon(instance, terminalShell, &result))
-            ffDetectTerminalFontPlatform(instance, terminalShell, &result);
+    if(result->error.length == 0 && result->font.pretty.length == 0)
+        ffStrbufAppendF(&result->error, "Unknown terminal: %s", terminalShell->terminalProcessName.chars);
 
-        if(result.error.length == 0 && result.font.pretty.length == 0)
-            ffStrbufAppendF(&result.error, "Unknown terminal: %s", terminalShell->terminalProcessName.chars);
-    );
+    return result->error.length == 0;
 }

@@ -8,28 +8,33 @@
 
 void ffPrintTerminalFont(FFinstance* instance, FFTerminalFontOptions* options)
 {
-    const FFTerminalFontResult* terminalFont = ffDetectTerminalFont(instance);
+    FFTerminalFontResult terminalFont;
+    ffStrbufInit(&terminalFont.error);
 
-    if(terminalFont->error.length > 0)
+    if(!ffDetectTerminalFont(instance, &terminalFont))
     {
-        ffPrintError(instance, FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, "%s", terminalFont->error.chars);
-        return;
-    }
-
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
-        ffPrintLogoAndKey(instance, FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs.key);
-        ffStrbufPutTo(&terminalFont->font.pretty, stdout);
+        ffPrintError(instance, FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, "%s", terminalFont.error.chars);
     }
     else
     {
-        ffPrintFormat(instance, FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_TERMINALFONT_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont->font.pretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont->font.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont->font.size},
-            {FF_FORMAT_ARG_TYPE_LIST,   &terminalFont->font.styles}
-        });
+        if(options->moduleArgs.outputFormat.length == 0)
+        {
+            ffPrintLogoAndKey(instance, FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs.key);
+            ffStrbufPutTo(&terminalFont.font.pretty, stdout);
+        }
+        else
+        {
+            ffPrintFormat(instance, FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_TERMINALFONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.pretty},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.name},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.size},
+                {FF_FORMAT_ARG_TYPE_LIST,   &terminalFont.font.styles}
+            });
+        }
     }
+
+    ffStrbufDestroy(&terminalFont.error);
+    ffFontDestroy(&terminalFont.font);
 }
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
