@@ -931,6 +931,45 @@ static const FFlogo* getLogoGaruda()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoGarudaDragon()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("garudadragon", "garuda-linux-dragon")
+    FF_LOGO_LINES(
+"                 .:--=========--:..\n"
+"            .:-=+++++===-----=======-:.\n"
+"          :=++++-:..            ..:-===-:.\n"
+"        .+++=:.                      .-=---.\n"
+"      . :-:                            :---:\n"
+"       :=           .                     :---:\n"
+"        .=-:        :-.                    .---:\n"
+"          :-===--::. .::::.                  ---:\n"
+"       .::--====-===+=-----=-:                ---:\n"
+"  ::  :-++++====--=-:=====--=--:              .---\n"
+" +**=:+++===++++++==- -===== -==-.             ---:\n"
+" *****+==++==--::::::======== . ===-.          :---\n"
+" ****==++-::.:::::-.::--======-.-===           .---\n"
+" +**+=+-::::--:.     -==:-==--=======-::. .    :---\n"
+" =**++-::::==       -+===-==: :::.:-=-==---    :--:\n"
+" .*+*-:::-+=        ...::====  .::  .=-:--.     ..\n"
+"  -*++:::=+-:             .:=-   -- .:  .  ...\n"
+"   =*++:.++-+:   .:.         =-.: :-:    ::   :.\n"
+"    -*++-=+=-+=-=++===-.     .====: .::::.\n"
+"     :++++++-:::--.-:===       --.\n"
+"      .=+++++- .=  +.=:=                .::\n"
+"        :=+++++:. .: : .              :----\n"
+"          .-++++=-:..            .:--===-.\n"
+"             .-=+++++===-----=======-:.\n"
+"                 .::-=========--::.\n"
+    )
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoGarudaSmall()
 {
     FF_LOGO_INIT
@@ -2544,6 +2583,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoFedoraOld,
         getLogoFreeBSD,
         getLogoGaruda,
+        getLogoGarudaDragon,
         getLogoGarudaSmall,
         getLogoGentoo,
         getLogoGentooSmall,
