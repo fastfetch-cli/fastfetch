@@ -8,6 +8,7 @@ bool ffdsAppendDisplay(
     double refreshRate,
     uint32_t scaledWidth,
     uint32_t scaledHeight,
+    uint32_t rotation,
     FFstrbuf* name,
     FFDisplayType type)
 {
@@ -20,6 +21,7 @@ bool ffdsAppendDisplay(
     display->refreshRate = refreshRate;
     display->scaledWidth = scaledWidth;
     display->scaledHeight = scaledHeight;
+    display->rotation = rotation;
     ffStrbufInitMove(&display->name, name);
     display->type = type;
 

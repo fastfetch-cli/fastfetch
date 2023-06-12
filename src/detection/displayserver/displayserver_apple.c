@@ -12,7 +12,7 @@
 
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
 
-static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
+static void detectDisplays(FFDisplayServerResult* ds)
 {
     CGDirectDisplayID screens[128];
     uint32_t screenCount;
@@ -41,7 +41,7 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
             }
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-            if(detectName && CoreDisplay_DisplayCreateInfoDictionary)
+            if(CoreDisplay_DisplayCreateInfoDictionary)
             {
                 CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
                 if(displayInfo)
@@ -58,6 +58,7 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
+                (uint32_t)CGDisplayRotation(screen),
                 &name,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
             );
@@ -120,5 +121,5 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
-    detectDisplays(ds, instance->config.display.detectName);
+    detectDisplays(ds);
 }

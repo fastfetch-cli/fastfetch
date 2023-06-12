@@ -3,7 +3,7 @@
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 7
+#define FF_DISPLAY_NUM_FORMAT_ARGS 8
 
 void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
 {
@@ -53,7 +53,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            if(result->name.length || (moduleIndex > 0 && displayType))
+            if((options->detectName && result->name.length) || (moduleIndex > 0 && displayType))
             {
                 ffStrbufClear(&key);
                 if(options->moduleArgs.key.length == 0)
@@ -102,6 +102,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
                 {FF_FORMAT_ARG_TYPE_STRING, displayType},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->rotation},
             });
         }
 

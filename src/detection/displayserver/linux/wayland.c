@@ -19,7 +19,6 @@ typedef struct WaylandData
     FF_LIBRARY_SYMBOL(wl_display_roundtrip)
     struct wl_display* display;
     const struct wl_interface* ffwl_output_interface;
-    bool detectName;
 } WaylandData;
 
 typedef struct WaylandDisplay
@@ -31,7 +30,6 @@ typedef struct WaylandDisplay
     enum wl_output_transform transform;
     FFDisplayType type;
     FFstrbuf name;
-    bool detectName;
 } WaylandDisplay;
 
 #ifndef __FreeBSD__
@@ -92,16 +90,14 @@ static void waylandOutputGeometryListener(void *data,
 {
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
-    if(display->detectName)
+
+    if(make && strcmp(make, "unknown") != 0)
+        ffStrbufAppendS(&display->name, make);
+    if(model && strcmp(model, "unknown") != 0)
     {
-        if(make && strcmp(make, "unknown") != 0)
-            ffStrbufAppendS(&display->name, make);
-        if(model && strcmp(model, "unknown") != 0)
-        {
-            if(display->name.length > 0)
-                ffStrbufAppendC(&display->name, '-');
-            ffStrbufAppendS(&display->name, model);
-        }
+        if(display->name.length > 0)
+            ffStrbufAppendC(&display->name, '-');
+        ffStrbufAppendS(&display->name, model);
     }
 }
 
@@ -123,7 +119,6 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         return;
 
     WaylandDisplay display = {
-        .detectName = wldata->detectName,
         .width = 0,
         .height = 0,
         .refreshRate = 0,
@@ -179,12 +174,33 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
             break;
     }
 
+    uint32_t rotation;
+    switch(display.transform)
+    {
+        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        case WL_OUTPUT_TRANSFORM_90:
+            rotation = 90;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        case WL_OUTPUT_TRANSFORM_180:
+            rotation = 180;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        case WL_OUTPUT_TRANSFORM_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
     ffdsAppendDisplay(wldata->result,
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
+        rotation,
         &display.name,
         display.type
     );
@@ -222,8 +238,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     data.display = ffwl_display_connect(NULL);
     if(data.display == NULL)
         return false;
-
-    data.detectName = instance->config.display.detectName;
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 

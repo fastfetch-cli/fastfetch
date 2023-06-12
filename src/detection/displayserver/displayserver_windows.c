@@ -5,7 +5,7 @@
 #include <dwmapi.h>
 #include <WinUser.h>
 
-static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
+static void detectDisplays(FFDisplayServerResult* ds)
 {
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = sizeof(paths) / sizeof(paths[0]);
@@ -44,26 +44,23 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
-            if (detectName)
+            DISPLAYCONFIG_TARGET_DEVICE_NAME targetName = {
+                .header = {
+                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME,
+                    .size = sizeof(targetName),
+                    .adapterId = path->targetInfo.adapterId,
+                    .id = path->targetInfo.id,
+                },
+            };
+            if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
             {
-                DISPLAYCONFIG_TARGET_DEVICE_NAME targetName = {
-                    .header = {
-                        .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME,
-                        .size = sizeof(targetName),
-                        .adapterId = path->targetInfo.adapterId,
-                        .id = path->targetInfo.id,
-                    },
-                };
-                if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
+                if (targetName.flags.friendlyNameFromEdid)
+                    ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
+                else
                 {
-                    if (targetName.flags.friendlyNameFromEdid)
-                        ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
-                    else
-                    {
-                        ffStrbufSetWS(&name, targetName.monitorDevicePath);
-                        ffStrbufSubstrAfterFirstC(&name, '#');
-                        ffStrbufSubstrBeforeFirstC(&name, '#');
-                    }
+                    ffStrbufSetWS(&name, targetName.monitorDevicePath);
+                    ffStrbufSubstrAfterFirstC(&name, '#');
+                    ffStrbufSubstrBeforeFirstC(&name, '#');
                 }
             }
 
@@ -77,12 +74,30 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 height = temp;
             }
 
+            uint32_t rotation;
+            switch (path->targetInfo.rotation)
+            {
+                case DISPLAYCONFIG_ROTATION_ROTATE90:
+                    rotation = 90;
+                    break;
+                case DISPLAYCONFIG_ROTATION_ROTATE180:
+                    rotation = 180;
+                    break;
+                case DISPLAYCONFIG_ROTATION_ROTATE270:
+                    rotation = 270;
+                    break;
+                default:
+                    rotation = 0;
+                    break;
+            }
+
             ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 scaledWidth,
                 scaledHeight,
+                rotation,
                 &name,
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL ||
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED ||
@@ -112,7 +127,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deVersion);
     ffListInit(&ds->displays, sizeof(FFDisplayResult));
 
-    detectDisplays(ds, instance->config.display.detectName);
+    detectDisplays(ds);
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
     const FFOSResult* os = ffDetectOS(instance);
