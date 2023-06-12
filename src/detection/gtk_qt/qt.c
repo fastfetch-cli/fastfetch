@@ -101,7 +101,6 @@ static void detectPlasma(const FFinstance* instance, FFQtResult* result)
         ffStrbufAppendS(&baseDir, "plasma-org.kde.plasma.desktop-appletsrc");
 
         ffParsePropFile(baseDir.chars, "Image=", &result->wallpaper);
-        puts(result->wallpaper.chars);
 
         if(allValuesSet(result))
         {
