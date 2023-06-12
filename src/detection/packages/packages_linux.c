@@ -134,7 +134,7 @@ static uint32_t getNixPackagesImpl(char* path)
 
     FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(128);
 
-    //https://github.com/LinusDierheimer/fastfetch/issues/195#issuecomment-1191748222
+    //https://github.com/fastfetch-cli/fastfetch/issues/195#issuecomment-1191748222
     FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(255);
     ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
     ffStrbufAppendS(&command, path);

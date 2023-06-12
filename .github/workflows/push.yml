@@ -289,7 +289,7 @@ jobs:
           path: ./fastfetch-*-Win32.zip
 
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
     runs-on: ubuntu-latest
     needs:
