@@ -113,7 +113,7 @@ __fastfetch_complete_option()
         "${FF_OPTIONS_LOGO[@]}"
         "${FF_OPTIONS_LOGO_TYPE[@]}"
         "${FF_OPTIONS_BINARY_PREFIX[@]}"
-        "${FF_OPTIONS_GL[@]}"
+        "${FF_OPTIONS_OPENGL[@]}"
     )
 
     if [[ $WORD_COUND -lt 3 ]]; then
@@ -399,8 +399,8 @@ __fastfetch_completion()
         "--binary-prefix"
     )
 
-    local FF_OPTIONS_GL=(
-        "--gl"
+    local FF_OPTIONS_OPENGL=(
+        "--opengl-type"
     )
 
     if __fastfetch_previous_matches "${FF_OPTIONS_SINGLE[@]}"; then
@@ -423,7 +423,7 @@ __fastfetch_completion()
         __fastfetch_complete_logo_type
     elif __fastfetch_previous_matches "${FF_OPTIONS_BINARY_PREFIX[@]}"; then
         __fastfetch_complete_binary_prefix
-    elif __fastfetch_previous_matches "${FF_OPTIONS_GL[@]}"; then
+    elif __fastfetch_previous_matches "${FF_OPTIONS_OPENGL[@]}"; then
         __fastfetch_complete_gl
     else
         __fastfetch_complete_option

@@ -206,11 +206,11 @@
 # Default is true.
 #--escape-bedrock true
 
-# GL option
+# OpenGL option
 # Sets with opengl context creation library to use
 # Must be either auto, egl, glx or osmesa
 # Default is auto.
-#--gl auto
+#--opengl-type auto
 
 # GPU hide options
 # Sets weather to hide certain gpu types
