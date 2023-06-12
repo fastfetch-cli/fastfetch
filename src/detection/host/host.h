@@ -12,9 +12,8 @@ typedef struct FFHostResult
     FFstrbuf productVersion;
     FFstrbuf productSku;
     FFstrbuf sysVendor;
-    FFstrbuf error;
 } FFHostResult;
 
-const FFHostResult* ffDetectHost();
+const char* ffDetectHost(FFHostResult* result);
 
 #endif

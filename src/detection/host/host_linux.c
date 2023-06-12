@@ -59,10 +59,8 @@ static void getHostProductName(FFstrbuf* name)
     ffStrbufClear(name);
 }
 
-void ffDetectHostImpl(FFHostResult* host)
+const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufInit(&host->error);
-
     ffStrbufInit(&host->productFamily);
     getHostValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->productFamily);
 
@@ -107,4 +105,6 @@ void ffDetectHostImpl(FFHostResult* host)
             }
         }
     }
+
+    return NULL;
 }
