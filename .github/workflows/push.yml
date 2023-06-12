@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04]
-        compiler: [gcc, clang, "musl-gcc -static"]
+        compiler: [gcc, clang, "musl-gcc"]
         enableFeatures: [ON, OFF]
     runs-on: ${{ matrix.os }}
     steps:
