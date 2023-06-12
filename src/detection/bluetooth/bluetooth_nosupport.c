@@ -1,6 +1,6 @@
 #include "bluetooth.h"
 
-void ffDetectBluetoothImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFBluetoothResult* bluetooth)
+const char* ffDetectBluetooth(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothDevice */)
 {
-    ffStrbufAppendS(&bluetooth->error, "Bluetooth not supported on this platform");
+    return "Not supported on this platform";
 }

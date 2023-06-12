@@ -30,17 +30,18 @@ static void printDevice(FFinstance* instance, FFBluetoothOptions* options, const
 
 void ffPrintBluetooth(FFinstance* instance, FFBluetoothOptions* options)
 {
-    const FFBluetoothResult* bluetooth = ffDetectBluetooth(instance);
+    FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof (FFBluetoothDevice));
+    const char* error = ffDetectBluetooth(instance, &devices);
 
-    if(bluetooth->error.length > 0)
+    if(error)
     {
-        ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "%s", bluetooth->error.chars);
+        ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothDevice*));
 
-    FF_LIST_FOR_EACH(FFBluetoothDevice, device, bluetooth->devices)
+    FF_LIST_FOR_EACH(FFBluetoothDevice, device, devices)
     {
         if(!device->connected && !options->showDisconnected)
             continue;
@@ -58,6 +59,13 @@ void ffPrintBluetooth(FFinstance* instance, FFBluetoothOptions* options)
     {
         uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
         printDevice(instance, options, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
+    }
+
+    FF_LIST_FOR_EACH(FFBluetoothDevice, device, devices)
+    {
+        ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->type);
+        ffStrbufDestroy(&device->address);
     }
 }
 
