@@ -140,10 +140,6 @@ void ffInitOSOptions(FFOSOptions* options)
 {
     options->moduleName = FF_OS_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
-
-    #if defined(__linux__) || defined(__FreeBSD__)
-    ffStrbufInit(&options->file);
-    #endif
 }
 
 bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* value)
@@ -153,23 +149,12 @@ bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    #if defined(__linux__) || defined(__FreeBSD__)
-        if (strcasecmp(subKey, "file") == 0)
-        {
-            ffOptionParseString(key, value, &options->file);
-            return true;
-        }
-    #endif
-
     return false;
 }
 
 void ffDestroyOSOptions(FFOSOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
-    #if defined(__linux__) || defined(__FreeBSD__)
-        ffStrbufDestroy(&options->file);
-    #endif
 }
 
 void ffParseOSJsonObject(FFinstance* instance, yyjson_val* module)
@@ -189,14 +174,6 @@ void ffParseOSJsonObject(FFinstance* instance, yyjson_val* module)
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
-
-            #if defined(__linux__) || defined(__FreeBSD__)
-                if (strcasecmp(key, "file") == 0)
-                {
-                    ffStrbufSetS(&options.file, yyjson_get_str(val));
-                    continue;
-                }
-            #endif
 
             ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }

@@ -8,8 +8,4 @@ typedef struct FFOSOptions
 {
     const char* moduleName;
     FFModuleArgs moduleArgs;
-
-    #if defined(__linux__) || defined(__FreeBSD__)
-    FFstrbuf file;
-    #endif
 } FFOSOptions;

@@ -902,6 +902,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     #if defined(__linux__) || defined(__FreeBSD__)
     else if(strcasecmp(key, "--player-name") == 0)
         optionParseString(key, value, &instance->config.playerName);
+    else if (strcasecmp(key, "--os-file") == 0)
+        optionParseString(key, value, &instance->config.osFile);
     #endif
 
     ////////////////

@@ -36,9 +36,10 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.colorKeys);
     ffStrbufInit(&instance->config.colorTitle);
     ffStrbufInitS(&instance->config.keyValueSeparator, ": ");
-    
+
     #if defined(__linux__) || defined(__FreeBSD__)
     ffStrbufInit(&instance->config.playerName);
+    ffStrbufInit(&instance->config.osFile);
     #endif
 
     instance->config.showErrors = false;
@@ -254,9 +255,10 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.colorKeys);
     ffStrbufDestroy(&instance->config.colorTitle);
     ffStrbufDestroy(&instance->config.keyValueSeparator);
-    
+
     #if defined(__linux__) || defined(__FreeBSD__)
     ffStrbufDestroy(&instance->config.playerName);
+    ffStrbufDestroy(&instance->config.osFile);
     #endif
 
     ffDestroyTitleOptions(&instance->config.title);

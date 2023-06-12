@@ -48,8 +48,10 @@ typedef struct FFconfig
     bool multithreading;
     bool stat;
 
+    // Module options that cannot be put in module option structure
     #if defined(__linux__) || defined(__FreeBSD__)
     FFstrbuf playerName;
+    FFstrbuf osFile;
     #endif
 
     FFTitleOptions title;

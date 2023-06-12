@@ -304,10 +304,12 @@ const char* ffParseGeneralJsonConfig(FFinstance* instance)
             config->escapeBedrock = yyjson_get_bool(val);
         else if (strcasecmp(key, "pipe") == 0)
             config->pipe = yyjson_get_bool(val);
-        
+
         #if defined(__linux__) || defined(__FreeBSD__)
         else if (strcasecmp(key, "playerName") == 0)
             ffStrbufSetS(&config->playerName, yyjson_get_str(val));
+        else if (strcasecmp(key, "osFile") == 0)
+            ffStrbufSetS(&config->osFile, yyjson_get_str(val));
         #endif
 
         else
