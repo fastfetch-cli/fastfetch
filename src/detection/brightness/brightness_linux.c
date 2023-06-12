@@ -3,6 +3,7 @@
 
 #include <dirent.h>
 #include <ctype.h>
+#include <limits.h>
 
 const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
 {
