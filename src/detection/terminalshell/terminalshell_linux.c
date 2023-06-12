@@ -374,7 +374,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.shellPrettyName, "xonsh");
     else
     {
-        // https://github.com/LinusDierheimer/fastfetch/discussions/280#discussioncomment-3831734
+        // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
         ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
     }
 

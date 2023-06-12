@@ -135,7 +135,7 @@ static uint32_t getNixPackagesImpl(char* path)
     FFstrbuf output;
     ffStrbufInitA(&output, 128);
 
-    //https://github.com/LinusDierheimer/fastfetch/issues/195#issuecomment-1191748222
+    //https://github.com/fastfetch-cli/fastfetch/issues/195#issuecomment-1191748222
     FFstrbuf command;
     ffStrbufInitA(&command, 255);
     ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");

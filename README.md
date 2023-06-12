@@ -10,7 +10,7 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 <img src="screenshots/example3.png" width="48%" align="top" />
 <img src="screenshots/example5.png" height="15%" align="top" />
 
-There are [screenshots on different platforms](https://github.com/LinusDierheimer/fastfetch/wiki)
+There are [screenshots on different platforms](https://github.com/fastfetch-cli/fastfetch/wiki)
 
 ## Customization
 

@@ -4,7 +4,7 @@ project(fastfetch
     VERSION 1.12.0
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
-    HOMEPAGE_URL "https://github.com/LinusDierheimer/fastfetch"
+    HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
 )
 
 set(PROJECT_LICENSE "MIT license")
