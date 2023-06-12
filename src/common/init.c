@@ -7,7 +7,6 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #ifdef _WIN32
     #include <windows.h>
     #include <locale.h>

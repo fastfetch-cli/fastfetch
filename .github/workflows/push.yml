@@ -13,8 +13,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04]
-        compiler: [gcc, clang, "musl-gcc"]
+        compiler: [gcc, clang, "musl-gcc", "musl-clang"]
         enableFeatures: [ON, OFF]
+        exclude:
+          # The feature libraries are all build against glibc, so they can't be used with musl
+          - compiler: "musl-gcc"
+            enableFeatures: ON
+          - compiler: "musl-clang"
+            enableFeatures: ON
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
