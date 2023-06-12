@@ -282,7 +282,7 @@ const char* ffDetectGPUImpl(const FFinstance* instance, const FFGPUOptions* opti
     #ifdef FF_HAVE_LIBPCI
         return pciDetectGPUs(instance, options, gpus);
     #else
-        FF_UNUSED(instance, gpus);
+        FF_UNUSED(instance, options, gpus);
         return "fastfetch is built without libpci support";
     #endif
 }
