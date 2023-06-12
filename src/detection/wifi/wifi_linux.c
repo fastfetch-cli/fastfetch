@@ -204,7 +204,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 #include "common/io/io.h"
 
 #include <net/if.h>
-#include <linux/wireless.h>
+#include <linux/wireless.h> //TODO: don't use kernel headers in userspace
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>

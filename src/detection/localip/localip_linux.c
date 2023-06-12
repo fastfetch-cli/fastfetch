@@ -10,7 +10,7 @@
 #if defined(__FreeBSD__) || defined(__APPLE__)
 #include <net/if_dl.h>
 #else
-#include <linux/if_packet.h>
+#include <netpacket/packet.h>
 #endif
 
 static void addNewIp(FFlist* list, const char* name, const char* addr, int type)
