@@ -665,17 +665,6 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
     exit(414);
 }
 
-static bool optionParseBoolean(const char* str)
-{
-    return (
-        !ffStrSet(str) ||
-        strcasecmp(str, "true") == 0 ||
-        strcasecmp(str, "yes")  == 0 ||
-        strcasecmp(str, "on")   == 0 ||
-        strcasecmp(str, "1")    == 0
-    );
-}
-
 static inline void optionCheckString(const char* key, const char* value, FFstrbuf* buffer)
 {
     if(value == NULL)
@@ -686,67 +675,9 @@ static inline void optionCheckString(const char* key, const char* value, FFstrbu
     ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
 }
 
-static void optionParseString(const char* key, const char* value, FFstrbuf* buffer)
-{
-    optionCheckString(key, value, buffer);
-    ffStrbufSetS(buffer, value);
-}
-
 static inline bool startsWith(const char* str, const char* compareTo)
 {
     return strncasecmp(str, compareTo, strlen(compareTo)) == 0;
-}
-
-static uint32_t optionParseUInt32(const char* key, const char* value)
-{
-    if(value == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <num>\n", key);
-        exit(480);
-    }
-
-    char* end;
-    uint32_t num = (uint32_t) strtoul(value, &end, 10);
-    if(*end != '\0')
-    {
-        fprintf(stderr, "Error: usage: %s <num>\n", key);
-        exit(479);
-    }
-
-    return num;
-}
-
-static void optionParseEnum(const char* argumentKey, const char* requestedKey, void* result, ...)
-{
-    if(requestedKey == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <value>\n", argumentKey);
-        exit(476);
-    }
-
-    va_list args;
-    va_start(args, result);
-
-    while(true)
-    {
-        const char* key = va_arg(args, const char*);
-        if(key == NULL)
-            break;
-
-        int value = va_arg(args, int); //C standard guarantees that enumeration constants are presented as ints
-
-        if(strcasecmp(requestedKey, key) == 0)
-        {
-            *(int*)result = value;
-            va_end(args);
-            return;
-        }
-    }
-
-    va_end(args);
-
-    fprintf(stderr, "Error: unknown %s value: %s\n", argumentKey, requestedKey);
-    exit(478);
 }
 
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
@@ -876,7 +807,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     ///////////////////
 
     else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
-        instance->config.recache = optionParseBoolean(value);
+        instance->config.recache = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--load-config") == 0)
         optionParseConfigFile(instance, data, key, value);
     else if(strcasecmp(key, "--gen-config") == 0)
@@ -884,26 +815,26 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(strcasecmp(key, "--gen-config-force") == 0)
         generateConfigFile(instance, true);
     else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
-        instance->config.multithreading = optionParseBoolean(value);
+        instance->config.multithreading = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--stat") == 0)
     {
-        if((instance->config.stat = optionParseBoolean(value)))
+        if((instance->config.stat = ffOptionParseBoolean(value)))
             instance->config.showErrors = true;
     }
     else if(strcasecmp(key, "--allow-slow-operations") == 0)
-        instance->config.allowSlowOperations = optionParseBoolean(value);
+        instance->config.allowSlowOperations = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--escape-bedrock") == 0)
-        instance->config.escapeBedrock = optionParseBoolean(value);
+        instance->config.escapeBedrock = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--pipe") == 0)
-        instance->config.pipe = optionParseBoolean(value);
+        instance->config.pipe = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--load-user-config") == 0)
-        data->loadUserConfig = optionParseBoolean(value);
+        data->loadUserConfig = ffOptionParseBoolean(value);
 
     #if defined(__linux__) || defined(__FreeBSD__)
     else if(strcasecmp(key, "--player-name") == 0)
-        optionParseString(key, value, &instance->config.playerName);
+        ffOptionParseString(key, value, &instance->config.playerName);
     else if (strcasecmp(key, "--os-file") == 0)
-        optionParseString(key, value, &instance->config.osFile);
+        ffOptionParseString(key, value, &instance->config.osFile);
     #endif
 
     ////////////////
@@ -917,15 +848,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     ///////////////////
 
     else if(strcasecmp(key, "--show-errors") == 0)
-        instance->config.showErrors = optionParseBoolean(value);
+        instance->config.showErrors = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--disable-linewrap") == 0)
-        instance->config.disableLinewrap = optionParseBoolean(value);
+        instance->config.disableLinewrap = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "--hide-cursor") == 0)
-        instance->config.hideCursor = optionParseBoolean(value);
+        instance->config.hideCursor = ffOptionParseBoolean(value);
     else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--structure") == 0)
-        optionParseString(key, value, &data->structure);
+        ffOptionParseString(key, value, &data->structure);
     else if(strcasecmp(key, "--separator") == 0)
-        optionParseString(key, value, &instance->config.keyValueSeparator);
+        ffOptionParseString(key, value, &instance->config.keyValueSeparator);
     else if(strcasecmp(key, "--color-keys") == 0)
     {
         optionCheckString(key, value, &instance->config.colorKeys);
@@ -944,15 +875,15 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--binary-prefix") == 0)
     {
-        optionParseEnum(key, value, &instance->config.binaryPrefixType,
-            "iec", FF_BINARY_PREFIX_TYPE_IEC,
-            "si", FF_BINARY_PREFIX_TYPE_SI,
-            "jedec", FF_BINARY_PREFIX_TYPE_JEDEC,
-            NULL
-        );
+        instance->config.binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "iec", FF_BINARY_PREFIX_TYPE_IEC },
+            { "si", FF_BINARY_PREFIX_TYPE_SI },
+            { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
+            {}
+        });
     }
     else if(strcasecmp(key, "--percent-type") == 0)
-        instance->config.percentType = optionParseUInt32(key, value);
+        instance->config.percentType = ffOptionParseUInt32(key, value);
 
     ///////////////////////
     //Module args options//
@@ -1016,53 +947,53 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     {
         const char* subkey = key + strlen("--lib");
         if(strcasecmp(subkey, "-PCI") == 0)
-            optionParseString(key, value, &instance->config.libPCI);
+            ffOptionParseString(key, value, &instance->config.libPCI);
         else if(strcasecmp(subkey, "-vulkan") == 0)
-            optionParseString(key, value, &instance->config.libVulkan);
+            ffOptionParseString(key, value, &instance->config.libVulkan);
         else if(strcasecmp(subkey, "-freetype") == 0)
-            optionParseString(key, value, &instance->config.libfreetype);
+            ffOptionParseString(key, value, &instance->config.libfreetype);
         else if(strcasecmp(subkey, "-wayland") == 0)
-            optionParseString(key, value, &instance->config.libWayland);
+            ffOptionParseString(key, value, &instance->config.libWayland);
         else if(strcasecmp(subkey, "-xcb-randr") == 0)
-            optionParseString(key, value, &instance->config.libXcbRandr);
+            ffOptionParseString(key, value, &instance->config.libXcbRandr);
         else if(strcasecmp(subkey, "-xcb") == 0)
-            optionParseString(key, value, &instance->config.libXcb);
+            ffOptionParseString(key, value, &instance->config.libXcb);
         else if(strcasecmp(subkey, "-Xrandr") == 0)
-            optionParseString(key, value, &instance->config.libXrandr);
+            ffOptionParseString(key, value, &instance->config.libXrandr);
         else if(strcasecmp(subkey, "-X11") == 0)
-            optionParseString(key, value, &instance->config.libX11);
+            ffOptionParseString(key, value, &instance->config.libX11);
         else if(strcasecmp(subkey, "-gio") == 0)
-            optionParseString(key, value, &instance->config.libGIO);
+            ffOptionParseString(key, value, &instance->config.libGIO);
         else if(strcasecmp(subkey, "-DConf") == 0)
-            optionParseString(key, value, &instance->config.libDConf);
+            ffOptionParseString(key, value, &instance->config.libDConf);
         else if(strcasecmp(subkey, "-dbus") == 0)
-            optionParseString(key, value, &instance->config.libDBus);
+            ffOptionParseString(key, value, &instance->config.libDBus);
         else if(strcasecmp(subkey, "-XFConf") == 0)
-            optionParseString(key, value, &instance->config.libXFConf);
+            ffOptionParseString(key, value, &instance->config.libXFConf);
         else if(strcasecmp(subkey, "-sqlite") == 0 || strcasecmp(subkey, "-sqlite3") == 0)
-            optionParseString(key, value, &instance->config.libSQLite3);
+            ffOptionParseString(key, value, &instance->config.libSQLite3);
         else if(strcasecmp(subkey, "-rpm") == 0)
-            optionParseString(key, value, &instance->config.librpm);
+            ffOptionParseString(key, value, &instance->config.librpm);
         else if(strcasecmp(subkey, "-imagemagick") == 0)
-            optionParseString(key, value, &instance->config.libImageMagick);
+            ffOptionParseString(key, value, &instance->config.libImageMagick);
         else if(strcasecmp(subkey, "-z") == 0)
-            optionParseString(key, value, &instance->config.libZ);
+            ffOptionParseString(key, value, &instance->config.libZ);
         else if(strcasecmp(subkey, "-chafa") == 0)
-            optionParseString(key, value, &instance->config.libChafa);
+            ffOptionParseString(key, value, &instance->config.libChafa);
         else if(strcasecmp(subkey, "-egl") == 0)
-            optionParseString(key, value, &instance->config.libEGL);
+            ffOptionParseString(key, value, &instance->config.libEGL);
         else if(strcasecmp(subkey, "-glx") == 0)
-            optionParseString(key, value, &instance->config.libGLX);
+            ffOptionParseString(key, value, &instance->config.libGLX);
         else if(strcasecmp(subkey, "-osmesa") == 0)
-            optionParseString(key, value, &instance->config.libOSMesa);
+            ffOptionParseString(key, value, &instance->config.libOSMesa);
         else if(strcasecmp(subkey, "-opencl") == 0)
-            optionParseString(key, value, &instance->config.libOpenCL);
+            ffOptionParseString(key, value, &instance->config.libOpenCL);
         else if(strcasecmp(subkey, "-wlanapi") == 0)
-            optionParseString(key, value, &instance->config.libwlanapi);
+            ffOptionParseString(key, value, &instance->config.libwlanapi);
         else if(strcasecmp(key, "-pulse") == 0)
-            optionParseString(key, value, &instance->config.libPulse);
+            ffOptionParseString(key, value, &instance->config.libPulse);
         else if(strcasecmp(subkey, "-nm") == 0)
-            optionParseString(key, value, &instance->config.libnm);
+            ffOptionParseString(key, value, &instance->config.libnm);
         else
             goto error;
     }
