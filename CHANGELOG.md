@@ -4,6 +4,7 @@ This release introduces a new configuration file format: JSON config
 
 Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
+* Remove `--shell-version` and `--terminal-version`. They are always enabled
 
 Features:
 * Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)

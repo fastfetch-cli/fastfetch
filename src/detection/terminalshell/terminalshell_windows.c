@@ -152,8 +152,7 @@ static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* 
     }
 
     ffStrbufClear(&result->shellVersion);
-    if(instance->config.shell.version)
-        fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
+    fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
 
     result->shellPid = pid;
     if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "pwsh"))
@@ -351,8 +350,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         getTerminalFromEnv(&result);
 
     ffStrbufInit(&result.terminalVersion);
-    if(instance->config.terminal.version)
-        fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
+    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
 exit:
     ffThreadMutexUnlock(&mutex);

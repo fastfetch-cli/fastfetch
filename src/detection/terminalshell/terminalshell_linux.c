@@ -353,15 +353,12 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getUserShellFromEnv(instance, &result);
 
     ffStrbufClear(&result.shellVersion);
-    if(instance->config.shell.version)
-    {
-        getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
+    getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
-        if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
-            getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
-        else
-            ffStrbufSet(&result.userShellVersion, &result.shellVersion);
-    }
+    if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
+        getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
+    else
+        ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
         ffStrbufInitS(&result.shellPrettyName, "PowerShell");
@@ -389,9 +386,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);
 
     ffStrbufInit(&result.terminalVersion);
-
-    if(instance->config.terminal.version)
-        fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
+    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
     ffThreadMutexUnlock(&mutex);
     return &result;

@@ -8,6 +8,4 @@ typedef struct FFTerminalOptions
 {
     const char* moduleName;
     FFModuleArgs moduleArgs;
-
-    bool version;
 } FFTerminalOptions;

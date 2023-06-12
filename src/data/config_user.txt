@@ -226,18 +226,6 @@
 # Default is false.
 #--gpu-force-vulkan
 
-# Shell option
-# Sets if shell version should be detected and printed
-# Must be either true or false
-# Default is true.
-#--shell-version true
-
-# Terminal option
-# Sets if terminal version should be detected and printed
-# Must be either true or false
-# Default is true.
-#--terminal-version true
-
 # Disk show options
 # Sets if certain types of disk should be printed
 # Must be either true or false

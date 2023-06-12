@@ -46,8 +46,6 @@ void ffInitShellOptions(FFShellOptions* options)
 {
     options->moduleName = FF_SHELL_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->version = true;
 }
 
 bool ffParseShellCommandOptions(FFShellOptions* options, const char* key, const char* value)
@@ -56,12 +54,6 @@ bool ffParseShellCommandOptions(FFShellOptions* options, const char* key, const 
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
-
-    if (strcasecmp(subKey, "version") == 0)
-    {
-        options->version = ffOptionParseBoolean(value);
-        return true;
-    }
 
     return false;
 }
@@ -88,12 +80,6 @@ void ffParseShellJsonObject(FFinstance* instance, yyjson_val* module)
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
-
-            if (strcasecmp(key, "version") == 0)
-            {
-                options.version = yyjson_get_bool(val);
-                continue;
-            }
 
             ffPrintError(instance, FF_SHELL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }

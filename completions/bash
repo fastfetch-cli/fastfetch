@@ -193,8 +193,6 @@ __fastfetch_completion()
         "--pipe"
         "--title-fqdn"
         "--escape-bedrock"
-        "--shell-version"
-        "--terminal-version"
         "--disk-folders"
         "--disk-show-removable"
         "--disk-show-hidden"
