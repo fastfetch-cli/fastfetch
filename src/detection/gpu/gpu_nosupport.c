@@ -1,7 +1,7 @@
 #include "gpu.h"
 
-const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+const char* ffDetectGPUImpl(const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_UNUSED(gpus, instance);
+    FF_UNUSED(instance, options, gpus);
     return "Not supported on this platform";
 }

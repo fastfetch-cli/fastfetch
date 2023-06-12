@@ -171,7 +171,7 @@ static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* dev
     gpu->type = FF_GPU_TYPE_INTEGRATED;
 }
 
-static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData* pci, struct pci_dev* device)
+static void pciHandleDevice(const FFinstance* instance, const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
 {
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
 
@@ -206,7 +206,7 @@ static void pciHandleDevice(const FFinstance* instance, FFlist* results, PCIData
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
-    if(instance->config.gpu.temp)
+    if(options->temp)
         pciDetectTemperatur(gpu, device);
 }
 
@@ -234,7 +234,7 @@ static void handlePciWarning(FF_MAYBE_UNUSED char *msg, ...)
     // noop
 }
 
-static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
+static const char* pciDetectGPUs(const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
 {
     PCIData pci;
 
@@ -267,7 +267,7 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
     struct pci_dev* device = pci.access->devices;
     while(device != NULL)
     {
-        pciHandleDevice(instance, gpus, &pci, device);
+        pciHandleDevice(instance, options, gpus, &pci, device);
         device = device->next;
     }
 
@@ -277,12 +277,12 @@ static const char* pciDetectGPUs(const FFinstance* instance, FFlist* gpus)
 
 #endif
 
-const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+const char* ffDetectGPUImpl(const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
 {
     #ifdef FF_HAVE_LIBPCI
-        return pciDetectGPUs(instance, gpus);
+        return pciDetectGPUs(instance, options, gpus);
     #else
-        FF_UNUSED(gpus, instance);
+        FF_UNUSED(instance, gpus);
         return "fastfetch is built without libpci support";
     #endif
 }

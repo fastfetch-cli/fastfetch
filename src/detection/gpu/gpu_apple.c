@@ -38,10 +38,8 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
     return result;
 }
 
-const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_UNUSED(instance);
-
     CFMutableDictionaryRef matchDict = IOServiceMatching(kIOAcceleratorClassName);
     io_iterator_t iterator;
     if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
@@ -98,7 +96,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
-        if(instance->config.gpu.temp)
+        if(options->temp)
             gpu->temperature = detectGpuTemp(&gpu->name);
         else
             gpu->temperature = FF_GPU_TEMP_UNSET;

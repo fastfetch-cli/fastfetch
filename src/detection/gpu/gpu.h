@@ -33,7 +33,8 @@ typedef struct FFGPUResult
     uint32_t vulkanDeviceId; // Only used for vulkan
 } FFGPUResult;
 
-const FFlist* ffDetectGPU(const FFinstance* instance);
+const char* ffDetectGPU(const FFinstance* instance, const FFGPUOptions* options, FFlist* result);
+const char* ffDetectGPUImpl(const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus);
 
 const char* ffGetGPUVendorString(unsigned vendorId);
 

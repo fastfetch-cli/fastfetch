@@ -245,7 +245,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 
 #endif
 
-const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
+FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
 {
     static FFVulkanResult result;
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;

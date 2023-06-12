@@ -75,12 +75,18 @@ static void printGPUResult(FFinstance* instance, FFGPUOptions* options, uint8_t 
 
 void ffPrintGPU(FFinstance* instance, FFGPUOptions* options)
 {
-    const FFlist* gpus = ffDetectGPU(instance);
+    FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
+    const char* error = ffDetectGPU(instance, options, &gpus);
+    if (error)
+    {
+        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        return;
+    }
 
     FF_LIST_AUTO_DESTROY selectedGPUs;
-    ffListInitA(&selectedGPUs, sizeof(const FFGPUResult*), gpus->length);
+    ffListInitA(&selectedGPUs, sizeof(const FFGPUResult*), gpus.length);
 
-    FF_LIST_FOR_EACH(FFGPUResult, gpu, *gpus)
+    FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
     {
         if(gpu->type == FF_GPU_TYPE_INTEGRATED && options->hideType == FF_GPU_TYPE_INTEGRATED)
             continue;
@@ -96,6 +102,13 @@ void ffPrintGPU(FFinstance* instance, FFGPUOptions* options)
 
     if(selectedGPUs.length == 0)
         ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "No GPUs found");
+
+    FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
+    {
+        ffStrbufDestroy(&gpu->vendor);
+        ffStrbufDestroy(&gpu->name);
+        ffStrbufDestroy(&gpu->driver);
+    }
 }
 
 void ffInitGPUOptions(FFGPUOptions* options)

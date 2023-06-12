@@ -4,7 +4,7 @@
 
 #include <inttypes.h>
 
-const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FF_MAYBE_UNUSED FFGPUOptions* options, FFlist* gpus)
 {
     DISPLAY_DEVICEW displayDevice = {.cb = sizeof(displayDevice) };
     wchar_t regKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Control\\Video\\{";
