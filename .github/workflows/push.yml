@@ -13,15 +13,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04]
-        compiler: [gcc, clang]
+        compiler: [gcc, clang, "musl-gcc"]
         enableFeatures: [ON, OFF]
+        exclude:
+          # The feature libraries are all build against glibc, so they can't be used with musl
+          - compiler: "musl-gcc"
+            enableFeatures: ON
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev
+        run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev
 
       - name: configure project
         env:
@@ -285,7 +289,7 @@ jobs:
           path: ./fastfetch-*-Win32.zip
 
   release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'LinusDierheimer/fastfetch'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
     runs-on: ubuntu-latest
     needs:

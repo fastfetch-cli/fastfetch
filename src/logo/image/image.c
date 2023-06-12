@@ -2,6 +2,8 @@
 #include "common/io/io.h"
 #include "common/printing.h"
 
+#include <limits.h>
+
 #ifdef __APPLE__
     #include <sys/syslimits.h>
 #elif _WIN32
