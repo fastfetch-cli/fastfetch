@@ -28,9 +28,9 @@ typedef struct FFstrbuf
     char* chars;
 } FFstrbuf;
 
+static inline void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src);
-void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
@@ -102,6 +102,20 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateCopy(const FFstrbuf* src)
     FFstrbuf strbuf;
     ffStrbufInitCopy(&strbuf, src);
     return strbuf;
+}
+
+// Move the content of `src` into `strbuf`, and left `src` empty
+static inline void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
+{
+    if (src)
+    {
+        strbuf->allocated = src->allocated;
+        strbuf->chars = src->chars;
+        strbuf->length = src->length;
+        ffStrbufInit(src);
+    }
+    else
+        ffStrbufInit(strbuf);
 }
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateMove(FFstrbuf* src)

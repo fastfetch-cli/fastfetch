@@ -22,19 +22,6 @@ void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
     ffStrbufAppend(strbuf, src);
 }
 
-void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
-{
-    if (src)
-    {
-        strbuf->allocated = src->allocated;
-        strbuf->chars = src->chars;
-        strbuf->length = src->length;
-        ffStrbufInit(src);
-    }
-    else
-        ffStrbufInit(strbuf);
-}
-
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 {
     assert(format != NULL);

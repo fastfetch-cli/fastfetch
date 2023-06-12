@@ -58,6 +58,23 @@ static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void
     qsort(list->data, list->length, list->elementSize, compar);
 }
 
+// Move the contents of `src` into `list`, and left `src` empty
+static inline void ffListInitMove(FFlist* list, FFlist* src)
+{
+    if (src)
+    {
+        list->elementSize = src->elementSize;
+        list->capacity = src->capacity;
+        list->length = src->length;
+        list->data = list->data;
+        ffListInit(src, list->elementSize);
+    }
+    else
+    {
+        ffListInit(list, 0);
+    }
+}
+
 static inline void ffListDestroy(FFlist* list)
 {
     if (!list->data) return;
