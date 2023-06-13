@@ -46,7 +46,7 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
-    u8 revId;
+    u8 revId = 0;
     bool revIdSet = false;
 
     #if PCI_LIB_VERSION >= 0x030800
