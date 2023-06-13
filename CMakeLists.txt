@@ -79,7 +79,6 @@ cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -715,10 +714,6 @@ if(ENABLE_THREADS)
     endif()
 endif()
 
-if(ENABLE_BUFFER)
-    target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
-endif()
-
 if(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework Cocoa"
@@ -790,11 +785,6 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
     PRIVATE yyjson
 )
-
-if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c
-    target_compile_definitions(fastfetch PRIVATE FF_ENABLE_BUFFER)
-    target_compile_definitions(flashfetch PRIVATE FF_ENABLE_BUFFER)
-endif()
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

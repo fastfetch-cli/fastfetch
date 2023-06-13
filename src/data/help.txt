@@ -62,7 +62,8 @@ Display options:
     --show-errors <?value>:      Print occurring errors
     --disable-linewrap <?value>: Whether to disable line wrap during the run
     --hide-cursor <?value>:      Whether to hide the cursor during the run
-    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC.
+    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
+    --no-buffer <?value>:        Set if the stdout application buffer should be disabled. Default is false
 
 General module options:
     --<module>-format <format>: Set the format string to use for each specific module.

@@ -884,6 +884,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     }
     else if(strcasecmp(key, "--percent-type") == 0)
         instance->config.percentType = ffOptionParseUInt32(key, value);
+    else if(strcasecmp(key, "--no-buffer") == 0)
+        instance->config.noBuffer = ffOptionParseBoolean(value);
 
     ///////////////////////
     //Module args options//
@@ -1201,8 +1203,8 @@ int main(int argc, const char** argv)
 
     ffStart(&instance);
 
-    #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
-        fflush(stdout);
+    #if defined(_WIN32)
+        if (!instance.config.noBuffer) fflush(stdout);
     #endif
 
     if (instance.state.configDoc)
@@ -1234,8 +1236,8 @@ int main(int argc, const char** argv)
                     printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
             }
 
-            #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
-                fflush(stdout);
+            #if defined(_WIN32)
+                if (!instance.config.noBuffer) fflush(stdout);
             #endif
 
             startIndex = colonIndex + 1;

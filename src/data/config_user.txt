@@ -146,6 +146,12 @@
 # Default is IEC.
 #--binary-prefix IEC
 
+# Disable output buffer option:
+# Sets if the stdout application buffer should be disabled.
+# Must be true or false.
+# Default is false.
+#--no-buffer false
+
 # Title FQDN option:
 # Sets if the title should use the fully qualified domain name.
 # Must be true or false.

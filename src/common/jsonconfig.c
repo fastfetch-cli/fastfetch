@@ -266,8 +266,8 @@ static const char* printJsonConfig(FFinstance* instance)
                 printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
         }
 
-        #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
-            fflush(stdout);
+        #if defined(_WIN32)
+        if (!instance->config.noBuffer) fflush(stdout);
         #endif
     }
 
@@ -380,6 +380,8 @@ const char* ffParseDisplayJsonConfig(FFinstance* instance)
         }
         else if (strcasecmp(key, "percentType") == 0)
             config->percentType = (uint32_t) yyjson_get_uint(val);
+        else if (strcasecmp(key, "noBuffer") == 0)
+            config->noBuffer = yyjson_get_bool(val);
         else
             return "Unknown display property";
     }
