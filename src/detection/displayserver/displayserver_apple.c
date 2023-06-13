@@ -117,7 +117,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
     ffStrbufInit(&ds->deVersion);
-    ffStrbufInit(&ds->deProcessName);
     ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
