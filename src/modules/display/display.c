@@ -37,7 +37,6 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                 if (index++) putchar(' ');
                 printf("%ix%i", result->scaledWidth, result->scaledHeight);
             }
-            ffStrbufDestroy(&result->name);
         }
         putchar('\n');
         return;
@@ -105,8 +104,6 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT, &result->rotation},
             });
         }
-
-        ffStrbufDestroy(&result->name);
     }
 }
 
