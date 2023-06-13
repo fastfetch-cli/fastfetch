@@ -66,7 +66,7 @@ static inline void ffListInitMove(FFlist* list, FFlist* src)
         list->elementSize = src->elementSize;
         list->capacity = src->capacity;
         list->length = src->length;
-        list->data = list->data;
+        list->data = src->data;
         ffListInit(src, list->elementSize);
     }
     else
