@@ -9,6 +9,7 @@
 void ffPrintTerminalFont(FFinstance* instance, FFTerminalFontOptions* options)
 {
     FFTerminalFontResult terminalFont;
+    ffFontInit(&terminalFont.font);
     ffStrbufInit(&terminalFont.error);
 
     if(!ffDetectTerminalFont(instance, &terminalFont))
