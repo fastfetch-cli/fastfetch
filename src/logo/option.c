@@ -314,15 +314,52 @@ const char* ffParseLogoJsonConfig(FFinstance* instance)
 
             yyjson_val* canvasMode = yyjson_obj_get(val, "canvasMode");
             if (canvasMode)
-                options->chafaCanvasMode = (uint32_t) yyjson_get_uint(canvasMode);
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(canvasMode, &value, (FFKeyValuePair[]) {
+                    { "TRUECOLOR", 0 },
+                    { "INDEXED_256", 1 },
+                    { "INDEXED_240", 2 },
+                    { "INDEXED_16", 3 },
+                    { "FGBG_BGFG", 4 },
+                    { "FGBG", 5 },
+                    { "INDEXED_8", 6 },
+                    { "INDEXED_16_8", 7 },
+                    {},
+                });
+
+                if (error) return error;
+                options->chafaCanvasMode = (uint32_t) value;
+            }
 
             yyjson_val* colorSpace = yyjson_obj_get(val, "colorSpace");
             if (colorSpace)
-                options->chafaColorSpace = (uint32_t) yyjson_get_uint(colorSpace);
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(colorSpace, &value, (FFKeyValuePair[]) {
+                    { "RGB", 0 },
+                    { "DIN99D", 1 },
+                    {},
+                });
+
+                if (error) return error;
+                options->chafaColorSpace = (uint32_t) value;
+            }
 
             yyjson_val* ditherMode = yyjson_obj_get(val, "ditherMode");
             if (ditherMode)
-                options->chafaDitherMode = (uint32_t) yyjson_get_uint(ditherMode);
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(ditherMode, &value, (FFKeyValuePair[]) {
+                    { "NONE", 0 },
+                    { "ORDERED", 1 },
+                    { "DIFFUSION", 2 },
+                    {},
+                });
+
+                if (error) return error;
+                options->chafaDitherMode = (uint32_t) value;
+            }
             continue;
         }
         else
