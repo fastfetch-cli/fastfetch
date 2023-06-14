@@ -19,7 +19,7 @@
 --cpu-usage-format Percentage: {}
 --gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}; Type: {}
 --memory-format Used: {}; Total: {}; Percentage: {}
---disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; Removable: {}; Hidden: {}; Filesystem: {}; Name: {}
+--disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; External: {}; Hidden: {}; Filesystem: {}; Name: {}
 --battery-format Manufactor: {}; Model: {}; Technology: {}; Capacity: {}; Status: {}
 --poweradapter-format Watts: {}; Name: {}; Manufactor: {}; Model: {}; Description: {}
 --player-format Pretty: {}; Name: {}; Bus: {}; Url: {}

@@ -235,8 +235,8 @@
 # Disk show options
 # Sets if certain types of disk should be printed
 # Must be either true or false
-# Default is false except for --disk-show-removable.
-#--disk-show-removable true
+# Default is false except for --disk-show-external.
+#--disk-show-external true
 #--disk-show-hidden false
 #--disk-show-subvolumes false
 #--disk-show-unknown false

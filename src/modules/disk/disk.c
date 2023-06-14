@@ -57,8 +57,17 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
         else
             ffStrbufAppendS(&str, "Unknown ");
 
-        if((disk->type & FF_DISK_TYPE_EXTERNAL_BIT) && !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
-            ffStrbufAppendS(&str, "[Removable]");
+        if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        {
+            ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
+
+            if(disk->type & FF_DISK_TYPE_EXTERNAL_BIT)
+                ffStrbufAppendS(&str, "[External]");
+            else if(disk->type & FF_DISK_TYPE_SUBVOLUME_BIT)
+                ffStrbufAppendS(&str, "[Subvolume]");
+            else if(disk->type & FF_DISK_TYPE_HIDDEN_BIT)
+                ffStrbufAppendS(&str, "[Hidden]");
+        }
 
         ffStrbufTrimRight(&str, ' ');
         ffStrbufPutTo(&str, stdout);
@@ -188,7 +197,7 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (strcasecmp(subKey, "show-removable") == 0)
+    if (strcasecmp(subKey, "show-external") == 0)
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
@@ -256,7 +265,7 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showRemovable") == 0)
+            if (strcasecmp(key, "showExternal") == 0)
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;

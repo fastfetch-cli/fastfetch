@@ -323,7 +323,7 @@ static inline void printCommandHelp(const char* command)
             "Files used",
             "Files total",
             "Files percentage",
-            "True if removable volume",
+            "True if external volume",
             "True if hidden volume",
             "Filesystem"
         );
