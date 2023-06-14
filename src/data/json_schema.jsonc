@@ -1,0 +1,377 @@
+{
+    "$schema": "http://json-schema.org/schema",
+    "type": "object",
+    "properties": {
+        "logo": {
+            "title": "Fastfetch logo configurations",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "title": "Set the type of the logo given",
+                    "enum": [
+                        "auto",
+                        "builtin",
+                        "file",
+                        "file-raw",
+                        "data",
+                        "data-raw",
+                        "sixel",
+                        "kitty",
+                        "iterm",
+                        "chafa",
+                        "raw",
+                        "none"
+                    ],
+                    "default": "auto"
+                },
+                "source": {
+                    "type": "string",
+                    "title": "Set the source file of the logo"
+                },
+                "color": {
+                    "type": "object",
+                    "title": "Overwrite a color in the logo",
+                    "properties": {
+                        "1": {
+                            "type": "string",
+                            "title": "Color 1",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "2": {
+                            "type": "string",
+                            "title": "Color 2",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "3": {
+                            "type": "string",
+                            "title": "Color 3",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "4": {
+                            "type": "string",
+                            "title": "Color 4",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "5": {
+                            "type": "string",
+                            "title": "Color 5",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "6": {
+                            "type": "string",
+                            "title": "Color 6",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "7": {
+                            "type": "string",
+                            "title": "Color 7",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "8": {
+                            "type": "string",
+                            "title": "Color 8",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        "9": {
+                            "type": "string",
+                            "title": "Color 9",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        }
+                    }
+                },
+                "width": {
+                    "type": "integer",
+                    "title": "Set the width of the logo (in characters). Required for iTerm image protocol",
+                    "minimum": 1
+                },
+                "height": {
+                    "type": "integer",
+                    "title": "Set the height of the logo (in characters). Required for iTerm image protocol",
+                    "minimum": 1
+                },
+                "padding": {
+                    "type": "object",
+                    "title": "Set the padding of the logo",
+                    "properties": {
+                        "top": {
+                            "type": "integer",
+                            "title": "Set the top padding of the logo",
+                            "minimum": 0
+                        },
+                        "left": {
+                            "type": "integer",
+                            "title": "Set the left padding of the logo",
+                            "minimum": 0
+                        },
+                        "right": {
+                            "type": "integer",
+                            "title": "Set the right padding of the logo",
+                            "minimum": 0
+                        }
+                    }
+                },
+                "printRemaining": {
+                    "type": "boolean",
+                    "title": "Whether to print the remaining logo, if it has more lines than modules to display",
+                    "default": false
+                },
+                "preserveAspectRadio": {
+                    "type": "boolean",
+                    "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
+                    "default": false
+                },
+                "chafa": {
+                    "type": "object",
+                    "title": "Chafa configuration. See chafa document for details",
+                    "properties": {
+                        "fgOnly": {
+                            "type": "boolean",
+                            "title": "Produce character-cell output using foreground colors only",
+                            "default": false
+                        },
+                        "symbols": {
+                            "type": "string",
+                            "title": "Specify character symbols to employ in final output"
+                        },
+                        "canvasMode": {
+                            "type": "string",
+                            "title": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
+                            "enum": [
+                                "TRUECOLOR",
+                                "INDEXED_256",
+                                "INDEXED_240",
+                                "INDEXED_16",
+                                "FGBG_BGFG",
+                                "FGBG",
+                                "INDEXED_8",
+                                "INDEXED_16_8"
+                            ]
+                        },
+                        "colorSpace": {
+                            "type": "string",
+                            "title": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
+                            "enum": [
+                                "RGB",
+                                "DIN99D"
+                            ]
+                        },
+                        "ditherMode": {
+                            "type": "string",
+                            "title": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
+                            "enum": [
+                                "NONE",
+                                "ORDERED",
+                                "DIFFUSION"
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "general": {
+            "title": "Fastfetch general configurations",
+            "type": "object",
+            "properties": {
+                "allowSlowOperations": {
+                    "type": "boolean",
+                    "title": "Allow operations that can be very slow for more detailed output",
+                    "default": false
+                },
+                "multithreading": {
+                    "type": "boolean",
+                    "title": "Use multiple threads to detect values",
+                    "default": true
+                },
+                "stat": {
+                    "type": "boolean",
+                    "title": "Show time usage (in ms) for individual modules",
+                    "default": false
+                },
+                "escapeBedrock": {
+                    "type": "boolean",
+                    "title": "On Bedrock Linux, whether to escape the bedrock jail",
+                    "default": true
+                },
+                "pipe": {
+                    "type": "boolean",
+                    "title": "Whether to enable pipe mode (disable logo and all escape sequences)",
+                    "default": false
+                },
+                "playerName": {
+                    "type": "string",
+                    "title": "The name of the player to use for module Media and Player. Linux only"
+                },
+                "osFile": {
+                    "type": "string",
+                    "title": "Set the path to the file containing OS information. Linux only"
+                }
+            }
+        },
+        "display": {
+            "title": "Fastfetch general configurations",
+            "type": "object",
+            "properties": {
+                "showErrors": {
+                    "type": "boolean",
+                    "title": "Print occurring errors to the console. False to ignore errored modules",
+                    "default": false
+                },
+                "disableLinewrap": {
+                    "type": "boolean",
+                    "title": "Whether to disable line wrap during the run",
+                    "default": true
+                },
+                "hideCursor": {
+                    "type": "boolean",
+                    "title": "Whether to hide the cursor during the run",
+                    "default": true
+                },
+                "separator": {
+                    "type": "string",
+                    "title": "Set the separator between key and value",
+                    "default": ": "
+                },
+                "color": {
+                    "title": "Set the color of the keys and title",
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "keys": {
+                                    "type": "string",
+                                    "title": "Set the color of the keys",
+                                    "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "title": "Set the color of the title",
+                                    "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                                }
+                            }
+                        }
+                    ]
+                },
+                "binaryPrefix": {
+                    "type": "string",
+                    "title": "Set the binary prefix to used when printing bytes",
+                    "enum": [
+                        "iec",
+                        "si",
+                        "jedec"
+                    ]
+                },
+                "percentType": {
+                    "type": "number",
+                    "title": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
+                    "minimum": 0,
+                    "maximum": 9,
+                    "default": 1
+                },
+                "noBuffer": {
+                    "type": "boolean",
+                    "title": "Whether to disable the stdout application buffer",
+                    "default": false
+                }
+            }
+        },
+        "library": {
+            "title": "Set the path of a library to load",
+            "type": "object",
+            "properties": {
+                "pci": {
+                    "type": "string"
+                },
+                "vulkan": {
+                    "type": "string"
+                },
+                "freetype": {
+                    "type": "string"
+                },
+                "wayland": {
+                    "type": "string"
+                },
+                "xcbRandr": {
+                    "type": "string"
+                },
+                "xcb": {
+                    "type": "string"
+                },
+                "Xrandr": {
+                    "type": "string"
+                },
+                "X11": {
+                    "type": "string"
+                },
+                "gio": {
+                    "type": "string"
+                },
+                "DConf": {
+                    "type": "string"
+                },
+                "dbus": {
+                    "type": "string"
+                },
+                "XFConf": {
+                    "type": "string"
+                },
+                "sqlite3": {
+                    "type": "string"
+                },
+                "rpm": {
+                    "type": "string"
+                },
+                "imagemagick": {
+                    "type": "string"
+                },
+                "z": {
+                    "title": "zlib",
+                    "type": "string"
+                },
+                "chafa": {
+                    "type": "string"
+                },
+                "egl": {
+                    "type": "string"
+                },
+                "glx": {
+                    "type": "string"
+                },
+                "osmesa": {
+                    "type": "string"
+                },
+                "opencl": {
+                    "type": "string"
+                },
+                "wlanapi": {
+                    "type": "string"
+                },
+                "pulse": {
+                    "title": "pulseaudio",
+                    "type": "string"
+                },
+                "nm": {
+                    "title": "NetworkManager",
+                    "type": "string"
+                }
+            }
+        },
+        "modules": {
+            "title": "Fastfetch modules to run",
+            "type": "array",
+            "items": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "object"
+                    }
+                ]
+            }
+        }
+    }
+}
