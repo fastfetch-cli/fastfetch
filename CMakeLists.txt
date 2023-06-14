@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
 
 project(fastfetch
     VERSION 1.11.3
@@ -46,7 +46,11 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ibireme/yyjson
     GIT_TAG 0.7.0
 )
-FetchContent_MakeAvailable(yyjson)
+FetchContent_GetProperties(yyjson)
+if(NOT yyjson_POPULATED)
+  FetchContent_Populate(yyjson)
+  add_subdirectory(${yyjson_SOURCE_DIR} ${yyjson_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 #####################
 # Configure options #
