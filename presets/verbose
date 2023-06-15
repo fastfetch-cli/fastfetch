@@ -8,7 +8,7 @@
 --display-format Width: {}; Height: {}; Refresh rate: {}; ScaledWith: {}; ScaledHeight: {}
 --de-format Process name: {}; Pretty name: {}; Version: {}
 --wm-format Process name: {}; Pretty name: {}; Protocol: {}
---wm-theme-format Name: {}
+--wmtheme-format Name: {}
 --theme-format Plasma: {}; Plasma colors: {}; Plasma colors pretty: {}; GTK2: {}; GTK3: {}; GTK4: {}; GTK: {}
 --icons-format Plasma: {}; GTK2: {}; GTK3: {}; GTK4: {}; GTK: {}
 --font-format Font1: {}; Font2: {}; Font3: {}; Font4: {}
@@ -19,7 +19,7 @@
 --cpu-usage-format Percentage: {}
 --gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}; Type: {}
 --memory-format Used: {}; Total: {}; Percentage: {}
---disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; Removable: {}; Hidden: {}; Filesystem: {}; Name: {}
+--disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; External: {}; Hidden: {}; Filesystem: {}; Name: {}
 --battery-format Manufactor: {}; Model: {}; Technology: {}; Capacity: {}; Status: {}
 --poweradapter-format Watts: {}; Name: {}; Manufactor: {}; Model: {}; Description: {}
 --player-format Pretty: {}; Name: {}; Bus: {}; Url: {}

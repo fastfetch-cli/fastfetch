@@ -39,7 +39,7 @@ jobs:
         run: ctest
 
       - name: run fastfetch
-        run: ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
 
       - name: run flashfetch
         run: ./flashfetch
@@ -77,7 +77,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -126,7 +126,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -159,7 +159,7 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package
             ./fastfetch --list-features
-            time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+            time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
             time ./flashfetch
             ctest
 
@@ -213,7 +213,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -271,7 +271,7 @@ jobs:
         run: cp /clang32/bin/{OpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors true --load-config presets/all
+        run: time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
 
       - name: run flashfetch
         run: time ./flashfetch

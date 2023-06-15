@@ -25,17 +25,17 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 void detectFsInfo(struct statfs* fs, FFDisk* disk);
 #endif
 
-void ffDetectDisksImpl(FFDiskResult* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     struct statfs* buf;
 
     int size = getmntinfo(&buf, MNT_WAIT);
     if(size <= 0)
-        ffStrbufAppendS(&disks->error, "getmntinfo() failed");
+        return "getmntinfo(&buf, MNT_WAIT) failed";
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
-        FFDisk* disk = ffListAdd(&disks->disks);
+        FFDisk* disk = ffListAdd(disks);
 
         #ifdef __FreeBSD__
         // f_bavail and f_ffree are signed on FreeBSD...
@@ -53,4 +53,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         detectFsInfo(fs, disk);
     }
+
+    return NULL;
 }

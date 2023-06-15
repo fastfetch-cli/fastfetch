@@ -7,12 +7,14 @@
 
 void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
 {
-    const FFPackagesResult* counts = ffDetectPackages(instance);
-    uint32_t all = counts->all; //Copy it, so we can substract from it in FF_PRINT_PACKAGE
+    FFPackagesResult counts = {};
+    ffStrbufInit(&counts.pacmanBranch);
 
-    if(all == 0)
+    const char* error = ffDetectPackages(instance, &counts);
+
+    if(error)
     {
-        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "No packages from known package managers found");
+        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -21,21 +23,22 @@ void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
         ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key);
 
         #define FF_PRINT_PACKAGE_NAME(var, name) \
-            if(counts->var > 0) \
+            if(counts.var > 0) \
             { \
-                printf("%u (%s)", counts->var, (name)); \
-                if((all -= counts->var) > 0) \
+                printf("%u (%s)", counts.var, (name)); \
+                if((all -= counts.var) > 0) \
                     printf(", "); \
             };
 
         #define FF_PRINT_PACKAGE(name) FF_PRINT_PACKAGE_NAME(name, #name)
 
-        if(counts->pacman > 0)
+        uint32_t all = counts.all;
+        if(counts.pacman > 0)
         {
-            printf("%u (pacman)", counts->pacman);
-            if(counts->pacmanBranch.length > 0)
-                printf("[%s]", counts->pacmanBranch.chars);
-            if((all -= counts->pacman) > 0)
+            printf("%u (pacman)", counts.pacman);
+            if(counts.pacmanBranch.length > 0)
+                printf("[%s]", counts.pacmanBranch.chars);
+            if((all -= counts.pacman) > 0)
                 printf(", ");
         };
 
@@ -49,7 +52,7 @@ void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
         FF_PRINT_PACKAGE_NAME(nixDefault, "nix-default")
         FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(pkg)
-        FF_PRINT_PACKAGE_NAME(flatpakSystem, counts->flatpakUser ? "flatpak-system" : "flatpak")
+        FF_PRINT_PACKAGE_NAME(flatpakSystem, counts.flatpakUser ? "flatpak-system" : "flatpak")
         FF_PRINT_PACKAGE_NAME(flatpakUser, "flatpak-user")
         FF_PRINT_PACKAGE(snap)
         FF_PRINT_PACKAGE(brew)
@@ -58,37 +61,36 @@ void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
         FF_PRINT_PACKAGE(scoop)
         FF_PRINT_PACKAGE(choco)
 
-        //Fix linter warning of unused value of all
-        (void) all;
-
         putchar('\n');
     }
     else
     {
         ffPrintFormat(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &all},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->pacman},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &counts->pacmanBranch},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->dpkg},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->rpm},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->emerge},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->eopkg},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->xbps},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->nixSystem},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->nixUser},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->nixDefault},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->apk},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->pkg},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->flatpakSystem},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->flatpakUser},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->snap},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->brew},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->brewCask},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->port},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->scoop},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts->choco},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.all},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.pacman},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &counts.pacmanBranch},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.dpkg},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.rpm},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.emerge},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.eopkg},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.xbps},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.nixSystem},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.nixUser},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.nixDefault},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.apk},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.pkg},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpakSystem},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.flatpakUser},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.snap},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.brew},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.brewCask},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.port},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.scoop},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.choco},
         });
     }
+
+    ffStrbufDestroy(&counts.pacmanBranch);
 }
 
 void ffInitPackagesOptions(FFPackagesOptions* options)

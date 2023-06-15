@@ -146,20 +146,23 @@ static void detectType(FF_MAYBE_UNUSED const FFlist* devices, FFDisk* currentDis
 
 static bool isSubvolume(const FFlist* devices)
 {
-    const FFstrbuf* currentDevie = ffListGet(devices, devices->length - 1);
+    const FFstrbuf* current = ffListGet(devices, devices->length - 1);
+
+    if(ffStrbufEqualS(current, "drvfs")) // WSL Windows drives
+        return false;
 
     //Filter all disks which device was already found. This catches BTRFS subvolumes.
     for(uint32_t i = 0; i < devices->length - 1; i++)
     {
         const FFstrbuf* otherDevice = ffListGet(devices, i);
 
-        if(ffStrbufEqual(currentDevie, otherDevice))
+        if(ffStrbufEqual(current, otherDevice))
             return true;
     }
 
     //ZFS subvolumes: rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>.
     //Test if the third slash is present.
-    if(strncmp(currentDevie->chars, "rpool/", 6) == 0 && ffStrHasNChars(currentDevie->chars, '/', 3))
+    if(ffStrbufStartsWithS(current, "rpool/") && ffStrHasNChars(current->chars, '/', 3))
         return true;
 
     return false;
@@ -192,14 +195,11 @@ static void detectStats(FFDisk* disk)
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
 }
 
-void ffDetectDisksImpl(FFDiskResult* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     FILE* mountsFile = fopen("/proc/mounts", "r");
     if(mountsFile == NULL)
-    {
-        ffStrbufAppendS(&disks->error, "fopen(\"/proc/mounts\", \"r\") == NULL");
-        return;
-    }
+        return "fopen(\"/proc/mounts\", \"r\") == NULL";
 
     FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
@@ -224,7 +224,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         }
 
         //We have a valid device, add it to the list
-        FFDisk* disk = ffListAdd(&disks->disks);
+        FFDisk* disk = ffListAdd(disks);
 
         //detect mountpoint
         ffStrbufInit(&disk->mountpoint);
@@ -252,4 +252,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ffStrbufDestroy(device);
 
     fclose(mountsFile);
+
+    return NULL;
 }

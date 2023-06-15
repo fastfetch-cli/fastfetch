@@ -14,6 +14,7 @@ typedef struct FFfont
     FFlist styles;
 } FFfont;
 
+void ffFontInit(FFfont* font);
 void ffFontInitQt(FFfont* font, const char* data);
 void ffFontInitPango(FFfont* font, const char* data);
 void ffFontInitCopy(FFfont* font, const char* name);

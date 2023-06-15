@@ -47,6 +47,7 @@ typedef struct FFconfig
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;
+    bool noBuffer;
 
     // Module options that cannot be put in module option structure
     #if defined(__linux__) || defined(__FreeBSD__)

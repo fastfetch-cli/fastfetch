@@ -7,18 +7,19 @@
 
 void ffPrintHost(FFinstance* instance, FFHostOptions* options)
 {
-    const FFHostResult* host = ffDetectHost();
+    FFHostResult host;
+    const char* error = ffDetectHost(&host);
 
-    if(host->error.length > 0)
+    if(error)
     {
-        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "%*s", host->error.length, host->error.chars);
-        return;
+        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        goto exit;
     }
 
-    if(host->productFamily.length == 0 && host->productName.length == 0)
+    if(host.productFamily.length == 0 && host.productName.length == 0)
     {
         ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "neither product_family nor product_name is set by O.E.M.");
-        return;
+        goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -27,14 +28,14 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
-        if(host->productName.length > 0)
-            ffStrbufAppend(&output, &host->productName);
+        if(host.productName.length > 0)
+            ffStrbufAppend(&output, &host.productName);
         else
-            ffStrbufAppend(&output, &host->productFamily);
+            ffStrbufAppend(&output, &host.productFamily);
 
-        if(host->productVersion.length > 0 && !ffStrbufIgnCaseEqualS(&host->productVersion, "none"))
+        if(host.productVersion.length > 0 && !ffStrbufIgnCaseEqualS(&host.productVersion, "none"))
         {
-            ffStrbufAppendF(&output, " (%s)", host->productVersion.chars);
+            ffStrbufAppendF(&output, " (%s)", host.productVersion.chars);
         }
 
         ffStrbufPutTo(&output, stdout);
@@ -42,13 +43,20 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
     else
     {
         ffPrintFormat(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->productFamily},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->productName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->productVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->productSku},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host->sysVendor}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productFamily},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productSku},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sysVendor}
         });
     }
+
+exit:
+    ffStrbufDestroy(&host.productFamily);
+    ffStrbufDestroy(&host.productName);
+    ffStrbufDestroy(&host.productVersion);
+    ffStrbufDestroy(&host.productSku);
+    ffStrbufDestroy(&host.sysVendor);
 }
 
 void ffInitHostOptions(FFHostOptions* options)

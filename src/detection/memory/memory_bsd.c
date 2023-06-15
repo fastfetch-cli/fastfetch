@@ -3,19 +3,21 @@
 
 const char* ffDetectMemory(FFMemoryResult* ram)
 {
+    uint64_t length = sizeof(ram->bytesTotal);
+    if (sysctl((int[]){ CTL_HW, HW_PHYSMEM }, 2, &ram->bytesTotal, &length, NULL, 0))
+        return "Failed to read hw.physmem";
+
     uint32_t pageSize;
-    uint64_t length = sizeof(pageSize);
+    length = sizeof(pageSize);
     if (sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &pageSize, &length, NULL, 0))
         return "Failed to read hw.pagesize";
 
-    ram->bytesTotal = (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_page_count", 0) * pageSize;
-    if(ram->bytesTotal == 0)
-        return "Failed to read vm.stats.vm.v_page_count";
+    // vm.stats.vm.* are int values
+    int32_t pagesFree = ffSysctlGetInt("vm.stats.vm.v_free_count", 0)
+        + ffSysctlGetInt("vm.stats.vm.v_inactive_count", 0)
+        + ffSysctlGetInt("vm.stats.vm.v_cache_count", 0);
 
-    ram->bytesUsed = ram->bytesTotal
-        - (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_free_count", 0) * pageSize
-        - (uint64_t) ffSysctlGetInt64("vm.stats.vm.v_inactive_count", 0) * pageSize
-    ;
+    ram->bytesUsed = ram->bytesTotal - (uint64_t) pagesFree * pageSize;
 
     return NULL;
 }

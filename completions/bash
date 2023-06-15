@@ -194,7 +194,7 @@ __fastfetch_completion()
         "--title-fqdn"
         "--escape-bedrock"
         "--disk-folders"
-        "--disk-show-removable"
+        "--disk-show-external"
         "--disk-show-hidden"
         "--disk-show-subvolumes"
         "--gpu-hide-integrated"

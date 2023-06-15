@@ -23,13 +23,11 @@ static void generateString(FFFontResult* font)
     ffStrbufAppendC(&font->display, ']');
 }
 
-void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
+const char* ffDetectFontImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFFontResult* result)
 {
-    FF_UNUSED(instance);
-
     NONCLIENTMETRICSW info = { .cbSize = sizeof(info) };
     if(!SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0))
-        ffStrbufAppendS(&result->error, "SystemParametersInfoW(SPI_GETNONCLIENTMETRICS) failed");
+        return "SystemParametersInfoW(SPI_GETNONCLIENTMETRICS) failed";
 
     LOGFONTW* fonts[4] = { &info.lfCaptionFont, &info.lfMenuFont, &info.lfMessageFont, &info.lfStatusFont };
 
@@ -41,4 +39,6 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
     }
 
     generateString(result);
+
+    return NULL;
 }

@@ -16,7 +16,7 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FF
     if (options->temp)
     {
         FF_STRBUF_AUTO_DESTROY cpuTemp = ffStrbufCreate();
-        if(ffSysctlGetString("temperature", &cpuTemp))
+        if(ffSysctlGetString("hw.acpi.thermal.tz0.temperature", &cpuTemp))
             cpu->temperature = FF_CPU_TEMP_UNSET;
         else
             cpu->temperature = ffStrbufToDouble(&cpuTemp);

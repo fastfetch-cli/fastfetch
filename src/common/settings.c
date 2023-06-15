@@ -403,9 +403,24 @@ bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, 
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
-void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
+bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
     ffStrbufEnsureFree(result, PROP_VALUE_MAX);
-    result->length += (uint32_t) __system_property_get(propName, result->chars + result->length);
+    int len = __system_property_get(propName, result->chars + result->length);
+    if (len <= 0) return false;
+    result->length += (uint32_t) len;
     result->chars[result->length] = '\0';
+    return true;
 }
-#endif //__ANDROID__
+#elif defined(__FreeBSD__)
+#include <kenv.h>
+bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result)
+{
+    //https://wiki.ghostbsd.org/index.php/Kenv
+    ffStrbufEnsureFree(result, KENV_MVALLEN);
+    int len = kenv(KENV_GET, propName, result->chars + result->length, KENV_MVALLEN);
+    if (len <= 0) return false;
+    result->length += (uint32_t) len;
+    result->chars[result->length] = '\0';
+    return true;
+}
+#endif

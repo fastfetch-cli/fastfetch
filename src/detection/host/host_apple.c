@@ -155,17 +155,16 @@ static const char* getProductName(const FFstrbuf* hwModel)
     return hwModel->chars;
 }
 
-void ffDetectHostImpl(FFHostResult* host)
+const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufInit(&host->error);
-
     ffStrbufInit(&host->productName);
     ffStrbufInit(&host->productFamily);
     ffStrbufInit(&host->productVersion);
     ffStrbufInit(&host->productSku);
     ffStrbufInitS(&host->sysVendor, "Apple");
 
-    ffStrbufAppendS(&host->error, ffSysctlGetString("hw.model", &host->productFamily));
-    if(host->error.length == 0)
-        ffStrbufAppendS(&host->productName, getProductName(&host->productFamily));
+    const char* error = ffSysctlGetString("hw.model", &host->productFamily);
+    if (error) return error;
+    ffStrbufAppendS(&host->productName, getProductName(&host->productFamily));
+    return NULL;
 }

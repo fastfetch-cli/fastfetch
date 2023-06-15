@@ -3,12 +3,13 @@
 
 #include <string.h>
 
-static void fontInit(FFfont* font)
+void ffFontInit(FFfont* font)
 {
+    // Ensure no memory allocates
     ffStrbufInit(&font->pretty);
     ffStrbufInit(&font->name);
-    ffStrbufInitA(&font->size, 8);
-    ffListInitA(&font->styles, sizeof(FFstrbuf), 4);
+    ffStrbufInit(&font->size);
+    ffListInit(&font->styles, sizeof(FFstrbuf));
 }
 
 static void fontInitPretty(FFfont* font)
@@ -44,7 +45,7 @@ static void fontInitPretty(FFfont* font)
 
 void ffFontInitQt(FFfont* font, const char* data)
 {
-    fontInit(font);
+    ffFontInit(font);
 
     //See https://doc.qt.io/qt-5/qfont.html#toString
 
@@ -181,7 +182,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
 
 void ffFontInitPango(FFfont* font, const char* data)
 {
-    fontInit(font);
+    ffFontInit(font);
 
     while(*data != '\0' && *data != '`' && *data != '\\')
         fontPangoParseWord(&data, font, NULL);
@@ -191,7 +192,7 @@ void ffFontInitPango(FFfont* font, const char* data)
 
 void ffFontInitValues(FFfont* font, const char* name, const char* size)
 {
-    fontInit(font);
+    ffFontInit(font);
 
     ffStrbufAppendS(&font->name, name);
     ffStrbufAppendS(&font->size, size);
@@ -213,7 +214,7 @@ void ffFontInitWithSpace(FFfont* font, const char* rawName)
         return;
     }
 
-    fontInit(font);
+    ffFontInit(font);
 
     ffStrbufAppendNS(&font->name, (uint32_t)(pspace - rawName), rawName);
     ffStrbufAppendS(&font->size, pspace + 1);

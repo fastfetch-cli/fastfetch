@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
 
 project(fastfetch
     VERSION 1.11.3
@@ -46,7 +46,11 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/ibireme/yyjson
     GIT_TAG 0.7.0
 )
-FetchContent_MakeAvailable(yyjson)
+FetchContent_GetProperties(yyjson)
+if(NOT yyjson_POPULATED)
+  FetchContent_Populate(yyjson)
+  add_subdirectory(${yyjson_SOURCE_DIR} ${yyjson_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 #####################
 # Configure options #
@@ -79,7 +83,6 @@ cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -103,12 +106,14 @@ else()
     message(STATUS "Threads type: disabled")
 endif()
 
+set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=uninitialized -Werror=return-type")
+
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wconversion")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS}")
 
 if(WIN32)
     set(CMAKE_CXX_STANDARD 11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wconversion -fno-exceptions -fno-rtti")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
 
@@ -245,7 +250,6 @@ set(LIBFASTFETCH_SRC
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
-    src/detection/bluetooth/bluetooth.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
     src/detection/datetime/datetime.c
@@ -253,7 +257,6 @@ set(LIBFASTFETCH_SRC
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
-    src/detection/host/host.c
     src/detection/locale/locale.c
     src/detection/media/media.c
     src/detection/opencl/opencl.c
@@ -426,9 +429,9 @@ elseif(BSD)
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
-        src/detection/board/board_nosupport.c
+        src/detection/board/board_bsd.c
         src/detection/brightness/brightness_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
@@ -444,7 +447,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/icons/icons_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/opengl/opengl_linux.c
@@ -462,7 +465,7 @@ elseif(BSD)
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_bsd.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -715,10 +718,6 @@ if(ENABLE_THREADS)
     endif()
 endif()
 
-if(ENABLE_BUFFER)
-    target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
-endif()
-
 if(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework Cocoa"
@@ -752,6 +751,10 @@ elseif(WIN32)
         PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
+    )
+elseif(BSD)
+    target_link_libraries(libfastfetch
+        PRIVATE "usbhid"
     )
 endif()
 
@@ -790,11 +793,6 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
     PRIVATE yyjson
 )
-
-if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c
-    target_compile_definitions(fastfetch PRIVATE FF_ENABLE_BUFFER)
-    target_compile_definitions(flashfetch PRIVATE FF_ENABLE_BUFFER)
-endif()
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

@@ -140,7 +140,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     ) ffStrbufSetS(&ds->dePrettyName, "Fluent");
     else if(
         ffStrbufEqualS(&os->version, "8") ||
-        ffStrbufEqualS(&os->version, "81.") ||
+        ffStrbufEqualS(&os->version, "8.1") ||
         ffStrbufEqualS(&os->version, "2012 R2") ||
         ffStrbufEqualS(&os->version, "2012")
     ) ffStrbufSetS(&ds->dePrettyName, "Metro");

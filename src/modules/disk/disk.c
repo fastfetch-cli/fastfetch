@@ -57,8 +57,17 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
         else
             ffStrbufAppendS(&str, "Unknown ");
 
-        if((disk->type & FF_DISK_TYPE_EXTERNAL_BIT) && !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
-            ffStrbufAppendS(&str, "[Removable]");
+        if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        {
+            ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
+
+            if(disk->type & FF_DISK_TYPE_EXTERNAL_BIT)
+                ffStrbufAppendS(&str, "[External]");
+            else if(disk->type & FF_DISK_TYPE_SUBVOLUME_BIT)
+                ffStrbufAppendS(&str, "[Subvolume]");
+            else if(disk->type & FF_DISK_TYPE_HIDDEN_BIT)
+                ffStrbufAppendS(&str, "[Hidden]");
+        }
 
         ffStrbufTrimRight(&str, ' ');
         ffStrbufPutTo(&str, stdout);
@@ -133,17 +142,27 @@ static void printAutodetected(FFinstance* instance, FFDiskOptions* options, cons
 
 void ffPrintDisk(FFinstance* instance, FFDiskOptions* options)
 {
-    const FFDiskResult* disks = ffDetectDisks();
-    if(disks->error.length > 0)
+    FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
+    const char* error = ffDetectDisks(&disks);
+
+    if(error)
     {
-        ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", disks->error.chars);
-        return;
+        ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+    }
+    else
+    {
+        if(options->folders.length == 0)
+            printAutodetected(instance, options, &disks);
+        else
+            printMountpoints(instance, options, &disks);
     }
 
-    if(options->folders.length == 0)
-        printAutodetected(instance, options, &disks->disks);
-    else
-        printMountpoints(instance, options, &disks->disks);
+    FF_LIST_FOR_EACH(FFDisk, disk, disks)
+    {
+        ffStrbufDestroy(&disk->mountpoint);
+        ffStrbufDestroy(&disk->filesystem);
+        ffStrbufDestroy(&disk->name);
+    }
 }
 
 
@@ -178,7 +197,7 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (strcasecmp(subKey, "show-removable") == 0)
+    if (strcasecmp(subKey, "show-external") == 0)
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
@@ -246,7 +265,7 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showRemovable") == 0)
+            if (strcasecmp(key, "showExternal") == 0)
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;

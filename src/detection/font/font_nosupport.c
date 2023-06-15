@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 #include "font.h"
 
-void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
+const char* ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
-    FF_UNUSED(instance);
-    ffStrbufAppendS(&result->error, "Not supported on this platform");
+    FF_UNUSED(instance, result);
+    return "Not supported on this platform";
 }

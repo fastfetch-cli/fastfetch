@@ -4,11 +4,12 @@
 #include <windows.h>
 #include <assert.h>
 
-void ffDetectDisksImpl(FFDiskResult* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     wchar_t buf[MAX_PATH + 1];
     uint32_t length = GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf);
-    assert(length < sizeof(buf) / sizeof(*buf));
+    if (length == 0 || length >= sizeof(buf) / sizeof(*buf))
+        return "GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf) failed";
 
     for(uint32_t i = 0; i < length; i++)
     {
@@ -21,7 +22,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             continue;
         }
 
-        FFDisk* disk = ffListAdd(&disks->disks);
+        FFDisk* disk = ffListAdd(disks);
         ffStrbufInitWS(&disk->mountpoint, mountpoint);
 
         uint64_t bytesFree;
@@ -61,10 +62,12 @@ void ffDetectDisksImpl(FFDiskResult* disks)
             ffStrbufSetWS(&disk->name, diskName);
         }
 
-        //TODO: implement
+        //Unsupported
         disk->filesUsed = 0;
         disk->filesTotal = 0;
 
         i += disk->mountpoint.length;
     }
+
+    return NULL;
 }

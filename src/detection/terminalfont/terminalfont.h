@@ -12,6 +12,6 @@ typedef struct FFTerminalFontResult
     FFfont font;
 } FFTerminalFontResult;
 
-const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance);
+bool ffDetectTerminalFont(const FFinstance* instance, FFTerminalFontResult* result);
 
 #endif

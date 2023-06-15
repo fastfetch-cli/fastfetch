@@ -103,7 +103,7 @@ static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFB
     }
 }
 
-static void detectBluetoothObject(FFBluetoothResult* bluetooth, FFDBusData* dbus, DBusMessageIter* iter)
+static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
         return;
@@ -129,7 +129,7 @@ static void detectBluetoothObject(FFBluetoothResult* bluetooth, FFDBusData* dbus
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    FFBluetoothDevice* device = ffListAdd(&bluetooth->devices);
+    FFBluetoothDevice* device = ffListAdd(devices);
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->address);
     ffStrbufInit(&device->type);
@@ -147,11 +147,11 @@ static void detectBluetoothObject(FFBluetoothResult* bluetooth, FFDBusData* dbus
         ffStrbufDestroy(&device->name);
         ffStrbufDestroy(&device->address);
         ffStrbufDestroy(&device->type);
-        --bluetooth->devices.length;
+        --devices->length;
     }
 }
 
-static void detectBluetoothRoot(FFBluetoothResult* bluetooth, FFDBusData* dbus, DBusMessageIter* iter)
+static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
         return;
@@ -161,12 +161,12 @@ static void detectBluetoothRoot(FFBluetoothResult* bluetooth, FFDBusData* dbus, 
 
     while(true)
     {
-        detectBluetoothObject(bluetooth, dbus, &arrayIter);
+        detectBluetoothObject(devices, dbus, &arrayIter);
         FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
     }
 }
 
-static const char* detectBluetooth(const FFinstance* instance, FFBluetoothResult* bluetooth)
+static const char* detectBluetooth(const FFinstance* instance, FFlist* devices)
 {
     FFDBusData dbus;
     const char* error = ffDBusLoadData(instance, DBUS_BUS_SYSTEM, &dbus);
@@ -184,7 +184,7 @@ static const char* detectBluetooth(const FFinstance* instance, FFBluetoothResult
         return "Failed to get root iterator of GetManagedObjects";
     }
 
-    detectBluetoothRoot(bluetooth, &dbus, &rootIter);
+    detectBluetoothRoot(devices, &dbus, &rootIter);
 
     dbus.lib->ffdbus_message_unref(managedObjects);
     return NULL;
@@ -192,12 +192,12 @@ static const char* detectBluetooth(const FFinstance* instance, FFBluetoothResult
 
 #endif
 
-void ffDetectBluetoothImpl(const FFinstance* instance, FFBluetoothResult* bluetooth)
+const char* ffDetectBluetooth(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* FFBluetoothDevice */)
 {
     #ifdef FF_HAVE_DBUS
-        ffStrbufAppendS(&bluetooth->error, detectBluetooth(instance, bluetooth));
+        return detectBluetooth(instance, devices);
     #else
         FF_UNUSED(instance);
-        ffStrbufAppendS(&bluetooth->error, "Fastfetch was compiled without DBus support");
+        return "Fastfetch was compiled without DBus support";
     #endif
 }

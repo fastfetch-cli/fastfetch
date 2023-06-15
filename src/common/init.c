@@ -51,6 +51,7 @@ static void defaultConfig(FFinstance* instance)
     instance->config.pipe = false;
     instance->config.multithreading = true;
     instance->config.stat = false;
+    instance->config.noBuffer = false;
 
     ffInitTitleOptions(&instance->config.title);
     ffInitOSOptions(&instance->config.os);
@@ -175,7 +176,7 @@ static void resetConsole()
     if(ffHideCursor)
         fputs("\033[?25h", stdout);
 
-    #if defined(_WIN32) && defined(FF_ENABLE_BUFFER)
+    #if defined(_WIN32)
         fflush(stdout);
     #endif
 }
@@ -207,9 +208,7 @@ void ffStart(FFinstance* instance)
     ffHideCursor = instance->config.hideCursor && !instance->config.pipe;
 
     #ifdef _WIN32
-    #ifdef FF_ENABLE_BUFFER
-        setvbuf(stdout, NULL, _IOFBF, 4096);
-    #endif
+    if (!instance->config.noBuffer) setvbuf(stdout, NULL, _IOFBF, 4096);
     SetConsoleCtrlHandler(consoleHandler, TRUE);
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
@@ -217,9 +216,7 @@ void ffStart(FFinstance* instance)
     SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     SetConsoleOutputCP(CP_UTF8);
     #else
-    #ifndef FF_ENABLE_BUFFER
-        setvbuf(stdout, NULL, _IONBF, 0);
-    #endif
+    if (instance->config.noBuffer) setvbuf(stdout, NULL, _IONBF, 0);
     struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);

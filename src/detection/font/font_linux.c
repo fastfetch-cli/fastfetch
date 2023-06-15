@@ -24,15 +24,12 @@ static void generateString(FFFontResult* font)
     ffParseGTK(&font->display, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
 }
 
-void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
+const char* ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
 
     if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
-    {
-        ffStrbufAppendS(&result->error, "Font isn't supported in TTY");
-        return;
-    }
+        return "Font isn't supported in TTY";
 
     FFfont qt;
     ffFontInitQt(&qt, ffDetectQt(instance)->font.chars);
@@ -55,4 +52,6 @@ void ffDetectFontImpl(const FFinstance* instance, FFFontResult* result)
     ffFontDestroy(&gtk4);
 
     generateString(result);
+
+    return NULL;
 }

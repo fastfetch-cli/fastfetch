@@ -19,18 +19,10 @@ typedef struct FFDisk
     uint32_t filesTotal;
 } FFDisk;
 
-typedef struct FFDiskResult
-{
-    FFstrbuf error;
-    FFlist disks; //List of FFDisk
-} FFDiskResult;
-
 /**
  * Returns a List of FFDisk, sorted alphabetically by mountpoint.
  * If error is not set, disks contains at least one disk.
- *
- * @return const FFDiskResult*
  */
-const FFDiskResult* ffDetectDisks();
+const char* ffDetectDisks(FFlist* result /* list of FFDisk */);
 
 #endif
