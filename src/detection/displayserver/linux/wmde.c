@@ -55,53 +55,47 @@ static const char* parseEnv()
     return NULL;
 }
 
-static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* processName)
+static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
 {
-    if(!ffStrSet(processName))
+    if(!ffStrSet(name))
         return;
 
-    if(
-        strcasecmp(processName, "kwin_wayland") == 0 ||
-        strcasecmp(processName, "kwin_wayland_wrapper") == 0 ||
-        strcasecmp(processName, "kwin_x11") == 0 ||
-        strcasecmp(processName, "kwin_x11_wrapper") == 0 ||
-        strcasecmp(processName, "kwin") == 0
-    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
+    if(strcasestr(name, "kwin") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
     else if(
-        strcasecmp(processName, "gnome-shell") == 0 ||
-        strcasecmp(processName, "gnome shell") == 0 ||
-        strcasecmp(processName, "gnome-session-binary") == 0 ||
-        strcasecmp(processName, "Mutter") == 0
+        strcasecmp(name, "gnome-shell") == 0 ||
+        strcasecmp(name, "gnome shell") == 0 ||
+        strcasecmp(name, "gnome-session-binary") == 0 ||
+        strcasestr(name, "mutter") != NULL
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
-        strcasecmp(processName, "cinnamon-session") == 0 ||
-        strcasecmp(processName, "Muffin") == 0 ||
-        strcasecmp(processName, "Mutter (Muffin)") == 0
+        strcasecmp(name, "cinnamon-session") == 0 ||
+        strcasestr(name, "muffin") != NULL
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
-    else if(strcasecmp(processName, "sway") == 0)
+    else if(strcasestr(name, "sway") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
-    else if(strcasecmp(processName, "weston") == 0)
+    else if(strcasestr(name, "weston") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WESTON);
-    else if(strcasecmp(processName, "wayfire") == 0)
+    else if(strcasestr(name, "wayfire") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WAYFIRE);
-    else if(strcasecmp(processName, "openbox") == 0)
+    else if(strcasestr(name, "openbox") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_OPENBOX);
-    else if(strcasecmp(processName, "xfwm4") == 0)
+    else if(strcasestr(name, "xfwm4") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XFWM4);
-    else if(strcasecmp(processName, "Marco") == 0)
+    else if(strcasestr(name, "marco") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MARCO);
-    else if(strcasecmp(processName, "xmonad") == 0)
+    else if(strcasestr(name, "xmonad") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
-    else if(strcasecmp(processName, "WSLg") == 0)
+    else if(strcasestr(name, "wslg") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WSLG);
     else if( // WMs where the pretty name matches the process name
-        strcasecmp(processName, "dwm") == 0 ||
-        strcasecmp(processName, "bspwm") == 0 ||
-        strcasecmp(processName, "tinywm") == 0
-    ) ffStrbufSetS(&result->wmPrettyName, processName);
+        strcasestr(name, "dwm") != NULL ||
+        strcasestr(name, "bspwm") != NULL ||
+        strcasestr(name, "tinywm") != NULL
+    ) ffStrbufSetS(&result->wmPrettyName, name);
 
     if(result->wmPrettyName.length > 0 && result->wmProcessName.length == 0)
-        ffStrbufSetS(&result->wmProcessName, processName);
+        ffStrbufSetS(&result->wmProcessName, name);
 }
 
 static void applyBetterWM(FFDisplayServerResult* result, const char* processName)
