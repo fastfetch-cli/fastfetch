@@ -30,6 +30,8 @@ static const char* glHandleResult(FFOpenGLResult* result, const GLData* data)
 #endif // FF_HAVE_GL
 
 #ifdef FF_HAVE_EGL
+#include "common/io/io.h"
+
 #include <EGL/egl.h>
 
 typedef struct EGLData
@@ -133,6 +135,7 @@ static const char* eglPrint(FFinstance* instance, FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroySurface);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
 
+    FF_SUPPRESS_IO();
     return eglHandleData(result, &eglData);
 }
 
