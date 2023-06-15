@@ -447,7 +447,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/icons/icons_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/opengl/opengl_linux.c
@@ -751,6 +751,10 @@ elseif(WIN32)
         PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "powrprof"
+    )
+elseif(BSD)
+    target_link_libraries(libfastfetch
+        PRIVATE "usbhid"
     )
 endif()
 
