@@ -1,5 +1,5 @@
 #include "host.h"
-#include "common/sysctl.h"
+#include "common/settings.h"
 
 const char* ffDetectHost(FFHostResult* host)
 {
@@ -8,6 +8,11 @@ const char* ffDetectHost(FFHostResult* host)
     ffStrbufInit(&host->productVersion);
     ffStrbufInit(&host->productSku);
     ffStrbufInit(&host->sysVendor);
+    ffSettingsGetFreeBSDKenv("smbios.system.product", &host->productName);
+    ffSettingsGetFreeBSDKenv("smbios.system.family", &host->productFamily);
+    ffSettingsGetFreeBSDKenv("smbios.system.version", &host->productVersion);
+    ffSettingsGetFreeBSDKenv("smbios.system.sku", &host->productSku);
+    ffSettingsGetFreeBSDKenv("smbios.system.maker", &host->sysVendor);
 
-    return ffSysctlGetString("hw.fdt.model", &host->productName);
+    return NULL;
 }
