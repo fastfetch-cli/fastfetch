@@ -429,7 +429,7 @@ elseif(BSD)
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
-        src/detection/board/board_nosupport.c
+        src/detection/board/board_bsd.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_bsd.c
