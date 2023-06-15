@@ -431,7 +431,7 @@ elseif(BSD)
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/board/board_bsd.c
         src/detection/brightness/brightness_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
