@@ -96,10 +96,10 @@ else()
     message(STATUS "Threads type: disabled")
 endif()
 
-set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=uninitialized -Werror=return-type")
+set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type")
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration")
 
 if(WIN32)
     set(CMAKE_CXX_STANDARD 11)
