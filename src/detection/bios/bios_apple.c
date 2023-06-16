@@ -3,14 +3,8 @@
 
 #include <IOKit/IOKitLib.h>
 
-void ffDetectBios(FFBiosResult* bios)
+const char* ffDetectBios(FFBiosResult* bios)
 {
-    ffStrbufInit(&bios->error);
-    ffStrbufInit(&bios->biosDate);
-    ffStrbufInit(&bios->biosRelease);
-    ffStrbufInit(&bios->biosVendor);
-    ffStrbufInit(&bios->biosVersion);
-
     io_registry_entry_t registryEntry;
 
     #ifndef __aarch64__
@@ -23,8 +17,7 @@ void ffDetectBios(FFBiosResult* bios)
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
         {
             IOObjectRelease(registryEntry);
-            ffStrbufAppendS(&bios->error, "IORegistryEntryCreateCFProperties(registryEntry) failed");
-            return;
+            return "IORegistryEntryCreateCFProperties(registryEntry) failed";
         }
 
         ffCfDictGetString(properties, CFSTR("vendor"), &bios->biosVendor);
@@ -36,7 +29,7 @@ void ffDetectBios(FFBiosResult* bios)
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
-        return;
+        return NULL;
     }
 
     #else
@@ -51,6 +44,7 @@ void ffDetectBios(FFBiosResult* bios)
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
+        return NULL;
     }
 
     if((registryEntry = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen")))
@@ -64,7 +58,10 @@ void ffDetectBios(FFBiosResult* bios)
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
+        return NULL;
     }
 
     #endif
+
+    return "Failed to query bios info";
 }

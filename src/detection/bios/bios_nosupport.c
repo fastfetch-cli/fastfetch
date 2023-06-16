@@ -1,11 +1,6 @@
 #include "bios.h"
 
-void ffDetectBios(FFBiosResult* bios)
+const char* ffDetectBios(FF_MAYBE_UNUSED FFBiosResult* bios)
 {
-    ffStrbufInitS(&bios->error, "Not supported on this platform");
-
-    ffStrbufInit(&bios->biosDate);
-    ffStrbufInit(&bios->biosRelease);
-    ffStrbufInit(&bios->biosVendor);
-    ffStrbufInit(&bios->biosVersion);
+    return "Not supported on this platform";
 }

@@ -40,19 +40,11 @@ static void getHostValue(const char* devicesPath, const char* classPath, FFstrbu
     ffStrbufClear(buffer);
 }
 
-void ffDetectBios(FFBiosResult* bios)
+const char*  ffDetectBios(FFBiosResult* bios)
 {
-    ffStrbufInit(&bios->error);
-
-    ffStrbufInit(&bios->biosDate);
     getHostValue("/sys/devices/virtual/dmi/id/bios_date", "/sys/class/dmi/id/bios_date", &bios->biosDate);
-
-    ffStrbufInit(&bios->biosRelease);
     getHostValue("/sys/devices/virtual/dmi/id/bios_release", "/sys/class/dmi/id/bios_release", &bios->biosRelease);
-
-    ffStrbufInit(&bios->biosVendor);
     getHostValue("/sys/devices/virtual/dmi/id/bios_vendor", "/sys/class/dmi/id/bios_vendor", &bios->biosVendor);
-
-    ffStrbufInit(&bios->biosVersion);
     getHostValue("/sys/devices/virtual/dmi/id/bios_version", "/sys/class/dmi/id/bios_version", &bios->biosVersion);
+    return NULL;
 }
