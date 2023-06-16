@@ -28,7 +28,8 @@ const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* 
             struct hid_item hItem;
             while (hid_get_item(hData, &hItem) > 0)
             {
-                switch (HID_PAGE(hItem.usage))
+                if (HID_PAGE(hItem.usage) != 1) continue;
+                switch (HID_USAGE(hItem.usage))
                 {
                     case 1: // FreeBSD returns 1 for my Pro Controller for some reason
                     case 5:
