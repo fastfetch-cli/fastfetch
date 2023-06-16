@@ -202,7 +202,8 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         (uint32_t) (display.height / display.scale),
         rotation,
         &display.name,
-        display.type
+        display.type,
+        false
     );
 
     ffThreadMutexUnlock(&mutex);

@@ -85,7 +85,8 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
             (uint32_t) HeightOfScreen(screen),
             0,
             NULL,
-            FF_DISPLAY_TYPE_UNKNOWN
+            FF_DISPLAY_TYPE_UNKNOWN,
+            false
         );
     }
 
@@ -146,7 +147,7 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
     return data->defaultRefreshRate;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, bool primary)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -182,20 +183,21 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
         (uint32_t) crtcInfo->height,
         rotation,
         NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
+        FF_DISPLAY_TYPE_UNKNOWN,
+        primary
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
     return res;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, bool primary)
 {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
     if(outputInfo == NULL)
         return false;
 
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc);
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc, primary);
 
     data->ffXRRFreeOutputInfo(outputInfo);
 
@@ -208,7 +210,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i]))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], monitorInfo->primary))
             foundOutput = true;
     }
 
@@ -221,7 +223,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->height,
         0,
         NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
+        FF_DISPLAY_TYPE_UNKNOWN,
+        !!monitorInfo->primary
     );
 }
 
@@ -278,7 +281,8 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         (uint32_t) HeightOfScreen(screen),
         0,
         NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
+        FF_DISPLAY_TYPE_UNKNOWN,
+        false
     );
 }
 
