@@ -34,7 +34,7 @@ int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, cons
 bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, const char* query, FFstrbuf* result);
 
 #ifdef __ANDROID__
-void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
+bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #elif defined(__FreeBSD__)
 bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result);
 #endif
