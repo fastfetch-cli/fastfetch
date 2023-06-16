@@ -10,9 +10,8 @@ typedef struct FFChassisResult
     FFstrbuf chassisType;
     FFstrbuf chassisVendor;
     FFstrbuf chassisVersion;
-    FFstrbuf error;
 } FFChassisResult;
 
-void ffDetectChassis(FFChassisResult* result);
+const char* ffDetectChassis(FFChassisResult* result);
 
 #endif

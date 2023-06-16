@@ -8,18 +8,22 @@
 void ffPrintChassis(FFinstance* instance, FFChassisOptions* options)
 {
     FFChassisResult result;
-    ffDetectChassis(&result);
+    ffStrbufInit(&result.chassisType);
+    ffStrbufInit(&result.chassisVendor);
+    ffStrbufInit(&result.chassisVersion);
 
-    if(result.error.length > 0)
+    const char* error = ffDetectChassis(&result);
+
+    if(error)
     {
-        ffPrintError(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "%*s", result.error.length, result.error.chars);
+        ffPrintError(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
     if(result.chassisType.length == 0)
     {
         ffPrintError(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "chassis_type is not set by O.E.M.");
-        return;
+        goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -46,7 +50,6 @@ exit:
     ffStrbufDestroy(&result.chassisType);
     ffStrbufDestroy(&result.chassisVendor);
     ffStrbufDestroy(&result.chassisVersion);
-    ffStrbufDestroy(&result.error);
 }
 
 void ffInitChassisOptions(FFChassisOptions* options)
