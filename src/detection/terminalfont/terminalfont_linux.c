@@ -4,6 +4,7 @@
 #include "common/parsing.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 
 static const char* getSystemMonospaceFont(const FFinstance* instance)
@@ -28,7 +29,7 @@ static const char* getSystemMonospaceFont(const FFinstance* instance)
 
 static void detectFromGSettings(const FFinstance* instance, const char* profilePath, const char* profileList, const char* profile, const char* defaultProfileKey, FFTerminalFontResult* terminalFont)
 {
-    const char* defaultProfile = ffSettingsGetGSettings(instance, profileList, NULL, defaultProfileKey, FF_VARIANT_TYPE_STRING).strValue;
+    FF_AUTO_FREE const char* defaultProfile = ffSettingsGetGSettings(instance, profileList, NULL, defaultProfileKey, FF_VARIANT_TYPE_STRING).strValue;
     if(!ffStrSet(defaultProfile))
     {
         ffStrbufAppendF(&terminalFont->error, "Could not get default profile from gsettings: %s", profileList);
@@ -42,7 +43,7 @@ static void detectFromGSettings(const FFinstance* instance, const char* profileP
 
     if(!ffSettingsGetGSettings(instance, profile, path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
     {
-        const char* fontName = ffSettingsGetGSettings(instance, profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
+        FF_AUTO_FREE const char* fontName = ffSettingsGetGSettings(instance, profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else
