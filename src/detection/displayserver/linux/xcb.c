@@ -1,4 +1,5 @@
 #include "displayserver_linux.h"
+#include "util/mallocHelper.h"
 
 #ifdef FF_HAVE_XCB
 #include "common/library.h"
@@ -14,6 +15,9 @@ typedef struct XcbPropertyData
     FF_LIBRARY_SYMBOL(xcb_get_property_reply)
     FF_LIBRARY_SYMBOL(xcb_get_property_value)
     FF_LIBRARY_SYMBOL(xcb_get_property_value_length)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name_name)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name_reply)
 } XcbPropertyData;
 
 static bool xcbInitPropertyData(void* libraryHandle, XcbPropertyData* propertyData)
@@ -24,6 +28,9 @@ static bool xcbInitPropertyData(void* libraryHandle, XcbPropertyData* propertyDa
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_reply, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value_length, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_reply, false)
 
     return true;
 }
@@ -164,17 +171,19 @@ typedef struct XcbRandrData
     FF_LIBRARY_SYMBOL(xcb_randr_get_output_info_reply)
     FF_LIBRARY_SYMBOL(xcb_randr_get_crtc_info)
     FF_LIBRARY_SYMBOL(xcb_randr_get_crtc_info_reply)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name)
 
     //init once
     xcb_connection_t* connection;
     FFDisplayServerResult* result;
+    XcbPropertyData propData;
 
     //init per screen
     uint32_t defaultRefreshRate;
     xcb_randr_get_screen_resources_reply_t* screenResources;
 } XcbRandrData;
 
-static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo)
+static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation)
 {
     double refreshRate = (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
 
@@ -185,13 +194,13 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
-        0,
-        NULL,
+        rotation,
+        name,
         FF_DISPLAY_TYPE_UNKNOWN
     );
 }
 
-static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode)
+static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrbuf* name, uint32_t rotation)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -202,7 +211,7 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode)
     while(modesIterator.rem > 0)
     {
         if(modesIterator.data->id == mode)
-            return xcbRandrHandleModeInfo(data, modesIterator.data);
+            return xcbRandrHandleModeInfo(data, modesIterator.data, name, rotation);
 
         data->ffxcb_randr_mode_info_next(&modesIterator);
     }
@@ -210,14 +219,30 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode)
     return false;
 }
 
-static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
+static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name)
 {
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, crtc, XCB_CURRENT_TIME);
     xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
     if(crtcInfoReply == NULL)
         return false;
 
-    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode);
+    uint32_t rotation;
+    switch (crtcInfoReply->rotation)
+    {
+        case XCB_RANDR_ROTATION_ROTATE_90:
+            rotation = 90;
+            break;
+        case XCB_RANDR_ROTATION_ROTATE_180:
+            rotation = 180;
+            break;
+        case XCB_RANDR_ROTATION_ROTATE_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation);
     res = res ? true : ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
@@ -225,8 +250,8 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
         data->defaultRefreshRate,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
-        0,
-        NULL,
+        rotation,
+        name,
         FF_DISPLAY_TYPE_UNKNOWN
     );
 
@@ -234,14 +259,14 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc)
     return res;
 }
 
-static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output)
+static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name)
 {
     xcb_randr_get_output_info_cookie_t outputInfoCookie = data->ffxcb_randr_get_output_info(data->connection, output, XCB_CURRENT_TIME);
     xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, NULL);
     if(outputInfoReply == NULL)
         return false;
 
-    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc);
+    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name);
 
     free(outputInfoReply);
 
@@ -257,11 +282,22 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         .rem = data->ffxcb_randr_monitor_info_outputs_length(monitor)
     };
 
+    FF_AUTO_FREE xcb_get_atom_name_reply_t* nameReply = data->propData.ffxcb_get_atom_name_reply(
+        data->connection,
+        data->propData.ffxcb_get_atom_name(data->connection, monitor->name),
+        NULL
+    );
+    char* buf = data->propData.ffxcb_get_atom_name_name(nameReply);
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(buf);
+    // name.chars = buf;
+    // name.allocated = (uint32_t) strlen(buf);
+    // name.length = name.allocated;
+
     bool foundOutput = false;
 
     while(outputIterator.rem > 0)
     {
-        if(xcbRandrHandleOutput(data, *outputIterator.data))
+        if(xcbRandrHandleOutput(data, *outputIterator.data, &name))
             foundOutput = true;
         data->ffxcb_randr_output_next(&outputIterator);
     };
@@ -274,7 +310,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
         0,
-        NULL,
+        &name,
         FF_DISPLAY_TYPE_UNKNOWN
     );
 }
@@ -371,8 +407,7 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_crtc_info,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_crtc_info_reply,)
 
-    XcbPropertyData propertyData;
-    bool propertyDataInitialized = xcbInitPropertyData(xcbRandr, &propertyData);
+    bool propertyDataInitialized = xcbInitPropertyData(xcbRandr, &data.propData);
 
     data.connection = ffxcb_connect(NULL, NULL);
     if(data.connection == NULL)
@@ -383,7 +418,7 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
     xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(data.connection));
 
     if(iterator.rem > 0 && propertyDataInitialized)
-        xcbDetectWMfromEWMH(&propertyData, data.connection, iterator.data->root, result);
+        xcbDetectWMfromEWMH(&data.propData, data.connection, iterator.data->root, result);
 
     while(iterator.rem > 0)
     {

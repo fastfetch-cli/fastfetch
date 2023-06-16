@@ -133,31 +133,17 @@ typedef struct XrandrData
     XRRScreenResources* screenResources;
 } XrandrData;
 
-static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
-{
-    double refreshRate = (double) modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
-
-    return ffdsAppendDisplay(
-        data->result,
-        (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height,
-        refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
-        (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height,
-        0,
-        NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
-    );
-}
-
-static bool xrandrHandleMode(XrandrData* data, RRMode mode)
+static double xrandrHandleMode(XrandrData* data, RRMode mode)
 {
     for(int i = 0; i < data->screenResources->nmode; i++)
     {
         if(data->screenResources->modes[i].id == mode)
-            return xrandrHandleModeInfo(data, &data->screenResources->modes[i]);
+        {
+            XRRModeInfo* modeInfo = &data->screenResources->modes[i];
+            return (double) modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
+        }
     }
-    return false;
+    return data->defaultRefreshRate;
 }
 
 static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
@@ -170,15 +156,31 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
     if(crtcInfo == NULL)
         return false;
 
-    bool res = xrandrHandleMode(data, crtcInfo->mode);
-    res = res ? true : ffdsAppendDisplay(
+    uint32_t rotation;
+    switch (crtcInfo->rotation)
+    {
+        case RR_Rotate_90:
+            rotation = 90;
+            break;
+        case RR_Rotate_180:
+            rotation = 180;
+            break;
+        case RR_Rotate_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
+    bool res = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
-        data->defaultRefreshRate,
+        xrandrHandleMode(data, crtcInfo->mode),
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
-        0,
+        rotation,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN
     );
