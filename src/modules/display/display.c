@@ -89,6 +89,9 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
                 printf(" (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
+            if(moduleIndex > 0 && result->primary)
+                printf(" *");
+
             putchar('\n');
         }
         else
@@ -102,6 +105,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
                 {FF_FORMAT_ARG_TYPE_STRING, displayType},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->rotation},
+                {FF_FORMAT_ARG_TYPE_BOOL, &result->primary},
             });
         }
     }

@@ -76,6 +76,8 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
     {
         uint8_t filesPercentage = disk->filesTotal > 0 ? (uint8_t) (((double) disk->filesUsed / (double) disk->filesTotal) * 100.0) : 0;
 
+        bool isExternal = !!(disk->type & FF_DISK_TYPE_EXTERNAL_BIT);
+        bool isHidden = !!(disk->type & FF_DISK_TYPE_HIDDEN_BIT);
         ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
@@ -83,8 +85,8 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed},
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal},
             {FF_FORMAT_ARG_TYPE_UINT8, &filesPercentage},
-            {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type & FF_DISK_TYPE_EXTERNAL_BIT)},
-            {FF_FORMAT_ARG_TYPE_BOOL, FF_FORMAT_ARG_VALUE_BOOL(disk->type & FF_DISK_TYPE_HIDDEN_BIT)},
+            {FF_FORMAT_ARG_TYPE_BOOL, &isExternal},
+            {FF_FORMAT_ARG_TYPE_BOOL, &isHidden},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name}
         });
