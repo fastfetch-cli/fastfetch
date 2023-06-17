@@ -111,7 +111,7 @@ void ffParseBluetoothJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "showConnected") == 0)
+            if (strcasecmp(key, "showDisconnected") == 0)
             {
                 options.showDisconnected = yyjson_get_bool(val);
                 continue;
