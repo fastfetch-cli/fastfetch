@@ -294,7 +294,7 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "show-unknown") == 0)
+            if (strcasecmp(key, "showUnknown") == 0)
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;
