@@ -526,7 +526,8 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
 static bool parseJsoncFile(FFinstance* instance, const char* path)
 {
-    yyjson_doc* doc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    yyjson_read_err error;
+    yyjson_doc* doc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, &error);
     if (doc)
     {
         instance->state.configDoc = doc;
@@ -543,6 +544,11 @@ static bool parseJsoncFile(FFinstance* instance, const char* path)
             exit(477);
         }
         return true;
+    }
+    else if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
+    {
+        fprintf(stderr, "ERROR: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
+        exit(477);
     }
     return false;
 }
