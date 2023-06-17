@@ -318,7 +318,7 @@ const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
 {
     #if FF_HAVE_GL
 
-    if(instance->config.openGL.type == FF_OPENGL_TYPE_GLX)
+    if(instance->config.openGL.library == FF_OPENGL_LIBRARY_GLX)
     {
         #ifdef FF_HAVE_GLX
             return glxPrint(instance, result);
@@ -327,7 +327,7 @@ const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
         #endif
     }
 
-    if(instance->config.openGL.type == FF_OPENGL_TYPE_EGL)
+    if(instance->config.openGL.library == FF_OPENGL_LIBRARY_EGL)
     {
         #ifdef FF_HAVE_EGL
             return eglPrint(instance, result);
@@ -336,7 +336,7 @@ const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
         #endif
     }
 
-    if(instance->config.openGL.type == FF_OPENGL_TYPE_OSMESA)
+    if(instance->config.openGL.library == FF_OPENGL_LIBRARY_OSMESA)
     {
         #ifdef FF_HAVE_OSMESA
             return osMesaPrint(instance, result);

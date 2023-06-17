@@ -216,7 +216,7 @@
 # Sets with opengl context creation library to use
 # Must be either auto, egl, glx or osmesa
 # Default is auto.
-#--opengl-type auto
+#--opengl-library auto
 
 # GPU hide options
 # Sets weather to hide certain gpu types

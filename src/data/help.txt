@@ -115,14 +115,13 @@ Module specific options:
     --bluetooth-show-disconnected: <?value>: Set if disconnected bluetooth devices should be printed. Default is false
     --display-compact-type: <?string>:       Set if all displays should be printed in one line. Default is none
     --display-detect-name: <?value>:         Set if display name should be detected and printed (if supported). Default is false
-    --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing
+    --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp  <?value>:                    Detect and display CPU temperature if supported. Default is false
     --gpu-temp  <?value>:                    Detect and display GPU temperature if supported. Default is false
     --gpu-force-vulkan  <?value>:            Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
-    --gpu-hide-integrated <?value>:          Hide integrated GPU if supported. Default is false
-    --gpu-hide-discrete <?value>:            Hide discrete GPU if supported. Default is false
+    --gpu-hide-type <?value>:                Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
     --battery-temp  <?value>:                Detect and display Battery temperature if supported. Default is false
     --localip-show-ipv4 <?value>:            Show IPv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
@@ -135,10 +134,10 @@ Module specific options:
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use
-    --opengl-type <value>:                   Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
+    --opengl-library <value>:                Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
-    --command-key <str>:                     Set the module key to display, can be specified mulitple times
-    --command-text <str>:                    Set the command text to be executed, can be specified mulitple times
+    --command-key <str>:                     Set the module key to display
+    --command-text <str>:                    Set the command text to be executed
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

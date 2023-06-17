@@ -47,7 +47,7 @@ void ffInitOpenGLOptions(FFOpenGLOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)
-    options->type = FF_OPENGL_TYPE_AUTO;
+    options->library = FF_OPENGL_LIBRARY_AUTO;
     #endif
 }
 
@@ -59,13 +59,16 @@ bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, cons
         return true;
 
     #if defined(__linux__) || defined(__FreeBSD__)
-    options->type = (FFOpenGLType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-        { "auto", FF_OPENGL_TYPE_AUTO },
-        { "egl", FF_OPENGL_TYPE_EGL },
-        { "glx", FF_OPENGL_TYPE_GLX },
-        { "osmesa", FF_OPENGL_TYPE_OSMESA },
-        {}
-    });
+    if (strcasecmp(key, "library") == 0)
+    {
+        options->library = (FFOpenGLLibrary) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "auto", FF_OPENGL_LIBRARY_AUTO },
+            { "egl", FF_OPENGL_LIBRARY_EGL },
+            { "glx", FF_OPENGL_LIBRARY_GLX },
+            { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
+            {}
+        });
+    }
     #endif
 
     return false;
@@ -95,20 +98,20 @@ void ffParseOpenGLJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
 
             #if defined(__linux__) || defined(__FreeBSD__)
-            if (strcasecmp(key, "type") == 0)
+            if (strcasecmp(key, "library") == 0)
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "auto", FF_OPENGL_TYPE_AUTO },
-                    { "egl", FF_OPENGL_TYPE_EGL },
-                    { "glx", FF_OPENGL_TYPE_GLX },
-                    { "osmesa", FF_OPENGL_TYPE_OSMESA },
+                    { "auto", FF_OPENGL_LIBRARY_AUTO },
+                    { "egl", FF_OPENGL_LIBRARY_EGL },
+                    { "glx", FF_OPENGL_LIBRARY_GLX },
+                    { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
                     {},
                 });
                 if (error)
                     ffPrintError(instance, FF_OPENGL_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
                 else
-                    options.type = (FFOpenGLType) value;
+                    options.library = (FFOpenGLLibrary) value;
                 continue;
             }
             #endif
