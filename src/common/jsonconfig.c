@@ -346,13 +346,13 @@ const char* ffParseDisplayJsonConfig(FFinstance* instance)
         else if (strcasecmp(key, "hideCursor") == 0)
             config->hideCursor = yyjson_get_bool(val);
         else if (strcasecmp(key, "separator") == 0)
-            ffStrbufAppendS(&config->keyValueSeparator, yyjson_get_str(val));
+            ffStrbufSetS(&config->keyValueSeparator, yyjson_get_str(val));
         else if (strcasecmp(key, "color") == 0)
         {
             if (yyjson_is_str(val))
             {
                 ffOptionParseColor(yyjson_get_str(val), &config->colorKeys);
-                ffStrbufAppend(&config->colorTitle, &config->colorKeys);
+                ffStrbufSet(&config->colorTitle, &config->colorKeys);
             }
             else if (yyjson_is_obj(val))
             {
@@ -410,53 +410,53 @@ const char* ffParseLibraryJsonConfig(FFinstance* instance)
         const char* key = yyjson_get_str(key_);
 
         if (strcasecmp(key, "pci") == 0)
-            ffStrbufAppendS(&config->libPCI, yyjson_get_str(val));
+            ffStrbufSetS(&config->libPCI, yyjson_get_str(val));
         else if (strcasecmp(key, "vulkan") == 0)
-            ffStrbufAppendS(&config->libVulkan, yyjson_get_str(val));
+            ffStrbufSetS(&config->libVulkan, yyjson_get_str(val));
         else if (strcasecmp(key, "freetype") == 0)
-            ffStrbufAppendS(&config->libfreetype, yyjson_get_str(val));
+            ffStrbufSetS(&config->libfreetype, yyjson_get_str(val));
         else if (strcasecmp(key, "wayland") == 0)
-            ffStrbufAppendS(&config->libWayland, yyjson_get_str(val));
+            ffStrbufSetS(&config->libWayland, yyjson_get_str(val));
         else if (strcasecmp(key, "xcbRandr") == 0)
-            ffStrbufAppendS(&config->libXcbRandr, yyjson_get_str(val));
+            ffStrbufSetS(&config->libXcbRandr, yyjson_get_str(val));
         else if (strcasecmp(key, "xcb") == 0)
-            ffStrbufAppendS(&config->libXcb, yyjson_get_str(val));
+            ffStrbufSetS(&config->libXcb, yyjson_get_str(val));
         else if (strcasecmp(key, "Xrandr") == 0)
-            ffStrbufAppendS(&config->libXrandr, yyjson_get_str(val));
+            ffStrbufSetS(&config->libXrandr, yyjson_get_str(val));
         else if (strcasecmp(key, "X11") == 0)
-            ffStrbufAppendS(&config->libX11, yyjson_get_str(val));
+            ffStrbufSetS(&config->libX11, yyjson_get_str(val));
         else if (strcasecmp(key, "gio") == 0)
-            ffStrbufAppendS(&config->libGIO, yyjson_get_str(val));
+            ffStrbufSetS(&config->libGIO, yyjson_get_str(val));
         else if (strcasecmp(key, "DConf") == 0)
-            ffStrbufAppendS(&config->libDConf, yyjson_get_str(val));
+            ffStrbufSetS(&config->libDConf, yyjson_get_str(val));
         else if (strcasecmp(key, "dbus") == 0)
-            ffStrbufAppendS(&config->libDBus, yyjson_get_str(val));
+            ffStrbufSetS(&config->libDBus, yyjson_get_str(val));
         else if (strcasecmp(key, "XFConf") == 0)
-            ffStrbufAppendS(&config->libXFConf, yyjson_get_str(val));
+            ffStrbufSetS(&config->libXFConf, yyjson_get_str(val));
         else if (strcasecmp(key, "sqlite") == 0 || strcasecmp(key, "sqlite3") == 0)
-            ffStrbufAppendS(&config->libSQLite3, yyjson_get_str(val));
+            ffStrbufSetS(&config->libSQLite3, yyjson_get_str(val));
         else if (strcasecmp(key, "rpm") == 0)
-            ffStrbufAppendS(&config->librpm, yyjson_get_str(val));
+            ffStrbufSetS(&config->librpm, yyjson_get_str(val));
         else if (strcasecmp(key, "imagemagick") == 0)
-            ffStrbufAppendS(&config->libImageMagick, yyjson_get_str(val));
+            ffStrbufSetS(&config->libImageMagick, yyjson_get_str(val));
         else if (strcasecmp(key, "z") == 0)
-            ffStrbufAppendS(&config->libZ, yyjson_get_str(val));
+            ffStrbufSetS(&config->libZ, yyjson_get_str(val));
         else if (strcasecmp(key, "chafa") == 0)
-            ffStrbufAppendS(&config->libChafa, yyjson_get_str(val));
+            ffStrbufSetS(&config->libChafa, yyjson_get_str(val));
         else if (strcasecmp(key, "egl") == 0)
-            ffStrbufAppendS(&config->libEGL, yyjson_get_str(val));
+            ffStrbufSetS(&config->libEGL, yyjson_get_str(val));
         else if (strcasecmp(key, "glx") == 0)
-            ffStrbufAppendS(&config->libGLX, yyjson_get_str(val));
+            ffStrbufSetS(&config->libGLX, yyjson_get_str(val));
         else if (strcasecmp(key, "osmesa") == 0)
-            ffStrbufAppendS(&config->libOSMesa, yyjson_get_str(val));
+            ffStrbufSetS(&config->libOSMesa, yyjson_get_str(val));
         else if (strcasecmp(key, "opencl") == 0)
-            ffStrbufAppendS(&config->libOpenCL, yyjson_get_str(val));
+            ffStrbufSetS(&config->libOpenCL, yyjson_get_str(val));
         else if (strcasecmp(key, "wlanapi") == 0)
-            ffStrbufAppendS(&config->libwlanapi, yyjson_get_str(val));
+            ffStrbufSetS(&config->libwlanapi, yyjson_get_str(val));
         else if (strcasecmp(key, "pulse") == 0)
-            ffStrbufAppendS(&config->libPulse, yyjson_get_str(val));
+            ffStrbufSetS(&config->libPulse, yyjson_get_str(val));
         else if (strcasecmp(key, "nm") == 0)
-            ffStrbufAppendS(&config->libnm, yyjson_get_str(val));
+            ffStrbufSetS(&config->libnm, yyjson_get_str(val));
         else
             return "Unknown library property";
     }
