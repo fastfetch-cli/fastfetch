@@ -4,9 +4,26 @@
 
 #include <dwmapi.h>
 #include <WinUser.h>
+#include <wchar.h>
+
+static CALLBACK BOOL MonitorEnumProc(
+  HMONITOR hMonitor,
+  FF_MAYBE_UNUSED HDC hdc,
+  FF_MAYBE_UNUSED LPRECT lpRect,
+  LPARAM lParam
+)
+{
+    FFlist* monitors = (FFlist*) lParam;
+    MONITORINFOEXW* newMonitor = ffListAdd(monitors);
+    newMonitor->cbSize = sizeof(*newMonitor);
+    return GetMonitorInfoW(hMonitor, (MONITORINFO*) newMonitor);
+}
 
 static void detectDisplays(FFDisplayServerResult* ds)
 {
+    FF_LIST_AUTO_DESTROY monitors = ffListCreate(sizeof(MONITORINFOEXW));
+    EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM) &monitors);
+
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = sizeof(paths) / sizeof(paths[0]);
     DISPLAYCONFIG_MODE_INFO modes[256];
@@ -33,14 +50,19 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 },
             };
 
-            uint32_t scaledWidth = 0, scaledHeight = 0;
+            MONITORINFOEXW* monitorInfo = NULL;
             if (DisplayConfigGetDeviceInfo(&sourceName.header) == ERROR_SUCCESS)
             {
-                HDC hdc = CreateICW(sourceName.viewGdiDeviceName, NULL, NULL, NULL);
-                scaledWidth = (uint32_t) GetDeviceCaps(hdc, HORZRES);
-                scaledHeight = (uint32_t) GetDeviceCaps(hdc, VERTRES);
-                DeleteDC(hdc);
+                FF_LIST_FOR_EACH(MONITORINFOEXW, item, monitors)
+                {
+                    if (wcsncmp(item->szDevice, sourceName.viewGdiDeviceName, sizeof(sourceName.viewGdiDeviceName) / sizeof(wchar_t)) == 0)
+                    {
+                        monitorInfo = item;
+                        break;
+                    }
+                }
             }
+            if (!monitorInfo) continue;
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
@@ -95,14 +117,15 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                scaledWidth,
-                scaledHeight,
+                (uint32_t) (monitorInfo->rcMonitor.right - monitorInfo->rcMonitor.left),
+                (uint32_t) (monitorInfo->rcMonitor.bottom - monitorInfo->rcMonitor.top),
                 rotation,
                 &name,
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL ||
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED ||
                     path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
-                    ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
+                    ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
+                !!(monitorInfo->dwFlags & MONITORINFOF_PRIMARY)
             );
         }
     }
