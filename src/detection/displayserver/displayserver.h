@@ -51,6 +51,7 @@ typedef struct FFDisplayResult
     FFstrbuf name;
     FFDisplayType type;
     uint32_t rotation;
+    bool primary;
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult
@@ -75,6 +76,7 @@ bool ffdsAppendDisplay(
     uint32_t scaledHeight,
     uint32_t rotation,
     FFstrbuf* name,
-    FFDisplayType type);
+    FFDisplayType type,
+    bool primary);
 
 #endif

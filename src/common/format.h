@@ -27,6 +27,4 @@ typedef struct FFformatarg
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments);
 
-#define FF_FORMAT_ARG_VALUE_BOOL(xpr) ((xpr) ? (const void*) 1 : NULL)
-
 #endif

@@ -25,7 +25,7 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
         ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_BOOL)
-        ffStrbufAppendS(buffer, formatarg->value != NULL ? "true" : "false");
+        ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_LIST)
     {
         const FFlist* list = formatarg->value;

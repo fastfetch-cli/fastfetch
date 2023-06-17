@@ -19,6 +19,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
     if(CGGetOnlineDisplayList(sizeof(screens) / sizeof(screens[0]), screens, &screenCount) != kCGErrorSuccess)
         return;
 
+    CGDirectDisplayID primary = CGMainDisplayID();
+
     for(uint32_t i = 0; i < screenCount; i++)
     {
         CGDirectDisplayID screen = screens[i];
@@ -60,7 +62,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 (uint32_t)CGDisplayModeGetHeight(mode),
                 (uint32_t)CGDisplayRotation(screen),
                 &name,
-                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
+                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
+                screen == primary
             );
             CGDisplayModeRelease(mode);
         }

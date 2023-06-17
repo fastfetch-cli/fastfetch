@@ -40,16 +40,10 @@ static void getHostValue(const char* devicesPath, const char* classPath, FFstrbu
     ffStrbufClear(buffer);
 }
 
-void ffDetectChassis(FFChassisResult* result)
+const char* ffDetectChassis(FFChassisResult* result)
 {
-    ffStrbufInit(&result->error);
-
-    ffStrbufInit(&result->chassisType);
     getHostValue("/sys/devices/virtual/dmi/id/chassis_type", "/sys/class/dmi/id/chassis_type", &result->chassisType);
-
-    ffStrbufInit(&result->chassisVendor);
     getHostValue("/sys/devices/virtual/dmi/id/chassis_vendor", "/sys/class/dmi/id/chassis_vendor", &result->chassisVendor);
-
-    ffStrbufInit(&result->chassisVersion);
     getHostValue("/sys/devices/virtual/dmi/id/chassis_version", "/sys/class/dmi/id/chassis_version", &result->chassisVersion);
+    return NULL;
 }

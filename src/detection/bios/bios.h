@@ -11,9 +11,8 @@ typedef struct FFBiosResult
     FFstrbuf biosRelease;
     FFstrbuf biosVendor;
     FFstrbuf biosVersion;
-    FFstrbuf error;
 } FFBiosResult;
 
-void ffDetectBios(FFBiosResult* bios);
+const char* ffDetectBios(FFBiosResult* bios);
 
 #endif

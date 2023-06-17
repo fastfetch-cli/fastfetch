@@ -1,6 +1,13 @@
 {
     "$schema": "http://json-schema.org/schema",
+    "$defs": {
+        "colors": {
+            "type": "string",
+            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+        }
+    },
     "type": "object",
+    "title": "JSON config file for fastfetch",
     "properties": {
         "logo": {
             "title": "Fastfetch logo configurations",
@@ -33,49 +40,40 @@
                     "title": "Overwrite a color in the logo",
                     "properties": {
                         "1": {
-                            "type": "string",
                             "title": "Color 1",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "2": {
-                            "type": "string",
                             "title": "Color 2",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "3": {
-                            "type": "string",
                             "title": "Color 3",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "4": {
-                            "type": "string",
                             "title": "Color 4",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "5": {
-                            "type": "string",
                             "title": "Color 5",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "6": {
-                            "type": "string",
                             "title": "Color 6",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "7": {
-                            "type": "string",
                             "title": "Color 7",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "8": {
-                            "type": "string",
                             "title": "Color 8",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         },
                         "9": {
-                            "type": "string",
                             "title": "Color 9",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "$ref": "#/$defs/colors"
                         }
                     }
                 },
@@ -235,21 +233,19 @@
                     "title": "Set the color of the keys and title",
                     "anyOf": [
                         {
-                            "type": "string",
-                            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                            "title": "Set the both color of the keys and title",
+                            "$ref": "#/$defs/colors"
                         },
                         {
                             "type": "object",
                             "properties": {
                                 "keys": {
-                                    "type": "string",
                                     "title": "Set the color of the keys",
-                                    "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                                    "$ref": "#/$defs/colors"
                                 },
                                 "title": {
-                                    "type": "string",
                                     "title": "Set the color of the title",
-                                    "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+                                    "$ref": "#/$defs/colors"
                                 }
                             }
                         }
@@ -365,10 +361,371 @@
             "items": {
                 "anyOf": [
                     {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "Battery",
+                            "Bios",
+                            "Bluetooth",
+                            "Board",
+                            "Break",
+                            "Brightness",
+                            "Chassis",
+                            "CPU",
+                            "CPUUsage",
+                            "Command",
+                            "Colors",
+                            "Cursor",
+                            "Custom",
+                            "DateTime",
+                            "Display",
+                            "Disk",
+                            "DE",
+                            "Font",
+                            "Gamepad",
+                            "GPU",
+                            "Host",
+                            "Icons",
+                            "Kernel",
+                            "Locale",
+                            "LocalIp",
+                            "Media",
+                            "Memory",
+                            "OpenCL",
+                            "OpenGL",
+                            "OS",
+                            "Packages",
+                            "Player",
+                            "PowerAdapter",
+                            "Processes",
+                            "PublicIp",
+                            "Separator",
+                            "Shell",
+                            "Sound",
+                            "Swap",
+                            "Terminal",
+                            "TerminalFont",
+                            "Title",
+                            "Theme",
+                            "Uptime",
+                            "Users",
+                            "Vulkan",
+                            "Wallpaper",
+                            "Weather",
+                            "WM",
+                            "Wifi",
+                            "WMTheme"
+                        ]
                     },
                     {
-                        "type": "object"
+                        "type": "object",
+                        "required": ["type"],
+                        "anyOf": [
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Break", "Colors"]
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": [
+                                            "Bios",
+                                            "Board",
+                                            "Brightness",
+                                            "Chassis",
+                                            "CPUUsage",
+                                            "Cursor",
+                                            "DateTime",
+                                            "DE",
+                                            "Font",
+                                            "Gamepad",
+                                            "Host",
+                                            "Icons",
+                                            "Kernel",
+                                            "Locale",
+                                            "Media",
+                                            "Memory",
+                                            "OpenCL",
+                                            "OS"
+                                        ]
+                                    },
+                                    "key": {
+                                        "title": "Key of the module",
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "title": "Format of the module",
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Battery"]
+                                    },
+                                    "dir": {
+                                        "title": "The directory where the battery folders are. Standard: /sys/class/power_supply/. Linux only",
+                                        "type": "string"
+                                    },
+                                    "temp": {
+                                        "title": "Detect and display Battery temperature if supported",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Bluetooth"]
+                                    },
+                                    "showDisconnected": {
+                                        "title": "Set if disconnected bluetooth devices should be printed",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["CPU"]
+                                    },
+                                    "temp": {
+                                        "title": "Detect and display CPU temperature if supported",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Command"]
+                                    },
+                                    "shell": {
+                                        "title": "Set the shell program to execute the command text",
+                                        "type": "string",
+                                        "default": "cmd for Windows, csh for FreeBSD, bash for others"
+                                    },
+                                    "text": {
+                                        "title": "Set the command text to be executed",
+                                        "type": "string"
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Print a custom string, with or without key",
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Custom"]
+                                    },
+                                    "key": {
+                                        "title": "Leave empty not to print the key",
+                                        "type": "string",
+                                        "default": "*empty*"
+                                    },
+                                    "format": {
+                                        "title": "Text to print",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["format"],
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Display"]
+                                    },
+                                    "compactType": {
+                                        "enum": ["none", "original", "scaled"],
+                                        "title": "Set if all displays should be printed in one line",
+                                        "default": "none"
+                                    },
+                                    "detectName": {
+                                        "title": "Set if display name should be detected and printed (if supported)",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "preciseRefreshRate": {
+                                        "title": "Set if decimal refresh rates should not be rounded into integers when printing",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Disk"]
+                                    },
+                                    "folders": {
+                                        "type": "string",
+                                        "title": "A colon (semicolon on Windows) separated list of folder paths for the disk output",
+                                        "default": "\"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
+                                    },
+                                    "showExternal": {
+                                        "type": "boolean",
+                                        "title": "Set if external volume should be printed",
+                                        "default": true
+                                    },
+                                    "showHidden": {
+                                        "type": "boolean",
+                                        "title": "Set if hidden volumes should be printed",
+                                        "default": false
+                                    },
+                                    "showSubvolumes": {
+                                        "type": "boolean",
+                                        "title": "Set if subvolumes should be printed",
+                                        "default": false
+                                    },
+                                    "showUnknown": {
+                                        "type": "boolean",
+                                        "title": "Set if unknown (unable to detect sizes) volumes should be printed",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["GPU"]
+                                    },
+                                    "temp": {
+                                        "title": "Detect and display GPU temperature if supported",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "forceVulkan": {
+                                        "title": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "hideType": {
+                                        "title": "Specify the type of GPUs should not be printed",
+                                        "enum": ["integrated", "discrete", "none"],
+                                        "default": "none"
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["LocalIp"]
+                                    },
+                                    "showIpv4": {
+                                        "title": "Show IPv4 addresses",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "showIpv6": {
+                                        "title": "Show IPv6 addresses",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "showMac": {
+                                        "title": "Show MAC addresses",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "showLoop": {
+                                        "title": "Show loop back addresses (127.0.0.1)",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "compact": {
+                                        "title": "Show all IPs in one line",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "namePrefix": {
+                                        "title": "Show IPs with given name prefix only",
+                                        "type": "string"
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["OpenGL"]
+                                    },
+                                    "library": {
+                                        "title": "Set the OpenGL context creation library to use. Linux only",
+                                        "enum": ["auto", "egl", "glx", "osmesa"],
+                                        "default": "auto"
+                                    },
+                                    "key": {
+                                        "type": "string"
+                                    },
+                                    "format": {
+                                        "type": "string"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
                     }
                 ]
             }

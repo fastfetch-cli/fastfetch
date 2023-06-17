@@ -7,16 +7,21 @@
 
 void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
 {
-    FFBiosResult result;
-    ffDetectBios(&result);
+    FFBiosResult bios;
+    ffStrbufInit(&bios.biosDate);
+    ffStrbufInit(&bios.biosRelease);
+    ffStrbufInit(&bios.biosVendor);
+    ffStrbufInit(&bios.biosVersion);
 
-    if(result.error.length > 0)
+    const char* error = ffDetectBios(&bios);
+
+    if(error)
     {
-        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "%*s", result.error.length, result.error.chars);
+        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
-    if(result.biosRelease.length == 0)
+    if(bios.biosRelease.length == 0)
     {
         ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "bios_release is not set.");
         goto exit;
@@ -25,24 +30,23 @@ void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key);
-        puts(result.biosRelease.chars);
+        puts(bios.biosRelease.chars);
     }
     else
     {
         ffPrintFormat(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosDate},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosRelease},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosVendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.biosVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.biosDate},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.biosRelease},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.biosVendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.biosVersion},
         });
     }
 
 exit:
-    ffStrbufDestroy(&result.biosDate);
-    ffStrbufDestroy(&result.biosRelease);
-    ffStrbufDestroy(&result.biosVendor);
-    ffStrbufDestroy(&result.biosVersion);
-    ffStrbufDestroy(&result.error);
+    ffStrbufDestroy(&bios.biosDate);
+    ffStrbufDestroy(&bios.biosRelease);
+    ffStrbufDestroy(&bios.biosVendor);
+    ffStrbufDestroy(&bios.biosVersion);
 }
 
 void ffInitBiosOptions(FFBiosOptions* options)
