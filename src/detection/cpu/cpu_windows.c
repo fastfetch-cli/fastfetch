@@ -7,7 +7,8 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FF
 {
     {
         DWORD length = 0;
-        if (GetLogicalProcessorInformationEx(RelationAll, NULL, &length) != ERROR_INSUFFICIENT_BUFFER)
+        GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
+        if (length == 0)
             return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
 
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE

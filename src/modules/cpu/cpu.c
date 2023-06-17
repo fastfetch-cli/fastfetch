@@ -14,9 +14,13 @@ void ffPrintCPU(FFinstance* instance, FFCPUOptions* options)
     ffStrbufInit(&cpu.name);
     ffStrbufInit(&cpu.vendor);
 
-    ffDetectCPU(instance, options, &cpu);
+    const char* error = ffDetectCPU(instance, options, &cpu);
 
-    if(cpu.vendor.length == 0 && cpu.name.length == 0 && cpu.coresOnline <= 1)
+    if(error)
+    {
+        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+    }
+    else if(cpu.vendor.length == 0 && cpu.name.length == 0 && cpu.coresOnline <= 1)
     {
         ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "No CPU detected");
     }
