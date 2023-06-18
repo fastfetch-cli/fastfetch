@@ -67,16 +67,14 @@ Display options:
     --no-buffer <?value>:        Set if the stdout application buffer should be disabled. Default is false
 
 General module options:
-    --<module>-format <format>: Set the format string to use for each specific module.
-                                To see how a format string works, use fastfetch --help format.
-                                To see help about a specific format string, use fastfetch --help <module>-format.
+    --<module>-format <format>:    Set the format string to use for each specific module.
+                                   To see how a format string works, use fastfetch --help format.
+                                   To see help about a specific format string, use fastfetch --help <module>-format.
 
-    --<module>-key <key>:       Set the key to use for each specific module.
-                                For modules which print multiple lines, the string is parsed as a format string with the index as first character.
+    --<module>-key <key>:          Set the key to use for each specific module.
+                                   For modules which print multiple lines, the string is parsed as a format string with the index as first character.
 
-    --<module>-error <format>:  Set the error format string to use for each specific module.
-                                The error is given as the first and only argument.
-                                Setting this for a module will cause it to appear, even if --show-errors is not given.
+    --<module>-key-color <format>: Override the global `--color-keys` option for each specific module.
 
 Library options: Set the path of a library to load
     --lib-PCI <path>
