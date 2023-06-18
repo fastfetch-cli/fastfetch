@@ -922,8 +922,7 @@
                                     "string": {
                                         "title": "Set the string to be printed",
                                         "type": "string",
-                                        "format": "url",
-                                        "default": "http://ipinfo.io/ip"
+                                        "default": "-"
                                     }
                                 },
                                 "additionalProperties": false
