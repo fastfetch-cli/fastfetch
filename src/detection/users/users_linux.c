@@ -11,8 +11,6 @@
     #define getutxent getutent
 #endif
 
-#pragma GCC diagnostic ignored "-Wstringop-overread"
-
 void ffDetectUsers(FFlist* users, FFstrbuf* error)
 {
     struct utmpx* n = NULL;
@@ -26,7 +24,7 @@ next:
 
         FF_LIST_FOR_EACH(FFstrbuf, user, *users)
         {
-            if(ffStrbufCompS(user, n->ut_user) == 0)
+            if(ffStrbufEqualS(user, n->ut_user))
                 goto next;
         }
 
