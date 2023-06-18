@@ -14,20 +14,20 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ## Customization
 
-With customization and speed being two competing goals, this project actually builds two executables.
+With customization and speed being two competing goals, this project actually builds two executables:
 
-* The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `$XDG_CONFIG_HOME/fastfetch/config.conf`. To view the available options run `fastfetch --help`.
-* The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
+* The main one is `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent by modifying `$XDG_CONFIG_HOME/fastfetch/config.conf`. To view the available options, run `fastfetch --help`.
+* The second executable is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
 
-At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.
+Currently, the performance difference is measurable, but too small to be recognizable by humans. But with more options planned, the leap will get bigger over time and on slow machines this might actually make a difference.
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
-Logos can be heavily customized to. See the [logo documentation](doc/logo.md) for more information.
+Logos can be heavily customized too; see the [logo documentation](doc/logo.md) for more information.
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.
+Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most Linux distributions.
 
 The following libraries are used if present at runtime:
 
@@ -75,7 +75,7 @@ For the image logo, iTerm with iterm image protocol should work. Apple Terminal 
 
 Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, as fastfetch for Windows targets [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library, [it must be installed manually](https://support.microsoft.com/en-us/topic/update-for-universal-c-runtime-in-windows-c0514201-7fe6-95a3-b0a5-287930f3560c) as UCRT is only pre-installed in Windows 10 and later.
 
-For the image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
+For the image logo, only chafa is supported due to [a design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not included by default due to the massive dependencies of imagemagick. You must built it yourself.
 
 ### Android
 
