@@ -58,7 +58,7 @@ void ffPrintPlayer(FFinstance* instance, FFPlayerOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&playerPretty, stdout);
     }
     else

@@ -20,7 +20,7 @@ void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         #define FF_PRINT_PACKAGE_NAME(var, name) \
             if(counts.var > 0) \

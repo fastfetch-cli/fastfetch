@@ -5,12 +5,16 @@ This release introduces a new configuration file format: JSON config
 Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
 * Remove `--shell-version` and `--terminal-version`. They are always enabled
+* Remove `--*-error-format`
 
 Features:
+* FreeBSD support is improved greatly, and actually tested in a phycial machine
 * Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
+* Support `--*-key-color` option to change the key color of specified module
+* Support `--colors-symbol`
 
 # 1.11.3
 

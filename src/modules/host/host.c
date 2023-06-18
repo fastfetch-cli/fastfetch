@@ -24,7 +24,7 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 

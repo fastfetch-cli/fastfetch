@@ -33,14 +33,19 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseString(argumentKey, value, &result->key);
         return true;
     }
+    else if(strcasecmp(subKey, "key-color") == 0)
+    {
+        if(value == NULL)
+        {
+            fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
+            exit(477);
+        }
+        ffOptionParseColor(value, &result->keyColor);
+        return true;
+    }
     else if(strcasecmp(subKey, "format") == 0)
     {
         ffOptionParseString(argumentKey, value, &result->outputFormat);
-        return true;
-    }
-    else if(strcasecmp(subKey, "error") == 0)
-    {
-        ffOptionParseString(argumentKey, value, &result->errorFormat);
         return true;
     }
     return false;
@@ -137,13 +142,13 @@ void ffOptionParseColor(const char* value, FFstrbuf* buffer)
 void ffOptionInitModuleArg(FFModuleArgs* args)
 {
     ffStrbufInit(&args->key);
+    ffStrbufInit(&args->keyColor);
     ffStrbufInit(&args->outputFormat);
-    ffStrbufInit(&args->errorFormat);
 }
 
 void ffOptionDestroyModuleArg(FFModuleArgs* args)
 {
     ffStrbufDestroy(&args->key);
+    ffStrbufDestroy(&args->keyColor);
     ffStrbufDestroy(&args->outputFormat);
-    ffStrbufDestroy(&args->errorFormat);
 }

@@ -22,7 +22,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
 
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE)
     {
-        ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         int index = 0;
         FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
@@ -67,11 +67,11 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                         {FF_FORMAT_ARG_TYPE_STRING, displayType},
                     });
                 }
-                ffPrintLogoAndKey(instance, key.chars, 0, NULL);
+                ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
             }
             else
             {
-                ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, moduleIndex, &options->moduleArgs.key);
+                ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, moduleIndex, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             }
 
             printf("%ix%i", result->width, result->height);
@@ -157,6 +157,7 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
 void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;

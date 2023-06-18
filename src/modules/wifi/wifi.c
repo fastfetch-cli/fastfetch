@@ -28,7 +28,7 @@ void ffPrintWifi(FFinstance* instance, FFWifiOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs.key);
+            ffPrintLogoAndKey(instance, FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             if(item->conn.ssid.length)
             {
                 ffStrbufWriteTo(&item->conn.ssid, stdout);

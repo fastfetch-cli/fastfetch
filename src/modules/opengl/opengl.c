@@ -22,7 +22,7 @@ void ffPrintOpenGL(FFinstance* instance, FFOpenGLOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         puts(result.version.chars);
     }
     else

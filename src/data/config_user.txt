@@ -379,53 +379,50 @@
 #--gamepad-format
 #--wallpaper-format
 
-# Error options:
-# Sets the format string to use if an error occured
-# For information on format strings, see "fastfetch --help format".
-# Each of them take the error as first and only argument.
-# If one of them is set, the module will appear, even if --show-errors is not given.
-#--os-error
-#--host-error
-#--chassis-error
-#--kernel-error
-#--uptime-error
-#--processes-error
-#--packages-error
-#--shell-error
-#--display-error
-#--brightness-error
-#--de-error
-#--wm-error
-#--wm-theme-error
-#--theme-error
-#--icons-error
-#--font-error
-#--cursor-error
-#--terminal-error
-#--terminal-font-error
-#--cpu-error
-#--cpu-usage-error
-#--gpu-error
-#--memory-error
-#--swap-error
-#--disk-error
-#--battery-error
-#--poweradapter-error
-#--locale-error
-#--localip-error
-#--publicip-error
-#--weather-error
-#--player-error
-#--media-error
-#--datetime-error
-#--vulkan-error
-#--opengl-error
-#--opencl-error
-#--users-error
-#--bluetooth-error
-#--sound-error
-#--gamepad-error
-#--wallpaper-error
+# Key color options:
+# Overrides the global `--color-keys` for one specified module
+#--os-key-color
+#--host-key-color
+#--chassis-key-color
+#--kernel-key-color
+#--uptime-key-color
+#--processes-key-color
+#--packages-key-color
+#--shell-key-color
+#--display-key-color
+#--brightness-key-color
+#--de-key-color
+#--wm-key-color
+#--wm-theme-key-color
+#--theme-key-color
+#--icons-key-color
+#--font-key-color
+#--cursor-key-color
+#--terminal-key-color
+#--terminal-font-key-color
+#--cpu-key-color
+#--cpu-usage-key-color
+#--gpu-key-color
+#--memory-key-color
+#--swap-key-color
+#--disk-key-color
+#--battery-key-color
+#--poweradapter-key-color
+#--locale-key-color
+#--localip-key-color
+#--publicip-key-color
+#--weather-key-color
+#--player-key-color
+#--media-key-color
+#--datetime-key-color
+#--vulkan-key-color
+#--opengl-key-color
+#--opencl-key-color
+#--users-key-color
+#--bluetooth-key-color
+#--sound-key-color
+#--gamepad-key-color
+#--wallpaper-key-color
 
 # Library options:
 # Sets an user specific path to a library to load.

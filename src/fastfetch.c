@@ -1153,7 +1153,7 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
     else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)
         ffPrintDateTime(instance, &instance->config.dateTime);
     else if(strcasecmp(line, FF_COLORS_MODULE_NAME) == 0)
-        ffPrintColors(instance);
+        ffPrintColors(instance, &instance->config.colors);
     else if(strcasecmp(line, FF_VULKAN_MODULE_NAME) == 0)
         ffPrintVulkan(instance, &instance->config.vulkan);
     else if(strcasecmp(line, FF_OPENGL_MODULE_NAME) == 0)

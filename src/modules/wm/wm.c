@@ -17,7 +17,7 @@ void ffPrintWM(FFinstance* instance, FFWMOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_WM_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_WM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         ffStrbufWriteTo(&result->wmPrettyName, stdout);
 

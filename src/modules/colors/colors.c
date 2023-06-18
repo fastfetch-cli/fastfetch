@@ -3,34 +3,120 @@
 #include "util/textModifier.h"
 #include "modules/colors/colors.h"
 
-void ffPrintColors(FFinstance* instance)
+void ffPrintColors(FFinstance* instance, FFColorsOptions* options)
 {
     if(instance->config.pipe)
         return;
 
     ffLogoPrintLine(instance);
 
-    // 4%d: Set the background color
-    // 3%d: Set the foreground color
-    for(uint8_t i = 0; i < 8; i++)
-        printf("\033[4%d;3%dm███", i, i);
+    if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+    {
+        // 4%d: Set the background color
+        // 3%d: Set the foreground color
+        for(uint8_t i = 0; i < 8; i++)
+            printf("\033[4%d;3%dm███", i, i);
 
-    puts(FASTFETCH_TEXT_MODIFIER_RESET);
+        puts(FASTFETCH_TEXT_MODIFIER_RESET);
 
-    ffLogoPrintLine(instance);
+        ffLogoPrintLine(instance);
 
-    // 1: Set everything to bolt. This causes normal colors on some systems to be bright.
-    // 4%d: Set the backgound to the not bright color
-    // 3%d: Set the foreground to the not bright color
-    // 10%d: Set the background to the bright color
-    // 9%d: Set the foreground to the bright color
-    for(uint8_t i = 0; i < 8; i++)
-        printf("\033[1;4%d;3%d;10%d;9%dm███", i, i, i, i);
+        // 1: Set everything to bolt. This causes normal colors on some systems to be bright.
+        // 4%d: Set the backgound to the not bright color
+        // 3%d: Set the foreground to the not bright color
+        // 10%d: Set the background to the bright color
+        // 9%d: Set the foreground to the bright color
+        for(uint8_t i = 0; i < 8; i++)
+            printf("\033[1;4%d;3%d;10%d;9%dm███", i, i, i, i);
+    }
+    else
+    {
+        const char* symbol;
+        switch (options->symbol)
+        {
+            case FF_COLORS_SYMBOL_CIRCLE: symbol = "●"; break;
+            case FF_COLORS_SYMBOL_DIAMOND: symbol = "◆"; break;
+            case FF_COLORS_SYMBOL_TRIANGLE: symbol = "▲"; break;
+            case FF_COLORS_SYMBOL_SQUARE: symbol = "■"; break;
+            case FF_COLORS_SYMBOL_STAR: symbol = "★"; break;
+            default: symbol = "███"; break;
+        }
+        for (int i = 8; i >= 1; --i)
+            printf("\e[3%dm%s ", i, symbol);
+    }
 
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffParseColorsJsonObject(FFinstance* instance, FF_MAYBE_UNUSED yyjson_val* module)
+void ffInitColorsOptions(FFColorsOptions* options)
 {
-    return ffPrintColors(instance);
+    options->moduleName = FF_COLORS_MODULE_NAME;
+    options->symbol = FF_COLORS_SYMBOL_BLOCK;
+}
+
+bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, const char* value)
+{
+    const char* subKey = ffOptionTestPrefix(key, FF_COLORS_MODULE_NAME);
+    if (!subKey) return false;
+
+    if (strcasecmp(subKey, "symbol") == 0)
+    {
+        options->symbol = (FFColorssymbol) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "block", FF_COLORS_SYMBOL_BLOCK },
+            { "circle", FF_COLORS_SYMBOL_CIRCLE },
+            { "diamond", FF_COLORS_SYMBOL_DIAMOND },
+            { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
+            { "square", FF_COLORS_SYMBOL_SQUARE },
+            { "star", FF_COLORS_SYMBOL_STAR },
+            {},
+        });
+        return true;
+    }
+
+    return false;
+}
+
+void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
+{
+}
+
+void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
+{
+    FFColorsOptions __attribute__((__cleanup__(ffDestroyColorsOptions))) options;
+    ffInitColorsOptions(&options);
+
+    if (module)
+    {
+        yyjson_val *key_, *val;
+        size_t idx, max;
+        yyjson_obj_foreach(module, idx, max, key_, val)
+        {
+            const char* key = yyjson_get_str(key_);
+            if(strcasecmp(key, "type") == 0)
+                continue;
+
+            if (strcasecmp(key, "symbol") == 0)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "block", FF_COLORS_SYMBOL_BLOCK },
+                    { "circle", FF_COLORS_SYMBOL_CIRCLE },
+                    { "diamond", FF_COLORS_SYMBOL_DIAMOND },
+                    { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
+                    { "square", FF_COLORS_SYMBOL_SQUARE },
+                    { "star", FF_COLORS_SYMBOL_STAR },
+                    {},
+                });
+                if (error)
+                    ffPrintErrorString(instance, FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
+                else
+                    options.symbol = (FFColorssymbol) value;
+                continue;
+            }
+
+            ffPrintErrorString(instance, FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+        }
+    }
+
+    ffPrintColors(instance, &options);
 }

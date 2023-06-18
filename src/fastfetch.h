@@ -104,6 +104,7 @@ typedef struct FFconfig
     FFSeparatorOptions separator;
     FFSoundOptions sound;
     FFGamepadOptions gamepad;
+    FFColorsOptions colors;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;

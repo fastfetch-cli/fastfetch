@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     //ffPrintSound(&instance, &instance.config.sound);
     //ffPrintGamepad(&instance);
     ffPrintBreak(&instance);
-    ffPrintColors(&instance);
+    ffPrintColors(&instance, &instance.config.colors);
 
     ffFinish(&instance);
     ffDestroyInstance(&instance);

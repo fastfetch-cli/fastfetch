@@ -75,7 +75,7 @@ void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
 
     if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
     {
-        ffPrintLogoAndKey(instance, FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
@@ -93,13 +93,13 @@ void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
             formatKey(options, ip, &key);
             if(options->moduleArgs.outputFormat.length == 0)
             {
-                ffPrintLogoAndKey(instance, key.chars, 0, NULL);
+                ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
                 printIp(ip);
                 putchar('\n');
             }
             else
             {
-                ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
+                ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},

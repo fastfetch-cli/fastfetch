@@ -31,7 +31,7 @@ void ffPrintUsers(FFinstance* instance, FFUsersOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_USERS_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_USERS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         puts(result.chars);
     }
     else

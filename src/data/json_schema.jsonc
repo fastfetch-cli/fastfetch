@@ -4,6 +4,19 @@
         "colors": {
             "type": "string",
             "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+        },
+        "key": {
+            "title": "Key of the module",
+            "type": "string"
+        },
+        "keyColor": {
+            "title": "Color of the module key",
+            "$ref": "#/$defs/colors",
+            "default": "Use display.color.keys"
+        },
+        "format": {
+            "title": "Format of the module",
+            "type": "string"
         }
     },
     "type": "object",
@@ -423,7 +436,7 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Break", "Colors"]
+                                        "enum": ["Break"]
                                     }
                                 },
                                 "additionalProperties": false
@@ -449,16 +462,33 @@
                                             "Media",
                                             "Memory",
                                             "OpenCL",
-                                            "OS"
+                                            "OS",
+                                            "Packages",
+                                            "Player",
+                                            "PowerAdapter",
+                                            "Processes",
+                                            "Shell",
+                                            "Swap",
+                                            "Terminal",
+                                            "TerminalFont",
+                                            "Theme",
+                                            "Uptime",
+                                            "Users",
+                                            "Vulkan",
+                                            "Wallpaper",
+                                            "WM",
+                                            "Wifi",
+                                            "WMTheme"
                                         ]
                                     },
                                     "key": {
-                                        "title": "Key of the module",
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "title": "Format of the module",
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -478,10 +508,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -497,10 +530,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -516,13 +552,36 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Colors"]
+                                    },
+                                    "symbol": {
+                                        "title": "Set the symbol to use",
+                                        "type": "string",
+                                        "enum": [
+                                            "block",
+                                            "circle",
+                                            "diamond",
+                                            "triangle",
+                                            "square",
+                                            "star"
+                                        ],
+                                        "default": "blocks"
+                                    }
+                                }
                             },
                             {
                                 "properties": {
@@ -539,10 +598,13 @@
                                         "type": "string"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -557,6 +619,9 @@
                                         "title": "Leave empty not to print the key",
                                         "type": "string",
                                         "default": "*empty*"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
                                         "title": "Text to print",
@@ -587,10 +652,13 @@
                                         "default": true
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -626,10 +694,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -655,10 +726,13 @@
                                         "default": "none"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -698,10 +772,13 @@
                                         "type": "string"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -717,10 +794,124 @@
                                         "default": "auto"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["PublicIp"]
+                                    },
+                                    "url": {
+                                        "title": "The URL of public IP detection server to be used. Only HTTP protocol is supported",
+                                        "type": "string",
+                                        "format": "url",
+                                        "default": "http://ipinfo.io/ip"
+                                    },
+                                    "timeout": {
+                                        "title": "Time in milliseconds to wait for the public ip server to respond",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "default": "disabled (0)"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Separator"]
+                                    },
+                                    "string": {
+                                        "title": "Set the string printed by the separator module",
+                                        "type": "string",
+                                        "format": "url",
+                                        "default": "http://ipinfo.io/ip"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Sound"]
+                                    },
+                                    "soundType": {
+                                        "title": "Set what type of sound devices should be printed",
+                                        "type": "string",
+                                        "enum": [
+                                            "main",
+                                            "active",
+                                            "all"
+                                        ],
+                                        "default": "main"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Title"]
+                                    },
+                                    "fqdn": {
+                                        "type": "boolean",
+                                        "title": "Set if the title should use fully qualified domain name",
+                                        "default": false
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Weather"]
+                                    },
+                                    "timeout": {
+                                        "title": "Time in milliseconds to wait for the weather server to respond",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "default": "disabled (0)"
+                                    },
+                                    "outputFormat": {
+                                        "title": "The output weather format to be used (must be URI encoded)",
+                                        "type": "string",
+                                        "default": "%t+-+%C+(%l)"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false

@@ -9,7 +9,7 @@ static void printDevice(FFinstance* instance, FFBluetoothOptions* options, const
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&device->name, stdout);
 
         if(device->battery > 0)

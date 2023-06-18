@@ -44,11 +44,11 @@ static void defaultConfig(FFinstance* instance)
     instance->config.showErrors = false;
     instance->config.recache = false;
     instance->config.allowSlowOperations = false;
-    instance->config.disableLinewrap = true;
-    instance->config.hideCursor = true;
+    instance->config.pipe = !isatty(STDOUT_FILENO);
+    instance->config.disableLinewrap = !instance->config.pipe;
+    instance->config.hideCursor = !instance->config.pipe;
     instance->config.escapeBedrock = true;
     instance->config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
-    instance->config.pipe = false;
     instance->config.multithreading = true;
     instance->config.stat = false;
     instance->config.noBuffer = false;
@@ -102,6 +102,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitSoundOptions(&instance->config.sound);
     ffInitSeparatorOptions(&instance->config.separator);
     ffInitGamepadOptions(&instance->config.gamepad);
+    ffInitColorsOptions(&instance->config.colors);
 
     ffStrbufInit(&instance->config.libPCI);
     ffStrbufInit(&instance->config.libVulkan);
@@ -306,6 +307,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroySeparatorOptions(&instance->config.separator);
     ffDestroySoundOptions(&instance->config.sound);
     ffDestroyGamepadOptions(&instance->config.gamepad);
+    ffDestroyColorsOptions(&instance->config.colors);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);

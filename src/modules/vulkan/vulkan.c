@@ -17,7 +17,7 @@ void ffPrintVulkan(FFinstance* instance, FFVulkanOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(vulkan->apiVersion.length > 0)
         {
