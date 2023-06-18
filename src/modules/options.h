@@ -10,6 +10,7 @@
 #include "modules/chassis/option.h"
 #include "modules/cpu/option.h"
 #include "modules/cpuusage/option.h"
+#include "modules/colors/option.h"
 #include "modules/cursor/option.h"
 #include "modules/custom/option.h"
 #include "modules/command/option.h"

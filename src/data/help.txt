@@ -136,6 +136,7 @@ Module specific options:
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
     --command-key <str>:                     Set the module key to display
     --command-text <str>:                    Set the command text to be executed
+    --colors-symbol <str>:                   Set the symbol to be printed by Colors module. Default is block
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

@@ -102,6 +102,7 @@ static void defaultConfig(FFinstance* instance)
     ffInitSoundOptions(&instance->config.sound);
     ffInitSeparatorOptions(&instance->config.separator);
     ffInitGamepadOptions(&instance->config.gamepad);
+    ffInitColorsOptions(&instance->config.colors);
 
     ffStrbufInit(&instance->config.libPCI);
     ffStrbufInit(&instance->config.libVulkan);
@@ -306,6 +307,7 @@ static void destroyConfig(FFinstance* instance)
     ffDestroySeparatorOptions(&instance->config.separator);
     ffDestroySoundOptions(&instance->config.sound);
     ffDestroyGamepadOptions(&instance->config.gamepad);
+    ffDestroyColorsOptions(&instance->config.colors);
 
     ffStrbufDestroy(&instance->config.libPCI);
     ffStrbufDestroy(&instance->config.libVulkan);

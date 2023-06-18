@@ -157,6 +157,7 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
 void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
 {
     FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;

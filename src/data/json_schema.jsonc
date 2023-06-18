@@ -436,7 +436,7 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Break", "Colors"]
+                                        "enum": ["Break"]
                                     }
                                 },
                                 "additionalProperties": false
@@ -546,6 +546,26 @@
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": {
+                                        "enum": ["Colors"]
+                                    },
+                                    "symbol": {
+                                        "title": "Set the symbol to use",
+                                        "type": "string",
+                                        "enum": [
+                                            "block",
+                                            "circle",
+                                            "diamond",
+                                            "triangle",
+                                            "square",
+                                            "star"
+                                        ],
+                                        "default": "blocks"
+                                    }
+                                }
                             },
                             {
                                 "properties": {
