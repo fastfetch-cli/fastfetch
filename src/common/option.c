@@ -38,11 +38,6 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseString(argumentKey, value, &result->outputFormat);
         return true;
     }
-    else if(strcasecmp(subKey, "error") == 0)
-    {
-        ffOptionParseString(argumentKey, value, &result->errorFormat);
-        return true;
-    }
     return false;
 }
 
@@ -138,12 +133,10 @@ void ffOptionInitModuleArg(FFModuleArgs* args)
 {
     ffStrbufInit(&args->key);
     ffStrbufInit(&args->outputFormat);
-    ffStrbufInit(&args->errorFormat);
 }
 
 void ffOptionDestroyModuleArg(FFModuleArgs* args)
 {
     ffStrbufDestroy(&args->key);
     ffStrbufDestroy(&args->outputFormat);
-    ffStrbufDestroy(&args->errorFormat);
 }

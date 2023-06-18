@@ -60,40 +60,29 @@ void ffPrintFormat(FFinstance* instance, const char* moduleName, uint8_t moduleI
     ffPrintFormatString(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->outputFormat, numArgs, arguments);
 }
 
-static void printError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customErrorFormat, const char* message, va_list arguments)
+static void printError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const char* message, va_list arguments)
 {
-    bool hasCustomErrorFormat = customErrorFormat != NULL && customErrorFormat->length > 0;
-    if(!hasCustomErrorFormat && !instance->config.showErrors)
+    if(!instance->config.showErrors)
         return;
 
-    if(hasCustomErrorFormat)
-    {
-        FF_STRBUF_AUTO_DESTROY error = ffStrbufCreateVF(message, arguments);
-        ffPrintFormatString(instance, moduleName, moduleIndex, customKeyFormat, customErrorFormat, 1, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &error}
-        });
-    }
-    else
-    {
-        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
+    ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
 
-        if(!instance->config.pipe)
-            fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
+    if(!instance->config.pipe)
+        fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
 
-        vprintf(message, arguments);
+    vprintf(message, arguments);
 
-        if(!instance->config.pipe)
-            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+    if(!instance->config.pipe)
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
-        putchar('\n');
-    }
+    putchar('\n');
 }
 
-void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customErrorFormat, const char* message, ...)
+void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const char* message, ...)
 {
     va_list arguments;
     va_start(arguments, message);
-    printError(instance, moduleName, moduleIndex, customKeyFormat, customErrorFormat, message, arguments);
+    printError(instance, moduleName, moduleIndex, customKeyFormat, message, arguments);
     va_end(arguments);
 }
 
@@ -101,7 +90,7 @@ void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIn
 {
     va_list arguments;
     va_start(arguments, message);
-    printError(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->errorFormat, message, arguments);
+    printError(instance, moduleName, moduleIndex, &moduleArgs->key, message, arguments);
     va_end(arguments);
 }
 

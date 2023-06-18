@@ -21,11 +21,6 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
         ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
-    else if(strcasecmp(key, "error") == 0)
-    {
-        ffStrbufSetNS(&moduleArgs->errorFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
-        return true;
-    }
     return false;
 }
 
