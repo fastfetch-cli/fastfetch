@@ -42,7 +42,7 @@ void ffPrintDateTime(FFinstance* instance, FFDateTimeOptions* options)
     }
 
     const FFDateTimeResult* datetime = ffDetectDateTime(instance);
-    ffPrintLogoAndKey(instance, FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs.key);
+    ffPrintLogoAndKey(instance, FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
     //yyyy-MM-dd HH:mm:ss
     printf("%u-%s-%02u %s:%s:%s\n", datetime->year, datetime->monthPretty.chars, datetime->dayInMonth, datetime->hourPretty.chars, datetime->minutePretty.chars, datetime->secondPretty.chars);

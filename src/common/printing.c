@@ -2,7 +2,7 @@
 #include "common/printing.h"
 #include "util/textModifier.h"
 
-void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat)
+void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customKeyColor)
 {
     ffLogoPrintLine(instance);
 
@@ -13,7 +13,10 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
     if(!instance->config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(&instance->config.colorKeys);
+        if(customKeyColor != NULL && customKeyColor->length > 0)
+            ffPrintColor(customKeyColor);
+        else
+            ffPrintColor(&instance->config.colorKeys);
     }
 
     //NULL check is required for modules with custom keys, e.g. disk with the folder path
@@ -42,14 +45,14 @@ void ffPrintLogoAndKey(FFinstance* instance, const char* moduleName, uint8_t mod
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }
 
-void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments)
+void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customKeyColor, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateA(256);
     ffParseFormatString(&buffer, format, numArgs, arguments);
 
     if(buffer.length > 0)
     {
-        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
+        ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat, customKeyColor);
         ffPrintUserString(buffer.chars);
         putchar('\n');
     }
@@ -57,15 +60,15 @@ void ffPrintFormatString(FFinstance* instance, const char* moduleName, uint8_t m
 
 void ffPrintFormat(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, uint32_t numArgs, const FFformatarg* arguments)
 {
-    ffPrintFormatString(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->outputFormat, numArgs, arguments);
+    ffPrintFormatString(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->keyColor, &moduleArgs->outputFormat, numArgs, arguments);
 }
 
-static void printError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const char* message, va_list arguments)
+static void printError(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customKeyColor, const char* message, va_list arguments)
 {
     if(!instance->config.showErrors)
         return;
 
-    ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat);
+    ffPrintLogoAndKey(instance, moduleName, moduleIndex, customKeyFormat, customKeyColor);
 
     if(!instance->config.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
@@ -78,11 +81,11 @@ static void printError(FFinstance* instance, const char* moduleName, uint8_t mod
     putchar('\n');
 }
 
-void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const char* message, ...)
+void ffPrintErrorString(FFinstance* instance, const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customKeyColor, const char* message, ...)
 {
     va_list arguments;
     va_start(arguments, message);
-    printError(instance, moduleName, moduleIndex, customKeyFormat, message, arguments);
+    printError(instance, moduleName, moduleIndex, customKeyFormat, customKeyColor, message, arguments);
     va_end(arguments);
 }
 
@@ -90,7 +93,7 @@ void ffPrintError(FFinstance* instance, const char* moduleName, uint8_t moduleIn
 {
     va_list arguments;
     va_start(arguments, message);
-    printError(instance, moduleName, moduleIndex, &moduleArgs->key, message, arguments);
+    printError(instance, moduleName, moduleIndex, &moduleArgs->key, &moduleArgs->keyColor, message, arguments);
     va_end(arguments);
 }
 

@@ -11,7 +11,7 @@ void ffPrintCustom(FFinstance* instance, FFCustomOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(instance, options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs.key);
+    ffPrintLogoAndKey(instance, options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
     ffPrintUserString(options->moduleArgs.outputFormat.chars);
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }

@@ -54,7 +54,7 @@ void ffPrintPublicIp(FFinstance* instance, FFPublicIpOptions* options)
 
     if (options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&result, stdout);
     }
     else

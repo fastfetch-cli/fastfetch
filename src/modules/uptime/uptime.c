@@ -24,7 +24,7 @@ void ffPrintUptime(FFinstance* instance, FFUptimeOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(days == 0 && hours == 0 && minutes == 0)
         {

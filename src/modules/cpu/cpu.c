@@ -28,7 +28,7 @@ void ffPrintCPU(FFinstance* instance, FFCPUOptions* options)
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs.key);
+            ffPrintLogoAndKey(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
             if(cpu.name.length > 0)
                 ffStrbufWriteTo(&cpu.name, stdout);

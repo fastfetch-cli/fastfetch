@@ -9,7 +9,7 @@ static void printDevice(FFinstance* instance, FFSoundOptions* options, const FFS
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_SOUND_MODULE_NAME, index, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_SOUND_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&device->name, stdout);
 
         if(device->volume != FF_SOUND_VOLUME_UNKNOWN)

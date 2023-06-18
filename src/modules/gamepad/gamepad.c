@@ -9,7 +9,7 @@ static void printDevice(FFinstance* instance, FFGamepadOptions* options, const F
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&device->name, stdout);
     }
     else

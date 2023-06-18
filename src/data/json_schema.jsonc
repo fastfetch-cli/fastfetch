@@ -4,6 +4,19 @@
         "colors": {
             "type": "string",
             "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+        },
+        "key": {
+            "title": "Key of the module",
+            "type": "string"
+        },
+        "keyColor": {
+            "title": "Color of the module key",
+            "$ref": "#/$defs/colors",
+            "default": "Use display.color.keys"
+        },
+        "format": {
+            "title": "Format of the module",
+            "type": "string"
         }
     },
     "type": "object",
@@ -453,12 +466,13 @@
                                         ]
                                     },
                                     "key": {
-                                        "title": "Key of the module",
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "title": "Format of the module",
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -478,10 +492,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -497,10 +514,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -516,10 +536,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -539,10 +562,13 @@
                                         "type": "string"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -557,6 +583,9 @@
                                         "title": "Leave empty not to print the key",
                                         "type": "string",
                                         "default": "*empty*"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
                                         "title": "Text to print",
@@ -587,10 +616,13 @@
                                         "default": true
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -626,10 +658,13 @@
                                         "default": false
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -655,10 +690,13 @@
                                         "default": "none"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -698,10 +736,13 @@
                                         "type": "string"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false
@@ -717,10 +758,13 @@
                                         "default": "auto"
                                     },
                                     "key": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "type": "string"
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false

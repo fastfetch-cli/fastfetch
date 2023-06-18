@@ -22,7 +22,7 @@ void ffPrintFont(FFinstance* instance, FFFontOptions* options)
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs.key);
+            ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             ffStrbufPutTo(&font.display, stdout);
         }
         else

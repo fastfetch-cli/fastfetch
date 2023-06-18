@@ -29,7 +29,7 @@ void ffPrintCommand(FFinstance* instance, FFCommandOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(instance, FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs.key);
+    ffPrintLogoAndKey(instance, FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
     ffStrbufPutTo(&result, stdout);
 }
 

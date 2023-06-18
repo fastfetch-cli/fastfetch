@@ -40,12 +40,12 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, key.chars, 0, NULL);
+            ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
             printf("%.0f%%\n", item->value);
         }
         else
         {
-            ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->value},
                 {FF_FORMAT_ARG_TYPE_FLOAT, &item->name}
             });

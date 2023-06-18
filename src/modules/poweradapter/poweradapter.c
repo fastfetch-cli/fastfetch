@@ -31,7 +31,7 @@ void ffPrintPowerAdapter(FFinstance* instance, FFPowerAdapterOptions* options)
             {
                 if(options->moduleArgs.outputFormat.length == 0)
                 {
-                    ffPrintLogoAndKey(instance, FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs.key);
+                    ffPrintLogoAndKey(instance, FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
                     if(result->name.length > 0)
                         puts(result->name.chars);

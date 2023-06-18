@@ -13,7 +13,7 @@ void ffPrintWMTheme(FFinstance* instance, FFWMThemeOptions* options)
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs.key);
+            ffPrintLogoAndKey(instance, FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             puts(themeOrError.chars);
         }
         else

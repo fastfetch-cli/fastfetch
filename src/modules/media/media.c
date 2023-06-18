@@ -79,7 +79,7 @@ void ffPrintMedia(FFinstance* instance, FFMediaOptions* options)
         if(artistInSongTitle(&songPretty, &artistPretty))
             ffStrbufClear(&artistPretty);
 
-        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key);
+        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(artistPretty.length > 0)
         {

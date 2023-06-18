@@ -5,6 +5,7 @@
 typedef struct FFModuleArgs
 {
     FFstrbuf key;
+    FFstrbuf keyColor;
     FFstrbuf outputFormat;
 } FFModuleArgs;
 

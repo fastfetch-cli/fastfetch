@@ -12,6 +12,7 @@ Features:
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
+* Support `--*-key-color` option to change the key color of specified module
 
 # 1.11.3
 
