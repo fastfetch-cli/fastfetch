@@ -8,6 +8,7 @@ Changes:
 * Remove `--*-error-format`
 
 Features:
+* FreeBSD support is improved greatly, and actually tested in a phycial machine
 * Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
