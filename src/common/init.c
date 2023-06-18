@@ -44,11 +44,11 @@ static void defaultConfig(FFinstance* instance)
     instance->config.showErrors = false;
     instance->config.recache = false;
     instance->config.allowSlowOperations = false;
-    instance->config.disableLinewrap = true;
-    instance->config.hideCursor = true;
+    instance->config.pipe = !isatty(STDOUT_FILENO);
+    instance->config.disableLinewrap = !instance->config.pipe;
+    instance->config.hideCursor = !instance->config.pipe;
     instance->config.escapeBedrock = true;
     instance->config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
-    instance->config.pipe = false;
     instance->config.multithreading = true;
     instance->config.stat = false;
     instance->config.noBuffer = false;
