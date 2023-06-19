@@ -4,6 +4,7 @@
 #include "common/io/io.h"
 #include "common/time.h"
 #include "modules/modules.h"
+#include "util/stringUtils.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -11,17 +12,17 @@
 
 bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs* moduleArgs)
 {
-    if(strcasecmp(key, "key") == 0)
+    if(ffStrEqualsIgnCase(key, "key"))
     {
         ffStrbufSetNS(&moduleArgs->key, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
-    else if(strcasecmp(key, "keyColor") == 0)
+    else if(ffStrEqualsIgnCase(key, "keyColor"))
     {
         ffOptionParseColor(yyjson_get_str(val), &moduleArgs->keyColor);
         return true;
     }
-    else if(strcasecmp(key, "format") == 0)
+    else if(ffStrEqualsIgnCase(key, "format"))
     {
         ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
@@ -51,7 +52,7 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         const char* strVal = yyjson_get_str(val);
         for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
         {
-            if (strcasecmp(strVal, pPair->key) == 0)
+            if (ffStrEqualsIgnCase(strVal, pPair->key))
             {
                 *result = pPair->value;
                 return NULL;
@@ -66,7 +67,7 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
 
 static inline bool tryModule(FFinstance* instance, const char* type, yyjson_val* module, const char* moduleName, void (*const f)(FFinstance *instance, yyjson_val *module))
 {
-    if (strcasecmp(type, moduleName) == 0)
+    if (ffStrEqualsIgnCase(type, moduleName))
     {
         f(instance, module);
         return true;
@@ -294,21 +295,21 @@ const char* ffParseGeneralJsonConfig(FFinstance* instance)
     {
         const char* key = yyjson_get_str(key_);
 
-        if (strcasecmp(key, "allowSlowOperations") == 0)
+        if (ffStrEqualsIgnCase(key, "allowSlowOperations"))
             config->allowSlowOperations = yyjson_get_bool(val);
-        else if (strcasecmp(key, "thread") == 0 || strcasecmp(key, "multithreading") == 0)
+        else if (ffStrEqualsIgnCase(key, "thread") || ffStrEqualsIgnCase(key, "multithreading"))
             config->multithreading = yyjson_get_bool(val);
-        else if (strcasecmp(key, "stat") == 0)
+        else if (ffStrEqualsIgnCase(key, "stat"))
             config->stat = yyjson_get_bool(val);
-        else if (strcasecmp(key, "escapeBedrock") == 0)
+        else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
             config->escapeBedrock = yyjson_get_bool(val);
-        else if (strcasecmp(key, "pipe") == 0)
+        else if (ffStrEqualsIgnCase(key, "pipe"))
             config->pipe = yyjson_get_bool(val);
 
         #if defined(__linux__) || defined(__FreeBSD__)
-        else if (strcasecmp(key, "playerName") == 0)
+        else if (ffStrEqualsIgnCase(key, "playerName"))
             ffStrbufSetS(&config->playerName, yyjson_get_str(val));
-        else if (strcasecmp(key, "osFile") == 0)
+        else if (ffStrEqualsIgnCase(key, "osFile"))
             ffStrbufSetS(&config->osFile, yyjson_get_str(val));
         #endif
 
@@ -339,15 +340,15 @@ const char* ffParseDisplayJsonConfig(FFinstance* instance)
     {
         const char* key = yyjson_get_str(key_);
 
-        if (strcasecmp(key, "showErrors") == 0)
+        if (ffStrEqualsIgnCase(key, "showErrors"))
             config->showErrors = yyjson_get_bool(val);
-        else if (strcasecmp(key, "disableLinewrap") == 0)
+        else if (ffStrEqualsIgnCase(key, "disableLinewrap"))
             config->disableLinewrap = yyjson_get_bool(val);
-        else if (strcasecmp(key, "hideCursor") == 0)
+        else if (ffStrEqualsIgnCase(key, "hideCursor"))
             config->hideCursor = yyjson_get_bool(val);
-        else if (strcasecmp(key, "separator") == 0)
+        else if (ffStrEqualsIgnCase(key, "separator"))
             ffStrbufSetS(&config->keyValueSeparator, yyjson_get_str(val));
-        else if (strcasecmp(key, "color") == 0)
+        else if (ffStrEqualsIgnCase(key, "color"))
         {
             if (yyjson_is_str(val))
             {
@@ -366,7 +367,7 @@ const char* ffParseDisplayJsonConfig(FFinstance* instance)
             else
                 return "display.color must be either a string or an object";
         }
-        else if (strcasecmp(key, "binaryPrefix") == 0)
+        else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -378,9 +379,9 @@ const char* ffParseDisplayJsonConfig(FFinstance* instance)
             if (error) return error;
             config->binaryPrefixType = (FFBinaryPrefixType) value;
         }
-        else if (strcasecmp(key, "percentType") == 0)
+        else if (ffStrEqualsIgnCase(key, "percentType"))
             config->percentType = (uint32_t) yyjson_get_uint(val);
-        else if (strcasecmp(key, "noBuffer") == 0)
+        else if (ffStrEqualsIgnCase(key, "noBuffer"))
             config->noBuffer = yyjson_get_bool(val);
         else
             return "Unknown display property";
@@ -409,53 +410,53 @@ const char* ffParseLibraryJsonConfig(FFinstance* instance)
     {
         const char* key = yyjson_get_str(key_);
 
-        if (strcasecmp(key, "pci") == 0)
+        if (ffStrEqualsIgnCase(key, "pci"))
             ffStrbufSetS(&config->libPCI, yyjson_get_str(val));
-        else if (strcasecmp(key, "vulkan") == 0)
+        else if (ffStrEqualsIgnCase(key, "vulkan"))
             ffStrbufSetS(&config->libVulkan, yyjson_get_str(val));
-        else if (strcasecmp(key, "freetype") == 0)
+        else if (ffStrEqualsIgnCase(key, "freetype"))
             ffStrbufSetS(&config->libfreetype, yyjson_get_str(val));
-        else if (strcasecmp(key, "wayland") == 0)
+        else if (ffStrEqualsIgnCase(key, "wayland"))
             ffStrbufSetS(&config->libWayland, yyjson_get_str(val));
-        else if (strcasecmp(key, "xcbRandr") == 0)
+        else if (ffStrEqualsIgnCase(key, "xcbRandr"))
             ffStrbufSetS(&config->libXcbRandr, yyjson_get_str(val));
-        else if (strcasecmp(key, "xcb") == 0)
+        else if (ffStrEqualsIgnCase(key, "xcb"))
             ffStrbufSetS(&config->libXcb, yyjson_get_str(val));
-        else if (strcasecmp(key, "Xrandr") == 0)
+        else if (ffStrEqualsIgnCase(key, "Xrandr"))
             ffStrbufSetS(&config->libXrandr, yyjson_get_str(val));
-        else if (strcasecmp(key, "X11") == 0)
+        else if (ffStrEqualsIgnCase(key, "X11"))
             ffStrbufSetS(&config->libX11, yyjson_get_str(val));
-        else if (strcasecmp(key, "gio") == 0)
+        else if (ffStrEqualsIgnCase(key, "gio"))
             ffStrbufSetS(&config->libGIO, yyjson_get_str(val));
-        else if (strcasecmp(key, "DConf") == 0)
+        else if (ffStrEqualsIgnCase(key, "DConf"))
             ffStrbufSetS(&config->libDConf, yyjson_get_str(val));
-        else if (strcasecmp(key, "dbus") == 0)
+        else if (ffStrEqualsIgnCase(key, "dbus"))
             ffStrbufSetS(&config->libDBus, yyjson_get_str(val));
-        else if (strcasecmp(key, "XFConf") == 0)
+        else if (ffStrEqualsIgnCase(key, "XFConf"))
             ffStrbufSetS(&config->libXFConf, yyjson_get_str(val));
-        else if (strcasecmp(key, "sqlite") == 0 || strcasecmp(key, "sqlite3") == 0)
+        else if (ffStrEqualsIgnCase(key, "sqlite") || ffStrEqualsIgnCase(key, "sqlite3"))
             ffStrbufSetS(&config->libSQLite3, yyjson_get_str(val));
-        else if (strcasecmp(key, "rpm") == 0)
+        else if (ffStrEqualsIgnCase(key, "rpm"))
             ffStrbufSetS(&config->librpm, yyjson_get_str(val));
-        else if (strcasecmp(key, "imagemagick") == 0)
+        else if (ffStrEqualsIgnCase(key, "imagemagick"))
             ffStrbufSetS(&config->libImageMagick, yyjson_get_str(val));
-        else if (strcasecmp(key, "z") == 0)
+        else if (ffStrEqualsIgnCase(key, "z"))
             ffStrbufSetS(&config->libZ, yyjson_get_str(val));
-        else if (strcasecmp(key, "chafa") == 0)
+        else if (ffStrEqualsIgnCase(key, "chafa"))
             ffStrbufSetS(&config->libChafa, yyjson_get_str(val));
-        else if (strcasecmp(key, "egl") == 0)
+        else if (ffStrEqualsIgnCase(key, "egl"))
             ffStrbufSetS(&config->libEGL, yyjson_get_str(val));
-        else if (strcasecmp(key, "glx") == 0)
+        else if (ffStrEqualsIgnCase(key, "glx"))
             ffStrbufSetS(&config->libGLX, yyjson_get_str(val));
-        else if (strcasecmp(key, "osmesa") == 0)
+        else if (ffStrEqualsIgnCase(key, "osmesa"))
             ffStrbufSetS(&config->libOSMesa, yyjson_get_str(val));
-        else if (strcasecmp(key, "opencl") == 0)
+        else if (ffStrEqualsIgnCase(key, "opencl"))
             ffStrbufSetS(&config->libOpenCL, yyjson_get_str(val));
-        else if (strcasecmp(key, "wlanapi") == 0)
+        else if (ffStrEqualsIgnCase(key, "wlanapi"))
             ffStrbufSetS(&config->libwlanapi, yyjson_get_str(val));
-        else if (strcasecmp(key, "pulse") == 0)
+        else if (ffStrEqualsIgnCase(key, "pulse"))
             ffStrbufSetS(&config->libPulse, yyjson_get_str(val));
-        else if (strcasecmp(key, "nm") == 0)
+        else if (ffStrEqualsIgnCase(key, "nm"))
             ffStrbufSetS(&config->libnm, yyjson_get_str(val));
         else
             return "Unknown library property";

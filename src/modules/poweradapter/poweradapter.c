@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/poweradapter/poweradapter.h"
 #include "modules/poweradapter/poweradapter.h"
+#include "util/stringUtils.h"
 
 #define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
 #define FF_POWERADAPTER_MODULE_ARGS 5
@@ -95,7 +96,7 @@ void ffParsePowerAdapterJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

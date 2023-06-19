@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/host/host.h"
 #include "modules/host/host.h"
+#include "util/stringUtils.h"
 
 #define FF_HOST_NUM_FORMAT_ARGS 5
 
@@ -92,7 +93,7 @@ void ffParseHostJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

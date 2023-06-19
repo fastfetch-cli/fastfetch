@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/opengl/opengl.h"
 #include "modules/opengl/opengl.h"
+#include "util/stringUtils.h"
 
 #define FF_OPENGL_NUM_FORMAT_ARGS 4
 
@@ -59,7 +60,7 @@ bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, cons
         return true;
 
     #if defined(__linux__) || defined(__FreeBSD__)
-    if (strcasecmp(key, "library") == 0)
+    if (ffStrEqualsIgnCase(key, "library"))
     {
         options->library = (FFOpenGLLibrary) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "auto", FF_OPENGL_LIBRARY_AUTO },
@@ -91,14 +92,14 @@ void ffParseOpenGLJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
             #if defined(__linux__) || defined(__FreeBSD__)
-            if (strcasecmp(key, "library") == 0)
+            if (ffStrEqualsIgnCase(key, "library"))
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {

@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "util/stringUtils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -257,8 +258,8 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
 
         if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0)
         {
-            if(strncasecmp(iwr.u.name, "IEEE ", 5) == 0)
-                ffStrbufSetS(&item->conn.protocol, iwr.u.name + 5);
+            if(ffStrStartsWithIgnCase(iwr.u.name, "IEEE "))
+                ffStrbufSetS(&item->conn.protocol, iwr.u.name + strlen("IEEE "));
             else
                 ffStrbufSetS(&item->conn.protocol, iwr.u.name);
         }

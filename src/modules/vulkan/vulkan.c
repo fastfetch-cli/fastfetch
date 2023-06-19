@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/vulkan/vulkan.h"
 #include "modules/vulkan/vulkan.h"
+#include "util/stringUtils.h"
 
 #define FF_VULKAN_NUM_FORMAT_ARGS 3
 
@@ -75,7 +76,7 @@ void ffParseVulkanJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

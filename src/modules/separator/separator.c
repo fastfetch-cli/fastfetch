@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "modules/separator/separator.h"
+#include "util/stringUtils.h"
 
 void ffPrintSeparator(FFinstance* instance, FFSeparatorOptions* options)
 {
@@ -44,7 +45,7 @@ bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key
     const char* subKey = ffOptionTestPrefix(key, FF_SEPARATOR_MODULE_NAME);
     if (!subKey) return false;
 
-    if (strcasecmp(subKey, "string") == 0)
+    if (ffStrEqualsIgnCase(subKey, "string"))
     {
         ffOptionParseString(key, value, &options->string);
         return true;
@@ -70,10 +71,10 @@ void ffParseSeparatorJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (strcasecmp(key, "string") == 0)
+            if (ffStrEqualsIgnCase(key, "string"))
             {
                 ffStrbufSetS(&options.string, yyjson_get_str(val));
                 continue;

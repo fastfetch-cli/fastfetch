@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/bios/bios.h"
 #include "modules/bios/bios.h"
+#include "util/stringUtils.h"
 
 #define FF_BIOS_NUM_FORMAT_ARGS 4
 
@@ -30,7 +31,10 @@ void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        puts(bios.biosRelease.chars);
+        ffStrbufWriteTo(&bios.biosRelease, stdout);
+        if (bios.biosVersion.length)
+            printf(" (%s)", bios.biosVersion.chars);
+        putchar('\n');
     }
     else
     {
@@ -82,7 +86,7 @@ void ffParseBiosJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

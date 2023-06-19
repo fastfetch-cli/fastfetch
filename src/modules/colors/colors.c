@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "util/textModifier.h"
 #include "modules/colors/colors.h"
+#include "util/stringUtils.h"
 
 void ffPrintColors(FFinstance* instance, FFColorsOptions* options)
 {
@@ -59,7 +60,7 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
     const char* subKey = ffOptionTestPrefix(key, FF_COLORS_MODULE_NAME);
     if (!subKey) return false;
 
-    if (strcasecmp(subKey, "symbol") == 0)
+    if (ffStrEqualsIgnCase(subKey, "symbol"))
     {
         options->symbol = (FFColorssymbol) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "block", FF_COLORS_SYMBOL_BLOCK },
@@ -92,10 +93,10 @@ void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (strcasecmp(key, "symbol") == 0)
+            if (ffStrEqualsIgnCase(key, "symbol"))
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {

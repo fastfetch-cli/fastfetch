@@ -46,9 +46,8 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
         return "clGetDeviceInfo returned NULL or empty string";
 
     const char* versionPretty = version;
-    const char* prefix = "OpenCL ";
-    if(strncasecmp(version, prefix, sizeof(prefix) - 1) == 0)
-        versionPretty = version + sizeof(prefix) - 1;
+    if(ffStrStartsWithIgnCase(version, "OpenCL "))
+        versionPretty = version + strlen("OpenCL ");
     ffStrbufSetS(&result->version, versionPretty);
 
     ffStrbufEnsureFree(&result->device, 128);

@@ -5,6 +5,7 @@
 #include "common/properties.h"
 #include "common/settings.h"
 #include "detection/os/os.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 
@@ -170,7 +171,7 @@ static uint32_t getXBPSImpl(FFstrbuf* baseDir)
     struct dirent *entry;
     while((entry = readdir(dir)) != NULL)
     {
-        if(entry->d_type != DT_REG || strncasecmp(entry->d_name, "pkgdb-", 6) != 0)
+        if(entry->d_type != DT_REG || !ffStrStartsWithIgnCase(entry->d_name, "pkgdb-"))
             continue;
 
         ffStrbufAppendC(baseDir, '/');
@@ -308,7 +309,7 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
     {
         if(entry->d_type != DT_DIR)
             continue;
-        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
             continue;
 
         ffStrbufAppendS(baseDir, entry->d_name);

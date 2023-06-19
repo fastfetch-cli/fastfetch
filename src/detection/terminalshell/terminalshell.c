@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
+#include "util/stringUtils.h"
 
 #ifdef _WIN32
 
@@ -305,8 +306,8 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         if(termProgram)
         {
             if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
-                (strcmp(termProgram, "vscode") == 0 && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
-                (strcmp(termProgram, "iTerm.app") == 0 && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
+                (ffStrEquals(termProgram, "vscode") && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
+                (ffStrEquals(termProgram, "iTerm.app") && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
             ) {
                 ffStrbufSetS(version, termProgramVersion);
                 return true;

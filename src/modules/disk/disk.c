@@ -4,6 +4,7 @@
 #include "common/bar.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
+#include "util/stringUtils.h"
 
 #define FF_DISK_NUM_FORMAT_ARGS 10
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -59,7 +60,8 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
 
         if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
         {
-            ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
+            if(disk->filesystem.length)
+                ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
 
             if(disk->type & FF_DISK_TYPE_EXTERNAL_BIT)
                 ffStrbufAppendS(&str, "[External]");
@@ -184,13 +186,13 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "folders") == 0)
+    if (ffStrEqualsIgnCase(subKey, "folders"))
     {
         ffOptionParseString(key, value, &options->folders);
         return true;
     }
 
-    if (strcasecmp(subKey, "show-regular") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-regular"))
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_REGULAR_BIT;
@@ -199,7 +201,7 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (strcasecmp(subKey, "show-external") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-external"))
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
@@ -208,7 +210,7 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (strcasecmp(subKey, "show-hidden") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-hidden"))
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_HIDDEN_BIT;
@@ -217,7 +219,7 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (strcasecmp(subKey, "show-subvolumes") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-subvolumes"))
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_SUBVOLUME_BIT;
@@ -226,7 +228,7 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (strcasecmp(subKey, "show-unknown") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-unknown"))
     {
         if (ffOptionParseBoolean(value))
             options->showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;
@@ -255,19 +257,19 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "folders") == 0)
+            if (ffStrEqualsIgnCase(key, "folders"))
             {
                 ffStrbufSetS(&options.folders, yyjson_get_str(val));
                 continue;
             }
 
-            if (strcasecmp(key, "showExternal") == 0)
+            if (ffStrEqualsIgnCase(key, "showExternal"))
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
@@ -276,7 +278,7 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showHidden") == 0)
+            if (ffStrEqualsIgnCase(key, "showHidden"))
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_HIDDEN_BIT;
@@ -285,7 +287,7 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showSubvolumes") == 0)
+            if (ffStrEqualsIgnCase(key, "showSubvolumes"))
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_SUBVOLUME_BIT;
@@ -294,7 +296,7 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showUnknown") == 0)
+            if (ffStrEqualsIgnCase(key, "showUnknown"))
             {
                 if (yyjson_get_bool(val))
                     options.showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;

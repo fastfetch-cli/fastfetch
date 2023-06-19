@@ -28,12 +28,12 @@ const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName)
 
 bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const char* value, FFModuleArgs* result)
 {
-    if(strcasecmp(subKey, "key") == 0)
+    if(ffStrEqualsIgnCase(subKey, "key"))
     {
         ffOptionParseString(argumentKey, value, &result->key);
         return true;
     }
-    else if(strcasecmp(subKey, "key-color") == 0)
+    else if(ffStrEqualsIgnCase(subKey, "key-color"))
     {
         if(value == NULL)
         {
@@ -43,7 +43,7 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseColor(value, &result->keyColor);
         return true;
     }
-    else if(strcasecmp(subKey, "format") == 0)
+    else if(ffStrEqualsIgnCase(subKey, "format"))
     {
         ffOptionParseString(argumentKey, value, &result->outputFormat);
         return true;
@@ -91,7 +91,7 @@ int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyVa
 
     for (const FFKeyValuePair* pPair = pairs; pPair->key; ++pPair)
     {
-        if(strcasecmp(requestedKey, pPair->key) == 0)
+        if(ffStrEqualsIgnCase(requestedKey, pPair->key))
             return pPair->value;
     }
 
@@ -103,10 +103,10 @@ bool ffOptionParseBoolean(const char* str)
 {
     return (
         !ffStrSet(str) ||
-        strcasecmp(str, "true") == 0 ||
-        strcasecmp(str, "yes")  == 0 ||
-        strcasecmp(str, "on")   == 0 ||
-        strcasecmp(str, "1")    == 0
+        ffStrEqualsIgnCase(str, "true") ||
+        ffStrEqualsIgnCase(str, "yes")  ||
+        ffStrEqualsIgnCase(str, "on")   ||
+        ffStrEqualsIgnCase(str, "1")
     );
 }
 

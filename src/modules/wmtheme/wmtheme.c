@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/wmtheme/wmtheme.h"
 #include "modules/wmtheme/wmtheme.h"
+#include "util/stringUtils.h"
 
 #define FF_WMTHEME_DISPLAY_NAME "WM Theme"
 #define FF_WMTHEME_NUM_FORMAT_ARGS 1
@@ -62,7 +63,7 @@ void ffParseWMThemeJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

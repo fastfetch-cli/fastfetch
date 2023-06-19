@@ -1,5 +1,6 @@
 #include "gamepad.h"
 #include "common/io/io.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 #include <ctype.h>
@@ -16,7 +17,7 @@ const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(strncmp(entry->d_name, "js", 2) != 0)
+        if(!ffStrStartsWith(entry->d_name, "js"))
             continue;
         if(!isdigit(entry->d_name[2]))
             continue;

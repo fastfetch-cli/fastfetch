@@ -2,17 +2,21 @@
 #include "common/jsonconfig.h"
 #include "detection/board/board.h"
 #include "modules/board/board.h"
+#include "util/stringUtils.h"
 
 #define FF_BOARD_NUM_FORMAT_ARGS 3
 
 void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
 {
     FFBoardResult result;
-    ffDetectBoard(&result);
+    ffStrbufInit(&result.boardName);
+    ffStrbufInit(&result.boardVendor);
+    ffStrbufInit(&result.boardVersion);
+    const char* error = ffDetectBoard(&result);
 
-    if(result.error.length > 0)
+    if(error)
     {
-        ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%*s", result.error.length, result.error.chars);
+        ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
@@ -25,7 +29,10 @@ void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        puts(result.boardName.chars);
+        ffStrbufWriteTo(&result.boardName, stdout);
+        if (result.boardVersion.length)
+            printf(" (%s)", result.boardVersion.chars);
+        putchar('\n');
     }
     else
     {
@@ -40,7 +47,6 @@ exit:
     ffStrbufDestroy(&result.boardName);
     ffStrbufDestroy(&result.boardVendor);
     ffStrbufDestroy(&result.boardVersion);
-    ffStrbufDestroy(&result.error);
 }
 
 void ffInitBoardOptions(FFBoardOptions* options)
@@ -76,7 +82,7 @@ void ffParseBoardJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

@@ -1,7 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "util/textModifier.h"
 #include "modules/title/title.h"
+#include "util/textModifier.h"
+#include "util/stringUtils.h"
 
 static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
 {
@@ -44,7 +45,7 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
     const char* subKey = ffOptionTestPrefix(key, FF_TITLE_MODULE_NAME);
     if (!subKey) return false;
 
-    if (strcasecmp(subKey, "fdqn") == 0)
+    if (ffStrEqualsIgnCase(subKey, "fdqn"))
     {
         options->fdqn = ffOptionParseBoolean(value);
         return true;
@@ -70,10 +71,10 @@ void ffParseTitleJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (strcasecmp(key, "fdqn") == 0)
+            if (ffStrEqualsIgnCase(key, "fdqn"))
             {
                 options.fdqn = yyjson_get_bool(val);
                 continue;

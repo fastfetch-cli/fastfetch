@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/shell/shell.h"
+#include "util/stringUtils.h"
 
 #define FF_SHELL_NUM_FORMAT_ARGS 7
 
@@ -75,7 +76,7 @@ void ffParseShellJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

@@ -3,6 +3,7 @@
 #include "common/bar.h"
 #include "detection/cpuusage/cpuusage.h"
 #include "modules/cpuusage/cpuusage.h"
+#include "util/stringUtils.h"
 
 #define FF_CPUUSAGE_DISPLAY_NAME "CPU Usage"
 #define FF_CPUUSAGE_NUM_FORMAT_ARGS 1
@@ -74,7 +75,7 @@ void ffParseCPUUsageJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

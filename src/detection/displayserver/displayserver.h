@@ -30,6 +30,12 @@
 #define FF_WM_PRETTY_WESTON "Weston"
 #define FF_WM_PRETTY_XMONAD "XMonad"
 #define FF_WM_PRETTY_WSLG "WSLg"
+#define FF_WM_PRETTY_TINYWM "TinyWM"
+#define FF_WM_PRETTY_QTILE "Qtile"
+#define FF_WM_PRETTY_HERBSTLUFTWM "herbstluftwm"
+#define FF_WM_PRETTY_ICEWM "IceWM"
+#define FF_WM_PRETTY_SPECTRWM "spectrwm"
+
 
 #define FF_WM_PROTOCOL_TTY "TTY"
 #define FF_WM_PROTOCOL_X11 "X11"

@@ -10,9 +10,8 @@ typedef struct FFBoardResult
     FFstrbuf boardName;
     FFstrbuf boardVendor;
     FFstrbuf boardVersion;
-    FFstrbuf error;
 } FFBoardResult;
 
-void ffDetectBoard(FFBoardResult* result);
+const char* ffDetectBoard(FFBoardResult* result);
 
 #endif

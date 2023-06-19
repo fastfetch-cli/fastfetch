@@ -5,6 +5,7 @@
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 
@@ -128,19 +129,19 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "force-vulkan") == 0)
+    if (ffStrEqualsIgnCase(subKey, "force-vulkan"))
     {
         options->forceVulkan = ffOptionParseBoolean(value);
         return true;
     }
 
-    if (strcasecmp(subKey, "temp") == 0)
+    if (ffStrEqualsIgnCase(subKey, "temp"))
     {
         options->temp = ffOptionParseBoolean(value);
         return true;
     }
 
-    if (strcasecmp(subKey, "hide-type") == 0)
+    if (ffStrEqualsIgnCase(subKey, "hide-type"))
     {
         options->hideType = (FFGPUType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "none", FF_GPU_TYPE_UNKNOWN },
@@ -170,25 +171,25 @@ void ffParseGPUJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "temp") == 0)
+            if (ffStrEqualsIgnCase(key, "temp"))
             {
                 options.temp = yyjson_get_bool(val);
                 continue;
             }
 
-            if (strcasecmp(key, "forceVulkan") == 0)
+            if (ffStrEqualsIgnCase(key, "forceVulkan"))
             {
                 options.forceVulkan = yyjson_get_bool(val);
                 continue;
             }
 
-            if (strcasecmp(key, "hideType") == 0)
+            if (ffStrEqualsIgnCase(key, "hideType"))
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {

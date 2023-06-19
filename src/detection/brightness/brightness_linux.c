@@ -1,5 +1,6 @@
 #include "brightness.h"
 #include "common/io/io.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 #include <ctype.h>
@@ -24,7 +25,7 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
             continue;
 
         ffStrbufAppendS(&backlightDir, entry->d_name);

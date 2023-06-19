@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/gamepad/gamepad.h"
 #include "modules/gamepad/gamepad.h"
+#include "util/stringUtils.h"
 
 #define FF_GAMEPAD_NUM_FORMAT_ARGS 2
 
@@ -81,7 +82,7 @@ void ffParseGamepadJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

@@ -1,4 +1,5 @@
 #include "displayserver_linux.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -91,9 +92,9 @@ static void waylandOutputGeometryListener(void *data,
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
 
-    if(make && strcmp(make, "unknown") != 0)
+    if(make && !ffStrEquals(make, "unknown"))
         ffStrbufAppendS(&display->name, make);
-    if(model && strcmp(model, "unknown") != 0)
+    if(model && !ffStrEquals(model, "unknown"))
     {
         if(display->name.length > 0)
             ffStrbufAppendC(&display->name, '-');
@@ -105,9 +106,9 @@ static void waylandOutputGeometryListener(void *data,
 static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
 {
     WaylandDisplay* display = data;
-    if(strncmp(name, "eDP-", strlen("eDP-")) == 0)
+    if(ffStrStartsWith(name, "eDP-"))
         display->type = FF_DISPLAY_TYPE_BUILTIN;
-    else if(strncmp(name, "HDMI-", strlen("HDMI-")) == 0 || strncmp(name, "DP-", strlen("DP-")) == 0)
+    else if(ffStrStartsWith(name, "HDMI-") || ffStrStartsWith(name, "DP-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
 }
 #endif
@@ -213,7 +214,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 {
     WaylandData* wldata = data;
 
-    if(strcmp(interface, wldata->ffwl_output_interface->name) == 0)
+    if(ffStrEquals(interface, wldata->ffwl_output_interface->name))
         waylandOutputHandler(wldata, registry, name, version);
 }
 

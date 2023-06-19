@@ -23,7 +23,8 @@ static bool hostValueSet(FFstrbuf* value)
         ffStrbufIgnCaseCompS(value, "Not Applicable") != 0 &&
         ffStrbufIgnCaseCompS(value, "INVALID") != 0 &&
         ffStrbufIgnCaseCompS(value, "Type1ProductConfigId") != 0 &&
-        ffStrbufIgnCaseCompS(value, "All Series") != 0
+        ffStrbufIgnCaseCompS(value, "All Series") != 0 &&
+        ffStrbufIgnCaseCompS(value, "N/A") != 0
     ;
 }
 

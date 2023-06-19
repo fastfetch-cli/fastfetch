@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/terminal/terminal.h"
+#include "util/stringUtils.h"
 
 #include <string.h>
 
@@ -76,7 +77,7 @@ void ffParseTerminalJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

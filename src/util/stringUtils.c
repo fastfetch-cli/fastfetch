@@ -1,6 +1,5 @@
 #include "stringUtils.h"
 
-#include <string.h>
 #include <ctype.h>
 
 bool ffStrSet(const char* str)

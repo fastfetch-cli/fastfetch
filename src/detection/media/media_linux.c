@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
 #include "common/thread.h"
+#include "util/stringUtils.h"
 
 #include <string.h>
 
@@ -61,13 +62,13 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
 
         data->lib->ffdbus_message_iter_next(&dictIterator);
 
-        if(strcmp(key, "xesam:title") == 0)
+        if(ffStrEquals(key, "xesam:title"))
             ffDBusGetValue(data, &dictIterator, &result->song);
-        else if(strcmp(key, "xesam:album") == 0)
+        else if(ffStrEquals(key, "xesam:album"))
             ffDBusGetValue(data, &dictIterator, &result->album);
-        else if(strcmp(key, "xesam:artist") == 0)
+        else if(ffStrEquals(key, "xesam:artist"))
             ffDBusGetValue(data, &dictIterator, &result->artist);
-        else if(strcmp(key, "xesam:url") == 0)
+        else if(ffStrEquals(key, "xesam:url"))
             ffDBusGetValue(data, &dictIterator, &result->url);
 
         if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0 && result->url.length > 0)
@@ -139,7 +140,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
         const char* busName;
         data->lib->ffdbus_message_iter_get_basic(&arrayIterator, &busName);
 
-        if(strncmp(busName, FF_DBUS_MPRIS_PREFIX, sizeof(FF_DBUS_MPRIS_PREFIX) - 1) != 0)
+        if(!ffStrStartsWith(busName, FF_DBUS_MPRIS_PREFIX))
             FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
 
         if(getBusProperties(data, busName, result))

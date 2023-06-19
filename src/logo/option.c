@@ -1,6 +1,7 @@
 #include "logo/logo.h"
 
 #include "common/jsonconfig.h"
+#include "util/stringUtils.h"
 
 void ffInitLogoOptions(FFLogoOptions* options)
 {
@@ -63,10 +64,10 @@ logoType:
                 {},
             });
         }
-        else if(strncasecmp(subKey, "color-", strlen("color-")) && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
+        else if(ffStrStartsWithIgnCase(subKey, "color-") && subKey[6] != '\0' && subKey[7] == '\0') // matches "--logo-color-*"
         {
             //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-            int index = (int)key[13] - 49;
+            int index = (int)subKey[6] - '0' - 1;
 
             //Match only --logo-color-[1-9]
             if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
@@ -289,17 +290,17 @@ const char* ffParseLogoJsonConfig(FFinstance* instance)
             #undef FF_PARSE_PADDING_POSITON
             continue;
         }
-        else if (strcasecmp(key, "printRemaining"))
+        else if (strcasecmp(key, "printRemaining") == 0)
         {
             options->printRemaining = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "preserveAspectRadio"))
+        else if (strcasecmp(key, "preserveAspectRadio") == 0)
         {
             options->preserveAspectRadio = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "chafa"))
+        else if (strcasecmp(key, "chafa") == 0)
         {
             if (!yyjson_is_obj(val))
                 return "Chafa config must be an object";

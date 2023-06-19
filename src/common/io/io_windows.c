@@ -1,4 +1,5 @@
 #include "io.h"
+#include "util/stringUtils.h"
 
 static void createSubfolders(const char* fileName)
 {
@@ -118,7 +119,7 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
     {
         if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-            if(strcmp(entry.cFileName, ".") == 0 || strcmp(entry.cFileName, "..") == 0)
+            if(ffStrEquals(entry.cFileName, ".") || ffStrEquals(entry.cFileName, ".."))
                 continue;
 
             ffStrbufSubstrBefore(folder, folderLength);

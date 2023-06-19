@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/icons/icons.h"
 #include "modules/icons/icons.h"
+#include "util/stringUtils.h"
 
 #define FF_ICONS_NUM_FORMAT_ARGS 1
 
@@ -62,7 +63,7 @@ void ffParseIconsJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

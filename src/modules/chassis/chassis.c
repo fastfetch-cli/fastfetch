@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/chassis/chassis.h"
 #include "modules/chassis/chassis.h"
+#include "util/stringUtils.h"
 
 #define FF_CHASSIS_NUM_FORMAT_ARGS 3
 
@@ -29,13 +30,10 @@ void ffPrintChassis(FFinstance* instance, FFChassisOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-
-        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateCopy(&result.chassisType);
-
-        if(result.chassisVersion.length > 0)
-            ffStrbufAppendF(&output, " (%s)", result.chassisVersion.chars);
-
-        ffStrbufPutTo(&output, stdout);
+        ffStrbufWriteTo(&result.chassisType, stdout);
+        if (result.chassisVersion.length)
+            printf(" (%s)", result.chassisVersion.chars);
+        putchar('\n');
     }
     else
     {
@@ -85,7 +83,7 @@ void ffParseChassisJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
