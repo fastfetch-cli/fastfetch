@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/io/io.h"
 #include "battery.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 
@@ -90,7 +91,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFinstance* instance, FFBatteryOptio
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
             continue;
 
         ffStrbufAppendS(&baseDir, entry->d_name);

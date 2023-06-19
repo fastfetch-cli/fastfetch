@@ -144,7 +144,7 @@ static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
     const char* sessionMode = getenv("GNOME_SHELL_SESSION_MODE");
-    if (sessionMode && strcmp(sessionMode, "classic") == 0)
+    if (sessionMode && ffStrEquals(sessionMode, "classic"))
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC);
     else
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);

@@ -1,4 +1,5 @@
 #include "io.h"
+#include "util/stringUtils.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -194,7 +195,7 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
     {
         if(entry->d_type == DT_DIR)
         {
-            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
                 continue;
 
             ffStrbufAppendS(folder, entry->d_name);

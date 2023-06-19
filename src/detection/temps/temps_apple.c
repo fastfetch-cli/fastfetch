@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "temps_apple.h"
+#include "util/stringUtils.h"
 
 #include <stdint.h>
 #include <math.h>
@@ -198,108 +199,108 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
     if (val.dataSize == 0)
         return "Empty SMC result";
 
-    if (strcmp(val.dataType, kDataTypeUi8) == 0 ||
-        strcmp(val.dataType, kDataTypeUi16) == 0 ||
-        strcmp(val.dataType, kDataTypeUi32) == 0 ||
-        strcmp(val.dataType, kDataTypeUi64) == 0)
+    if (ffStrEquals(val.dataType, kDataTypeUi8) ||
+        ffStrEquals(val.dataType, kDataTypeUi16) ||
+        ffStrEquals(val.dataType, kDataTypeUi32) ||
+        ffStrEquals(val.dataType, kDataTypeUi64))
     {
         uint64_t tmp = 0;
         for (uint32_t i = 0; i < val.dataSize; i++)
             tmp += (uint64_t)((uint8_t)(val.bytes[i]) * pow(256, val.dataSize - 1 - i));
         *value = (double)tmp;
     }
-    else if (strcmp(val.dataType, kDataTypeFlt) == 0)
+    else if (ffStrEquals(val.dataType, kDataTypeFlt))
     {
         *value = *(float *)(val.bytes);
     }
-    else if (strcmp(val.dataType, kDataTypeFp1f) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFp1f) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 32768.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFp4c) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFp4c) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 4096.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFp5b) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFp5b) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 2048.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFp6a) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFp6a) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 1024.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFp79) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFp79) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 512.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFp88) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFp88) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 256.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFpa6) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFpa6) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 64.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFpc4) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFpc4) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 16.0;
     }
-    else if (strcmp(val.dataType, kDataTypeFpe2) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeFpe2) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 4.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp1e) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp1e) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 16384.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp3c) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp3c) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 4096.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp4b) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp4b) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 2048.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp5a) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp5a) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 1024.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp69) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp69) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 512.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp78) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp78) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 256.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp87) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp87) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 128.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSp96) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSp96) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 64.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSpb4) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSpb4) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 16.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSpf0) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSpf0) && val.dataSize == 2)
     {
         *value = ntohs(*(uint16_t *)(val.bytes)) / 1.0;
     }
-    else if (strcmp(val.dataType, kDataTypeSi8) == 0 && val.dataSize == 1)
+    else if (ffStrEquals(val.dataType, kDataTypeSi8) && val.dataSize == 1)
     {
         signed char *bytes = (signed char *)val.bytes;
         int16_t temp = 0;
         temp += (int8_t)(bytes[0]);
         *value = temp;
     }
-    else if (strcmp(val.dataType, kDataTypeSi16) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypeSi16) && val.dataSize == 2)
     {
         *value = ntohs(*(int16_t *)(val.bytes));
     }
-    else if (strcmp(val.dataType, kDataTypePwm) == 0 && val.dataSize == 2)
+    else if (ffStrEquals(val.dataType, kDataTypePwm) && val.dataSize == 2)
     {
         *value = (double)ntohs(*(uint16_t *)(val.bytes)) * 100 / 65536.0;
     }

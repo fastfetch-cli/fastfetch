@@ -92,9 +92,9 @@ static void waylandOutputGeometryListener(void *data,
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
 
-    if(make && strcmp(make, "unknown") != 0)
+    if(make && !ffStrEquals(make, "unknown"))
         ffStrbufAppendS(&display->name, make);
-    if(model && strcmp(model, "unknown") != 0)
+    if(model && !ffStrEquals(model, "unknown"))
     {
         if(display->name.length > 0)
             ffStrbufAppendC(&display->name, '-');
@@ -214,7 +214,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 {
     WaylandData* wldata = data;
 
-    if(strcmp(interface, wldata->ffwl_output_interface->name) == 0)
+    if(ffStrEquals(interface, wldata->ffwl_output_interface->name))
         waylandOutputHandler(wldata, registry, name, version);
 }
 

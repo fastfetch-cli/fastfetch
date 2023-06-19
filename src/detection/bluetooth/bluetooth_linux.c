@@ -1,4 +1,5 @@
 #include "bluetooth.h"
+#include "util/stringUtils.h"
 
 #ifdef FF_HAVE_DBUS
 #include "common/dbus.h"
@@ -59,15 +60,15 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
-    if(strcmp(deviceProperty, "Address") == 0)
+    if(ffStrEquals(deviceProperty, "Address"))
         ffDBusGetValue(dbus, &dictIter, &device->address);
-    else if(strcmp(deviceProperty, "Name") == 0)
+    else if(ffStrEquals(deviceProperty, "Name"))
         ffDBusGetValue(dbus, &dictIter, &device->name);
-    else if(strcmp(deviceProperty, "Icon") == 0)
+    else if(ffStrEquals(deviceProperty, "Icon"))
         ffDBusGetValue(dbus, &dictIter, &device->type);
-    else if(strcmp(deviceProperty, "Percentage") == 0)
+    else if(ffStrEquals(deviceProperty, "Percentage"))
         ffDBusGetByte(dbus, &dictIter, &device->battery);
-    else if(strcmp(deviceProperty, "Connected") == 0)
+    else if(ffStrEquals(deviceProperty, "Connected"))
         ffDBusGetBool(dbus, &dictIter, &device->connected);
 }
 

@@ -138,13 +138,13 @@ static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResul
 
         for(int count = 0; getline(&line, &len, file) != -1 && count < 2;)
         {
-            if(strcmp(line, "[basic.interface.font]\n") == 0)
+            if(ffStrEquals(line, "[basic.interface.font]\n"))
             {
                 if(getline(&line, &len, file) != -1)
                     ffParsePropLine(line, "value=", &fontName);
                 ++count;
             }
-            else if(strcmp(line, "[basic.interface.font_size]\n") == 0)
+            else if(ffStrEquals(line, "[basic.interface.font_size]\n"))
             {
                 if(getline(&line, &len, file) != -1)
                     ffParsePropLine(line, "value=", &fontSize);

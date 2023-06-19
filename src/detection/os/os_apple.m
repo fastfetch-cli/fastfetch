@@ -1,5 +1,6 @@
 #include "os.h"
 #include "common/sysctl.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
