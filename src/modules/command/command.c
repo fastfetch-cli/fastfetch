@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/processing.h"
 #include "modules/command/command.h"
+#include "util/stringUtils.h"
 
 void ffPrintCommand(FFinstance* instance, FFCommandOptions* options)
 {
@@ -58,13 +59,13 @@ bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if(strcasecmp(subKey, "shell") == 0)
+    if(ffStrEqualsIgnCase(subKey, "shell"))
     {
         ffOptionParseString(key, value, &options->shell);
         return true;
     }
 
-    if(strcasecmp(subKey, "text") == 0)
+    if(ffStrEqualsIgnCase(subKey, "text"))
     {
         ffOptionParseString(key, value, &options->text);
         return true;
@@ -92,19 +93,19 @@ void ffParseCommandJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "shell") == 0)
+            if (ffStrEqualsIgnCase(key, "shell"))
             {
                 ffStrbufSetS(&options.shell, yyjson_get_str(val));
                 continue;
             }
 
-            if (strcasecmp(key, "text") == 0)
+            if (ffStrEqualsIgnCase(key, "text"))
             {
                 ffStrbufSetS(&options.text, yyjson_get_str(val));
                 continue;

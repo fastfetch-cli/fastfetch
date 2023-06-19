@@ -4,6 +4,7 @@
 #include "common/bar.h"
 #include "detection/swap/swap.h"
 #include "modules/swap/swap.h"
+#include "util/stringUtils.h"
 
 #define FF_SWAP_NUM_FORMAT_ARGS 3
 
@@ -96,7 +97,7 @@ void ffParseSwapJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

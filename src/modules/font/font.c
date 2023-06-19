@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/font/font.h"
 #include "modules/font/font.h"
+#include "util/stringUtils.h"
 
 #define FF_FONT_NUM_FORMAT_ARGS (FF_DETECT_FONT_NUM_FONTS + 1)
 
@@ -75,7 +76,7 @@ void ffParseFontJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
+#include "util/stringUtils.h"
 
 #define FF_DISPLAY_NUM_FORMAT_ARGS 8
 
@@ -127,7 +128,7 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "compact-type") == 0)
+    if (ffStrEqualsIgnCase(subKey, "compact-type"))
     {
         options->compactType = (FFDisplayCompactType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
@@ -138,13 +139,13 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
         return true;
     }
 
-    if (strcasecmp(subKey, "detect-name") == 0)
+    if (ffStrEqualsIgnCase(subKey, "detect-name"))
     {
         options->detectName = ffOptionParseBoolean(value);
         return true;
     }
 
-    if (strcasecmp(subKey, "precise-refresh-rate") == 0)
+    if (ffStrEqualsIgnCase(subKey, "precise-refresh-rate"))
     {
         options->preciseRefreshRate = ffOptionParseBoolean(value);
         return true;
@@ -170,13 +171,13 @@ void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "compactType") == 0)
+            if (ffStrEqualsIgnCase(key, "compactType"))
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -192,13 +193,13 @@ void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "detectName") == 0)
+            if (ffStrEqualsIgnCase(key, "detectName"))
             {
                 options.detectName = yyjson_get_bool(val);
                 continue;
             }
 
-            if (strcasecmp(key, "preciseRefreshRate") == 0)
+            if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
             {
                 options.preciseRefreshRate = yyjson_get_bool(val);
                 continue;

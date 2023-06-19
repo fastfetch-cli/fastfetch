@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/uptime/uptime.h"
 #include "modules/uptime/uptime.h"
+#include "util/stringUtils.h"
 
 #define FF_UPTIME_NUM_FORMAT_ARGS 4
 
@@ -111,6 +112,9 @@ void ffParseUptimeJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
+            if(ffStrEqualsIgnCase(key, "type"))
+                continue;
+
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 

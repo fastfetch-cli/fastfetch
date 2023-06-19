@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/networking.h"
 #include "modules/publicip/publicip.h"
+#include "util/stringUtils.h"
 
 #define FF_PUBLICIP_DISPLAY_NAME "Public IP"
 #define FF_PUBLICIP_NUM_FORMAT_ARGS 1
@@ -81,13 +82,13 @@ bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "url") == 0)
+    if (ffStrEqualsIgnCase(subKey, "url"))
     {
         ffOptionParseString(key, value, &options->url);
         return true;
     }
 
-    if (strcasecmp(subKey, "timeout") == 0)
+    if (ffStrEqualsIgnCase(subKey, "timeout"))
     {
         options->timeout = ffOptionParseUInt32(key, value);
         return true;
@@ -115,19 +116,19 @@ void ffParsePublicIpJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "url") == 0)
+            if (ffStrEqualsIgnCase(key, "url"))
             {
                 ffStrbufSetS(&options.url, yyjson_get_str(val));
                 continue;
             }
 
-            if (strcasecmp(key, "timeout") == 0)
+            if (ffStrEqualsIgnCase(key, "timeout"))
             {
                 options.timeout = (uint32_t) yyjson_get_uint(val);
                 continue;

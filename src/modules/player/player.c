@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/media/media.h"
 #include "modules/player/player.h"
+#include "util/stringUtils.h"
 
 #include <ctype.h>
 
@@ -105,7 +106,7 @@ void ffParsePlayerJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

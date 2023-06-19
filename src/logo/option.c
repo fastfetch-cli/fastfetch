@@ -289,17 +289,17 @@ const char* ffParseLogoJsonConfig(FFinstance* instance)
             #undef FF_PARSE_PADDING_POSITON
             continue;
         }
-        else if (strcasecmp(key, "printRemaining"))
+        else if (strcasecmp(key, "printRemaining") == 0)
         {
             options->printRemaining = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "preserveAspectRadio"))
+        else if (strcasecmp(key, "preserveAspectRadio") == 0)
         {
             options->preserveAspectRadio = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "chafa"))
+        else if (strcasecmp(key, "chafa") == 0)
         {
             if (!yyjson_is_obj(val))
                 return "Chafa config must be an object";

@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
+#include "util/stringUtils.h"
 
 #define FF_CPU_NUM_FORMAT_ARGS 8
 
@@ -84,7 +85,7 @@ bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "temp") == 0)
+    if (ffStrEqualsIgnCase(subKey, "temp"))
     {
         options->temp = ffOptionParseBoolean(value);
         return true;
@@ -110,13 +111,13 @@ void ffParseCPUJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "temp") == 0)
+            if (ffStrEqualsIgnCase(key, "temp"))
             {
                 options.temp = yyjson_get_bool(val);
                 continue;

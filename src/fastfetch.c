@@ -53,13 +53,13 @@ static inline void printCommandHelp(const char* command)
 {
     if(command == NULL)
         puts(FASTFETCH_DATATEXT_HELP);
-    else if(strcasecmp(command, "c") == 0 || strcasecmp(command, "color") == 0)
+    else if(ffStrEqualsIgnCase(command, "c") || ffStrEqualsIgnCase(command, "color"))
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
-    else if(strcasecmp(command, "format") == 0)
+    else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(strcasecmp(command, "load-config") == 0 || strcasecmp(command, "loadconfig") == 0 || strcasecmp(command, "config") == 0)
+    else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "loadconfig") || ffStrEqualsIgnCase(command, "config"))
         puts(FASTFETCH_DATATEXT_HELP_CONFIG);
-    else if(strcasecmp(command, "os-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "os-format"))
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
             "System name (typically just Linux)",
@@ -76,7 +76,7 @@ static inline void printCommandHelp(const char* command)
             "Architecture of the OS"
         );
     }
-    else if(strcasecmp(command, "host-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "host-format"))
     {
         constructAndPrintCommandHelpFormat("host", "{2} {3}", 8,
             "product family",
@@ -89,7 +89,7 @@ static inline void printCommandHelp(const char* command)
             "sys vendor"
         );
     }
-    else if(strcasecmp(command, "bios-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "bios-format"))
     {
         constructAndPrintCommandHelpFormat("bios", "{2} {3}", 4,
             "bios date",
@@ -98,7 +98,7 @@ static inline void printCommandHelp(const char* command)
             "bios version"
         );
     }
-    else if(strcasecmp(command, "board-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "board-format"))
     {
         constructAndPrintCommandHelpFormat("board", "{2} {3}", 3,
             "board name",
@@ -106,7 +106,7 @@ static inline void printCommandHelp(const char* command)
             "board version"
         );
     }
-    else if(strcasecmp(command, "chassis-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "chassis-format"))
     {
         constructAndPrintCommandHelpFormat("chassis", "{2} {3}", 4,
             "chassis type",
@@ -114,7 +114,7 @@ static inline void printCommandHelp(const char* command)
             "chassis version"
         );
     }
-    else if(strcasecmp(command, "kernel-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "kernel-format"))
     {
         constructAndPrintCommandHelpFormat("kernel", "{2}", 3,
             "Kernel sysname",
@@ -122,7 +122,7 @@ static inline void printCommandHelp(const char* command)
             "Kernel version"
         );
     }
-    else if(strcasecmp(command, "uptime-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "uptime-format"))
     {
         constructAndPrintCommandHelpFormat("uptime", "{} days {} hours {} mins", 4,
             "Days",
@@ -131,13 +131,13 @@ static inline void printCommandHelp(const char* command)
             "Seconds"
         );
     }
-    else if(strcasecmp(command, "processes-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "processes-format"))
     {
         constructAndPrintCommandHelpFormat("processes", "{}", 1,
             "Count"
         );
     }
-    else if(strcasecmp(command, "packages-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "packages-format"))
     {
         constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco)", 21,
             "Number of all packages",
@@ -163,7 +163,7 @@ static inline void printCommandHelp(const char* command)
             "Number of choco packages"
         );
     }
-    else if(strcasecmp(command, "shell-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "shell-format"))
     {
         constructAndPrintCommandHelpFormat("shell", "{3} {4}", 7,
             "Shell process name",
@@ -175,7 +175,7 @@ static inline void printCommandHelp(const char* command)
             "User shell version"
         );
     }
-    else if(strcasecmp(command, "display-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "display-format"))
     {
         constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 7,
             "Screen width",
@@ -188,7 +188,7 @@ static inline void printCommandHelp(const char* command)
             "Screen rotation"
         );
     }
-    else if(strcasecmp(command, "de-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "de-format"))
     {
         constructAndPrintCommandHelpFormat("de", "{2} {3}", 3,
             "DE process name",
@@ -196,7 +196,7 @@ static inline void printCommandHelp(const char* command)
             "DE version"
         );
     }
-    else if(strcasecmp(command, "wm-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "wm-format"))
     {
         constructAndPrintCommandHelpFormat("wm", "{2} ({3})", 3,
             "WM process name",
@@ -204,31 +204,31 @@ static inline void printCommandHelp(const char* command)
             "WM protocol name"
         );
     }
-    else if(strcasecmp(command, "wm-theme-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "wm-theme-format"))
     {
         constructAndPrintCommandHelpFormat("wm-theme", "{}", 1,
             "WM theme name"
         );
     }
-    else if(strcasecmp(command, "theme-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "theme-format"))
     {
         constructAndPrintCommandHelpFormat("theme", "{}", 1,
             "Combined themes"
         );
     }
-    else if(strcasecmp(command, "icons-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "icons-format"))
     {
         constructAndPrintCommandHelpFormat("icons", "{}", 1,
             "Combined icons"
         );
     }
-    else if(strcasecmp(command, "wallpaper-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "wallpaper-format"))
     {
         constructAndPrintCommandHelpFormat("wallpaper", "{}", 1,
             "Wallpaper image file"
         );
     }
-    else if(strcasecmp(command, "font-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "font-format"))
     {
         constructAndPrintCommandHelpFormat("font", "{} [QT], {} [GTK2], {} [GTK3], {} [GTK4]", 4,
             "Font 1",
@@ -237,14 +237,14 @@ static inline void printCommandHelp(const char* command)
             "Font 4"
         );
     }
-    else if(strcasecmp(command, "cursor-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "cursor-format"))
     {
         constructAndPrintCommandHelpFormat("cursor", "{} ({}pt)", 2,
             "Cursor theme",
             "Cursor size"
         );
     }
-    else if(strcasecmp(command, "terminal-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "terminal-format"))
     {
         constructAndPrintCommandHelpFormat("terminal", "{3}", 10,
             "Terminal process name",
@@ -259,7 +259,7 @@ static inline void printCommandHelp(const char* command)
             "User shell version"
         );
     }
-    else if(strcasecmp(command, "terminal-font-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "terminal-font-format"))
     {
         constructAndPrintCommandHelpFormat("terminal-font", "{}", 4,
             "Terminal font",
@@ -268,7 +268,7 @@ static inline void printCommandHelp(const char* command)
             "Terminal font styles"
         );
     }
-    else if(strcasecmp(command, "cpu-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "cpu-format"))
     {
         constructAndPrintCommandHelpFormat("cpu", "{1} ({5}) @ {7}GHz", 8,
             "Name",
@@ -281,13 +281,13 @@ static inline void printCommandHelp(const char* command)
             "Temperature"
         );
     }
-    else if(strcasecmp(command, "cpu-usage-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "cpu-usage-format"))
     {
         constructAndPrintCommandHelpFormat("cpu-usage", "{0}%", 1,
             "CPU usage without percent mark"
         );
     }
-    else if(strcasecmp(command, "gpu-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "gpu-format"))
     {
         constructAndPrintCommandHelpFormat("gpu", "{} {}", 6,
             "GPU vendor",
@@ -298,7 +298,7 @@ static inline void printCommandHelp(const char* command)
             "GPU type"
         );
     }
-    else if(strcasecmp(command, "memory-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "memory-format"))
     {
         constructAndPrintCommandHelpFormat("memory", "{} / {} ({}%)", 3,
             "Used size",
@@ -306,7 +306,7 @@ static inline void printCommandHelp(const char* command)
             "Percentage used"
         );
     }
-    else if(strcasecmp(command, "swap-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "swap-format"))
     {
         constructAndPrintCommandHelpFormat("swap", "{} / {} ({}%)", 3,
             "Used size",
@@ -314,7 +314,7 @@ static inline void printCommandHelp(const char* command)
             "Percentage used"
         );
     }
-    else if(strcasecmp(command, "disk-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "disk-format"))
     {
         constructAndPrintCommandHelpFormat("disk", "{1} / {2} ({3}%)", 9,
             "Size used",
@@ -328,7 +328,7 @@ static inline void printCommandHelp(const char* command)
             "Filesystem"
         );
     }
-    else if(strcasecmp(command, "battery-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "battery-format"))
     {
         constructAndPrintCommandHelpFormat("battery", "{}%, {}", 5,
             "Battery manufactor",
@@ -338,7 +338,7 @@ static inline void printCommandHelp(const char* command)
             "Battery status"
         );
     }
-    else if(strcasecmp(command, "poweradapter-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "poweradapter-format"))
     {
         constructAndPrintCommandHelpFormat("poweradapter", "{}%, {}", 5,
             "PowerAdapter watts",
@@ -348,25 +348,25 @@ static inline void printCommandHelp(const char* command)
             "PowerAdapter description"
         );
     }
-    else if(strcasecmp(command, "locale-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "locale-format"))
     {
         constructAndPrintCommandHelpFormat("locale", "{}", 1,
             "Locale code"
         );
     }
-    else if(strcasecmp(command, "local-ip-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "local-ip-format"))
     {
         constructAndPrintCommandHelpFormat("local-ip", "{}", 1,
             "Local IP address"
         );
     }
-    else if(strcasecmp(command, "public-ip-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "public-ip-format"))
     {
         constructAndPrintCommandHelpFormat("public-ip", "{}", 1,
             "Public IP address"
         );
     }
-    else if(strcasecmp(command, "wifi-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "wifi-format"))
     {
         constructAndPrintCommandHelpFormat("wifi", "{4} - {6}", 3,
             "Interface description",
@@ -381,7 +381,7 @@ static inline void printCommandHelp(const char* command)
             "Connection Security algorithm"
         );
     }
-    else if(strcasecmp(command, "player-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "player-format"))
     {
         constructAndPrintCommandHelpFormat("player", "{}", 4,
             "Pretty player name",
@@ -390,7 +390,7 @@ static inline void printCommandHelp(const char* command)
             "URL name"
         );
     }
-    else if(strcasecmp(command, "media-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "media-format"))
     {
         constructAndPrintCommandHelpFormat("media", "{3} - {1}", 4,
             "Pretty media name",
@@ -399,7 +399,7 @@ static inline void printCommandHelp(const char* command)
             "Album name"
         );
     }
-    else if(strcasecmp(command, "datetime-format") == 0 || strcasecmp(command, "date-format") == 0 || strcasecmp(command, "time-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "datetime-format") == 0 || ffStrEqualsIgnCase(command, "date-format") || ffStrEqualsIgnCase(command, "time-format"))
     {
         constructAndPrintCommandHelpFormat("[date][time]", "{1}-{4}-{11} {14}:{18}:{20}", 20,
             "year",
@@ -424,7 +424,7 @@ static inline void printCommandHelp(const char* command)
             "second with leading zero"
         );
     }
-    else if(strcasecmp(command, "vulkan-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "vulkan-format"))
     {
         constructAndPrintCommandHelpFormat("vulkan", "{} (driver), {} (api version)", 3,
             "Driver name",
@@ -432,7 +432,7 @@ static inline void printCommandHelp(const char* command)
             "Conformance version"
         );
     }
-    else if(strcasecmp(command, "opengl-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "opengl-format"))
     {
         constructAndPrintCommandHelpFormat("opengl", "{}", 3,
             "version",
@@ -441,7 +441,7 @@ static inline void printCommandHelp(const char* command)
             "shading language version"
         );
     }
-    else if(strcasecmp(command, "opencl-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "opencl-format"))
     {
         constructAndPrintCommandHelpFormat("opencl", "{}", 3,
             "version",
@@ -449,7 +449,7 @@ static inline void printCommandHelp(const char* command)
             "vendor"
         );
     }
-    else if(strcasecmp(command, "bluetooth-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "bluetooth-format"))
     {
         constructAndPrintCommandHelpFormat("bluetooth", "{1} (4%)", 4,
             "Name",
@@ -458,7 +458,7 @@ static inline void printCommandHelp(const char* command)
             "Battery percentage"
         );
     }
-    else if(strcasecmp(command, "sound-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "sound-format"))
     {
         constructAndPrintCommandHelpFormat("sound", "{2} (3%)", 4,
             "Main",
@@ -467,7 +467,7 @@ static inline void printCommandHelp(const char* command)
             "Identifier"
         );
     }
-    else if(strcasecmp(command, "gamepad-format") == 0)
+    else if(ffStrEqualsIgnCase(command, "gamepad-format"))
     {
         constructAndPrintCommandHelpFormat("gamepad", "{1}", 1,
             "Name",
@@ -681,23 +681,18 @@ static inline void optionCheckString(const char* key, const char* value, FFstrbu
     ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
 }
 
-static inline bool startsWith(const char* str, const char* compareTo)
-{
-    return strncasecmp(str, compareTo, strlen(compareTo)) == 0;
-}
-
 static void parseOption(FFinstance* instance, FFdata* data, const char* key, const char* value)
 {
     ///////////////////////
     //Informative options//
     ///////////////////////
 
-    if(strcasecmp(key, "-h") == 0 || strcasecmp(key, "--help") == 0)
+    if(ffStrEqualsIgnCase(key, "-h") || ffStrEqualsIgnCase(key, "--help"))
     {
         printCommandHelp(value);
         exit(0);
     }
-    else if(strcasecmp(key, "-v") == 0 || strcasecmp(key, "--version") == 0)
+    else if(ffStrEqualsIgnCase(key, "-v") || ffStrEqualsIgnCase(key, "--version"))
     {
         #ifndef NDEBUG
             #define FF_BUILD_TYPE "-debug"
@@ -732,30 +727,30 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
 
         exit(0);
     }
-    else if(strcasecmp(key, "--version-raw") == 0)
+    else if(ffStrEqualsIgnCase(key, "--version-raw"))
     {
         puts(FASTFETCH_PROJECT_VERSION);
         exit(0);
     }
-    else if(startsWith(key, "--print"))
+    else if(ffStrStartsWithIgnCase(key, "--print"))
     {
         const char* subkey = key + strlen("--print");
-        if(strcasecmp(subkey, "-config-system") == 0)
+        if(ffStrEqualsIgnCase(subkey, "-config-system"))
         {
             puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-config-user") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-config-user"))
         {
             puts(FASTFETCH_DATATEXT_CONFIG_USER);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-structure") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-structure"))
         {
             puts(FASTFETCH_DATATEXT_STRUCTURE);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-logos") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-logos"))
         {
             ffLogoBuiltinPrint(instance);
             exit(0);
@@ -763,35 +758,35 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
         else
             goto error;
     }
-    else if(startsWith(key, "--list"))
+    else if(ffStrStartsWithIgnCase(key, "--list"))
     {
         const char* subkey = key + strlen("--list");
-        if(strcasecmp(subkey, "-modules") == 0)
+        if(ffStrEqualsIgnCase(subkey, "-modules"))
         {
             puts(FASTFETCH_DATATEXT_MODULES);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-presets") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-presets"))
         {
             listAvailablePresets(instance);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-config-paths") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-config-paths"))
         {
             listConfigPaths(instance);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-data-paths") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-data-paths"))
         {
             listDataPaths(instance);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-features") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-features"))
         {
             ffListFeatures();
             exit(0);
         }
-        else if(strcasecmp(subkey, "-logos") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-logos"))
         {
             puts("Builtin logos:");
             ffLogoBuiltinList();
@@ -799,7 +794,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             listAvailableLogos(instance);
             exit(0);
         }
-        else if(strcasecmp(subkey, "-logos-autocompletion") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-logos-autocompletion"))
         {
             ffLogoBuiltinListAutocompletion();
             exit(0);
@@ -812,34 +807,34 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //General options//
     ///////////////////
 
-    else if(strcasecmp(key, "-r") == 0 || strcasecmp(key, "--recache") == 0)
+    else if(ffStrEqualsIgnCase(key, "-r") || ffStrEqualsIgnCase(key, "--recache"))
         instance->config.recache = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--load-config") == 0)
+    else if(ffStrEqualsIgnCase(key, "--load-config"))
         optionParseConfigFile(instance, data, key, value);
-    else if(strcasecmp(key, "--gen-config") == 0)
+    else if(ffStrEqualsIgnCase(key, "--gen-config"))
         generateConfigFile(instance, false);
-    else if(strcasecmp(key, "--gen-config-force") == 0)
+    else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
         generateConfigFile(instance, true);
-    else if(strcasecmp(key, "--thread") == 0 || strcasecmp(key, "--multithreading") == 0)
+    else if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
         instance->config.multithreading = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--stat") == 0)
+    else if(ffStrEqualsIgnCase(key, "--stat"))
     {
         if((instance->config.stat = ffOptionParseBoolean(value)))
             instance->config.showErrors = true;
     }
-    else if(strcasecmp(key, "--allow-slow-operations") == 0)
+    else if(ffStrEqualsIgnCase(key, "--allow-slow-operations"))
         instance->config.allowSlowOperations = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--escape-bedrock") == 0)
+    else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
         instance->config.escapeBedrock = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--pipe") == 0)
+    else if(ffStrEqualsIgnCase(key, "--pipe"))
         instance->config.pipe = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--load-user-config") == 0)
+    else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);
 
     #if defined(__linux__) || defined(__FreeBSD__)
-    else if(strcasecmp(key, "--player-name") == 0)
+    else if(ffStrEqualsIgnCase(key, "--player-name"))
         ffOptionParseString(key, value, &instance->config.playerName);
-    else if (strcasecmp(key, "--os-file") == 0)
+    else if (ffStrEqualsIgnCase(key, "--os-file"))
         ffOptionParseString(key, value, &instance->config.osFile);
     #endif
 
@@ -853,33 +848,33 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Display options//
     ///////////////////
 
-    else if(strcasecmp(key, "--show-errors") == 0)
+    else if(ffStrEqualsIgnCase(key, "--show-errors"))
         instance->config.showErrors = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--disable-linewrap") == 0)
+    else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
         instance->config.disableLinewrap = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "--hide-cursor") == 0)
+    else if(ffStrEqualsIgnCase(key, "--hide-cursor"))
         instance->config.hideCursor = ffOptionParseBoolean(value);
-    else if(strcasecmp(key, "-s") == 0 || strcasecmp(key, "--structure") == 0)
+    else if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
         ffOptionParseString(key, value, &data->structure);
-    else if(strcasecmp(key, "--separator") == 0)
+    else if(ffStrEqualsIgnCase(key, "--separator"))
         ffOptionParseString(key, value, &instance->config.keyValueSeparator);
-    else if(strcasecmp(key, "--color-keys") == 0)
+    else if(ffStrEqualsIgnCase(key, "--color-keys"))
     {
         optionCheckString(key, value, &instance->config.colorKeys);
         ffOptionParseColor(value, &instance->config.colorKeys);
     }
-    else if(strcasecmp(key, "--color-title") == 0)
+    else if(ffStrEqualsIgnCase(key, "--color-title"))
     {
         optionCheckString(key, value, &instance->config.colorTitle);
         ffOptionParseColor(value, &instance->config.colorTitle);
     }
-    else if(strcasecmp(key, "-c") == 0 || strcasecmp(key, "--color") == 0)
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--color"))
     {
         optionCheckString(key, value, &instance->config.colorKeys);
         ffOptionParseColor(value, &instance->config.colorKeys);
         ffStrbufSet(&instance->config.colorTitle, &instance->config.colorKeys);
     }
-    else if(strcasecmp(key, "--binary-prefix") == 0)
+    else if(ffStrEqualsIgnCase(key, "--binary-prefix"))
     {
         instance->config.binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "iec", FF_BINARY_PREFIX_TYPE_IEC },
@@ -888,9 +883,9 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             {}
         });
     }
-    else if(strcasecmp(key, "--percent-type") == 0)
+    else if(ffStrEqualsIgnCase(key, "--percent-type"))
         instance->config.percentType = ffOptionParseUInt32(key, value);
-    else if(strcasecmp(key, "--no-buffer") == 0)
+    else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         instance->config.noBuffer = ffOptionParseBoolean(value);
 
     ///////////////////////
@@ -951,56 +946,56 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     //Library options//
     ///////////////////
 
-    else if(startsWith(key, "--lib"))
+    else if(ffStrStartsWithIgnCase(key, "--lib"))
     {
         const char* subkey = key + strlen("--lib");
-        if(strcasecmp(subkey, "-PCI") == 0)
+        if(ffStrEqualsIgnCase(subkey, "-PCI"))
             ffOptionParseString(key, value, &instance->config.libPCI);
-        else if(strcasecmp(subkey, "-vulkan") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-vulkan"))
             ffOptionParseString(key, value, &instance->config.libVulkan);
-        else if(strcasecmp(subkey, "-freetype") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-freetype"))
             ffOptionParseString(key, value, &instance->config.libfreetype);
-        else if(strcasecmp(subkey, "-wayland") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-wayland"))
             ffOptionParseString(key, value, &instance->config.libWayland);
-        else if(strcasecmp(subkey, "-xcb-randr") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-xcb-randr"))
             ffOptionParseString(key, value, &instance->config.libXcbRandr);
-        else if(strcasecmp(subkey, "-xcb") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-xcb"))
             ffOptionParseString(key, value, &instance->config.libXcb);
-        else if(strcasecmp(subkey, "-Xrandr") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-Xrandr"))
             ffOptionParseString(key, value, &instance->config.libXrandr);
-        else if(strcasecmp(subkey, "-X11") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-X11"))
             ffOptionParseString(key, value, &instance->config.libX11);
-        else if(strcasecmp(subkey, "-gio") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-gio"))
             ffOptionParseString(key, value, &instance->config.libGIO);
-        else if(strcasecmp(subkey, "-DConf") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-DConf"))
             ffOptionParseString(key, value, &instance->config.libDConf);
-        else if(strcasecmp(subkey, "-dbus") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-dbus"))
             ffOptionParseString(key, value, &instance->config.libDBus);
-        else if(strcasecmp(subkey, "-XFConf") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-XFConf"))
             ffOptionParseString(key, value, &instance->config.libXFConf);
-        else if(strcasecmp(subkey, "-sqlite") == 0 || strcasecmp(subkey, "-sqlite3") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-sqlite") || ffStrEqualsIgnCase(subkey, "-sqlite3"))
             ffOptionParseString(key, value, &instance->config.libSQLite3);
-        else if(strcasecmp(subkey, "-rpm") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-rpm"))
             ffOptionParseString(key, value, &instance->config.librpm);
-        else if(strcasecmp(subkey, "-imagemagick") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-imagemagick"))
             ffOptionParseString(key, value, &instance->config.libImageMagick);
-        else if(strcasecmp(subkey, "-z") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-z"))
             ffOptionParseString(key, value, &instance->config.libZ);
-        else if(strcasecmp(subkey, "-chafa") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-chafa"))
             ffOptionParseString(key, value, &instance->config.libChafa);
-        else if(strcasecmp(subkey, "-egl") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-egl"))
             ffOptionParseString(key, value, &instance->config.libEGL);
-        else if(strcasecmp(subkey, "-glx") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-glx"))
             ffOptionParseString(key, value, &instance->config.libGLX);
-        else if(strcasecmp(subkey, "-osmesa") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-osmesa"))
             ffOptionParseString(key, value, &instance->config.libOSMesa);
-        else if(strcasecmp(subkey, "-opencl") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-opencl"))
             ffOptionParseString(key, value, &instance->config.libOpenCL);
-        else if(strcasecmp(subkey, "-wlanapi") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-wlanapi"))
             ffOptionParseString(key, value, &instance->config.libwlanapi);
-        else if(strcasecmp(key, "-pulse") == 0)
+        else if(ffStrEqualsIgnCase(key, "-pulse"))
             ffOptionParseString(key, value, &instance->config.libPulse);
-        else if(strcasecmp(subkey, "-nm") == 0)
+        else if(ffStrEqualsIgnCase(subkey, "-nm"))
             ffOptionParseString(key, value, &instance->config.libnm);
         else
             goto error;
@@ -1068,107 +1063,107 @@ static void parseArguments(FFinstance* instance, FFdata* data, int argc, const c
 
 static void parseStructureCommand(FFinstance* instance, const char* line)
 {
-    if(strcasecmp(line, FF_BREAK_MODULE_NAME) == 0)
+    if(ffStrEqualsIgnCase(line, FF_BREAK_MODULE_NAME))
         ffPrintBreak(instance);
-    else if(strcasecmp(line, FF_TITLE_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_TITLE_MODULE_NAME))
         ffPrintTitle(instance, &instance->config.title);
-    else if(strcasecmp(line, FF_SEPARATOR_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_SEPARATOR_MODULE_NAME))
         ffPrintSeparator(instance, &instance->config.separator);
-    else if(strcasecmp(line, FF_OS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_OS_MODULE_NAME))
         ffPrintOS(instance, &instance->config.os);
-    else if(strcasecmp(line, FF_HOST_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_HOST_MODULE_NAME))
         ffPrintHost(instance, &instance->config.host);
-    else if(strcasecmp(line, FF_BIOS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_BIOS_MODULE_NAME))
         ffPrintBios(instance, &instance->config.bios);
-    else if(strcasecmp(line, FF_BOARD_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_BOARD_MODULE_NAME))
         ffPrintBoard(instance, &instance->config.board);
-    else if(strcasecmp(line, FF_BRIGHTNESS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_BRIGHTNESS_MODULE_NAME))
         ffPrintBrightness(instance, &instance->config.brightness);
-    else if(strcasecmp(line, FF_CHASSIS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_CHASSIS_MODULE_NAME))
         ffPrintChassis(instance, &instance->config.chassis);
-    else if(strcasecmp(line, FF_KERNEL_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_KERNEL_MODULE_NAME))
         ffPrintKernel(instance, &instance->config.kernel);
-    else if(strcasecmp(line, FF_PROCESSES_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_PROCESSES_MODULE_NAME))
         ffPrintProcesses(instance, &instance->config.processes);
-    else if(strcasecmp(line, FF_UPTIME_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_UPTIME_MODULE_NAME))
         ffPrintUptime(instance, &instance->config.uptime);
-    else if(strcasecmp(line, FF_PACKAGES_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_PACKAGES_MODULE_NAME))
         ffPrintPackages(instance, &instance->config.packages);
-    else if(strcasecmp(line, FF_SHELL_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_SHELL_MODULE_NAME))
         ffPrintShell(instance, &instance->config.shell);
-    else if(strcasecmp(line, FF_DISPLAY_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_DISPLAY_MODULE_NAME))
         ffPrintDisplay(instance, &instance->config.display);
-    else if(strcasecmp(line, FF_DE_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_DE_MODULE_NAME))
         ffPrintDE(instance, &instance->config.de);
-    else if(strcasecmp(line, FF_WM_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_WM_MODULE_NAME))
         ffPrintWM(instance, &instance->config.wm);
-    else if(strcasecmp(line, FF_THEME_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_THEME_MODULE_NAME))
         ffPrintTheme(instance, &instance->config.theme);
-    else if(strcasecmp(line, FF_WMTHEME_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_WMTHEME_MODULE_NAME))
         ffPrintWMTheme(instance, &instance->config.wmTheme);
-    else if(strcasecmp(line, FF_ICONS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_ICONS_MODULE_NAME))
         ffPrintIcons(instance, &instance->config.icons);
-    else if(strcasecmp(line, FF_WALLPAPER_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_WALLPAPER_MODULE_NAME))
         ffPrintWallpaper(instance, &instance->config.wallpaper);
-    else if(strcasecmp(line, FF_FONT_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_FONT_MODULE_NAME))
         ffPrintFont(instance, &instance->config.font);
-    else if(strcasecmp(line, FF_CURSOR_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_CURSOR_MODULE_NAME))
         ffPrintCursor(instance, &instance->config.cursor);
-    else if(strcasecmp(line, FF_TERMINAL_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_TERMINAL_MODULE_NAME))
         ffPrintTerminal(instance, &instance->config.terminal);
-    else if(strcasecmp(line, FF_TERMINALFONT_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_TERMINALFONT_MODULE_NAME))
         ffPrintTerminalFont(instance, &instance->config.terminalFont);
-    else if(strcasecmp(line, FF_CPU_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_CPU_MODULE_NAME))
         ffPrintCPU(instance, &instance->config.cpu);
-    else if(strcasecmp(line, FF_CPUUSAGE_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_CPUUSAGE_MODULE_NAME))
         ffPrintCPUUsage(instance, &instance->config.cpuUsage);
-    else if(strcasecmp(line, FF_CUSTOM_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_CUSTOM_MODULE_NAME))
         ffPrintCustom(instance, &instance->config.custom);
-    else if(strcasecmp(line, FF_GPU_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_GPU_MODULE_NAME))
         ffPrintGPU(instance, &instance->config.gpu);
-    else if(strcasecmp(line, FF_MEMORY_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_MEMORY_MODULE_NAME))
         ffPrintMemory(instance, &instance->config.memory);
-    else if(strcasecmp(line, FF_SWAP_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_SWAP_MODULE_NAME))
         ffPrintSwap(instance, &instance->config.swap);
-    else if(strcasecmp(line, FF_DISK_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_DISK_MODULE_NAME))
         ffPrintDisk(instance, &instance->config.disk);
-    else if(strcasecmp(line, FF_BATTERY_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_BATTERY_MODULE_NAME))
         ffPrintBattery(instance, &instance->config.battery);
-    else if(strcasecmp(line, FF_POWERADAPTER_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_POWERADAPTER_MODULE_NAME))
         ffPrintPowerAdapter(instance, &instance->config.powerAdapter);
-    else if(strcasecmp(line, FF_LOCALE_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_LOCALE_MODULE_NAME))
         ffPrintLocale(instance, &instance->config.locale);
-    else if(strcasecmp(line, FF_LOCALIP_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))
         ffPrintLocalIp(instance, &instance->config.localIP);
-    else if(strcasecmp(line, FF_PUBLICIP_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_PUBLICIP_MODULE_NAME))
         ffPrintPublicIp(instance, &instance->config.publicIP);
-    else if(strcasecmp(line, FF_WIFI_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_WIFI_MODULE_NAME))
         ffPrintWifi(instance, &instance->config.wifi);
-    else if(strcasecmp(line, FF_WEATHER_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_WEATHER_MODULE_NAME))
         ffPrintWeather(instance, &instance->config.weather);
-    else if(strcasecmp(line, FF_PLAYER_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_PLAYER_MODULE_NAME))
         ffPrintPlayer(instance, &instance->config.player);
-    else if(strcasecmp(line, FF_MEDIA_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
         ffPrintMedia(instance, &instance->config.media);
-    else if(strcasecmp(line, FF_DATETIME_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
         ffPrintDateTime(instance, &instance->config.dateTime);
-    else if(strcasecmp(line, FF_COLORS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_COLORS_MODULE_NAME))
         ffPrintColors(instance, &instance->config.colors);
-    else if(strcasecmp(line, FF_VULKAN_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_VULKAN_MODULE_NAME))
         ffPrintVulkan(instance, &instance->config.vulkan);
-    else if(strcasecmp(line, FF_OPENGL_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_OPENGL_MODULE_NAME))
         ffPrintOpenGL(instance, &instance->config.openGL);
-    else if(strcasecmp(line, FF_OPENCL_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_OPENCL_MODULE_NAME))
         ffPrintOpenCL(instance, &instance->config.openCL);
-    else if(strcasecmp(line, FF_USERS_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_USERS_MODULE_NAME))
         ffPrintUsers(instance, &instance->config.users);
-    else if(strcasecmp(line, FF_COMMAND_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_COMMAND_MODULE_NAME))
         ffPrintCommand(instance, &instance->config.command);
-    else if(strcasecmp(line, FF_BLUETOOTH_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_BLUETOOTH_MODULE_NAME))
         ffPrintBluetooth(instance, &instance->config.bluetooth);
-    else if(strcasecmp(line, FF_SOUND_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_SOUND_MODULE_NAME))
         ffPrintSound(instance, &instance->config.sound);
-    else if(strcasecmp(line, FF_GAMEPAD_MODULE_NAME) == 0)
+    else if(ffStrEqualsIgnCase(line, FF_GAMEPAD_MODULE_NAME))
         ffPrintGamepad(instance, &instance->config.gamepad);
     else
         ffPrintErrorString(instance, line, 0, NULL, NULL, "<no implementation provided>");

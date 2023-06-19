@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/bluetooth/bluetooth.h"
 #include "modules/bluetooth/bluetooth.h"
+#include "util/stringUtils.h"
 
 #define FF_BLUETOOTH_NUM_FORMAT_ARGS 4
 
@@ -83,7 +84,7 @@ bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "show-disconnected") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-disconnected"))
         options->showDisconnected = ffOptionParseBoolean(value);
     return false;
 }
@@ -105,13 +106,13 @@ void ffParseBluetoothJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "showDisconnected") == 0)
+            if (ffStrEqualsIgnCase(key, "showDisconnected"))
             {
                 options.showDisconnected = yyjson_get_bool(val);
                 continue;

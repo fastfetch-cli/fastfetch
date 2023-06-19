@@ -3,6 +3,7 @@
 #include "common/option.h"
 #include "detection/os/os.h"
 #include "modules/os/os.h"
+#include "util/stringUtils.h"
 
 #include <ctype.h>
 
@@ -169,7 +170,7 @@ void ffParseOSJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))

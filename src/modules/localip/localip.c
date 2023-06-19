@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "detection/localip/localip.h"
 #include "modules/localip/localip.h"
+#include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
 #define FF_LOCALIP_NUM_FORMAT_ARGS 2
@@ -134,7 +135,7 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (strcasecmp(subKey, "show-ipv4") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-ipv4"))
     {
         if (ffOptionParseBoolean(value))
             options->showType |= FF_LOCALIP_TYPE_IPV4_BIT;
@@ -143,7 +144,7 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
-    if (strcasecmp(subKey, "show-ipv6") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-ipv6"))
     {
         if (ffOptionParseBoolean(value))
             options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
@@ -152,7 +153,7 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
-    if (strcasecmp(subKey, "show-mac") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-mac"))
     {
         if (ffOptionParseBoolean(value))
             options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
@@ -161,7 +162,7 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
-    if (strcasecmp(subKey, "show-loop") == 0)
+    if (ffStrEqualsIgnCase(subKey, "show-loop"))
     {
         if (ffOptionParseBoolean(value))
             options->showType |= FF_LOCALIP_TYPE_LOOP_BIT;
@@ -170,7 +171,7 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
-    if(strcasecmp(subKey, "compact") == 0)
+    if(ffStrEqualsIgnCase(subKey, "compact"))
     {
         if (ffOptionParseBoolean(value))
             options->showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
@@ -179,7 +180,7 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
-    if (strcasecmp(subKey, "name-prefix") == 0)
+    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
     {
         ffOptionParseString(key, value, &options->namePrefix);
         return true;
@@ -206,13 +207,13 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
         yyjson_obj_foreach(module, idx, max, key_, val)
         {
             const char* key = yyjson_get_str(key_);
-            if(strcasecmp(key, "type") == 0)
+            if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            if (strcasecmp(key, "showIpv4") == 0)
+            if (ffStrEqualsIgnCase(key, "showIpv4"))
             {
                 if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_IPV4_BIT;
@@ -221,7 +222,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showIpv6") == 0)
+            if (ffStrEqualsIgnCase(key, "showIpv6"))
             {
                 if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_IPV6_BIT;
@@ -230,7 +231,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showMac") == 0)
+            if (ffStrEqualsIgnCase(key, "showMac"))
             {
                 if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_MAC_BIT;
@@ -239,7 +240,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "showLoop") == 0)
+            if (ffStrEqualsIgnCase(key, "showLoop"))
             {
                 if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_LOOP_BIT;
@@ -248,7 +249,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "compact") == 0)
+            if (ffStrEqualsIgnCase(key, "compact"))
             {
                 if (yyjson_get_bool(val))
                     options.showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
@@ -257,7 +258,7 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            if (strcasecmp(key, "namePrefix") == 0)
+            if (ffStrEqualsIgnCase(key, "namePrefix"))
             {
                 ffStrbufSetS(&options.namePrefix, yyjson_get_str(val));
                 continue;
