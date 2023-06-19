@@ -1,6 +1,7 @@
 #include "wifi.h"
 #include "common/processing.h"
 #include "common/properties.h"
+#include "util/stringUtils.h"
 
 #include <net/if.h>
 #include <stdio.h>
@@ -14,7 +15,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* res
 
     for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
     {
-        if (strncmp(i->if_name, "wlan", strlen("wlan")) != 0) continue;
+        if (!ffStrStartsWith(i->if_name, "wlan")) continue;
         FF_STRBUF_AUTO_DESTROY ifconfig = ffStrbufCreate();
         if (ffProcessAppendStdOut(&ifconfig, (char* const[]) {
             "ifconfig",

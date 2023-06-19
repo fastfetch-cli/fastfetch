@@ -1,6 +1,7 @@
 #include "logo/logo.h"
 
 #include "common/jsonconfig.h"
+#include "util/stringUtils.h"
 
 void ffInitLogoOptions(FFLogoOptions* options)
 {
@@ -63,10 +64,10 @@ logoType:
                 {},
             });
         }
-        else if(strncasecmp(subKey, "color-", strlen("color-")) && key[13] != '\0' && key[14] == '\0') // matches "--logo-color-*"
+        else if(ffStrStartsWithIgnCase(subKey, "color-") && subKey[6] != '\0' && subKey[7] == '\0') // matches "--logo-color-*"
         {
             //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-            int index = (int)key[13] - 49;
+            int index = (int)subKey[6] - '0' - 1;
 
             //Match only --logo-color-[1-9]
             if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)

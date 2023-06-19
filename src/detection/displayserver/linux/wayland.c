@@ -1,4 +1,5 @@
 #include "displayserver_linux.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -105,9 +106,9 @@ static void waylandOutputGeometryListener(void *data,
 static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
 {
     WaylandDisplay* display = data;
-    if(strncmp(name, "eDP-", strlen("eDP-")) == 0)
+    if(ffStrStartsWith(name, "eDP-"))
         display->type = FF_DISPLAY_TYPE_BUILTIN;
-    else if(strncmp(name, "HDMI-", strlen("HDMI-")) == 0 || strncmp(name, "DP-", strlen("DP-")) == 0)
+    else if(ffStrStartsWith(name, "HDMI-") || ffStrStartsWith(name, "DP-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
 }
 #endif

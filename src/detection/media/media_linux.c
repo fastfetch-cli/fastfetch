@@ -139,7 +139,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
         const char* busName;
         data->lib->ffdbus_message_iter_get_basic(&arrayIterator, &busName);
 
-        if(strncmp(busName, FF_DBUS_MPRIS_PREFIX, sizeof(FF_DBUS_MPRIS_PREFIX) - 1) != 0)
+        if(!ffStrStartsWith(busName, FF_DBUS_MPRIS_PREFIX))
             FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
 
         if(getBusProperties(data, busName, result))

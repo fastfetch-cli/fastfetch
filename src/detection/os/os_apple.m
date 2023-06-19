@@ -78,12 +78,11 @@ static void parseOSXSoftwareLicense(FFOSResult* os)
     char* line = NULL;
     size_t len = 0;
     const char* searchStr = "\\f0\\b SOFTWARE LICENSE AGREEMENT FOR macOS ";
-    const size_t searchLen = strlen(searchStr);
     while(getline(&line, &len, rtf) != EOF)
     {
-        if (strncmp(line, searchStr, searchLen) == 0)
+        if (ffStrStartsWith(line, searchStr))
         {
-            ffStrbufAppendS(&os->codename, line + searchLen);
+            ffStrbufAppendS(&os->codename, line + strlen(searchStr));
             ffStrbufTrimRight(&os->codename, '\n');
             ffStrbufTrimRight(&os->codename, '\\');
             break;
