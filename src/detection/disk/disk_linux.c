@@ -17,6 +17,8 @@
 
 static bool isPhysicalDevice(FFstrbuf* device)
 {
+    #ifndef __ANDROID__ //On Android, `/dev` is not accessable, so that the following checks always fail
+
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(ffStrbufEqualS(device, "drvfs"))
         return true;
@@ -36,6 +38,8 @@ static bool isPhysicalDevice(FFstrbuf* device)
     //Pseudo filesystems don't have a device in /dev
     if(!ffStrbufStartsWithS(device, "/dev/"))
         return false;
+
+    #endif // __ANDROID__
 
     if(
         ffStrbufStartsWithS(device, "/dev/loop") || //Ignore loop devices
