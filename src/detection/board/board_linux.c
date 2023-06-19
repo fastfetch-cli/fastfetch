@@ -41,16 +41,10 @@ static void getHostValue(const char* devicesPath, const char* classPath, FFstrbu
     ffStrbufClear(buffer);
 }
 
-void ffDetectBoard(FFBoardResult* board)
+const char* ffDetectBoard(FFBoardResult* board)
 {
-    ffStrbufInit(&board->error);
-
-    ffStrbufInit(&board->boardName);
     getHostValue("/sys/devices/virtual/dmi/id/board_name", "/sys/class/dmi/id/board_name", &board->boardName);
-
-    ffStrbufInit(&board->boardVendor);
     getHostValue("/sys/devices/virtual/dmi/id/board_vendor", "/sys/class/dmi/id/board_vendor", &board->boardVendor);
-
-    ffStrbufInit(&board->boardVersion);
     getHostValue("/sys/devices/virtual/dmi/id/board_version", "/sys/class/dmi/id/board_version", &board->boardVersion);
+    return NULL;
 }

@@ -9,11 +9,14 @@
 void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
 {
     FFBoardResult result;
-    ffDetectBoard(&result);
+    ffStrbufInit(&result.boardName);
+    ffStrbufInit(&result.boardVendor);
+    ffStrbufInit(&result.boardVersion);
+    const char* error = ffDetectBoard(&result);
 
-    if(result.error.length > 0)
+    if(error)
     {
-        ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%*s", result.error.length, result.error.chars);
+        ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
@@ -44,7 +47,6 @@ exit:
     ffStrbufDestroy(&result.boardName);
     ffStrbufDestroy(&result.boardVendor);
     ffStrbufDestroy(&result.boardVersion);
-    ffStrbufDestroy(&result.error);
 }
 
 void ffInitBoardOptions(FFBoardOptions* options)
