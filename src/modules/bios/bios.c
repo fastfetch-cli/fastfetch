@@ -31,7 +31,10 @@ void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        puts(bios.biosRelease.chars);
+        ffStrbufWriteTo(&bios.biosRelease, stdout);
+        if (bios.biosVersion.length)
+            printf(" (%s)", bios.biosVersion.chars);
+        putchar('\n');
     }
     else
     {
