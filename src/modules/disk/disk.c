@@ -60,7 +60,8 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
 
         if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
         {
-            ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
+            if(disk->filesystem.length)
+                ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
 
             if(disk->type & FF_DISK_TYPE_EXTERNAL_BIT)
                 ffStrbufAppendS(&str, "[External]");
