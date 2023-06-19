@@ -30,13 +30,10 @@ void ffPrintChassis(FFinstance* instance, FFChassisOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-
-        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateCopy(&result.chassisType);
-
-        if(result.chassisVersion.length > 0)
-            ffStrbufAppendF(&output, " (%s)", result.chassisVersion.chars);
-
-        ffStrbufPutTo(&output, stdout);
+        ffStrbufWriteTo(&result.chassisType, stdout);
+        if (result.chassisVersion.length)
+            printf(" (%s)", result.chassisVersion.chars);
+        putchar('\n');
     }
     else
     {
