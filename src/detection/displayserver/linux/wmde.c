@@ -67,11 +67,13 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         strcasecmp(name, "gnome shell") == 0 ||
         strcasecmp(name, "gnome-session-binary") == 0 ||
         strcasestr(name, "mutter") != NULL
-    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
+    )
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
         strcasecmp(name, "cinnamon-session") == 0 ||
         strcasestr(name, "muffin") != NULL
-    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
+    )
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
     else if(strcasestr(name, "sway") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
     else if(strcasestr(name, "weston") != NULL)
@@ -88,14 +90,25 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
     else if(strcasestr(name, "wslg") != NULL)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WSLG);
-    else if( // WMs where the pretty name matches the process name
-        strcasestr(name, "dwm") != NULL ||
-        strcasestr(name, "bspwm") != NULL ||
-        strcasestr(name, "tinywm") != NULL
-    ) ffStrbufSetS(&result->wmPrettyName, name);
+    else if(strcasestr(name, "dwm") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DWM);
+    else if(strcasestr(name, "bspwm") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_BSPWM);
+    else if(strcasestr(name, "tinywm") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_TINYWM);
+    else if(strcasestr(name, "qtile") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_QTILE);
+    else if(strcasestr(name, "herbstluftwm") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HERBSTLUFTWM);
+    else if(strcasestr(name, "icewm") != NULL)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
+}
 
-    if(result->wmPrettyName.length > 0 && result->wmProcessName.length == 0)
-        ffStrbufSetS(&result->wmProcessName, name);
+static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)
+{
+    applyPrettyNameIfWM(result, processName);
+    if(result->wmPrettyName.length > 0)
+        ffStrbufSetS(&result->wmProcessName, processName);
 }
 
 static void applyBetterWM(FFDisplayServerResult* result, const char* processName)
@@ -103,11 +116,10 @@ static void applyBetterWM(FFDisplayServerResult* result, const char* processName
     if(!ffStrSet(processName))
         return;
 
+    ffStrbufSetS(&result->wmProcessName, processName);
+
     //If it is a known wm, this will set the pretty name
     applyPrettyNameIfWM(result, processName);
-
-    //If it isn't a known wm, we have to set the process name our self
-    ffStrbufSetS(&result->wmProcessName, processName);
 
     //If it isn't a known wm, set the pretty name to the process name
     if(result->wmPrettyName.length == 0)
@@ -261,52 +273,20 @@ static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResul
 {
     if(!ffStrSet(name))
         return;
-
-    else if(
-        strcasecmp(name, "KDE") == 0 ||
-        strcasecmp(name, "plasma") == 0 ||
-        strcasecmp(name, "plasmashell") == 0 ||
-        strcasecmp(name, "plasmawayland") == 0
-    ) getKDE(instance, result);
-
-    else if(
-        strcasecmp(name, "Gnome") == 0 ||
-        strcasecmp(name, "ubuntu:GNOME") == 0 ||
-        strcasecmp(name, "ubuntu") == 0 ||
-        strcasecmp(name, "gnome-shell") == 0
-    ) getGnome(instance, result);
-
-    else if(
-        strcasecmp(name, "X-Cinnamon") == 0 ||
-        strcasecmp(name, "Cinnamon") == 0
-    ) getCinnamon(instance, result);
-
-    else if(
-        strcasecmp(name, "XFCE") == 0 ||
-        strcasecmp(name, "X-XFCE") == 0 ||
-        strcasecmp(name, "XFCE4") == 0 ||
-        strcasecmp(name, "X-XFCE4") == 0 ||
-        strcasecmp(name, "xfce4-session") == 0
-    ) getXFCE4(instance, result);
-
-    else if(
-        strcasecmp(name, "MATE") == 0 ||
-        strcasecmp(name, "X-MATE") == 0 ||
-        strcasecmp(name, "mate-session") == 0
-    ) getMate(instance, result);
-
-    else if(
-        strcasecmp(name, "LXQt") == 0 ||
-        strcasecmp(name, "X-LXQT") == 0 ||
-        strcasecmp(name, "lxqt-session") == 0
-    ) getLXQt(instance, result);
-
-    else if(
-        strcasecmp(name, "Budgie") == 0 ||
-        strcasecmp(name, "X-Budgie") == 0 ||
-        strcasecmp(name, "budgie-desktop") == 0 ||
-        strcasecmp(name, "Budgie:GNOME") == 0
-    ) getBudgie(instance, result);
+    else if(strcasestr(name, "plasma") != NULL || strcasestr(name, "kde") != NULL)
+        getKDE(instance, result);
+    else if(strcasestr(name, "gnome") != NULL)
+        getGnome(instance, result);
+    else if(strcasestr(name, "cinnamon") != NULL)
+        getCinnamon(instance, result);
+    else if(strcasestr(name, "xfce") != NULL)
+        getXFCE4(instance, result);
+    else if(strcasestr(name, "mate") != NULL)
+        getMate(instance, result);
+    else if(strcasestr(name, "lxqt") != NULL)
+        getLXQt(instance, result);
+    else if(strcasestr(name, "budgie") != NULL)
+        getBudgie(instance, result);
 }
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
@@ -390,7 +370,7 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
             applyPrettyNameIfDE(instance, result, processName.chars);
 
         if(result->wmPrettyName.length == 0)
-            applyPrettyNameIfWM(result, processName.chars);
+            applyNameIfWM(result, processName.chars);
 
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
@@ -423,7 +403,7 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
     else
     {
         //if env is a known WM, use it
-        applyPrettyNameIfWM(result, env);
+        applyNameIfWM(result, env);
     }
 
     //Connecting to a display server only gives WM results, not DE results.
