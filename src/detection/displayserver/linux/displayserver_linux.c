@@ -32,16 +32,30 @@ static void parseDRM(FFDisplayServerResult* result)
             continue;
         }
 
-        FFDisplayResult* display = ffListAdd(&result->displays);
-        display->width = 0;
-        display->height = 0;
-        display->refreshRate = 0;
-        display->scaledWidth = 0;
-        display->scaledHeight = 0;
+        uint32_t width = 0, height = 0;
 
-        int scanned = fscanf(modeFile, "%ux%u", &display->width, &display->height);
-        if(scanned < 2 || display->width == 0 || display->height == 0)
-            --result->displays.length;
+        int scanned = fscanf(modeFile, "%ux%u", &width, &height);
+        if(scanned == 2 && width > 0 && height > 0)
+        {
+            const char* plainName = entry->d_name;
+            if (ffStrStartsWith(plainName, "card"))
+            {
+                const char* tmp = strchr(plainName + strlen("card"), '-');
+                if (tmp) plainName = tmp + 1;
+            }
+
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(plainName);
+            ffdsAppendDisplay(
+                result,
+                width, height,
+                0,
+                0, 0,
+                0,
+                &name,
+                FF_DISPLAY_TYPE_UNKNOWN,
+                false
+            );
+        }
 
         fclose(modeFile);
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
