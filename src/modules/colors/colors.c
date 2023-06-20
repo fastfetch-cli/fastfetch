@@ -69,7 +69,7 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
 
     if (ffStrEqualsIgnCase(subKey, "symbol"))
     {
-        options->symbol = (FFColorssymbol) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+        options->symbol = (FFColorsSymbol) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "block", FF_COLORS_SYMBOL_BLOCK },
             { "circle", FF_COLORS_SYMBOL_CIRCLE },
             { "diamond", FF_COLORS_SYMBOL_DIAMOND },
@@ -124,7 +124,7 @@ void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
                 if (error)
                     ffPrintErrorString(instance, FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
                 else
-                    options.symbol = (FFColorssymbol) value;
+                    options.symbol = (FFColorsSymbol) value;
                 continue;
             }
 

@@ -4,7 +4,7 @@
 
 #include "common/option.h"
 
-typedef enum FFColorssymbol
+typedef enum FFColorsSymbol
 {
     FF_COLORS_SYMBOL_BLOCK,
     FF_COLORS_SYMBOL_CIRCLE,
@@ -12,11 +12,11 @@ typedef enum FFColorssymbol
     FF_COLORS_SYMBOL_SQUARE,
     FF_COLORS_SYMBOL_TRIANGLE,
     FF_COLORS_SYMBOL_STAR,
-} FFColorssymbol;
+} FFColorsSymbol;
 
 typedef struct FFColorsOptions
 {
     const char* moduleName;
-    FFColorssymbol symbol;
+    FFColorsSymbol symbol;
     uint32_t paddingLeft;
 } FFColorsOptions;
