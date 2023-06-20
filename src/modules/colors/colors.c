@@ -11,6 +11,9 @@ void ffPrintColors(FFinstance* instance, FFColorsOptions* options)
 
     ffLogoPrintLine(instance);
 
+    if(options->paddingLeft > 0)
+        ffPrintCharTimes(' ', options->paddingLeft);
+
     if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
     {
         // 4%d: Set the background color
@@ -21,6 +24,9 @@ void ffPrintColors(FFinstance* instance, FFColorsOptions* options)
         puts(FASTFETCH_TEXT_MODIFIER_RESET);
 
         ffLogoPrintLine(instance);
+
+        if(options->paddingLeft > 0)
+            ffPrintCharTimes(' ', options->paddingLeft);
 
         // 1: Set everything to bolt. This causes normal colors on some systems to be bright.
         // 4%d: Set the backgound to the not bright color
@@ -53,6 +59,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
 {
     options->moduleName = FF_COLORS_MODULE_NAME;
     options->symbol = FF_COLORS_SYMBOL_BLOCK;
+    options->paddingLeft = 0;
 }
 
 bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, const char* value)
@@ -71,6 +78,12 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
             { "star", FF_COLORS_SYMBOL_STAR },
             {},
         });
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "padding-left"))
+    {
+        options->paddingLeft = ffOptionParseUInt32(key, value);
         return true;
     }
 
@@ -112,6 +125,12 @@ void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
                     ffPrintErrorString(instance, FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
                 else
                     options.symbol = (FFColorssymbol) value;
+                continue;
+            }
+
+            if (ffStrEqualsIgnCase(key, "paddingLeft"))
+            {
+                options.paddingLeft = (uint32_t) yyjson_get_uint(val);
                 continue;
             }
 

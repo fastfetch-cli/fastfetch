@@ -941,6 +941,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
     else if(ffParseSoundCommandOptions(&instance->config.sound, key, value)) {}
     else if(ffParseGamepadCommandOptions(&instance->config.gamepad, key, value)) {}
+    else if(ffParseColorsCommandOptions(&instance->config.colors, key, value)) {}
 
     ///////////////////
     //Library options//

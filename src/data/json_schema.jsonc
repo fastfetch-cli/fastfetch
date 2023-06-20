@@ -678,6 +678,13 @@
                                             "star"
                                         ],
                                         "default": "block"
+                                    },
+                                    "paddingLeft": {
+                                        "title": "modules.colors.paddingLeft",
+                                        "description": "Set the number of white spaces to print before the symbol",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "default": 0
                                     }
                                 }
                             },

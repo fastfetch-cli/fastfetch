@@ -18,4 +18,5 @@ typedef struct FFColorsOptions
 {
     const char* moduleName;
     FFColorssymbol symbol;
+    uint32_t paddingLeft;
 } FFColorsOptions;
