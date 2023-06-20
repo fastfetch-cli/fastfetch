@@ -16,6 +16,7 @@ Features:
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
 * Support `--*-key-color` option to change the key color of specified module
 * Support `--colors-symbol` and `--colors-padding-left`
+* Add LM (Login Manager) module
 
 # 1.11.3
 

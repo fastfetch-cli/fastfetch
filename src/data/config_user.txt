@@ -314,6 +314,7 @@
 #--disk-key Disk ({1})
 #--battery-key Battery {1}
 #--poweradapter-key Power Adapter {1}
+#--lm-key LM
 #--locale-key Locale
 #--localip-key Local IP ({1})
 #--publicip-key Public IP
@@ -363,6 +364,7 @@
 #--disk-format
 #--battery-format
 #--poweradapter-format
+#--lm-format
 #--locale-format
 #--localip-format
 #--publicip-format
@@ -408,6 +410,7 @@
 #--disk-key-color
 #--battery-key-color
 #--poweradapter-key-color
+#--lm-key-color
 #--locale-key-color
 #--localip-key-color
 #--publicip-key-color

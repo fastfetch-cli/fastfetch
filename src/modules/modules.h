@@ -25,6 +25,7 @@
 #include "modules/host/host.h"
 #include "modules/icons/icons.h"
 #include "modules/kernel/kernel.h"
+#include "modules/lm/lm.h"
 #include "modules/locale/locale.h"
 #include "modules/localip/localip.h"
 #include "modules/media/media.h"

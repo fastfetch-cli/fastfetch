@@ -89,6 +89,7 @@ typedef struct FFconfig
     FFDiskOptions disk;
     FFBatteryOptions battery;
     FFPowerAdapterOptions powerAdapter;
+    FFLMOptions lm;
     FFLocaleOptions locale;
     FFLocalIpOptions localIP;
     FFPublicIpOptions publicIP;

@@ -348,6 +348,13 @@ static inline void printCommandHelp(const char* command)
             "PowerAdapter description"
         );
     }
+    else if(ffStrEqualsIgnCase(command, "lm-format"))
+    {
+        constructAndPrintCommandHelpFormat("lm", "{} ({})", 2,
+            "LM service",
+            "LM type"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "locale-format"))
     {
         constructAndPrintCommandHelpFormat("locale", "{}", 1,
@@ -1130,6 +1137,8 @@ static void parseStructureCommand(FFinstance* instance, const char* line)
         ffPrintBattery(instance, &instance->config.battery);
     else if(ffStrEqualsIgnCase(line, FF_POWERADAPTER_MODULE_NAME))
         ffPrintPowerAdapter(instance, &instance->config.powerAdapter);
+    else if(ffStrEqualsIgnCase(line, FF_LM_MODULE_NAME))
+        ffPrintLM(instance, &instance->config.lm);
     else if(ffStrEqualsIgnCase(line, FF_LOCALE_MODULE_NAME))
         ffPrintLocale(instance, &instance->config.locale);
     else if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))

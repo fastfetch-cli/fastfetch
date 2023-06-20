@@ -1,0 +1,18 @@
+#pragma once
+
+#ifndef FF_INCLUDED_detection_lm_lm
+#define FF_INCLUDED_detection_lm_lm
+
+#include "fastfetch.h"
+
+typedef struct FFLMResult
+{
+    FFstrbuf service;
+    FFstrbuf type;
+    // bool isDisplay;
+    // bool remote;
+} FFLMResult;
+
+const char* ffDetectLM(FFLMResult* result);
+
+#endif
