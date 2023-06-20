@@ -85,21 +85,12 @@ static void waylandOutputGeometryListener(void *data,
     FF_MAYBE_UNUSED int32_t physical_width,
     FF_MAYBE_UNUSED int32_t physical_height,
     FF_MAYBE_UNUSED int32_t subpixel,
-    const char *make,
-    const char *model,
+    FF_MAYBE_UNUSED const char *make,
+    FF_MAYBE_UNUSED const char *model,
     int32_t transform)
 {
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
-
-    if(make && !ffStrEquals(make, "unknown"))
-        ffStrbufAppendS(&display->name, make);
-    if(model && !ffStrEquals(model, "unknown"))
-    {
-        if(display->name.length > 0)
-            ffStrbufAppendC(&display->name, '-');
-        ffStrbufAppendS(&display->name, model);
-    }
 }
 
 #ifdef WL_OUTPUT_NAME_SINCE_VERSION
@@ -110,6 +101,7 @@ static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_outp
         display->type = FF_DISPLAY_TYPE_BUILTIN;
     else if(ffStrStartsWith(name, "HDMI-") || ffStrStartsWith(name, "DP-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
+    ffStrbufAppendS(&display->name, name);
 }
 #endif
 
