@@ -747,12 +747,6 @@
                                         "description": "Set if all displays should be printed in one line",
                                         "default": "none"
                                     },
-                                    "detectName": {
-                                        "title": "modules.display.detectName",
-                                        "description": "Set if display name should be detected and printed (if supported)",
-                                        "type": "boolean",
-                                        "default": false
-                                    },
                                     "preciseRefreshRate": {
                                         "title": "modules.display.preciseRefreshRate",
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",

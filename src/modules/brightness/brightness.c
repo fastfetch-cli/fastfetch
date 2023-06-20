@@ -1,6 +1,8 @@
+#include "common/bar.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/brightness/brightness.h"
+#include "detection/displayserver/displayserver.h"
 #include "modules/brightness/brightness.h"
 #include "util/stringUtils.h"
 
@@ -9,6 +11,8 @@
 void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
+
+    const FFDisplayServerResult* ds = ffConnectDisplayServer(instance);
 
     const char* error = ffDetectBrightness(&result);
 
@@ -30,7 +34,9 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
     {
         if(options->moduleArgs.key.length == 0)
         {
-            ffStrbufAppendF(&key, "%s (%s)", FF_BRIGHTNESS_MODULE_NAME, item->name.chars);
+            ffStrbufAppendS(&key, FF_BRIGHTNESS_MODULE_NAME);
+            if (ds->displays.length > 1)
+                ffStrbufAppendF(&key, " (%s)", item->name.chars);
         }
         else
         {
@@ -39,10 +45,26 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
             });
         }
 
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
-            printf("%.0f%%\n", item->value);
+
+            if (instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                ffAppendPercentBar(instance, &str, (uint8_t) (item->value + 0.5), 0, 10, 10);
+            }
+
+            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            {
+                if(str.length > 0)
+                    ffStrbufAppendC(&str, ' ');
+
+                ffAppendPercentNum(instance, &str, (uint8_t) (item->value + 0.5), 10, 10, str.length > 0);
+            }
+
+            ffStrbufPutTo(&str, stdout);
         }
         else
         {
