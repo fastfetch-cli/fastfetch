@@ -126,7 +126,6 @@ static void defaultConfig(FFinstance* instance)
     ffStrbufInit(&instance->config.libOpenCL);
     ffStrbufInit(&instance->config.libfreetype);
     ffStrbufInit(&instance->config.libPulse);
-    ffStrbufInit(&instance->config.libwlanapi);
     ffStrbufInit(&instance->config.libnm);
 
     instance->config.percentType = 1;
@@ -331,7 +330,6 @@ static void destroyConfig(FFinstance* instance)
     ffStrbufDestroy(&instance->config.libOpenCL);
     ffStrbufDestroy(&instance->config.libfreetype);
     ffStrbufDestroy(&instance->config.libPulse);
-    ffStrbufDestroy(&instance->config.libwlanapi);
     ffStrbufDestroy(&instance->config.libnm);
 }
 

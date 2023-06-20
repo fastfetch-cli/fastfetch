@@ -452,8 +452,6 @@ const char* ffParseLibraryJsonConfig(FFinstance* instance)
             ffStrbufSetS(&config->libOSMesa, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "opencl"))
             ffStrbufSetS(&config->libOpenCL, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "wlanapi"))
-            ffStrbufSetS(&config->libwlanapi, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "pulse"))
             ffStrbufSetS(&config->libPulse, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "nm"))

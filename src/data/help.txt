@@ -137,6 +137,7 @@ Module specific options:
     --command-key <str>:                     Set the module key to display
     --command-text <str>:                    Set the command text to be executed
     --colors-symbol <str>:                   Set the symbol to be printed by Colors module. Default is block
+    --colors-padding-left <value>:           Set the number of white spaces to print before the symbol. Default is 0
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

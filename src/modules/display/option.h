@@ -17,6 +17,5 @@ typedef struct FFDisplayOptions
     FFModuleArgs moduleArgs;
 
     FFDisplayCompactType compactType;
-    bool detectName;
     bool preciseRefreshRate;
 } FFDisplayOptions;

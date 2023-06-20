@@ -53,7 +53,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            if((options->detectName && result->name.length) || (moduleIndex > 0 && displayType))
+            if(moduleIndex > 0)
             {
                 ffStrbufClear(&key);
                 if(options->moduleArgs.key.length == 0)
@@ -117,7 +117,6 @@ void ffInitDisplayOptions(FFDisplayOptions* options)
     options->moduleName = FF_DISPLAY_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    options->detectName = false;
     options->preciseRefreshRate = false;
 }
 
@@ -136,12 +135,6 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
             { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
             {},
         });
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detect-name"))
-    {
-        options->detectName = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -190,12 +183,6 @@ void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
                     ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
                 else
                     options.compactType = (FFDisplayCompactType) value;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "detectName"))
-            {
-                options.detectName = yyjson_get_bool(val);
                 continue;
             }
 

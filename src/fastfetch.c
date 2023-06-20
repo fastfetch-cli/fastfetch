@@ -941,6 +941,7 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
     else if(ffParseSeparatorCommandOptions(&instance->config.separator, key, value)) {}
     else if(ffParseSoundCommandOptions(&instance->config.sound, key, value)) {}
     else if(ffParseGamepadCommandOptions(&instance->config.gamepad, key, value)) {}
+    else if(ffParseColorsCommandOptions(&instance->config.colors, key, value)) {}
 
     ///////////////////
     //Library options//
@@ -991,8 +992,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             ffOptionParseString(key, value, &instance->config.libOSMesa);
         else if(ffStrEqualsIgnCase(subkey, "-opencl"))
             ffOptionParseString(key, value, &instance->config.libOpenCL);
-        else if(ffStrEqualsIgnCase(subkey, "-wlanapi"))
-            ffOptionParseString(key, value, &instance->config.libwlanapi);
         else if(ffStrEqualsIgnCase(key, "-pulse"))
             ffOptionParseString(key, value, &instance->config.libPulse);
         else if(ffStrEqualsIgnCase(subkey, "-nm"))
@@ -1183,7 +1182,7 @@ int main(int argc, const char** argv)
         parseConfigFiles(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
-    if(!instance.state.configDoc)
+    if(data.structure.length > 0 || !instance.state.configDoc)
     {
         //If we don't have a custom structure, use the default one
         if(data.structure.length == 0)
@@ -1208,7 +1207,7 @@ int main(int argc, const char** argv)
         if (!instance.config.noBuffer) fflush(stdout);
     #endif
 
-    if (instance.state.configDoc)
+    if (data.structure.length == 0 && instance.state.configDoc)
     {
         ffPrintJsonConfig(&instance);
     }
