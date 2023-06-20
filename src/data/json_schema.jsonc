@@ -6,28 +6,34 @@
             "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
         },
         "key": {
-            "title": "Key of the module",
+            "title": "modules.*.key",
+            "description": "Key of the module",
             "type": "string"
         },
         "keyColor": {
-            "title": "Color of the module key",
+            "title": "modules.*.keyColor",
+            "description": "Color of the module key",
             "$ref": "#/$defs/colors",
             "default": "Use display.color.keys"
         },
         "format": {
-            "title": "Format of the module",
+            "title": "modules.*.format",
+            "description": "Format of the module",
             "type": "string"
         }
     },
     "type": "object",
-    "title": "JSON config file for fastfetch",
+    "title": "Fastfetch config",
+    "description": "JSON config file for fastfetch. Usually be `~/.config/fastfetch.jsonc`",
     "properties": {
         "logo": {
-            "title": "Fastfetch logo configurations",
+            "title": "logo",
+            "description": "Fastfetch logo configurations",
             "type": "object",
             "properties": {
                 "type": {
-                    "title": "Set the type of the logo given",
+                    "title": "logo.type",
+                    "description": "Set the type of the logo given",
                     "enum": [
                         "auto",
                         "builtin",
@@ -45,108 +51,131 @@
                     "default": "auto"
                 },
                 "source": {
+                    "title": "logo.source",
                     "type": "string",
-                    "title": "Set the source file of the logo"
+                    "description": "Set the source file of the logo"
                 },
                 "color": {
+                    "title": "logo.color",
                     "type": "object",
-                    "title": "Overwrite a color in the logo",
+                    "description": "Overwrite a color in the logo",
                     "properties": {
                         "1": {
-                            "title": "Color 1",
+                            "title": "logo.color.1",
+                            "description": "Color 1",
                             "$ref": "#/$defs/colors"
                         },
                         "2": {
-                            "title": "Color 2",
+                            "title": "logo.color.2",
+                            "description": "Color 2",
                             "$ref": "#/$defs/colors"
                         },
                         "3": {
-                            "title": "Color 3",
+                            "title": "logo.color.3",
+                            "description": "Color 3",
                             "$ref": "#/$defs/colors"
                         },
                         "4": {
-                            "title": "Color 4",
+                            "title": "logo.color.4",
+                            "description": "Color 4",
                             "$ref": "#/$defs/colors"
                         },
                         "5": {
-                            "title": "Color 5",
+                            "title": "logo.color.5",
+                            "description": "Color 5",
                             "$ref": "#/$defs/colors"
                         },
                         "6": {
-                            "title": "Color 6",
+                            "title": "logo.color.6",
+                            "description": "Color 6",
                             "$ref": "#/$defs/colors"
                         },
                         "7": {
-                            "title": "Color 7",
+                            "title": "logo.color.7",
+                            "description": "Color 7",
                             "$ref": "#/$defs/colors"
                         },
                         "8": {
-                            "title": "Color 8",
+                            "title": "logo.color.8",
+                            "description": "Color 8",
                             "$ref": "#/$defs/colors"
                         },
                         "9": {
-                            "title": "Color 9",
+                            "title": "logo.color.9",
+                            "description": "Color 9",
                             "$ref": "#/$defs/colors"
                         }
                     }
                 },
                 "width": {
+                    "title": "logo.width",
                     "type": "integer",
-                    "title": "Set the width of the logo (in characters). Required for iTerm image protocol",
+                    "description": "Set the width of the logo (in characters). Required for iTerm image protocol",
                     "minimum": 1
                 },
                 "height": {
+                    "title": "logo.height",
                     "type": "integer",
-                    "title": "Set the height of the logo (in characters). Required for iTerm image protocol",
+                    "description": "Set the height of the logo (in characters). Required for iTerm image protocol",
                     "minimum": 1
                 },
                 "padding": {
+                    "title": "logo.padding",
                     "type": "object",
-                    "title": "Set the padding of the logo",
+                    "description": "Set the padding of the logo",
                     "properties": {
                         "top": {
+                            "title": "logo.padding.top",
                             "type": "integer",
-                            "title": "Set the top padding of the logo",
+                            "description": "Set the top padding of the logo",
                             "minimum": 0
                         },
                         "left": {
+                            "title": "logo.padding.left",
                             "type": "integer",
-                            "title": "Set the left padding of the logo",
+                            "description": "Set the left padding of the logo",
                             "minimum": 0
                         },
                         "right": {
+                            "title": "logo.padding.right",
                             "type": "integer",
-                            "title": "Set the right padding of the logo",
+                            "description": "Set the right padding of the logo",
                             "minimum": 0
                         }
                     }
                 },
                 "printRemaining": {
+                    "title": "logo.printRemaining",
                     "type": "boolean",
-                    "title": "Whether to print the remaining logo, if it has more lines than modules to display",
+                    "description": "Whether to print the remaining logo, if it has more lines than modules to display",
                     "default": false
                 },
                 "preserveAspectRadio": {
+                    "title": "logo.preserveAspectRadio",
                     "type": "boolean",
-                    "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
+                    "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
                     "default": false
                 },
                 "chafa": {
+                    "title": "logo.chafa",
                     "type": "object",
-                    "title": "Chafa configuration. See chafa document for details",
+                    "description": "Chafa configuration. See chafa document for details",
                     "properties": {
                         "fgOnly": {
+                            "title": "logo.chafa.fgOnly",
                             "type": "boolean",
-                            "title": "Produce character-cell output using foreground colors only",
+                            "description": "Produce character-cell output using foreground colors only",
                             "default": false
                         },
                         "symbols": {
+                            "title": "logo.chafa.symbols",
                             "type": "string",
-                            "title": "Specify character symbols to employ in final output"
+                            "description": "Specify character symbols to employ in final output"
                         },
                         "canvasMode": {
+                            "title": "logo.chafa.canvasMode",
                             "type": "string",
-                            "title": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
+                            "description": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
                             "enum": [
                                 "TRUECOLOR",
                                 "INDEXED_256",
@@ -159,16 +188,18 @@
                             ]
                         },
                         "colorSpace": {
+                            "title": "logo.chafa.colorSpace",
                             "type": "string",
-                            "title": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
+                            "description": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
                             "enum": [
                                 "RGB",
                                 "DIN99D"
                             ]
                         },
                         "ditherMode": {
+                            "title": "logo.chafa.ditherMode",
                             "type": "string",
-                            "title": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
+                            "description": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
                             "enum": [
                                 "NONE",
                                 "ORDERED",
@@ -180,84 +211,100 @@
             }
         },
         "general": {
-            "title": "Fastfetch general configurations",
+            "title": "general",
+            "description": "Fastfetch general configurations",
             "type": "object",
             "properties": {
                 "allowSlowOperations": {
+                    "title": "general.allowSlowOperations",
                     "type": "boolean",
-                    "title": "Allow operations that can be very slow for more detailed output",
+                    "description": "Allow operations that can be very slow for more detailed output",
                     "default": false
                 },
                 "multithreading": {
+                    "title": "general.multithreading",
                     "type": "boolean",
-                    "title": "Use multiple threads to detect values",
+                    "description": "Use multiple threads to detect values",
                     "default": true
                 },
                 "stat": {
+                    "title": "general.stat",
                     "type": "boolean",
-                    "title": "Show time usage (in ms) for individual modules",
+                    "description": "Show time usage (in ms) for individual modules",
                     "default": false
                 },
                 "escapeBedrock": {
+                    "title": "general.escapeBedrock",
                     "type": "boolean",
-                    "title": "On Bedrock Linux, whether to escape the bedrock jail",
+                    "description": "On Bedrock Linux, whether to escape the bedrock jail",
                     "default": true
                 },
                 "pipe": {
+                    "title": "general.pipe",
                     "type": "boolean",
-                    "title": "Whether to enable pipe mode (disable logo and all escape sequences)",
+                    "description": "Whether to enable pipe mode (disable logo and all escape sequences)",
                     "default": false
                 },
                 "playerName": {
+                    "title": "general.playerName",
                     "type": "string",
-                    "title": "The name of the player to use for module Media and Player. Linux only"
+                    "description": "The name of the player to use for module Media and Player. Linux only"
                 },
                 "osFile": {
+                    "title": "general.osFile",
                     "type": "string",
-                    "title": "Set the path to the file containing OS information. Linux only"
+                    "description": "Set the path to the file containing OS information. Linux only"
                 }
             }
         },
         "display": {
-            "title": "Fastfetch general configurations",
+            "title": "display",
+            "description": "Configure how things to be displayed",
             "type": "object",
             "properties": {
                 "showErrors": {
+                    "title": "display.showErrors",
                     "type": "boolean",
-                    "title": "Print occurring errors to the console. False to ignore errored modules",
+                    "description": "Print occurring errors to the console. False to ignore errored modules",
                     "default": false
                 },
                 "disableLinewrap": {
+                    "title": "display.disableLinewrap",
                     "type": "boolean",
-                    "title": "Whether to disable line wrap during the run",
+                    "description": "Whether to disable line wrap during the run",
                     "default": true
                 },
                 "hideCursor": {
+                    "title": "display.hideCursor",
                     "type": "boolean",
-                    "title": "Whether to hide the cursor during the run",
+                    "description": "Whether to hide the cursor during the run",
                     "default": true
                 },
                 "separator": {
+                    "title": "display.separator",
                     "type": "string",
-                    "title": "Set the separator between key and value",
+                    "description": "Set the separator between key and value",
                     "default": ": "
                 },
                 "color": {
-                    "title": "Set the color of the keys and title",
+                    "title": "display.color",
+                    "description": "Set the color of the keys and title",
                     "anyOf": [
                         {
-                            "title": "Set the both color of the keys and title",
+                            "description": "Set the both color of the keys and title",
                             "$ref": "#/$defs/colors"
                         },
                         {
                             "type": "object",
                             "properties": {
                                 "keys": {
-                                    "title": "Set the color of the keys",
+                                    "title": "display.color.keys",
+                                    "description": "Set the color of the keys",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "title": {
-                                    "title": "Set the color of the title",
+                                    "title": "display.color.title",
+                                    "description": "Set the color of the title",
                                     "$ref": "#/$defs/colors"
                                 }
                             }
@@ -266,7 +313,8 @@
                 },
                 "binaryPrefix": {
                     "type": "string",
-                    "title": "Set the binary prefix to used when printing bytes",
+                    "title": "display.binaryPrefix",
+                    "description": "Set the binary prefix to used when printing bytes",
                     "enum": [
                         "iec",
                         "si",
@@ -275,158 +323,203 @@
                 },
                 "percentType": {
                     "type": "number",
-                    "title": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
+                    "title": "display.percentType",
+                    "description": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
                     "minimum": 0,
                     "maximum": 9,
                     "default": 1
                 },
                 "noBuffer": {
                     "type": "boolean",
-                    "title": "Whether to disable the stdout application buffer",
+                    "title": "display.noBuffer",
+                    "description": "Whether to disable the stdout application buffer",
                     "default": false
                 }
             }
         },
         "library": {
-            "title": "Set the path of a library to load",
+            "title": "library",
+            "description": "Set the path of a library to load",
             "type": "object",
             "properties": {
                 "pci": {
-                    "type": "string"
+                    "title": "library.pci",
+                    "type": "string",
+                    "description": "GPU output (Linux and FreeBSD)"
                 },
                 "vulkan": {
-                    "type": "string"
+                    "title": "library.vulkan",
+                    "type": "string",
+                    "description": "Vulkan module & fallback for GPU output"
                 },
                 "freetype": {
-                    "type": "string"
+                    "title": "library.freetype",
+                    "type": "string",
+                    "description": "Used for Termux font detection (Android)"
                 },
                 "wayland": {
-                    "type": "string"
+                    "title": "library.wayland",
+                    "type": "string",
+                    "description": "Better display performance and output in wayland sessions.\nSupports different refresh rates per monitor.\n(Linux)"
                 },
                 "xcbRandr": {
-                    "type": "string"
+                    "title": "library.xcbRandr",
+                    "type": "string",
+                    "description": ""
                 },
                 "xcb": {
-                    "type": "string"
+                    "title": "library.xcb",
+                    "type": "string",
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
-                "Xrandr": {
-                    "type": "string"
+                "xrandr": {
+                    "title": "library.xrandr",
+                    "type": "string",
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
-                "X11": {
-                    "type": "string"
+                "x11": {
+                    "title": "library.x11",
+                    "type": "string",
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
                 "gio": {
-                    "type": "string"
+                    "title": "library.gio",
+                    "type": "string",
+                    "description": "Needed for values that are only stored GSettings (Linux, FreeBSD)"
                 },
-                "DConf": {
-                    "type": "string"
+                "dconf": {
+                    "title": "library.dconf",
+                    "type": "string",
+                    "description": "Needed for values that are only stored in DConf + Fallback for GSettings (Linux, FreeBSD)"
                 },
                 "dbus": {
-                    "type": "string"
+                    "title": "library.dbus",
+                    "type": "string",
+                    "description": "Bluetooth, Player & Media detection (Linux, FreeBSD)"
                 },
-                "XFConf": {
-                    "type": "string"
+                "xfconf": {
+                    "title": "library.xfconf",
+                    "type": "string",
+                    "description": "Needed for XFWM theme and XFCE Terminal font (Linux, FreeBSD)"
                 },
                 "sqlite3": {
-                    "type": "string"
+                    "title": "library.sqlite3",
+                    "type": "string",
+                    "description": "Needed for pkg & rpm package count (Linux, FreeBSD)"
                 },
                 "rpm": {
-                    "type": "string"
+                    "title": "library.rpm",
+                    "type": "string",
+                    "description": "Slower fallback for rpm package count. Needed on openSUSE & old CentOS / Redhat. (Linux)"
                 },
                 "imagemagick": {
-                    "type": "string"
+                    "title": "library.imagemagick",
+                    "type": "string",
+                    "description": "Images in terminal using sixel or kitty graphics protocol (Linux, FreeBSD, macOS)"
                 },
                 "z": {
-                    "title": "zlib",
+                    "title": "library.z",
+                    "description": "Libz. Faster image output when using kitty graphics protocol (Linux, FreeBSD, macOS)",
                     "type": "string"
                 },
                 "chafa": {
-                    "type": "string"
+                    "title": "library.chafa",
+                    "type": "string",
+                    "description": "Image output as ascii art (Linux, FreeBSD, macOS)"
                 },
                 "egl": {
-                    "type": "string"
+                    "title": "library.egl",
+                    "type": "string",
+                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
                 },
                 "glx": {
-                    "type": "string"
+                    "title": "library.glx",
+                    "type": "string",
+                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
                 },
                 "osmesa": {
-                    "type": "string"
+                    "title": "library.osmesa",
+                    "type": "string",
+                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
                 },
                 "opencl": {
-                    "type": "string"
-                },
-                "wlanapi": {
-                    "type": "string"
+                    "title": "library.opencl",
+                    "type": "string",
+                    "description": "OpenCL module (Linux, FreeBSD, Windows)"
                 },
                 "pulse": {
-                    "title": "pulseaudio",
+                    "title": "library.pulse",
+                    "description": "Pulseaudio. Used for Sound detection (Linux, FreeBSD)",
                     "type": "string"
                 },
                 "nm": {
-                    "title": "NetworkManager",
+                    "title": "library.nm",
+                    "description": "NetworkManager. Used for Wifi detection (Linux)",
                     "type": "string"
                 }
             }
         },
         "modules": {
-            "title": "Fastfetch modules to run",
+            "title": "modules",
+            "description": "Fastfetch modules to run",
             "type": "array",
             "items": {
                 "anyOf": [
                     {
                         "type": "string",
+                        "description": "Run module with default configurations",
                         "enum": [
-                            "Battery",
-                            "Bios",
-                            "Bluetooth",
-                            "Board",
-                            "Break",
-                            "Brightness",
-                            "Chassis",
-                            "CPU",
-                            "CPUUsage",
-                            "Command",
-                            "Colors",
-                            "Cursor",
-                            "Custom",
-                            "DateTime",
-                            "Display",
-                            "Disk",
-                            "DE",
-                            "Font",
-                            "Gamepad",
-                            "GPU",
-                            "Host",
-                            "Icons",
-                            "Kernel",
-                            "Locale",
-                            "LocalIp",
-                            "Media",
-                            "Memory",
-                            "OpenCL",
-                            "OpenGL",
-                            "OS",
-                            "Packages",
-                            "Player",
-                            "PowerAdapter",
-                            "Processes",
-                            "PublicIp",
-                            "Separator",
-                            "Shell",
-                            "Sound",
-                            "Swap",
-                            "Terminal",
-                            "TerminalFont",
-                            "Title",
-                            "Theme",
-                            "Uptime",
-                            "Users",
-                            "Vulkan",
-                            "Wallpaper",
-                            "Weather",
-                            "WM",
-                            "Wifi",
-                            "WMTheme"
+                            "battery",
+                            "bios",
+                            "bluetooth",
+                            "board",
+                            "break",
+                            "brightness",
+                            "chassis",
+                            "cpu",
+                            "cpuusage",
+                            "command",
+                            "colors",
+                            "cursor",
+                            "custom",
+                            "datetime",
+                            "display",
+                            "disk",
+                            "de",
+                            "font",
+                            "gamepad",
+                            "gpu",
+                            "host",
+                            "icons",
+                            "kernel",
+                            "locale",
+                            "localip",
+                            "media",
+                            "memory",
+                            "opencl",
+                            "opengl",
+                            "os",
+                            "packages",
+                            "player",
+                            "poweradapter",
+                            "processes",
+                            "publicip",
+                            "separator",
+                            "shell",
+                            "sound",
+                            "swap",
+                            "terminal",
+                            "terminalfont",
+                            "title",
+                            "theme",
+                            "uptime",
+                            "users",
+                            "vulkan",
+                            "wallpaper",
+                            "weather",
+                            "wm",
+                            "wifi",
+                            "wmtheme"
                         ]
                     },
                     {
@@ -436,7 +529,7 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Break"]
+                                        "const": "Break"
                                     }
                                 },
                                 "additionalProperties": false
@@ -445,40 +538,40 @@
                                 "properties": {
                                     "type": {
                                         "enum": [
-                                            "Bios",
-                                            "Board",
-                                            "Brightness",
-                                            "Chassis",
-                                            "CPUUsage",
-                                            "Cursor",
-                                            "DateTime",
-                                            "DE",
-                                            "Font",
-                                            "Gamepad",
-                                            "Host",
-                                            "Icons",
-                                            "Kernel",
-                                            "Locale",
-                                            "Media",
-                                            "Memory",
-                                            "OpenCL",
-                                            "OS",
-                                            "Packages",
-                                            "Player",
-                                            "PowerAdapter",
-                                            "Processes",
-                                            "Shell",
-                                            "Swap",
-                                            "Terminal",
-                                            "TerminalFont",
-                                            "Theme",
-                                            "Uptime",
-                                            "Users",
-                                            "Vulkan",
-                                            "Wallpaper",
-                                            "WM",
-                                            "Wifi",
-                                            "WMTheme"
+                                            "bios",
+                                            "board",
+                                            "brightness",
+                                            "chassis",
+                                            "cpuusage",
+                                            "cursor",
+                                            "datetime",
+                                            "de",
+                                            "font",
+                                            "gamepad",
+                                            "host",
+                                            "icons",
+                                            "kernel",
+                                            "locale",
+                                            "media",
+                                            "memory",
+                                            "opencl",
+                                            "os",
+                                            "packages",
+                                            "player",
+                                            "poweradapter",
+                                            "processes",
+                                            "shell",
+                                            "swap",
+                                            "terminal",
+                                            "terminalfont",
+                                            "theme",
+                                            "uptime",
+                                            "users",
+                                            "vulkan",
+                                            "wallpaper",
+                                            "wm",
+                                            "wifi",
+                                            "wmtheme"
                                         ]
                                     },
                                     "key": {
@@ -496,14 +589,16 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Battery"]
+                                        "const": "battery"
                                     },
                                     "dir": {
-                                        "title": "The directory where the battery folders are. Standard: /sys/class/power_supply/. Linux only",
+                                        "title": "modules.battery.dir",
+                                        "description": "The directory where the battery folders are. Standard: /sys/class/power_supply/. Linux only",
                                         "type": "string"
                                     },
                                     "temp": {
-                                        "title": "Detect and display Battery temperature if supported",
+                                        "title": "modules.battery.temp",
+                                        "description": "Detect and display Battery temperature if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -522,10 +617,11 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Bluetooth"]
+                                        "const": "bluetooth"
                                     },
                                     "showDisconnected": {
-                                        "title": "Set if disconnected bluetooth devices should be printed",
+                                        "title": "modules.bluetooth.showDisconnected",
+                                        "description": "Set if disconnected bluetooth devices should be printed",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -544,10 +640,11 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["CPU"]
+                                        "const": "cpu"
                                     },
                                     "temp": {
-                                        "title": "Detect and display CPU temperature if supported",
+                                        "title": "modules.cpu.temp",
+                                        "description": "Detect and display CPU temperature if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -566,10 +663,11 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Colors"]
+                                        "const": "colors"
                                     },
                                     "symbol": {
-                                        "title": "Set the symbol to use",
+                                        "title": "modules.colors.symbol",
+                                        "description": "Set the symbol to use",
                                         "type": "string",
                                         "enum": [
                                             "block",
@@ -579,22 +677,23 @@
                                             "square",
                                             "star"
                                         ],
-                                        "default": "blocks"
+                                        "default": "block"
                                     }
                                 }
                             },
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Command"]
+                                        "const": "command"
                                     },
                                     "shell": {
-                                        "title": "Set the shell program to execute the command text",
-                                        "type": "string",
-                                        "default": "cmd for Windows, csh for FreeBSD, bash for others"
+                                        "title": "modules.command.shell",
+                                        "description": "Set the shell program to execute the command text\nDefault: cmd for Windows, csh for FreeBSD, bash for others",
+                                        "type": "string"
                                     },
                                     "text": {
-                                        "title": "Set the command text to be executed",
+                                        "title": "modules.command.text",
+                                        "description": "Set the command text to be executed",
                                         "type": "string"
                                     },
                                     "key": {
@@ -610,21 +709,20 @@
                                 "additionalProperties": false
                             },
                             {
-                                "title": "Print a custom string, with or without key",
+                                "description": "Print a custom string, with or without key",
                                 "properties": {
                                     "type": {
-                                        "enum": ["Custom"]
+                                        "const": "custom"
                                     },
                                     "key": {
-                                        "title": "Leave empty not to print the key",
-                                        "type": "string",
-                                        "default": "*empty*"
+                                        "description": "Leave empty not to print the key",
+                                        "type": "string"
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
                                     "format": {
-                                        "title": "Text to print",
+                                        "description": "Text to print",
                                         "type": "string"
                                     }
                                 },
@@ -634,20 +732,23 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Display"]
+                                        "const": "display"
                                     },
                                     "compactType": {
+                                        "title": "modules.display.compactType",
                                         "enum": ["none", "original", "scaled"],
-                                        "title": "Set if all displays should be printed in one line",
+                                        "description": "Set if all displays should be printed in one line",
                                         "default": "none"
                                     },
                                     "detectName": {
-                                        "title": "Set if display name should be detected and printed (if supported)",
+                                        "title": "modules.display.detectName",
+                                        "description": "Set if display name should be detected and printed (if supported)",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "preciseRefreshRate": {
-                                        "title": "Set if decimal refresh rates should not be rounded into integers when printing",
+                                        "title": "modules.display.preciseRefreshRate",
+                                        "description": "Set if decimal refresh rates should not be rounded into integers when printing",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -666,31 +767,35 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Disk"]
+                                        "const": "disk"
                                     },
                                     "folders": {
+                                        "title": "modules.disk.folders",
                                         "type": "string",
-                                        "title": "A colon (semicolon on Windows) separated list of folder paths for the disk output",
-                                        "default": "\"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: \"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
                                     },
                                     "showExternal": {
+                                        "title": "modules.disk.showExternal",
                                         "type": "boolean",
-                                        "title": "Set if external volume should be printed",
+                                        "description": "Set if external volume should be printed",
                                         "default": true
                                     },
                                     "showHidden": {
+                                        "title": "modules.disk.showHidden",
                                         "type": "boolean",
-                                        "title": "Set if hidden volumes should be printed",
+                                        "description": "Set if hidden volumes should be printed",
                                         "default": false
                                     },
                                     "showSubvolumes": {
+                                        "title": "modules.disk.showSubvolumes",
                                         "type": "boolean",
-                                        "title": "Set if subvolumes should be printed",
+                                        "description": "Set if subvolumes should be printed",
                                         "default": false
                                     },
                                     "showUnknown": {
+                                        "title": "modules.disk.showUnknown",
                                         "type": "boolean",
-                                        "title": "Set if unknown (unable to detect sizes) volumes should be printed",
+                                        "description": "Set if unknown (unable to detect sizes) volumes should be printed",
                                         "default": false
                                     },
                                     "key": {
@@ -708,20 +813,23 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["GPU"]
+                                        "const": "gpu"
                                     },
                                     "temp": {
-                                        "title": "Detect and display GPU temperature if supported",
+                                        "title": "modules.gpu.temp",
+                                        "description": "Detect and display GPU temperature if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "forceVulkan": {
-                                        "title": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
+                                        "title": "modules.gpu.forceVulkan",
+                                        "description": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "hideType": {
-                                        "title": "Specify the type of GPUs should not be printed",
+                                        "title": "modules.gpu.hideType",
+                                        "description": "Specify the type of GPUs should not be printed",
                                         "enum": ["integrated", "discrete", "none"],
                                         "default": "none"
                                     },
@@ -740,35 +848,41 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["LocalIp"]
+                                        "const": "localip"
                                     },
                                     "showIpv4": {
-                                        "title": "Show IPv4 addresses",
+                                        "title": "modules.localip.showIpv4",
+                                        "description": "Show IPv4 addresses",
                                         "type": "boolean",
                                         "default": true
                                     },
                                     "showIpv6": {
-                                        "title": "Show IPv6 addresses",
+                                        "title": "modules.localip.showIpv6",
+                                        "description": "Show IPv6 addresses",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "showMac": {
-                                        "title": "Show MAC addresses",
+                                        "title": "modules.localip.showMac",
+                                        "description": "Show MAC addresses",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "showLoop": {
-                                        "title": "Show loop back addresses (127.0.0.1)",
+                                        "title": "modules.localip.showLoop",
+                                        "description": "Show loop back addresses (127.0.0.1)",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "compact": {
-                                        "title": "Show all IPs in one line",
+                                        "title": "modules.localip.compact",
+                                        "description": "Show all IPs in one line",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "namePrefix": {
-                                        "title": "Show IPs with given name prefix only",
+                                        "title": "modules.localip.namePrefix",
+                                        "description": "Show IPs with given name prefix only",
                                         "type": "string"
                                     },
                                     "key": {
@@ -786,10 +900,11 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["OpenGL"]
+                                        "const": "opengl"
                                     },
                                     "library": {
-                                        "title": "Set the OpenGL context creation library to use. Linux only",
+                                        "title": "modules.opengl.library",
+                                        "description": "Set the OpenGL context creation library to use. Linux only",
                                         "enum": ["auto", "egl", "glx", "osmesa"],
                                         "default": "auto"
                                     },
@@ -808,16 +923,18 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["PublicIp"]
+                                        "const": "publicip"
                                     },
                                     "url": {
-                                        "title": "The URL of public IP detection server to be used. Only HTTP protocol is supported",
+                                        "title": "modules.publicip.url",
+                                        "description": "The URL of public IP detection server to be used. Only HTTP protocol is supported",
                                         "type": "string",
                                         "format": "url",
                                         "default": "http://ipinfo.io/ip"
                                     },
                                     "timeout": {
-                                        "title": "Time in milliseconds to wait for the public ip server to respond",
+                                        "title": "modules.publicip.timeout",
+                                        "description": "Time in milliseconds to wait for the public ip server to respond",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": "disabled (0)"
@@ -837,10 +954,11 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Separator"]
+                                        "const": "separator"
                                     },
                                     "string": {
-                                        "title": "Set the string printed by the separator module",
+                                        "title": "modules.separator.string",
+                                        "description": "Set the string to be printed",
                                         "type": "string",
                                         "format": "url",
                                         "default": "http://ipinfo.io/ip"
@@ -851,10 +969,11 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Sound"]
+                                        "const": "sound"
                                     },
                                     "soundType": {
-                                        "title": "Set what type of sound devices should be printed",
+                                        "title": "modules.sound.soundType",
+                                        "description": "Set what type of sound devices should be printed",
                                         "type": "string",
                                         "enum": [
                                             "main",
@@ -878,11 +997,12 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Title"]
+                                        "const": "title"
                                     },
                                     "fqdn": {
+                                        "title": "modules.title.fqdn",
                                         "type": "boolean",
-                                        "title": "Set if the title should use fully qualified domain name",
+                                        "description": "Set if the title should use fully qualified domain name",
                                         "default": false
                                     }
                                 },
@@ -891,16 +1011,18 @@
                             {
                                 "properties": {
                                     "type": {
-                                        "enum": ["Weather"]
+                                        "const": "weather"
                                     },
                                     "timeout": {
-                                        "title": "Time in milliseconds to wait for the weather server to respond",
+                                        "title": "modules.weather.timeout",
+                                        "description": "Time in milliseconds to wait for the weather server to respond",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": "disabled (0)"
                                     },
                                     "outputFormat": {
-                                        "title": "The output weather format to be used (must be URI encoded)",
+                                        "title": "modules.weather.outputFormat",
+                                        "description": "The output weather format to be used (must be URI encoded)",
                                         "type": "string",
                                         "default": "%t+-+%C+(%l)"
                                     },
