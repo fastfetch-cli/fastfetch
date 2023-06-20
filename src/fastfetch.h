@@ -128,7 +128,6 @@ typedef struct FFconfig
     FFstrbuf libOpenCL;
     FFstrbuf libfreetype;
     FFstrbuf libPulse;
-    FFstrbuf libwlanapi;
     FFstrbuf libnm;
 
     uint32_t percentType;

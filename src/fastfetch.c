@@ -991,8 +991,6 @@ static void parseOption(FFinstance* instance, FFdata* data, const char* key, con
             ffOptionParseString(key, value, &instance->config.libOSMesa);
         else if(ffStrEqualsIgnCase(subkey, "-opencl"))
             ffOptionParseString(key, value, &instance->config.libOpenCL);
-        else if(ffStrEqualsIgnCase(subkey, "-wlanapi"))
-            ffOptionParseString(key, value, &instance->config.libwlanapi);
         else if(ffStrEqualsIgnCase(key, "-pulse"))
             ffOptionParseString(key, value, &instance->config.libPulse);
         else if(ffStrEqualsIgnCase(subkey, "-nm"))
