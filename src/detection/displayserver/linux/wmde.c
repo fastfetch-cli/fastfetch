@@ -132,7 +132,7 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
         ffParsePropFileData(instance, "wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
         ffParsePropFileData(instance, "wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-    if(result->deVersion.length == 0)
+    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
         if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "plasmashell",
