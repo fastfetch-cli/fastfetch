@@ -9,6 +9,8 @@
 void ffPrintLM(FFinstance* instance, FFLMOptions* options)
 {
     FFLMResult result;
+    ffStrbufInit(&result.service);
+    ffStrbufInit(&result.type);
     const char* error = ffDetectLM(&result);
 
     if(error)
@@ -38,6 +40,8 @@ void ffPrintLM(FFinstance* instance, FFLMOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
         });
     }
+    ffStrbufDestroy(&result.service);
+    ffStrbufDestroy(&result.type);
 }
 
 void ffInitLMOptions(FFLMOptions* options)
