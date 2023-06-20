@@ -125,13 +125,24 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_PLASMA);
 
-    ffParsePropFileData(instance, "xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    ffParsePropFileValues("/usr/share/xsessions/plasmax11.desktop", 1, (FFpropquery[]) {
+        {"X-KDE-PluginInfo-Version =", &result->deVersion}
+    });
+    if(result->deVersion.length == 0)
+        ffParsePropFileData(instance, "xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
         ffParsePropFileData(instance, "xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+    if(result->deVersion.length == 0)
+    {
+        ffParsePropFileValues("/usr/share/wayland-sessions/plasma.desktop", 1, (FFpropquery[]) {
+            {"X-KDE-PluginInfo-Version =", &result->deVersion}
+        });
+    }
     if(result->deVersion.length == 0)
         ffParsePropFileData(instance, "wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
         ffParsePropFileData(instance, "wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+
     if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
     {
         if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
