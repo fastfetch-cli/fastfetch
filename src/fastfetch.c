@@ -1183,7 +1183,7 @@ int main(int argc, const char** argv)
         parseConfigFiles(&instance, &data);
     parseArguments(&instance, &data, argc, argv);
 
-    if(!instance.state.configDoc)
+    if(data.structure.length > 0 || !instance.state.configDoc)
     {
         //If we don't have a custom structure, use the default one
         if(data.structure.length == 0)
@@ -1208,7 +1208,7 @@ int main(int argc, const char** argv)
         if (!instance.config.noBuffer) fflush(stdout);
     #endif
 
-    if (instance.state.configDoc)
+    if (data.structure.length == 0 && instance.state.configDoc)
     {
         ffPrintJsonConfig(&instance);
     }
