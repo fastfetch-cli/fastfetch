@@ -53,27 +53,20 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            if(moduleIndex > 0)
+            ffStrbufClear(&key);
+            if(options->moduleArgs.key.length == 0)
             {
-                ffStrbufClear(&key);
-                if(options->moduleArgs.key.length == 0)
-                {
-                    ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.length ? result->name.chars : displayType);
-                }
-                else
-                {
-                    ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
-                        {FF_FORMAT_ARG_TYPE_UINT, &i},
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-                        {FF_FORMAT_ARG_TYPE_STRING, displayType},
-                    });
-                }
-                ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
+                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.length ? result->name.chars : displayType);
             }
             else
             {
-                ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, moduleIndex, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+                ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
+                    {FF_FORMAT_ARG_TYPE_UINT, &i},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+                    {FF_FORMAT_ARG_TYPE_STRING, displayType},
+                });
             }
+            ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
             printf("%ix%i", result->width, result->height);
 

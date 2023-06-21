@@ -2,7 +2,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/brightness/brightness.h"
-#include "detection/displayserver/displayserver.h"
 #include "modules/brightness/brightness.h"
 #include "util/stringUtils.h"
 
@@ -11,8 +10,6 @@
 void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
-
-    const FFDisplayServerResult* ds = ffConnectDisplayServer(instance);
 
     const char* error = ffDetectBrightness(&result);
 
@@ -34,9 +31,7 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
     {
         if(options->moduleArgs.key.length == 0)
         {
-            ffStrbufAppendS(&key, FF_BRIGHTNESS_MODULE_NAME);
-            if (ds->displays.length > 1)
-                ffStrbufAppendF(&key, " (%s)", item->name.chars);
+            ffStrbufAppendF(&key, "%s (%s)", FF_BRIGHTNESS_MODULE_NAME, item->name.chars);
         }
         else
         {
