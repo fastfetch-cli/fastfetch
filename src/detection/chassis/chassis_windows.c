@@ -7,14 +7,14 @@ const char* ffDetectChassis(FFChassisResult* result)
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL)) // SMBIOS
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\BIOS\", &hKey, NULL) failed";
 
-    uint32_t chassisType = 0;
-    if(!ffRegReadUint(hKey, L"EnclosureType", &chassisType, NULL))
+    uint32_t type = 0;
+    if(!ffRegReadUint(hKey, L"EnclosureType", &type, NULL))
         return "\"HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\BIOS\\EnclosureType\" doesn't exist";
 
-    const char* chassisTypeStr = ffChassisTypeToString(chassisType);
-    if(!chassisTypeStr)
+    const char* typeStr = ffChassisTypeToString(type);
+    if(!typeStr)
         return "Unknown chassis type";
 
-    ffStrbufAppendS(&result->chassisType, chassisTypeStr);
+    ffStrbufAppendS(&result->type, typeStr);
     return NULL;
 }

@@ -1,10 +1,10 @@
 #include "chassis.h"
 
-const char* ffChassisTypeToString(uint32_t chassisType)
+const char* ffChassisTypeToString(uint32_t type)
 {
     // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.2.0.pdf
     // 7.4.1 System Enclosure or Chassis Types
-    switch (chassisType)
+    switch (type)
     {
         case 0x01: return "Other";
         case 0x02: return "Unknown";

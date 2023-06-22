@@ -9,9 +9,9 @@
 void ffPrintChassis(FFinstance* instance, FFChassisOptions* options)
 {
     FFChassisResult result;
-    ffStrbufInit(&result.chassisType);
-    ffStrbufInit(&result.chassisVendor);
-    ffStrbufInit(&result.chassisVersion);
+    ffStrbufInit(&result.type);
+    ffStrbufInit(&result.vendor);
+    ffStrbufInit(&result.version);
 
     const char* error = ffDetectChassis(&result);
 
@@ -21,7 +21,7 @@ void ffPrintChassis(FFinstance* instance, FFChassisOptions* options)
         goto exit;
     }
 
-    if(result.chassisType.length == 0)
+    if(result.type.length == 0)
     {
         ffPrintError(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "chassis_type is not set by O.E.M.");
         goto exit;
@@ -30,24 +30,24 @@ void ffPrintChassis(FFinstance* instance, FFChassisOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        ffStrbufWriteTo(&result.chassisType, stdout);
-        if (result.chassisVersion.length)
-            printf(" (%s)", result.chassisVersion.chars);
+        ffStrbufWriteTo(&result.type, stdout);
+        if (result.version.length)
+            printf(" (%s)", result.version.chars);
         putchar('\n');
     }
     else
     {
         ffPrintFormat(instance, FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_CHASSIS_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.chassisType},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.chassisVendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.chassisVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
         });
     }
 
 exit:
-    ffStrbufDestroy(&result.chassisType);
-    ffStrbufDestroy(&result.chassisVendor);
-    ffStrbufDestroy(&result.chassisVersion);
+    ffStrbufDestroy(&result.type);
+    ffStrbufDestroy(&result.vendor);
+    ffStrbufDestroy(&result.version);
 }
 
 void ffInitChassisOptions(FFChassisOptions* options)
