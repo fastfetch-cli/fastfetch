@@ -372,9 +372,13 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
     }
 
+
+    if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
+        ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
+
     #if defined(__linux__) || defined(__FreeBSD__)
 
-    if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
+    else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
         ffStrbufInitS(&result.terminalPrettyName, "gnome-terminal");
 
     #elif defined(__APPLE__)
@@ -388,8 +392,6 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
 
     #endif
 
-    else if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
-        ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
     else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
         ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
     else
