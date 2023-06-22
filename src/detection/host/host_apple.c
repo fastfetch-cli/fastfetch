@@ -157,11 +157,7 @@ static const char* getProductName(const FFstrbuf* hwModel)
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufInit(&host->productName);
-    ffStrbufInit(&host->productFamily);
-    ffStrbufInit(&host->productVersion);
-    ffStrbufInit(&host->productSku);
-    ffStrbufInitS(&host->sysVendor, "Apple");
+    ffStrbufAppendS(&host->sysVendor, "Apple");
 
     const char* error = ffSysctlGetString("hw.model", &host->productFamily);
     if (error) return error;
