@@ -22,18 +22,18 @@ void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
         goto exit;
     }
 
-    if(bios.biosRelease.length == 0)
+    if(bios.biosVersion.length == 0)
     {
-        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "bios_release is not set.");
+        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "bios_version is not set.");
         goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        ffStrbufWriteTo(&bios.biosRelease, stdout);
-        if (bios.biosVersion.length)
-            printf(" (%s)", bios.biosVersion.chars);
+        ffStrbufWriteTo(&bios.biosVersion, stdout);
+        if (bios.biosRelease.length)
+            printf(" (%s)", bios.biosRelease.chars);
         putchar('\n');
     }
     else
