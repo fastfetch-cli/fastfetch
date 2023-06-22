@@ -7,9 +7,9 @@
 
 typedef struct FFBoardResult
 {
-    FFstrbuf boardName;
-    FFstrbuf boardVendor;
-    FFstrbuf boardVersion;
+    FFstrbuf name;
+    FFstrbuf vendor;
+    FFstrbuf version;
 } FFBoardResult;
 
 const char* ffDetectBoard(FFBoardResult* result);

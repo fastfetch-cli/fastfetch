@@ -9,9 +9,9 @@
 void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
 {
     FFBoardResult result;
-    ffStrbufInit(&result.boardName);
-    ffStrbufInit(&result.boardVendor);
-    ffStrbufInit(&result.boardVersion);
+    ffStrbufInit(&result.name);
+    ffStrbufInit(&result.vendor);
+    ffStrbufInit(&result.version);
     const char* error = ffDetectBoard(&result);
 
     if(error)
@@ -20,7 +20,7 @@ void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
         goto exit;
     }
 
-    if(result.boardName.length == 0)
+    if(result.name.length == 0)
     {
         ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "board_name is not set.");
         goto exit;
@@ -29,24 +29,24 @@ void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        ffStrbufWriteTo(&result.boardName, stdout);
-        if (result.boardVersion.length)
-            printf(" (%s)", result.boardVersion.chars);
+        ffStrbufWriteTo(&result.name, stdout);
+        if (result.version.length)
+            printf(" (%s)", result.version.chars);
         putchar('\n');
     }
     else
     {
         ffPrintFormat(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_BOARD_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.boardName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.boardVendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.boardVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
         });
     }
 
 exit:
-    ffStrbufDestroy(&result.boardName);
-    ffStrbufDestroy(&result.boardVendor);
-    ffStrbufDestroy(&result.boardVersion);
+    ffStrbufDestroy(&result.name);
+    ffStrbufDestroy(&result.vendor);
+    ffStrbufDestroy(&result.version);
 }
 
 void ffInitBoardOptions(FFBoardOptions* options)
