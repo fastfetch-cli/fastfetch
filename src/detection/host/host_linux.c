@@ -86,6 +86,7 @@ const char* ffDetectHost(FFHostResult* host)
         if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
         {
             ffStrbufAppendS(&host->productName, "Windows Subsystem for Linux");
+            ffStrbufAppendS(&host->productFamily, "WSL");
 
             FF_STRBUF_AUTO_DESTROY wslVer = ffStrbufCreate(); //Wide charactors
             if(!ffProcessAppendStdOut(&wslVer, (char* const[]){
@@ -96,12 +97,10 @@ const char* ffDetectHost(FFHostResult* host)
             {
                 ffStrbufSubstrBeforeFirstC(&wslVer, '\r'); //CRLF
                 ffStrbufSubstrAfterLastC(&wslVer, ' ');
-                ffStrbufAppendS(&host->productName, " (");
                 for(uint32_t i = 0; i < wslVer.length; ++i) {
                     if(wslVer.chars[i]) //don't append \0
-                        ffStrbufAppendC(&host->productName, wslVer.chars[i]);
+                        ffStrbufAppendC(&host->productVersion, wslVer.chars[i]);
                 }
-                ffStrbufAppendC(&host->productName, ')');
             }
         }
     }
