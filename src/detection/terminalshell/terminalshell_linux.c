@@ -378,12 +378,22 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
     }
 
-    if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result.terminalProcessName, "iTermServer-"))
+    #if defined(__linux__) || defined(__FreeBSD__)
+
+    if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
+        ffStrbufInitS(&result.terminalPrettyName, "gnome-terminal");
+
+    #elif defined(__APPLE__)
+
+    else if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result.terminalProcessName, "iTermServer-"))
         ffStrbufInitS(&result.terminalPrettyName, "iTerm");
     else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
         ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
         ffStrbufInitS(&result.terminalPrettyName, "Warp");
+
+    #endif
+
     else if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
         ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
     else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
