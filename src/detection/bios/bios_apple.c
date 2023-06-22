@@ -20,12 +20,12 @@ const char* ffDetectBios(FFBiosResult* bios)
             return "IORegistryEntryCreateCFProperties(registryEntry) failed";
         }
 
-        ffCfDictGetString(properties, CFSTR("vendor"), &bios->biosVendor);
-        ffCfDictGetString(properties, CFSTR("version"), &bios->biosVersion);
-        ffCfDictGetString(properties, CFSTR("release-date"), &bios->biosDate);
-        if(!ffStrbufContainC(&bios->biosDate, '-'))
+        ffCfDictGetString(properties, CFSTR("vendor"), &bios->vendor);
+        ffCfDictGetString(properties, CFSTR("version"), &bios->version);
+        ffCfDictGetString(properties, CFSTR("release-date"), &bios->date);
+        if(!ffStrbufContainC(&bios->date, '-'))
             ffStrbufAppendS(&bios->biosRelease, "Efi-");
-        ffStrbufAppend(&bios->biosRelease, &bios->biosVersion);
+        ffStrbufAppend(&bios->biosRelease, &bios->version);
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
@@ -40,7 +40,7 @@ const char* ffDetectBios(FFBiosResult* bios)
         CFMutableDictionaryRef properties;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
-            ffCfDictGetString(properties, CFSTR("manufacturer"), &bios->biosVendor);
+            ffCfDictGetString(properties, CFSTR("manufacturer"), &bios->vendor);
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
@@ -53,8 +53,8 @@ const char* ffDetectBios(FFBiosResult* bios)
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
             ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->biosRelease);
-            ffStrbufAppend(&bios->biosVersion, &bios->biosRelease);
-            ffStrbufSubstrAfterFirstC(&bios->biosVersion, '-');
+            ffStrbufAppend(&bios->version, &bios->biosRelease);
+            ffStrbufSubstrAfterFirstC(&bios->version, '-');
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);

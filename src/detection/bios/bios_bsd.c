@@ -5,13 +5,13 @@
 
 const char* ffDetectBios(FFBiosResult* result)
 {
-    ffSettingsGetFreeBSDKenv("smbios.bios.reldate", &result->biosDate);
-    ffCleanUpSmbiosValue(&result->biosDate);
+    ffSettingsGetFreeBSDKenv("smbios.bios.reldate", &result->date);
+    ffCleanUpSmbiosValue(&result->date);
     ffSettingsGetFreeBSDKenv("smbios.bios.revision", &result->biosRelease);
     ffCleanUpSmbiosValue(&result->biosRelease);
-    ffSettingsGetFreeBSDKenv("smbios.bios.vendor", &result->biosVendor);
-    ffCleanUpSmbiosValue(&result->biosVendor);
-    ffSettingsGetFreeBSDKenv("smbios.bios.version", &result->biosVersion);
-    ffCleanUpSmbiosValue(&result->biosVersion);
+    ffSettingsGetFreeBSDKenv("smbios.bios.vendor", &result->vendor);
+    ffCleanUpSmbiosValue(&result->vendor);
+    ffSettingsGetFreeBSDKenv("smbios.bios.version", &result->version);
+    ffCleanUpSmbiosValue(&result->version);
     return NULL;
 }

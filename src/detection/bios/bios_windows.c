@@ -7,11 +7,11 @@ const char* ffDetectBios(FFBiosResult* bios)
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\BIOS\", &hKey, NULL) failed";
 
-    if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->biosVersion, NULL))
+    if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->version, NULL))
         return "\"HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\BIOS\\BIOSVersion\" doesn't exist";
 
-    ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->biosVendor, NULL);
-    ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->biosDate, NULL);
+    ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->vendor, NULL);
+    ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->date, NULL);
 
     uint32_t major, minor;
     if(
