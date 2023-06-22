@@ -462,7 +462,7 @@ elseif(BSD)
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_bsd.c
-        src/detection/temps/temps_linux.c
+        src/detection/temps/temps_bsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/theme/theme_linux.c
