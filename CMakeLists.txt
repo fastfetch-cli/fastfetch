@@ -250,6 +250,7 @@ set(LIBFASTFETCH_SRC
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
     src/detection/datetime/datetime.c
@@ -530,7 +531,7 @@ elseif(WIN32)
         src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c

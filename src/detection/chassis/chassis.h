@@ -13,5 +13,6 @@ typedef struct FFChassisResult
 } FFChassisResult;
 
 const char* ffDetectChassis(FFChassisResult* result);
+const char* ffChassisTypeToString(uint32_t chassisType);
 
 #endif
