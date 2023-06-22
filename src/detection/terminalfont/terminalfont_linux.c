@@ -248,7 +248,7 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         detectFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "tilix"))
         detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", "default", terminalFont);
-    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "gnome-terminal-"))
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "gnome-terminal-"))
         detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", "default", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "mate-terminal"))
         detectFromGSettings(instance, "/org/mate/terminal/profiles/", "org.mate.terminal.global", "org.mate.terminal.profile", "default-profile", terminalFont);
