@@ -253,7 +253,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #if defined(__linux__) || defined(__FreeBSD__)
 
-    if(ffStrbufIgnCaseEqualS(processName, "gnome-terminal-"))
+    if(ffStrbufStartsWithIgnCaseS(processName, "gnome-terminal-"))
         return getTerminalVersionGnome(version);
 
     if(ffStrbufIgnCaseEqualS(processName, "konsole"))
