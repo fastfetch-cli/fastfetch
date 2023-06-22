@@ -46,5 +46,12 @@ const char* ffDetectChassis(FFChassisResult* result)
     getHostValue("/sys/devices/virtual/dmi/id/chassis_type", "/sys/class/dmi/id/chassis_type", &result->chassisType);
     getHostValue("/sys/devices/virtual/dmi/id/chassis_vendor", "/sys/class/dmi/id/chassis_vendor", &result->chassisVendor);
     getHostValue("/sys/devices/virtual/dmi/id/chassis_version", "/sys/class/dmi/id/chassis_version", &result->chassisVersion);
+
+    if(result->chassisType.length)
+    {
+        const char* chassisTypeStr = ffChassisTypeToString(ffStrbufToUInt16(&result->chassisType, 9999));
+        if(chassisTypeStr)
+            ffStrbufSetS(&result->chassisType, chassisTypeStr);
+    }
     return NULL;
 }
