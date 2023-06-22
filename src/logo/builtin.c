@@ -1505,26 +1505,28 @@ static const FFlogo* getLogoWindows11()
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11", "Windows Server 2022")
     FF_LOGO_LINES(
-        "$1\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
         "\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////"
     )
     FF_LOGO_COLORS(
+        "34", //blue
+        "34", //blue
+        "34", //blue
         "34" //blue
     )
     FF_LOGO_COLOR_KEYS("33"); //yellow
@@ -1537,8 +1539,7 @@ static const FFlogo* getLogoWindows11Small()
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11_small", "Windows 11-small")
     FF_LOGO_LINES(
-        "$1\n"
-        "lllllllll  lllllllll\n"
+        "$1lllllllll  lllllllll\n"
         "lllllllll  lllllllll\n"
         "lllllllll  lllllllll\n"
         "lllllllll  lllllllll\n"
@@ -1561,27 +1562,30 @@ static const FFlogo* getLogoWindows8()
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019")
     FF_LOGO_LINES(
-        "$1                                ..,\n"
+        "                                $2..,\n"
         "                    ....,,:;+ccllll\n"
-        "      ...,,+:;  cllllllllllllllllll\n"
-        ",cclllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
+        "$1      ...,,+:;  $2cllllllllllllllllll\n"
+        "$1,cclllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
         "\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "`'ccllllllllll  lllllllllllllllllll\n"
-        "       `' \\*::  :ccllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3`'ccllllllllll  $4lllllllllllllllllll\n"
+        "$3       `' \\*::  $4:ccllllllllllllllll\n"
         "                       ````''*::cll\n"
         "                                 ``"
     )
     FF_LOGO_COLORS(
+        "36", //cyan
+        "36", //cyan
+        "36", //cyan
         "36" //cyan
     )
     FF_LOGO_COLOR_KEYS("33"); //yellow
