@@ -22,10 +22,6 @@ elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(WIN32)
-    enable_language(CXX)
-endif()
-
 #############################
 # Compile time dependencies #
 #############################
@@ -112,7 +108,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration")
 
 if(WIN32)
-    set(CMAKE_CXX_STANDARD 11)
+    enable_language(CXX)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
@@ -532,7 +529,7 @@ elseif(WIN32)
         src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
-        src/detection/chassis/chassis_windows.c
+        src/detection/chassis/chassis_windows.cpp
         src/detection/cpu/cpu_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c

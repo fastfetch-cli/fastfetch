@@ -1,6 +1,10 @@
 #include "wmi.hpp"
 #include "util/windows/com.hpp"
 
+extern "C" {
+#include "util/windows/unicode.h"
+}
+
 #include <synchapi.h>
 #include <wchar.h>
 #include <math.h>
@@ -144,8 +148,7 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     CIMTYPE type;
     if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)) || vtProp.vt != VT_BSTR)
@@ -180,13 +183,12 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
                 ffStrbufAppendS(strbuf, vtProp.pcVal);
                 break;
 
-            case VT_LPWSTR: // TODO
+            case VT_LPWSTR:
             default:
-                result = false;
+                ffStrbufSetWS(strbuf, vtProp.bstrVal);
                 break;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
 
@@ -194,8 +196,7 @@ bool FFWmiRecord::getSigned(const wchar_t* key, int64_t* integer)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     CIMTYPE type;
     if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)))
@@ -221,7 +222,6 @@ bool FFWmiRecord::getSigned(const wchar_t* key, int64_t* integer)
             default: *integer = 0; result = false;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
 
@@ -229,8 +229,7 @@ bool FFWmiRecord::getUnsigned(const wchar_t* key, uint64_t* integer)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     if(FAILED(obj->Get(key, 0, &vtProp, nullptr, nullptr)))
     {
@@ -255,7 +254,6 @@ bool FFWmiRecord::getUnsigned(const wchar_t* key, uint64_t* integer)
             default: *integer = 0; result = false;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
 
@@ -263,8 +261,7 @@ bool FFWmiRecord::getReal(const wchar_t* key, double* real)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     if(FAILED(obj->Get(key, 0, &vtProp, nullptr, nullptr)))
     {
@@ -291,6 +288,5 @@ bool FFWmiRecord::getReal(const wchar_t* key, double* real)
             default: *real = NAN; result = false;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
