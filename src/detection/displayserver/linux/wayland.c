@@ -141,18 +141,26 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
 
         #ifdef WL_OUTPUT_DONE_SINCE_VERSION
             .done = (void*) stubListener,
+        #else
+            #warning wl_output_listener::done is not supported
         #endif
 
         #ifdef WL_OUTPUT_SCALE_SINCE_VERSION
             .scale = waylandOutputScaleListener,
+        #else
+            #warning wl_output_listener::scale is not supported
         #endif
 
         #ifdef WL_OUTPUT_NAME_SINCE_VERSION
             .name = waylandOutputNameListener,
+        #else
+            #warning wl_output_listener::name is not supported
         #endif
 
         #ifdef WL_OUTPUT_DESCRIPTION_SINCE_VERSION
             .description = (void*) stubListener,
+        #else
+            #warning wl_output_listener::description is not supported
         #endif
     };
 
