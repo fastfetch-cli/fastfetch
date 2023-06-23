@@ -9,6 +9,7 @@
 #include "common/thread.h"
 #include <wayland-client.h>
 #include <sys/socket.h>
+#include <assert.h>
 
 typedef struct WaylandData
 {
@@ -73,13 +74,11 @@ static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_outp
     display->refreshRate = refreshRate;
 }
 
-#ifdef WL_OUTPUT_SCALE_SINCE_VERSION
 static void waylandOutputScaleListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, int32_t scale)
 {
     WaylandDisplay* display = data;
     display->scale = scale;
 }
-#endif
 
 static void waylandOutputGeometryListener(void *data,
     FF_MAYBE_UNUSED struct wl_output *output,
@@ -107,7 +106,6 @@ static void waylandOutputGeometryListener(void *data,
     }
 }
 
-#ifdef WL_OUTPUT_NAME_SINCE_VERSION
 static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
 {
     WaylandDisplay* display = data;
@@ -116,7 +114,6 @@ static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_outp
     else if(strncmp(name, "HDMI-", strlen("HDMI-")) == 0 || strncmp(name, "DP-", strlen("DP-")) == 0)
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
 }
-#endif
 
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
@@ -135,34 +132,20 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
     };
     ffStrbufInit(&display.name);
 
-    struct wl_output_listener outputListener = {
-        .mode = waylandOutputModeListener,
-        .geometry = waylandOutputGeometryListener,
-
-        #ifdef WL_OUTPUT_DONE_SINCE_VERSION
-            .done = (void*) stubListener,
-        #else
-            #warning wl_output_listener::done is not supported
-        #endif
-
-        #ifdef WL_OUTPUT_SCALE_SINCE_VERSION
-            .scale = waylandOutputScaleListener,
-        #else
-            #warning wl_output_listener::scale is not supported
-        #endif
-
-        #ifdef WL_OUTPUT_NAME_SINCE_VERSION
-            .name = waylandOutputNameListener,
-        #else
-            #warning wl_output_listener::name is not supported
-        #endif
-
-        #ifdef WL_OUTPUT_DESCRIPTION_SINCE_VERSION
-            .description = (void*) stubListener,
-        #else
-            #warning wl_output_listener::description is not supported
-        #endif
+    // Dirty hack for #477
+    // The order of these callbacks MUST follow `struct wl_output_listener`
+    void* outputListener[] = {
+        waylandOutputGeometryListener, // geometry
+        waylandOutputModeListener, // mode
+        stubListener, // done
+        waylandOutputScaleListener, // scale
+        waylandOutputNameListener, // name
+        stubListener, // description
     };
+    static_assert(
+        sizeof(outputListener) >= sizeof(struct wl_output_listener),
+        "sizeof(outputListener) is too small. Please report it to fastfetch github issue"
+    );
 
     wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display);
     wldata->ffwl_display_roundtrip(wldata->display);
