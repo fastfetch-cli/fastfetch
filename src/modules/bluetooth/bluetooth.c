@@ -16,7 +16,10 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothDevice* de
         if(device->battery > 0)
             printf(" (%d%%)", device->battery);
 
-        putchar('\n');
+        if(!device->connected)
+            puts(" [disconnected]");
+        else
+            putchar('\n');
     }
     else
     {
@@ -37,29 +40,29 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
     if(error)
     {
         ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
-        return;
     }
-
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothDevice*));
-
-    FF_LIST_FOR_EACH(FFBluetoothDevice, device, devices)
+    else
     {
-        if(!device->connected && !options->showDisconnected)
-            continue;
+        FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothDevice*));
 
-        *(FFBluetoothDevice**)ffListAdd(&filtered) = device;
-    }
+        FF_LIST_FOR_EACH(FFBluetoothDevice, device, devices)
+        {
+            if(!device->connected && !options->showDisconnected)
+                continue;
 
-    if(filtered.length == 0)
-    {
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "No bluetooth devices found");
-        return;
-    }
+            *(FFBluetoothDevice**)ffListAdd(&filtered) = device;
+        }
 
-    for(uint32_t i = 0; i < filtered.length; i++)
-    {
-        uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
-        printDevice(options, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
+        if(filtered.length == 0)
+        {
+            ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "No bluetooth devices found");
+        }
+
+        for(uint32_t i = 0; i < filtered.length; i++)
+        {
+            uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
+            printDevice(options, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
+        }
     }
 
     FF_LIST_FOR_EACH(FFBluetoothDevice, device, devices)
@@ -85,7 +88,11 @@ bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key
         return true;
 
     if (ffStrEqualsIgnCase(subKey, "show-disconnected"))
+    {
         options->showDisconnected = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
