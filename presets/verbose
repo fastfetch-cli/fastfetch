@@ -14,7 +14,7 @@
 --font-format Font1: {}; Font2: {}; Font3: {}; Font4: {}
 --cursor-format Theme: {}; Size: {}
 --terminal-format Process: {}; Path: {}; Exe: {}
---terminal-font-format Pretty: {}; Name: {}; Size: {}; Styles: {}
+--terminalfont-format Pretty: {}; Name: {}; Size: {}; Styles: {}
 --cpu-format Name: {}, Vendor: {}, CoresPhysical: {}, CoresLogical: {}, CoresOnline: {}, FrequencyMin: {}, FrequencyMax: {}, Temperature: {}
 --cpu-usage-format Percentage: {}
 --gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}; Type: {}

@@ -204,9 +204,9 @@ static inline void printCommandHelp(const char* command)
             "WM protocol name"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "wm-theme-format"))
+    else if(ffStrEqualsIgnCase(command, "wmtheme-format"))
     {
-        constructAndPrintCommandHelpFormat("wm-theme", "{}", 1,
+        constructAndPrintCommandHelpFormat("wmtheme", "{}", 1,
             "WM theme name"
         );
     }
@@ -259,9 +259,9 @@ static inline void printCommandHelp(const char* command)
             "User shell version"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "terminal-font-format"))
+    else if(ffStrEqualsIgnCase(command, "terminalfont-format"))
     {
-        constructAndPrintCommandHelpFormat("terminal-font", "{}", 4,
+        constructAndPrintCommandHelpFormat("terminalfont", "{}", 4,
             "Terminal font",
             "Terminal font name",
             "Termianl font size",

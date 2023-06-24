@@ -20,5 +20,5 @@
 --wm-key "  "
 --shell-key "  "
 --terminal-key "  "
---terminal-font-key "  "
+--terminalfont-key "  "
 --packages-key "  "

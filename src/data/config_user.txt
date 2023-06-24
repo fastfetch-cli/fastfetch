@@ -299,13 +299,13 @@
 #--brightness-key Brightness ({1})
 #--de-key DE
 #--wm-key WM
-#--wm-theme-key WM Theme
+#--wmtheme-key WM Theme
 #--theme-key Theme
 #--icons-key Icons
 #--font-key Font
 #--cursor-key Cursor
 #--terminal-key Terminal
-#--terminal-font-key Terminal Font
+#--terminalfont-key Terminal Font
 #--cpu-key CPU
 #--cpu-usage-key CPU Usage
 #--gpu-key GPU {1}
@@ -349,13 +349,13 @@
 #--brightness-format
 #--de-format
 #--wm-format
-#--wm-theme-format
+#--wmtheme-format
 #--theme-format
 #--icons-format
 #--font-format
 #--cursor-format
 #--terminal-format
-#--terminal-font-format
+#--terminalfont-format
 #--cpu-format
 #--cpu-usage-format
 #--gpu-format
@@ -395,13 +395,13 @@
 #--brightness-key-color
 #--de-key-color
 #--wm-key-color
-#--wm-theme-key-color
+#--wmtheme-key-color
 #--theme-key-color
 #--icons-key-color
 #--font-key-color
 #--cursor-key-color
 #--terminal-key-color
-#--terminal-font-key-color
+#--terminalfont-key-color
 #--cpu-key-color
 #--cpu-usage-key-color
 #--gpu-key-color
