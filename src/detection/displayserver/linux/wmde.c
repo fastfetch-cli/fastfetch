@@ -284,9 +284,13 @@ static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResul
 {
     if(!ffStrSet(name))
         return;
-    else if(strcasestr(name, "plasma") != NULL || strcasestr(name, "kde") != NULL)
+    else if(strcasestr(name, "plasma") != NULL)
         getKDE(instance, result);
-    else if(strcasestr(name, "gnome") != NULL)
+    else if(
+        strcasecmp(name, "polkit-gnome") != 0 &&
+        strcasecmp(name, "gnome-keyring") != 0 &&
+        strcasestr(name, "gnome") != NULL
+    )
         getGnome(instance, result);
     else if(strcasestr(name, "cinnamon") != NULL)
         getCinnamon(instance, result);
