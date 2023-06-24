@@ -12,6 +12,14 @@
 #include <pci/pci.h>
 #include <setjmp.h>
 
+// Fix building on Ubuntu 20.04
+#ifndef PCI_IORESOURCE_MEM
+    #define PCI_IORESOURCE_MEM 0x00000200
+#endif
+#ifndef PCI_IORESOURCE_PREFETCH
+    #define PCI_IORESOURCE_PREFETCH 0x00002000
+#endif
+
 typedef struct PCIData
 {
     struct pci_access* access;
@@ -77,7 +85,7 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
-    if(ffStrbufCompS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD) == 0)
+    if(ffStrbufEqualS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD))
     {
         drmDetectDeviceName(gpu, pci, device);
         if(gpu->name.length > 0)
@@ -122,7 +130,7 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     }
 }
 
-FF_MAYBE_UNUSED static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
+FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, struct pci_dev* device)
 {
     const FFTempsResult* tempsResult = ffDetectTemps();
 
@@ -139,36 +147,53 @@ FF_MAYBE_UNUSED static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev
     }
 }
 
-static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* device)
+static bool pciDetectMemory(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* device)
+{
+    gpu->dedicated.used = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+
+    uint32_t flags = (uint32_t) pci->ffpci_fill_info(device, PCI_FILL_IO_FLAGS | PCI_FILL_SIZES);
+    if (!(flags & PCI_FILL_IO_FLAGS) || !(flags & PCI_FILL_SIZES))
+    {
+        gpu->dedicated.total = gpu->shared.total = FF_GPU_VMEM_SIZE_UNSET;
+        return false;
+    }
+
+    gpu->dedicated.total = gpu->shared.total = 0;
+    for (uint32_t i = 0; i < sizeof(device->size) / sizeof(device->size[0]); i++)
+    {
+        if (!(device->flags[i] & PCI_IORESOURCE_MEM)) continue;
+
+        // Assume dedicated memories are prefetchable
+        // At least it's true for my laptop
+        if (device->flags[i] & PCI_IORESOURCE_PREFETCH)
+            gpu->dedicated.total += device->size[i];
+        else
+            gpu->shared.total += device->size[i];
+    }
+
+    if (gpu->dedicated.total == 0 && gpu->shared.total == 0)
+    {
+        gpu->dedicated.total = gpu->shared.total = FF_GPU_VMEM_SIZE_UNSET;
+        return false;
+    }
+
+    return true;
+}
+
+static void pciDetectType(FFGPUResult* gpu)
 {
     //There is no straightforward way to detect the type of a GPU.
     //The approach taken here is to look at the memory sizes of the device.
     //Since integrated GPUs usually use the system ram, they don't have expansive ROMs
     //and their memory sizes are usually smaller than 1GB.
-
-    if(!(pci->ffpci_fill_info(device, PCI_FILL_SIZES) & PCI_FILL_SIZES))
+    if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
     {
+        gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 // 1GB
+            ? FF_GPU_TYPE_DISCRETE
+            : FF_GPU_TYPE_INTEGRATED;
+    }
+    else
         gpu->type = FF_GPU_TYPE_UNKNOWN;
-        return;
-    }
-
-    if(device->rom_size > 0)
-    {
-        gpu->type = FF_GPU_TYPE_DISCRETE;
-        return;
-    }
-
-    uint32_t numSizes = sizeof(device->size) / sizeof(device->size[0]);
-    for(uint32_t i = 0; i < numSizes; i++)
-    {
-        if(device->size[i] >= 1024 * 1024 * 1024) //1GB
-        {
-            gpu->type = FF_GPU_TYPE_DISCRETE;
-            return;
-        }
-    }
-
-    gpu->type = FF_GPU_TYPE_INTEGRATED;
 }
 
 static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
@@ -190,8 +215,6 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     FFGPUResult* gpu = ffListAdd(results);
 
-    gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-
     ffStrbufInit(&gpu->vendor);
     pciDetectVendorName(gpu, pci, device);
 
@@ -201,7 +224,8 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
 
-    detectType(gpu, pci, device);
+    pciDetectMemory(gpu, pci, device);
+    pciDetectType(gpu);
 
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
@@ -209,7 +233,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     #ifdef __linux__
     if(options->temp)
-        pciDetectTemperatur(gpu, device);
+        pciDetectTemp(gpu, device);
     #endif
 }
 
