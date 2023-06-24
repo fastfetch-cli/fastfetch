@@ -201,9 +201,9 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
         waylandOutputHandler(wldata, registry, name, version);
 }
 
-bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
+bool detectWayland(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(wayland, &instance->config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(wayland, &instance.config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)
@@ -255,17 +255,15 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 }
 #endif
 
-void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectWayland(FFDisplayServerResult* result)
 {
     //Wayland requires this to be set
     if(getenv("XDG_RUNTIME_DIR") == NULL)
         return;
 
     #ifdef FF_HAVE_WAYLAND
-        if(detectWayland(instance, result))
+        if(detectWayland(result))
             return;
-    #else
-        FF_UNUSED(instance);
     #endif
 
     const char* xdgSessionType = getenv("XDG_SESSION_TYPE");

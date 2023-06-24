@@ -4,12 +4,12 @@
 #include "modules/colors/colors.h"
 #include "util/stringUtils.h"
 
-void ffPrintColors(FFinstance* instance, FFColorsOptions* options)
+void ffPrintColors(FFColorsOptions* options)
 {
-    if(instance->config.pipe)
+    if(instance.config.pipe)
         return;
 
-    ffLogoPrintLine(instance);
+    ffLogoPrintLine();
 
     if(options->paddingLeft > 0)
         ffPrintCharTimes(' ', options->paddingLeft);
@@ -23,7 +23,7 @@ void ffPrintColors(FFinstance* instance, FFColorsOptions* options)
 
         puts(FASTFETCH_TEXT_MODIFIER_RESET);
 
-        ffLogoPrintLine(instance);
+        ffLogoPrintLine();
 
         if(options->paddingLeft > 0)
             ffPrintCharTimes(' ', options->paddingLeft);
@@ -94,7 +94,7 @@ void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
 {
 }
 
-void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseColorsJsonObject(yyjson_val* module)
 {
     FFColorsOptions __attribute__((__cleanup__(ffDestroyColorsOptions))) options;
     ffInitColorsOptions(&options);
@@ -122,7 +122,7 @@ void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintErrorString(instance, FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
+                    ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
                 else
                     options.symbol = (FFColorsSymbol) value;
                 continue;
@@ -134,9 +134,9 @@ void ffParseColorsJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintErrorString(instance, FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintColors(instance, &options);
+    ffPrintColors(&options);
 }

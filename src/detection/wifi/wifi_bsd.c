@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
+const char* ffDetectWifi(FFlist* result)
 {
     struct if_nameindex* infs = if_nameindex();
     if(!infs)

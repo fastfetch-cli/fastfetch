@@ -6,19 +6,19 @@
 
 #define FF_WM_NUM_FORMAT_ARGS 3
 
-void ffPrintWM(FFinstance* instance, FFWMOptions* options)
+void ffPrintWM(FFWMOptions* options)
 {
-    const FFDisplayServerResult* result = ffConnectDisplayServer(instance);
+    const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if(result->wmPrettyName.length == 0)
     {
-        ffPrintError(instance, FF_WM_MODULE_NAME, 0, &options->moduleArgs, "No WM found");
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "No WM found");
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_WM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_WM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         ffStrbufWriteTo(&result->wmPrettyName, stdout);
 
@@ -33,7 +33,7 @@ void ffPrintWM(FFinstance* instance, FFWMOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName}
@@ -62,7 +62,7 @@ void ffDestroyWMOptions(FFWMOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWMJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseWMJsonObject(yyjson_val* module)
 {
     FFWMOptions __attribute__((__cleanup__(ffDestroyWMOptions))) options;
     ffInitWMOptions(&options);
@@ -80,9 +80,9 @@ void ffParseWMJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_WM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintWM(instance, &options);
+    ffPrintWM(&options);
 }

@@ -11,11 +11,11 @@
 
 #define FF_TERMUX_FONT_PATH FASTFETCH_TARGET_DIR_HOME "/.termux/font.ttf"
 
-const char* detectTermux(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+const char* detectTermux(FFTerminalFontResult* terminalFont)
 {
     #ifdef FF_HAVE_FREETYPE
 
-    FF_LIBRARY_LOAD(freetype, &instance->config.libfreetype, "dlopen libfreetype"FF_LIBRARY_EXTENSION " failed", "libfreetype"FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(freetype, &instance.config.libfreetype, "dlopen libfreetype"FF_LIBRARY_EXTENSION " failed", "libfreetype"FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_Init_FreeType);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_New_Face);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_Done_Face);
@@ -53,7 +53,7 @@ exit:
     #endif
 }
 
-void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufCompS(&terminalShell->terminalProcessName, "Termux") != 0)
     {
@@ -67,5 +67,5 @@ void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalSh
         return;
     }
 
-    ffStrbufSetS(&terminalFont->error, detectTermux(instance, terminalFont));
+    ffStrbufSetS(&terminalFont->error, detectTermux(terminalFont));
 }

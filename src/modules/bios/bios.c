@@ -6,7 +6,7 @@
 
 #define FF_BIOS_NUM_FORMAT_ARGS 4
 
-void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
+void ffPrintBios(FFBiosOptions* options)
 {
     FFBiosResult bios;
     ffStrbufInit(&bios.date);
@@ -18,19 +18,19 @@ void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
     if(bios.version.length == 0)
     {
-        ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "bios_version is not set.");
+        ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "bios_version is not set.");
         goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&bios.version, stdout);
         if (bios.biosRelease.length)
             printf(" (%s)", bios.biosRelease.chars);
@@ -38,7 +38,7 @@ void ffPrintBios(FFinstance* instance, FFBiosOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.date},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.biosRelease},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.vendor},
@@ -74,7 +74,7 @@ void ffDestroyBiosOptions(FFBiosOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBiosJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseBiosJsonObject(yyjson_val* module)
 {
     FFBiosOptions __attribute__((__cleanup__(ffDestroyBiosOptions))) options;
     ffInitBiosOptions(&options);
@@ -92,9 +92,9 @@ void ffParseBiosJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_BIOS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BIOS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintBios(instance, &options);
+    ffPrintBios(&options);
 }

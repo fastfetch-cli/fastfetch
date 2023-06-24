@@ -17,19 +17,19 @@ typedef struct FFlogo
 typedef const FFlogo*(*GetLogoMethod)();
 
 //logo.c
-void ffLogoPrintChars(FFinstance* instance, const char* data, bool doColorReplacement);
+void ffLogoPrintChars(const char* data, bool doColorReplacement);
 
 //builtin.c
 const FFlogo* ffLogoBuiltinGetUnknown();
 GetLogoMethod* ffLogoBuiltinGetAll();
 
 //image/image.c
-bool ffLogoPrintImageIfExists(FFinstance* instance, FFLogoType type, bool printError);
+bool ffLogoPrintImageIfExists(FFLogoType type, bool printError);
 
 //option.c
 void ffInitLogoOptions(FFLogoOptions* options);
 bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const char* value);
 void ffDestroyLogoOptions(FFLogoOptions* options);
-const char* ffParseLogoJsonConfig(FFinstance* instance);
+const char* ffParseLogoJsonConfig();
 
 #endif

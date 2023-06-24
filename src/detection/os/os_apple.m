@@ -96,10 +96,8 @@ static void parseOSXSoftwareLicense(FFOSResult* os)
     fclose(rtf);
 }
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->version);
     ffStrbufInit(&os->buildID);

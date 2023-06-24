@@ -6,7 +6,7 @@
 #define FF_TERMUX_API_PATH FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api"
 #define FF_TERMUX_API_PARAM "WifiConnectionInfo"
 
-const char* ffDetectWifi(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
+const char* ffDetectWifi(FFlist* result)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 

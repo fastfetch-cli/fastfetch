@@ -6,17 +6,17 @@
 
 #define FF_CURSOR_NUM_FORMAT_ARGS 2
 
-void ffPrintCursor(FFinstance* instance, FFCursorOptions* options)
+void ffPrintCursor(FFCursorOptions* options)
 {
     FFCursorResult result;
     ffStrbufInit(&result.error);
     ffStrbufInit(&result.theme);
     ffStrbufInit(&result.size);
 
-    ffDetectCursor(instance, &result);
+    ffDetectCursor(&result);
 
     if(result.error.length)
-        ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "%s", result.error.chars);
+        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "%s", result.error.chars);
     else
     {
         ffStrbufRemoveIgnCaseEndS(&result.theme, "cursors");
@@ -28,7 +28,7 @@ void ffPrintCursor(FFinstance* instance, FFCursorOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             ffStrbufWriteTo(&result.theme, stdout);
 
             if(result.size.length > 0)
@@ -38,7 +38,7 @@ void ffPrintCursor(FFinstance* instance, FFCursorOptions* options)
         }
         else
         {
-            ffPrintFormat(instance, FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_CURSOR_NUM_FORMAT_ARGS, (FFformatarg[]){
+            ffPrintFormat(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_CURSOR_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result.theme},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result.size}
             });
@@ -71,7 +71,7 @@ void ffDestroyCursorOptions(FFCursorOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCursorJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseCursorJsonObject(yyjson_val* module)
 {
     FFCursorOptions __attribute__((__cleanup__(ffDestroyCursorOptions))) options;
     ffInitCursorOptions(&options);
@@ -89,9 +89,9 @@ void ffParseCursorJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_CURSOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintCursor(instance, &options);
+    ffPrintCursor(&options);
 }

@@ -54,7 +54,7 @@ static void printIp(FFLocalIpResult* ip)
     }
 }
 
-void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
+void ffPrintLocalIp(FFLocalIpOptions* options)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
 
@@ -62,13 +62,13 @@ void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(results.length == 0)
     {
-        ffPrintError(instance, FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to detect any IPs");
+        ffPrintError(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to detect any IPs");
         return;
     }
 
@@ -76,7 +76,7 @@ void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
 
     if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
     {
-        ffPrintLogoAndKey(instance, FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
@@ -94,13 +94,13 @@ void ffPrintLocalIp(FFinstance* instance, FFLocalIpOptions* options)
             formatKey(options, ip, &key);
             if(options->moduleArgs.outputFormat.length == 0)
             {
-                ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
+                ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
                 printIp(ip);
                 putchar('\n');
             }
             else
             {
-                ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
+                ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
@@ -195,7 +195,7 @@ void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
     ffStrbufDestroy(&options->namePrefix);
 }
 
-void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseLocalIpJsonObject(yyjson_val* module)
 {
     FFLocalIpOptions __attribute__((__cleanup__(ffDestroyLocalIpOptions))) options;
     ffInitLocalIpOptions(&options);
@@ -264,9 +264,9 @@ void ffParseLocalIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_LOCALIP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintLocalIp(instance, &options);
+    ffPrintLocalIp(&options);
 }

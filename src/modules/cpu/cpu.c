@@ -6,7 +6,7 @@
 
 #define FF_CPU_NUM_FORMAT_ARGS 8
 
-void ffPrintCPU(FFinstance* instance, FFCPUOptions* options)
+void ffPrintCPU(FFCPUOptions* options)
 {
     FFCPUResult cpu;
     cpu.temperature = FF_CPU_TEMP_UNSET;
@@ -15,21 +15,21 @@ void ffPrintCPU(FFinstance* instance, FFCPUOptions* options)
     ffStrbufInit(&cpu.name);
     ffStrbufInit(&cpu.vendor);
 
-    const char* error = ffDetectCPU(instance, options, &cpu);
+    const char* error = ffDetectCPU(options, &cpu);
 
     if(error)
     {
-        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
     }
     else if(cpu.vendor.length == 0 && cpu.name.length == 0 && cpu.coresOnline <= 1)
     {
-        ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "No CPU detected");
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "No CPU detected");
     }
     else
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_CPU_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
             if(cpu.name.length > 0)
                 ffStrbufWriteTo(&cpu.name, stdout);
@@ -54,7 +54,7 @@ void ffPrintCPU(FFinstance* instance, FFCPUOptions* options)
         }
         else
         {
-            ffPrintFormat(instance, FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+            ffPrintFormat(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical},
@@ -99,7 +99,7 @@ void ffDestroyCPUOptions(FFCPUOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCPUJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseCPUJsonObject(yyjson_val* module)
 {
     FFCPUOptions __attribute__((__cleanup__(ffDestroyCPUOptions))) options;
     ffInitCPUOptions(&options);
@@ -123,9 +123,9 @@ void ffParseCPUJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_CPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_CPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintCPU(instance, &options);
+    ffPrintCPU(&options);
 }

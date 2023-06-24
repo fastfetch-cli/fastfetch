@@ -32,14 +32,14 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
     }
 }
 
-void ffPrintPublicIp(FFinstance* instance, FFPublicIpOptions* options)
+void ffPrintPublicIp(FFPublicIpOptions* options)
 {
     if (status == -1)
         ffPreparePublicIp(options);
 
     if (status == 0)
     {
-        ffPrintError(instance, FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to connect to an IP detection server");
+        ffPrintError(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to connect to an IP detection server");
         return;
     }
 
@@ -49,18 +49,18 @@ void ffPrintPublicIp(FFinstance* instance, FFPublicIpOptions* options)
 
     if (!success || result.length == 0)
     {
-        ffPrintError(instance, FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to receive the server response");
+        ffPrintError(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to receive the server response");
         return;
     }
 
     if (options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&result, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PUBLICIP_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PUBLICIP_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
         });
     }
@@ -104,7 +104,7 @@ void ffDestroyPublicIpOptions(FFPublicIpOptions* options)
     ffStrbufDestroy(&options->url);
 }
 
-void ffParsePublicIpJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParsePublicIpJsonObject(yyjson_val* module)
 {
     FFPublicIpOptions __attribute__((__cleanup__(ffDestroyPublicIpOptions))) options;
     ffInitPublicIpOptions(&options);
@@ -134,9 +134,9 @@ void ffParsePublicIpJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_PUBLICIP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PUBLICIP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintPublicIp(instance, &options);
+    ffPrintPublicIp(&options);
 }

@@ -4,10 +4,8 @@
 
 #include <IOKit/IOKitLib.h>
 
-const char* ffDetectPowerAdapterImpl(FFinstance* instance, FFlist* results)
+const char* ffDetectPowerAdapterImpl(FFlist* results)
 {
-    FF_UNUSED(instance);
-
     CFMutableDictionaryRef matchDict = IOServiceMatching("AppleSmartBattery");
     if (matchDict == NULL)
         return "IOServiceMatching(\"AppleSmartBattery\") failed";

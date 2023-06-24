@@ -14,6 +14,6 @@ typedef struct FFBluetoothDevice
     bool connected;
 } FFBluetoothDevice;
 
-const char* ffDetectBluetooth(const FFinstance* instance, FFlist* devices /* FFBluetoothDevice */);
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */);
 
 #endif

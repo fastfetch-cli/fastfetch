@@ -32,7 +32,7 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
     return counter;
 }
 
-static void detectScoop(const FFinstance* instance, FFPackagesResult* result)
+static void detectScoop(FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY scoopPath = ffStrbufCreateA(MAX_PATH + 3);
 
@@ -44,13 +44,13 @@ static void detectScoop(const FFinstance* instance, FFPackagesResult* result)
     }
     else
     {
-        ffStrbufAppendS(&scoopPath, instance->state.platform.homeDir.chars);
+        ffStrbufAppendS(&scoopPath, instance.state.platform.homeDir.chars);
         ffStrbufAppendS(&scoopPath, "/scoop/apps/*");
     }
     result->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY, "scoop");
 }
 
-static void detectChoco(FF_MAYBE_UNUSED const FFinstance* instance, FFPackagesResult* result)
+static void detectChoco(FF_MAYBE_UNUSED FFPackagesResult* result)
 {
     const char* chocoInstall = getenv("ChocolateyInstall");
     if(!chocoInstall || chocoInstall[0] == '\0')
@@ -62,7 +62,7 @@ static void detectChoco(FF_MAYBE_UNUSED const FFinstance* instance, FFPackagesRe
     result->choco = getNumElements(chocoPath, FILE_ATTRIBUTE_DIRECTORY, "choco");
 }
 
-static void detectPacman(FF_MAYBE_UNUSED const FFinstance* instance, FFPackagesResult* result)
+static void detectPacman(FF_MAYBE_UNUSED FFPackagesResult* result)
 {
     const char* msystemPrefix = getenv("MSYSTEM_PREFIX");
     if(!msystemPrefix)
@@ -75,9 +75,9 @@ static void detectPacman(FF_MAYBE_UNUSED const FFinstance* instance, FFPackagesR
     result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY, NULL);
 }
 
-void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
+void ffDetectPackagesImpl(FFPackagesResult* result)
 {
-    detectScoop(instance, result);
-    detectChoco(instance, result);
-    detectPacman(instance, result);
+    detectScoop(result);
+    detectChoco(result);
+    detectPacman(result);
 }

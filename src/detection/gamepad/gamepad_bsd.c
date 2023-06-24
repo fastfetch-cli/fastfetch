@@ -8,7 +8,7 @@
 
 #define MAX_UHID_JOYS 64
 
-const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */)
+const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 {
     char path[16];
     for (int i = 0; i < MAX_UHID_JOYS; i++)

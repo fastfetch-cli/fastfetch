@@ -15,9 +15,9 @@ namespace
     struct bstr_t
     {
         explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
-        ~bstr_t() noexcept { SysFreeString(_bstr); }
-        explicit operator const wchar_t*() const noexcept { return _bstr; }
-        operator BSTR() const noexcept { return _bstr; }
+        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
+        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
+        operator BSTR(void) const noexcept { return _bstr; }
 
         private:
             BSTR _bstr;

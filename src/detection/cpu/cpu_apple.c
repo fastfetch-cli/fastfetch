@@ -40,7 +40,7 @@ static double detectCpuTemp(const FFstrbuf* cpuName)
     return result;
 }
 
-const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     if (ffSysctlGetString("machdep.cpu.brand_string", &cpu->name) != NULL)
         return "sysctlbyname(machdep.cpu.brand_string) failed";

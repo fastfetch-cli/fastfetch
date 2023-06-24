@@ -8,22 +8,22 @@
 
 #define FF_MEMORY_NUM_FORMAT_ARGS 3
 
-void ffPrintMemory(FFinstance* instance, FFMemoryOptions* options)
+void ffPrintMemory(FFMemoryOptions* options)
 {
     FFMemoryResult storage;
     const char* error = ffDetectMemory(&storage);
 
     if(error)
     {
-        ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesUsed, instance->config.binaryPrefixType, &usedPretty);
+    ffParseSize(storage.bytesUsed, instance.config.binaryPrefixType, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesTotal, instance->config.binaryPrefixType, &totalPretty);
+    ffParseSize(storage.bytesTotal, instance.config.binaryPrefixType, &totalPretty);
 
     uint8_t percentage = storage.bytesTotal == 0
         ? 0
@@ -31,24 +31,24 @@ void ffPrintMemory(FFinstance* instance, FFMemoryOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         if (storage.bytesTotal == 0)
             puts("Disabled");
         else
         {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(instance, &str, percentage, 0, 5, 8);
+                ffAppendPercentBar(&str, percentage, 0, 5, 8);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffAppendPercentNum(instance, &str, (uint8_t) percentage, 50, 80, str.length > 0);
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffAppendPercentNum(&str, (uint8_t) percentage, 50, 80, str.length > 0);
 
             ffStrbufTrimRight(&str, ' ');
             ffStrbufPutTo(&str, stdout);
@@ -56,7 +56,7 @@ void ffPrintMemory(FFinstance* instance, FFMemoryOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
@@ -85,7 +85,7 @@ void ffDestroyMemoryOptions(FFMemoryOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMemoryJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseMemoryJsonObject(yyjson_val* module)
 {
     FFMemoryOptions __attribute__((__cleanup__(ffDestroyMemoryOptions))) options;
     ffInitMemoryOptions(&options);
@@ -103,9 +103,9 @@ void ffParseMemoryJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_MEMORY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintMemory(instance, &options);
+    ffPrintMemory(&options);
 }

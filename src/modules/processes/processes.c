@@ -6,26 +6,26 @@
 
 #define FF_PROCESSES_NUM_FORMAT_ARGS 1
 
-void ffPrintProcesses(FFinstance* instance, FFProcessesOptions* options)
+void ffPrintProcesses(FFProcessesOptions* options)
 {
     uint32_t numProcesses = 0;
     const char* error = ffDetectProcesses(&numProcesses);
 
     if(error)
     {
-        ffPrintError(instance, FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         printf("%u\n", numProcesses);
     }
     else
     {
-        ffPrintFormat(instance, FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PROCESSES_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PROCESSES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &numProcesses}
         });
     }
@@ -52,7 +52,7 @@ void ffDestroyProcessesOptions(FFProcessesOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseProcessesJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseProcessesJsonObject(yyjson_val* module)
 {
     FFProcessesOptions __attribute__((__cleanup__(ffDestroyProcessesOptions))) options;
     ffInitProcessesOptions(&options);
@@ -70,9 +70,9 @@ void ffParseProcessesJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_PROCESSES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintProcesses(instance, &options);
+    ffPrintProcesses(&options);
 }

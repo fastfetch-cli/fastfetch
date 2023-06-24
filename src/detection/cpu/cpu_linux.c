@@ -104,7 +104,7 @@ static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
 

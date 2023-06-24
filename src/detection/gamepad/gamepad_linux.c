@@ -5,7 +5,7 @@
 #include <dirent.h>
 #include <ctype.h>
 
-const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */)
+const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 {
     DIR* dirp = opendir("/sys/class/input/");
     if(dirp == NULL)

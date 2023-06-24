@@ -60,7 +60,7 @@ const char* colorHexToString(DWORD hex)
     }
 }
 
-bool ffDetectWmTheme(FF_MAYBE_UNUSED FFinstance* instance, FFstrbuf* themeOrError)
+bool ffDetectWmTheme(FFstrbuf* themeOrError)
 {
     {
         FF_HKEY_AUTO_DESTROY hKey = NULL;

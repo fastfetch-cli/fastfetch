@@ -4,15 +4,15 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-void ffPrintCustom(FFinstance* instance, FFCustomOptions* options)
+void ffPrintCustom(FFCustomOptions* options)
 {
     if (options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintError(instance, FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, "output format must be set for custom module");
+        ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, "output format must be set for custom module");
         return;
     }
 
-    ffPrintLogoAndKey(instance, options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+    ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
     ffPrintUserString(options->moduleArgs.outputFormat.chars);
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
@@ -38,7 +38,7 @@ void ffDestroyCustomOptions(FFCustomOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCustomJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseCustomJsonObject(yyjson_val* module)
 {
     FFCustomOptions __attribute__((__cleanup__(ffDestroyCustomOptions))) options;
     ffInitCustomOptions(&options);
@@ -56,9 +56,9 @@ void ffParseCustomJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_CUSTOM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintCustom(instance, &options);
+    ffPrintCustom(&options);
 }

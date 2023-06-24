@@ -3,19 +3,19 @@
 #include "modules/separator/separator.h"
 #include "util/stringUtils.h"
 
-void ffPrintSeparator(FFinstance* instance, FFSeparatorOptions* options)
+void ffPrintSeparator(FFSeparatorOptions* options)
 {
-    uint32_t titleLength = instance->state.titleLength;
+    uint32_t titleLength = instance.state.titleLength;
     if (titleLength == 0)
     {
         // Title was not printed, should we support this case?
-        titleLength = instance->state.platform.userName.length + 1 + (instance->config.title.fdqn ?
-            instance->state.platform.domainName.length :
-            instance->state.platform.hostName.length
+        titleLength = instance.state.platform.userName.length + 1 + (instance.config.title.fdqn ?
+            instance.state.platform.domainName.length :
+            instance.state.platform.hostName.length
         );
     }
 
-    ffLogoPrintLine(instance);
+    ffLogoPrintLine();
 
     if(options->string.length == 0)
     {
@@ -59,7 +59,7 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
     ffStrbufDestroy(&options->string);
 }
 
-void ffParseSeparatorJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseSeparatorJsonObject(yyjson_val* module)
 {
     FFSeparatorOptions __attribute__((__cleanup__(ffDestroySeparatorOptions))) options;
     ffInitSeparatorOptions(&options);
@@ -80,9 +80,9 @@ void ffParseSeparatorJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintErrorString(instance, FF_SEPARATOR_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            ffPrintErrorString(FF_SEPARATOR_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintSeparator(instance, &options);
+    ffPrintSeparator(&options);
 }

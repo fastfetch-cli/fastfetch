@@ -6,7 +6,7 @@
 
 #define FF_USERS_NUM_FORMAT_ARGS 1
 
-void ffPrintUsers(FFinstance* instance, FFUsersOptions* options)
+void ffPrintUsers(FFUsersOptions* options)
 {
     FF_LIST_AUTO_DESTROY users = ffListCreate(sizeof(FFstrbuf));
 
@@ -16,7 +16,7 @@ void ffPrintUsers(FFinstance* instance, FFUsersOptions* options)
 
     if(error.length > 0)
     {
-        ffPrintError(instance, FF_USERS_MODULE_NAME, 0, &options->moduleArgs, "%*s", error.length, error.chars);
+        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, "%*s", error.length, error.chars);
         return;
     }
 
@@ -32,12 +32,12 @@ void ffPrintUsers(FFinstance* instance, FFUsersOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_USERS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_USERS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         puts(result.chars);
     }
     else
     {
-        ffPrintFormat(instance, FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_USERS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_USERS_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result},
         });
     }
@@ -64,7 +64,7 @@ void ffDestroyUsersOptions(FFUsersOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseUsersJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseUsersJsonObject(yyjson_val* module)
 {
     FFUsersOptions __attribute__((__cleanup__(ffDestroyUsersOptions))) options;
     ffInitUsersOptions(&options);
@@ -82,9 +82,9 @@ void ffParseUsersJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_USERS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_USERS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintUsers(instance, &options);
+    ffPrintUsers(&options);
 }

@@ -6,8 +6,8 @@
 
 void ffPreparePublicIp(FFPublicIpOptions* options);
 
-void ffPrintPublicIp(FFinstance* instance, FFPublicIpOptions* options);
+void ffPrintPublicIp(FFPublicIpOptions* options);
 void ffInitPublicIpOptions(FFPublicIpOptions* options);
 bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, const char* value);
 void ffDestroyPublicIpOptions(FFPublicIpOptions* options);
-void ffParsePublicIpJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParsePublicIpJsonObject(yyjson_val* module);

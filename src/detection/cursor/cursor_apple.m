@@ -17,10 +17,10 @@ static void appendColor(FFstrbuf* str, NSDictionary* color)
         ffStrbufAppendF(str, "#%02X%02X%02X%02X", r, g, b, a);
 }
 
-void ffDetectCursor(const FFinstance* instance, FFCursorResult* result)
+void ffDetectCursor(FFCursorResult* result)
 {
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.apple.universalaccess.plist", instance->state.platform.homeDir.chars];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.apple.universalaccess.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)

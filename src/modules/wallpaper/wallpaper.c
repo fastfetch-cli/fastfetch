@@ -6,10 +6,10 @@
 
 #define FF_WALLPAPER_NUM_FORMAT_ARGS 2
 
-void ffPrintWallpaper(FFinstance* instance, FFWallpaperOptions* options)
+void ffPrintWallpaper(FFWallpaperOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
-    const char* error = ffDetectWallpaper(instance, &fullpath);
+    const char* error = ffDetectWallpaper(&fullpath);
 
     const uint32_t index = ffStrbufLastIndexC(&fullpath,
         #ifndef _WIN32
@@ -24,18 +24,18 @@ void ffPrintWallpaper(FFinstance* instance, FFWallpaperOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         puts(filename);
     }
     else
     {
-        ffPrintFormat(instance, FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_WALLPAPER_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_WALLPAPER_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, filename},
             {FF_FORMAT_ARG_TYPE_STRBUF, &fullpath},
         });
@@ -63,7 +63,7 @@ void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWallpaperJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseWallpaperJsonObject(yyjson_val* module)
 {
     FFWallpaperOptions __attribute__((__cleanup__(ffDestroyWallpaperOptions))) options;
     ffInitWallpaperOptions(&options);
@@ -81,9 +81,9 @@ void ffParseWallpaperJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_WALLPAPER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintWallpaper(instance, &options);
+    ffPrintWallpaper(&options);
 }

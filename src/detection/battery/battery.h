@@ -17,6 +17,6 @@ typedef struct BatteryResult
     double temperature;
 } BatteryResult;
 
-const char* ffDetectBattery(FFinstance* instance, FFBatteryOptions* options, FFlist* results);
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results);
 
 #endif

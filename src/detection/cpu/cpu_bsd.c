@@ -2,7 +2,7 @@
 #include "common/sysctl.h"
 #include "detection/temps/temps_bsd.h"
 
-const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     if (ffSysctlGetString("hw.model", &cpu->name))
         return "sysctlbyname(hw.model) failed";

@@ -7,20 +7,20 @@
 #define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
 #define FF_POWERADAPTER_MODULE_ARGS 5
 
-void ffPrintPowerAdapter(FFinstance* instance, FFPowerAdapterOptions* options)
+void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
     FFlist results;
     ffListInit(&results, sizeof(PowerAdapterResult));
 
-    const char* error = ffDetectPowerAdapterImpl(instance, &results);
+    const char* error = ffDetectPowerAdapterImpl(&results);
 
     if (error)
     {
-        ffPrintError(instance, FF_POWERADAPTER_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_POWERADAPTER_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
     }
     else if(results.length == 0)
     {
-        ffPrintError(instance, FF_POWERADAPTER_DISPLAY_NAME, 0, &options->moduleArgs, "No power adapters found");
+        ffPrintError(FF_POWERADAPTER_DISPLAY_NAME, 0, &options->moduleArgs, "No power adapters found");
     }
     else
     {
@@ -32,7 +32,7 @@ void ffPrintPowerAdapter(FFinstance* instance, FFPowerAdapterOptions* options)
             {
                 if(options->moduleArgs.outputFormat.length == 0)
                 {
-                    ffPrintLogoAndKey(instance, FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+                    ffPrintLogoAndKey(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
                     if(result->name.length > 0)
                         puts(result->name.chars);
@@ -43,7 +43,7 @@ void ffPrintPowerAdapter(FFinstance* instance, FFPowerAdapterOptions* options)
                 }
                 else
                 {
-                    ffPrintFormat(instance, FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_POWERADAPTER_MODULE_ARGS, (FFformatarg[]){
+                    ffPrintFormat(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_POWERADAPTER_MODULE_ARGS, (FFformatarg[]){
                         {FF_FORMAT_ARG_TYPE_INT, &result->watts},
                         {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
                         {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
@@ -84,7 +84,7 @@ void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePowerAdapterJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParsePowerAdapterJsonObject(yyjson_val* module)
 {
     FFPowerAdapterOptions __attribute__((__cleanup__(ffDestroyPowerAdapterOptions))) options;
     ffInitPowerAdapterOptions(&options);
@@ -102,9 +102,9 @@ void ffParsePowerAdapterJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_POWERADAPTER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintPowerAdapter(instance, &options);
+    ffPrintPowerAdapter(&options);
 }

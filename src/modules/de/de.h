@@ -4,8 +4,8 @@
 
 #define FF_DE_MODULE_NAME "DE"
 
-void ffPrintDE(FFinstance* instance, FFDEOptions* options);
+void ffPrintDE(FFDEOptions* options);
 void ffInitDEOptions(FFDEOptions* options);
 bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* value);
 void ffDestroyDEOptions(FFDEOptions* options);
-void ffParseDEJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseDEJsonObject(yyjson_val* module);

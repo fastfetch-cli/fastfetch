@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 #include "battery.h"
 
-const char* ffDetectBattery(FFinstance* instance, FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    FF_UNUSED(instance, options, results)
+    FF_UNUSED(options, results)
     return "Not supported on this platform";
 }

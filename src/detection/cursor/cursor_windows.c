@@ -2,10 +2,8 @@
 
 #include "util/windows/registry.h"
 
-void ffDetectCursor(const FFinstance* instance, FFCursorResult* result)
+void ffDetectCursor(FFCursorResult* result)
 {
-    FF_UNUSED(instance);
-
     FF_HKEY_AUTO_DESTROY hKey;
     if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Cursors", &hKey, &result->error))
     {

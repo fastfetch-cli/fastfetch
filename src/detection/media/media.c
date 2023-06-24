@@ -1,9 +1,9 @@
 #include "media.h"
 #include "detection/internal.h"
 
-void ffDetectMediaImpl(const FFinstance* instance, FFMediaResult* media);
+void ffDetectMediaImpl(FFMediaResult* media);
 
-const FFMediaResult* ffDetectMedia(const FFinstance* instance)
+const FFMediaResult* ffDetectMedia(void)
 {
     FF_DETECTION_INTERNAL_GUARD(FFMediaResult,
         ffStrbufInit(&result.error);
@@ -15,7 +15,7 @@ const FFMediaResult* ffDetectMedia(const FFinstance* instance)
         ffStrbufInit(&result.url);
         ffStrbufInit(&result.status);
 
-        ffDetectMediaImpl(instance, &result);
+        ffDetectMediaImpl(&result);
 
         if(result.song.length == 0 && result.error.length == 0)
             ffStrbufAppendS(&result.error, "No media found");

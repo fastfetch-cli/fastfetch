@@ -7,7 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-sign"
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
 {
     BLUETOOTH_DEVICE_SEARCH_PARAMS btsp = {
         .fReturnConnected = TRUE,

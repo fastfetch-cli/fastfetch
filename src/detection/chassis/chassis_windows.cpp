@@ -52,5 +52,5 @@ extern "C"
 const char* ffDetectChassis(FFChassisResult* result)
 {
     return detectWithRegistry(result);
-    // TODO: if (instance->config.allowSlowOperations) detectWithWmi(result);
+    // TODO: if (instance.config.allowSlowOperations) detectWithWmi(result);
 }

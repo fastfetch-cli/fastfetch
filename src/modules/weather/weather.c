@@ -16,14 +16,14 @@ void ffPrepareWeather(FFWeatherOptions* options)
     status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
 }
 
-void ffPrintWeather(FFinstance* instance, FFWeatherOptions* options)
+void ffPrintWeather(FFWeatherOptions* options)
 {
     if(status == -1)
         ffPrepareWeather(options);
 
     if(status == 0)
     {
-        ffPrintError(instance, FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Failed to connect to 'wttr.in'");
+        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Failed to connect to 'wttr.in'");
         return;
     }
 
@@ -33,18 +33,18 @@ void ffPrintWeather(FFinstance* instance, FFWeatherOptions* options)
 
     if(!success || result.length == 0)
     {
-        ffPrintError(instance, FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Failed to receive the server response");
+        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Failed to receive the server response");
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&result, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_WEATHER_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_WEATHER_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
         });
     }
@@ -88,7 +88,7 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options)
     ffStrbufDestroy(&options->outputFormat);
 }
 
-void ffParseWeatherJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseWeatherJsonObject(yyjson_val* module)
 {
     FFWeatherOptions __attribute__((__cleanup__(ffDestroyWeatherOptions))) options;
     ffInitWeatherOptions(&options);
@@ -118,9 +118,9 @@ void ffParseWeatherJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_WEATHER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintWeather(instance, &options);
+    ffPrintWeather(&options);
 }

@@ -144,9 +144,9 @@ done:
     return true;
 }
 
-bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
+bool ffParsePropFileHomeValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
-    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateF("%s/%s", instance->state.platform.homeDir.chars, relativeFile);
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateF("%s/%s", instance.state.platform.homeDir.chars, relativeFile);
     return ffParsePropFileValues(absolutePath.chars, numQueries, queries);
 }
 

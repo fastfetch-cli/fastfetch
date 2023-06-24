@@ -262,9 +262,9 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResult* result)
+static void getUserShellFromEnv(FFTerminalShellResult* result)
 {
-    ffStrbufSet(&result->userShellExe, &instance->state.platform.userShell);
+    ffStrbufSet(&result->userShellExe, &instance.state.platform.userShell);
     if(result->userShellExe.length == 0)
         return;
 
@@ -309,10 +309,8 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
-const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
+const FFTerminalShellResult* ffDetectTerminalShell()
 {
-    FF_UNUSED(instance);
-
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
@@ -350,7 +348,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
-    getUserShellFromEnv(instance, &result);
+    getUserShellFromEnv(&result);
 
     ffStrbufClear(&result.shellVersion);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);

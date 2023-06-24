@@ -6,11 +6,11 @@
 
 #define FF_BLUETOOTH_NUM_FORMAT_ARGS 4
 
-static void printDevice(FFinstance* instance, FFBluetoothOptions* options, const FFBluetoothDevice* device, uint8_t index)
+static void printDevice(FFBluetoothOptions* options, const FFBluetoothDevice* device, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&device->name, stdout);
 
         if(device->battery > 0)
@@ -20,7 +20,7 @@ static void printDevice(FFinstance* instance, FFBluetoothOptions* options, const
     }
     else
     {
-        ffPrintFormat(instance, FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_BLUETOOTH_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_BLUETOOTH_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->address},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->type},
@@ -29,14 +29,14 @@ static void printDevice(FFinstance* instance, FFBluetoothOptions* options, const
     }
 }
 
-void ffPrintBluetooth(FFinstance* instance, FFBluetoothOptions* options)
+void ffPrintBluetooth(FFBluetoothOptions* options)
 {
     FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof (FFBluetoothDevice));
-    const char* error = ffDetectBluetooth(instance, &devices);
+    const char* error = ffDetectBluetooth(&devices);
 
     if(error)
     {
-        ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -52,14 +52,14 @@ void ffPrintBluetooth(FFinstance* instance, FFBluetoothOptions* options)
 
     if(filtered.length == 0)
     {
-        ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "No bluetooth devices found");
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "No bluetooth devices found");
         return;
     }
 
     for(uint32_t i = 0; i < filtered.length; i++)
     {
         uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
-        printDevice(instance, options, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
+        printDevice(options, *(FFBluetoothDevice**)ffListGet(&filtered, i), index);
     }
 
     FF_LIST_FOR_EACH(FFBluetoothDevice, device, devices)
@@ -94,7 +94,7 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBluetoothJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseBluetoothJsonObject(yyjson_val* module)
 {
     FFBluetoothOptions __attribute__((__cleanup__(ffDestroyBluetoothOptions))) options;
     ffInitBluetoothOptions(&options);
@@ -118,9 +118,9 @@ void ffParseBluetoothJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_BLUETOOTH_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintBluetooth(instance, &options);
+    ffPrintBluetooth(&options);
 }

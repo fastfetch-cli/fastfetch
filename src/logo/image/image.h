@@ -35,17 +35,17 @@ typedef struct FFIMData
     void*(*resizeFunc)(const void* image, size_t width, size_t height, void* exceptionInfo);
 } FFIMData;
 
-FFLogoImageResult ffLogoPrintImageImpl(FFinstance* instance, FFLogoRequestData* requestData, const FFIMData* imData);
+FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFIMData* imData);
 
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK7
-FFLogoImageResult ffLogoPrintImageIM7(FFinstance* instance, FFLogoRequestData* requestData);
+FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData);
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK6
 #include <math.h>
-FFLogoImageResult ffLogoPrintImageIM6(FFinstance* instance, FFLogoRequestData* requestData);
+FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData);
 #endif
 
 #endif

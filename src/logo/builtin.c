@@ -8,7 +8,7 @@
 #define FF_LOGO_COLOR_TITLE(x) logo.colorTitle = x;
 #define FF_LOGO_RETURN return &logo;
 
-const FFlogo* ffLogoBuiltinGetUnknown()
+const FFlogo* ffLogoBuiltinGetUnknown(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("unknown", "question mark", "?")
@@ -38,7 +38,7 @@ const FFlogo* ffLogoBuiltinGetUnknown()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoAlmaLinux()
+static const FFlogo* getLogoAlmaLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("almalinux")
@@ -76,7 +76,7 @@ static const FFlogo* getLogoAlmaLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoAlpine()
+static const FFlogo* getLogoAlpine(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("alpine", "alpinelinux", "alpine-linux")
@@ -110,7 +110,7 @@ static const FFlogo* getLogoAlpine()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoAlpineSmall()
+static const FFlogo* getLogoAlpineSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("alpine_small", "alpine-linux-small")
@@ -130,7 +130,7 @@ static const FFlogo* getLogoAlpineSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoAndroid()
+static const FFlogo* getLogoAndroid(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("android")
@@ -163,7 +163,7 @@ static const FFlogo* getLogoAndroid()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoAndroidSmall()
+static const FFlogo* getLogoAndroidSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("android-small", "android_small")
@@ -183,7 +183,7 @@ static const FFlogo* getLogoAndroidSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoArch()
+static const FFlogo* getLogoArch(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("arch", "archlinux", "arch-linux")
@@ -217,7 +217,7 @@ static const FFlogo* getLogoArch()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoArchSmall()
+static const FFlogo* getLogoArchSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("arch_small", "archlinux_small", "arch-linux-small")
@@ -238,7 +238,7 @@ static const FFlogo* getLogoArchSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoArtix()
+static const FFlogo* getLogoArtix(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("artix", "artixlinux", "artix-linux")
@@ -272,7 +272,7 @@ static const FFlogo* getLogoArtix()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoArtixSmall()
+static const FFlogo* getLogoArtixSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("artix_small", "artixlinux_small", "artix-linux-small")
@@ -293,7 +293,7 @@ static const FFlogo* getLogoArtixSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoArcoLinux()
+static const FFlogo* getLogoArcoLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("arco", "arcolinux", "arco-linux")
@@ -328,7 +328,7 @@ static const FFlogo* getLogoArcoLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoBSD()
+static const FFlogo* getLogoBSD(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("bsd")
@@ -365,7 +365,7 @@ static const FFlogo* getLogoBSD()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoBedrock()
+static const FFlogo* getLogoBedrock(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("bedrock", "bedrocklinux", "bedrock-linux")
@@ -397,7 +397,7 @@ static const FFlogo* getLogoBedrock()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoCachyOS()
+static const FFlogo* getLogoCachyOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("cachy", "cachyos", "cachy-linux", "cachyos-linux")
@@ -435,7 +435,7 @@ static const FFlogo* getLogoCachyOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoCachyOSSmall()
+static const FFlogo* getLogoCachyOSSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("cachy_small", "cachyos_small", "cachy-linux-small", "cachyos-linux-small")
@@ -458,7 +458,7 @@ static const FFlogo* getLogoCachyOSSmall()
 }
 
 
-static const FFlogo* getLogoCelOS()
+static const FFlogo* getLogoCelOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("cel", "celos", "cel-linux", "celos-linux")
@@ -488,7 +488,7 @@ static const FFlogo* getLogoCelOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoCentOS()
+static const FFlogo* getLogoCentOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("cent", "centos", "cent-linux", "centos-linux")
@@ -525,7 +525,7 @@ static const FFlogo* getLogoCentOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoCentOSSmall()
+static const FFlogo* getLogoCentOSSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("cent_small", "centos_small", "cent-linux_small", "cent-linux-small", "centos-linux-small")
@@ -549,7 +549,7 @@ static const FFlogo* getLogoCentOSSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoCRUX()
+static const FFlogo* getLogoCRUX(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("CRUX", "crux")
@@ -583,7 +583,7 @@ static const FFlogo* getLogoCRUX()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoCrystalLinux()
+static const FFlogo* getLogoCrystalLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("crystal", "Crystal", "crystal-linux", "Crystal-Linux")
@@ -619,7 +619,7 @@ static const FFlogo* getLogoCrystalLinux()
 
 
 
-static const FFlogo* getLogoDebian()
+static const FFlogo* getLogoDebian(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("debian", "debian-linux")
@@ -651,7 +651,7 @@ static const FFlogo* getLogoDebian()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoDebianSmall()
+static const FFlogo* getLogoDebianSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("debian_small", "debian-linux-small")
@@ -671,7 +671,7 @@ static const FFlogo* getLogoDebianSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoDevuan()
+static const FFlogo* getLogoDevuan(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("devuan", "devuan-linux")
@@ -700,7 +700,7 @@ static const FFlogo* getLogoDevuan()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoDevuanSmall()
+static const FFlogo* getLogoDevuanSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("devuan_small", "devuan-linux-small")
@@ -721,7 +721,7 @@ static const FFlogo* getLogoDevuanSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoDeepin()
+static const FFlogo* getLogoDeepin(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("deepin", "deepin-linux")
@@ -753,7 +753,7 @@ static const FFlogo* getLogoDeepin()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoEndeavour()
+static const FFlogo* getLogoEndeavour(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("endeavour", "endeavour-linux", "endeavouros", "endeavouros-linux")
@@ -784,7 +784,7 @@ static const FFlogo* getLogoEndeavour()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoEnso()
+static const FFlogo* getLogoEnso(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("enso", "uqc")
@@ -817,7 +817,7 @@ static const FFlogo* getLogoEnso()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoFedora()
+static const FFlogo* getLogoFedora(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("fedora", "fedora-linux")
@@ -851,7 +851,7 @@ static const FFlogo* getLogoFedora()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoFedoraSmall()
+static const FFlogo* getLogoFedoraSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("fedora_small", "fedora-linux-small")
@@ -874,7 +874,7 @@ static const FFlogo* getLogoFedoraSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoFedoraOld()
+static const FFlogo* getLogoFedoraOld(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("fedora_old", "fedora-old", "fedora-linux-old", "fedora-linux_old")
@@ -906,7 +906,7 @@ static const FFlogo* getLogoFedoraOld()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoFreeBSD()
+static const FFlogo* getLogoFreeBSD(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("freebsd")
@@ -936,7 +936,7 @@ static const FFlogo* getLogoFreeBSD()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoFreeBSDSmall()
+static const FFlogo* getLogoFreeBSDSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("freebsd_small")
@@ -956,7 +956,7 @@ static const FFlogo* getLogoFreeBSDSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoGaruda()
+static const FFlogo* getLogoGaruda(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("garuda", "garuda-linux")
@@ -988,7 +988,7 @@ static const FFlogo* getLogoGaruda()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoGarudaSmall()
+static const FFlogo* getLogoGarudaSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("garuda_small", "garudalinux_small", "garuda-linux-small")
@@ -1007,7 +1007,7 @@ static const FFlogo* getLogoGarudaSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoGentoo()
+static const FFlogo* getLogoGentoo(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("gentoo", "gentoo-linux")
@@ -1040,7 +1040,7 @@ static const FFlogo* getLogoGentoo()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoGentooSmall()
+static const FFlogo* getLogoGentooSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("gentoo_small", "gentoo-linux-small")
@@ -1064,7 +1064,7 @@ static const FFlogo* getLogoGentooSmall()
 
 #define FF_RAW_STRING(x) #x
 
-static const FFlogo* getLogoGhostBSD()
+static const FFlogo* getLogoGhostBSD(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("ghostbsd")
@@ -1091,7 +1091,7 @@ static const FFlogo* getLogoGhostBSD()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoKDENeon()
+static const FFlogo* getLogoKDENeon(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("kde", "kde-neon", "neon")
@@ -1124,7 +1124,7 @@ static const FFlogo* getLogoKDENeon()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoKISSLinux()
+static const FFlogo* getLogoKISSLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("kiss", "kiss-linux", "kisslinux")
@@ -1147,7 +1147,7 @@ static const FFlogo* getLogoKISSLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoKubuntu()
+static const FFlogo* getLogoKubuntu(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("kubuntu", "kubuntu-linux", "kde-ubuntu", "ubuntu-kde", "ubuntu-plasma")
@@ -1182,7 +1182,7 @@ static const FFlogo* getLogoKubuntu()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoLangitKetujuh()
+static const FFlogo* getLogoLangitKetujuh(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("l7", "langitketujuh", "LangitKetujuh")
@@ -1210,7 +1210,7 @@ static const FFlogo* getLogoLangitKetujuh()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoLinux()
+static const FFlogo* getLogoLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("linux", "linux-generic")
@@ -1238,7 +1238,7 @@ static const FFlogo* getLogoLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMacOS()
+static const FFlogo* getLogoMacOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("macos", "mac", "apple", "darwin", "osx")
@@ -1273,7 +1273,7 @@ static const FFlogo* getLogoMacOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMacOSSmall()
+static const FFlogo* getLogoMacOSSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("macos_small", "mac_small", "apple_small", "darwin_small", "osx_small")
@@ -1298,7 +1298,7 @@ static const FFlogo* getLogoMacOSSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMacOSSmall2()
+static const FFlogo* getLogoMacOSSmall2(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("macos_small2", "mac_small2", "apple_small2", "darwin_small2", "osx_small2")
@@ -1323,7 +1323,7 @@ static const FFlogo* getLogoMacOSSmall2()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoManjaro()
+static const FFlogo* getLogoManjaro(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("manjaro", "manjaro-linux")
@@ -1351,7 +1351,7 @@ static const FFlogo* getLogoManjaro()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoManjaroSmall()
+static const FFlogo* getLogoManjaroSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("manjaro_small", "manjaro-linux-small")
@@ -1372,7 +1372,7 @@ static const FFlogo* getLogoManjaroSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMint()
+static const FFlogo* getLogoMint(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("mint", "linuxmint", "mint-linux", "linux-mint")
@@ -1406,7 +1406,7 @@ static const FFlogo* getLogoMint()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMintSmall()
+static const FFlogo* getLogoMintSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("mint_small", "linuxmint_small", "mint-linux-small")
@@ -1428,7 +1428,7 @@ static const FFlogo* getLogoMintSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMintOld()
+static const FFlogo* getLogoMintOld(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("mint_old", "mint-old", "mint-linux_old", "mint-linux-old", "linux-mint_old", "linux-mint-old")
@@ -1459,7 +1459,7 @@ static const FFlogo* getLogoMintOld()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoMsys2()
+static const FFlogo* getLogoMsys2(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("msys2")
@@ -1500,7 +1500,7 @@ static const FFlogo* getLogoMsys2()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoWindows11()
+static const FFlogo* getLogoWindows11(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11", "Windows Server 2022")
@@ -1534,7 +1534,7 @@ static const FFlogo* getLogoWindows11()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoWindows11Small()
+static const FFlogo* getLogoWindows11Small(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11_small", "Windows 11-small")
@@ -1557,7 +1557,7 @@ static const FFlogo* getLogoWindows11Small()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoWindows8()
+static const FFlogo* getLogoWindows8(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019")
@@ -1593,7 +1593,7 @@ static const FFlogo* getLogoWindows8()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoWindows()
+static const FFlogo* getLogoWindows(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows", "Windows 7", "Windows Server 2008", "Windows Server 2008 R2")
@@ -1626,7 +1626,7 @@ static const FFlogo* getLogoWindows()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoNixOS()
+static const FFlogo* getLogoNixOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("nixos", "nix", "nixos-linux", "nix-linux", "nix-os", "nix_os", "nix_os_linux")
@@ -1661,7 +1661,7 @@ static const FFlogo* getLogoNixOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoNixOsOld()
+static const FFlogo* getLogoNixOsOld(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("nixos_old", "nix-old", "nixos-old", "nix_old", "nix-os-old", "nix_os_old")
@@ -1704,7 +1704,7 @@ static const FFlogo* getLogoNixOsOld()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoNixOsSmall()
+static const FFlogo* getLogoNixOsSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("nixos_small", "nix-small", "nixos-small", "nix_small", "nix-os-small", "nix_os_small")
@@ -1725,7 +1725,7 @@ static const FFlogo* getLogoNixOsSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoNobara()
+static const FFlogo* getLogoNobara(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("nobara", "nobara-linux");
@@ -1756,7 +1756,7 @@ static const FFlogo* getLogoNobara()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoOpenSuse()
+static const FFlogo* getLogoOpenSuse(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("suse", "opensuse", "open_suse", "open-suse", "suse-linux")
@@ -1789,7 +1789,7 @@ static const FFlogo* getLogoOpenSuse()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoOpenSuseSmall()
+static const FFlogo* getLogoOpenSuseSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("suse_small", "opensuse_small", "open_suse_small", "open-suse_small")
@@ -1810,7 +1810,7 @@ static const FFlogo* getLogoOpenSuseSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoOpenSuseLeap()
+static const FFlogo* getLogoOpenSuseLeap(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("opensuse_leap", "open_suse_leap", "opensuse-leap", "open-suse-leap", "suse_leap", "suse-leap", "opensuseleap")
@@ -1840,7 +1840,7 @@ static const FFlogo* getLogoOpenSuseLeap()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoOpenSuseTumbleweed()
+static const FFlogo* getLogoOpenSuseTumbleweed(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("opensuse_tumbleweed", "open_suse_tumbleweed", "opensuse-tumbleweed", "open-suse-tumbleweed", "suse_tumbleweed", "suse-tumbleweed", "opensusetumbleweed")
@@ -1867,7 +1867,7 @@ static const FFlogo* getLogoOpenSuseTumbleweed()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoOpenMandriva()
+static const FFlogo* getLogoOpenMandriva(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("openmandriva", "open-mandriva", "open_mandriva")
@@ -1906,7 +1906,7 @@ static const FFlogo* getLogoOpenMandriva()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoPop()
+static const FFlogo* getLogoPop(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("pop", "popos", "pop_os", "pop-linux")
@@ -1941,7 +1941,7 @@ static const FFlogo* getLogoPop()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoParabola()
+static const FFlogo* getLogoParabola(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("parabola", "parabola-gnulinux")
@@ -1971,7 +1971,7 @@ static const FFlogo* getLogoParabola()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoParabolaSmall()
+static const FFlogo* getLogoParabolaSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("parabola_small", "parabola-gnulinux_small")
@@ -1991,7 +1991,7 @@ static const FFlogo* getLogoParabolaSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoPopSmall()
+static const FFlogo* getLogoPopSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("pop_small", "popos_small", "pop_os_small", "pop-linux-small")
@@ -2012,7 +2012,7 @@ static const FFlogo* getLogoPopSmall()
     FF_LOGO_COLOR_TITLE("36"); //cyan
     FF_LOGO_RETURN
 }
-static const FFlogo* getLogoRaspbian()
+static const FFlogo* getLogoRaspbian(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("raspbian", "raspi", "raspberrypi" "raspberrypios"  "pios")
@@ -2050,7 +2050,7 @@ static const FFlogo* getLogoRaspbian()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoRaspbianSmall()
+static const FFlogo* getLogoRaspbianSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("raspbian_small", "raspi_small", "raspberrypi_small" "raspberrypios_small" "pios_small")
@@ -2075,7 +2075,7 @@ static const FFlogo* getLogoRaspbianSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoReborn()
+static const FFlogo* getLogoReborn(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("reborn", "reborn-os", "rebornos", "rebornos-linux", "reborn-os-linux")
@@ -2110,7 +2110,7 @@ static const FFlogo* getLogoReborn()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoRebornSmall()
+static const FFlogo* getLogoRebornSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("reborn_small", "reborn-os-small", "rebornos_small", "rebornos-linux-small", "reborn-os-linux-small")
@@ -2135,7 +2135,7 @@ static const FFlogo* getLogoRebornSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoRedHatEnterpriseLinux()
+static const FFlogo* getLogoRedHatEnterpriseLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("rhel", "redhat", "redhat-linux")
@@ -2167,7 +2167,7 @@ static const FFlogo* getLogoRedHatEnterpriseLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoRedstarOS()
+static const FFlogo* getLogoRedstarOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("redstar", "redstar-os", "redstaros", "redstaros-linux", "redstar-os-linux")
@@ -2199,7 +2199,7 @@ static const FFlogo* getLogoRedstarOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoRockyLinux()
+static const FFlogo* getLogoRockyLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("rocky", "rocky-linux", "rockylinux")
@@ -2232,7 +2232,7 @@ static const FFlogo* getLogoRockyLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoRosaLinux()
+static const FFlogo* getLogoRosaLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("rosa", "rosa-linux", "rosalinux")
@@ -2266,7 +2266,7 @@ static const FFlogo* getLogoRosaLinux()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoSlackware()
+static const FFlogo* getLogoSlackware(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("slackware", "slackware-linux", "slackwarelinux")
@@ -2302,7 +2302,7 @@ static const FFlogo* getLogoSlackware()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoSlackwareSmall()
+static const FFlogo* getLogoSlackwareSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("slackware-small", "slackware-linux-small", "slackware_small", "slackwarelinux_small")
@@ -2323,7 +2323,7 @@ static const FFlogo* getLogoSlackwareSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoSolus()
+static const FFlogo* getLogoSolus(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("solus", "solus-linux")
@@ -2358,7 +2358,7 @@ static const FFlogo* getLogoSolus()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoSteamOS()
+static const FFlogo* getLogoSteamOS(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("steamos")
@@ -2391,7 +2391,7 @@ static const FFlogo* getLogoSteamOS()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoUbuntu()
+static const FFlogo* getLogoUbuntu(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("ubuntu", "ubuntu-linux")
@@ -2427,7 +2427,7 @@ static const FFlogo* getLogoUbuntu()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoUbuntuOld()
+static const FFlogo* getLogoUbuntuOld(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("ubuntu_old", "ubuntu-linux_old")
@@ -2462,7 +2462,7 @@ static const FFlogo* getLogoUbuntuOld()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoUbuntuSmall()
+static const FFlogo* getLogoUbuntuSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("ubuntu_small", "ubuntu-linux-small")
@@ -2482,7 +2482,7 @@ static const FFlogo* getLogoUbuntuSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoVanilla()
+static const FFlogo* getLogoVanilla(void)
 {
 
     FF_LOGO_INIT
@@ -2515,7 +2515,7 @@ static const FFlogo* getLogoVanilla()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoVoid()
+static const FFlogo* getLogoVoid(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("void", "void-linux")
@@ -2548,7 +2548,7 @@ static const FFlogo* getLogoVoid()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoVoidSmall()
+static const FFlogo* getLogoVoidSmall(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("void_small", "void-linux-small")
@@ -2569,7 +2569,7 @@ static const FFlogo* getLogoVoidSmall()
     FF_LOGO_RETURN
 }
 
-static const FFlogo* getLogoZorin()
+static const FFlogo* getLogoZorin(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("zorin", "zorin-linux", "zorinos", "zorinos-linux")
@@ -2600,7 +2600,7 @@ static const FFlogo* getLogoZorin()
     FF_LOGO_RETURN
 }
 
-GetLogoMethod* ffLogoBuiltinGetAll()
+GetLogoMethod* ffLogoBuiltinGetAll(void)
 {
     static GetLogoMethod logoMethods[] = {
         ffLogoBuiltinGetUnknown,

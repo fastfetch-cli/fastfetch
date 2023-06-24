@@ -6,7 +6,7 @@
 
 #define FF_UPTIME_NUM_FORMAT_ARGS 4
 
-void ffPrintUptime(FFinstance* instance, FFUptimeOptions* options)
+void ffPrintUptime(FFUptimeOptions* options)
 {
     uint64_t uptime;
 
@@ -14,7 +14,7 @@ void ffPrintUptime(FFinstance* instance, FFUptimeOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -25,7 +25,7 @@ void ffPrintUptime(FFinstance* instance, FFUptimeOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(days == 0 && hours == 0 && minutes == 0)
         {
@@ -70,7 +70,7 @@ void ffPrintUptime(FFinstance* instance, FFUptimeOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_UPTIME_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_UPTIME_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &days},
             {FF_FORMAT_ARG_TYPE_UINT, &hours},
             {FF_FORMAT_ARG_TYPE_UINT, &minutes},
@@ -100,7 +100,7 @@ void ffDestroyUptimeOptions(FFUptimeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseUptimeJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseUptimeJsonObject(yyjson_val* module)
 {
     FFUptimeOptions __attribute__((__cleanup__(ffDestroyUptimeOptions))) options;
     ffInitUptimeOptions(&options);
@@ -118,9 +118,9 @@ void ffParseUptimeJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_UPTIME_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintUptime(instance, &options);
+    ffPrintUptime(&options);
 }

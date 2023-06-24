@@ -6,25 +6,25 @@
 
 #define FF_ICONS_NUM_FORMAT_ARGS 1
 
-void ffPrintIcons(FFinstance* instance, FFIconsOptions* options)
+void ffPrintIcons(FFIconsOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
-    const char* error = ffDetectIcons(instance, &icons);
+    const char* error = ffDetectIcons(&icons);
 
     if(error)
     {
-        ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_ICONS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&icons, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_ICONS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_ICONS_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &icons}
         });
     }
@@ -51,7 +51,7 @@ void ffDestroyIconsOptions(FFIconsOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseIconsJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseIconsJsonObject(yyjson_val* module)
 {
     FFIconsOptions __attribute__((__cleanup__(ffDestroyIconsOptions))) options;
     ffInitIconsOptions(&options);
@@ -69,9 +69,9 @@ void ffParseIconsJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_ICONS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_ICONS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintIcons(instance, &options);
+    ffPrintIcons(&options);
 }

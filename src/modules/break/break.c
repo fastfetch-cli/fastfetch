@@ -1,13 +1,13 @@
 #include "common/printing.h"
 #include "modules/break/break.h"
 
-void ffPrintBreak(FFinstance* instance)
+void ffPrintBreak(void)
 {
-    ffLogoPrintLine(instance);
+    ffLogoPrintLine();
     putchar('\n');
 }
 
-void ffParseBreakJsonObject(FFinstance* instance, FF_MAYBE_UNUSED yyjson_val* module)
+void ffParseBreakJsonObject(FF_MAYBE_UNUSED yyjson_val* module)
 {
-    return ffPrintBreak(instance);
+    return ffPrintBreak();
 }

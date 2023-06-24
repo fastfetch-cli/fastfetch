@@ -44,7 +44,7 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
         ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
-static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
+static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     u8 revId = 0;
     bool revIdSet = false;
@@ -65,7 +65,7 @@ static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PC
     }
 
     FF_STRBUF_AUTO_DESTROY query = ffStrbufCreateF("%X, %X,", device->device_id, revId);
-    ffParsePropFileData(instance, "libdrm/amdgpu.ids", query.chars, &gpu->name);
+    ffParsePropFileData("libdrm/amdgpu.ids", query.chars, &gpu->name);
 
     const char* removeStrings[] = {
         "AMD ", "ATI ",
@@ -75,11 +75,11 @@ static void drmDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PC
     ffStrbufRemoveStringsA(&gpu->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
 }
 
-static void pciDetectDeviceName(const FFinstance* instance, FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
+static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
     if(ffStrbufCompS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD) == 0)
     {
-        drmDetectDeviceName(instance, gpu, pci, device);
+        drmDetectDeviceName(gpu, pci, device);
         if(gpu->name.length > 0)
             return;
     }
@@ -171,7 +171,7 @@ static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* dev
     gpu->type = FF_GPU_TYPE_INTEGRATED;
 }
 
-static void pciHandleDevice(const FFinstance* instance, FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
+static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
 {
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
 
@@ -196,7 +196,7 @@ static void pciHandleDevice(const FFinstance* instance, FF_MAYBE_UNUSED const FF
     pciDetectVendorName(gpu, pci, device);
 
     ffStrbufInit(&gpu->name);
-    pciDetectDeviceName(instance, gpu, pci, device);
+    pciDetectDeviceName(gpu, pci, device);
 
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
@@ -237,11 +237,11 @@ static void handlePciWarning(FF_MAYBE_UNUSED char *msg, ...)
     // noop
 }
 
-static const char* pciDetectGPUs(const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
+static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 {
     PCIData pci;
 
-    FF_LIBRARY_LOAD(libpci, &instance->config.libPCI, "dlopen libpci.so failed", "libpci" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_LOAD(libpci, &instance.config.libPCI, "dlopen libpci.so failed", "libpci" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_alloc);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_init);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus);
@@ -270,7 +270,7 @@ static const char* pciDetectGPUs(const FFinstance* instance, const FFGPUOptions*
     struct pci_dev* device = pci.access->devices;
     while(device != NULL)
     {
-        pciHandleDevice(instance, options, gpus, &pci, device);
+        pciHandleDevice(options, gpus, &pci, device);
         device = device->next;
     }
 
@@ -280,12 +280,12 @@ static const char* pciDetectGPUs(const FFinstance* instance, const FFGPUOptions*
 
 #endif
 
-const char* ffDetectGPUImpl(const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
+const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
     #ifdef FF_HAVE_LIBPCI
-        return pciDetectGPUs(instance, options, gpus);
+        return pciDetectGPUs(options, gpus);
     #else
-        FF_UNUSED(instance, options, gpus);
+        FF_UNUSED(options, gpus);
         return "fastfetch is built without libpci support";
     #endif
 }

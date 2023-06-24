@@ -100,15 +100,13 @@ static void detectWMPlugin(FFstrbuf* name)
     }
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInitS(&ds->wmProcessName, "WindowServer");
     ffStrbufInitS(&ds->wmPrettyName, "Quartz Compositor");
     ffStrbufInit(&ds->wmProtocolName);
 
-    if(instance->config.allowSlowOperations)
+    if(instance.config.allowSlowOperations)
     {
         FF_STRBUF_AUTO_DESTROY name;
         ffStrbufInit(&name);

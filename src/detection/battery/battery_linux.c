@@ -68,7 +68,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     result->temperature = FF_BATTERY_TEMP_UNSET;
 }
 
-const char* ffDetectBattery(FF_MAYBE_UNUSED FFinstance* instance, FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
 

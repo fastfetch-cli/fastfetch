@@ -7,7 +7,7 @@
 
 #define FF_BRIGHTNESS_NUM_FORMAT_ARGS 2
 
-void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
+void ffPrintBrightness(FFBrightnessOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
@@ -15,13 +15,13 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(result.length == 0)
     {
-        ffPrintError(instance, FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "No result is detected.");
+        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "No result is detected.");
         return;
     }
 
@@ -44,26 +44,26 @@ void ffPrintBrightness(FFinstance* instance, FFBrightnessOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
-            if (instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(instance, &str, (uint8_t) (item->value + 0.5), 0, 10, 10);
+                ffAppendPercentBar(&str, (uint8_t) (item->value + 0.5), 0, 10, 10);
             }
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(instance, &str, (uint8_t) (item->value + 0.5), 10, 10, str.length > 0);
+                ffAppendPercentNum(&str, (uint8_t) (item->value + 0.5), 10, 10, str.length > 0);
             }
 
             ffStrbufPutTo(&str, stdout);
         }
         else
         {
-            ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->value},
                 {FF_FORMAT_ARG_TYPE_FLOAT, &item->name}
             });
@@ -95,7 +95,7 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBrightnessJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseBrightnessJsonObject(yyjson_val* module)
 {
     FFBrightnessOptions __attribute__((__cleanup__(ffDestroyBrightnessOptions))) options;
     ffInitBrightnessOptions(&options);
@@ -113,9 +113,9 @@ void ffParseBrightnessJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_BRIGHTNESS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintBrightness(instance, &options);
+    ffPrintBrightness(&options);
 }

@@ -35,10 +35,8 @@ static const char* cglHandlePixelFormat(FFOpenGLResult* result, CGLPixelFormatOb
     return error;
 }
 
-const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
+const char* ffDetectOpenGL(FFOpenGLResult* result)
 {
-    FF_UNUSED(instance);
-
     CGLPixelFormatObj pixelFormat;
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core,

@@ -4,32 +4,32 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-static inline void printTitlePart(FFinstance* instance, const FFstrbuf* content)
+static inline void printTitlePart(const FFstrbuf* content)
 {
-    if(!instance->config.pipe)
+    if(!instance.config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(&instance->config.colorTitle);
+        ffPrintColor(&instance.config.colorTitle);
     }
 
     ffStrbufWriteTo(content, stdout);
 
-    if(!instance->config.pipe)
+    if(!instance.config.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 }
 
-void ffPrintTitle(FFinstance* instance, FFTitleOptions* options)
+void ffPrintTitle(FFTitleOptions* options)
 {
-    ffLogoPrintLine(instance);
+    ffLogoPrintLine();
 
-    printTitlePart(instance, &instance->state.platform.userName);
+    printTitlePart(&instance.state.platform.userName);
     putchar('@');
     FFstrbuf* host = options->fdqn ?
-        &instance->state.platform.domainName :
-        &instance->state.platform.hostName;
-    printTitlePart(instance, host);
+        &instance.state.platform.domainName :
+        &instance.state.platform.hostName;
+    printTitlePart(host);
 
-    instance->state.titleLength = instance->state.platform.userName.length + host->length + 1;
+    instance.state.titleLength = instance.state.platform.userName.length + host->length + 1;
 
     putchar('\n');
 }
@@ -59,7 +59,7 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
     FF_UNUSED(options);
 }
 
-void ffParseTitleJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseTitleJsonObject(yyjson_val* module)
 {
     FFTitleOptions __attribute__((__cleanup__(ffDestroyTitleOptions))) options;
     ffInitTitleOptions(&options);
@@ -80,9 +80,9 @@ void ffParseTitleJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintErrorString(instance, FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintTitle(instance, &options);
+    ffPrintTitle(&options);
 }

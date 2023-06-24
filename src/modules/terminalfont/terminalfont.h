@@ -4,8 +4,8 @@
 
 #define FF_TERMINALFONT_MODULE_NAME "TerminalFont"
 
-void ffPrintTerminalFont(FFinstance* instance, FFTerminalFontOptions* options);
+void ffPrintTerminalFont(FFTerminalFontOptions* options);
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options);
 bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const char* key, const char* value);
 void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options);
-void ffParseTerminalFontJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseTerminalFontJsonObject(yyjson_val* module);

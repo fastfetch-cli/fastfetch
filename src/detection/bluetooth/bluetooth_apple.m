@@ -2,7 +2,7 @@
 
 #import <IOBluetooth/IOBluetooth.h>
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
 {
     NSArray<IOBluetoothDevice*>* ioDevices = IOBluetoothDevice.pairedDevices;
     if(!ioDevices)

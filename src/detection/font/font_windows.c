@@ -23,7 +23,7 @@ static void generateString(FFFontResult* font)
     ffStrbufAppendC(&font->display, ']');
 }
 
-const char* ffDetectFontImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFFontResult* result)
+const char* ffDetectFontImpl(FFFontResult* result)
 {
     NONCLIENTMETRICSW info = { .cbSize = sizeof(info) };
     if(!SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0))

@@ -6,7 +6,7 @@
 
 #define FF_BOARD_NUM_FORMAT_ARGS 3
 
-void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
+void ffPrintBoard(FFBoardOptions* options)
 {
     FFBoardResult result;
     ffStrbufInit(&result.name);
@@ -16,19 +16,19 @@ void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
     if(result.name.length == 0)
     {
-        ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "board_name is not set.");
+        ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "board_name is not set.");
         goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&result.name, stdout);
         if (result.version.length)
             printf(" (%s)", result.version.chars);
@@ -36,7 +36,7 @@ void ffPrintBoard(FFinstance* instance, FFBoardOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_BOARD_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_BOARD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
@@ -70,7 +70,7 @@ void ffDestroyBoardOptions(FFBoardOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBoardJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseBoardJsonObject(yyjson_val* module)
 {
     FFBoardOptions __attribute__((__cleanup__(ffDestroyBoardOptions))) options;
     ffInitBoardOptions(&options);
@@ -88,9 +88,9 @@ void ffParseBoardJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_BOARD_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BOARD_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintBoard(instance, &options);
+    ffPrintBoard(&options);
 }

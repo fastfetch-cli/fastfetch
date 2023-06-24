@@ -9,7 +9,7 @@ const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll);
 
 static uint64_t inUseAll1, totalAll1;
 
-void ffPrepareCPUUsage()
+void ffPrepareCPUUsage(void)
 {
     ffGetCpuUsageInfo(&inUseAll1, &totalAll1);
 }

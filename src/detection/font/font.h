@@ -19,6 +19,6 @@ typedef struct FFFontResult
     FFstrbuf display;
 } FFFontResult;
 
-const char* ffDetectFont(const FFinstance* instance, FFFontResult* font);
+const char* ffDetectFont(FFFontResult* font);
 
 #endif

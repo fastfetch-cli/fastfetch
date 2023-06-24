@@ -7,29 +7,29 @@
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 
-static const char* getSystemMonospaceFont(const FFinstance* instance)
+static const char* getSystemMonospaceFont(void)
 {
-    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
     if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, "Cinnamon"))
     {
-        const char* systemMonospaceFont = ffSettingsGet(instance, "/org/cinnamon/desktop/interface/monospace-font-name", "org.cinnamon.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+        const char* systemMonospaceFont = ffSettingsGet("/org/cinnamon/desktop/interface/monospace-font-name", "org.cinnamon.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemMonospaceFont))
             return systemMonospaceFont;
     }
     else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, "Mate"))
     {
-        const char* systemMonospaceFont = ffSettingsGet(instance, "/org/mate/interface/monospace-font-name", "org.mate.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+        const char* systemMonospaceFont = ffSettingsGet("/org/mate/interface/monospace-font-name", "org.mate.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemMonospaceFont))
             return systemMonospaceFont;
     }
 
-    return ffSettingsGet(instance, "/org/gnome/desktop/interface/monospace-font-name", "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+    return ffSettingsGet("/org/gnome/desktop/interface/monospace-font-name", "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 }
 
-static void detectFromGSettings(const FFinstance* instance, const char* profilePath, const char* profileList, const char* profile, const char* defaultProfileKey, FFTerminalFontResult* terminalFont)
+static void detectFromGSettings(const char* profilePath, const char* profileList, const char* profile, const char* defaultProfileKey, FFTerminalFontResult* terminalFont)
 {
-    FF_AUTO_FREE const char* defaultProfile = ffSettingsGetGSettings(instance, profileList, NULL, defaultProfileKey, FF_VARIANT_TYPE_STRING).strValue;
+    FF_AUTO_FREE const char* defaultProfile = ffSettingsGetGSettings(profileList, NULL, defaultProfileKey, FF_VARIANT_TYPE_STRING).strValue;
     if(!ffStrSet(defaultProfile))
     {
         ffStrbufAppendF(&terminalFont->error, "Could not get default profile from gsettings: %s", profileList);
@@ -41,9 +41,9 @@ static void detectFromGSettings(const FFinstance* instance, const char* profileP
     ffStrbufAppendS(&path, defaultProfile);
     ffStrbufAppendC(&path, '/');
 
-    if(!ffSettingsGetGSettings(instance, profile, path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
+    if(!ffSettingsGetGSettings(profile, path.chars, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
     {
-        FF_AUTO_FREE const char* fontName = ffSettingsGetGSettings(instance, profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
+        FF_AUTO_FREE const char* fontName = ffSettingsGetGSettings(profile, path.chars, "font", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else
@@ -51,7 +51,7 @@ static void detectFromGSettings(const FFinstance* instance, const char* profileP
     }
     else
     {
-        const char* fontName = getSystemMonospaceFont(instance);
+        const char* fontName = getSystemMonospaceFont();
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else
@@ -59,10 +59,10 @@ static void detectFromGSettings(const FFinstance* instance, const char* profileP
     }
 }
 
-static void detectFromConfigFile(const FFinstance* instance, const char* configFile, const char* start, FFTerminalFontResult* terminalFont)
+static void detectFromConfigFile(const char* configFile, const char* start, FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
-    ffParsePropFileConfig(instance, configFile, start, &fontName);
+    ffParsePropFileConfig(configFile, start, &fontName);
 
     if(fontName.length == 0)
         ffStrbufAppendF(&terminalFont->error, "Couldn't find %s in .config/%s", start, configFile);
@@ -70,10 +70,10 @@ static void detectFromConfigFile(const FFinstance* instance, const char* configF
         ffFontInitPango(&terminalFont->font, fontName.chars);
 }
 
-static void detectKonsole(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectKonsole(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreate();
-    ffParsePropFileConfig(instance, "konsolerc", "DefaultProfile =", &profile);
+    ffParsePropFileConfig("konsolerc", "DefaultProfile =", &profile);
 
     if(profile.length == 0)
     {
@@ -86,7 +86,7 @@ static void detectKonsole(const FFinstance* instance, FFTerminalFontResult* term
     ffStrbufAppend(&profilePath, &profile);
 
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
-    ffParsePropFileData(instance, profilePath.chars, "Font =", &fontName);
+    ffParsePropFileData(profilePath.chars, "Font =", &fontName);
 
     if(fontName.length == 0)
         ffStrbufAppendF(&terminalFont->error, "Couldn't find \"Font=%%[^\\n]\" in \"%s\"", profilePath.chars);
@@ -94,12 +94,12 @@ static void detectKonsole(const FFinstance* instance, FFTerminalFontResult* term
         ffFontInitQt(&terminalFont->font, fontName.chars);
 }
 
-static void detectXFCETerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectXFCETerminal(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY useSysFont = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
-    ffParsePropFileConfigValues(instance, "xfce4/terminal/terminalrc", 2, (FFpropquery[]) {
+    ffParsePropFileConfigValues("xfce4/terminal/terminalrc", 2, (FFpropquery[]) {
         {"FontUseSystem = ", &useSysFont},
         {"FontName = ", &fontName}
     });
@@ -113,7 +113,7 @@ static void detectXFCETerminal(const FFinstance* instance, FFTerminalFontResult*
     }
     else
     {
-        const char* systemFontName = ffSettingsGetXFConf(instance, "xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
+        const char* systemFontName = ffSettingsGetXFConf("xsettings", "/Gtk/MonospaceFontName", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemFontName))
             ffFontInitPango(&terminalFont->font, systemFontName);
         else
@@ -121,13 +121,13 @@ static void detectXFCETerminal(const FFinstance* instance, FFTerminalFontResult*
     }
 }
 
-static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectDeepinTerminal(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreate();
 
-    ffStrbufAppend(&profile, &instance->state.platform.homeDir);
+    ffStrbufAppend(&profile, &instance.state.platform.homeDir);
     ffStrbufAppendS(&profile, ".config/deepin/deepin-terminal/config.conf"); //TODO: Use config dirs
     FILE* file = fopen(profile.chars, "r");
 
@@ -164,11 +164,11 @@ static void detectDeepinTerminal(const FFinstance* instance, FFTerminalFontResul
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-static void detectFootTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectFootTerminal(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
 
-    if (!ffParsePropFileConfig(instance, "foot/foot.ini", "font=", &font) || !ffStrSet(font.chars))
+    if (!ffParsePropFileConfig("foot/foot.ini", "font=", &font) || !ffStrSet(font.chars))
     {
         ffFontInitValues(&terminalFont->font, "monospace", "8");
         return;
@@ -191,12 +191,12 @@ static void detectFootTerminal(const FFinstance* instance, FFTerminalFontResult*
     ffFontInitValues(&terminalFont->font, font.chars, &font.chars[equal + strlen("size=")]);
 }
 
-static void detectQTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectQTerminal(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    ffParsePropFileConfigValues(instance, "qterminal.org/qterminal.ini", 2, (FFpropquery[]) {
+    ffParsePropFileConfigValues("qterminal.org/qterminal.ini", 2, (FFpropquery[]) {
         {"fontFamily=", &fontName},
         {"fontSize=", &fontSize},
     });
@@ -208,24 +208,24 @@ static void detectQTerminal(const FFinstance* instance, FFTerminalFontResult* te
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "konsole"))
-        detectKonsole(instance, terminalFont);
+        detectKonsole(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "xfce4-terminal"))
-        detectXFCETerminal(instance, terminalFont);
+        detectXFCETerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "lxterminal"))
-        detectFromConfigFile(instance, "lxterminal/lxterminal.conf", "fontname =", terminalFont);
+        detectFromConfigFile("lxterminal/lxterminal.conf", "fontname =", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "tilix"))
-        detectFromGSettings(instance, "/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", "default", terminalFont);
+        detectFromGSettings("/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", "default", terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "gnome-terminal-"))
-        detectFromGSettings(instance, "/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", "default", terminalFont);
+        detectFromGSettings("/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", "default", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "mate-terminal"))
-        detectFromGSettings(instance, "/org/mate/terminal/profiles/", "org.mate.terminal.global", "org.mate.terminal.profile", "default-profile", terminalFont);
+        detectFromGSettings("/org/mate/terminal/profiles/", "org.mate.terminal.global", "org.mate.terminal.profile", "default-profile", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "deepin-terminal"))
-        detectDeepinTerminal(instance, terminalFont);
+        detectDeepinTerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "foot"))
-        detectFootTerminal(instance, terminalFont);
+        detectFootTerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "qterminal"))
-        detectQTerminal(instance, terminalFont);
+        detectQTerminal(terminalFont);
 }

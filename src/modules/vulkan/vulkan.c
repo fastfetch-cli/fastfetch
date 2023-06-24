@@ -6,19 +6,19 @@
 
 #define FF_VULKAN_NUM_FORMAT_ARGS 3
 
-void ffPrintVulkan(FFinstance* instance, FFVulkanOptions* options)
+void ffPrintVulkan(FFVulkanOptions* options)
 {
-    const FFVulkanResult* vulkan = ffDetectVulkan(instance);
+    const FFVulkanResult* vulkan = ffDetectVulkan();
 
     if(vulkan->error)
     {
-        ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "%s", vulkan->error);
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "%s", vulkan->error);
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(vulkan->apiVersion.length > 0)
         {
@@ -35,7 +35,7 @@ void ffPrintVulkan(FFinstance* instance, FFVulkanOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_VULKAN_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_VULKAN_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->driver},
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->apiVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->conformanceVersion}
@@ -64,7 +64,7 @@ void ffDestroyVulkanOptions(FFVulkanOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseVulkanJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseVulkanJsonObject(yyjson_val* module)
 {
     FFVulkanOptions __attribute__((__cleanup__(ffDestroyVulkanOptions))) options;
     ffInitVulkanOptions(&options);
@@ -82,9 +82,9 @@ void ffParseVulkanJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_VULKAN_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintVulkan(instance, &options);
+    ffPrintVulkan(&options);
 }

@@ -6,27 +6,27 @@
 
 #define FF_OPENCL_NUM_FORMAT_ARGS 3
 
-void ffPrintOpenCL(FFinstance* instance, FFOpenCLOptions* options)
+void ffPrintOpenCL(FFOpenCLOptions* options)
 {
     FFOpenCLResult opencl;
     ffStrbufInit(&opencl.version);
     ffStrbufInit(&opencl.device);
     ffStrbufInit(&opencl.vendor);
 
-    const char* error = ffDetectOpenCL(instance, &opencl);
+    const char* error = ffDetectOpenCL(&opencl);
 
     if(error != NULL)
-        ffPrintError(instance, FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
     else
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             ffStrbufPutTo(&opencl.version, stdout);
         }
         else
         {
-            ffPrintFormat(instance, FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_OPENCL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormat(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_OPENCL_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.version},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.device},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.vendor},
@@ -60,7 +60,7 @@ void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseOpenCLJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseOpenCLJsonObject(yyjson_val* module)
 {
     FFOpenCLOptions __attribute__((__cleanup__(ffDestroyOpenCLOptions))) options;
     ffInitOpenCLOptions(&options);
@@ -78,9 +78,9 @@ void ffParseOpenCLJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_OPENCL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintOpenCL(instance, &options);
+    ffPrintOpenCL(&options);
 }

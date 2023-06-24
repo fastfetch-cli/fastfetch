@@ -17,6 +17,6 @@ typedef struct FFMediaResult
     FFstrbuf status;
 } FFMediaResult;
 
-const FFMediaResult* ffDetectMedia(const FFinstance* instance);
+const FFMediaResult* ffDetectMedia();
 
 #endif

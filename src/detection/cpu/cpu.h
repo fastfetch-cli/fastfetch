@@ -22,6 +22,6 @@ typedef struct FFCPUResult
     double temperature;
 } FFCPUResult;
 
-const char* ffDetectCPU(const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu);
+const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu);
 
 #endif

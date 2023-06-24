@@ -24,9 +24,9 @@ typedef struct FFQtResult
     FFstrbuf wallpaper;
 } FFQtResult;
 
-const FFGTKResult* ffDetectGTK2(const FFinstance* instance);
-const FFGTKResult* ffDetectGTK4(const FFinstance* instance);
-const FFGTKResult* ffDetectGTK3(const FFinstance* instance);
-const FFQtResult* ffDetectQt(const FFinstance* instance);
+const FFGTKResult* ffDetectGTK2(void);
+const FFGTKResult* ffDetectGTK4(void);
+const FFGTKResult* ffDetectGTK3(void);
+const FFQtResult* ffDetectQt(void);
 
 #endif

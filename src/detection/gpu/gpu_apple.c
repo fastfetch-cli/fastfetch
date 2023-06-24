@@ -38,7 +38,7 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
     return result;
 }
 
-const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFGPUOptions* options, FFlist* gpus)
+const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
     CFMutableDictionaryRef matchDict = IOServiceMatching(kIOAcceleratorClassName);
     io_iterator_t iterator;

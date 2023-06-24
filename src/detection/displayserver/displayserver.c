@@ -30,11 +30,11 @@ bool ffdsAppendDisplay(
     return true;
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance);
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
-const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance)
+const FFDisplayServerResult* ffConnectDisplayServer()
 {
     FF_DETECTION_INTERNAL_GUARD(FFDisplayServerResult,
-        ffConnectDisplayServerImpl(&result, instance);
+        ffConnectDisplayServerImpl(&result);
     );
 }

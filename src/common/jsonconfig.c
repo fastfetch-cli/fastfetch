@@ -65,154 +65,154 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline bool tryModule(FFinstance* instance, const char* type, yyjson_val* module, const char* moduleName, void (*const f)(FFinstance *instance, yyjson_val *module))
+static inline bool tryModule(const char* type, yyjson_val* module, const char* moduleName, void (*const f)(yyjson_val *module))
 {
     if (ffStrEqualsIgnCase(type, moduleName))
     {
-        f(instance, module);
+        f(module);
         return true;
     }
     return false;
 }
 
-static bool parseModuleJsonObject(FFinstance* instance, const char* type, yyjson_val* module)
+static bool parseModuleJsonObject(const char* type, yyjson_val* module)
 {
     switch (toupper(type[0]))
     {
         case 'B': {
             return
-                tryModule(instance, type, module, FF_BATTERY_MODULE_NAME, ffParseBatteryJsonObject) ||
-                tryModule(instance, type, module, FF_BIOS_MODULE_NAME, ffParseBiosJsonObject) ||
-                tryModule(instance, type, module, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothJsonObject) ||
-                tryModule(instance, type, module, FF_BOARD_MODULE_NAME, ffParseBoardJsonObject) ||
-                tryModule(instance, type, module, FF_BREAK_MODULE_NAME, ffParseBreakJsonObject) ||
-                tryModule(instance, type, module, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessJsonObject) ||
+                tryModule(type, module, FF_BATTERY_MODULE_NAME, ffParseBatteryJsonObject) ||
+                tryModule(type, module, FF_BIOS_MODULE_NAME, ffParseBiosJsonObject) ||
+                tryModule(type, module, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothJsonObject) ||
+                tryModule(type, module, FF_BOARD_MODULE_NAME, ffParseBoardJsonObject) ||
+                tryModule(type, module, FF_BREAK_MODULE_NAME, ffParseBreakJsonObject) ||
+                tryModule(type, module, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessJsonObject) ||
                 false;
         }
 
         case 'C': {
             return
-                tryModule(instance, type, module, FF_CHASSIS_MODULE_NAME, ffParseChassisJsonObject) ||
-                tryModule(instance, type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
-                tryModule(instance, type, module, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageJsonObject) ||
-                tryModule(instance, type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
-                tryModule(instance, type, module, FF_COLORS_MODULE_NAME, ffParseColorsJsonObject) ||
-                tryModule(instance, type, module, FF_CURSOR_MODULE_NAME, ffParseCursorJsonObject) ||
-                tryModule(instance, type, module, FF_CUSTOM_MODULE_NAME, ffParseCustomJsonObject) ||
+                tryModule(type, module, FF_CHASSIS_MODULE_NAME, ffParseChassisJsonObject) ||
+                tryModule(type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
+                tryModule(type, module, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageJsonObject) ||
+                tryModule(type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
+                tryModule(type, module, FF_COLORS_MODULE_NAME, ffParseColorsJsonObject) ||
+                tryModule(type, module, FF_CURSOR_MODULE_NAME, ffParseCursorJsonObject) ||
+                tryModule(type, module, FF_CUSTOM_MODULE_NAME, ffParseCustomJsonObject) ||
                 false;
         }
 
         case 'D': {
             return
-                tryModule(instance, type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
-                tryModule(instance, type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
-                tryModule(instance, type, module, FF_DISK_MODULE_NAME, ffParseDiskJsonObject) ||
-                tryModule(instance, type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
+                tryModule(type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
+                tryModule(type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
+                tryModule(type, module, FF_DISK_MODULE_NAME, ffParseDiskJsonObject) ||
+                tryModule(type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
                 false;
         }
 
         case 'F': {
             return
-                tryModule(instance, type, module, FF_FONT_MODULE_NAME, ffParseFontJsonObject) ||
+                tryModule(type, module, FF_FONT_MODULE_NAME, ffParseFontJsonObject) ||
                 false;
         }
 
         case 'G': {
             return
-                tryModule(instance, type, module, FF_GAMEPAD_MODULE_NAME, ffParseGamepadJsonObject) ||
-                tryModule(instance, type, module, FF_GPU_MODULE_NAME, ffParseGPUJsonObject) ||
+                tryModule(type, module, FF_GAMEPAD_MODULE_NAME, ffParseGamepadJsonObject) ||
+                tryModule(type, module, FF_GPU_MODULE_NAME, ffParseGPUJsonObject) ||
                 false;
         }
 
         case 'H': {
             return
-                tryModule(instance, type, module, FF_HOST_MODULE_NAME, ffParseHostJsonObject) ||
+                tryModule(type, module, FF_HOST_MODULE_NAME, ffParseHostJsonObject) ||
                 false;
         }
 
         case 'I': {
             return
-                tryModule(instance, type, module, FF_ICONS_MODULE_NAME, ffParseIconsJsonObject) ||
+                tryModule(type, module, FF_ICONS_MODULE_NAME, ffParseIconsJsonObject) ||
                 false;
         }
 
         case 'K': {
             return
-                tryModule(instance, type, module, FF_KERNEL_MODULE_NAME, ffParseKernelJsonObject) ||
+                tryModule(type, module, FF_KERNEL_MODULE_NAME, ffParseKernelJsonObject) ||
                 false;
         }
 
         case 'L': {
             return
-                tryModule(instance, type, module, FF_LM_MODULE_NAME, ffParseLMJsonObject) ||
-                tryModule(instance, type, module, FF_LOCALE_MODULE_NAME, ffParseLocaleJsonObject) ||
-                tryModule(instance, type, module, FF_LOCALIP_MODULE_NAME, ffParseLocalIpJsonObject) ||
+                tryModule(type, module, FF_LM_MODULE_NAME, ffParseLMJsonObject) ||
+                tryModule(type, module, FF_LOCALE_MODULE_NAME, ffParseLocaleJsonObject) ||
+                tryModule(type, module, FF_LOCALIP_MODULE_NAME, ffParseLocalIpJsonObject) ||
                 false;
         }
 
         case 'M': {
             return
-                tryModule(instance, type, module, FF_MEDIA_MODULE_NAME, ffParseMediaJsonObject) ||
-                tryModule(instance, type, module, FF_MEMORY_MODULE_NAME, ffParseMemoryJsonObject) ||
+                tryModule(type, module, FF_MEDIA_MODULE_NAME, ffParseMediaJsonObject) ||
+                tryModule(type, module, FF_MEMORY_MODULE_NAME, ffParseMemoryJsonObject) ||
                 false;
         }
 
         case 'O': {
             return
-                tryModule(instance, type, module, FF_OPENCL_MODULE_NAME, ffParseOpenCLJsonObject) ||
-                tryModule(instance, type, module, FF_OPENGL_MODULE_NAME, ffParseOpenGLJsonObject) ||
-                tryModule(instance, type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
+                tryModule(type, module, FF_OPENCL_MODULE_NAME, ffParseOpenCLJsonObject) ||
+                tryModule(type, module, FF_OPENGL_MODULE_NAME, ffParseOpenGLJsonObject) ||
+                tryModule(type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
                 false;
         }
 
         case 'P': {
             return
-                tryModule(instance, type, module, FF_PACKAGES_MODULE_NAME, ffParsePackagesJsonObject) ||
-                tryModule(instance, type, module, FF_PLAYER_MODULE_NAME, ffParsePlayerJsonObject) ||
-                tryModule(instance, type, module, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterJsonObject) ||
-                tryModule(instance, type, module, FF_PROCESSES_MODULE_NAME, ffParseProcessesJsonObject) ||
-                tryModule(instance, type, module, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpJsonObject) ||
+                tryModule(type, module, FF_PACKAGES_MODULE_NAME, ffParsePackagesJsonObject) ||
+                tryModule(type, module, FF_PLAYER_MODULE_NAME, ffParsePlayerJsonObject) ||
+                tryModule(type, module, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterJsonObject) ||
+                tryModule(type, module, FF_PROCESSES_MODULE_NAME, ffParseProcessesJsonObject) ||
+                tryModule(type, module, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpJsonObject) ||
                 false;
         }
 
         case 'S': {
             return
-                tryModule(instance, type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
-                tryModule(instance, type, module, FF_SHELL_MODULE_NAME, ffParseShellJsonObject) ||
-                tryModule(instance, type, module, FF_SOUND_MODULE_NAME, ffParseSoundJsonObject) ||
-                tryModule(instance, type, module, FF_SWAP_MODULE_NAME, ffParseSwapJsonObject) ||
+                tryModule(type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
+                tryModule(type, module, FF_SHELL_MODULE_NAME, ffParseShellJsonObject) ||
+                tryModule(type, module, FF_SOUND_MODULE_NAME, ffParseSoundJsonObject) ||
+                tryModule(type, module, FF_SWAP_MODULE_NAME, ffParseSwapJsonObject) ||
                 false;
         }
 
         case 'T': {
             return
-                tryModule(instance, type, module, FF_TERMINAL_MODULE_NAME, ffParseTerminalJsonObject) ||
-                tryModule(instance, type, module, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontJsonObject) ||
-                tryModule(instance, type, module, FF_TITLE_MODULE_NAME, ffParseTitleJsonObject) ||
-                tryModule(instance, type, module, FF_THEME_MODULE_NAME, ffParseThemeJsonObject) ||
+                tryModule(type, module, FF_TERMINAL_MODULE_NAME, ffParseTerminalJsonObject) ||
+                tryModule(type, module, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontJsonObject) ||
+                tryModule(type, module, FF_TITLE_MODULE_NAME, ffParseTitleJsonObject) ||
+                tryModule(type, module, FF_THEME_MODULE_NAME, ffParseThemeJsonObject) ||
                 false;
         }
 
         case 'U': {
             return
-                tryModule(instance, type, module, FF_UPTIME_MODULE_NAME, ffParseUptimeJsonObject) ||
-                tryModule(instance, type, module, FF_USERS_MODULE_NAME, ffParseUsersJsonObject) ||
+                tryModule(type, module, FF_UPTIME_MODULE_NAME, ffParseUptimeJsonObject) ||
+                tryModule(type, module, FF_USERS_MODULE_NAME, ffParseUsersJsonObject) ||
                 false;
         }
 
         case 'V': {
             return
-                tryModule(instance, type, module, FF_VULKAN_MODULE_NAME, ffParseVulkanJsonObject) ||
+                tryModule(type, module, FF_VULKAN_MODULE_NAME, ffParseVulkanJsonObject) ||
                 false;
         }
 
         case 'W': {
             return
-                tryModule(instance, type, module, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperJsonObject) ||
-                tryModule(instance, type, module, FF_WEATHER_MODULE_NAME, ffParseWeatherJsonObject) ||
-                tryModule(instance, type, module, FF_WM_MODULE_NAME, ffParseWMJsonObject) ||
-                tryModule(instance, type, module, FF_WIFI_MODULE_NAME, ffParseWifiJsonObject) ||
-                tryModule(instance, type, module, FF_WMTHEME_MODULE_NAME, ffParseWMThemeJsonObject) ||
+                tryModule(type, module, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperJsonObject) ||
+                tryModule(type, module, FF_WEATHER_MODULE_NAME, ffParseWeatherJsonObject) ||
+                tryModule(type, module, FF_WM_MODULE_NAME, ffParseWMJsonObject) ||
+                tryModule(type, module, FF_WIFI_MODULE_NAME, ffParseWifiJsonObject) ||
+                tryModule(type, module, FF_WMTHEME_MODULE_NAME, ffParseWMThemeJsonObject) ||
                 false;
         }
 
@@ -221,9 +221,9 @@ static bool parseModuleJsonObject(FFinstance* instance, const char* type, yyjson
     }
 }
 
-static const char* printJsonConfig(FFinstance* instance)
+static const char* printJsonConfig(void)
 {
-    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))
@@ -238,7 +238,7 @@ static const char* printJsonConfig(FFinstance* instance)
     yyjson_arr_foreach(modules, idx, max, item)
     {
         uint64_t ms = 0;
-        if(__builtin_expect(instance->config.stat, false))
+        if(__builtin_expect(instance.config.stat, false))
             ms = ffTimeGetTick();
 
         yyjson_val* module = item;
@@ -255,32 +255,32 @@ static const char* printJsonConfig(FFinstance* instance)
         else
             return "modules must be an array of strings or objects";
 
-        if(!parseModuleJsonObject(instance, type, module))
+        if(!parseModuleJsonObject(type, module))
             return "Unknown module type";
 
-        if(__builtin_expect(instance->config.stat, false))
+        if(__builtin_expect(instance.config.stat, false))
         {
             char str[32];
             int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-            if(instance->config.pipe)
+            if(instance.config.pipe)
                 puts(str);
             else
                 printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
         }
 
         #if defined(_WIN32)
-        if (!instance->config.noBuffer) fflush(stdout);
+        if (!instance.config.noBuffer) fflush(stdout);
         #endif
     }
 
     return NULL;
 }
 
-const char* ffParseGeneralJsonConfig(FFinstance* instance)
+const char* ffParseGeneralJsonConfig(void)
 {
-    FFconfig* config = &instance->config;
+    FFconfig* config = &instance.config;
 
-    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))
@@ -321,11 +321,11 @@ const char* ffParseGeneralJsonConfig(FFinstance* instance)
     return NULL;
 }
 
-const char* ffParseDisplayJsonConfig(FFinstance* instance)
+const char* ffParseDisplayJsonConfig(void)
 {
-    FFconfig* config = &instance->config;
+    FFconfig* config = &instance.config;
 
-    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))
@@ -391,11 +391,11 @@ const char* ffParseDisplayJsonConfig(FFinstance* instance)
     return NULL;
 }
 
-const char* ffParseLibraryJsonConfig(FFinstance* instance)
+const char* ffParseLibraryJsonConfig(void)
 {
-    FFconfig* config = &instance->config;
+    FFconfig* config = &instance.config;
 
-    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))
@@ -464,9 +464,9 @@ const char* ffParseLibraryJsonConfig(FFinstance* instance)
     return NULL;
 }
 
-void ffPrintJsonConfig(FFinstance* instance)
+void ffPrintJsonConfig(void)
 {
-    const char* error = printJsonConfig(instance);
+    const char* error = printJsonConfig();
     if (error)
-        ffPrintErrorString(instance, "JsonConfig", 0, NULL, NULL, "%s", error);
+        ffPrintErrorString("JsonConfig", 0, NULL, NULL, "%s", error);
 }

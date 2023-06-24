@@ -74,11 +74,11 @@ static uint32_t getNumStrings(FFstrbuf* baseDir, const char* filename, const cha
     return num_elements;
 }
 
-static uint32_t getSQLite3Int(const FFinstance* instance, FFstrbuf* baseDir, const char* dbPath, const char* query)
+static uint32_t getSQLite3Int(FFstrbuf* baseDir, const char* dbPath, const char* query)
 {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dbPath);
-    uint32_t num_elements = (uint32_t) ffSettingsGetSQLite3Int(instance, baseDir->chars, query);
+    uint32_t num_elements = (uint32_t) ffSettingsGetSQLite3Int(baseDir->chars, query);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
     return num_elements;
 }
@@ -221,9 +221,9 @@ static uint32_t getFlatpak(FFstrbuf* baseDir, const char* dirname)
 #include <rpm/rpmdb.h>
 #include <rpm/rpmlog.h>
 
-static uint32_t getRpmFromLibrpm(const FFinstance* instance)
+static uint32_t getRpmFromLibrpm(void)
 {
-    FF_LIBRARY_LOAD(rpm, &instance->config.librpm, 0, "librpm" FF_LIBRARY_EXTENSION, 12)
+    FF_LIBRARY_LOAD(rpm, &instance.config.librpm, 0, "librpm" FF_LIBRARY_EXTENSION, 12)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)
@@ -259,7 +259,7 @@ static uint32_t getRpmFromLibrpm(const FFinstance* instance)
 
 #endif //FF_HAVE_RPM
 
-static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
     packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
     packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: ");
@@ -269,17 +269,17 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
     packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
-    packageCounts->pkg += getSQLite3Int(instance, baseDir, "/var/db/pkg/local.sqlite", "SELECT count(id) FROM packages");
-    packageCounts->rpm += getSQLite3Int(instance, baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
+    packageCounts->pkg += getSQLite3Int(baseDir, "/var/db/pkg/local.sqlite", "SELECT count(id) FROM packages");
+    packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
     packageCounts->snap += getSnap(baseDir);
     packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
     packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
     packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
 }
 
-static void getPackageCountsRegular(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
-    getPackageCounts(instance, baseDir, packageCounts);
+    getPackageCounts(baseDir, packageCounts);
 
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ETC"/pacman-mirrors.conf");
@@ -288,7 +288,7 @@ static void getPackageCountsRegular(const FFinstance* instance, FFstrbuf* baseDi
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
-static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
     uint32_t baseDirLength = baseDir->length;
 
@@ -313,7 +313,7 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
             continue;
 
         ffStrbufAppendS(baseDir, entry->d_name);
-        getPackageCounts(instance, baseDir, packageCounts);
+        getPackageCounts(baseDir, packageCounts);
         ffStrbufSubstrBefore(baseDir, baseDirLength2);
     }
 
@@ -321,25 +321,25 @@ static void getPackageCountsBedrock(const FFinstance* instance, FFstrbuf* baseDi
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
-void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result)
+void ffDetectPackagesImpl(FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
-    if(ffStrbufIgnCaseEqualS(&ffDetectOS(instance)->id, "bedrock"))
-        getPackageCountsBedrock(instance, &baseDir, result);
+    if(ffStrbufIgnCaseEqualS(&ffDetectOS()->id, "bedrock"))
+        getPackageCountsBedrock(&baseDir, result);
     else
-        getPackageCountsRegular(instance, &baseDir, result);
+        getPackageCountsRegular(&baseDir, result);
 
     // If SQL failed, we can still try with librpm.
     // This is needed on openSUSE, which seems to use a proprietary database file
     // This method doesn't work on bedrock, so we do it here.
     #ifdef FF_HAVE_RPM
         if(result->rpm == 0)
-            result->rpm = getRpmFromLibrpm(instance);
+            result->rpm = getRpmFromLibrpm();
     #endif
 
-    ffStrbufSet(&baseDir, &instance->state.platform.homeDir);
+    ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
     result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
     result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
 }

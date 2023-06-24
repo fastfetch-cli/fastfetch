@@ -1,11 +1,11 @@
 #include "os.h"
 #include "detection/internal.h"
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance);
+void ffDetectOSImpl(FFOSResult* os);
 
-const FFOSResult* ffDetectOS(const FFinstance* instance)
+const FFOSResult* ffDetectOS(void)
 {
     FF_DETECTION_INTERNAL_GUARD(FFOSResult,
-        ffDetectOSImpl(&result, instance)
+        ffDetectOSImpl(&result)
     );
 }

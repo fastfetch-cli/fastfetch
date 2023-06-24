@@ -4,8 +4,8 @@
 
 #define FF_THEME_MODULE_NAME "Theme"
 
-void ffPrintTheme(FFinstance* instance, FFThemeOptions* options);
+void ffPrintTheme(FFThemeOptions* options);
 void ffInitThemeOptions(FFThemeOptions* options);
 bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value);
 void ffDestroyThemeOptions(FFThemeOptions* options);
-void ffParseThemeJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseThemeJsonObject(yyjson_val* module);

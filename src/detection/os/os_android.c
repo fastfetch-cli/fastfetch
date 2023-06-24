@@ -1,10 +1,8 @@
 #include "os.h"
 #include "common/settings.h"
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInitS(&os->name, "Android");
 
     ffStrbufInitS(&os->prettyName, "Android");

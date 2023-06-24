@@ -5,9 +5,9 @@
 #include "common/thread.h"
 #include "util/stringUtils.h"
 
-static bool loadLibSymbols(const FFinstance* instance, FFDBusLibrary* lib)
+static bool loadLibSymbols(FFDBusLibrary* lib)
 {
-    FF_LIBRARY_LOAD(dbus, &instance->config.libDBus, false, "libdbus-1" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_LOAD(dbus, &instance.config.libDBus, false, "libdbus-1" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_bus_get, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_new_method_call, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_init, false)
@@ -28,7 +28,7 @@ static bool loadLibSymbols(const FFinstance* instance, FFDBusLibrary* lib)
     return true;
 }
 
-static const FFDBusLibrary* loadLib(const FFinstance* instance)
+static const FFDBusLibrary* loadLib(void)
 {
     static FFDBusLibrary lib;
     static bool loaded = false;
@@ -40,16 +40,16 @@ static const FFDBusLibrary* loadLib(const FFinstance* instance)
     if(!loaded)
     {
         loaded = true;
-        loadSuccess = loadLibSymbols(instance, &lib);
+        loadSuccess = loadLibSymbols(&lib);
     }
 
     ffThreadMutexUnlock(&mutex);
     return loadSuccess ? &lib : NULL;
 }
 
-const char* ffDBusLoadData(const FFinstance* instance, DBusBusType busType, FFDBusData* data)
+const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data)
 {
-    data->lib = loadLib(instance);
+    data->lib = loadLib();
     if(data->lib == NULL)
         return "Failed to load DBus library";
 

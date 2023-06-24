@@ -6,7 +6,7 @@
 
 #define FF_HOST_NUM_FORMAT_ARGS 5
 
-void ffPrintHost(FFinstance* instance, FFHostOptions* options)
+void ffPrintHost(FFHostOptions* options)
 {
     FFHostResult host;
     ffStrbufInit(&host.productFamily);
@@ -18,19 +18,19 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         goto exit;
     }
 
     if(host.productFamily.length == 0 && host.productName.length == 0)
     {
-        ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "neither product_family nor product_name is set by O.E.M.");
+        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "neither product_family nor product_name is set by O.E.M.");
         goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_HOST_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
@@ -48,7 +48,7 @@ void ffPrintHost(FFinstance* instance, FFHostOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.productFamily},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.productName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.productVersion},
@@ -86,7 +86,7 @@ void ffDestroyHostOptions(FFHostOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseHostJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseHostJsonObject(yyjson_val* module)
 {
     FFHostOptions __attribute__((__cleanup__(ffDestroyHostOptions))) options;
     ffInitHostOptions(&options);
@@ -104,9 +104,9 @@ void ffParseHostJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_HOST_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_HOST_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintHost(instance, &options);
+    ffPrintHost(&options);
 }

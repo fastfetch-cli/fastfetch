@@ -4,7 +4,7 @@
 #include "modules/command/command.h"
 #include "util/stringUtils.h"
 
-void ffPrintCommand(FFinstance* instance, FFCommandOptions* options)
+void ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&result, (char* const[]){
@@ -20,17 +20,17 @@ void ffPrintCommand(FFinstance* instance, FFCommandOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(!result.length)
     {
-        ffPrintError(instance, FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "No result printed");
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "No result printed");
         return;
     }
 
-    ffPrintLogoAndKey(instance, FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+    ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
     ffStrbufPutTo(&result, stdout);
 }
 
@@ -81,7 +81,7 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
     ffStrbufDestroy(&options->text);
 }
 
-void ffParseCommandJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseCommandJsonObject(yyjson_val* module)
 {
     FFCommandOptions __attribute__((__cleanup__(ffDestroyCommandOptions))) options;
     ffInitCommandOptions(&options);
@@ -111,9 +111,9 @@ void ffParseCommandJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_COMMAND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintCommand(instance, &options);
+    ffPrintCommand(&options);
 }

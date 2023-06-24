@@ -4,8 +4,8 @@
 
 #define FF_ICONS_MODULE_NAME "Icons"
 
-void ffPrintIcons(FFinstance* instance, FFIconsOptions* options);
+void ffPrintIcons(FFIconsOptions* options);
 void ffInitIconsOptions(FFIconsOptions* options);
 bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const char* value);
 void ffDestroyIconsOptions(FFIconsOptions* options);
-void ffParseIconsJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseIconsJsonObject(yyjson_val* module);

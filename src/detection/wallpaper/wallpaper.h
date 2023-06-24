@@ -5,6 +5,6 @@
 
 #include "fastfetch.h"
 
-const char* ffDetectWallpaper(const FFinstance* instance, FFstrbuf* result);
+const char* ffDetectWallpaper(FFstrbuf* result);
 
 #endif

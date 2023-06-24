@@ -6,22 +6,22 @@
 
 #define FF_PACKAGES_NUM_FORMAT_ARGS 21
 
-void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
+void ffPrintPackages(FFPackagesOptions* options)
 {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
-    const char* error = ffDetectPackages(instance, &counts);
+    const char* error = ffDetectPackages(&counts);
 
     if(error)
     {
-        ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         #define FF_PRINT_PACKAGE_NAME(var, name) \
             if(counts.var > 0) \
@@ -66,7 +66,7 @@ void ffPrintPackages(FFinstance* instance, FFPackagesOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PACKAGES_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &counts.all},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pacman},
             {FF_FORMAT_ARG_TYPE_STRBUF, &counts.pacmanBranch},
@@ -115,7 +115,7 @@ void ffDestroyPackagesOptions(FFPackagesOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePackagesJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParsePackagesJsonObject(yyjson_val* module)
 {
     FFPackagesOptions __attribute__((__cleanup__(ffDestroyPackagesOptions))) options;
     ffInitPackagesOptions(&options);
@@ -133,9 +133,9 @@ void ffParsePackagesJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_PACKAGES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintPackages(instance, &options);
+    ffPrintPackages(&options);
 }

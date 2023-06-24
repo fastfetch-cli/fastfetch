@@ -21,7 +21,7 @@ static void generateString(FFFontResult* font)
     }
 }
 
-const char* ffDetectFontImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFFontResult* result)
+const char* ffDetectFontImpl(FFFontResult* result)
 {
     ffStrbufAppendS(&result->fonts[0], [NSFont systemFontOfSize:12].familyName.UTF8String);
     ffStrbufAppendS(&result->fonts[1], [NSFont userFontOfSize:12].familyName.UTF8String);

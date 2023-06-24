@@ -7,7 +7,7 @@
 #define FF_TERMUX_API_PATH FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api"
 #define FF_TERMUX_API_PARAM "BatteryStatus"
 
-const char* ffDetectBattery(FF_MAYBE_UNUSED FFinstance* instance, FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 

@@ -36,9 +36,9 @@ static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *u
     }
 }
 
-static const char* detectSound(const FFinstance* instance, FFlist* devices)
+static const char* detectSound(FFlist* devices)
 {
-    FF_LIBRARY_LOAD(pulse, &instance->config.libPulse, "Failed to load libpulse" FF_LIBRARY_EXTENSION, "libpulse" FF_LIBRARY_EXTENSION, 0)
+    FF_LIBRARY_LOAD(pulse, &instance.config.libPulse, "Failed to load libpulse" FF_LIBRARY_EXTENSION, "libpulse" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_new)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_get_api)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_iterate)
@@ -119,12 +119,12 @@ static const char* detectSound(const FFinstance* instance, FFlist* devices)
 
 #endif // FF_HAVE_PULSE
 
-const char* ffDetectSound(const FFinstance* instance, FFlist* devices)
+const char* ffDetectSound(FFlist* devices)
 {
     #ifdef FF_HAVE_PULSE
-        return detectSound(instance, devices);
+        return detectSound(devices);
     #else
-        FF_UNUSED(instance, devices);
+        FF_UNUSED(devices);
         return "Fastfetch was built without libpulse support";
     #endif
 }

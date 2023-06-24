@@ -119,7 +119,7 @@ static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* re
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
-static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* result, uint32_t pid)
+static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
@@ -148,7 +148,7 @@ static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* 
         ffStrbufClear(&result->shellPrettyName);
         ffStrbufClear(&result->shellExe);
         result->shellExeName = NULL;
-        return getShellInfo(instance, result, ppid);
+        return getShellInfo(result, ppid);
     }
 
     ffStrbufClear(&result->shellVersion);
@@ -199,7 +199,7 @@ static uint32_t getShellInfo(const FFinstance* instance, FFTerminalShellResult* 
     return ppid;
 }
 
-static uint32_t getTerminalInfo(const FFinstance* instance, FFTerminalShellResult* result, uint32_t pid)
+static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
@@ -225,7 +225,7 @@ static uint32_t getTerminalInfo(const FFinstance* instance, FFTerminalShellResul
         ffStrbufClear(&result->terminalPrettyName);
         ffStrbufClear(&result->terminalExe);
         result->terminalExeName = "";
-        return getTerminalInfo(instance, result, ppid);
+        return getTerminalInfo(result, ppid);
     }
 
     if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "sihost")           ||
@@ -306,10 +306,8 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
-const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
+const FFTerminalShellResult* ffDetectTerminalShell(void)
 {
-    FF_UNUSED(instance);
-
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
@@ -342,9 +340,9 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     if(!getProcessInfo(0, &ppid, NULL, NULL, NULL))
         goto exit;
 
-    ppid = getShellInfo(instance, &result, ppid);
+    ppid = getShellInfo(&result, ppid);
     if(ppid)
-        getTerminalInfo(instance, &result, ppid);
+        getTerminalInfo(&result, ppid);
 
     if(result.terminalProcessName.length == 0)
         getTerminalFromEnv(&result);

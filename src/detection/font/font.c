@@ -1,11 +1,11 @@
 #include "font.h"
 #include "detection/internal.h"
 
-const char* ffDetectFontImpl(const FFinstance* instance, FFFontResult* font);
+const char* ffDetectFontImpl(FFFontResult* font);
 
-const char* ffDetectFont(const FFinstance* instance, FFFontResult* font)
+const char* ffDetectFont(FFFontResult* font)
 {
-    const char* error = ffDetectFontImpl(instance, font);
+    const char* error = ffDetectFontImpl(font);
 
     if(error) return error;
 

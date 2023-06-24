@@ -1,11 +1,11 @@
 #include "cpu.h"
 #include "detection/internal.h"
 
-const char* ffDetectCPUImpl(const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu);
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu);
 
-const char* ffDetectCPU(const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
+const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    const char* error = ffDetectCPUImpl(instance, options, cpu);
+    const char* error = ffDetectCPUImpl(options, cpu);
     if (error) return error;
 
     const char* removeStrings[] = {

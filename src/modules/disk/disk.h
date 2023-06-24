@@ -4,8 +4,8 @@
 
 #define FF_DISK_MODULE_NAME "Disk"
 
-void ffPrintDisk(FFinstance* instance, FFDiskOptions* options);
+void ffPrintDisk(FFDiskOptions* options);
 void ffInitDiskOptions(FFDiskOptions* options);
 bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const char* value);
 void ffDestroyDiskOptions(FFDiskOptions* options);
-void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseDiskJsonObject(yyjson_val* module);

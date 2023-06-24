@@ -96,9 +96,9 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
     free(wmName);
 }
 
-void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXcb(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xcb, &instance->config.libXcb, , "libxcb" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(xcb, &instance.config.libXcb, , "libxcb" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(xcb, xcb_connect,)
     FF_LIBRARY_LOAD_SYMBOL(xcb, xcb_get_setup,)
     FF_LIBRARY_LOAD_SYMBOL(xcb, xcb_setup_roots_iterator,)
@@ -142,10 +142,10 @@ void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
 
 #else
 
-void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXcb(FFDisplayServerResult* result)
 {
     //Do nothing. There are other implementations coming
-    FF_UNUSED(instance, result)
+    FF_UNUSED(result)
 }
 
 #endif
@@ -383,9 +383,9 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
     );
 }
 
-void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXcbRandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xcbRandr, &instance->config.libXcbRandr, , "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(xcbRandr, &instance.config.libXcbRandr, , "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL(xcbRandr, xcb_connect,)
     FF_LIBRARY_LOAD_SYMBOL(xcbRandr, xcb_get_setup,)
     FF_LIBRARY_LOAD_SYMBOL(xcbRandr, xcb_setup_roots_iterator,)
@@ -440,10 +440,10 @@ void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* resu
 
 #else
 
-void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXcbRandr(FFDisplayServerResult* result)
 {
     //Do nothing. There are other implementations coming
-    FF_UNUSED(instance, result)
+    FF_UNUSED(result)
 }
 
 #endif

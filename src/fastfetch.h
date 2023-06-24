@@ -152,16 +152,17 @@ typedef struct FFinstance
     FFconfig config;
     FFstate state;
 } FFinstance;
+extern FFinstance instance; // Defined in `common/init.c`
 
 //////////////////////
 // Init functions //
 //////////////////////
 
 //common/init.c
-void ffInitInstance(FFinstance* instance);
-void ffStart(FFinstance* instance);
-void ffFinish(FFinstance* instance);
-void ffDestroyInstance(FFinstance* instance);
+void ffInitInstance();
+void ffStart();
+void ffFinish();
+void ffDestroyInstance();
 
 void ffListFeatures();
 
@@ -169,11 +170,11 @@ void ffListFeatures();
 // Logo functions //
 ////////////////////
 
-void ffLogoPrint(FFinstance* instance);
-void ffLogoPrintRemaining(FFinstance* instance);
-void ffLogoPrintLine(FFinstance* instance);
+void ffLogoPrint();
+void ffLogoPrintRemaining();
+void ffLogoPrintLine();
 
-void ffLogoBuiltinPrint(FFinstance* instance);
+void ffLogoBuiltinPrint();
 void ffLogoBuiltinList();
 void ffLogoBuiltinListAutocompletion();
 

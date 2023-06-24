@@ -8,22 +8,22 @@
 
 #define FF_SWAP_NUM_FORMAT_ARGS 3
 
-void ffPrintSwap(FFinstance* instance, FFSwapOptions* options)
+void ffPrintSwap(FFSwapOptions* options)
 {
     FFSwapResult storage;
     const char* error = ffDetectSwap(&storage);
 
     if(error)
     {
-        ffPrintError(instance, FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesUsed, instance->config.binaryPrefixType, &usedPretty);
+    ffParseSize(storage.bytesUsed, instance.config.binaryPrefixType, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesTotal, instance->config.binaryPrefixType, &totalPretty);
+    ffParseSize(storage.bytesTotal, instance.config.binaryPrefixType, &totalPretty);
 
     uint8_t percentage = storage.bytesTotal == 0
         ? 0
@@ -31,24 +31,24 @@ void ffPrintSwap(FFinstance* instance, FFSwapOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_SWAP_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         if (storage.bytesTotal == 0)
             puts("Disabled");
         else
         {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(instance, &str, percentage, 0, 5, 8);
+                ffAppendPercentBar(&str, percentage, 0, 5, 8);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffAppendPercentNum(instance, &str, (uint8_t) percentage, 50, 80, str.length > 0);
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffAppendPercentNum(&str, (uint8_t) percentage, 50, 80, str.length > 0);
 
             ffStrbufTrimRight(&str, ' ');
             ffStrbufPutTo(&str, stdout);
@@ -56,7 +56,7 @@ void ffPrintSwap(FFinstance* instance, FFSwapOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_SWAP_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_SWAP_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
@@ -85,7 +85,7 @@ void ffDestroySwapOptions(FFSwapOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseSwapJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseSwapJsonObject(yyjson_val* module)
 {
     FFSwapOptions __attribute__((__cleanup__(ffDestroySwapOptions))) options;
     ffInitSwapOptions(&options);
@@ -103,9 +103,9 @@ void ffParseSwapJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_SWAP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_SWAP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintSwap(instance, &options);
+    ffPrintSwap(&options);
 }

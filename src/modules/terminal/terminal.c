@@ -8,19 +8,19 @@
 
 #define FF_TERMINAL_NUM_FORMAT_ARGS 10
 
-void ffPrintTerminal(FFinstance* instance, FFTerminalOptions* options)
+void ffPrintTerminal(FFTerminalOptions* options)
 {
-    const FFTerminalShellResult* result = ffDetectTerminalShell(instance);
+    const FFTerminalShellResult* result = ffDetectTerminalShell();
 
     if(result->terminalProcessName.length == 0)
     {
-        ffPrintError(instance, FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect terminal");
+        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect terminal");
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(result->terminalVersion.length)
             printf("%s %s\n", result->terminalPrettyName.chars, result->terminalVersion.chars);
@@ -29,7 +29,7 @@ void ffPrintTerminal(FFinstance* instance, FFTerminalOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalExe},
             {FF_FORMAT_ARG_TYPE_STRING, result->terminalExeName},
@@ -65,7 +65,7 @@ void ffDestroyTerminalOptions(FFTerminalOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseTerminalJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseTerminalJsonObject(yyjson_val* module)
 {
     FFTerminalOptions __attribute__((__cleanup__(ffDestroyTerminalOptions))) options;
     ffInitTerminalOptions(&options);
@@ -83,9 +83,9 @@ void ffParseTerminalJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_TERMINAL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintTerminal(instance, &options);
+    ffPrintTerminal(&options);
 }

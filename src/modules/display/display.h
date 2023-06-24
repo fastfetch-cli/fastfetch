@@ -4,8 +4,8 @@
 
 #define FF_DISPLAY_MODULE_NAME "Display"
 
-void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options);
+void ffPrintDisplay(FFDisplayOptions* options);
 void ffInitDisplayOptions(FFDisplayOptions* options);
 bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, const char* value);
 void ffDestroyDisplayOptions(FFDisplayOptions* options);
-void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseDisplayJsonObject(yyjson_val* module);

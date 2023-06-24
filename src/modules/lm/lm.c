@@ -6,7 +6,7 @@
 
 #define FF_LM_NUM_FORMAT_ARGS 2
 
-void ffPrintLM(FFinstance* instance, FFLMOptions* options)
+void ffPrintLM(FFLMOptions* options)
 {
     FFLMResult result;
     ffStrbufInit(&result.service);
@@ -15,19 +15,19 @@ void ffPrintLM(FFinstance* instance, FFLMOptions* options)
 
     if(error)
     {
-        ffPrintError(instance, FF_LM_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(result.service.length == 0)
     {
-        ffPrintError(instance, FF_LM_MODULE_NAME, 0, &options->moduleArgs, "No LM service found");
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "No LM service found");
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_LM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_LM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&result.service, stdout);
         if(result.type.length)
             printf(" (%s)", result.type.chars);
@@ -35,7 +35,7 @@ void ffPrintLM(FFinstance* instance, FFLMOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_LM_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_LM_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.service},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
         });
@@ -65,7 +65,7 @@ void ffDestroyLMOptions(FFLMOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseLMJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseLMJsonObject(yyjson_val* module)
 {
     FFLMOptions __attribute__((__cleanup__(ffDestroyLMOptions))) options;
     ffInitLMOptions(&options);
@@ -83,9 +83,9 @@ void ffParseLMJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_LM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_LM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintLM(instance, &options);
+    ffPrintLM(&options);
 }

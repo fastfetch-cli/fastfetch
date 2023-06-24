@@ -9,7 +9,7 @@
 #define FF_DISK_NUM_FORMAT_ARGS 10
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
-static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk* disk)
+static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
@@ -25,40 +25,40 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesUsed, instance->config.binaryPrefixType, &usedPretty);
+    ffParseSize(disk->bytesUsed, instance.config.binaryPrefixType, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesTotal, instance->config.binaryPrefixType, &totalPretty);
+    ffParseSize(disk->bytesTotal, instance.config.binaryPrefixType, &totalPretty);
 
     uint8_t bytesPercentage = disk->bytesTotal > 0 ? (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0) : 0;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
         if(disk->bytesTotal > 0)
         {
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(instance, &str, bytesPercentage, 0, 5, 8);
+                ffAppendPercentBar(&str, bytesPercentage, 0, 5, 8);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffAppendPercentNum(instance, &str, (uint8_t) bytesPercentage, 50, 80, str.length > 0);
+                ffAppendPercentNum(&str, (uint8_t) bytesPercentage, 50, 80, str.length > 0);
                 ffStrbufAppendC(&str, ' ');
             }
         }
         else
             ffStrbufAppendS(&str, "Unknown ");
 
-        if(!(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
         {
             if(disk->filesystem.length)
                 ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
@@ -80,7 +80,7 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
 
         bool isExternal = !!(disk->type & FF_DISK_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_TYPE_HIDDEN_BIT);
-        ffPrintFormatString(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &bytesPercentage},
@@ -95,22 +95,22 @@ static void printDisk(FFinstance* instance, FFDiskOptions* options, const FFDisk
     }
 }
 
-static void printMountpoint(FFinstance* instance, FFDiskOptions* options, const FFlist* disks, const char* mountpoint)
+static void printMountpoint(FFDiskOptions* options, const FFlist* disks, const char* mountpoint)
 {
     for(uint32_t i = disks->length; i > 0; i--)
     {
         FFDisk* disk = ffListGet(disks, i - 1);
         if(strncmp(mountpoint, disk->mountpoint.chars, disk->mountpoint.length) == 0)
         {
-            printDisk(instance, options, disk);
+            printDisk(options, disk);
             return;
         }
     }
 
-    ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "No disk found for mountpoint: %s", mountpoint);
+    ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "No disk found for mountpoint: %s", mountpoint);
 }
 
-static void printMountpoints(FFinstance* instance, FFDiskOptions* options, const FFlist* disks)
+static void printMountpoints(FFDiskOptions* options, const FFlist* disks)
 {
     #ifdef _WIN32
     const char separator = ';';
@@ -127,38 +127,38 @@ static void printMountpoints(FFinstance* instance, FFDiskOptions* options, const
         uint32_t colonIndex = ffStrbufNextIndexC(&mountpoints, startIndex, separator);
         mountpoints.chars[colonIndex] = '\0';
 
-        printMountpoint(instance, options, disks, mountpoints.chars + startIndex);
+        printMountpoint(options, disks, mountpoints.chars + startIndex);
 
         startIndex = colonIndex + 1;
     }
 }
 
-static void printAutodetected(FFinstance* instance, FFDiskOptions* options, const FFlist* disks)
+static void printAutodetected(FFDiskOptions* options, const FFlist* disks)
 {
     FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
         if(!(disk->type & options->showTypes))
             continue;
 
-        printDisk(instance, options, disk);
+        printDisk(options, disk);
     }
 }
 
-void ffPrintDisk(FFinstance* instance, FFDiskOptions* options)
+void ffPrintDisk(FFDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(&disks);
 
     if(error)
     {
-        ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
     }
     else
     {
         if(options->folders.length == 0)
-            printAutodetected(instance, options, &disks);
+            printAutodetected(options, &disks);
         else
-            printMountpoints(instance, options, &disks);
+            printMountpoints(options, &disks);
     }
 
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
@@ -245,7 +245,7 @@ void ffDestroyDiskOptions(FFDiskOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseDiskJsonObject(yyjson_val* module)
 {
     FFDiskOptions __attribute__((__cleanup__(ffDestroyDiskOptions))) options;
     ffInitDiskOptions(&options);
@@ -305,9 +305,9 @@ void ffParseDiskJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_DISK_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DISK_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintDisk(instance, &options);
+    ffPrintDisk(&options);
 }

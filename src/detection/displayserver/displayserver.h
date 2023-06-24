@@ -71,7 +71,7 @@ typedef struct FFDisplayServerResult
     FFlist displays; //List of FFDisplayResult
 } FFDisplayServerResult;
 
-const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
+const FFDisplayServerResult* ffConnectDisplayServer();
 
 bool ffdsAppendDisplay(
     FFDisplayServerResult* result,

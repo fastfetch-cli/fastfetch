@@ -11,11 +11,11 @@
 
 #define FF_GPU_NUM_FORMAT_ARGS 6
 
-static void printGPUResult(FFinstance* instance, FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
+static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_GPU_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(gpu->vendor.length + 1 + gpu->name.length);
 
@@ -39,14 +39,14 @@ static void printGPUResult(FFinstance* instance, FFGPUOptions* options, uint8_t 
 
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
-                ffParseSize(gpu->dedicated.used, instance->config.binaryPrefixType, &output);
+                ffParseSize(gpu->dedicated.used, instance.config.binaryPrefixType, &output);
                 ffStrbufAppendS(&output, " / ");
             }
-            ffParseSize(gpu->dedicated.total, instance->config.binaryPrefixType, &output);
+            ffParseSize(gpu->dedicated.total, instance.config.binaryPrefixType, &output);
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffAppendPercentNum(instance, &output, (uint8_t) (gpu->dedicated.used * 100 / gpu->dedicated.total), 50, 80, false);
+                ffAppendPercentNum(&output, (uint8_t) (gpu->dedicated.used * 100 / gpu->dedicated.total), 50, 80, false);
             }
             ffStrbufAppendC(&output, ')');
         }
@@ -63,7 +63,7 @@ static void printGPUResult(FFinstance* instance, FFGPUOptions* options, uint8_t 
         else
             type = "Unknown";
 
-        ffPrintFormat(instance, FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
@@ -74,13 +74,13 @@ static void printGPUResult(FFinstance* instance, FFGPUOptions* options, uint8_t 
     }
 }
 
-void ffPrintGPU(FFinstance* instance, FFGPUOptions* options)
+void ffPrintGPU(FFGPUOptions* options)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
-    const char* error = ffDetectGPU(instance, options, &gpus);
+    const char* error = ffDetectGPU(options, &gpus);
     if (error)
     {
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -99,10 +99,10 @@ void ffPrintGPU(FFinstance* instance, FFGPUOptions* options)
     }
 
     for(uint32_t i = 0; i < selectedGPUs.length; i++)
-        printGPUResult(instance, options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), * (const FFGPUResult**) ffListGet(&selectedGPUs, i));
+        printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), * (const FFGPUResult**) ffListGet(&selectedGPUs, i));
 
     if(selectedGPUs.length == 0)
-        ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "No GPUs found");
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "No GPUs found");
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
     {
@@ -159,7 +159,7 @@ void ffDestroyGPUOptions(FFGPUOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseGPUJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseGPUJsonObject(yyjson_val* module)
 {
     FFGPUOptions __attribute__((__cleanup__(ffDestroyGPUOptions))) options;
     ffInitGPUOptions(&options);
@@ -199,15 +199,15 @@ void ffParseGPUJsonObject(FFinstance* instance, yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
                 else
                     options.hideType = (FFGPUType) value;
                 continue;
             }
 
-            ffPrintError(instance, FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintGPU(instance, &options);
+    ffPrintGPU(&options);
 }

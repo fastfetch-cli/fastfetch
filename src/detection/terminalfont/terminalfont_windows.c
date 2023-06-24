@@ -6,16 +6,16 @@
 
 #include <windows.h>
 
-static void detectMintty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectMintty(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    if(!ffParsePropFileConfigValues(instance, "mintty/config", 2, (FFpropquery[]) {
+    if(!ffParsePropFileConfigValues("mintty/config", 2, (FFpropquery[]) {
         {"Font=", &fontName},
         {"FontHeight=", &fontSize}
     }))
-        ffParsePropFileConfigValues(instance, ".minttyrc", 2, (FFpropquery[]) {
+        ffParsePropFileConfigValues(".minttyrc", 2, (FFpropquery[]) {
             {"Font=", &fontName},
             {"FontHeight=", &fontSize}
         });
@@ -27,10 +27,8 @@ static void detectMintty(const FFinstance* instance, FFTerminalFontResult* termi
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-static void detectConhost(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectConhost(FFTerminalFontResult* terminalFont)
 {
-    FF_UNUSED(instance);
-
     CONSOLE_FONT_INFOEX cfi = { .cbSize = sizeof(cfi) };
     if(!GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi))
     {
@@ -46,10 +44,8 @@ static void detectConhost(const FFinstance* instance, FFTerminalFontResult* term
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize);
 }
 
-static void detectConEmu(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectConEmu(FFTerminalFontResult* terminalFont)
 {
-    FF_UNUSED(instance)
-
     //https://conemu.github.io/en/ConEmuXml.html#search-sequence
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
@@ -89,12 +85,12 @@ static void detectConEmu(const FFinstance* instance, FFTerminalFontResult* termi
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "mintty") == 0)
-        detectMintty(instance, terminalFont);
+        detectMintty(terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "conhost.exe") == 0)
-        detectConhost(instance, terminalFont);
+        detectConhost(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "ConEmuC"))
-        detectConEmu(instance, terminalFont);
+        detectConEmu(terminalFont);
 }

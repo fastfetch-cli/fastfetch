@@ -6,11 +6,11 @@
 
 #define FF_SOUND_NUM_FORMAT_ARGS 4
 
-static void printDevice(FFinstance* instance, FFSoundOptions* options, const FFSoundDevice* device, uint8_t index)
+static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_SOUND_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&device->name, stdout);
 
         if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
@@ -28,7 +28,7 @@ static void printDevice(FFinstance* instance, FFSoundOptions* options, const FFS
     }
     else
     {
-        ffPrintFormat(instance, FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_SOUND_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_SOUND_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_UINT8, &device->volume},
@@ -37,15 +37,15 @@ static void printDevice(FFinstance* instance, FFSoundOptions* options, const FFS
     }
 }
 
-void ffPrintSound(FFinstance* instance, FFSoundOptions* options)
+void ffPrintSound(FFSoundOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
 
-    const char* error = ffDetectSound(instance, &result);
+    const char* error = ffDetectSound(&result);
 
     if(error)
     {
-        ffPrintError(instance, FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -65,14 +65,14 @@ void ffPrintSound(FFinstance* instance, FFSoundOptions* options)
 
     if(filtered.length == 0)
     {
-        ffPrintError(instance, FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "No active sound devices found");
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "No active sound devices found");
         return;
     }
 
     uint8_t index = 1;
     FF_LIST_FOR_EACH(FFSoundDevice*, device, filtered)
     {
-        printDevice(instance, options, *device, filtered.length == 1 ? 0 : index++);
+        printDevice(options, *device, filtered.length == 1 ? 0 : index++);
     }
 
     FF_LIST_FOR_EACH(FFSoundDevice, device, result)
@@ -117,7 +117,7 @@ void ffDestroySoundOptions(FFSoundOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseSoundJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseSoundJsonObject(yyjson_val* module)
 {
     FFSoundOptions __attribute__((__cleanup__(ffDestroySoundOptions))) options;
     ffInitSoundOptions(&options);
@@ -145,15 +145,15 @@ void ffParseSoundJsonObject(FFinstance* instance, yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(instance, FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
                 else
                     options.soundType = (FFSoundType) value;
                 continue;
             }
 
-            ffPrintError(instance, FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintSound(instance, &options);
+    ffPrintSound(&options);
 }

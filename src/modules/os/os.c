@@ -9,7 +9,7 @@
 
 #define FF_OS_NUM_FORMAT_ARGS 12
 
-static void buildOutputDefault(const FFinstance* instance, const FFOSResult* os, FFstrbuf* result)
+static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
 {
     //Create the basic output
     if(os->name.length > 0)
@@ -19,7 +19,7 @@ static void buildOutputDefault(const FFinstance* instance, const FFOSResult* os,
     else if(os->id.length > 0)
         ffStrbufAppend(result, &os->id);
     else
-        ffStrbufAppend(result, &instance->state.platform.systemName);
+        ffStrbufAppend(result, &instance.state.platform.systemName);
 
     #ifdef __APPLE__
     if(os->codename.length > 0)
@@ -64,14 +64,14 @@ static void buildOutputDefault(const FFinstance* instance, const FFOSResult* os,
     }
 
     //Append architecture if it is missing
-    if(ffStrbufFirstIndex(result, &instance->state.platform.systemArchitecture) == result->length)
+    if(ffStrbufFirstIndex(result, &instance.state.platform.systemArchitecture) == result->length)
     {
         ffStrbufAppendC(result, ' ');
-        ffStrbufAppend(result, &instance->state.platform.systemArchitecture);
+        ffStrbufAppend(result, &instance.state.platform.systemArchitecture);
     }
 }
 
-static void buildOutputNixOS(const FFinstance* instance, const FFOSResult* os, FFstrbuf* result)
+static void buildOutputNixOS(const FFOSResult* os, FFstrbuf* result)
 {
     ffStrbufAppendS(result, "NixOS");
 
@@ -89,20 +89,20 @@ static void buildOutputNixOS(const FFinstance* instance, const FFOSResult* os, F
         ffStrbufAppendC(result, ')');
     }
 
-    if(instance->state.platform.systemArchitecture.length > 0)
+    if(instance.state.platform.systemArchitecture.length > 0)
     {
         ffStrbufAppendC(result, ' ');
-        ffStrbufAppend(result, &instance->state.platform.systemArchitecture);
+        ffStrbufAppend(result, &instance.state.platform.systemArchitecture);
     }
 }
 
-void ffPrintOS(FFinstance* instance, FFOSOptions* options)
+void ffPrintOS(FFOSOptions* options)
 {
-    const FFOSResult* os = ffDetectOS(instance);
+    const FFOSResult* os = ffDetectOS();
 
     if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0)
     {
-        ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs, "Could not detect OS");
+        ffPrintError(FF_OS_MODULE_NAME, 0, &options->moduleArgs, "Could not detect OS");
         return;
     }
 
@@ -111,17 +111,17 @@ void ffPrintOS(FFinstance* instance, FFOSOptions* options)
         FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
 
         if(ffStrbufIgnCaseCompS(&os->id, "nixos") == 0)
-            buildOutputNixOS(instance, os, &result);
+            buildOutputNixOS(os, &result);
         else
-            buildOutputDefault(instance, os, &result);
+            buildOutputDefault(os, &result);
 
-        ffPrintLogoAndKey(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_OS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&result, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.platform.systemName},
+        ffPrintFormat(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->id},
@@ -132,7 +132,7 @@ void ffPrintOS(FFinstance* instance, FFOSOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->versionID},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->codename},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->buildID},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance->state.platform.systemArchitecture}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemArchitecture}
         });
     }
 }
@@ -158,7 +158,7 @@ void ffDestroyOSOptions(FFOSOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseOSJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseOSJsonObject(yyjson_val* module)
 {
     FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
     ffInitOSOptions(&options);
@@ -176,9 +176,9 @@ void ffParseOSJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintOS(instance, &options);
+    ffPrintOS(&options);
 }

@@ -6,19 +6,19 @@
 
 #define FF_SHELL_NUM_FORMAT_ARGS 7
 
-void ffPrintShell(FFinstance* instance, FFShellOptions* options)
+void ffPrintShell(FFShellOptions* options)
 {
-    const FFTerminalShellResult* result = ffDetectTerminalShell(instance);
+    const FFTerminalShellResult* result = ffDetectTerminalShell();
 
     if(result->shellProcessName.length == 0)
     {
-        ffPrintError(instance, FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect shell");
+        ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect shell");
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_SHELL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&result->shellPrettyName, stdout);
 
         if(result->shellVersion.length > 0)
@@ -31,7 +31,7 @@ void ffPrintShell(FFinstance* instance, FFShellOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffPrintFormat(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
             {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
@@ -64,7 +64,7 @@ void ffDestroyShellOptions(FFShellOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseShellJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseShellJsonObject(yyjson_val* module)
 {
     FFShellOptions __attribute__((__cleanup__(ffDestroyShellOptions))) options;
     ffInitShellOptions(&options);
@@ -82,9 +82,9 @@ void ffParseShellJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_SHELL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_SHELL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintShell(instance, &options);
+    ffPrintShell(&options);
 }

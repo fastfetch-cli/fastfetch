@@ -167,10 +167,10 @@ static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIt
     }
 }
 
-static const char* detectBluetooth(const FFinstance* instance, FFlist* devices)
+static const char* detectBluetooth(FFlist* devices)
 {
     FFDBusData dbus;
-    const char* error = ffDBusLoadData(instance, DBUS_BUS_SYSTEM, &dbus);
+    const char* error = ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus);
     if(error)
         return error;
 
@@ -193,12 +193,11 @@ static const char* detectBluetooth(const FFinstance* instance, FFlist* devices)
 
 #endif
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
 {
     #ifdef FF_HAVE_DBUS
-        return detectBluetooth(instance, devices);
+        return detectBluetooth(devices);
     #else
-        FF_UNUSED(instance);
         return "Fastfetch was compiled without DBus support";
     #endif
 }

@@ -5,6 +5,6 @@
 
 #include "fastfetch.h"
 
-bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError);
+bool ffDetectWmTheme(FFstrbuf* themeOrError);
 
 #endif

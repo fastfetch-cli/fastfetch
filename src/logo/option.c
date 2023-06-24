@@ -189,11 +189,11 @@ void ffDestroyLogoOptions(FFLogoOptions* options)
         ffStrbufDestroy(&options->colors[i]);
 }
 
-const char* ffParseLogoJsonConfig(FFinstance* instance)
+const char* ffParseLogoJsonConfig(void)
 {
-    FFLogoOptions* options = &instance->config.logo;
+    FFLogoOptions* options = &instance.config.logo;
 
-    yyjson_val* const root = yyjson_doc_get_root(instance->state.configDoc);
+    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))

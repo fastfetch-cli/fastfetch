@@ -9,13 +9,13 @@
 #define FF_PLAYER_DISPLAY_NAME "Media Player"
 #define FF_PLAYER_NUM_FORMAT_ARGS 4
 
-void ffPrintPlayer(FFinstance* instance, FFPlayerOptions* options)
+void ffPrintPlayer(FFPlayerOptions* options)
 {
-    const FFMediaResult* media = ffDetectMedia(instance);
+    const FFMediaResult* media = ffDetectMedia();
 
     if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
+        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
         return;
     }
 
@@ -59,12 +59,12 @@ void ffPrintPlayer(FFinstance* instance, FFPlayerOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufPutTo(&playerPretty, stdout);
     }
     else
     {
-        ffPrintFormat(instance, FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->player},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId},
@@ -94,7 +94,7 @@ void ffDestroyPlayerOptions(FFPlayerOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePlayerJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParsePlayerJsonObject(yyjson_val* module)
 {
     FFPlayerOptions __attribute__((__cleanup__(ffDestroyPlayerOptions))) options;
     ffInitPlayerOptions(&options);
@@ -112,9 +112,9 @@ void ffParsePlayerJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_PLAYER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintPlayer(instance, &options);
+    ffPrintPlayer(&options);
 }

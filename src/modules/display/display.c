@@ -6,24 +6,24 @@
 
 #define FF_DISPLAY_NUM_FORMAT_ARGS 8
 
-void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
+void ffPrintDisplay(FFDisplayOptions* options)
 {
     #ifdef __ANDROID__
-        ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &instance->config.display.moduleArgs, "Display detection is not supported on Android");
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &instance.config.display.moduleArgs, "Display detection is not supported on Android");
         return;
     #endif
 
-    const FFDisplayServerResult* dsResult = ffConnectDisplayServer(instance);
+    const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if(dsResult->displays.length == 0)
     {
-        ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &instance->config.display.moduleArgs, "Couldn't detect display");
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &instance.config.display.moduleArgs, "Couldn't detect display");
         return;
     }
 
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE)
     {
-        ffPrintLogoAndKey(instance, FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         int index = 0;
         FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
@@ -72,7 +72,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
                     {FF_FORMAT_ARG_TYPE_STRING, displayType},
                 });
             }
-            ffPrintLogoAndKey(instance, key.chars, 0, NULL, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
             printf("%ix%i", result->width, result->height);
 
@@ -96,7 +96,7 @@ void ffPrintDisplay(FFinstance* instance, FFDisplayOptions* options)
         }
         else
         {
-            ffPrintFormat(instance, FF_DISPLAY_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_DISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormat(FF_DISPLAY_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_DISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_UINT, &result->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->height},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate},
@@ -151,7 +151,7 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseDisplayJsonObject(yyjson_val* module)
 {
     FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;
     ffInitDisplayOptions(&options);
@@ -179,7 +179,7 @@ void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
                 else
                     options.compactType = (FFDisplayCompactType) value;
                 continue;
@@ -191,9 +191,9 @@ void ffParseDisplayJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintDisplay(instance, &options);
+    ffPrintDisplay(&options);
 }

@@ -7,7 +7,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-const char* ffDetectBattery(FF_MAYBE_UNUSED FFinstance* instance, FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
 {
     //https://www.freebsd.org/cgi/man.cgi?acpi_battery(4)
     //https://gitlab.xfce.org/panel-plugins/xfce4-battery-plugin/-/blob/master/panel-plugin/libacpi.c

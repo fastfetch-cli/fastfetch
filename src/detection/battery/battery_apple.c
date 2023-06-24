@@ -5,7 +5,7 @@
 
 #include <IOKit/IOKitLib.h>
 
-static double detectBatteryTemp()
+static double detectBatteryTemp(void)
 {
     FF_LIST_AUTO_DESTROY temps = ffListCreate(sizeof(FFTempValue));
 
@@ -27,7 +27,7 @@ static double detectBatteryTemp()
     return result;
 }
 
-const char* ffDetectBattery(FF_MAYBE_UNUSED FFinstance* instance, FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
     CFMutableDictionaryRef matchDict = IOServiceMatching("AppleSmartBattery");
     if (matchDict == NULL)

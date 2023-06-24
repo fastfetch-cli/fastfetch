@@ -12,16 +12,16 @@ static void* logoResize(const void* image, size_t width, size_t height, void* ex
     return ffResizeImage(image, width, height, UndefinedFilter, exceptionInfo);
 }
 
-FFLogoImageResult ffLogoPrintImageIM7(FFinstance* instance, FFLogoRequestData* requestData)
+FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData)
 {
-    FF_LIBRARY_LOAD(imageMagick, &instance->config.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
+    FF_LIBRARY_LOAD(imageMagick, &instance.config.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
         "libMagickCore-7.Q16HDRI" FF_LIBRARY_EXTENSION, 11,
         "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11,
         "libMagickCore-7.Q16HDRI-10" FF_LIBRARY_EXTENSION, -1 // Required for Windows
     )
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
 
-    return ffLogoPrintImageImpl(instance, requestData, &(FFIMData) {
+    return ffLogoPrintImageImpl(requestData, &(FFIMData) {
         .resizeFunc = logoResize,
         .library = imageMagick,
     });

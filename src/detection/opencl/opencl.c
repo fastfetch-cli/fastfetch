@@ -63,13 +63,13 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
 
 #endif // defined(FF_HAVE_OPENCL) || defined(__APPLE__)
 
-const char* ffDetectOpenCL(FFinstance* instance, FFOpenCLResult* result)
+const char* ffDetectOpenCL(FFOpenCLResult* result)
 {
     #ifdef FF_HAVE_OPENCL
 
     OpenCLData data;
 
-    FF_LIBRARY_LOAD(opencl, &instance->config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
+    FF_LIBRARY_LOAD(opencl, &instance.config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
     #ifdef _WIN32
         "OpenCL"FF_LIBRARY_EXTENSION, -1,
     #endif
@@ -83,8 +83,6 @@ const char* ffDetectOpenCL(FFinstance* instance, FFOpenCLResult* result)
 
     #elif defined(__APPLE__) // FF_HAVE_OPENCL
 
-    FF_UNUSED(instance);
-
     OpenCLData data;
     data.ffclGetPlatformIDs = clGetPlatformIDs;
     data.ffclGetDeviceIDs = clGetDeviceIDs;
@@ -94,7 +92,7 @@ const char* ffDetectOpenCL(FFinstance* instance, FFOpenCLResult* result)
 
     #else
 
-    FF_UNUSED(instance, result);
+    FF_UNUSED(result);
     return "Fastfetch was build without OpenCL support";
 
     #endif // FF_HAVE_OPENCL

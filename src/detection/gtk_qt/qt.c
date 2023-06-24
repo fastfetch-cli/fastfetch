@@ -81,14 +81,14 @@ static bool detectPlasmaFromFile(const char* filename, FFQtResult* result)
     return true;
 }
 
-static void detectPlasma(const FFinstance* instance, FFQtResult* result)
+static void detectPlasma(FFQtResult* result)
 {
     bool foundAFile = false;
 
     //We need to do this because we use multiple threads on configDirs
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
 
-    FF_LIST_FOR_EACH(FFstrbuf, configDir, instance->state.platform.configDirs)
+    FF_LIST_FOR_EACH(FFstrbuf, configDir, instance.state.platform.configDirs)
     {
         ffStrbufSet(&baseDir, configDir);
         ffStrbufAppendS(&baseDir, "kdeglobals");
@@ -123,18 +123,18 @@ static void detectPlasma(const FFinstance* instance, FFQtResult* result)
         ffStrbufAppendS(&result->font, "Noto Sans, 10");
 }
 
-static void detectLXQt(const FFinstance* instance, FFQtResult* result)
+static void detectLXQt(FFQtResult* result)
 {
-    ffParsePropFileConfigValues(instance, "lxqt/lxqt.conf", 3, (FFpropquery[]) {
+    ffParsePropFileConfigValues("lxqt/lxqt.conf", 3, (FFpropquery[]) {
         {"style = ", &result->widgetStyle},
         {"icon_theme = ", &result->icons},
         {"font = ", &result->font}
     });
 
-    ffParsePropFileConfig(instance, "pcmanfm-qt/lxqt/settings.conf", "Wallpaper=", &result->wallpaper);
+    ffParsePropFileConfig("pcmanfm-qt/lxqt/settings.conf", "Wallpaper=", &result->wallpaper);
 }
 
-const FFQtResult* ffDetectQt(const FFinstance* instance)
+const FFQtResult* ffDetectQt(void)
 {
     static FFQtResult result;
 
@@ -154,12 +154,12 @@ const FFQtResult* ffDetectQt(const FFinstance* instance)
     ffStrbufInit(&result.font);
     ffStrbufInit(&result.wallpaper);
 
-    const FFDisplayServerResult* wmde = ffConnectDisplayServer(instance);
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
     if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA) == 0)
-        detectPlasma(instance, &result);
+        detectPlasma(&result);
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT) == 0)
-        detectLXQt(instance, &result);
+        detectLXQt(&result);
 
     ffThreadMutexUnlock(&mutex);
     return &result;

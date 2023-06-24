@@ -58,9 +58,9 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     data->ffXFree(wmWindow);
 }
 
-void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXlib(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(x11, &instance->config.libX11, , "libX11" FF_LIBRARY_EXTENSION, 7, "libX11-xcb" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(x11, &instance.config.libX11, , "libX11" FF_LIBRARY_EXTENSION, 7, "libX11-xcb" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(x11, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay,)
 
@@ -99,10 +99,10 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 
 #else
 
-void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXlib(FFDisplayServerResult* result)
 {
     //Do nothing. WM / DE detection will use environment vars to detect as much as possible.
-    FF_UNUSED(instance, result);
+    FF_UNUSED(result);
 }
 
 #endif //FF_HAVE_X11
@@ -286,9 +286,9 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
     );
 }
 
-void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXrandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xrandr, &instance->config.libXrandr, , "libXrandr" FF_LIBRARY_EXTENSION, 3)
+    FF_LIBRARY_LOAD(xrandr, &instance.config.libXrandr, , "libXrandr" FF_LIBRARY_EXTENSION, 3)
 
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XCloseDisplay,)
@@ -331,10 +331,10 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
 #else
 
-void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXrandr(FFDisplayServerResult* result)
 {
     //Do nothing here. There are more x11 implementaions to come.
-    FF_UNUSED(instance, result);
+    FF_UNUSED(result);
 }
 
 #endif // FF_HAVE_XRANDR

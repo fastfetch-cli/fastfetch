@@ -41,7 +41,7 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     return value->name.length > 0 || value->deviceClass > 0;
 }
 
-const FFTempsResult* ffDetectTemps()
+const FFTempsResult* ffDetectTemps(void)
 {
     static FFTempsResult result;
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;

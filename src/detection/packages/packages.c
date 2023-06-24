@@ -3,11 +3,11 @@
 
 #include <stddef.h>
 
-void ffDetectPackagesImpl(const FFinstance* instance, FFPackagesResult* result);
+void ffDetectPackagesImpl(FFPackagesResult* result);
 
-const char* ffDetectPackages(const FFinstance* instance, FFPackagesResult* result)
+const char* ffDetectPackages(FFPackagesResult* result)
 {
-    ffDetectPackagesImpl(instance, result);
+    ffDetectPackagesImpl(result);
 
     for(uint32_t i = 0; i < offsetof(FFPackagesResult, all) / sizeof(uint32_t); ++i)
         result->all += ((uint32_t *)result)[i];

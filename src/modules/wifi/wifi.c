@@ -6,19 +6,19 @@
 
 #define FF_WIFI_NUM_FORMAT_ARGS 10
 
-void ffPrintWifi(FFinstance* instance, FFWifiOptions* options)
+void ffPrintWifi(FFWifiOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
 
-    const char* error = ffDetectWifi(instance, &result);
+    const char* error = ffDetectWifi(&result);
     if(error)
     {
-        ffPrintError(instance, FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
     if(!result.length)
     {
-        ffPrintError(instance, FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "No Wifi interfaces found");
+        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "No Wifi interfaces found");
         return;
     }
 
@@ -29,7 +29,7 @@ void ffPrintWifi(FFinstance* instance, FFWifiOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             if(item->conn.ssid.length)
             {
                 ffStrbufWriteTo(&item->conn.ssid, stdout);
@@ -46,7 +46,7 @@ void ffPrintWifi(FFinstance* instance, FFWifiOptions* options)
         }
         else
         {
-            ffPrintFormat(instance, FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_WIFI_NUM_FORMAT_ARGS, (FFformatarg[]){
+            ffPrintFormat(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_WIFI_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.description},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.status},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.status},
@@ -91,7 +91,7 @@ void ffDestroyWifiOptions(FFWifiOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWifiJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseWifiJsonObject(yyjson_val* module)
 {
     FFWifiOptions __attribute__((__cleanup__(ffDestroyWifiOptions))) options;
     ffInitWifiOptions(&options);
@@ -109,9 +109,9 @@ void ffParseWifiJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_WIFI_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WIFI_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintWifi(instance, &options);
+    ffPrintWifi(&options);
 }

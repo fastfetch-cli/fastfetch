@@ -6,19 +6,19 @@
 
 #define FF_DE_NUM_FORMAT_ARGS 3
 
-void ffPrintDE(FFinstance* instance, FFDEOptions* options)
+void ffPrintDE(FFDEOptions* options)
 {
-    const FFDisplayServerResult* result = ffConnectDisplayServer(instance);
+    const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if(result->dePrettyName.length == 0)
     {
-        ffPrintError(instance, FF_DE_MODULE_NAME, 0, &options->moduleArgs, "No DE found");
+        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "No DE found");
         return;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_DE_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_DE_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         ffStrbufWriteTo(&result->dePrettyName, stdout);
 
@@ -32,7 +32,7 @@ void ffPrintDE(FFinstance* instance, FFDEOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->deVersion}
@@ -61,7 +61,7 @@ void ffDestroyDEOptions(FFDEOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDEJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseDEJsonObject(yyjson_val* module)
 {
     FFDEOptions __attribute__((__cleanup__(ffDestroyDEOptions))) options;
     ffInitDEOptions(&options);
@@ -79,9 +79,9 @@ void ffParseDEJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_DE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintDE(instance, &options);
+    ffPrintDE(&options);
 }

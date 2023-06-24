@@ -7,26 +7,26 @@
 #define FF_WMTHEME_DISPLAY_NAME "WM Theme"
 #define FF_WMTHEME_NUM_FORMAT_ARGS 1
 
-void ffPrintWMTheme(FFinstance* instance, FFWMThemeOptions* options)
+void ffPrintWMTheme(FFWMThemeOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
-    if(ffDetectWmTheme(instance, &themeOrError))
+    if(ffDetectWmTheme(&themeOrError))
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             puts(themeOrError.chars);
         }
         else
         {
-            ffPrintFormat(instance, FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_WMTHEME_NUM_FORMAT_ARGS, (FFformatarg[]){
+            ffPrintFormat(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_WMTHEME_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &themeOrError}
             });
         }
     }
     else
     {
-        ffPrintError(instance, FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "%*s", themeOrError.length, themeOrError.chars);
+        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "%*s", themeOrError.length, themeOrError.chars);
     }
 }
 
@@ -51,7 +51,7 @@ void ffDestroyWMThemeOptions(FFWMThemeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWMThemeJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseWMThemeJsonObject(yyjson_val* module)
 {
     FFWMThemeOptions __attribute__((__cleanup__(ffDestroyWMThemeOptions))) options;
     ffInitWMThemeOptions(&options);
@@ -69,9 +69,9 @@ void ffParseWMThemeJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_WMTHEME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintWMTheme(instance, &options);
+    ffPrintWMTheme(&options);
 }

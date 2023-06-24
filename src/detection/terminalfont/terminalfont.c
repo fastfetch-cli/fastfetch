@@ -4,7 +4,7 @@
 #include "detection/internal.h"
 #include "detection/terminalshell/terminalshell.h"
 
-static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectAlacritty(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
@@ -15,11 +15,11 @@ static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* te
     };
 
     // alacritty parses config files in this order
-    ffParsePropFileConfigValues(instance, "alacritty/alacritty.yml", 2, fontQuery);
+    ffParsePropFileConfigValues("alacritty/alacritty.yml", 2, fontQuery);
     if(fontName.length == 0 || fontSize.length == 0)
-        ffParsePropFileConfigValues(instance, "alacritty.yml", 2, fontQuery);
+        ffParsePropFileConfigValues("alacritty.yml", 2, fontQuery);
     if(fontName.length == 0 || fontSize.length == 0)
-        ffParsePropFileConfigValues(instance, ".alacritty.yml", 2, fontQuery);
+        ffParsePropFileConfigValues(".alacritty.yml", 2, fontQuery);
 
     //by default alacritty uses its own font called alacritty
     if(fontName.length == 0)
@@ -238,7 +238,7 @@ static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFo
 
 #endif //defined(_WIN32) || defined(__linux__)
 
-FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
+FF_MAYBE_UNUSED static bool detectKitty(FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
@@ -248,7 +248,7 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
         {"font_size ", &fontSize},
     };
 
-    if(!ffParsePropFileConfigValues(instance, "kitty/kitty.conf", 2, fontQuery))
+    if(!ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery))
         return false;
 
     if(fontName.length == 0)
@@ -261,7 +261,7 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
     return true;
 }
 
-static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
+static void detectTerminator(FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY useSystemFont = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
@@ -271,7 +271,7 @@ static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* r
         {"font =", &fontName},
     };
 
-    if(!ffParsePropFileConfigValues(instance, "terminator/config", 2, fontQuery))
+    if(!ffParsePropFileConfigValues("terminator/config", 2, fontQuery))
     {
         ffStrbufAppendS(&result->error, "Couldn't read Terminator config file");
         return;
@@ -289,7 +289,7 @@ static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* r
         ffFontInitPango(&result->font, fontName.chars);
 }
 
-static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
+static bool detectWezterm(FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
@@ -316,7 +316,7 @@ static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminal
     return true;
 }
 
-static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
+static bool detectTabby(FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
@@ -326,7 +326,7 @@ static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFo
         {"fontSize: ", &fontSize},
     };
 
-    if(!ffParsePropFileConfigValues(instance, "tabby/config.yaml", 2, fontQuery))
+    if(!ffParsePropFileConfigValues("tabby/config.yaml", 2, fontQuery))
         return false;
 
     if(fontName.length == 0)
@@ -339,24 +339,24 @@ static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFo
     return true;
 }
 
-void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
+void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
-static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+static bool detectTerminalFontCommon(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "alacritty"))
-        detectAlacritty(instance, terminalFont);
+        detectAlacritty(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "terminator"))
-        detectTerminator(instance, terminalFont);
+        detectTerminator(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
-        detectWezterm(instance, terminalFont);
+        detectWezterm(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "tabby"))
-        detectTabby(instance, terminalFont);
+        detectTabby(terminalFont);
 
     #ifndef _WIN32
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/pts/"))
         ffStrbufAppendS(&terminalFont->error, "Terminal font detection is not supported on PTS");
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
-        detectKitty(instance, terminalFont);
+        detectKitty(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
     #endif
@@ -374,15 +374,15 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
     return true;
 }
 
-bool ffDetectTerminalFont(const FFinstance* instance, FFTerminalFontResult* result)
+bool ffDetectTerminalFont(FFTerminalFontResult* result)
 {
-    const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
+    const FFTerminalShellResult* terminalShell = ffDetectTerminalShell();
 
     if(terminalShell->terminalProcessName.length == 0)
         ffStrbufAppendS(&result->error, "Terminal font needs successful terminal detection");
 
-    else if(!detectTerminalFontCommon(instance, terminalShell, result))
-        ffDetectTerminalFontPlatform(instance, terminalShell, result);
+    else if(!detectTerminalFontCommon(terminalShell, result))
+        ffDetectTerminalFontPlatform(terminalShell, result);
 
     if(result->error.length == 0 && result->font.pretty.length == 0)
         ffStrbufAppendF(&result->error, "Unknown terminal: %s", terminalShell->terminalProcessName.chars);

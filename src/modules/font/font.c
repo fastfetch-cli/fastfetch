@@ -6,29 +6,29 @@
 
 #define FF_FONT_NUM_FORMAT_ARGS (FF_DETECT_FONT_NUM_FONTS + 1)
 
-void ffPrintFont(FFinstance* instance, FFFontOptions* options)
+void ffPrintFont(FFFontOptions* options)
 {
     FFFontResult font;
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufInit(&font.fonts[i]);
     ffStrbufInit(&font.display);
 
-    const char* error = ffDetectFont(instance, &font);
+    const char* error = ffDetectFont(&font);
 
     if(error)
     {
-        ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
     }
     else
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_FONT_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
             ffStrbufPutTo(&font.display, stdout);
         }
         else
         {
-            ffPrintFormat(instance, FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormat(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[0]},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[1]},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[2]},
@@ -64,7 +64,7 @@ void ffDestroyFontOptions(FFFontOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseFontJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseFontJsonObject(yyjson_val* module)
 {
     FFFontOptions __attribute__((__cleanup__(ffDestroyFontOptions))) options;
     ffInitFontOptions(&options);
@@ -82,9 +82,9 @@ void ffParseFontJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_FONT_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_FONT_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintFont(instance, &options);
+    ffPrintFont(&options);
 }

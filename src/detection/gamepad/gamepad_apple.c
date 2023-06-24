@@ -15,7 +15,7 @@ static void enumSet(const void* value, void *context)
     ffCfStrGetString(product, &device->name);
 }
 
-const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */)
+const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 {
     IOHIDManagerRef FF_CFTYPE_AUTO_RELEASE manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
     if (IOHIDManagerOpen(manager, kIOHIDOptionsTypeNone) != kIOReturnSuccess)

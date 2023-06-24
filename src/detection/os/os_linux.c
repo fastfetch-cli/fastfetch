@@ -94,15 +94,15 @@ static void getUbuntuFlavour(FFOSResult* result)
     }
 }
 
-static void detectOS(FFOSResult* os, const FFinstance* instance)
+static void detectOS(FFOSResult* os)
 {
-    if(instance->config.osFile.length > 0)
+    if(instance.config.osFile.length > 0)
     {
-        parseFile(instance->config.osFile.chars, os);
+        parseFile(instance.config.osFile.chars, os);
         return;
     }
 
-    if(instance->config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
+    if(instance.config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
     {
         if(os->id.length == 0)
             ffStrbufAppendS(&os->id, "bedrock");
@@ -127,7 +127,7 @@ static void detectOS(FFOSResult* os, const FFinstance* instance)
     parseFile(FASTFETCH_TARGET_DIR_ETC"/lsb-release", os);
 }
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->prettyName);
@@ -140,7 +140,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->codename);
     ffStrbufInit(&os->buildID);
 
-    detectOS(os, instance);
+    detectOS(os);
 
     if(ffStrbufIgnCaseCompS(&os->id, "ubuntu") == 0)
         getUbuntuFlavour(os);

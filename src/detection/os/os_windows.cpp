@@ -44,10 +44,8 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
 }
 
 extern "C"
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->id);

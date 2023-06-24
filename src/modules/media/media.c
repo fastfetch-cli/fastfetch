@@ -43,13 +43,13 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
     return false;
 }
 
-void ffPrintMedia(FFinstance* instance, FFMediaOptions* options)
+void ffPrintMedia(FFMediaOptions* options)
 {
-    const FFMediaResult* media = ffDetectMedia(instance);
+    const FFMediaResult* media = ffDetectMedia();
 
     if(media->error.length > 0)
     {
-        ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
         return;
     }
 
@@ -80,7 +80,7 @@ void ffPrintMedia(FFinstance* instance, FFMediaOptions* options)
         if(artistInSongTitle(&songPretty, &artistPretty))
             ffStrbufClear(&artistPretty);
 
-        ffPrintLogoAndKey(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         if(artistPretty.length > 0)
         {
@@ -95,7 +95,7 @@ void ffPrintMedia(FFinstance* instance, FFMediaOptions* options)
     }
     else
     {
-        ffPrintFormat(instance, FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
@@ -126,7 +126,7 @@ void ffDestroyMediaOptions(FFMediaOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMediaJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseMediaJsonObject(yyjson_val* module)
 {
     FFMediaOptions __attribute__((__cleanup__(ffDestroyMediaOptions))) options;
     ffInitMediaOptions(&options);
@@ -144,9 +144,9 @@ void ffParseMediaJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_MEDIA_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintMedia(instance, &options);
+    ffPrintMedia(&options);
 }

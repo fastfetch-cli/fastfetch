@@ -1,9 +1,7 @@
 #include "displayserver.h"
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInit(&ds->wmProcessName);
     ffStrbufInit(&ds->wmPrettyName);
     ffStrbufInit(&ds->wmProtocolName);

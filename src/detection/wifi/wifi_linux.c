@@ -20,9 +20,9 @@
     #define NM_802_11_AP_SEC_KEY_MGMT_OWE_TM 0x00001000
 #endif
 
-static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* result)
+static const char* detectWifiWithLibnm(FFlist* result)
 {
-    FF_LIBRARY_LOAD(nm, &instance->config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
+    FF_LIBRARY_LOAD(nm, &instance.config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_new);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_get_devices);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_device_get_iface);
@@ -143,7 +143,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
         item->conn.signalQuality = ffnm_access_point_get_strength(ap);
         item->conn.rxRate = ffnm_access_point_get_max_bitrate(ap);
 
-        if(instance->config.allowSlowOperations)
+        if(instance.config.allowSlowOperations)
         {
             FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
             if(!ffProcessAppendStdOut(&output, (char* const[]){
@@ -213,7 +213,7 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 #include <unistd.h>
 #include <linux/wireless.h> //TODO: Don't depend on kernel headers
 
-static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
+static const char* detectWifiWithIoctls(FFlist* result)
 {
     struct if_nameindex* infs = if_nameindex();
     if(!infs)
@@ -315,15 +315,15 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
 
 #endif
 
-const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
+const char* ffDetectWifi(FFlist* result)
 {
     #ifdef FF_HAVE_LIBNM
-    if(!detectWifiWithLibnm(instance, result))
+    if(!detectWifiWithLibnm(result))
         return NULL;
     #endif
 
     #ifdef FF_DETECT_WIFI_WITH_IOCTLS
-        detectWifiWithIoctls(instance, result);
+        detectWifiWithIoctls(result);
     #endif
 
     return "linux/wireless.h not found during compilation";

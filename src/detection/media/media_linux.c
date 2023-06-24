@@ -152,17 +152,17 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
     data->lib->ffdbus_message_unref(reply);
 }
 
-static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
+static const char* getMedia(FFMediaResult* result)
 {
     FFDBusData data;
-    const char* error = ffDBusLoadData(instance, DBUS_BUS_SESSION, &data);
+    const char* error = ffDBusLoadData(DBUS_BUS_SESSION, &data);
     if(error != NULL)
         return error;
 
     // FIXME: This is shared for both player and media module.
     // However it uses an option in one specific module
-    if(instance->config.playerName.length > 0)
-        getCustomBus(&data, &instance->config.playerName, result);
+    if(instance.config.playerName.length > 0)
+        getCustomBus(&data, &instance.config.playerName, result);
     else
         getBestBus(&data, result);
 
@@ -171,13 +171,12 @@ static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
 
 #endif
 
-void ffDetectMediaImpl(const FFinstance* instance, FFMediaResult* media)
+void ffDetectMediaImpl(FFMediaResult* media)
 {
     #ifdef FF_HAVE_DBUS
-        const char* error = getMedia(instance, media);
+        const char* error = getMedia(media);
         ffStrbufAppendS(&media->error, error);
     #else
-        FF_UNUSED(instance);
         ffStrbufAppendS(&media->error, "Fastfetch was compiled without DBus support");
     #endif
 }

@@ -64,7 +64,7 @@ static void parseDRM(FFDisplayServerResult* result)
     closedir(dirp);
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     ffStrbufInit(&ds->wmProcessName);
     ffStrbufInit(&ds->wmPrettyName);
@@ -76,23 +76,23 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
 
     //We try wayland as our prefered display server, as it supports the most features.
     //This method can't detect the name of our WM / DE
-    ffdsConnectWayland(instance, ds);
+    ffdsConnectWayland(ds);
 
     //Try the x11 libs, from most feature rich to least.
     //We use the display list to detect if a connection is needed.
     //They respect wmProtocolName, and only detect display if it is set.
 
     if(ds->displays.length == 0)
-        ffdsConnectXcbRandr(instance, ds);
+        ffdsConnectXcbRandr(ds);
 
     if(ds->displays.length == 0)
-        ffdsConnectXrandr(instance, ds);
+        ffdsConnectXrandr(ds);
 
     if(ds->displays.length == 0)
-        ffdsConnectXcb(instance, ds);
+        ffdsConnectXcb(ds);
 
     if(ds->displays.length == 0)
-        ffdsConnectXlib(instance, ds);
+        ffdsConnectXlib(ds);
 
     //This display detection method is display server independent.
     //Use it if all connections failed
@@ -100,5 +100,5 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
         parseDRM(ds);
 
     //This fills in missing information about WM / DE by using env vars and iterating processes
-    ffdsDetectWMDE(instance, ds);
+    ffdsDetectWMDE(ds);
 }

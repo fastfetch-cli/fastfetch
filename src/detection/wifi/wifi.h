@@ -29,6 +29,6 @@ typedef struct FFWifiResult
     struct FFWifiConnection conn;
 } FFWifiResult;
 
-const char* ffDetectWifi(const FFinstance* instance, FFlist* result /*list of FFWifiItem*/);
+const char* ffDetectWifi(FFlist* result /*list of FFWifiItem*/);
 
 #endif

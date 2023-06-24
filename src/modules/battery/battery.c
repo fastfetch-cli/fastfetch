@@ -7,14 +7,14 @@
 
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFinstance* instance, FFBatteryOptions* options, BatteryResult* result, uint8_t index)
+static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8_t index)
 {
-    if(instance->config.battery.moduleArgs.outputFormat.length == 0)
+    if(instance.config.battery.moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(instance, FF_BATTERY_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
         bool showStatus =
-            !(instance->config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
+            !(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
@@ -22,22 +22,22 @@ static void printBattery(FFinstance* instance, FFBatteryOptions* options, Batter
 
         if(result->capacity >= 0)
         {
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 if(result->capacity <= 20)
-                    ffAppendPercentBar(instance, &str, (uint8_t)result->capacity, 10, 10, 0);
+                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 10, 10, 0);
                 else if(result->capacity <= 50)
-                    ffAppendPercentBar(instance, &str, (uint8_t)result->capacity, 10, 0, 10);
+                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 10, 0, 10);
                 else
-                    ffAppendPercentBar(instance, &str, (uint8_t)result->capacity, 0, 10, 10);
+                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 0, 10, 10);
             }
 
-            if(instance->config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(instance, &str, (uint8_t) result->capacity, 51, 21, str.length > 0);
+                ffAppendPercentNum(&str, (uint8_t) result->capacity, 51, 21, str.length > 0);
             }
         }
 
@@ -61,7 +61,7 @@ static void printBattery(FFinstance* instance, FFBatteryOptions* options, Batter
     }
     else
     {
-        ffPrintFormat(instance, FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
@@ -72,23 +72,23 @@ static void printBattery(FFinstance* instance, FFBatteryOptions* options, Batter
     }
 }
 
-void ffPrintBattery(FFinstance* instance, FFBatteryOptions* options)
+void ffPrintBattery(FFBatteryOptions* options)
 {
     FFlist results;
     ffListInitA(&results, sizeof(BatteryResult), 0);
 
-    const char* error = ffDetectBattery(instance, options, &results);
+    const char* error = ffDetectBattery(options, &results);
 
     if (error)
     {
-        ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
     }
     else
     {
         for(uint8_t i = 0; i < (uint8_t) results.length; i++)
         {
             BatteryResult* result = ffListGet(&results, i);
-            printBattery(instance, options, result, i);
+            printBattery(options, result, i);
 
             ffStrbufDestroy(&result->manufacturer);
             ffStrbufDestroy(&result->modelName);
@@ -96,7 +96,7 @@ void ffPrintBattery(FFinstance* instance, FFBatteryOptions* options)
             ffStrbufDestroy(&result->status);
         }
         if(results.length == 0)
-            ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
+            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
     }
 
     ffListDestroy(&results);
@@ -146,7 +146,7 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
     #endif
 }
 
-void ffParseBatteryJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseBatteryJsonObject(yyjson_val* module)
 {
     FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
     ffInitBatteryOptions(&options);
@@ -178,9 +178,9 @@ void ffParseBatteryJsonObject(FFinstance* instance, yyjson_val* module)
                 continue;
             }
 
-            ffPrintError(instance, FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintBattery(instance, &options);
+    ffPrintBattery(&options);
 }

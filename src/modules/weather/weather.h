@@ -6,8 +6,8 @@
 
 void ffPrepareWeather(FFWeatherOptions* options);
 
-void ffPrintWeather(FFinstance* instance, FFWeatherOptions* options);
+void ffPrintWeather(FFWeatherOptions* options);
 void ffInitWeatherOptions(FFWeatherOptions* options);
 bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, const char* value);
 void ffDestroyWeatherOptions(FFWeatherOptions* options);
-void ffParseWeatherJsonObject(FFinstance* instance, yyjson_val* module);
+void ffParseWeatherJsonObject(yyjson_val* module);

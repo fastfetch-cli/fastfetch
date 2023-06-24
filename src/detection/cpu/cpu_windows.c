@@ -3,7 +3,7 @@
 #include "util/windows/registry.h"
 #include "util/mallocHelper.h"
 
-const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFinstance* instance, const FFCPUOptions* options, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     {
         DWORD length = 0;

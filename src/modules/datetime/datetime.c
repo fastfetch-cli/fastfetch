@@ -7,10 +7,10 @@
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
 
-void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const FFModuleArgs* moduleArgs)
+void ffPrintDateTimeFormat(const char* moduleName, const FFModuleArgs* moduleArgs)
 {
-    const FFDateTimeResult* result = ffDetectDateTime(instance);
-    ffPrintFormat(instance, moduleName, 0, moduleArgs, FF_DATETIME_NUM_FORMAT_ARGS, (FFformatarg[]) {
+    const FFDateTimeResult* result = ffDetectDateTime();
+    ffPrintFormat(moduleName, 0, moduleArgs, FF_DATETIME_NUM_FORMAT_ARGS, (FFformatarg[]) {
         {FF_FORMAT_ARG_TYPE_UINT16, &result->year}, // 1
         {FF_FORMAT_ARG_TYPE_UINT8, &result->yearShort}, // 2
         {FF_FORMAT_ARG_TYPE_UINT8, &result->month}, // 3
@@ -34,16 +34,16 @@ void ffPrintDateTimeFormat(FFinstance* instance, const char* moduleName, const F
     });
 }
 
-void ffPrintDateTime(FFinstance* instance, FFDateTimeOptions* options)
+void ffPrintDateTime(FFDateTimeOptions* options)
 {
     if(options->moduleArgs.outputFormat.length > 0)
     {
-        ffPrintDateTimeFormat(instance, FF_DATETIME_DISPLAY_NAME, &options->moduleArgs);
+        ffPrintDateTimeFormat(FF_DATETIME_DISPLAY_NAME, &options->moduleArgs);
         return;
     }
 
-    const FFDateTimeResult* datetime = ffDetectDateTime(instance);
-    ffPrintLogoAndKey(instance, FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+    const FFDateTimeResult* datetime = ffDetectDateTime();
+    ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
     //yyyy-MM-dd HH:mm:ss
     printf("%u-%s-%02u %s:%s:%s\n", datetime->year, datetime->monthPretty.chars, datetime->dayInMonth, datetime->hourPretty.chars, datetime->minutePretty.chars, datetime->secondPretty.chars);
@@ -70,7 +70,7 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDateTimeJsonObject(FFinstance* instance, yyjson_val* module)
+void ffParseDateTimeJsonObject(yyjson_val* module)
 {
     FFDateTimeOptions __attribute__((__cleanup__(ffDestroyDateTimeOptions))) options;
     ffInitDateTimeOptions(&options);
@@ -88,9 +88,9 @@ void ffParseDateTimeJsonObject(FFinstance* instance, yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(instance, FF_DATETIME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintDateTime(instance, &options);
+    ffPrintDateTime(&options);
 }

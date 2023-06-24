@@ -30,6 +30,6 @@ typedef struct FFDateTimeResult
     FFstrbuf secondPretty; //37
 } FFDateTimeResult;
 
-const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance);
+const FFDateTimeResult* ffDetectDateTime();
 
 #endif

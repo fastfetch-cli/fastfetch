@@ -131,7 +131,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
     }
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     BOOL enabled;
     if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled == TRUE)
@@ -153,7 +153,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     detectDisplays(ds);
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
-    const FFOSResult* os = ffDetectOS(instance);
+    const FFOSResult* os = ffDetectOS();
     if(
         ffStrbufEqualS(&os->version, "11") ||
         ffStrbufEqualS(&os->version, "10") ||
