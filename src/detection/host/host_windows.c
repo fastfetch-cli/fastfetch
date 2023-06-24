@@ -3,12 +3,6 @@
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufInit(&host->productName);
-    ffStrbufInit(&host->productFamily);
-    ffStrbufInit(&host->productVersion);
-    ffStrbufInit(&host->productSku);
-    ffStrbufInit(&host->sysVendor);
-
     FF_HKEY_AUTO_DESTROY hKey = NULL;
 
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL))

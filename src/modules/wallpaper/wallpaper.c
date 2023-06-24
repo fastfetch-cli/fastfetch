@@ -4,12 +4,23 @@
 #include "modules/wallpaper/wallpaper.h"
 #include "util/stringUtils.h"
 
-#define FF_WALLPAPER_NUM_FORMAT_ARGS 1
+#define FF_WALLPAPER_NUM_FORMAT_ARGS 2
 
 void ffPrintWallpaper(FFinstance* instance, FFWallpaperOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY wallpaper = ffStrbufCreate();
-    const char* error = ffDetectWallpaper(instance, &wallpaper);
+    FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
+    const char* error = ffDetectWallpaper(instance, &fullpath);
+
+    const uint32_t index = ffStrbufLastIndexC(&fullpath,
+        #ifndef _WIN32
+        '/'
+        #else
+        '\\'
+        #endif
+    ) + 1;
+    const char* filename = index >= fullpath.length
+        ? fullpath.chars
+        : fullpath.chars + index;
 
     if(error)
     {
@@ -20,12 +31,13 @@ void ffPrintWallpaper(FFinstance* instance, FFWallpaperOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(instance, FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        ffStrbufPutTo(&wallpaper, stdout);
+        puts(filename);
     }
     else
     {
         ffPrintFormat(instance, FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_WALLPAPER_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &wallpaper}
+            {FF_FORMAT_ARG_TYPE_STRING, filename},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &fullpath},
         });
     }
 }

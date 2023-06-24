@@ -328,6 +328,43 @@ static const FFlogo* getLogoArcoLinux()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoBSD()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("bsd")
+    FF_LOGO_LINES(
+"$1             ,        ,\n"
+"            /(        )`\n"
+"            \\ \\___   / |\n"
+"            /- _  `-/  '\n"
+"           ($2/\\/ \\ $1\\   /\\\n"
+"           $2/ /   | `    $1\\\n"
+"           $3O O   $2) $1/    |\n"
+"           $2`-^--'$1`<     '\n"
+"          (_.)  _  )   /\n"
+"           `.___/`    /\n"
+"             `-----' /\n"
+"$4<----.     __ / __   \\\n"
+"$4<----|====$1O)))$4==$1) \\) /$4====|\n"
+"<----'    $1`--' `.__,' \\\n"
+"             |        |\n"
+"              \\       /       /\\\n"
+"         $5______$1( (_  / \\______/\n"
+"       $5,'  ,-----'   |\n"
+"       `--{__________)\n"
+    )
+    FF_LOGO_COLORS(
+        "31",
+        "37",
+        "34",
+        "33",
+        "36"
+    )
+    FF_LOGO_COLOR_KEYS("31");
+    FF_LOGO_COLOR_TITLE("37");
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoBedrock()
 {
     FF_LOGO_INIT
@@ -899,6 +936,26 @@ static const FFlogo* getLogoFreeBSD()
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoFreeBSDSmall()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("freebsd_small")
+    FF_LOGO_LINES(
+        "$1/\\,-'''''-,/\\\n"
+        "\\_)       (_/\n"
+        "|           |\n"
+        "|           |\n"
+        " ;         ;\n"
+        "  '-_____-'"
+    )
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31") //red
+    FF_LOGO_COLOR_TITLE("31") //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoGaruda()
 {
     FF_LOGO_INIT
@@ -1041,6 +1098,35 @@ static const FFlogo* getLogoGentooSmall()
     )
     FF_LOGO_COLOR_KEYS("35"); //magenta
     FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
+#define FF_RAW_STRING(x) #x
+
+static const FFlogo* getLogoGhostBSD()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ghostbsd")
+    FF_LOGO_LINES(
+        "$1           ,gggggg.\n"
+        "        ,agg9*   .g)\n"
+        "      .agg* ._.,gg*\n"
+        "    ,gga*  (ggg*'\n"
+        "   ,ga*       ,ga*\n"
+        "  ,ga'     .ag*\n"
+        " ,ga'   .agga'\n"
+        " 9g' .agg'g*,a\n"
+        " 'gggg*',gga'\n"
+        "      .gg*'\n"
+        "    .gga*\n"
+        "  .gga*\n"
+        " (ga*"
+    )
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("31"); //red
     FF_LOGO_RETURN
 }
 
@@ -1458,26 +1544,28 @@ static const FFlogo* getLogoWindows11()
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11", "Windows Server 2022")
     FF_LOGO_LINES(
-        "$1\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
+        "$1/////////////////  $2/////////////////\n"
         "\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////\n"
-        "/////////////////  /////////////////"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////\n"
+        "$3/////////////////  $4/////////////////"
     )
     FF_LOGO_COLORS(
+        "34", //blue
+        "34", //blue
+        "34", //blue
         "34" //blue
     )
     FF_LOGO_COLOR_KEYS("33"); //yellow
@@ -1490,8 +1578,7 @@ static const FFlogo* getLogoWindows11Small()
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11_small", "Windows 11-small")
     FF_LOGO_LINES(
-        "$1\n"
-        "lllllllll  lllllllll\n"
+        "$1lllllllll  lllllllll\n"
         "lllllllll  lllllllll\n"
         "lllllllll  lllllllll\n"
         "lllllllll  lllllllll\n"
@@ -1514,27 +1601,30 @@ static const FFlogo* getLogoWindows8()
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019")
     FF_LOGO_LINES(
-        "$1                                ..,\n"
+        "                                $2..,\n"
         "                    ....,,:;+ccllll\n"
-        "      ...,,+:;  cllllllllllllllllll\n"
-        ",cclllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
+        "$1      ...,,+:;  $2cllllllllllllllllll\n"
+        "$1,cclllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
+        "$1llllllllllllll  $2lllllllllllllllllll\n"
         "\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "llllllllllllll  lllllllllllllllllll\n"
-        "`'ccllllllllll  lllllllllllllllllll\n"
-        "       `' \\*::  :ccllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3llllllllllllll  $4lllllllllllllllllll\n"
+        "$3`'ccllllllllll  $4lllllllllllllllllll\n"
+        "$3       `' \\*::  $4:ccllllllllllllllll\n"
         "                       ````''*::cll\n"
         "                                 ``"
     )
     FF_LOGO_COLORS(
+        "36", //cyan
+        "36", //cyan
+        "36", //cyan
         "36" //cyan
     )
     FF_LOGO_COLOR_KEYS("33"); //yellow
@@ -2564,6 +2654,7 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoArtix,
         getLogoArtixSmall,
         getLogoBedrock,
+        getLogoBSD,
         getLogoCachyOS,
         getLogoCachyOSSmall,
         getLogoCelOS,
@@ -2582,11 +2673,13 @@ GetLogoMethod* ffLogoBuiltinGetAll()
         getLogoFedoraSmall,
         getLogoFedoraOld,
         getLogoFreeBSD,
+        getLogoFreeBSDSmall,
         getLogoGaruda,
         getLogoGarudaDragon,
         getLogoGarudaSmall,
         getLogoGentoo,
         getLogoGentooSmall,
+        getLogoGhostBSD,
         getLogoKDENeon,
         getLogoKISSLinux,
         getLogoKubuntu,

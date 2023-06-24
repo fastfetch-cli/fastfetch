@@ -7,10 +7,10 @@
 
 typedef struct FFBiosResult
 {
-    FFstrbuf biosDate;
+    FFstrbuf date;
     FFstrbuf biosRelease;
-    FFstrbuf biosVendor;
-    FFstrbuf biosVersion;
+    FFstrbuf vendor;
+    FFstrbuf version;
 } FFBiosResult;
 
 const char* ffDetectBios(FFBiosResult* bios);

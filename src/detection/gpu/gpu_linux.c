@@ -122,7 +122,7 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     }
 }
 
-static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
+FF_MAYBE_UNUSED static void pciDetectTemperatur(FFGPUResult* gpu, struct pci_dev* device)
 {
     const FFTempsResult* tempsResult = ffDetectTemps();
 
@@ -171,7 +171,7 @@ static void detectType(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* dev
     gpu->type = FF_GPU_TYPE_INTEGRATED;
 }
 
-static void pciHandleDevice(const FFinstance* instance, const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
+static void pciHandleDevice(const FFinstance* instance, FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
 {
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
 
@@ -206,8 +206,11 @@ static void pciHandleDevice(const FFinstance* instance, const FFGPUOptions* opti
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
     gpu->temperature = FF_GPU_TEMP_UNSET;
+
+    #ifdef __linux__
     if(options->temp)
         pciDetectTemperatur(gpu, device);
+    #endif
 }
 
 jmp_buf pciInitJmpBuf;

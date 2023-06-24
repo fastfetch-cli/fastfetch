@@ -11,7 +11,8 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         ffStrbufStartsWithS(&disk->mountpoint, "/var") ||
         ffStrbufStartsWithS(&disk->mountpoint, "/tmp") ||
         ffStrbufStartsWithS(&disk->mountpoint, "/proc") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/zroot")
+        ffStrbufStartsWithS(&disk->mountpoint, "/zroot") ||
+        ffStrbufStartsWithS(&disk->mountpoint, "/compat/linux/")
     )
         disk->type = FF_DISK_TYPE_HIDDEN_BIT;
     else if((fs->f_flags & MNT_NOSUID) || !(fs->f_flags & MNT_LOCAL))

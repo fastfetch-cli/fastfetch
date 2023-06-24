@@ -8,11 +8,11 @@ const char* ffDetectBoard(FFBoardResult* board)
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\BIOS\") failed";
 
-    if(!ffRegReadStrbuf(hKey, L"BaseBoardProduct", &board->boardName, NULL))
+    if(!ffRegReadStrbuf(hKey, L"BaseBoardProduct", &board->name, NULL))
         return "ffRegReadStrbuf(hKey, L\"BaseBoardProduct\") failed";
 
-    ffRegReadStrbuf(hKey, L"BaseBoardManufacturer", &board->boardVendor, NULL);
-    ffRegReadStrbuf(hKey, L"BaseBoardVersion", &board->boardVersion, NULL);
+    ffRegReadStrbuf(hKey, L"BaseBoardManufacturer", &board->vendor, NULL);
+    ffRegReadStrbuf(hKey, L"BaseBoardVersion", &board->version, NULL);
 
     return NULL;
 }

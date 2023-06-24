@@ -230,7 +230,7 @@ static const char* printJsonConfig(FFinstance* instance)
         return "Invalid JSON config format. Root value must be an object";
 
     yyjson_val* modules = yyjson_obj_get(root, "modules");
-    if (!modules) return "Property 'modules' is not found";
+    if (!modules) return NULL;
     if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
 
     yyjson_val* item;

@@ -7,6 +7,7 @@ Changes:
 * Remove `--shell-version` and `--terminal-version`. They are always enabled
 * Remove `--*-error-format`
 * Remove `--display-detect-name`. Display name is always detected, and will be printed if multiple displays are detected
+* Remove `--set` and `--set-keyless`. Use JSON config with Custom module instead
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a phycial machine

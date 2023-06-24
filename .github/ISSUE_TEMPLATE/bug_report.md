@@ -8,9 +8,13 @@ assignees: ''
 ---
 
 # General description of bug:
-<!-- What was the result? What is the expection? Did it work before? -->
 
-[ ] The issue still occurs in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)
+* What happened:
+* What should happen:
+* Did it work in an older version:
+* Where did you get the binary: <!-- Github Release / Github Actions / Installed with a package manager (What package manager) / Built from source yourself -->
+
+- [ ] The issue still occurs in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)
 
 # Often helpful information:
 

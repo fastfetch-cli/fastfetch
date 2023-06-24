@@ -9,6 +9,11 @@
 void ffPrintHost(FFinstance* instance, FFHostOptions* options)
 {
     FFHostResult host;
+    ffStrbufInit(&host.productFamily);
+    ffStrbufInit(&host.productName);
+    ffStrbufInit(&host.productVersion);
+    ffStrbufInit(&host.productSku);
+    ffStrbufInit(&host.sysVendor);
     const char* error = ffDetectHost(&host);
 
     if(error)
