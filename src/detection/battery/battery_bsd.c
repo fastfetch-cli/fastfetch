@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/sysctl.h"
+#include "common/io/io.h"
 #include "battery.h"
 
 #include <dev/acpica/acpiio.h>
@@ -19,7 +20,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
     if(units == 0)
         return NULL;
 
-    int acpifd = open("/dev/acpi", O_RDONLY);
+    FF_AUTO_CLOSE_FD int acpifd = open("/dev/acpi", O_RDONLY);
     if(acpifd < 0)
         return "open(\"/dev/acpi\", O_RDONLY) failed";
 
@@ -72,6 +73,5 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             ffStrbufAppendS(&battery->technology, battio.bix.type);
         }
     }
-    close(acpifd);
     return NULL;
 }
