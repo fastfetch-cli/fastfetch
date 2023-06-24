@@ -7,14 +7,15 @@ assignees: ''
 
 ---
 
+<!-- We will try hard to solve the issue. However since platforms and hardwares vary greatly, it can be hard to find the root cause is. Providing following information may help us greatly. Thanks in advance -->
+
 # General description of bug:
 
 * What happened:
 * What should happen:
-* Did it work in an older version:
+* Did it work in an older version: <!-- if yes, which version -->
 * Where did you get the binary: <!-- Github Release / Github Actions / Installed with a package manager (What package manager) / Built from source yourself -->
-
-- [ ] The issue still occurs in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)
+* Does this issue still occurs in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)?
 
 # Often helpful information:
 
@@ -28,12 +29,12 @@ The content of the configuration file you use (if any)
 //paste here
 ```
 
-Output of `fastfetch --load-config devinfo-verbose --show-errors --multithreading false --disable-linewrap false`:
+Output of `env NO_CONFIG=1 fastfetch --load-config all --show-errors --stat --multithreading false --disable-linewrap false --hide-cursor false`:
 <!--
 Note that this output will contain you public IP. If it is not relevant for the issue, feel free to remove it before uploading.
 
 If you get the following error: `Error: couldn't find config: [...]`, copy the files in [presets](../../presets/) to `/usr/share/fastfetch/presets/` or `~/.local/share/fastfetch/presets/`.
-If this isn't possible (or too much work) for you, post the output of `fastfetch --show-errors --multithreading false --disable-linewrap false`. 
+If this isn't possible (or too much work) for you, post the output of `env NO_CONFIG=1 fastfetch --show-errors --stat --multithreading false --disable-linewrap false --hide-cursor false`. 
 -->
 
 ```
