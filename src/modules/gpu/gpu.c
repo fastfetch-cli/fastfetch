@@ -13,6 +13,14 @@
 
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
 {
+    const char* type;
+    switch (gpu->type)
+    {
+        case FF_GPU_TYPE_INTEGRATED: type = "Integrated"; break;
+        case FF_GPU_TYPE_DISCRETE: type = "Discrete"; break;
+        default: type = "Unknown"; break;
+    }
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
@@ -51,18 +59,13 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             ffStrbufAppendC(&output, ')');
         }
 
+        if (gpu->type != FF_GPU_TYPE_UNKNOWN)
+            ffStrbufAppendF(&output, " [%s]", type);
+
         ffStrbufPutTo(&output, stdout);
     }
     else
     {
-        const char* type;
-        if(gpu->type == FF_GPU_TYPE_INTEGRATED)
-            type = "Integrated";
-        else if(gpu->type == FF_GPU_TYPE_DISCRETE)
-            type = "Discrete";
-        else
-            type = "Unknown";
-
         ffPrintFormat(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
