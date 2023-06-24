@@ -1,6 +1,7 @@
 extern "C" {
 #include "chassis.h"
 #include "util/windows/registry.h"
+#include "util/smbiosHelper.h"
 }
 #include "util/windows/wmi.hpp"
 
@@ -39,10 +40,17 @@ FF_MAYBE_UNUSED static const char* detectWithWmi(FFChassisResult* result)
         if(len == 0)
             return "ChassisTypes contain no data failed";
 
-        ffStrbufAppendS(&result->type, ffChassisTypeToString((uint32_t) *arr));
+        for (uint32_t i = 0; i < len; ++i)
+        {
+            if (i > 0)
+                ffStrbufAppendS(&result->type, ", ");
+            ffStrbufAppendS(&result->type, ffChassisTypeToString((uint32_t) arr[i]));
+        }
 
         record.getString(L"Version", &result->version);
+        ffCleanUpSmbiosValue(&result->version);
         record.getString(L"Manufacturer", &result->vendor);
+        ffCleanUpSmbiosValue(&result->vendor);
         return NULL;
     }
     return "No WMI result returned";
@@ -51,6 +59,7 @@ FF_MAYBE_UNUSED static const char* detectWithWmi(FFChassisResult* result)
 extern "C"
 const char* ffDetectChassis(FFChassisResult* result)
 {
+    if (instance.config.allowSlowOperations)
+        return detectWithWmi(result);
     return detectWithRegistry(result);
-    // TODO: if (instance.config.allowSlowOperations) detectWithWmi(result);
 }
