@@ -10,7 +10,7 @@
     #include <libloaderapi.h>
     #define FF_DLOPEN_FLAGS 0
     FF_C_NODISCARD static inline void* dlopen(const char* path, int mode) { FF_UNUSED(mode); return LoadLibraryA(path); }
-    FF_C_NODISCARD static inline void* dlsym(void* handle, const char* symbol) { return GetProcAddress((HMODULE)handle, symbol); }
+    FF_C_NODISCARD static inline void* dlsym(void* handle, const char* symbol) { return (void*) GetProcAddress((HMODULE)handle, symbol); }
     static inline int dlclose(void* handle) { return !FreeLibrary((HMODULE)handle); }
 #else
     #include <dlfcn.h>
@@ -40,20 +40,20 @@ static inline void ffLibraryUnload(void** handle)
         return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \
-    symbolMapping = dlsym(library, #symbolName); \
+    symbolMapping = (__typeof__(&symbolName)) dlsym(library, #symbolName); \
     if(symbolMapping == NULL) \
         return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS2(library, symbolMapping, symbolName, alternateName, returnValue) \
     symbolMapping = dlsym(library, #symbolName); \
-    if(symbolMapping == NULL && !(symbolMapping = dlsym(library, #alternateName))) \
+    if(symbolMapping == NULL && !(symbolMapping = (__typeof__(&symbolName)) dlsym(library, #alternateName))) \
         return returnValue;
 
 #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, returnValue);
 
 #define FF_LIBRARY_LOAD_SYMBOL_LAZY(library, symbolName) \
-    __typeof__(&symbolName) ff ## symbolName = dlsym(library, #symbolName);
+    __typeof__(&symbolName) ff ## symbolName = (__typeof__(&symbolName)) dlsym(library, #symbolName);
 
 #define FF_LIBRARY_LOAD_SYMBOL_MESSAGE(library, symbolName) \
     __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, "dlsym " #symbolName " failed");

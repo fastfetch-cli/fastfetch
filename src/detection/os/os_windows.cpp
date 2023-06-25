@@ -1,5 +1,6 @@
 extern "C" {
 #include "os.h"
+#include "common/library.h"
 #include "util/windows/unicode.h"
 }
 #include "util/windows/wmi.hpp"
@@ -20,27 +21,18 @@ static const char* getOsNameByWmi(FFstrbuf* osName)
     return "No WMI result returned";
 }
 
-static inline void wrapFreeLibrary(HMODULE* module)
-{
-    if(*module)
-        FreeLibrary(*module);
-}
+PWSTR WINAPI BrandingFormatString(PCWSTR format);
 
 static const char* getOsNameByWinbrand(FFstrbuf* osName)
 {
     //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
-    if(HMODULE __attribute__((__cleanup__(wrapFreeLibrary))) hWinbrand = LoadLibraryW(L"winbrand.dll"))
-    {
-        auto BrandingFormatString = (PWSTR(WINAPI*)(PCWSTR))(void*)GetProcAddress(hWinbrand, "BrandingFormatString");
-        if(!BrandingFormatString)
-            return "GetProcAddress(BrandingFormatString) failed";
+    FF_LIBRARY_LOAD(winbrand, nullptr, "dlopen winbrand" FF_LIBRARY_EXTENSION " failed", "winbrand" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(winbrand, BrandingFormatString);
 
-        const wchar_t* rawName = BrandingFormatString(L"%WINDOWS_LONG%");
+    const wchar_t* rawName = ffBrandingFormatString(L"%WINDOWS_LONG%");
         ffStrbufSetWS(osName, rawName);
         GlobalFree((HGLOBAL)rawName);
         return NULL;
-    }
-    return "LoadLibraryW(winbrand.dll) failed";
 }
 
 extern "C"
