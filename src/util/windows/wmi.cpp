@@ -1,9 +1,6 @@
 #include "wmi.hpp"
 #include "util/windows/com.hpp"
-
-extern "C" {
-#include "util/windows/unicode.h"
-}
+#include "util/windows/unicode.hpp"
 
 #include <synchapi.h>
 #include <wchar.h>
@@ -129,21 +126,6 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace 
     }
 }
 
-static void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf)
-{
-    int len = (int)SysStringLen(bstr);
-    if(len <= 0)
-    {
-        ffStrbufClear(strbuf);
-        return;
-    }
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, bstr, len, nullptr, 0, nullptr, nullptr);
-    ffStrbufEnsureFree(strbuf, (uint32_t)size_needed);
-    WideCharToMultiByte(CP_UTF8, 0, bstr, len, strbuf->chars, size_needed, nullptr, nullptr);
-    strbuf->length = (uint32_t)size_needed;
-    strbuf->chars[size_needed] = '\0';
-}
-
 bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
 {
     bool result = true;
@@ -171,11 +153,11 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
                     else if(FAILED(pDateTime->GetFileTime(VARIANT_TRUE, &dateStr)))
                         result = false;
                     else
-                        ffBstrToStrbuf(dateStr, strbuf);
+                        ffStrbufSetNWS(strbuf, SysStringLen(dateStr), dateStr);
                 }
                 else
                 {
-                    ffBstrToStrbuf(vtProp.bstrVal, strbuf);
+                    ffStrbufSetWS(strbuf, SysStringLen(vtProp.bstrVal), vtProp.bstrVal);
                 }
                 break;
 

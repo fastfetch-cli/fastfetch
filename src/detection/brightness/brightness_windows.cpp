@@ -3,6 +3,7 @@ extern "C"
 #include "brightness.h"
 }
 #include "util/windows/wmi.hpp"
+#include "util/windows/unicode.hpp"
 
 extern "C"
 const char* ffDetectBrightness(FFlist* result)
@@ -13,15 +14,19 @@ const char* ffDetectBrightness(FFlist* result)
 
     while(FFWmiRecord record = query.next())
     {
-        FFBrightnessResult* display = (FFBrightnessResult*) ffListAdd(result);
-        ffStrbufInit(&display->name);
-        record.getString(L"InstanceName", &display->name);
-        ffStrbufSubstrAfterFirstC(&display->name, '\\');
-        ffStrbufSubstrBeforeFirstC(&display->name, '\\');
+        if(FFWmiVariant vtValue = record.get(L"CurrentBrightness"))
+        {
+            FFBrightnessResult* display = (FFBrightnessResult*) ffListAdd(result);
+            display->value = vtValue.get<uint8_t>();
 
-        uint64_t brightness;
-        record.getUnsigned(L"CurrentBrightness", &brightness);
-        display->value = (float) brightness;
+            ffStrbufInit(&display->name);
+            if (FFWmiVariant vtName = record.get(L"InstanceName"))
+            {
+                ffStrbufSetWSV(&display->name, vtName.get<std::wstring_view>());
+                ffStrbufSubstrAfterFirstC(&display->name, '\\');
+                ffStrbufSubstrBeforeFirstC(&display->name, '\\');
+            }
+        }
     }
     return NULL;
 }

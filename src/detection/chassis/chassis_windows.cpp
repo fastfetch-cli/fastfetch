@@ -3,6 +3,7 @@ extern "C" {
 #include "util/windows/registry.h"
 #include "util/smbiosHelper.h"
 }
+#include "util/windows/unicode.hpp"
 #include "util/windows/wmi.hpp"
 
 static const char* detectWithRegistry(FFChassisResult* result)
@@ -31,26 +32,33 @@ FF_MAYBE_UNUSED static const char* detectWithWmi(FFChassisResult* result)
 
     if (FFWmiRecord record = query.next())
     {
-        FFWmiVariant vtProp;
-        if(FAILED(record.obj->Get(L"ChassisTypes", 0, &vtProp, nullptr, nullptr)))
+        if (auto vtProp = record.get(L"ChassisTypes"))
+        {
+            auto [arr, len] = vtProp.get<std::pair<const int32_t*, uint32_t>>();
+            if(len == 0)
+                return "ChassisTypes contain no data failed";
+            for (uint32_t i = 0; i < len; ++i)
+            {
+                if (i > 0)
+                    ffStrbufAppendS(&result->type, ", ");
+                ffStrbufAppendS(&result->type, ffChassisTypeToString((uint32_t) arr[i]));
+            }
+        }
+        else
             return "Get ChassisTypes failed";
 
-        auto [arr, len] = (std::pair<const int32_t*, uint32_t>) vtProp;
-
-        if(len == 0)
-            return "ChassisTypes contain no data failed";
-
-        for (uint32_t i = 0; i < len; ++i)
+        if (auto vtProp = record.get(L"Version"))
         {
-            if (i > 0)
-                ffStrbufAppendS(&result->type, ", ");
-            ffStrbufAppendS(&result->type, ffChassisTypeToString((uint32_t) arr[i]));
+            ffStrbufSetWSV(&result->version, vtProp.get<std::wstring_view>());
+            ffCleanUpSmbiosValue(&result->version);
         }
 
-        record.getString(L"Version", &result->version);
-        ffCleanUpSmbiosValue(&result->version);
-        record.getString(L"Manufacturer", &result->vendor);
-        ffCleanUpSmbiosValue(&result->vendor);
+        if (auto vtProp = record.get(L"Manufacturer"))
+        {
+            ffStrbufSetWSV(&result->vendor, vtProp.get<std::wstring_view>());
+            ffCleanUpSmbiosValue(&result->vendor);
+        }
+
         return NULL;
     }
     return "No WMI result returned";
