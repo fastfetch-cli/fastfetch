@@ -68,7 +68,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
 
         int vram; // Supported on Intel
         if(!ffCfDictGetInt(properties, CFSTR("VRAM,totalMB"), &vram))
-            gpu->dedicated.total = (uint64_t) vram * 1024 * 1034;
+            gpu->dedicated.total = (uint64_t) vram * 1024 * 1024;
 
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount)) // For Apple
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
