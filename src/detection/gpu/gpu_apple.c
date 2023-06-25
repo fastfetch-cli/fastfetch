@@ -63,23 +63,18 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
 
-        ffStrbufInit(&gpu->vendor);
-        int vendorId;
-        if(!ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId))
-        {
-            const char* vendorStr = ffGetGPUVendorString((unsigned) vendorId);
-            ffStrbufAppendS(&gpu->vendor, vendorStr);
-            if (vendorStr == FF_GPU_VENDOR_NAME_APPLE || vendorStr == FF_GPU_VENDOR_NAME_INTEL)
-                gpu->type = FF_GPU_TYPE_INTEGRATED;
-            else if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA || vendorStr == FF_GPU_VENDOR_NAME_AMD)
-                gpu->type = FF_GPU_TYPE_DISCRETE;
-        }
-
-        ffStrbufInit(&gpu->driver);
+        ffStrbufInit(&gpu->driver); // Ok for both Apple and Intel
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);
 
+        int vram; // Supported on Intel
+        if(!ffCfDictGetInt(properties, CFSTR("VRAM,totalMB"), &vram))
+            gpu->dedicated.total = (uint64_t) vram * 1024 * 1034;
+
+        if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount)) // For Apple
+            gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+
         ffStrbufInit(&gpu->name);
-        //IOAccelerator returns model property for Apple Silicon, but not for Intel Iris GPUs.
+        //IOAccelerator returns model / vendor-id properties for Apple Silicon, but not for Intel Iris GPUs.
         //Still needs testing for AMD's
         if(ffCfDictGetString(properties, CFSTR("model"), &gpu->name))
         {
@@ -96,8 +91,17 @@ const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance)
             ffCfDictGetString(properties, CFSTR("model"), &gpu->name);
         }
 
-        if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount))
-            gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        ffStrbufInit(&gpu->vendor);
+        int vendorId;
+        if(!ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId))
+        {
+            const char* vendorStr = ffGetGPUVendorString((unsigned) vendorId);
+            ffStrbufAppendS(&gpu->vendor, vendorStr);
+            if (vendorStr == FF_GPU_VENDOR_NAME_APPLE || vendorStr == FF_GPU_VENDOR_NAME_INTEL)
+                gpu->type = FF_GPU_TYPE_INTEGRATED;
+            else if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA || vendorStr == FF_GPU_VENDOR_NAME_AMD)
+                gpu->type = FF_GPU_TYPE_DISCRETE;
+        }
 
         if(instance->config.gpuTemp)
             gpu->temperature = detectGpuTemp(&gpu->name);
