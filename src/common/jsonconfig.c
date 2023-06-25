@@ -314,7 +314,7 @@ const char* ffParseGeneralJsonConfig(void)
             ffStrbufSetS(&config->osFile, yyjson_get_str(val));
         #elif defined(_WIN32)
         else if (ffStrEqualsIgnCase(key, "wmiTimeout"))
-            config->wmiTimeout = yyjson_get_uint(val);
+            config->wmiTimeout = (int32_t) yyjson_get_int(val);
         #endif
 
         else
