@@ -220,6 +220,10 @@
                 "osFile": {
                     "type": "string",
                     "title": "Set the path to the file containing OS information. Linux only"
+                },
+                "wmiTimeout": {
+                    "type": "integer",
+                    "title": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only"
                 }
             },
             "additionalProperties": false

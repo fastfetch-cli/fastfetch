@@ -81,6 +81,25 @@ uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value)
     return num;
 }
 
+int32_t ffOptionParseInt32(const char* argumentKey, const char* value)
+{
+    if(value == NULL)
+    {
+        fprintf(stderr, "Error: usage: %s <num>\n", argumentKey);
+        exit(480);
+    }
+
+    char* end;
+    int32_t num = (int32_t) strtol(value, &end, 10);
+    if(*end != '\0')
+    {
+        fprintf(stderr, "Error: usage: %s <num>\n", argumentKey);
+        exit(479);
+    }
+
+    return num;
+}
+
 int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[])
 {
     if(requestedKey == NULL)

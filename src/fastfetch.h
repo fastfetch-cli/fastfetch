@@ -53,6 +53,8 @@ typedef struct FFconfig
     #if defined(__linux__) || defined(__FreeBSD__)
     FFstrbuf playerName;
     FFstrbuf osFile;
+    #elif defined(_WIN32)
+    int32_t wmiTimeout;
     #endif
 
     FFTitleOptions title;

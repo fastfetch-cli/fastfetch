@@ -18,6 +18,7 @@ Features:
 * Support `--*-key-color` option to change the key color of specified module
 * Support `--colors-symbol` and `--colors-padding-left`
 * Add LM (Login Manager) module
+* Add `--wmi-timeout` option (Windows)
 
 # 1.11.3
 

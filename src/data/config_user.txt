@@ -58,6 +58,12 @@
 # Default is true.
 #--hide-cursor true
 
+# WMI timeout option:
+# Sets the timeout (ms) for WMI queries. Windows only
+# Must be an integer.
+# Default is 5000
+#--wmi-timeout 5000
+
 # Logo option:
 # Sets the logo to use.
 # List available logos with "fastfetch --list-logos".

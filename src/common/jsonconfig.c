@@ -312,6 +312,9 @@ const char* ffParseGeneralJsonConfig(void)
             ffStrbufSetS(&config->playerName, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "osFile"))
             ffStrbufSetS(&config->osFile, yyjson_get_str(val));
+        #elif defined(_WIN32)
+        else if (ffStrEqualsIgnCase(key, "wmiTimeout"))
+            config->wmiTimeout = yyjson_get_uint(val);
         #endif
 
         else

@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 
 extern "C" {
-    #include "util/FFstrbuf.h"
+    #include "fastfetch.h"
 }
 
 #include <initguid.h>
@@ -19,10 +19,6 @@ enum class FFWmiNamespace {
     CIMV2,
     WMI,
     LAST,
-};
-
-enum {
-    FF_WMI_QUERY_TIMEOUT = 5000
 };
 
 struct FFWmiVariant: VARIANT {
@@ -160,7 +156,7 @@ struct FFWmiRecord
         if(!pEnumerator) return;
 
         ULONG ret;
-        bool ok = SUCCEEDED(pEnumerator->Next(FF_WMI_QUERY_TIMEOUT, 1, &obj, &ret)) && ret;
+        bool ok = SUCCEEDED(pEnumerator->Next(instance.config.wmiTimeout, 1, &obj, &ret)) && ret;
         if(!ok) obj = nullptr;
     }
     FFWmiRecord(const FFWmiRecord&) = delete;

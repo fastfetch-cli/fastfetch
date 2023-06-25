@@ -157,7 +157,7 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
                 }
                 else
                 {
-                    ffStrbufSetWS(strbuf, SysStringLen(vtProp.bstrVal), vtProp.bstrVal);
+                    ffStrbufSetNWS(strbuf, SysStringLen(vtProp.bstrVal), vtProp.bstrVal);
                 }
                 break;
 
