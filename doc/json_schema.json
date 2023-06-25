@@ -27,162 +27,174 @@
             "format": "uri"
         },
         "logo": {
-            "title": "Fastfetch logo configurations",
-            "type": "object",
-            "properties": {
-                "type": {
-                    "title": "Set the type of the logo given",
-                    "enum": [
-                        "auto",
-                        "builtin",
-                        "file",
-                        "file-raw",
-                        "data",
-                        "data-raw",
-                        "sixel",
-                        "kitty",
-                        "iterm",
-                        "chafa",
-                        "raw",
-                        "none"
-                    ],
-                    "default": "auto"
+            "oneOf": [
+                {
+                    "title": "Disable logo",
+                    "type": "null"
                 },
-                "source": {
-                    "type": "string",
-                    "title": "Set the source file of the logo"
+                {
+                    "title": "Set the source file of the logo",
+                    "type": "string"
                 },
-                "color": {
+                {
+                    "title": "Fastfetch logo configurations",
                     "type": "object",
-                    "title": "Overwrite a color in the logo",
                     "properties": {
-                        "1": {
-                            "title": "Color 1",
-                            "$ref": "#/$defs/colors"
+                        "type": {
+                            "title": "Set the type of the logo given",
+                            "enum": [
+                                "auto",
+                                "builtin",
+                                "file",
+                                "file-raw",
+                                "data",
+                                "data-raw",
+                                "sixel",
+                                "kitty",
+                                "iterm",
+                                "chafa",
+                                "raw",
+                                "none"
+                            ],
+                            "default": "auto"
                         },
-                        "2": {
-                            "title": "Color 2",
-                            "$ref": "#/$defs/colors"
+                        "source": {
+                            "type": "string",
+                            "title": "Set the source file of the logo"
                         },
-                        "3": {
-                            "title": "Color 3",
-                            "$ref": "#/$defs/colors"
+                        "color": {
+                            "type": "object",
+                            "title": "Overwrite a color in the logo",
+                            "properties": {
+                                "1": {
+                                    "title": "Color 1",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "2": {
+                                    "title": "Color 2",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "3": {
+                                    "title": "Color 3",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "4": {
+                                    "title": "Color 4",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "5": {
+                                    "title": "Color 5",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "6": {
+                                    "title": "Color 6",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "7": {
+                                    "title": "Color 7",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "8": {
+                                    "title": "Color 8",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "9": {
+                                    "title": "Color 9",
+                                    "$ref": "#/$defs/colors"
+                                }
+                            }
                         },
-                        "4": {
-                            "title": "Color 4",
-                            "$ref": "#/$defs/colors"
-                        },
-                        "5": {
-                            "title": "Color 5",
-                            "$ref": "#/$defs/colors"
-                        },
-                        "6": {
-                            "title": "Color 6",
-                            "$ref": "#/$defs/colors"
-                        },
-                        "7": {
-                            "title": "Color 7",
-                            "$ref": "#/$defs/colors"
-                        },
-                        "8": {
-                            "title": "Color 8",
-                            "$ref": "#/$defs/colors"
-                        },
-                        "9": {
-                            "title": "Color 9",
-                            "$ref": "#/$defs/colors"
-                        }
-                    }
-                },
-                "width": {
-                    "type": "integer",
-                    "title": "Set the width of the logo (in characters). Required for iTerm image protocol",
-                    "minimum": 1
-                },
-                "height": {
-                    "type": "integer",
-                    "title": "Set the height of the logo (in characters). Required for iTerm image protocol",
-                    "minimum": 1
-                },
-                "padding": {
-                    "type": "object",
-                    "title": "Set the padding of the logo",
-                    "properties": {
-                        "top": {
+                        "width": {
                             "type": "integer",
-                            "title": "Set the top padding of the logo",
-                            "minimum": 0
+                            "title": "Set the width of the logo (in characters). Required for iTerm image protocol",
+                            "minimum": 1
                         },
-                        "left": {
+                        "height": {
                             "type": "integer",
-                            "title": "Set the left padding of the logo",
-                            "minimum": 0
+                            "title": "Set the height of the logo (in characters). Required for iTerm image protocol",
+                            "minimum": 1
                         },
-                        "right": {
-                            "type": "integer",
-                            "title": "Set the right padding of the logo",
-                            "minimum": 0
-                        }
-                    }
-                },
-                "printRemaining": {
-                    "type": "boolean",
-                    "title": "Whether to print the remaining logo, if it has more lines than modules to display",
-                    "default": false
-                },
-                "preserveAspectRadio": {
-                    "type": "boolean",
-                    "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
-                    "default": false
-                },
-                "chafa": {
-                    "type": "object",
-                    "title": "Chafa configuration. See chafa document for details",
-                    "properties": {
-                        "fgOnly": {
+                        "padding": {
+                            "type": "object",
+                            "title": "Set the padding of the logo",
+                            "properties": {
+                                "top": {
+                                    "type": "integer",
+                                    "title": "Set the top padding of the logo",
+                                    "minimum": 0
+                                },
+                                "left": {
+                                    "type": "integer",
+                                    "title": "Set the left padding of the logo",
+                                    "minimum": 0
+                                },
+                                "right": {
+                                    "type": "integer",
+                                    "title": "Set the right padding of the logo",
+                                    "minimum": 0
+                                }
+                            }
+                        },
+                        "printRemaining": {
                             "type": "boolean",
-                            "title": "Produce character-cell output using foreground colors only",
+                            "title": "Whether to print the remaining logo, if it has more lines than modules to display",
                             "default": false
                         },
-                        "symbols": {
-                            "type": "string",
-                            "title": "Specify character symbols to employ in final output"
+                        "preserveAspectRadio": {
+                            "type": "boolean",
+                            "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
+                            "default": false
                         },
-                        "canvasMode": {
-                            "type": "string",
-                            "title": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
-                            "enum": [
-                                "TRUECOLOR",
-                                "INDEXED_256",
-                                "INDEXED_240",
-                                "INDEXED_16",
-                                "FGBG_BGFG",
-                                "FGBG",
-                                "INDEXED_8",
-                                "INDEXED_16_8"
-                            ]
-                        },
-                        "colorSpace": {
-                            "type": "string",
-                            "title": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
-                            "enum": [
-                                "RGB",
-                                "DIN99D"
-                            ]
-                        },
-                        "ditherMode": {
-                            "type": "string",
-                            "title": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
-                            "enum": [
-                                "NONE",
-                                "ORDERED",
-                                "DIFFUSION"
-                            ]
+                        "chafa": {
+                            "type": "object",
+                            "title": "Chafa configuration. See chafa document for details",
+                            "properties": {
+                                "fgOnly": {
+                                    "type": "boolean",
+                                    "title": "Produce character-cell output using foreground colors only",
+                                    "default": false
+                                },
+                                "symbols": {
+                                    "type": "string",
+                                    "title": "Specify character symbols to employ in final output"
+                                },
+                                "canvasMode": {
+                                    "type": "string",
+                                    "title": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
+                                    "enum": [
+                                        "TRUECOLOR",
+                                        "INDEXED_256",
+                                        "INDEXED_240",
+                                        "INDEXED_16",
+                                        "FGBG_BGFG",
+                                        "FGBG",
+                                        "INDEXED_8",
+                                        "INDEXED_16_8"
+                                    ]
+                                },
+                                "colorSpace": {
+                                    "type": "string",
+                                    "title": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
+                                    "enum": [
+                                        "RGB",
+                                        "DIN99D"
+                                    ]
+                                },
+                                "ditherMode": {
+                                    "type": "string",
+                                    "title": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
+                                    "enum": [
+                                        "NONE",
+                                        "ORDERED",
+                                        "DIFFUSION"
+                                    ]
+                                }
+                            }
                         }
-                    }
+                    },
+                    "additionalProperties": false
                 }
-            },
-            "additionalProperties": false
+            ]
         },
         "general": {
             "title": "Fastfetch general configurations",

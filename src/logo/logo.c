@@ -410,6 +410,12 @@ void ffLogoPrint(void)
 
     const FFLogoOptions* options = &instance.config.logo;
 
+    if (options->type == FF_LOGO_TYPE_NONE)
+    {
+        logoPrintNone();
+        return;
+    }
+
     //If the source is not set, we can directly print the detected logo.
     if(options->source.length == 0)
     {

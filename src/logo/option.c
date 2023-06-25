@@ -201,6 +201,22 @@ const char* ffParseLogoJsonConfig(void)
 
     yyjson_val* object = yyjson_obj_get(root, "logo");
     if (!object) return NULL;
+    if (yyjson_is_null(object))
+    {
+        options->type = FF_LOGO_TYPE_NONE;
+        options->paddingTop = 0;
+        options->paddingRight = 0;
+        options->paddingLeft = 0;
+        return NULL;
+    }
+
+    if (yyjson_is_str(object))
+    {
+        const char* value = yyjson_get_str(object);
+        ffStrbufSetS(&options->source, value);
+        return NULL;
+    }
+
     if (!yyjson_is_obj(object)) return "Property 'logo' must be an object";
 
     yyjson_val *key_, *val;
