@@ -301,7 +301,10 @@ const char* ffParseGeneralJsonConfig(void)
         else if (ffStrEqualsIgnCase(key, "thread") || ffStrEqualsIgnCase(key, "multithreading"))
             config->multithreading = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "stat"))
+        {
             config->stat = yyjson_get_bool(val);
+            config->showErrors= config->stat;
+        }
         else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
             config->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "pipe"))
