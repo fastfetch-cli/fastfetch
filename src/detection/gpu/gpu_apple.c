@@ -5,7 +5,6 @@
 #include "util/apple/cf_helpers.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
-#include <wchar.h>
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
