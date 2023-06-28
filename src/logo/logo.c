@@ -467,11 +467,9 @@ void ffLogoPrintLine(void)
 
 void ffLogoPrintRemaining(void)
 {
-    while(instance.state.keysHeight <= instance.state.logoHeight)
-    {
-        ffLogoPrintLine();
-        putchar('\n');
-    }
+    if (instance.state.keysHeight <= instance.state.logoHeight)
+        ffPrintCharTimes('\n', instance.state.logoHeight - instance.state.keysHeight + 1);
+    instance.state.keysHeight = instance.state.logoHeight + 1;
 }
 
 void ffLogoBuiltinPrint(void)
