@@ -23,9 +23,7 @@ const char* ffDetectBios(FFBiosResult* bios)
         ffCfDictGetString(properties, CFSTR("vendor"), &bios->vendor);
         ffCfDictGetString(properties, CFSTR("version"), &bios->version);
         ffCfDictGetString(properties, CFSTR("release-date"), &bios->date);
-        if(!ffStrbufContainC(&bios->date, '-'))
-            ffStrbufAppendS(&bios->release, "Efi-");
-        ffStrbufAppend(&bios->release, &bios->version);
+        ffStrbufAppendS(&bios->release, "Efi");
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
@@ -44,7 +42,6 @@ const char* ffDetectBios(FFBiosResult* bios)
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
-        return NULL;
     }
 
     if((registryEntry = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen")))
@@ -52,9 +49,17 @@ const char* ffDetectBios(FFBiosResult* bios)
         CFMutableDictionaryRef properties;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
-            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->release);
-            ffStrbufAppend(&bios->version, &bios->release);
-            ffStrbufSubstrAfterFirstC(&bios->version, '-');
+            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->version);
+            uint32_t index = ffStrbufFirstIndexC(&bios->version, '-');
+            if (index != bios->version.length)
+            {
+                ffStrbufAppendNS(&bios->release, index, bios->version.chars);
+                ffStrbufRemoveSubstr(&bios->version, 0, index + 1);
+            }
+            else
+            {
+                ffStrbufAppendS(&bios->release, "iBoot");
+            }
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
