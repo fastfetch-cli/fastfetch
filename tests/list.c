@@ -87,6 +87,12 @@ int main(void)
     n = 999;
     VERIFY(ffListFirstIndexComp(&list, &n, numEqualsAdapter) == list.length);
 
+    // ffListContains
+    n = 10;
+    VERIFY(ffListContains(&list, &n, numEqualsAdapter));
+    n = 999;
+    VERIFY(!ffListContains(&list, &n, numEqualsAdapter));
+
     //shift
     VERIFY(ffListShift(&list, &n));
     VERIFY(n == 1);

@@ -53,6 +53,11 @@ static inline void* ffListGet(const FFlist* list, uint32_t index)
     return list->data + (index * list->elementSize);
 }
 
+static inline bool ffListContains(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
+{
+    return ffListFirstIndexComp(list, compElement, compFunc) != list->length;
+}
+
 static inline void ffListSort(FFlist* list, int(*compar)(const void*, const void*))
 {
     qsort(list->data, list->length, list->elementSize, compar);

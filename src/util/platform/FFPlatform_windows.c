@@ -1,9 +1,11 @@
 #include "FFPlatform_private.h"
+#include "common/io/io.h"
 #include "util/stringUtils.h"
 #include "util/windows/unicode.h"
 
 #include <Windows.h>
 #include <shlobj.h>
+
 static void getHomeDir(FFPlatform* platform)
 {
     PWSTR pPath;
@@ -38,11 +40,11 @@ static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
     PWSTR pPath;
     if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
     {
-        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
-        ffStrbufInitWS(buffer, pPath);
-        ffStrbufReplaceAllC(buffer, '\\', '/');
-        ffStrbufEnsureEndsWithC(buffer, '/');
-        FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
+        ffStrbufReplaceAllC(&buffer, '\\', '/');
+        ffStrbufEnsureEndsWithC(&buffer, '/');
+        if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+            ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
     }
     CoTaskMemFree(pPath);
 }
@@ -53,14 +55,18 @@ static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* 
     if(!ffStrSet(value))
         return;
 
-    FFstrbuf* buffer = ffListAdd(dirs);
-    ffStrbufInitA(buffer, 64);
-    ffStrbufAppendS(buffer, value);
-    ffStrbufReplaceAllC(buffer, '\\', '/');
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    ffStrbufAppendS(buffer, suffix);
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateA(64);
+    ffStrbufAppendS(&buffer, value);
+    ffStrbufReplaceAllC(&buffer, '\\', '/');
+    ffStrbufEnsureEndsWithC(&buffer, '/');
+    if (suffix)
+    {
+        ffStrbufAppendS(&buffer, suffix);
+        ffStrbufEnsureEndsWithC(&buffer, '/');
+    }
+
+    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
 }
 
 static void getConfigDirs(FFPlatform* platform)
@@ -69,11 +75,12 @@ static void getConfigDirs(FFPlatform* platform)
     {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->configDirs, "HOME", ".config/");
-        platformPathAddEnvSuffix(&platform->configDirs, "HOME", "");
+        platformPathAddEnvSuffix(&platform->configDirs, "HOME", NULL);
         platformPathAddEnvSuffix(&platform->configDirs, "MINGW_PREFIX", "etc");
     }
 
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
+    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_ProgramData);
     platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_RoamingAppData);
     platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_LocalAppData);
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
@@ -85,10 +92,11 @@ static void getDataDirs(FFPlatform* platform)
     {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->dataDirs, "HOME", ".local/share/");
-        platformPathAddEnvSuffix(&platform->dataDirs, "HOME", "");
+        platformPathAddEnvSuffix(&platform->dataDirs, "HOME", NULL);
         platformPathAddEnvSuffix(&platform->dataDirs, "MINGW_PREFIX", "share");
     }
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
+    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_ProgramData);
     platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_RoamingAppData);
     platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_LocalAppData);
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
