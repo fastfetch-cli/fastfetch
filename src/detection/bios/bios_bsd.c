@@ -7,8 +7,8 @@ const char* ffDetectBios(FFBiosResult* result)
 {
     ffSettingsGetFreeBSDKenv("smbios.bios.reldate", &result->date);
     ffCleanUpSmbiosValue(&result->date);
-    ffSettingsGetFreeBSDKenv("smbios.bios.revision", &result->biosRelease);
-    ffCleanUpSmbiosValue(&result->biosRelease);
+    ffSettingsGetFreeBSDKenv("smbios.bios.revision", &result->release);
+    ffCleanUpSmbiosValue(&result->release);
     ffSettingsGetFreeBSDKenv("smbios.bios.vendor", &result->vendor);
     ffCleanUpSmbiosValue(&result->vendor);
     ffSettingsGetFreeBSDKenv("smbios.bios.version", &result->version);

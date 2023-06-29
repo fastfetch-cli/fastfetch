@@ -18,7 +18,7 @@ const char* ffDetectBios(FFBiosResult* bios)
         ffRegReadUint(hKey, L"BiosMajorRelease", &major, NULL) &&
         ffRegReadUint(hKey, L"BiosMinorRelease", &minor, NULL)
     )
-        ffStrbufAppendF(&bios->biosRelease, "%u.%u", (unsigned)major, (unsigned)minor);
+        ffStrbufAppendF(&bios->release, "%u.%u", (unsigned)major, (unsigned)minor);
 
     return NULL;
 }

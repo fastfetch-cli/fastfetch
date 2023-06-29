@@ -10,7 +10,7 @@ void ffPrintBios(FFBiosOptions* options)
 {
     FFBiosResult bios;
     ffStrbufInit(&bios.date);
-    ffStrbufInit(&bios.biosRelease);
+    ffStrbufInit(&bios.release);
     ffStrbufInit(&bios.vendor);
     ffStrbufInit(&bios.version);
 
@@ -32,15 +32,15 @@ void ffPrintBios(FFBiosOptions* options)
     {
         ffPrintLogoAndKey(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&bios.version, stdout);
-        if (bios.biosRelease.length)
-            printf(" (%s)", bios.biosRelease.chars);
+        if (bios.release.length)
+            printf(" (%s)", bios.release.chars);
         putchar('\n');
     }
     else
     {
         ffPrintFormat(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.date},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.biosRelease},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.release},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.version},
         });
@@ -48,7 +48,7 @@ void ffPrintBios(FFBiosOptions* options)
 
 exit:
     ffStrbufDestroy(&bios.date);
-    ffStrbufDestroy(&bios.biosRelease);
+    ffStrbufDestroy(&bios.release);
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
 }

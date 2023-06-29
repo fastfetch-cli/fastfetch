@@ -24,8 +24,8 @@ const char* ffDetectBios(FFBiosResult* bios)
         ffCfDictGetString(properties, CFSTR("version"), &bios->version);
         ffCfDictGetString(properties, CFSTR("release-date"), &bios->date);
         if(!ffStrbufContainC(&bios->date, '-'))
-            ffStrbufAppendS(&bios->biosRelease, "Efi-");
-        ffStrbufAppend(&bios->biosRelease, &bios->version);
+            ffStrbufAppendS(&bios->release, "Efi-");
+        ffStrbufAppend(&bios->release, &bios->version);
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
@@ -52,8 +52,8 @@ const char* ffDetectBios(FFBiosResult* bios)
         CFMutableDictionaryRef properties;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
-            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->biosRelease);
-            ffStrbufAppend(&bios->version, &bios->biosRelease);
+            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->release);
+            ffStrbufAppend(&bios->version, &bios->release);
             ffStrbufSubstrAfterFirstC(&bios->version, '-');
             CFRelease(properties);
         }

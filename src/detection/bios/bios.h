@@ -8,7 +8,7 @@
 typedef struct FFBiosResult
 {
     FFstrbuf date;
-    FFstrbuf biosRelease;
+    FFstrbuf release;
     FFstrbuf vendor;
     FFstrbuf version;
 } FFBiosResult;
