@@ -98,7 +98,13 @@ void ffPlatformPathAddEnv(FFlist* dirs, const char* env)
     uint32_t startIndex = 0;
     while (startIndex < value.length)
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&value, startIndex, ':');
+        #ifdef _WIN32
+        const char separator = ';';
+        #else
+        const char separator = ':';
+        #endif
+
+        uint32_t colonIndex = ffStrbufNextIndexC(&value, startIndex, separator);
         value.chars[colonIndex] = '\0';
 
         if(!ffStrSet(value.chars + startIndex))
