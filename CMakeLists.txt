@@ -750,7 +750,6 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
-        PRIVATE "powrprof"
     )
 endif()
 
