@@ -284,7 +284,7 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 {
     if(!ffStrSet(name))
         return;
-    else if(strcasestr(name, "plasma") != NULL)
+    else if(strcasestr(name, "plasma") != NULL || strcasecmp(name, "KDE") == 0)
         getKDE(result);
     else if(
         strcasecmp(name, "polkit-gnome") != 0 &&
