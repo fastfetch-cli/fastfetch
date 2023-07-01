@@ -6,17 +6,17 @@
 
 const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
 {
-    DISPLAY_DEVICEW displayDevice = {.cb = sizeof(displayDevice) };
+    DISPLAY_DEVICEW displayDevice = { .cb = sizeof(displayDevice) };
     wchar_t regKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Control\\Video\\{";
-    const uint32_t regKeyPrefixLength = strlen("SYSTEM\\CurrentControlSet\\Control\\Video\\{");
-    const uint32_t deviceKeyPrefixLength = strlen("\\Registry\\Machine\\System\\CurrentControlSet\\Control\\Video\\{");
+    const uint32_t regKeyPrefixLength = (uint32_t) wcslen(regKey);
+    const uint32_t deviceKeyPrefixLength = strlen("\\Registry\\Machine\\") + regKeyPrefixLength;
 
     for (DWORD i = 0; EnumDisplayDevicesW(NULL, i, &displayDevice, 0); ++i)
     {
         if (displayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) continue;
 
         const uint32_t deviceKeyLength = (uint32_t) wcslen(displayDevice.DeviceKey);
-        if (wmemcmp(&displayDevice.DeviceKey[deviceKeyLength - 4], L"0000", 4) != 0) continue;
+        if (deviceKeyLength != 100 || wmemcmp(&displayDevice.DeviceKey[deviceKeyLength - 4], L"0000", 4) != 0) continue;
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInit(&gpu->vendor);
@@ -27,7 +27,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* inst
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
-        if (deviceKeyLength == 100 && displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
+        if (displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
         {
             wmemcpy(regKey + regKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, 100 - regKeyPrefixLength + 1);
             FF_HKEY_AUTO_DESTROY hKey = NULL;
