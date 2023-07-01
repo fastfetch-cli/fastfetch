@@ -4,6 +4,11 @@
 
 #include <inttypes.h>
 
+static int isGpuNameEqual(const FFGPUResult* gpu, const FFstrbuf* name)
+{
+    return ffStrbufEqual(&gpu->name, name);
+}
+
 const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
 {
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(displayDevice) };
@@ -16,7 +21,16 @@ const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* inst
         if (displayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) continue;
 
         const uint32_t deviceKeyLength = (uint32_t) wcslen(displayDevice.DeviceKey);
-        if (deviceKeyLength != 100 || wmemcmp(&displayDevice.DeviceKey[deviceKeyLength - 4], L"0000", 4) != 0) continue;
+        if (__builtin_expect(deviceKeyLength == 100, true))
+        {
+            if (wmemcmp(&displayDevice.DeviceKey[deviceKeyLength - 4], L"0000", 4) != 0) continue;
+        }
+        else
+        {
+            // DeviceKey can be empty. See #484
+            FF_STRBUF_AUTO_DESTROY gpuName = ffStrbufCreateWS(displayDevice.DeviceString);
+            if (ffListFirstIndexComp(gpus, &gpuName, (void*) isGpuNameEqual) != gpus->length) continue;
+        }
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInit(&gpu->vendor);
@@ -27,7 +41,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* inst
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
-        if (displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
+        if (deviceKeyLength == 100 && displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
         {
             wmemcpy(regKey + regKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, 100 - regKeyPrefixLength + 1);
             FF_HKEY_AUTO_DESTROY hKey = NULL;
