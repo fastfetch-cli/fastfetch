@@ -79,7 +79,6 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 
 void ffPrintGPU(FFGPUOptions* options)
 {
-    fputs("ffPrintGPU start\n", stderr);
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);
     if (error)
@@ -87,7 +86,6 @@ void ffPrintGPU(FFGPUOptions* options)
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
-    fputs("ffPrintGPU 1\n", stderr);
 
     FF_LIST_AUTO_DESTROY selectedGPUs;
     ffListInitA(&selectedGPUs, sizeof(const FFGPUResult*), gpus.length);
@@ -102,15 +100,12 @@ void ffPrintGPU(FFGPUOptions* options)
 
         * (const FFGPUResult**) ffListAdd(&selectedGPUs) = gpu;
     }
-    fputs("ffPrintGPU 2\n", stderr);
 
     for(uint32_t i = 0; i < selectedGPUs.length; i++)
         printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), * (const FFGPUResult**) ffListGet(&selectedGPUs, i));
 
-    fputs("ffPrintGPU 3\n", stderr);
     if(selectedGPUs.length == 0)
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "No GPUs found");
-    fputs("ffPrintGPU 4\n", stderr);
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
     {
