@@ -32,15 +32,20 @@ const char* ffGetGPUVendorString(unsigned vendorId)
 
 const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
 {
+    fputs("ffDetectGPU start\n", stderr);
     if (!options->forceVulkan)
     {
         const char* error = ffDetectGPUImpl(options, result);
+        fputs("ffDetectGPU end 1\n", stderr);
         if (!error) return NULL;
     }
+    fputs("ffDetectVulkan start\n", stderr);
     FFVulkanResult* vulkan = ffDetectVulkan();
+    fputs("ffDetectVulkan end\n", stderr);
     if (vulkan->error) return "GPU detection failed";
     ffListDestroy(result);
     ffListInitMove(result, &vulkan->gpus);
+    fputs("ffDetectGPU end 2\n", stderr);
 
     return NULL;
 }
