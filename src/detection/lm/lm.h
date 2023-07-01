@@ -9,8 +9,7 @@ typedef struct FFLMResult
 {
     FFstrbuf service;
     FFstrbuf type;
-    // bool isDisplay;
-    // bool remote;
+    FFstrbuf version;
 } FFLMResult;
 
 const char* ffDetectLM(FFLMResult* result);

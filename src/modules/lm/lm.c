@@ -4,13 +4,14 @@
 #include "modules/lm/lm.h"
 #include "util/stringUtils.h"
 
-#define FF_LM_NUM_FORMAT_ARGS 2
+#define FF_LM_NUM_FORMAT_ARGS 3
 
 void ffPrintLM(FFLMOptions* options)
 {
     FFLMResult result;
     ffStrbufInit(&result.service);
     ffStrbufInit(&result.type);
+    ffStrbufInit(&result.version);
     const char* error = ffDetectLM(&result);
 
     if(error)
@@ -29,6 +30,8 @@ void ffPrintLM(FFLMOptions* options)
     {
         ffPrintLogoAndKey(FF_LM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
         ffStrbufWriteTo(&result.service, stdout);
+        if(result.version.length)
+            printf(" %s", result.version.chars);
         if(result.type.length)
             printf(" (%s)", result.type.chars);
         putchar('\n');
@@ -38,10 +41,12 @@ void ffPrintLM(FFLMOptions* options)
         ffPrintFormat(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_LM_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.service},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
         });
     }
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
+    ffStrbufDestroy(&result.version);
 }
 
 void ffInitLMOptions(FFLMOptions* options)
