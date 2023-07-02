@@ -1,9 +1,32 @@
-# 1.11.4
+# 1.12.0
+
+This release backports some changes from dev branch, and fixes 2 crashing issues
 
 Features:
 * Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
+* Set `--pipe true` automatically if stdout is not a tty
+* Detect new macs released on WWDC 2023 (macOS, Host)
+* Count cached memory as free memory (FreeBSD, Memory)
+* Support sound detection (FreeBSD, Sound)
+
+Bugfixes:
+* Fix DE detection on Windows 8.1 (Windows, DE)
+* Fix `--logo-padding-left` doesn't work when `--logo-padding-top` is set (Logo)
+* Fix KDE version detection on Fedora (DE)
+* Include limits.h when needed (Linux, #472)
+* Fix Windows drives detection in WSL (Linux, Disk)
+* Fix CPU temp detection (FreeBSD, CPU)
+* Fix disk detection (Android, Disk)
+* Fix Gnome Terminal version and font detection (FreeBSD, TerminalFont)
+* Fix crash on newer wayland desktops (Linux, Display, #477)
+* Fix vendor detection for Intel GPU (macOS, GPU)
+* Fix possible crashes on Windows Server (Windows, GPU, #484)
+
+Logo:
+* Add bsd, freebsd_small, ghostbsd
+* Make Windows 11 logo colorable
 
 # 1.11.3
 
