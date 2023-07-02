@@ -121,6 +121,13 @@ static inline void ffStrbufInit(FFstrbuf* strbuf)
     strbuf->chars = CHAR_NULL_PTR;
 }
 
+static inline FFstrbuf ffStrbufCreate()
+{
+    FFstrbuf result;
+    ffStrbufInit(&result);
+    return result;
+}
+
 static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* str)
 {
     ffStrbufInit(strbuf);
