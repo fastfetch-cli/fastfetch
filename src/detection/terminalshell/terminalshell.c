@@ -41,11 +41,17 @@ static bool getFileVersion(const char* exePath, FFstrbuf* version)
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
 {
-    return ffProcessAppendStdOut(version, (char* const[]) {
+    bool ok = ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "--version",
         NULL
     }) == NULL;
+    if (ok)
+    {
+        ffStrbufTrim(version, '\n');
+        ffStrbufTrim(version, ' ');
+    }
+    return ok;
 }
 
 static bool getExeVersionGeneral(FFstrbuf* exe, FFstrbuf* version)

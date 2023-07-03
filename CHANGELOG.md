@@ -5,20 +5,47 @@ This release introduces a new configuration file format: JSON config
 Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
 * Remove `--shell-version` and `--terminal-version`. They are always enabled
-* Remove `--*-error-format`
+* Remove `--*-error-format`, which seems to be useless
 * Remove `--display-detect-name`. Display name is always detected, and will be printed if multiple displays are detected
 * Remove `--set` and `--set-keyless`. Use JSON config with Custom module instead
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a phycial machine
-* Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
-* Support QTerminal version & terminal font detection
-* Support MATE Terminal version & terminal font detection
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
 * Support `--*-key-color` option to change the key color of specified module
 * Support `--colors-symbol` and `--colors-padding-left`
 * Add LM (Login Manager) module
 * Add `--wmi-timeout` option (Windows)
+
+# 1.12.0
+
+This release backports some changes from dev branch, and fixes 2 crashing issues
+
+Features:
+* Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
+* Support QTerminal version & terminal font detection
+* Support MATE Terminal version & terminal font detection
+* Set `--pipe true` automatically if stdout is not a tty
+* Detect new macs released on WWDC 2023 (macOS, Host)
+* Count cached memory as free memory (FreeBSD, Memory)
+* Support sound detection (FreeBSD, Sound)
+
+Bugfixes:
+* Fix DE detection on Windows 8.1 (Windows, DE)
+* Fix `--logo-padding-left` doesn't work when `--logo-padding-top` is set (Logo)
+* Fix KDE version detection on Fedora (DE)
+* Include limits.h when needed (Linux, #472)
+* Fix Windows drives detection in WSL (Linux, Disk)
+* Fix CPU temp detection (FreeBSD, CPU)
+* Fix disk detection (Android, Disk)
+* Fix Gnome Terminal version and font detection (FreeBSD, TerminalFont)
+* Fix crash on newer wayland desktops (Linux, Display, #477)
+* Fix vendor detection for Intel GPU (macOS, GPU)
+* Fix possible crashes on Windows Server (Windows, GPU, #484)
+
+Logo:
+* Add bsd, freebsd_small, ghostbsd
+* Make Windows 11 logo colorable
 
 # 1.11.3
 
