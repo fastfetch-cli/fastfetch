@@ -61,6 +61,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(port)
         FF_PRINT_PACKAGE(scoop)
         FF_PRINT_PACKAGE(choco)
+        FF_PRINT_PACKAGE(pkgtool)
 
         putchar('\n');
     }
@@ -88,6 +89,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.port},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.scoop},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.choco},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.pkgtool},
         });
     }
 

@@ -16,6 +16,7 @@ Features:
 * Support `--colors-symbol` and `--colors-padding-left`
 * Add LM (Login Manager) module
 * Add `--wmi-timeout` option (Windows)
+* Support `pkgtool` package manager detection (Linux, Packages)
 
 # 1.12.1
 
