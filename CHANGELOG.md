@@ -1,7 +1,11 @@
+# 1.12.2
+
+Features:
+* Support `pkgtool` package manager detection (Linux, Packages)
+
 # 1.12.1
 
 Bugfixes:
-
 * Fix compiling error on Apple Slicon (Bios, macOS)
 
 # 1.12.0

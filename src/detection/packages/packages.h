@@ -21,6 +21,7 @@ typedef struct FFPackagesResult
     uint32_t nixUser;
     uint32_t pacman;
     uint32_t pkg;
+    uint32_t pkgtool;
     uint32_t port;
     uint32_t rpm;
     uint32_t scoop;

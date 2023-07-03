@@ -276,6 +276,7 @@ static void getPackageCounts(const FFinstance* instance, FFstrbuf* baseDir, FFPa
     packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
     packageCounts->pkg += getSQLite3Int(instance, baseDir, "/var/db/pkg/local.sqlite", "SELECT count(id) FROM packages");
+    packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", DT_REG);
     packageCounts->rpm += getSQLite3Int(instance, baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(blob) FROM Packages");
     packageCounts->snap += getSnap(baseDir);
     packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
