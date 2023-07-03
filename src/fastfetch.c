@@ -18,16 +18,18 @@
 
 #include "modules/modules.h"
 
-typedef struct CustomValue
+typedef struct FFCustomValue
 {
     bool printKey;
+    FFstrbuf key;
     FFstrbuf value;
-} CustomValue;
+} FFCustomValue;
 
 // Things only needed by fastfetch
 typedef struct FFdata
 {
     FFstrbuf structure;
+    FFlist customValues; // List of FFCustomValue
     bool loadUserConfig;
 } FFdata;
 
@@ -810,6 +812,26 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         else
             goto error;
     }
+    else if(ffStrStartsWithIgnCase(key, "--set"))
+    {
+        const char* subkey = key + strlen("--set");
+        if(*subkey != '\0' && !ffStrEqualsIgnCase(subkey, "-keyless"))
+            goto error;
+
+        FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
+        ffOptionParseString(key, value, &customValueStr);
+        uint32_t index = ffStrbufFirstIndexC(&customValueStr, '=');
+        if(index == 0 || index == customValueStr.length)
+        {
+            fprintf(stderr, "Error: usage: %s <key>=<str>\n", key);
+            exit(477);
+        }
+        FFCustomValue* customValue = (FFCustomValue*) ffListAdd(&data->customValues);
+        ffStrbufInitS(&customValue->value, &customValueStr.chars[index + 1]);
+        ffStrbufSubstrBefore(&customValueStr, index);
+        ffStrbufInitMove(&customValue->key, &customValueStr);
+        customValue->printKey = *subkey == '\0';
+    }
 
     ///////////////////
     //General options//
@@ -1071,8 +1093,23 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
     }
 }
 
-static void parseStructureCommand(const char* line)
+static void parseStructureCommand(const char* line, FFlist* customValues)
 {
+    // handle `--set` and `--set-keyless`
+    FF_LIST_FOR_EACH(FFCustomValue, customValue, *customValues)
+    {
+        if (ffStrbufEqualS(&customValue->key, line))
+        {
+            __attribute__((__cleanup__(ffDestroyCustomOptions))) FFCustomOptions options;
+            ffInitCustomOptions(&options);
+            if (customValue->printKey)
+                ffStrbufAppend(&options.moduleArgs.key, &customValue->key);
+            ffStrbufAppend(&options.moduleArgs.outputFormat, &customValue->value);
+            ffPrintCustom(&options);
+            return;
+        }
+    }
+
     if(ffStrEqualsIgnCase(line, FF_BREAK_MODULE_NAME))
         ffPrintBreak();
     else if(ffStrEqualsIgnCase(line, FF_TITLE_MODULE_NAME))
@@ -1188,6 +1225,7 @@ int main(int argc, const char** argv)
     //Data stores things only needed for the configuration of fastfetch
     FFdata data;
     ffStrbufInit(&data.structure);
+    ffListInit(&data.customValues, sizeof(FFCustomValue));
     data.loadUserConfig = true;
 
     if(!getenv("NO_CONFIG"))
@@ -1236,7 +1274,7 @@ int main(int argc, const char** argv)
             if(__builtin_expect(instance.config.stat, false))
                 ms = ffTimeGetTick();
 
-            parseStructureCommand(data.structure.chars + startIndex);
+            parseStructureCommand(data.structure.chars + startIndex, &data.customValues);
 
             if(__builtin_expect(instance.config.stat, false))
             {
@@ -1259,6 +1297,12 @@ int main(int argc, const char** argv)
     ffFinish();
 
     ffStrbufDestroy(&data.structure);
+    FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)
+    {
+        ffStrbufDestroy(&customValue->key);
+        ffStrbufDestroy(&customValue->value);
+    }
+    ffListDestroy(&data.customValues);
 
     ffDestroyInstance();
 }
