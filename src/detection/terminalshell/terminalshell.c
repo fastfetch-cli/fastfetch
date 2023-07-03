@@ -267,6 +267,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
         return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
 
+    if(ffStrbufIgnCaseEqualS(processName, "terminator"))
+        return getExeVersionGeneral(exe, version);//terminator 2.1.3
+
     if(ffStrbufIgnCaseEqualS(processName, "deepin-terminal"))
         return getExeVersionGeneral(exe, version);//deepin-terminal 5.4.36
 
