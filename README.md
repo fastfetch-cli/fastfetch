@@ -1,5 +1,7 @@
 # Fastfetch
 
+[![CI](https://github.com/fastfetch-cli/fastfetch/actions/workflows/ci.yml/badge.svg)](https://github.com/fastfetch-cli/fastfetch/actions/workflows/ci.yml)
+
 Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written mainly in C, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />

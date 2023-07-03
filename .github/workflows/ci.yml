@@ -1,4 +1,4 @@
-name: manage pushes
+name: CI
 
 on:
   - push
