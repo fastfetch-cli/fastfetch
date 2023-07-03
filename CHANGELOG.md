@@ -1,3 +1,9 @@
+# 1.12.1
+
+Bugfixes:
+
+* Fix compiling error on Apple Slicon (Bios, macOS)
+
 # 1.12.0
 
 This release backports some changes from dev branch, and fixes 2 crashing issues

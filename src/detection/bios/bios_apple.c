@@ -48,7 +48,7 @@ void ffDetectBios(FFBiosResult* bios)
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
             ffCfDictGetString(properties, CFSTR("manufacturer"), &bios->biosVendor);
-            ffCfDictGetString(properties, CFSTR("time-stamp"), &bios->date);
+            ffCfDictGetString(properties, CFSTR("time-stamp"), &bios->biosDate);
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
