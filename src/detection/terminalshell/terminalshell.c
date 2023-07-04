@@ -121,11 +121,6 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
-
-static bool getShellVersionCmd(FFstrbuf* exe, FFstrbuf* version)
-{
-    return getFileVersion(exe->chars, version);
-}
 #endif
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
@@ -151,11 +146,11 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
     #ifdef _WIN32
     if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
         return getShellVersionWinPowerShell(exe, version);
-    if(strcasecmp(exeName, "cmd") == 0)
-        return getShellVersionCmd(exe, version);
-    #endif
 
+    return getFileVersion(exe->chars, version);
+    #else
     return false;
+    #endif
 }
 
 FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
