@@ -142,7 +142,8 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "guake-wrapped") ||
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "fastfetch")     || //scoop warps the real binaries with a "shim" exe
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "flashfetch")    ||
-        ffStrbufContainIgnCaseS(&result->shellPrettyName, "debug")
+        ffStrbufContainIgnCaseS(&result->shellPrettyName, "debug")       ||
+        ffStrbufStartsWithIgnCaseS(&result->shellPrettyName, "ConEmuC") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
     ) {
         ffStrbufClear(&result->shellProcessName);
         ffStrbufClear(&result->shellPrettyName);
