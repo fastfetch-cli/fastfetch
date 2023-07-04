@@ -1,5 +1,6 @@
 #include "bios.h"
 #include "util/windows/registry.h"
+#include "util/smbiosHelper.h"
 
 const char* ffDetectBios(FFBiosResult* bios)
 {
@@ -10,8 +11,11 @@ const char* ffDetectBios(FFBiosResult* bios)
     if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->version, NULL))
         return "\"HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\BIOS\\BIOSVersion\" doesn't exist";
 
+    ffCleanUpSmbiosValue(&bios->version);
     ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->vendor, NULL);
+    ffCleanUpSmbiosValue(&bios->vendor);
     ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->date, NULL);
+    ffCleanUpSmbiosValue(&bios->date);
 
     uint32_t major, minor;
     if(
