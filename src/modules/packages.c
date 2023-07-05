@@ -3,7 +3,7 @@
 #include "detection/packages/packages.h"
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
-#define FF_PACKAGES_NUM_FORMAT_ARGS 21
+#define FF_PACKAGES_NUM_FORMAT_ARGS 22
 
 void ffPrintPackages(FFinstance* instance)
 {
@@ -88,6 +88,7 @@ void ffPrintPackages(FFinstance* instance)
             {FF_FORMAT_ARG_TYPE_UINT, &counts->port},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->scoop},
             {FF_FORMAT_ARG_TYPE_UINT, &counts->choco},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts->pkgtool},
         });
     }
 }
