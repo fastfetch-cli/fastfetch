@@ -538,29 +538,20 @@ static bool parseJsoncFile(const char* path)
 {
     yyjson_read_err error;
     yyjson_doc* doc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, &error);
-    if (doc)
+    if (!doc)
     {
-        instance.state.configDoc = doc;
-        const char* error = NULL;
-
-        if (
-            (error = ffParseLogoJsonConfig()) ||
-            (error = ffParseGeneralJsonConfig()) ||
-            (error = ffParseDisplayJsonConfig()) ||
-            (error = ffParseLibraryJsonConfig()) ||
-            false
-        ) {
-            fputs(error, stderr);
+        if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
+        {
+            fprintf(stderr, "ERROR: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
             exit(477);
         }
-        return true;
+        return false;
     }
-    else if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
-    {
-        fprintf(stderr, "ERROR: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
-        exit(477);
-    }
-    return false;
+    if (instance.state.configDoc)
+        yyjson_doc_free(instance.state.configDoc); // for `--load-config`
+
+    instance.state.configDoc = doc;
+    return true;
 }
 
 static bool parseConfigFile(FFdata* data, const char* path)
@@ -652,10 +643,18 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         fprintf(stderr, "Error: usage: %s <file>\n", key);
         exit(413);
     }
+    uint32_t fileNameLen = (uint32_t) strlen(value);
+    if(fileNameLen == 0)
+    {
+        fprintf(stderr, "Error: usage: %s <file>\n", key);
+        exit(413);
+    }
+
+    bool isJsonConfig = fileNameLen > strlen(".jsonc") && strcasecmp(value + fileNameLen - strlen(".jsonc"), ".jsonc") == 0;
 
     //Try to load as an absolute path
 
-    if(parseConfigFile(data, value))
+    if(isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, value))
         return;
 
     //Try to load as a relative path
@@ -669,7 +668,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
         ffStrbufAppendS(&absolutePath, value);
 
-        bool success = parseConfigFile(data, absolutePath.chars);
+        bool success = isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, absolutePath.chars);
 
         if(success)
             return;
@@ -1231,6 +1230,22 @@ int main(int argc, const char** argv)
     if(!getenv("NO_CONFIG"))
         parseConfigFiles(&data);
     parseArguments(&data, argc, argv);
+
+    if (instance.state.configDoc)
+    {
+        const char* error = NULL;
+
+        if (
+            (error = ffParseLogoJsonConfig()) ||
+            (error = ffParseGeneralJsonConfig()) ||
+            (error = ffParseDisplayJsonConfig()) ||
+            (error = ffParseLibraryJsonConfig()) ||
+            false
+        ) {
+            fputs(error, stderr);
+            exit(477);
+        }
+    }
 
     if(data.structure.length > 0 || !instance.state.configDoc)
     {
