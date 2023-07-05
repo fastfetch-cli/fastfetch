@@ -97,10 +97,9 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
 static void printMountpoint(FFDiskOptions* options, const FFlist* disks, const char* mountpoint)
 {
-    for(uint32_t i = disks->length; i > 0; i--)
+    FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
-        FFDisk* disk = ffListGet(disks, i - 1);
-        if(strncmp(mountpoint, disk->mountpoint.chars, disk->mountpoint.length) == 0)
+        if(ffStrbufEqualS(&disk->mountpoint, mountpoint))
         {
             printDisk(options, disk);
             return;
