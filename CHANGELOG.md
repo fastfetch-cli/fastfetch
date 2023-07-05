@@ -1,7 +1,13 @@
 # 1.12.2
 
 Features:
+* Support terminator terminal version detection (Linux, Terminal)
 * Support `pkgtool` package manager detection (Linux, Packages)
+* Support `Far` shell version detection (Windows, Shell)
+
+Bugfixes:
+* Fix ConEmu terminal detection in some special cases (Windows, Terminal, #488)
+* Fix incorrect Host on M2 Mac Studio with M2 Max CPU (macOS, Host, #490)
 
 # 1.12.1
 
