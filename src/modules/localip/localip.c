@@ -84,6 +84,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                 fputs(" - ", stdout);
             printIp(ip);
         }
+        putchar('\n');
     }
     else
     {
