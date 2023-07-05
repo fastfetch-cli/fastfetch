@@ -17,12 +17,21 @@ Features:
 * Support `--colors-symbol` and `--colors-padding-left`
 * Add LM (Login Manager) module
 * Add `--wmi-timeout` option (Windows)
+
+# 1.12.2
+
+Features:
+* Support terminator terminal version detection (Linux, Terminal)
 * Support `pkgtool` package manager detection (Linux, Packages)
+* Support `Far` shell version detection (Windows, Shell)
+
+Bugfixes:
+* Fix ConEmu terminal detection in some special cases (Windows, Terminal, #488)
+* Fix incorrect Host on M2 Mac Studio with M2 Max CPU (macOS, Host, #490)
 
 # 1.12.1
 
 Bugfixes:
-
 * Fix compiling error on Apple Slicon (Bios, macOS)
 
 # 1.12.0
