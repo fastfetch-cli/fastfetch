@@ -109,8 +109,8 @@ static const char* getProductName(const FFstrbuf* hwModel)
     {
         const char* version = hwModel->chars + strlen("Mac");
         if(ffStrEquals(version, "14,15"))       return "MacBook Air (15-inch, M2, 2023)";
-        if(ffStrEquals(version, "14,14"))       return "Mac Studio (M2 Max, 2023, Two USB-C front ports)";
-        if(ffStrEquals(version, "14,13"))       return "Mac Studio (M2 Ultra, 2023, Two Thunderbolt 4 front ports)";
+        if(ffStrEquals(version, "14,14"))       return "Mac Studio (M2 Ultra, 2023, Two Thunderbolt 4 front ports)";
+        if(ffStrEquals(version, "14,13"))       return "Mac Studio (M2 Max, 2023, Two USB-C front ports)";
         if(ffStrEquals(version, "14,8"))        return "Mac Pro (2023)";
         if(ffStrEquals(version, "14,6") ||
            ffStrEquals(version, "14,10"))       return "MacBook Pro (16-inch, 2023)";
