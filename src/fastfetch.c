@@ -611,7 +611,7 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
 
     //Try to load as a relative path
 
-    FFstrbuf absolutePath;
+    FF_STRBUF_AUTO_DESTROY absolutePath;
     ffStrbufInitA(&absolutePath, 128);
 
     FF_LIST_FOR_EACH(FFstrbuf, path, instance->state.platform.dataDirs)
@@ -626,8 +626,6 @@ static void optionParseConfigFile(FFinstance* instance, FFdata* data, const char
         if(success)
             return;
     }
-
-    ffStrbufDestroy(&absolutePath);
 
     //File not found
 
