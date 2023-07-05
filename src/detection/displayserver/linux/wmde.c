@@ -286,6 +286,8 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         return;
     else if(strcasestr(name, "plasma") != NULL || strcasecmp(name, "KDE") == 0)
         getKDE(result);
+    else if(strcasestr(name, "budgie") != NULL)
+        getBudgie(result);
     else if(
         strcasecmp(name, "polkit-gnome") != 0 &&
         strcasecmp(name, "gnome-keyring") != 0 &&
@@ -300,8 +302,6 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         getMate(result);
     else if(strcasestr(name, "lxqt") != NULL)
         getLXQt(result);
-    else if(strcasestr(name, "budgie") != NULL)
-        getBudgie(result);
 }
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
