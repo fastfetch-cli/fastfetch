@@ -9,7 +9,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     if (titleLength == 0)
     {
         // Title was not printed, should we support this case?
-        titleLength = instance.state.platform.userName.length + 1 + (instance.config.title.fdqn ?
+        titleLength = instance.state.platform.userName.length + 1 + (instance.config.title.fqdn ?
             instance.state.platform.domainName.length :
             instance.state.platform.hostName.length
         );

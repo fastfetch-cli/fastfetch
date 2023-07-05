@@ -965,6 +965,15 @@
                                         "type": "boolean",
                                         "title": "Set if the title should use fully qualified domain name",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 },
                                 "additionalProperties": false

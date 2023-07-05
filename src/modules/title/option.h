@@ -7,6 +7,7 @@
 typedef struct FFTitleOptions
 {
     const char* moduleName;
+    FFModuleArgs moduleArgs;
 
-    bool fdqn;
+    bool fqdn;
 } FFTitleOptions;

@@ -4,6 +4,8 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
+#define FF_TITLE_NUM_FORMAT_ARGS 2
+
 static inline void printTitlePart(const FFstrbuf* content)
 {
     if(!instance.config.pipe)
@@ -20,34 +22,45 @@ static inline void printTitlePart(const FFstrbuf* content)
 
 void ffPrintTitle(FFTitleOptions* options)
 {
-    ffLogoPrintLine();
-
-    printTitlePart(&instance.state.platform.userName);
-    putchar('@');
-    FFstrbuf* host = options->fdqn ?
+    FFstrbuf* host = options->fqdn ?
         &instance.state.platform.domainName :
         &instance.state.platform.hostName;
-    printTitlePart(host);
 
+    if (options->moduleArgs.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_TITLE_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        printTitlePart(&instance.state.platform.userName);
+        putchar('@');
+        printTitlePart(host);
+        putchar('\n');
+    }
+    else
+    {
+        ffPrintFormat(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_TITLE_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, host},
+        });
+    }
     instance.state.titleLength = instance.state.platform.userName.length + host->length + 1;
-
-    putchar('\n');
 }
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
     options->moduleName = FF_TITLE_MODULE_NAME;
-    options->fdqn = false;
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->fqdn = false;
 }
 
 bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TITLE_MODULE_NAME);
     if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
 
-    if (ffStrEqualsIgnCase(subKey, "fdqn"))
+    if (ffStrEqualsIgnCase(subKey, "fqdn"))
     {
-        options->fdqn = ffOptionParseBoolean(value);
+        options->fqdn = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -56,7 +69,7 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
 
 void ffDestroyTitleOptions(FFTitleOptions* options)
 {
-    FF_UNUSED(options);
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTitleJsonObject(yyjson_val* module)
@@ -74,9 +87,12 @@ void ffParseTitleJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffStrEqualsIgnCase(key, "fdqn"))
+            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+                continue;
+
+            if (ffStrEqualsIgnCase(key, "fqdn"))
             {
-                options.fdqn = yyjson_get_bool(val);
+                options.fqdn = yyjson_get_bool(val);
                 continue;
             }
 
