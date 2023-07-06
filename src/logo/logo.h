@@ -12,6 +12,7 @@ typedef struct FFlogo
     const char** builtinColors; //Null terminated
     const char* colorKeys;
     const char* colorTitle;
+    bool small;
 } FFlogo;
 
 typedef const FFlogo*(*GetLogoMethod)();

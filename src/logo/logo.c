@@ -4,9 +4,17 @@
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "util/textModifier.h"
+#include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <string.h>
+
+typedef enum FFLogoSize
+{
+    FF_LOGO_SIZE_UNKNOWN,
+    FF_LOGO_SIZE_NORMAL,
+    FF_LOGO_SIZE_SMALL,
+} FFLogoSize;
 
 static void ffLogoPrintCharsRaw(const char* data, size_t length)
 {
@@ -177,58 +185,71 @@ static void logoApplyColors(const FFlogo* logo)
         ffStrbufAppendS(&instance.config.colorTitle, logo->colorTitle);
 }
 
-static bool logoHasName(const FFlogo* logo, const char* name)
+static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small)
 {
-    const char** logoName = logo->names;
-
-    while(*logoName != NULL)
+    for(const char** logoName = logo->names; *logoName != NULL; ++logoName)
     {
-        if(strcasecmp(*logoName, name) == 0)
+        if(small)
+        {
+            uint32_t logoNameLength = (uint32_t) (strlen(*logoName) - strlen("_small"));
+            if(name->length == logoNameLength && strncasecmp(*logoName, name->chars, logoNameLength) == 0) return true;
+        }
+        if(ffStrbufIgnCaseEqualS(name, *logoName))
             return true;
-        ++logoName;
     }
 
     return false;
 }
 
-static const FFlogo* logoGetBuiltin(const char* name)
+static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size)
 {
-    GetLogoMethod* methods = ffLogoBuiltinGetAll();
+    if (name->length == 0)
+        return NULL;
 
-    while(*methods != NULL)
+    for(GetLogoMethod* methods = ffLogoBuiltinGetAll(); *methods; ++methods)
     {
         const FFlogo* logo = (*methods)();
 
-        if(logoHasName(logo, name))
-            return logo;
+        switch (size)
+        {
+            case FF_LOGO_SIZE_NORMAL:
+                if(logo->small) continue;
+                break;
+            case FF_LOGO_SIZE_SMALL:
+                if(!logo->small) continue;
+                break;
+            default:
+                break;
+        }
 
-        ++methods;
+        if(logoHasName(logo, name, size == FF_LOGO_SIZE_SMALL))
+            return logo;
     }
 
     return NULL;
 }
 
-static const FFlogo* logoGetBuiltinDetected(void)
+static const FFlogo* logoGetBuiltinDetected(FFLogoSize size)
 {
     const FFOSResult* os = ffDetectOS();
 
-    const FFlogo* logo = logoGetBuiltin(os->id.chars);
+    const FFlogo* logo = logoGetBuiltin(&os->id, size);
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(os->name.chars);
+    logo = logoGetBuiltin(&os->name, size);
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(os->prettyName.chars);
+    logo = logoGetBuiltin(&os->prettyName, size);
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(os->idLike.chars);
+    logo = logoGetBuiltin(&os->idLike, size);
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(instance.state.platform.systemName.chars);
+    logo = logoGetBuiltin(&instance.state.platform.systemName, size);
     if(logo != NULL)
         return logo;
 
@@ -237,7 +258,7 @@ static const FFlogo* logoGetBuiltinDetected(void)
 
 static inline void logoApplyColorsDetected(void)
 {
-    logoApplyColors(logoGetBuiltinDetected());
+    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL));
 }
 
 static void logoPrintStruct(const FFlogo* logo)
@@ -263,15 +284,15 @@ static void logoPrintNone(void)
     instance.state.logoWidth = 0;
 }
 
-static bool logoPrintBuiltinIfExists(const char* name)
+static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
 {
-    if(strcasecmp(name, "none") == 0)
+    if(ffStrbufIgnCaseEqualS(name, "none"))
     {
         logoPrintNone();
         return true;
     }
 
-    const FFlogo* logo = logoGetBuiltin(name);
+    const FFlogo* logo = logoGetBuiltin(name, size);
     if(logo == NULL)
         return false;
 
@@ -280,12 +301,13 @@ static bool logoPrintBuiltinIfExists(const char* name)
     return true;
 }
 
-static inline void logoPrintDetected(void)
+static inline void logoPrintDetected(FFLogoSize size)
 {
-    logoPrintStruct(logoGetBuiltinDetected());
+    logoPrintStruct(logoGetBuiltinDetected(size));
 }
 
-static bool logoPrintData(bool doColorReplacement) {
+static bool logoPrintData(bool doColorReplacement)
+{
     FFLogoOptions* options = &instance.config.logo;
     if(options->source.length == 0)
         return false;
@@ -360,7 +382,10 @@ static bool logoTryKnownType(void)
     }
 
     if(options->type == FF_LOGO_TYPE_BUILTIN)
-        return logoPrintBuiltinIfExists(options->source.chars);
+        return logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_NORMAL);
+
+    if(options->type == FF_LOGO_TYPE_SMALL)
+        return logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_SMALL);
 
     if(options->type == FF_LOGO_TYPE_DATA)
         return logoPrintData(true);
@@ -393,7 +418,7 @@ static bool logoTryKnownType(void)
 static void logoPrintKnownType(void)
 {
     if(!logoTryKnownType())
-        logoPrintDetected();
+        logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
 }
 
 void ffLogoPrint(void)
@@ -419,7 +444,7 @@ void ffLogoPrint(void)
     //If the source is not set, we can directly print the detected logo.
     if(options->source.length == 0)
     {
-        logoPrintDetected();
+        logoPrintDetected(options->type == FF_LOGO_TYPE_SMALL ? FF_LOGO_SIZE_SMALL : FF_LOGO_SIZE_NORMAL);
         return;
     }
 
@@ -431,7 +456,7 @@ void ffLogoPrint(void)
     }
 
     //If source matches the name of a builtin logo, print it and return.
-    if(logoPrintBuiltinIfExists(options->source.chars))
+    if(logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_UNKNOWN))
         return;
 
     //Make sure the logo path is set correctly.
@@ -454,7 +479,7 @@ void ffLogoPrint(void)
     if(logoPrintFileIfExists(true, false))
         return;
 
-    logoPrintDetected();
+    logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
 }
 
 void ffLogoPrintLine(void)

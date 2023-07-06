@@ -8,6 +8,7 @@ typedef enum FFLogoType
 {
     FF_LOGO_TYPE_AUTO,        //if something is given, first try builtin, then file. Otherwise detect logo
     FF_LOGO_TYPE_BUILTIN,     //builtin ascii art
+    FF_LOGO_TYPE_SMALL,       //builtin ascii art, small version
     FF_LOGO_TYPE_FILE,        //text file, printed with color code replacement
     FF_LOGO_TYPE_FILE_RAW,    //text file, printed as is
     FF_LOGO_TYPE_DATA,        //text data, printed with color code replacement

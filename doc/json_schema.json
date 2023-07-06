@@ -45,6 +45,7 @@
                             "enum": [
                                 "auto",
                                 "builtin",
+                                "small",
                                 "file",
                                 "file-raw",
                                 "data",

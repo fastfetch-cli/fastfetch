@@ -25,7 +25,7 @@ Currently, the performance difference is measurable, but too small to be recogni
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
-Logos can be heavily customized too; see the [logo documentation](doc/logo.md) for more information.
+Logos can be heavily customized too; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
 
 ## Dependencies
 

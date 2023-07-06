@@ -35,8 +35,6 @@ bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const ch
         if (subKey[0] == '\0')
         {
 logoType:
-            ffOptionParseString(key, value, &options->source);
-
             //this is usally wanted when using the none logo
             if(strcasecmp(value, "none") == 0)
             {
@@ -45,12 +43,19 @@ logoType:
                 options->paddingLeft = 0;
                 options->type = FF_LOGO_TYPE_NONE;
             }
+            else if(strcasecmp(value, "small") == 0)
+            {
+                options->type = FF_LOGO_TYPE_SMALL;
+            }
+            else
+                ffOptionParseString(key, value, &options->source);
         }
         else if(strcasecmp(subKey, "type") == 0)
         {
             options->type = (FFLogoType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "auto", FF_LOGO_TYPE_AUTO },
                 { "builtin", FF_LOGO_TYPE_BUILTIN },
+                { "small", FF_LOGO_TYPE_SMALL },
                 { "file", FF_LOGO_TYPE_FILE },
                 { "file-raw", FF_LOGO_TYPE_FILE_RAW },
                 { "data", FF_LOGO_TYPE_DATA },
@@ -231,6 +236,7 @@ const char* ffParseLogoJsonConfig(void)
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
                 { "auto", FF_LOGO_TYPE_AUTO },
                 { "builtin", FF_LOGO_TYPE_BUILTIN },
+                { "small", FF_LOGO_TYPE_SMALL },
                 { "file", FF_LOGO_TYPE_FILE },
                 { "file-raw", FF_LOGO_TYPE_FILE_RAW },
                 { "data", FF_LOGO_TYPE_DATA },
