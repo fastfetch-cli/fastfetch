@@ -9,14 +9,17 @@ Changes:
 * Remove `--display-detect-name`. Display name is always detected, and will be printed if multiple displays are detected
 * Deprecate `--set` and `--set-keyless`; they may be removed in future releases. Use JSON config with Custom module instead
 * Remove the special handling of Command module (it can be set once in the triditional `config.conf`). Use JSON config with Command module instead
+* Change `--wm-theme-*` to `--wmtheme-*`. Affect `key` and `format`
+* Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format`
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a phycial machine
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
 * Support `--*-key-color` option to change the key color of specified module
 * Support `--colors-symbol` and `--colors-padding-left`
-* Add LM (Login Manager) module
+* Add LM (Login Manager) module. Currently requires systemd installed (thus Linux only)
 * Add `--wmi-timeout` option (Windows)
+* Add `--logo-type small` to search for small logos
 
 # 1.12.2
 
