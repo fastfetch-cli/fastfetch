@@ -1539,15 +1539,15 @@ static const FFlogo* getLogoWindows11Small(void)
     FF_LOGO_INIT
     FF_LOGO_NAMES("Windows 11_small", "Windows 11-small")
     FF_LOGO_LINES(
-        "$1lllllllll  lllllllll\n"
-        "lllllllll  lllllllll\n"
-        "lllllllll  lllllllll\n"
-        "lllllllll  lllllllll\n"
+        "$1lllllllll  $2lllllllll\n"
+        "$1lllllllll  $2lllllllll\n"
+        "$1lllllllll  $2lllllllll\n"
+        "$1lllllllll  $2lllllllll\n"
         "\n"
-        "lllllllll  lllllllll\n"
-        "lllllllll  lllllllll\n"
-        "lllllllll  lllllllll\n"
-        "lllllllll  lllllllll\n"
+        "$3lllllllll  $4lllllllll\n"
+        "$3lllllllll  $4lllllllll\n"
+        "$3lllllllll  $4lllllllll\n"
+        "$3lllllllll  $4lllllllll\n"
     )
     FF_LOGO_COLORS(
         "34" //blue
