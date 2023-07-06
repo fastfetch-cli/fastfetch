@@ -3,12 +3,11 @@
 
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-    // "logo": {
-    //     "type": "iterm",
-    //     "source": "/Users/carter/Desktop/apple1.png",
-    //     "width": 28,
-    //     "height": 12
-    // },
+    "logo": {
+        "padding": {
+            "top": 2
+        }
+    },
     "display": {
         "separator": " -> "
     },
@@ -18,25 +17,24 @@
         {
             "type": "os",
             "key": " OS",
-            "keyColor": "blue",
+            "keyColor": "yellow",
             "format": "{2}"
         },
         {
             "type": "os",
             "key": "├", // Just get your distro's logo off nerdfonts.com
-            "keyColor": "blue",
+            "keyColor": "yellow",
             "format": "{6}{?6} {?}{10} {8}"
         },
         {
             "type": "kernel",
             "key": "├",
-            "format": "{1} {2}",
-            "keyColor": "blue"
+            "keyColor": "yellow"
         },
         {
             "type": "packages",
             "key": "├󰏖",
-            "keyColor": "blue"
+            "keyColor": "yellow"
         },
         {
             "type": "shell",
@@ -48,32 +46,32 @@
         {
             "type": "wm",
             "key": " DE/WM",
-            "keyColor": "yellow"
+            "keyColor": "blue"
         },
         {
             "type": "lm",
             "key": "├󰧨",
-            "keyColor": "yellow"
+            "keyColor": "blue"
         },
         {
             "type": "wmtheme",
             "key": "├󰉼",
-            "keyColor": "yellow"
+            "keyColor": "blue"
         },
         {
             "type": "icons",
             "key": "├󰀻",
-            "keyColor": "yellow"
+            "keyColor": "blue"
         },
         {
             "type": "terminal",
             "key": "├",
-            "keyColor": "yellow"
+            "keyColor": "blue"
         },
         {
             "type": "wallpaper",
             "key": "└󰸉",
-            "keyColor": "yellow"
+            "keyColor": "blue"
         },
 
         "break",
@@ -110,7 +108,7 @@
         {
             "type": "uptime",
             "key": "├󰅐",
-            "keyColor": "blue"
+            "keyColor": "green"
         },
         {
             "type": "display",
@@ -120,19 +118,19 @@
 
         "break",
         {
-            "type": "media",
-            "key": "󰝚 SONG",
-            "keyColor": "blue"
+            "type": "sound",
+            "key": " SOUND",
+            "keyColor": "cyan"
         },
         {
             "type": "player",
             "key": "├󰥠",
-            "keyColor": "blue"
+            "keyColor": "cyan"
         },
         {
-            "type": "sound",
-            "key": "└",
-            "keyColor": "green"
+            "type": "media",
+            "key": "└󰝚",
+            "keyColor": "cyan"
         },
 
         "break",
