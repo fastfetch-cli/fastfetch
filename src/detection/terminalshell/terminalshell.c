@@ -214,6 +214,16 @@ FF_MAYBE_UNUSED static bool getTerminalVersionMateTerminal(FFstrbuf* exe, FFstrb
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionCockpit(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version)) return false;
+
+    //Version: 295\n...
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -277,6 +287,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "mate-terminal"))
         return getTerminalVersionMateTerminal(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "cockpit-bridge"))
+        return getTerminalVersionCockpit(exe, version);
 
     #endif
 
