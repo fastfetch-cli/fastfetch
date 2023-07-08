@@ -60,7 +60,7 @@ static const char* getSddmVersion(FFstrbuf* version)
     }
 
     ffStrbufSubstrBefore(version, ffStrbufNextIndexC(version, index, '\n'));
-    ffStrbufSubstrAfter(version, index + strlen(".TH "));
+    ffStrbufSubstrAfter(version, index + (uint32_t) strlen(".TH "));
 
     // "SDDM" 1 "May 2014" "sddm 0.20.0" "sddm"
     ffStrbufSubstrBeforeLastC(version, ' ');
@@ -95,7 +95,7 @@ static const char* getXfwmVersion(FFstrbuf* version)
 
 static const char* getLightdmVersion(FFstrbuf* version)
 {
-    const char* error = = ffProcessAppendStdOut(version, (char* const[]) {
+    const char* error = ffProcessAppendStdOut(version, (char* const[]) {
         "lightdm",
         "--version",
         NULL
