@@ -846,12 +846,6 @@ install(
 )
 
 install(
-    FILES "${CMAKE_SOURCE_DIR}/src/data/config_system.txt"
-    DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/${CMAKE_PROJECT_NAME}"
-    RENAME "config.conf"
-)
-
-install(
     FILES "${CMAKE_SOURCE_DIR}/completions/bash"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions"
     RENAME "${CMAKE_PROJECT_NAME}"
