@@ -755,6 +755,7 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
+        PRIVATE "dxva2"
     )
 elseif(BSD)
     target_link_libraries(libfastfetch
