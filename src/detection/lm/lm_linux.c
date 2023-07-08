@@ -93,6 +93,22 @@ static const char* getXfwmVersion(FFstrbuf* version)
     return NULL;
 }
 
+static const char* getLightdmVersion(FFstrbuf* version)
+{
+    const char* error = = ffProcessAppendStdOut(version, (char* const[]) {
+        "lightdm",
+        "--version",
+        NULL
+    });
+    if (error)
+        return error;
+
+    // lightdm 1.30.0
+    ffStrbufSubstrAfterFirstC(version, ' ');
+
+    return NULL;
+}
+
 const char* ffDetectLM(FFLMResult* result)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
@@ -129,6 +145,8 @@ const char* ffDetectLM(FFLMResult* result)
         getSddmVersion(&result->version);
     else if (ffStrbufStartsWithS(&result->service, "xfwm"))
         getXfwmVersion(&result->version);
+    else if (ffStrbufStartsWithS(&result->service, "lightdm"))
+        getLightdmVersion(&result->version);
 
     // Correct char cases
     if (ffStrbufIgnCaseEqualS(&result->type, FF_WM_PROTOCOL_WAYLAND))
