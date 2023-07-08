@@ -35,7 +35,12 @@ bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const ch
         if (subKey[0] == '\0')
         {
 logoType:
-            //this is usally wanted when using the none logo
+            if(value == NULL)
+            {
+                fprintf(stderr, "Error: usage: %s <none|small|logo-source>\n", key);
+                exit(477);
+            }
+            //this is usually wanted when disabling logo
             if(strcasecmp(value, "none") == 0)
             {
                 options->paddingTop = 0;
