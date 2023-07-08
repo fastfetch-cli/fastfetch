@@ -53,7 +53,8 @@ static void parseDRM(FFDisplayServerResult* result)
                 0,
                 &name,
                 FF_DISPLAY_TYPE_UNKNOWN,
-                false
+                false,
+                0
             );
         }
 

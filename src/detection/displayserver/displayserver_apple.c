@@ -63,7 +63,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 (uint32_t)CGDisplayRotation(screen),
                 &name,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
-                screen == primary
+                screen == primary,
+                (uint64_t)screen
             );
             CGDisplayModeRelease(mode);
         }

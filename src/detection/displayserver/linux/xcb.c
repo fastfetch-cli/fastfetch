@@ -128,7 +128,8 @@ void ffdsConnectXcb(FFDisplayServerResult* result)
             0,
             NULL,
             FF_DISPLAY_TYPE_UNKNOWN,
-            false
+            false,
+            0
         );
         ffxcb_screen_next(&iterator);
     }
@@ -198,7 +199,8 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         rotation,
         name,
         FF_DISPLAY_TYPE_UNKNOWN,
-        primary
+        primary,
+        0
     );
 }
 
@@ -255,7 +257,8 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
         rotation,
         name,
         FF_DISPLAY_TYPE_UNKNOWN,
-        primary
+        primary,
+        0
     );
 
     free(crtcInfoReply);
@@ -315,7 +318,8 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         0,
         &name,
         FF_DISPLAY_TYPE_UNKNOWN,
-        !!monitor->primary
+        !!monitor->primary,
+        0
     );
 }
 
@@ -379,7 +383,8 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
-        false
+        false,
+        0
     );
 }
 

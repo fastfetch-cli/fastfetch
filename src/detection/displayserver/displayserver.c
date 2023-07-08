@@ -11,7 +11,8 @@ bool ffdsAppendDisplay(
     uint32_t rotation,
     FFstrbuf* name,
     FFDisplayType type,
-    bool primary)
+    bool primary,
+    uint64_t id)
 {
     if(width == 0 || height == 0)
         return false;
@@ -26,6 +27,7 @@ bool ffdsAppendDisplay(
     ffStrbufInitMove(&display->name, name);
     display->type = type;
     display->primary = primary;
+    display->id = id;
 
     return true;
 }

@@ -187,7 +187,8 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         rotation,
         &display.name,
         display.type,
-        false
+        false,
+        0
     );
 
     ffThreadMutexUnlock(&mutex);

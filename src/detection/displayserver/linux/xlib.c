@@ -86,7 +86,8 @@ void ffdsConnectXlib(FFDisplayServerResult* result)
             0,
             NULL,
             FF_DISPLAY_TYPE_UNKNOWN,
-            false
+            false,
+            0
         );
     }
 
@@ -184,7 +185,8 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, bool primary)
         rotation,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
-        primary
+        primary,
+        0
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
@@ -224,7 +226,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
-        !!monitorInfo->primary
+        !!monitorInfo->primary,
+        0
     );
 }
 
@@ -282,7 +285,8 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
-        false
+        false,
+        0
     );
 }
 
