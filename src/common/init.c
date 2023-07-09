@@ -49,8 +49,15 @@ static void defaultConfig(void)
     instance.config.recache = false;
     instance.config.allowSlowOperations = false;
     instance.config.pipe = !isatty(STDOUT_FILENO);
+
+    #ifdef NDEBUG
     instance.config.disableLinewrap = !instance.config.pipe;
     instance.config.hideCursor = !instance.config.pipe;
+    #else
+    instance.config.disableLinewrap = false;
+    instance.config.hideCursor = false;
+    #endif
+
     instance.config.escapeBedrock = true;
     instance.config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
     instance.config.multithreading = true;
