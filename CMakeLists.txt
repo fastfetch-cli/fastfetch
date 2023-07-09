@@ -78,6 +78,7 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
@@ -714,6 +715,10 @@ ff_lib_enable(FREETYPE
 ff_lib_enable(PULSE
     "libpulse"
     "Pulse"
+)
+ff_lib_enable(DDCUTIL
+    "ddcutil"
+    "Ddcutil"
 )
 
 if(ENABLE_THREADS)

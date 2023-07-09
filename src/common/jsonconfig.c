@@ -463,6 +463,8 @@ const char* ffParseLibraryJsonConfig(void)
             ffStrbufSetS(&config->libPulse, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "nm"))
             ffStrbufSetS(&config->libnm, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "ddcutil"))
+            ffStrbufSetS(&config->libDdcutil, yyjson_get_str(val));
         else
             return "Unknown library property";
     }

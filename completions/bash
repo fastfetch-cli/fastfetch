@@ -383,6 +383,8 @@ __fastfetch_completion()
         "--lib-osmesa"
         "--lib-opencl"
         "--lib-pulse"
+        "--lib-ddcutil"
+        "--lib-nm"
         "--battery-dir"
     )
 

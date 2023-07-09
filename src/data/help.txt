@@ -99,6 +99,7 @@ Library options: Set the path of a library to load
     --lib-opencl <path>
     --lib-pulse <path>
     --lib-freetype <path>
+    --lib-ddcutil <path>
 
 Module specific options:
     --title-fqdn <?value>:                   Set if the title should use fully qualified domain name. Default is false

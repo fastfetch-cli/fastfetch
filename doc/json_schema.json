@@ -406,6 +406,10 @@
                 "nm": {
                     "title": "NetworkManager. Used for Wifi detection (Linux)",
                     "type": "string"
+                },
+                "ddcutil": {
+                    "title": "Used for brightness detection of external displays (Linux)",
+                    "type": "string"
                 }
             },
             "additionalProperties": false

@@ -1028,6 +1028,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             ffOptionParseString(key, value, &instance.config.libPulse);
         else if(ffStrEqualsIgnCase(subkey, "-nm"))
             ffOptionParseString(key, value, &instance.config.libnm);
+        else if(ffStrEqualsIgnCase(subkey, "-ddcutil"))
+            ffOptionParseString(key, value, &instance.config.libDdcutil);
         else
             goto error;
     }

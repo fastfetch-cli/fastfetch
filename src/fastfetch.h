@@ -132,6 +132,7 @@ typedef struct FFconfig
     FFstrbuf libfreetype;
     FFstrbuf libPulse;
     FFstrbuf libnm;
+    FFstrbuf libDdcutil;
 
     uint32_t percentType;
 

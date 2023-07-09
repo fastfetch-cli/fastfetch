@@ -139,6 +139,7 @@ static void defaultConfig(void)
     ffStrbufInit(&instance.config.libfreetype);
     ffStrbufInit(&instance.config.libPulse);
     ffStrbufInit(&instance.config.libnm);
+    ffStrbufInit(&instance.config.libDdcutil);
 
     instance.config.percentType = 1;
 }
@@ -344,6 +345,7 @@ static void destroyConfig(void)
     ffStrbufDestroy(&instance.config.libfreetype);
     ffStrbufDestroy(&instance.config.libPulse);
     ffStrbufDestroy(&instance.config.libnm);
+    ffStrbufDestroy(&instance.config.libDdcutil);
 }
 
 static void destroyState(void)
@@ -436,6 +438,9 @@ void ffListFeatures(void)
         #endif
         #ifdef FF_HAVE_LIBNM
             "libnm\n"
+        #endif
+        #ifdef FF_HAVE_DDCUTIL
+            "libddcutil\n"
         #endif
         ""
     , stdout);

@@ -20,6 +20,7 @@ Features:
 * Add LM (Login Manager) module. Currently requires systemd installed (thus Linux only)
 * Add `--wmi-timeout` option (Windows)
 * Add `--logo-type small` to search for small logos
+* Support detecting brightness of external displays with DDC/CI (guard behind `--allow-slow-operations`) (Brightness)
 
 # 1.12.2
 

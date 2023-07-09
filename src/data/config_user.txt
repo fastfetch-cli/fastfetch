@@ -458,3 +458,5 @@
 #--lib-opencl /usr/lib/libOpenCL.so
 #--lib-freetype /data/data/com.termux/files/usr/lib
 #--lib-pulse /usr/lib/libpulse.so
+#--lib-ddcutil /usr/lib/libddcutil.so
+#--lib-nm /usr/lib/libnm.so
