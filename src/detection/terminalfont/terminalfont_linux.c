@@ -208,6 +208,23 @@ static void detectQTerminal(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
+static void detectXterm(FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) {
+        {"xterm*faceName:", &fontName},
+        {"xterm*faceSize:", &fontSize},
+    });
+
+    if (fontName.length == 0)
+        ffStrbufAppendS(&fontName, "fixed");
+    if (fontSize.length == 0)
+        ffStrbufAppendS(&fontSize, "8.0");
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "konsole"))
@@ -228,4 +245,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FF
         detectFootTerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "qterminal"))
         detectQTerminal(terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "xterm"))
+        detectXterm(terminalFont);
 }
