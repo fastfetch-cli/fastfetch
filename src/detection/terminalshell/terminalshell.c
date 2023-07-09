@@ -224,6 +224,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionCockpit(FFstrbuf* exe, FFstrbuf* v
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "-v",
+        NULL
+    })) return false;
+
+    //xterm(273)
+    ffStrbufTrimRight(version, ')');
+    ffStrbufSubstrAfterFirstC(version, '(');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -290,6 +304,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "cockpit-bridge"))
         return getTerminalVersionCockpit(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "xterm"))
+        return getTerminalVersionXterm(exe, version);
 
     #endif
 
