@@ -53,33 +53,41 @@ const char* ffDetectBrightness(FFlist* result)
         }
     }
 
-    if (!instance.config.allowSlowOperations)
+    if (!instance.config.allowSlowOperations || displayServer->displays.length <= result->length)
         return NULL;
 
     // https://github.com/waydabber/m1ddc
     // This only works for Apple Silicon and USB-C adapter connection ( but not HTMI )
     FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = IOAVServiceCreate(kCFAllocatorDefault);
-    uint8_t i2cData[12] = { 0x82, 0x01, 0x00 };
-    i2cData[3] = 0x6e ^ i2cData[0] ^ i2cData[1] ^ i2cData[2] ^ i2cData[3];
-
-    for (uint32_t i = 0; i < 3; ++i)
+    if (service)
     {
-        IOAVServiceWriteI2C(service, 0x37, 0x51, i2cData, 4);
-        usleep(10000);
-    }
+        uint8_t i2cData[12] = { 0x82, 0x01, 0x00 };
+        i2cData[3] = 0x6e ^ i2cData[0] ^ i2cData[1] ^ i2cData[2] ^ i2cData[3];
 
-    memset(i2cData, 0, sizeof(i2cData));
-    if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cData, sizeof(i2cData)) == KERN_SUCCESS)
-    {
-        uint8_t current = i2cData[9], max = i2cData[7];
+        for (uint32_t i = 0; i < 3; ++i)
+        {
+            IOAVServiceWriteI2C(service, 0x37, 0x51, i2cData, 4);
+            usleep(10000);
+        }
 
-        FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-        brightness->value = (float) current * 100.f / max;
-        ffStrbufInit(&brightness->name);
+        memset(i2cData, 0, sizeof(i2cData));
+        if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cData, sizeof(i2cData)) == KERN_SUCCESS)
+        {
+            if (i2cData[2] != 0x02 || i2cData[3] != 0x00)
+                return NULL;
 
-        uint8_t edid[128] = {};
-        if (IOAVServiceReadI2C(service, 0x50, 0x00, edid, sizeof(edid)) == KERN_SUCCESS)
-            getNameFromEdid(edid, &brightness->name);
+            uint32_t mh = i2cData[6], ml = i2cData[7], sh = i2cData[8], sl = i2cData[9];
+            uint32_t current = (mh << 8u) + ml;
+            uint32_t max = (sh << 8u) + sl;
+
+            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+            brightness->value = (float) current * 100.f / max;
+            ffStrbufInit(&brightness->name);
+
+            uint8_t edid[128] = {};
+            if (IOAVServiceReadI2C(service, 0x50, 0x00, edid, sizeof(edid)) == KERN_SUCCESS)
+                getNameFromEdid(edid, &brightness->name);
+        }
     }
 
     return NULL;
