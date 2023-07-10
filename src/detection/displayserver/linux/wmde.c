@@ -60,47 +60,52 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
     if(!ffStrSet(name))
         return;
 
-    if(strcasestr(name, "kwin") != NULL)
-        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
+    if(
+        strcasecmp(name, "kwin_wayland") == 0 ||
+        strcasecmp(name, "kwin_wayland_wrapper") == 0 ||
+        strcasecmp(name, "kwin_x11") == 0 ||
+        strcasecmp(name, "kwin_x11_wrapper") == 0 ||
+        strcasecmp(name, "kwin") == 0
+    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
     else if(
         strcasecmp(name, "gnome-shell") == 0 ||
         strcasecmp(name, "gnome shell") == 0 ||
         strcasecmp(name, "gnome-session-binary") == 0 ||
-        strcasestr(name, "mutter") != NULL
-    )
-        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
+        strcasecmp(name, "Mutter") == 0
+    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
         strcasecmp(name, "cinnamon-session") == 0 ||
-        strcasestr(name, "muffin") != NULL
-    )
-        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
-    else if(strcasestr(name, "sway") != NULL)
+        strcasecmp(name, "Muffin") == 0 ||
+        strcasecmp(name, "Mutter (Muffin)") == 0
+    ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
+    else if(strcasecmp(name, "sway") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
-    else if(strcasestr(name, "weston") != NULL)
+    else if(strcasecmp(name, "weston") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WESTON);
-    else if(strcasestr(name, "wayfire") != NULL)
+    else if(strcasecmp(name, "wayfire") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WAYFIRE);
-    else if(strcasestr(name, "openbox") != NULL)
+    else if(strcasecmp(name, "openbox") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_OPENBOX);
-    else if(strcasestr(name, "xfwm4") != NULL)
+    else if(strcasecmp(name, "xfwm4") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XFWM4);
-    else if(strcasestr(name, "marco") != NULL)
+    else if(strcasecmp(name, "Marco") == 0 ||
+        strcasecmp(name, "Metacity (Macro)") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MARCO);
-    else if(strcasestr(name, "xmonad") != NULL)
+    else if(strcasecmp(name, "xmonad") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
-    else if(strcasestr(name, "wslg") != NULL)
+    else if(strcasecmp(name, "WSLg") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WSLG);
-    else if(strcasestr(name, "dwm") != NULL)
+    else if(strcasecmp(name, "dwm") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DWM);
-    else if(strcasestr(name, "bspwm") != NULL)
+    else if(strcasecmp(name, "bspwm") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_BSPWM);
-    else if(strcasestr(name, "tinywm") != NULL)
+    else if(strcasecmp(name, "tinywm") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_TINYWM);
-    else if(strcasestr(name, "qtile") != NULL)
+    else if(strcasecmp(name, "qtile") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_QTILE);
-    else if(strcasestr(name, "herbstluftwm") != NULL)
+    else if(strcasecmp(name, "herbstluftwm") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HERBSTLUFTWM);
-    else if(strcasestr(name, "icewm") != NULL)
+    else if(strcasecmp(name, "icewm") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
 }
 
