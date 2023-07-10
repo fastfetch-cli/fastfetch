@@ -60,6 +60,8 @@ static void defaultConfig(void)
 
     instance.config.escapeBedrock = true;
     instance.config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
+    instance.config.sizeNdigits = 2;
+    instance.config.sizeMaxPrefix = UINT8_MAX;
     instance.config.multithreading = true;
     instance.config.stat = false;
     instance.config.noBuffer = false;

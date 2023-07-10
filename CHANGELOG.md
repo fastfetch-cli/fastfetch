@@ -21,6 +21,7 @@ Features:
 * Add `--wmi-timeout` option (Windows)
 * Add `--logo-type small` to search for small logos
 * Support detecting brightness of external displays with DDC/CI (guard behind `--allow-slow-operations`) (Brightness)
+* Add option `--size-ndigits` and `--size-max-prefix` (#494)
 
 # 1.12.2
 

@@ -915,6 +915,10 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             {}
         });
     }
+    else if(ffStrEqualsIgnCase(key, "--size-ndigits"))
+        instance.config.sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--size-max-prefix"))
+        instance.config.sizeMaxPrefix = (uint8_t) ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--percent-type"))
         instance.config.percentType = ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))

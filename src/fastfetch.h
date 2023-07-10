@@ -44,6 +44,8 @@ typedef struct FFconfig
     bool hideCursor;
     bool escapeBedrock;
     FFBinaryPrefixType binaryPrefixType;
+    uint8_t sizeNdigits;
+    uint8_t sizeMaxPrefix;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;

@@ -296,6 +296,16 @@
                         "jedec"
                     ]
                 },
+                "sizeNdigits": {
+                    "type": "integer",
+                    "title": "Set the number of digits to keep after the decimal point when formatting sizes",
+                    "default": 2
+                },
+                "sizeMaxPrefix": {
+                    "type": "integer",
+                    "title": "Set the largest binary prefix to use when formatting sizes. 0 is B; 1 is KB; 2 is MB; etc.",
+                    "default": 255
+                },
                 "percentType": {
                     "type": "number",
                     "title": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",

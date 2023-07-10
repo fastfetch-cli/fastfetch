@@ -152,6 +152,18 @@
 # Default is IEC.
 #--binary-prefix IEC
 
+# Size number of digits option:
+# Sets the number of digits to keep after the decimal point when formatting sizes.
+# Must be an possitive integer.
+# Default is 2.
+#--size-ndigits 2
+
+# Size max prefix option:
+# Sets the largest binary prefix to use when formatting sizes. 0 is B; 1 is KB; 2 is MB; etc.
+# Must be an possitive integer.
+# Default is 255 (unlimited).
+#--size-max-prefix 255
+
 # Disable output buffer option:
 # Sets if the stdout application buffer should be disabled.
 # Must be true or false.

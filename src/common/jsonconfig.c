@@ -386,6 +386,10 @@ const char* ffParseDisplayJsonConfig(void)
             if (error) return error;
             config->binaryPrefixType = (FFBinaryPrefixType) value;
         }
+        else if (ffStrEqualsIgnCase(key, "sizeNdigits"))
+            config->sizeNdigits = (uint8_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "sizeMaxPrefix"))
+            config->sizeMaxPrefix = (uint8_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "percentType"))
             config->percentType = (uint32_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "noBuffer"))
