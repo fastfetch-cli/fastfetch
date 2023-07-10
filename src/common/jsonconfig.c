@@ -309,6 +309,8 @@ const char* ffParseGeneralJsonConfig(void)
             config->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "pipe"))
             config->pipe = yyjson_get_bool(val);
+        else if (ffStrEqualsIgnCase(key, "processingTimeout"))
+            config->processingTimeout = (int32_t) yyjson_get_int(val);
 
         #if defined(__linux__) || defined(__FreeBSD__)
         else if (ffStrEqualsIgnCase(key, "playerName"))

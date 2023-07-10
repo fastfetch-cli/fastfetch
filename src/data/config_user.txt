@@ -58,6 +58,12 @@
 # Default is true.
 #--hide-cursor true
 
+# Processing timeout option:
+# Sets the timeout (ms) when waiting for child processes
+# Must be an integer.
+# Default is 1000
+#--processing-timeout 1000
+
 # WMI timeout option:
 # Sets the timeout (ms) for WMI queries. Windows only
 # Must be an integer.

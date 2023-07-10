@@ -24,6 +24,8 @@ General options:
     --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
     --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
     --pipe <?value>:                  Disable logo and all escape sequences
+    --wmi-timeout <num>:              Set the timeout (ms) for WMI queries. Windows only. Default is 5000
+    --processing-timeout <num>:       Set the timeout (ms) when waiting for child processes. Default is 1000
 
 Logo options:
     -l,--logo <logo>:                      Set the logo; if default, the name of a builtin logo or a path to a file

@@ -58,9 +58,9 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if(!success)
         return "CreateProcessA() failed";
 
-    if (FF_WAIT_TIMEOUT > 0)
+    if (instance.config.processingTimeout > 0)
     {
-        DWORD ret = WaitForSingleObjectEx(piProcInfo.hProcess, FF_WAIT_TIMEOUT, TRUE);
+        DWORD ret = WaitForSingleObjectEx(piProcInfo.hProcess, (DWORD) instance.config.processingTimeout, TRUE);
         if (ret == WAIT_TIMEOUT)
         {
             TerminateProcess(piProcInfo.hProcess, 1);

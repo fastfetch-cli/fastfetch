@@ -50,6 +50,7 @@ typedef struct FFconfig
     bool multithreading;
     bool stat;
     bool noBuffer;
+    int32_t processingTimeout;
 
     // Module options that cannot be put in module option structure
     #if defined(__linux__) || defined(__FreeBSD__)

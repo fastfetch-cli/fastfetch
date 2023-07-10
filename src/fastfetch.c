@@ -859,6 +859,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         instance.config.pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);
+    else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
+        instance.config.processingTimeout = ffOptionParseInt32(key, value);
 
     #if defined(__linux__) || defined(__FreeBSD__)
     else if(ffStrEqualsIgnCase(key, "--player-name"))

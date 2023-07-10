@@ -16,15 +16,17 @@
 
 int waitpid_timeout(pid_t pid, int* status)
 {
-    if (FF_WAIT_TIMEOUT <= 0)
+    if (instance.config.processingTimeout <= 0)
         return waitpid(pid, status, 0);
+
+    uint32_t timeout = (uint32_t) instance.config.processingTimeout;
 
     #if defined(__linux__) && defined(SYS_pidfd_open) // musl don't define SYS_pidfd_open
 
     FF_AUTO_CLOSE_FD int pidfd = (int) syscall(SYS_pidfd_open, pid, 0);
     if (pidfd >= 0)
     {
-        int res = poll(&(struct pollfd) { .events = POLLIN, .fd = pidfd }, 1, FF_WAIT_TIMEOUT);
+        int res = poll(&(struct pollfd) { .events = POLLIN, .fd = pidfd }, 1, (int) timeout);
         if (res > 0)
             return (int) waitpid(pid, status, WNOHANG);
         else if (res == 0)
@@ -43,8 +45,8 @@ int waitpid_timeout(pid_t pid, int* status)
         int res = (int) waitpid(pid, status, WNOHANG);
         if (res != 0)
             return res;
-        if (ffTimeGetTick() - start < FF_WAIT_TIMEOUT)
-            ffTimeSleep(FF_WAIT_TIMEOUT / 10);
+        if (ffTimeGetTick() - start < timeout)
+            ffTimeSleep(timeout / 10);
         else
         {
             kill(pid, SIGTERM);
