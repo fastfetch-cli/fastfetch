@@ -11,8 +11,7 @@
 
 #ifdef __linux__
     #include <sys/syscall.h>
-    #include <sys/poll.h>
-    #include <errno.h>
+    #include <poll.h>
 #endif
 
 #define FF_WAIT_TIMEOUT 1000
@@ -33,7 +32,7 @@ int waitpid_timeout(pid_t pid, int* status)
         else if (res == 0)
         {
             kill(pid, SIGTERM);
-            return -ETIME;
+            return -62; // -ETIME
         }
         return -1;
     }
@@ -51,7 +50,7 @@ int waitpid_timeout(pid_t pid, int* status)
         else
         {
             kill(pid, SIGTERM);
-            return -ETIME;
+            return -62; // -ETIME
         }
     }
 }
