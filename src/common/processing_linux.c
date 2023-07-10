@@ -75,7 +75,7 @@ const char* ffProcessAppendStdErr(FFstrbuf* buffer, char* const argv[])
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
     int status = -1;
-    if(waitpid(childPid, &status, 0) < 0)
+    if(waitpid(childPid, &status, WNOHANG) < 0)
         return "waitpid(childPid, &status, 0) failed";
 
     if (!WIFEXITED(status))
