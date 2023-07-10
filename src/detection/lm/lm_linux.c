@@ -95,7 +95,7 @@ static const char* getXfwmVersion(FFstrbuf* version)
 
 static const char* getLightdmVersion(FFstrbuf* version)
 {
-    const char* error = ffProcessAppendStdOut(version, (char* const[]) {
+    const char* error = ffProcessAppendStdErr(version, (char* const[]) {
         "lightdm",
         "--version",
         NULL

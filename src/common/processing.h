@@ -6,5 +6,6 @@
 #include "util/FFstrbuf.h"
 
 const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]);
+const char* ffProcessAppendStdErr(FFstrbuf* buffer, char* const argv[]);
 
 #endif
