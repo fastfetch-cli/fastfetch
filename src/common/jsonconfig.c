@@ -389,7 +389,23 @@ const char* ffParseDisplayJsonConfig(void)
         else if (ffStrEqualsIgnCase(key, "sizeNdigits"))
             config->sizeNdigits = (uint8_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "sizeMaxPrefix"))
-            config->sizeMaxPrefix = (uint8_t) yyjson_get_uint(val);
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "B", 0 },
+                { "kB", 1 },
+                { "MB", 2 },
+                { "GB", 3 },
+                { "TB", 4 },
+                { "PB", 5 },
+                { "EB", 6 },
+                { "ZB", 7 },
+                { "YB", 8 },
+                {}
+            });
+            if (error) return error;
+            config->sizeMaxPrefix = (uint8_t) value;
+        }
         else if (ffStrEqualsIgnCase(key, "percentType"))
             config->percentType = (uint32_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "noBuffer"))

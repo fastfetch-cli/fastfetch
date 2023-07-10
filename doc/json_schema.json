@@ -302,9 +302,10 @@
                     "default": 2
                 },
                 "sizeMaxPrefix": {
-                    "type": "integer",
-                    "title": "Set the largest binary prefix to use when formatting sizes. 0 is B; 1 is KB; 2 is MB; etc.",
-                    "default": 255
+                    "type": "string",
+                    "title": "Set the largest binary prefix to use when formatting sizes",
+                    "enum": ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+                    "default": "YB"
                 },
                 "percentType": {
                     "type": "number",

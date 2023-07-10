@@ -918,7 +918,20 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(ffStrEqualsIgnCase(key, "--size-ndigits"))
         instance.config.sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--size-max-prefix"))
-        instance.config.sizeMaxPrefix = (uint8_t) ffOptionParseUInt32(key, value);
+    {
+        instance.config.sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "B", 0 },
+            { "kB", 1 },
+            { "MB", 2 },
+            { "GB", 3 },
+            { "TB", 4 },
+            { "PB", 5 },
+            { "EB", 6 },
+            { "ZB", 7 },
+            { "YB", 8 },
+            {}
+        });
+    }
     else if(ffStrEqualsIgnCase(key, "--percent-type"))
         instance.config.percentType = ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
