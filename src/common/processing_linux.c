@@ -21,7 +21,7 @@ int waitpid_timeout(pid_t pid, int* status)
     if (FF_WAIT_TIMEOUT <= 0)
         return waitpid(pid, status, 0);
 
-    #ifdef __linux__
+    #if defined(__linux__) && defined(SYS_pidfd_open) // musl don't define SYS_pidfd_open
 
     FF_AUTO_CLOSE_FD int pidfd = (int) syscall(SYS_pidfd_open, pid, 0);
     if (pidfd >= 0)
