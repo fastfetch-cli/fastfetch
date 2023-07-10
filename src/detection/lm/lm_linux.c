@@ -24,6 +24,23 @@ static const char* getGdmVersion(FFstrbuf* version)
     return NULL;
 }
 
+static const char* getSshdVersion(FFstrbuf* version)
+{
+    const char* error = ffProcessAppendStdErr(version, (char* const[]) {
+        "sshd",
+        "-qv",
+        NULL
+    });
+    if (error)
+        return error;
+
+    // unknown option -- v
+    // OpenSSH_9.0p1, OpenSSL 3.0.9 30 May 2023...
+    ffStrbufSubstrBeforeFirstC(version, ',');
+    ffStrbufSubstrAfterFirstC(version, '_');
+    return NULL;
+}
+
 #ifdef FF_HAVE_ZLIB
 #include "common/library.h"
 #include <stdlib.h>
@@ -147,6 +164,8 @@ const char* ffDetectLM(FFLMResult* result)
         getXfwmVersion(&result->version);
     else if (ffStrbufStartsWithS(&result->service, "lightdm"))
         getLightdmVersion(&result->version);
+    else if (ffStrbufStartsWithS(&result->service, "sshd"))
+        getSshdVersion(&result->version);
 
     // Correct char cases
     if (ffStrbufIgnCaseEqualS(&result->type, FF_WM_PROTOCOL_WAYLAND))
