@@ -5,55 +5,8 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/wait.h>
-#include <sys/time.h>
 #include <signal.h>
-
-#ifdef __linux__
-    #include <sys/syscall.h>
-    #include <poll.h>
-#endif
-
-int waitpid_timeout(pid_t pid, int* status)
-{
-    if (instance.config.processingTimeout <= 0)
-        return waitpid(pid, status, 0);
-
-    uint32_t timeout = (uint32_t) instance.config.processingTimeout;
-
-    #if defined(__linux__) && defined(SYS_pidfd_open) // musl don't define SYS_pidfd_open
-
-    FF_AUTO_CLOSE_FD int pidfd = (int) syscall(SYS_pidfd_open, pid, 0);
-    if (pidfd >= 0)
-    {
-        int res = poll(&(struct pollfd) { .events = POLLIN, .fd = pidfd }, 1, (int) timeout);
-        if (res > 0)
-            return (int) waitpid(pid, status, WNOHANG);
-        else if (res == 0)
-        {
-            kill(pid, SIGTERM);
-            return -62; // -ETIME
-        }
-        return -1;
-    }
-
-    #endif
-
-    uint64_t start = ffTimeGetTick();
-    while (true)
-    {
-        int res = (int) waitpid(pid, status, WNOHANG);
-        if (res != 0)
-            return res;
-        if (ffTimeGetTick() - start < timeout)
-            ffTimeSleep(timeout / 10);
-        else
-        {
-            kill(pid, SIGTERM);
-            return -62; // -ETIME
-        }
-    }
-}
+#include <poll.h>
 
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
@@ -81,16 +34,27 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     close(pipes[1]);
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
-    int status = -1;
-    if(waitpid_timeout(childPid, &status) < 0)
-        return "waitpid(childPid, &status) failed";
+    if (instance.config.processingTimeout >= 0)
+    {
+        struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
+        if (poll(&pollfd, 1, (int) instance.config.processingTimeout) == 0)
+        {
+            kill(childPid, SIGTERM);
+            return "poll(&pollfd, 1, (int) instance.config.processingTimeout) timeout";
+        }
+        else if (pollfd.revents & POLLERR)
+        {
+            kill(childPid, SIGTERM);
+            return "poll(&pollfd, 1, (int) instance.config.processingTimeout) error";
+        }
+        else if (pollfd.revents & POLLHUP)
+        {
+            return "Child process closed its end (nothing to read)";
+        }
+    }
 
-    if (!WIFEXITED(status))
-        return "WIFEXITED(status) == false";
-
-    if(WEXITSTATUS(status) == 901)
-        return "WEXITSTATUS(status) == 901 ( execvp failed )";
-
+    // Note that we only know we have something to read here
+    // However the child process may still block later
     if(!ffAppendFDBuffer(childPipeFd, buffer))
         return "ffAppendFDBuffer(childPipeFd, buffer) failed";
 
