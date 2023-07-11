@@ -82,31 +82,34 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     DWORD nRead = 0;
     OVERLAPPED overlapped = {};
     // ReadFile always completes synchronously if the pipe is not created with FILE_FLAG_OVERLAPPED
-    if (!ReadFile(hChildPipeRead, str, sizeof(str), &nRead, &overlapped))
+    do
     {
-        if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, (DWORD) timeout, TRUE))
-        {
-            if (GetLastError() == ERROR_BROKEN_PIPE)
-                return "Child process closed its end (nothing to read)";
-            CancelIo(hChildPipeRead);
-            TerminateProcess(piProcInfo.hProcess, 1);
-            return "GetOverlappedResultEx(hChildPipeRead) failed or timeout";
-        }
-    }
-    while (nRead > 0)
-    {
-        ffStrbufAppendNS(buffer, nRead, str);
         if (!ReadFile(hChildPipeRead, str, sizeof(str), &nRead, &overlapped))
         {
-            if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, TRUE))
+            switch (GetLastError())
             {
-                if (GetLastError() == ERROR_BROKEN_PIPE)
-                    return NULL;
+            case ERROR_IO_PENDING:
+                if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, (DWORD) timeout, TRUE))
+                {
+                    if (GetLastError() == ERROR_BROKEN_PIPE)
+                        return NULL;
+                    CancelIo(hChildPipeRead);
+                    TerminateProcess(piProcInfo.hProcess, 1);
+                    return "GetOverlappedResultEx(hChildPipeRead) failed or timeout";
+                }
+                break;
+
+            case ERROR_BROKEN_PIPE:
+                return NULL;
+
+            default:
                 CancelIo(hChildPipeRead);
-                return "GetOverlappedResult(hChildPipeRead) failed";
+                TerminateProcess(piProcInfo.hProcess, 1);
+                return "ReadFile(hChildPipeRead) failed";
             }
         }
-    }
+        ffStrbufAppendNS(buffer, nRead, str);
+    } while (nRead > 0);
 
     return NULL;
 }

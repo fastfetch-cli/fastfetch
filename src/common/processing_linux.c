@@ -49,7 +49,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         }
         else if (pollfd.revents & POLLHUP)
         {
-            return "Child process closed its end (nothing to read)";
+            return NULL;
         }
     }
 
