@@ -7,6 +7,10 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+#include <fcntl.h>
+#include <errno.h>
+
+enum { FF_PIPE_BUFSIZ = 4096 };
 
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
@@ -34,29 +38,44 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     close(pipes[1]);
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
-    if (instance.config.processingTimeout >= 0)
-    {
-        struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
-        if (poll(&pollfd, 1, (int) instance.config.processingTimeout) == 0)
-        {
-            kill(childPid, SIGTERM);
-            return "poll(&pollfd, 1, (int) instance.config.processingTimeout) timeout";
-        }
-        else if (pollfd.revents & POLLERR)
-        {
-            kill(childPid, SIGTERM);
-            return "poll(&pollfd, 1, (int) instance.config.processingTimeout) error";
-        }
-        else if (pollfd.revents & POLLHUP)
-        {
-            return NULL;
-        }
-    }
 
-    // Note that we only know we have something to read here
-    // However the child process may still block later
-    if(!ffAppendFDBuffer(childPipeFd, buffer))
-        return "ffAppendFDBuffer(childPipeFd, buffer) failed";
+    int timeout = instance.config.processingTimeout;
+    if (timeout >= 0)
+        fcntl(childPipeFd, F_SETFL, fcntl(childPipeFd, F_GETFL) | O_NONBLOCK);
+
+    do
+    {
+        if (timeout >= 0)
+        {
+            struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
+            if (poll(&pollfd, 1, timeout) == 0)
+            {
+                kill(childPid, SIGTERM);
+                return "poll(&pollfd, 1, timeout) timeout";
+            }
+            else if (pollfd.revents & POLLERR)
+            {
+                kill(childPid, SIGTERM);
+                return "poll(&pollfd, 1, timeout) error";
+            }
+            else if (pollfd.revents & POLLHUP)
+            {
+                return NULL;
+            }
+        }
+
+        char str[FF_PIPE_BUFSIZ];
+        while (true)
+        {
+            ssize_t nRead = read(childPipeFd, str, FF_PIPE_BUFSIZ);
+            if (nRead > 0)
+                ffStrbufAppendNS(buffer, (uint32_t) nRead, str);
+            else if (nRead == 0)
+                return NULL;
+            else if (nRead < 0)
+                break;
+        }
+    } while (errno == EAGAIN);
 
     return NULL;
 }
