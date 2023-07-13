@@ -122,6 +122,7 @@ static const char* getLightdmVersion(FFstrbuf* version)
 
     // lightdm 1.30.0
     ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufTrimRight(version, '\n');
 
     return NULL;
 }
