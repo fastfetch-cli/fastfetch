@@ -323,7 +323,7 @@ const char* ffDetectWifi(FFlist* result)
     #endif
 
     #ifdef FF_DETECT_WIFI_WITH_IOCTLS
-        detectWifiWithIoctls(result);
+        return detectWifiWithIoctls(result);
     #endif
 
     return "linux/wireless.h not found during compilation";
