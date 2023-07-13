@@ -80,6 +80,7 @@ cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
+cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -726,6 +727,10 @@ if(ENABLE_THREADS)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
+endif()
+
+if(ENABLE_PCI_MEMORY)
+    target_compile_definitions(libfastfetch PRIVATE FF_USE_PCI_MEMORY)
 endif()
 
 if(APPLE)

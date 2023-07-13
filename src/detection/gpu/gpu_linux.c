@@ -147,7 +147,7 @@ FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, struct pci_dev* devi
     }
 }
 
-static bool pciDetectMemory(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* device)
+FF_MAYBE_UNUSED static bool pciDetectMemory(FFGPUResult* gpu, const PCIData* pci, struct pci_dev* device)
 {
     gpu->dedicated.used = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
 
@@ -180,7 +180,7 @@ static bool pciDetectMemory(FFGPUResult* gpu, const PCIData* pci, struct pci_dev
     return true;
 }
 
-static void pciDetectType(FFGPUResult* gpu)
+FF_MAYBE_UNUSED static void pciDetectType(FFGPUResult* gpu)
 {
     //There is no straightforward way to detect the type of a GPU.
     //The approach taken here is to look at the memory sizes of the device.
@@ -224,11 +224,16 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
 
-    pciDetectMemory(gpu, pci, device);
-    pciDetectType(gpu);
+    #if FF_USE_PCI_MEMORY
+        // Libpci reports at least 2 false results (#495, #497)
+        pciDetectMemory(gpu, pci, device);
+        pciDetectType(gpu);
+    #else
+        gpu->dedicated.used = gpu->shared.used = gpu->dedicated.total = gpu->shared.total = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+    #endif
 
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
-
     gpu->temperature = FF_GPU_TEMP_UNSET;
 
     #ifdef __linux__
