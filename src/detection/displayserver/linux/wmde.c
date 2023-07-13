@@ -289,24 +289,52 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 {
     if(!ffStrSet(name))
         return;
-    else if(strcasestr(name, "plasma") != NULL || strcasecmp(name, "KDE") == 0)
-        getKDE(result);
-    else if(strcasestr(name, "budgie") != NULL)
-        getBudgie(result);
+
     else if(
-        strcasecmp(name, "polkit-gnome") != 0 &&
-        strcasecmp(name, "gnome-keyring") != 0 &&
-        strcasestr(name, "gnome") != NULL
-    )
-        getGnome(result);
-    else if(strcasestr(name, "cinnamon") != NULL)
-        getCinnamon(result);
-    else if(strcasestr(name, "xfce") != NULL)
-        getXFCE4(result);
-    else if(strcasestr(name, "mate") != NULL)
-        getMate(result);
-    else if(strcasestr(name, "lxqt") != NULL)
-        getLXQt(result);
+        strcasecmp(name, "KDE") == 0 ||
+        strcasecmp(name, "plasma") == 0 ||
+        strcasecmp(name, "plasmashell") == 0 ||
+        strcasecmp(name, "plasmawayland") == 0
+    ) getKDE(result);
+
+    else if(
+        strcasecmp(name, "Gnome") == 0 ||
+        strcasecmp(name, "ubuntu:GNOME") == 0 ||
+        strcasecmp(name, "ubuntu") == 0 ||
+        strcasecmp(name, "gnome-shell") == 0
+    ) getGnome(result);
+
+    else if(
+        strcasecmp(name, "X-Cinnamon") == 0 ||
+        strcasecmp(name, "Cinnamon") == 0
+    ) getCinnamon(result);
+
+    else if(
+        strcasecmp(name, "XFCE") == 0 ||
+        strcasecmp(name, "X-XFCE") == 0 ||
+        strcasecmp(name, "XFCE4") == 0 ||
+        strcasecmp(name, "X-XFCE4") == 0 ||
+        strcasecmp(name, "xfce4-session") == 0
+    ) getXFCE4(result);
+
+    else if(
+        strcasecmp(name, "MATE") == 0 ||
+        strcasecmp(name, "X-MATE") == 0 ||
+        strcasecmp(name, "mate-session") == 0
+    ) getMate(result);
+
+    else if(
+        strcasecmp(name, "LXQt") == 0 ||
+        strcasecmp(name, "X-LXQT") == 0 ||
+        strcasecmp(name, "lxqt-session") == 0
+    ) getLXQt(result);
+
+    else if(
+        strcasecmp(name, "Budgie") == 0 ||
+        strcasecmp(name, "X-Budgie") == 0 ||
+        strcasecmp(name, "budgie-desktop") == 0 ||
+        strcasecmp(name, "Budgie:GNOME") == 0
+    ) getBudgie(result);
 }
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
