@@ -146,6 +146,10 @@ static const char* detectWithDdcci(FFlist* result)
                     if (ffStrbufStartsWithS(&brightness->name, "card"))
                         ffStrbufSubstrAfterFirstC(&brightness->name, '-');
                 }
+                else
+                {
+                    ffStrbufAppendS(&brightness->name, display->model_name);
+                }
             }
             ffddca_close_display(handle);
         }
