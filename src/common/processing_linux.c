@@ -9,8 +9,16 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <wait.h>
 
 enum { FF_PIPE_BUFSIZ = 4096 };
+
+static inline void waitpid_wrapper(pid_t* pid)
+{
+    // remove zombie processes
+    if (*pid > 0)
+        waitpid(*pid, NULL, 0);
+}
 
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
@@ -19,7 +27,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if(pipe(pipes) == -1)
         return "pipe() failed";
 
-    pid_t childPid = fork();
+    __attribute__((__cleanup__(waitpid_wrapper))) pid_t childPid = fork();
     if(childPid == -1)
         return "fork() failed";
 
