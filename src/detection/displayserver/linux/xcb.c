@@ -17,6 +17,7 @@ typedef struct XcbPropertyData
     FF_LIBRARY_SYMBOL(xcb_get_property_value_length)
     FF_LIBRARY_SYMBOL(xcb_get_atom_name)
     FF_LIBRARY_SYMBOL(xcb_get_atom_name_name)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name_name_length)
     FF_LIBRARY_SYMBOL(xcb_get_atom_name_reply)
 } XcbPropertyData;
 
@@ -30,6 +31,7 @@ static bool xcbInitPropertyData(void* libraryHandle, XcbPropertyData* propertyDa
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value_length, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name_length, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_reply, false)
 
     return true;
@@ -293,11 +295,10 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         data->propData.ffxcb_get_atom_name(data->connection, monitor->name),
         NULL
     );
-    char* buf = data->propData.ffxcb_get_atom_name_name(nameReply);
-    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(buf);
-    // name.chars = buf;
-    // name.allocated = (uint32_t) strlen(buf);
-    // name.length = name.allocated;
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateNS(
+        (uint32_t) data->propData.ffxcb_get_atom_name_name_length(nameReply),
+        data->propData.ffxcb_get_atom_name_name(nameReply)
+    );
 
     bool foundOutput = false;
 
