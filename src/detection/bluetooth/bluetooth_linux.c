@@ -193,7 +193,7 @@ static const char* detectBluetooth(FFlist* devices)
 
 #endif
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothDevice */)
 {
     #ifdef FF_HAVE_DBUS
         return detectBluetooth(devices);
