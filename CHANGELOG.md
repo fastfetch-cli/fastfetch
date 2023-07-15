@@ -23,6 +23,7 @@ Features:
 * Support detecting brightness of external displays with DDC/CI (guard behind `--allow-slow-operations`) (Brightness)
 * Add option `--size-ndigits` and `--size-max-prefix` (#494)
 * Add option `--processing-timeout` to the timeout when waiting for child processes.
+* Public IP module prints the IP location if `--publicip-url` is not set
 
 # 1.12.2
 

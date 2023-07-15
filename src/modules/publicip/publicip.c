@@ -10,10 +10,17 @@
 static FFNetworkingState state;
 static int status = -1;
 
+static inline void wrapYyjsonFree(yyjson_doc** doc)
+{
+    assert(doc);
+    if (*doc)
+        yyjson_doc_free(*doc);
+}
+
 void ffPreparePublicIp(FFPublicIpOptions* options)
 {
     if (options->url.length == 0)
-        status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/ip", NULL);
+        status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/json", NULL);
     else
     {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);
@@ -56,6 +63,22 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     if (options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+
+        if (options->url.length == 0)
+        {
+            yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(result.chars, result.length, 0, NULL, NULL);
+            if (doc)
+            {
+                yyjson_val* root = yyjson_doc_get_root(doc);
+                printf("%s (%s, %s)\n",
+                    yyjson_get_str(yyjson_obj_get(root, "ip")),
+                    yyjson_get_str(yyjson_obj_get(root, "city")),
+                    yyjson_get_str(yyjson_obj_get(root, "country"))
+                );
+                return;
+            }
+        }
+
         ffStrbufPutTo(&result, stdout);
     }
     else
