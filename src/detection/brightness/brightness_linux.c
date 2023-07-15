@@ -116,6 +116,7 @@ static const char* detectWithDdcci(FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
+    libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (__builtin_expect(ffddca_get_display_info_list2(false, &infoList) < 0, 0))
