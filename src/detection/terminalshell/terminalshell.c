@@ -83,7 +83,6 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
         return false;
 
     //fish, version 3.6.0
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
@@ -101,7 +100,6 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
     if(!getExeVersionRaw(exe, version))
         return false;
 
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
@@ -118,7 +116,6 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
         NULL
     })) return false;
 
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
