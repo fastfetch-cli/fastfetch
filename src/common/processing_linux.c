@@ -9,7 +9,7 @@
 #include <poll.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <wait.h>
+#include <sys/wait.h>
 
 enum { FF_PIPE_BUFSIZ = 4096 };
 
