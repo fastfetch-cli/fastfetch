@@ -208,6 +208,11 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("WT_SESSION") != NULL ||
         getenv("WT_PROFILE_ID") != NULL
     )) term = "Windows Terminal";
+
+    //ConEmu
+    if(!ffStrSet(term) && (
+        getenv("ConEmuPID") != NULL
+    )) term = "ConEmu";
     #endif
 
     //Alacritty
@@ -236,15 +241,6 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     //MacOS, mintty
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
-
-    #ifdef __linux__
-    if(!ffStrSet(term))
-    {
-        //We are in WSL but not in Windows Terminal
-        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
-            term = "conhost";
-    }
-    #endif
 
     //Normal Terminal
     if(!ffStrSet(term))
