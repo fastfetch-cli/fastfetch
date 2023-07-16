@@ -78,9 +78,13 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if(!success)
         return "CreateProcessA() failed";
 
+    FF_AUTO_CLOSE_FD HANDLE hProcess = piProcInfo.hProcess;
+    FF_MAYBE_UNUSED FF_AUTO_CLOSE_FD HANDLE hThread = piProcInfo.hThread;
+
     char str[FF_PIPE_BUFSIZ];
     DWORD nRead = 0;
-    OVERLAPPED overlapped = {};
+    FF_AUTO_CLOSE_FD HANDLE hEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
+    OVERLAPPED overlapped = { .hEvent = hEvent };
     // ReadFile always completes synchronously if the pipe is not created with FILE_FLAG_OVERLAPPED
     do
     {
@@ -89,13 +93,21 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             switch (GetLastError())
             {
             case ERROR_IO_PENDING:
-                if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, (DWORD) timeout, TRUE))
+                if (!timeout || WaitForSingleObject(hEvent, (DWORD) timeout) != WAIT_OBJECT_0)
+                {
+                    CancelIo(hChildPipeRead);
+                    TerminateProcess(hProcess, 1);
+                    return "WaitForSingleObject(hEvent) failed or timeout";
+                }
+
+                if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, FALSE))
                 {
                     if (GetLastError() == ERROR_BROKEN_PIPE)
                         return NULL;
+
                     CancelIo(hChildPipeRead);
-                    TerminateProcess(piProcInfo.hProcess, 1);
-                    return "GetOverlappedResultEx(hChildPipeRead) failed or timeout";
+                    TerminateProcess(hProcess, 1);
+                    return "GetOverlappedResult(hChildPipeRead) failed";
                 }
                 break;
 
@@ -104,7 +116,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
             default:
                 CancelIo(hChildPipeRead);
-                TerminateProcess(piProcInfo.hProcess, 1);
+                TerminateProcess(hProcess, 1);
                 return "ReadFile(hChildPipeRead) failed";
             }
         }
