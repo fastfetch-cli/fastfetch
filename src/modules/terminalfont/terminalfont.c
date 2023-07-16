@@ -11,6 +11,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 {
     FFTerminalFontResult terminalFont;
     ffFontInit(&terminalFont.font);
+    ffFontInit(&terminalFont.fallback);
     ffStrbufInit(&terminalFont.error);
 
     if(!ffDetectTerminalFont(&terminalFont))
@@ -22,7 +23,13 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-            ffStrbufPutTo(&terminalFont.font.pretty, stdout);
+            ffStrbufWriteTo(&terminalFont.font.pretty, stdout);
+            if(terminalFont.fallback.pretty.length)
+            {
+                fputs(" / ", stdout);
+                ffStrbufWriteTo(&terminalFont.fallback.pretty, stdout);
+            }
+            putchar('\n');
         }
         else
         {
@@ -37,6 +44,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
     ffStrbufDestroy(&terminalFont.error);
     ffFontDestroy(&terminalFont.font);
+    ffFontDestroy(&terminalFont.fallback);
 }
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)

@@ -38,6 +38,14 @@ static void detectIterm2(FFTerminalFontResult* terminalFont)
             return;
         }
         ffFontInitWithSpace(&terminalFont->font, normalFont.UTF8String);
+
+        NSNumber* useNonAsciiFont = [bookmark valueForKey:@"Use Non-ASCII Font"];
+        if(useNonAsciiFont.boolValue)
+        {
+            NSString* nonAsciiFont = [bookmark valueForKey:@"Non Ascii Font"];
+            if (nonAsciiFont)
+                ffFontInitWithSpace(&terminalFont->fallback, nonAsciiFont.UTF8String);
+        }
         return;
     }
 
