@@ -15,7 +15,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
     if(options->moduleArgs.key.length == 0)
     {
-        ffStrbufAppendF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
+        if(instance.config.pipe)
+            ffStrbufAppendF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
+        else
+            ffStrbufAppendF(&key, "%s (\e]8;;file://%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars, disk->mountpoint.chars);
     }
     else
     {
