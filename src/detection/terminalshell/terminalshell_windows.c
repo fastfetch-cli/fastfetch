@@ -1,7 +1,10 @@
 #include "terminalshell.h"
+#include "common/io/io.h"
 #include "common/processing.h"
 #include "common/thread.h"
 #include "util/mallocHelper.h"
+#include "util/windows/registry.h"
+#include "util/windows/unicode.h"
 
 #include <windows.h>
 #include <wchar.h>
@@ -161,6 +164,118 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     return ppid;
 }
 
+static bool getTerminalFromEnv(FFTerminalShellResult* result)
+{
+    if(
+        result->terminalProcessName.length > 0 &&
+        ffStrbufIgnCaseCompS(&result->terminalProcessName, "explorer") != 0
+    ) return false;
+
+    const char* term = getenv("ConEmuPID");
+
+    if(term)
+    {
+        //ConEmu
+        uint32_t pid = (uint32_t) strtoul(term, NULL, 10);
+        result->terminalPid = pid;
+        getProcessInfo(pid, NULL, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);
+        return true;
+    }
+
+    //SSH
+    if(getenv("SSH_CONNECTION") != NULL)
+        term = getenv("SSH_TTY");
+
+    //Windows Terminal
+    if(!term && (
+        getenv("WT_SESSION") != NULL ||
+        getenv("WT_PROFILE_ID") != NULL
+    )) term = "Windows Terminal";
+
+    //Alacritty
+    if(!term && (
+        getenv("ALACRITTY_SOCKET") != NULL ||
+        getenv("ALACRITTY_LOG") != NULL ||
+        getenv("ALACRITTY_WINDOW_ID") != NULL
+    )) term = "Alacritty";
+
+    if(!term)
+        term = getenv("TERM_PROGRAM");
+
+    //Normal Terminal
+    if(!term)
+        term = getenv("TERM");
+
+    if(term)
+    {
+        ffStrbufSetS(&result->terminalProcessName, term);
+        ffStrbufSetS(&result->terminalPrettyName, term);
+        ffStrbufSetS(&result->terminalExe, term);
+        result->terminalExeName = "";
+        return true;
+    }
+
+    return false;
+}
+
+static bool detectDefaultTerminal(FFTerminalShellResult* result)
+{
+    wchar_t regPath[128] = L"SOFTWARE\\Classes\\PackagedCom\\ClassIndex\\";
+    wchar_t* uuid = regPath + strlen("SOFTWARE\\Classes\\PackagedCom\\ClassIndex\\");
+    DWORD bufSize = 80;
+    if (RegGetValueW(HKEY_CURRENT_USER, L"Console\\%%Startup", L"DelegationTerminal", RRF_RT_REG_SZ, NULL, uuid, &bufSize) == ERROR_SUCCESS)
+    {
+        if(wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0)
+        {
+            // Let Windows deside
+            return false;
+        }
+        if(wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0)
+        {
+            goto conhost;
+        }
+
+        FF_HKEY_AUTO_DESTROY hKey = NULL;
+        if(ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL))
+        {
+            FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+            if(ffRegGetSubKey(hKey, 0, &path, NULL))
+            {
+                if (ffStrbufStartsWithS(&path, "Microsoft.WindowsTerminal"))
+                {
+                    ffStrbufSetS(&result->terminalProcessName, "WindowsTerminal.exe");
+                    ffStrbufSetS(&result->terminalPrettyName, "WindowsTerminal");
+                    ffStrbufSetF(&result->terminalExe, "%s\\WindowsApps\\%s\\WindowsTerminal.exe", getenv("ProgramFiles"), path.chars);
+                    if(ffPathExists(result->terminalExe.chars, FF_PATHTYPE_FILE))
+                    {
+                        result->terminalExeName = result->terminalExe.chars + ffStrbufLastIndexC(&result->terminalExe, '\\') + 1;
+                    }
+                    else
+                    {
+                        ffStrbufDestroy(&result->terminalExe);
+                        ffStrbufInitMove(&result->terminalExe, &path);
+                        result->terminalExeName = "";
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+
+conhost:
+    ffStrbufSetF(&result->terminalExe, "%s\\System32\\conhost.exe", getenv("SystemRoot"));
+    if(ffPathExists(result->terminalExe.chars, FF_PATHTYPE_FILE))
+    {
+        ffStrbufSetS(&result->terminalProcessName, "conhost.exe");
+        ffStrbufSetS(&result->terminalPrettyName, "conhost");
+        result->terminalExeName = result->terminalExe.chars + ffStrbufLastIndexC(&result->terminalExe, '\\') + 1;
+        return true;
+    }
+
+    ffStrbufClear(&result->terminalExe);
+    return false;
+}
+
 static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
@@ -196,11 +311,14 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         // A CUI program created by Windows Explorer will spawn a conhost as its child.
         // However the conhost process is just a placeholder;
         // The true terminal can be Windows Terminal or others.
-        ffStrbufClear(&result->terminalProcessName);
-        ffStrbufClear(&result->terminalPrettyName);
-        ffStrbufClear(&result->terminalExe);
-        result->terminalExeName = "";
-        return 0;
+        if (!getTerminalFromEnv(result) && !detectDefaultTerminal(result))
+        {
+            ffStrbufClear(&result->terminalProcessName);
+            ffStrbufClear(&result->terminalPrettyName);
+            ffStrbufClear(&result->terminalExe);
+            result->terminalExeName = "";
+            return 0;
+        }
     }
     else
         result->terminalPid = pid;
@@ -222,48 +340,6 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufInitS(&result->terminalPrettyName, "WezTerm");
 
     return ppid;
-}
-
-static void getTerminalFromEnv(FFTerminalShellResult* result)
-{
-    if(
-        result->terminalProcessName.length > 0 &&
-        ffStrbufIgnCaseCompS(&result->terminalProcessName, "explorer") != 0
-    ) return;
-
-    const char* term = NULL;
-
-    //SSH
-    if(getenv("SSH_CONNECTION") != NULL)
-        term = getenv("SSH_TTY");
-
-    //Windows Terminal
-    if(!term && (
-        getenv("WT_SESSION") != NULL ||
-        getenv("WT_PROFILE_ID") != NULL
-    )) term = "Windows Terminal";
-
-    //Alacritty
-    if(!term && (
-        getenv("ALACRITTY_SOCKET") != NULL ||
-        getenv("ALACRITTY_LOG") != NULL ||
-        getenv("ALACRITTY_WINDOW_ID") != NULL
-    )) term = "Alacritty";
-
-    if(!term)
-        term = getenv("TERM_PROGRAM");
-
-    //Normal Terminal
-    if(!term)
-        term = getenv("TERM");
-
-    if(term)
-    {
-        ffStrbufSetS(&result->terminalProcessName, term);
-        ffStrbufSetS(&result->terminalPrettyName, term);
-        ffStrbufSetS(&result->terminalExe, term);
-        result->terminalExeName = "";
-    }
 }
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);

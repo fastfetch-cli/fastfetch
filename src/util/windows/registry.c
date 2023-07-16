@@ -97,3 +97,24 @@ bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFs
     }
     return true;
 }
+
+bool ffRegGetSubKey(HKEY hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error)
+{
+    DWORD bufSize = 0;
+    if(RegQueryInfoKeyW(hKey, NULL, NULL, NULL, NULL, &bufSize, NULL, NULL, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+    {
+        if (error)
+            ffStrbufAppendS(error, "RegQueryInfoKeyW(hKey) failed");
+        return false;
+    }
+    ++bufSize;
+    wchar_t* FF_AUTO_FREE resultW = (wchar_t*) malloc(bufSize * sizeof(*resultW));
+    if(RegEnumKeyExW(hKey, index, resultW, &bufSize, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+    {
+        if (error)
+            ffStrbufAppendF(error, "RegEnumKeyExW(hKey, %u) failed", (unsigned) index);
+        return false;
+    }
+    ffStrbufSetWS(result, resultW);
+    return true;
+}
