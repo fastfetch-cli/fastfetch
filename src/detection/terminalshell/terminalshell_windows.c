@@ -107,7 +107,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "fastfetch")     || //scoop warps the real binaries with a "shim" exe
         ffStrbufIgnCaseEqualS(&result->shellPrettyName, "flashfetch")    ||
         ffStrbufContainIgnCaseS(&result->shellPrettyName, "debug")       ||
-        ffStrbufStartsWithIgnCaseS(&result->shellPrettyName, "ConEmuC") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
+        ffStrbufStartsWithIgnCaseS(&result->shellPrettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
     ) {
         ffStrbufClear(&result->shellProcessName);
         ffStrbufClear(&result->shellPrettyName);
@@ -178,8 +178,17 @@ static bool getTerminalFromEnv(FFTerminalShellResult* result)
         //ConEmu
         uint32_t pid = (uint32_t) strtoul(term, NULL, 10);
         result->terminalPid = pid;
-        getProcessInfo(pid, NULL, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);
-        return true;
+        if(getProcessInfo(pid, NULL, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName))
+        {
+            ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
+            if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
+                ffStrbufSubstrBefore(&result->terminalPrettyName, result->terminalPrettyName.length - 4);
+            return true;
+        }
+        else
+        {
+            term = "ConEmu";
+        }
     }
 
     //SSH
@@ -295,7 +304,8 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "fish")           ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "nu")             ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell")     ||
-        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell_ise")
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell_ise") ||
+        ffStrbufStartsWithIgnCaseS(&result->terminalPrettyName, "ConEmuC") // wrapper process of ConEmu
     ) {
         //We are nested shell
         ffStrbufClear(&result->terminalProcessName);
@@ -334,8 +344,6 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetS(&result->terminalPrettyName, "Visual Studio Code");
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
         ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
-    else if(ffStrbufStartsWithIgnCaseS(&result->terminalPrettyName, "ConEmuC"))
-        ffStrbufSetS(&result->terminalPrettyName, "ConEmu");
     else if(ffStrbufEqualS(&result->terminalPrettyName, "wezterm-gui"))
         ffStrbufInitS(&result->terminalPrettyName, "WezTerm");
 

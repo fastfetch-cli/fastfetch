@@ -312,7 +312,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "WindowsTerminal.exe"))
         return getTerminalVersionWindowsTerminal(exe, version);
 
-    if(ffStrbufStartsWithIgnCaseS(processName, "ConEmuC"))
+    if(ffStrbufStartsWithIgnCaseS(processName, "ConEmu"))
         return getTerminalVersionConEmu(exe, version);
 
     #endif
