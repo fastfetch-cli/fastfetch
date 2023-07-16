@@ -172,6 +172,12 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         return;
     }
 
+    #ifdef __APPLE__
+    // https://github.com/fastfetch-cli/fastfetch/discussions/501
+    if (ffStrEndsWith(name, " (figterm)"))
+        getProcessNameAndPpid(ppid, name, &ppid);
+    #endif
+
     result->terminalPid = (uint32_t) pid;
     ffStrbufSetS(&result->terminalProcessName, name);
     getProcessInformation(pid, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);

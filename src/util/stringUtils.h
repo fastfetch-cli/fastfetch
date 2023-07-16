@@ -25,6 +25,15 @@ static inline bool ffStrStartsWith(const char* str, const char* compareTo)
     return strncmp(str, compareTo, strlen(compareTo)) == 0;
 }
 
+static inline bool ffStrEndsWith(const char* str, const char* compareTo)
+{
+    size_t strLength = strlen(str);
+    size_t compareToLength = strlen(compareTo);
+    if (strLength < compareToLength)
+        return false;
+    return memcmp(str + strLength - compareToLength, compareTo, compareToLength) == 0;
+}
+
 static inline bool ffStrEquals(const char* str, const char* compareTo)
 {
     return strcmp(str, compareTo) == 0;
