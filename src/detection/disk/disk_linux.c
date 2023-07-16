@@ -19,6 +19,10 @@ static bool isPhysicalDevice(FFstrbuf* device)
 {
     #ifndef __ANDROID__ //On Android, `/dev` is not accessable, so that the following checks always fail
 
+    //https://askubuntu.com/a/1289123
+    if(ffStrbufEqualS(device, "/cow"))
+        return true;
+
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(ffStrbufEqualS(device, "drvfs"))
         return true;
