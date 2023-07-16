@@ -78,45 +78,6 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
     return true;
 }
 
-static bool getTerminalInfoByEnumeratingChildProcesses(FFTerminalShellResult* result, uint32_t ppid)
-{
-    ULONG size = 0;
-    if(NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
-        return false;
-
-    size += sizeof(SystemProcessInformation) * 5; //What if new processes are created during two syscalls?
-
-    SYSTEM_PROCESS_INFORMATION* FF_AUTO_FREE pstart = (SYSTEM_PROCESS_INFORMATION*)malloc(size);
-    if(!pstart)
-        return false;
-
-    if(!NT_SUCCESS(NtQuerySystemInformation(SystemProcessInformation, pstart, size, NULL)))
-        return false;
-
-    uint32_t currentProcessId = (uint32_t) GetCurrentProcessId();
-
-    for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ptr->NextEntryOffset; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
-    {
-        if ((uint32_t)(uintptr_t) ptr->InheritedFromUniqueProcessId != ppid)
-            continue;
-
-        uint32_t pid = (uint32_t)(uintptr_t) ptr->UniqueProcessId;
-        if (pid == currentProcessId)
-            continue;
-
-        if(!getProcessInfo(pid, NULL, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName))
-            return false;
-
-        result->terminalPid = pid;
-        ffStrbufSet(&result->terminalPrettyName, &result->terminalProcessName);
-        if(ffStrbufEndsWithIgnCaseS(&result->terminalPrettyName, ".exe"))
-            ffStrbufSubstrBefore(&result->terminalPrettyName, result->terminalPrettyName.length - 4);
-
-        return true;
-    }
-    return false;
-}
-
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
@@ -232,14 +193,14 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
     if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "sihost")           ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer")
     ) {
+        // A CUI program created by Windows Explorer will spawn a conhost as its child.
+        // However the conhost process is just a placeholder;
+        // The true terminal can be Windows Terminal or others.
         ffStrbufClear(&result->terminalProcessName);
         ffStrbufClear(&result->terminalPrettyName);
         ffStrbufClear(&result->terminalExe);
         result->terminalExeName = "";
-
-        // Maybe terminal process is created by shell
-        if(!getTerminalInfoByEnumeratingChildProcesses(result, result->shellPid))
-            return 0;
+        return 0;
     }
     else
         result->terminalPid = pid;
