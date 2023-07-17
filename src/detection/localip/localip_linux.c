@@ -17,10 +17,12 @@
 #include <netpacket/packet.h>
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__ANDROID__)
 static bool getDefaultRoute(char iface[IF_NAMESIZE + 1])
 {
     FILE* FF_AUTO_CLOSE_FILE netRoute = fopen("/proc/net/route", "r");
+    if (!netRoute) return false;
+
     // skip first line
     flockfile(netRoute);
     while (getc_unlocked(netRoute) != '\n');
