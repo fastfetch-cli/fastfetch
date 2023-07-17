@@ -31,7 +31,7 @@ static void formatKey(const FFLocalIpOptions* options, const FFLocalIpResult* ip
     }
 }
 
-static void printIp(FFLocalIpResult* ip)
+static void printIp(FFLocalIpResult* ip, bool markDefaultRoute)
 {
     bool flag = false;
     if (ip->ipv4.length)
@@ -52,6 +52,8 @@ static void printIp(FFLocalIpResult* ip)
         else
             ffStrbufWriteTo(&ip->mac, stdout);
     }
+    if (markDefaultRoute && flag && ip->defaultRoute)
+        fputs(" *", stdout);
 }
 
 void ffPrintLocalIp(FFLocalIpOptions* options)
@@ -82,7 +84,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
         {
             if ((void*) ip != (void*) results.data)
                 fputs(" - ", stdout);
-            printIp(ip);
+            printIp(ip, false);
         }
         putchar('\n');
     }
@@ -96,7 +98,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
             if(options->moduleArgs.outputFormat.length == 0)
             {
                 ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
-                printIp(ip);
+                printIp(ip, results.length > 1);
                 putchar('\n');
             }
             else
@@ -106,6 +108,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name},
+                    {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute},
                 });
             }
         }

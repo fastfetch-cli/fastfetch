@@ -17,6 +17,7 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
+        ip->defaultRoute = false;
     }
     else
     {

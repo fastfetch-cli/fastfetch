@@ -1,4 +1,5 @@
 #include "localip.h"
+#include "common/io/io.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -6,12 +7,30 @@
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdio.h>
 
 #if defined(__FreeBSD__) || defined(__APPLE__)
 #include <net/if_dl.h>
 #else
 #include <netpacket/packet.h>
 #endif
+
+static bool getDefaultRoute(char iface[16 /*IF_NAMESIZE*/ + 1])
+{
+    FILE* FF_AUTO_CLOSE_FILE netRoute = fopen("/proc/net/route", "r");
+    // skip first line
+    flockfile(netRoute);
+    while (fgetc_unlocked(netRoute) != '\n');
+    funlockfile(netRoute);
+    unsigned long long destination; //, gateway, flags, refCount, use, metric, mask, mtu,
+
+    while (fscanf(netRoute, "%16s%llx%*[^\n]", iface, &destination) == 2)
+    {
+        if (destination == 0)
+            return true;
+    }
+    return false;
+}
 
 static void addNewIp(FFlist* list, const char* name, const char* addr, int type)
 {
@@ -30,6 +49,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type)
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
+        ip->defaultRoute = false;
     }
 
     switch (type)
@@ -111,5 +131,12 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     }
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);
+
+    char iface[16 /*IF_NAMESIZE*/ + 1];
+    if (getDefaultRoute(iface))
+    {
+        FF_LIST_FOR_EACH(FFLocalIpResult, ip, *results)
+            ip->defaultRoute = ffStrbufEqualS(&ip->name, iface);
+    }
     return NULL;
 }
