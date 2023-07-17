@@ -80,10 +80,17 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
     {
         ffPrintLogoAndKey(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
+        bool flag = false;
+
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
-            if ((void*) ip != (void*) results.data)
+            if (options->defaultRouteOnly && !ip->defaultRoute)
+                continue;
+
+            if (flag)
                 fputs(" - ", stdout);
+            else
+                flag = true;
             printIp(ip, false);
         }
         putchar('\n');
@@ -94,11 +101,14 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
+            if (options->defaultRouteOnly && !ip->defaultRoute)
+                continue;
+
             formatKey(options, ip, &key);
             if(options->moduleArgs.outputFormat.length == 0)
             {
                 ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
-                printIp(ip, results.length > 1);
+                printIp(ip, !options->defaultRouteOnly);
                 putchar('\n');
             }
             else
@@ -130,6 +140,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
     ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly = false;
 }
 
 bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, const char* value)
@@ -187,6 +198,12 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
     if (ffStrEqualsIgnCase(subKey, "name-prefix"))
     {
         ffOptionParseString(key, value, &options->namePrefix);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
+    {
+        options->defaultRouteOnly = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -265,6 +282,12 @@ void ffParseLocalIpJsonObject(yyjson_val* module)
             if (ffStrEqualsIgnCase(key, "namePrefix"))
             {
                 ffStrbufSetS(&options.namePrefix, yyjson_get_str(val));
+                continue;
+            }
+
+            if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+            {
+                options.defaultRouteOnly = yyjson_get_bool(val);
                 continue;
             }
 

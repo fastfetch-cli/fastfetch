@@ -131,6 +131,7 @@ Module specific options:
     --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
     --localip-show-loop <?value>:            Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --localip-name-prefix <str>:             Show IPs with given name prefix only. Default is empty
+    --localip-default-route-only <?value>:   Show ips that are used for default routing only. Default is false
     --localip-compact <?value>:              Show all IPs in one line. Default is false
     --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url:                          The URL of public IP detection server to be used.

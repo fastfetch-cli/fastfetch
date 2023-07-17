@@ -22,4 +22,5 @@ typedef struct FFLocalIpOptions
 
     FFLocalIpType showType;
     FFstrbuf namePrefix;
+    bool defaultRouteOnly;
 } FFLocalIpOptions;

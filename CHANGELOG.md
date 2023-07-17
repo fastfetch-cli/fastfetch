@@ -24,6 +24,7 @@ Features:
 * Add option `--size-ndigits` and `--size-max-prefix` (#494)
 * Add option `--processing-timeout` to the timeout when waiting for child processes.
 * Public IP module prints the IP location if `--publicip-url` is not set (PublicIP)
+* Add option `--localip-default-route-only` (LocalIP)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)

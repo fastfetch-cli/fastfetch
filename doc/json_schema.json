@@ -859,6 +859,11 @@
                                         "title": "Show IPs with given name prefix only",
                                         "type": "string"
                                     },
+                                    "showDefaultRouteOnly": {
+                                        "title": "Show ips that are used for default routing only",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
