@@ -23,7 +23,7 @@ static bool getDefaultRoute(char iface[IF_NAMESIZE + 1])
     FILE* FF_AUTO_CLOSE_FILE netRoute = fopen("/proc/net/route", "r");
     // skip first line
     flockfile(netRoute);
-    while (fgetc_unlocked(netRoute) != '\n');
+    while (getc_unlocked(netRoute) != '\n');
     funlockfile(netRoute);
     unsigned long long destination; //, gateway, flags, refCount, use, metric, mask, mtu,
 
