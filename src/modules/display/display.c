@@ -8,11 +8,6 @@
 
 void ffPrintDisplay(FFDisplayOptions* options)
 {
-    #ifdef __ANDROID__
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &instance.config.display.moduleArgs, "Display detection is not supported on Android");
-        return;
-    #endif
-
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if(dsResult->displays.length == 0)

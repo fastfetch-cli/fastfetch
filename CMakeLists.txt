@@ -395,7 +395,7 @@ elseif(ANDROID)
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
-        src/detection/displayserver/displayserver_nosupport.c
+        src/detection/displayserver/displayserver_android.c
         src/detection/font/font_nosupport.c
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
