@@ -25,6 +25,7 @@ Features:
 * Add option `--processing-timeout` to the timeout when waiting for child processes.
 * Public IP module prints the IP location if `--publicip-url` is not set (PublicIP)
 * Add option `--localip-default-route-only` (LocalIP)
+* Add option `--weather-location` (Weather)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)

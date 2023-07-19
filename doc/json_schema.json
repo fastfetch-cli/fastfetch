@@ -1006,6 +1006,10 @@
                                     "type": {
                                         "const": "weather"
                                     },
+                                    "location": {
+                                        "title": "The location to display",
+                                        "type": "string"
+                                    },
                                     "timeout": {
                                         "title": "Time in milliseconds to wait for the weather server to respond",
                                         "type": "integer",

@@ -11,7 +11,10 @@ static int status = -1;
 
 void ffPrepareWeather(FFWeatherOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/?format=");
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/");
+    if (options->location.length)
+        ffStrbufAppend(&path, &options->location);
+    ffStrbufAppendS(&path, "?format=");
     ffStrbufAppend(&path, &options->outputFormat);
     status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
 }
@@ -55,6 +58,7 @@ void ffInitWeatherOptions(FFWeatherOptions* options)
     options->moduleName = FF_WEATHER_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
 
+    ffStrbufInit(&options->location);
     ffStrbufInitS(&options->outputFormat, "%t+-+%C+(%l)");
     options->timeout = 0;
 }
@@ -65,6 +69,12 @@ bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, co
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
+
+    if (ffStrEqualsIgnCase(subKey, "location"))
+    {
+        ffOptionParseString(key, value, &options->location);
+        return true;
+    }
 
     if (ffStrEqualsIgnCase(subKey, "output-format"))
     {
@@ -105,6 +115,12 @@ void ffParseWeatherJsonObject(yyjson_val* module)
 
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
+
+            if (ffStrEqualsIgnCase(key, "location"))
+            {
+                ffStrbufSetS(&options.location, yyjson_get_str(val));
+                continue;
+            }
 
             if (ffStrEqualsIgnCase(key, "outputFormat"))
             {

@@ -206,6 +206,11 @@
 # Default is 0 (disabled).
 #--publicip-timeout 0
 
+# Weather location option:
+# Sets location to be used. It must be URI encoded.
+# Default is empty (guessing by public IP)
+#--weather-location "Location"
+
 # Weather output format option:
 # Sets the weather format to be used. It must be URI encoded.
 # See: https://github.com/chubin/wttr.in#one-line-output

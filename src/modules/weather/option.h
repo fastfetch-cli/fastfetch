@@ -9,6 +9,7 @@ typedef struct FFWeatherOptions
     const char* moduleName;
     FFModuleArgs moduleArgs;
 
+    FFstrbuf location;
     FFstrbuf outputFormat;
     uint32_t timeout;
 } FFWeatherOptions;
