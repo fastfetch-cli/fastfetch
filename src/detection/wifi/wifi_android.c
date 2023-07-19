@@ -6,6 +6,13 @@
 #define FF_TERMUX_API_PATH FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api"
 #define FF_TERMUX_API_PARAM "WifiConnectionInfo"
 
+static inline void wrapYyjsonFree(yyjson_doc** doc)
+{
+    assert(doc);
+    if (*doc)
+        yyjson_doc_free(*doc);
+}
+
 const char* ffDetectWifi(FFlist* result)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -17,8 +24,13 @@ const char* ffDetectWifi(FFlist* result)
     }))
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
 
-    if(buffer.chars[0] != '{')
-        return "`" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` prints invalid result (not a JSON object)";
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(buffer.chars, buffer.length, 0, NULL, NULL);
+    if (!doc)
+        return "Failed to parse wifi connection info";
+
+    yyjson_val* root = yyjson_doc_get_root(doc);
+    if (!yyjson_is_obj(root))
+        return "Wifi info result is not a JSON object";
 
     FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
     ffStrbufInit(&item->inf.description);
@@ -32,37 +44,22 @@ const char* ffDetectWifi(FFlist* result)
     item->conn.rxRate = 0.0/0.0;
     item->conn.txRate = 0.0/0.0;
 
-    if(!ffParsePropLines(buffer.chars, "\"supplicant_state\": ", &item->inf.status))
+    ffStrbufAppendS(&item->inf.status, yyjson_get_str(yyjson_obj_get(root, "supplicant_state")));
+    if(!item->inf.status.length)
+    {
         ffStrbufAppendS(&item->inf.status, "Unknown");
-
-    {
-        ffStrbufTrimRight(&item->inf.status, ',');
-        ffStrbufTrim(&item->inf.status, '"');
-        if(!ffStrbufEqualS(&item->inf.status, "COMPLETED"))
-            return NULL;
+        return NULL;
     }
 
-    if(ffParsePropLines(buffer.chars, "\"rssi\": ", &item->inf.description))
-    {
-        double rssi = ffStrbufToDouble(&item->inf.description);
-        item->conn.signalQuality = rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2;
-        ffStrbufClear(&item->inf.description);
-    }
-
-    if(ffParsePropLines(buffer.chars, "\"network_id\": ", &item->inf.description))
-        ffStrbufTrimRight(&item->inf.description, ',');
-
-    if(ffParsePropLines(buffer.chars, "\"bssid\": ", &item->conn.macAddress))
-    {
-        ffStrbufTrimRight(&item->conn.macAddress, ',');
-        ffStrbufTrim(&item->conn.macAddress, '"');
-    }
-
-    if(ffParsePropLines(buffer.chars, "\"ssid\": ", &item->conn.ssid))
-    {
-        ffStrbufTrimRight(&item->conn.ssid, ',');
-        ffStrbufTrim(&item->conn.ssid, '"');
-    }
+    if(!ffStrbufEqualS(&item->inf.status, "COMPLETED"))
+        return NULL;
+    
+    double rssi = yyjson_get_num(yyjson_obj_get(root, "rssi"));
+    item->conn.signalQuality = rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2;
+    
+    ffStrbufAppendS(&item->inf.description, yyjson_get_str(yyjson_obj_get(root, "ip")));
+    ffStrbufAppendS(&item->conn.macAddress, yyjson_get_str(yyjson_obj_get(root, "bssid")));
+    ffStrbufAppendS(&item->conn.ssid, yyjson_get_str(yyjson_obj_get(root, "ssid")));
 
     return NULL;
 }
