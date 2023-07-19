@@ -26,12 +26,14 @@ Features:
 * Public IP module prints the IP location if `--publicip-url` is not set (PublicIP)
 * Add option `--localip-default-route-only` (LocalIP)
 * Add option `--weather-location` (Weather)
+* Support iTerm non-ascii font detection (Terminal, macOS)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)
 * Fix heap-buffer-overflow reading (DisplayServer, Linux)
 * Fix false errors when built without libnm support (Wifi, Linux)
 * Properly detect CPU on POWER (CPU, Linux)
+* Fix compatibility with Fig (Terminal, macOS)
 
 Logo:
 * Change the special handling of `kitty` protocol with `.png` image file to a new image protocol `kitty-direct`. This is the fastest image protocol because fastfetch doesn't need to pre-encode the image to base64 or something and the image content doesn't need to be transmitted via tty. Note:
