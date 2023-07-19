@@ -17,7 +17,7 @@
 #include <netpacket/packet.h>
 #endif
 
-#if defined(__linux__) || defined(__ANDROID__)
+#if defined(__linux__)
 static bool getDefaultRoute(char iface[IF_NAMESIZE + 1])
 {
     FILE* FF_AUTO_CLOSE_FILE netRoute = fopen("/proc/net/route", "r");
