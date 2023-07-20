@@ -182,6 +182,21 @@
 # Default is false.
 #--title-fqdn false
 
+# Title user color option:
+# Sets color of the user name (left part).
+# Default is empty (use color of `--color-title`).
+#--title-color-user
+
+# Title at color option:
+# Sets color of the @ symbol (middle part).
+# Default is empty (use color of `--color-title`).
+#--title-color-at
+
+# Title host color option:
+# Sets color of the host name (right part).
+# Default is empty (use color of `--color-title`).
+#--title-color-host
+
 # Separator option:
 # Sets the string placed between a key and its value.
 # Can be any string.

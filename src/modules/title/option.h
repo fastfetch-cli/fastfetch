@@ -10,4 +10,7 @@ typedef struct FFTitleOptions
     FFModuleArgs moduleArgs;
 
     bool fqdn;
+    FFstrbuf colorUser;
+    FFstrbuf colorAt;
+    FFstrbuf colorHost;
 } FFTitleOptions;

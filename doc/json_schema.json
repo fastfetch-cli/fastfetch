@@ -988,6 +988,23 @@
                                         "title": "Set if the title should use fully qualified domain name",
                                         "default": false
                                     },
+                                    "color": {
+                                        "title": "Set colors of the different part of title",
+                                        "properties": {
+                                            "user": {
+                                                "title": "Set color of the user name (left part)",
+                                                "$ref": "#/$defs/colors"
+                                            },
+                                            "at": {
+                                                "title": "Set color of the @ symbol (middle part)",
+                                                "$ref": "#/$defs/colors"
+                                            },
+                                            "host": {
+                                                "title": "Set color of the host name (right part)",
+                                                "$ref": "#/$defs/colors"
+                                            }
+                                        }
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

@@ -27,6 +27,7 @@ Features:
 * Add option `--localip-default-route-only` (LocalIP)
 * Add option `--weather-location` (Weather)
 * Support iTerm non-ascii font detection (Terminal, macOS)
+* Add option `--title-color-user`, `--title-color-at` and `--title-color-host` (Title)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)

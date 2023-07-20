@@ -6,12 +6,12 @@
 
 #define FF_TITLE_NUM_FORMAT_ARGS 2
 
-static inline void printTitlePart(const FFstrbuf* content)
+static inline void printTitlePart(const FFstrbuf* content, const FFstrbuf* color)
 {
     if(!instance.config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(&instance.config.colorTitle);
+        ffPrintColor(color->length > 0 ? color : &instance.config.colorTitle);
     }
 
     ffStrbufWriteTo(content, stdout);
@@ -29,9 +29,14 @@ void ffPrintTitle(FFTitleOptions* options)
     if (options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_TITLE_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
-        printTitlePart(&instance.state.platform.userName);
+
+        printTitlePart(&instance.state.platform.userName, &options->colorUser);
+
+        if (!instance.config.pipe && options->colorAt.length > 0)
+            ffPrintColor(&options->colorAt);
         putchar('@');
-        printTitlePart(host);
+
+        printTitlePart(host, &options->colorHost);
         putchar('\n');
     }
     else
@@ -49,6 +54,9 @@ void ffInitTitleOptions(FFTitleOptions* options)
     options->moduleName = FF_TITLE_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
     options->fqdn = false;
+    ffStrbufInit(&options->colorUser);
+    ffStrbufInit(&options->colorAt);
+    ffStrbufInit(&options->colorHost);
 }
 
 bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value)
@@ -64,12 +72,33 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "color-user"))
+    {
+        ffOptionParseColor(value, &options->colorUser);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "color-at"))
+    {
+        ffOptionParseColor(value, &options->colorAt);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "color-host"))
+    {
+        ffOptionParseColor(value, &options->colorHost);
+        return true;
+    }
+
     return false;
 }
 
 void ffDestroyTitleOptions(FFTitleOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->colorUser);
+    ffStrbufDestroy(&options->colorAt);
+    ffStrbufDestroy(&options->colorHost);
 }
 
 void ffParseTitleJsonObject(yyjson_val* module)
@@ -93,6 +122,23 @@ void ffParseTitleJsonObject(yyjson_val* module)
             if (ffStrEqualsIgnCase(key, "fqdn"))
             {
                 options.fqdn = yyjson_get_bool(val);
+                continue;
+            }
+
+            if (ffStrEqualsIgnCase(key, "color"))
+            {
+                if (!yyjson_is_obj(val))
+                    continue;
+
+                yyjson_val* color = yyjson_obj_get(val, "user");
+                if (color)
+                    ffOptionParseColor(yyjson_get_str(color), &options.colorUser);
+                color = yyjson_obj_get(val, "at");
+                if (color)
+                    ffOptionParseColor(yyjson_get_str(color), &options.colorAt);
+                color = yyjson_obj_get(val, "host");
+                if (color)
+                    ffOptionParseColor(yyjson_get_str(color), &options.colorHost);
                 continue;
             }
 
