@@ -62,6 +62,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(scoop)
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(pkgtool)
+        FF_PRINT_PACKAGE(paludis)
 
         putchar('\n');
     }
