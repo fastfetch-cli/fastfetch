@@ -819,6 +819,44 @@ static const FFlogo* getLogoEnso(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoExherbo(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("exherbo", "exherbo-linux")
+    FF_LOGO_LINES(
+        "$2 ,\n"
+        "OXo.\n"
+        "NXdX0:    .cok0KXNNXXK0ko:.\n"
+        "KX  '0XdKMMK;.xMMMk, .0MMMMMXx;  ...\n"
+        "'NO..xWkMMx   kMMM    cMMMMMX,NMWOxOXd.\n"
+        "  cNMk  NK    .oXM.   OMMMMO. 0MMNo  kW.\n"
+        "  lMc   o:       .,   .oKNk;   ;NMMWlxW'\n"
+        " ;Mc    ..   .,,'    .0M$1g;$2WMN'dWMMMMMMO\n"
+        " XX        ,WMMMMW.  cM$1cfli$2WMKlo.   .kMk\n"
+        ".Mo        .WM$1GD$2MW.   XM$1WO0$2MMk        oMl\n"
+        ",M:         ,XMMWx::,''oOK0x;          NM.\n"
+        "'Ml      ,kNKOxxxxxkkO0XXKOd:.         oMk\n"
+        " NK    .0Nxc$3:::::::::::::::$2fkKNk,      .MW\n"
+        " ,Mo  .NXc$3::$2qXWXb$3::::::::::$2oo$3::$2lNK.    .MW\n"
+        "  ;Wo oMd$3:::$2oNMNP$3::::::::$2oWMMMx$3:$2c0M;   lMO\n"
+        "   'NO;W0c$3:::::::::::::::$2dMMMMO$3::$2lMk  .WM'\n"
+        "     xWONXdc$3::::::::::::::$2oOOo$3::$2lXN. ,WMd\n"
+        "      'KWWNXXK0Okxxo,$3:::::::$2,lkKNo  xMMO\n"
+        "        :XMNxl,';:lodxkOO000Oxc. .oWMMo\n"
+        "          'dXMMXkl;,.        .,o0MMNo'\n"
+        "             ':d0XWMMMMWNNNNMMMNOl'\n"
+        "                   ':okKXWNKkl'\n"
+    )
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37", //white
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoFedora(void)
 {
     FF_LOGO_INIT
@@ -2690,6 +2728,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoDeepin,
         getLogoEndeavour,
         getLogoEnso,
+        getLogoExherbo,
         getLogoFedora,
         getLogoFedoraSmall,
         getLogoFedoraOld,
