@@ -276,6 +276,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
     packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
     packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
     packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
+    packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts)

@@ -141,7 +141,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "packages-format"))
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool)", 22,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis)", 23,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
@@ -163,7 +163,8 @@ static inline void printCommandHelp(const char* command)
             "Number of macports packages",
             "Number of scoop packages",
             "Number of choco packages",
-            "Number of pkgtool packages"
+            "Number of pkgtool packages",
+            "Number of paludis packages"
         );
     }
     else if(ffStrEqualsIgnCase(command, "shell-format"))

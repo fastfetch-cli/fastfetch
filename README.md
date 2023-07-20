@@ -101,7 +101,7 @@ AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, BSD, CachyOS, CentOS, CR
 
 ##### Package managers
 ```
-apk, brew, Chocolatey, dpkg, emerge, eopkg, Flatpak, MacPorts, nix, Pacman, pkg, pkgtool, rpm, scoop, Snap, xbps
+apk, brew, Chocolatey, dpkg, emerge, eopkg, Flatpak, MacPorts, nix, Pacman, paludis, pkg, pkgtool, rpm, scoop, Snap, xbps
 ```
 
 ##### WM themes
