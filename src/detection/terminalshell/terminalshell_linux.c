@@ -152,6 +152,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "bash")      == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
+        strcasecmp(name, "mksh")      == 0 ||
+        strcasecmp(name, "oksh")      == 0 ||
         strcasecmp(name, "csh")       == 0 ||
         strcasecmp(name, "tcsh")      == 0 ||
         strcasecmp(name, "fish")      == 0 ||

@@ -98,6 +98,36 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    //  version         sh (AT&T Research) 93u+ 2012-08-01
+    ffStrbufSubstrAfterLastC(version, ')');
+    ffStrbufTrim(version, ' ');
+    return true;
+}
+
+static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "-c",
+        "echo $OKSH_VERSION",
+        NULL
+    }) != NULL)
+        return false;
+
+    //oksh 7.3
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return true;
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -129,6 +159,10 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(strcasecmp(exeName, "nu") == 0)
         return getExeVersionRaw(exe, version); //0.73.0
+    if(strcasecmp(exeName, "ksh") == 0)
+        return getShellVersionKsh(exe, version);
+    if(strcasecmp(exeName, "oksh") == 0)
+        return getShellVersionOksh(exe, version);
     if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
     {
         ffStrbufSetS(version, getenv("XONSH_VERSION"));
