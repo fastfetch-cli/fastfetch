@@ -34,6 +34,7 @@ Bugfixes:
 * Fix false errors when built without libnm support (Wifi, Linux)
 * Properly detect CPU on POWER (CPU, Linux)
 * Fix compatibility with Fig (Terminal, macOS)
+* Fix option `--title-fqdn` doesn't work (Title)
 
 Logo:
 * Change the special handling of `kitty` protocol with `.png` image file to a new image protocol `kitty-direct`. This is the fastest image protocol because fastfetch doesn't need to pre-encode the image to base64 or something and the image content doesn't need to be transmitted via tty. Note:

@@ -962,6 +962,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(ffParseWifiCommandOptions(&instance.config.wifi, key, value)) {}
     else if(ffParseWMCommandOptions(&instance.config.wm, key, value)) {}
     else if(ffParseWMThemeCommandOptions(&instance.config.wmTheme, key, value)) {}
+    else if(ffParseTitleCommandOptions(&instance.config.title, key, value)) {}
     else if(ffParseThemeCommandOptions(&instance.config.theme, key, value)) {}
     else if(ffParseIconsCommandOptions(&instance.config.icons, key, value)) {}
     else if(ffParseWallpaperCommandOptions(&instance.config.wallpaper, key, value)) {}
