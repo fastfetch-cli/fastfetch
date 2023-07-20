@@ -37,16 +37,21 @@ endif()
 include(CheckIncludeFile)
 
 include(FetchContent)
-FetchContent_Declare(
-    yyjson
-    GIT_REPOSITORY https://github.com/ibireme/yyjson
-    GIT_TAG 0.7.0
-)
-FetchContent_GetProperties(yyjson)
-if(NOT yyjson_POPULATED)
-  FetchContent_Populate(yyjson)
-  add_subdirectory(${yyjson_SOURCE_DIR} ${yyjson_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+function(ff_fetch_dep package repo tag)
+    FetchContent_Declare(
+        "${package}"
+        GIT_REPOSITORY "${repo}"
+        GIT_TAG "${tag}"
+    )
+    FetchContent_GetProperties("${package}")
+    if(NOT ${package}_POPULATED)
+        message("-- Fetching dependency ${package}@${tag} from ${repo}")
+        FetchContent_Populate(${package})
+        add_subdirectory(${${package}_SOURCE_DIR} ${${package}_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+endfunction()
+
+ff_fetch_dep(yyjson "https://github.com/ibireme/yyjson" "0.7.0")
 
 #####################
 # Configure options #
