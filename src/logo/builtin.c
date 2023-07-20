@@ -1240,6 +1240,29 @@ static const FFlogo* getLogoLinux(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoLinuxSmall(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("linux_small", "linux-generic_small")
+    FF_LOGO_LINES(
+        "    $1___\n"
+        "   ($2.. $1\\\n"
+        "   ($3<> $1|\n"
+        "  /$2/  \\ $1\\\n"
+        " ( $2|  | $1/|\n"
+        "$3_$1/\\ $2__)$1/$3_$1)\n"
+        "$3\\/$1-____$3\\/\n"
+    )
+    FF_LOGO_COLORS(
+        "30", //black
+        "37", //white
+        "33" //yellow
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoMacOS(void)
 {
     FF_LOGO_INIT
@@ -2682,6 +2705,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoKubuntu,
         getLogoLangitKetujuh,
         getLogoLinux,
+        getLogoLinuxSmall,
         getLogoMacOS,
         getLogoMacOSSmall,
         getLogoMacOS2,
