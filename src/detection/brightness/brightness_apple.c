@@ -8,11 +8,31 @@ extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float *bright
 
 // DDC/CI
 typedef CFTypeRef IOAVServiceRef;
-extern IOAVServiceRef IOAVServiceCreate(CFAllocatorRef allocator);
-extern IOAVServiceRef IOAVServiceCreateWithService(CFAllocatorRef allocator, io_service_t service);
-extern IOReturn IOAVServiceCopyEDID(IOAVServiceRef service, CFDataRef* x2);
-extern IOReturn IOAVServiceReadI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize);
-extern IOReturn IOAVServiceWriteI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize);
+extern IOAVServiceRef IOAVServiceCreate(CFAllocatorRef allocator) __attribute__((weak_import));
+extern IOAVServiceRef IOAVServiceCreateWithService(CFAllocatorRef allocator, io_service_t service) __attribute__((weak_import));
+extern IOReturn IOAVServiceCopyEDID(IOAVServiceRef service, CFDataRef* x2) __attribute__((weak_import));
+extern IOReturn IOAVServiceReadI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize) __attribute__((weak_import));
+extern IOReturn IOAVServiceWriteI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize) __attribute__((weak_import));
+
+// Works for internal display
+static const char* detectWithDisplayServices(const FFDisplayServerResult* displayServer, FFlist* result)
+{
+    if(DisplayServicesGetBrightness == NULL)
+        return "DisplayServices function DisplayServicesGetBrightness is not available";
+
+    FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
+    {
+        float value;
+        if(DisplayServicesGetBrightness((CGDirectDisplayID) display->id, &value) == kCGErrorSuccess)
+        {
+            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+            brightness->value = value * 100;
+            ffStrbufInitCopy(&brightness->name, &display->name);
+        }
+    }
+
+    return NULL;
+}
 
 static void getNameFromEdid(uint8_t edid[128], FFstrbuf* name)
 {
@@ -34,51 +54,65 @@ static void getNameFromEdid(uint8_t edid[128], FFstrbuf* name)
     }
 }
 
-const char* ffDetectBrightness(FFlist* result)
+// https://github.com/waydabber/m1ddc
+// Works for Apple Silicon and USB-C adapter connection ( but not HTMI )
+static const char* detectWithDdcci(FFlist* result)
 {
-    if(DisplayServicesGetBrightness == NULL)
-        return "DisplayServices function DisplayServicesGetBrightness is not available";
+    if (!IOAVServiceCreate || !IOAVServiceReadI2C)
+        return "IOAVService is not available";
 
-    const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
+    CFMutableDictionaryRef matchDict = IOServiceMatching("DCPAVServiceProxy");
+    if (matchDict == NULL)
+        return "IOServiceMatching(\"DCPAVServiceProxy\") failed";
 
-    FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
+    io_iterator_t iterator;
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
+        return "IOServiceGetMatchingServices() failed";
+
+    FF_STRBUF_AUTO_DESTROY location = ffStrbufCreate();
+
+    io_registry_entry_t registryEntry;
+    while((registryEntry = IOIteratorNext(iterator)) != 0)
     {
-        float value;
-        if(DisplayServicesGetBrightness((CGDirectDisplayID) display->id, &value) == kCGErrorSuccess)
+        CFMutableDictionaryRef properties;
+        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
         {
-            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-            brightness->value = value * 100;
-            ffStrbufInitCopy(&brightness->name, &display->name);
+            IOObjectRelease(registryEntry);
             continue;
         }
-    }
 
-    if (!instance.config.allowSlowOperations || displayServer->displays.length <= result->length)
-        return NULL;
-
-    // https://github.com/waydabber/m1ddc
-    // This only works for Apple Silicon and USB-C adapter connection ( but not HTMI )
-    FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = IOAVServiceCreate(kCFAllocatorDefault);
-    if (service)
-    {
-        uint8_t i2cData[12] = { 0x82, 0x01, 0x00 };
-        i2cData[3] = 0x6e ^ i2cData[0] ^ i2cData[1] ^ i2cData[2] ^ i2cData[3];
-
-        for (uint32_t i = 0; i < 3; ++i)
+        ffStrbufClear(&location);
+        if(ffCfDictGetString(properties, CFSTR("Location"), &location) || ffStrbufEqualS(&location, "Embedded"))
         {
-            IOAVServiceWriteI2C(service, 0x37, 0x51, i2cData, 4);
-            usleep(10000);
+            // Builtin display should be handled by DisplayServices
+            IOObjectRelease(registryEntry);
+            continue;
         }
 
-        memset(i2cData, 0, sizeof(i2cData));
-        if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cData, sizeof(i2cData)) == KERN_SUCCESS)
-        {
-            if (i2cData[2] != 0x02 || i2cData[3] != 0x00)
-                return NULL;
+        FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = IOAVServiceCreateWithService(kCFAllocatorDefault, (io_service_t) registryEntry);
+        IOObjectRelease(registryEntry);
 
-            uint32_t mh = i2cData[6], ml = i2cData[7], sh = i2cData[8], sl = i2cData[9];
-            uint32_t current = (mh << 8u) + ml;
-            uint32_t max = (sh << 8u) + sl;
+        if (!service) continue;
+
+        {
+            uint8_t i2cIn[4] = { 0x82, 0x01, 0x10 /* luminance */ };
+            i2cIn[3] = 0x6e ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2];
+
+            for (uint32_t i = 0; i < 2; ++i)
+            {
+                IOAVServiceWriteI2C(service, 0x37, 0x51, i2cIn, sizeof(i2cIn));
+                usleep(10000);
+            }
+        }
+
+        uint8_t i2cOut[12] = {};
+        if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cOut, sizeof(i2cOut)) == KERN_SUCCESS)
+        {
+            if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00)
+                continue;
+
+            uint32_t current = ((uint32_t) i2cOut[8] << 8u) + (uint32_t) i2cOut[9];
+            uint32_t max = ((uint32_t) i2cOut[6] << 8u) + (uint32_t) i2cOut[7];
 
             FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
             brightness->value = (float) current * 100.f / max;
@@ -89,6 +123,17 @@ const char* ffDetectBrightness(FFlist* result)
                 getNameFromEdid(edid, &brightness->name);
         }
     }
+
+    return NULL;
+}
+
+const char* ffDetectBrightness(FFlist* result)
+{
+    const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
+    detectWithDisplayServices(displayServer, result);
+
+    if (instance.config.allowSlowOperations && displayServer->displays.length > result->length)
+        detectWithDdcci(result);
 
     return NULL;
 }
