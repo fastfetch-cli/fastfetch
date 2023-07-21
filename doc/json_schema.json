@@ -1010,7 +1010,8 @@
                                                 "title": "Set color of the host name (right part)",
                                                 "$ref": "#/$defs/colors"
                                             }
-                                        }
+                                        },
+                                        "additionalProperties": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1057,8 +1058,7 @@
                                 },
                                 "additionalProperties": false
                             }
-                        ],
-                        "additionalProperties": false
+                        ]
                     }
                 ]
             }
