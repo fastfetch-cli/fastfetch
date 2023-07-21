@@ -1,6 +1,6 @@
 # 2.0.0
 
-This release introduces a new configuration file format: JSON config
+This release introduces a new configuration file format: JSON config. Please refer to 
 
 Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
@@ -28,6 +28,7 @@ Features:
 * Add option `--weather-location` (Weather)
 * Support iTerm non-ascii font detection (Terminal, macOS)
 * Add option `--title-color-user`, `--title-color-at` and `--title-color-host` (Title)
+* Add Exherbo logo and package manager count (Packages, Linux, #503)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)
