@@ -19,12 +19,14 @@
         }
     },
     "type": "object",
-    "title": "JSON config file for fastfetch. Usually be `~/.config/fastfetch.jsonc`",
+    "title": "JSON config",
+    "description": "JSON config file for fastfetch. Usually be `~/.config/fastfetch.jsonc`",
     "properties": {
         "$schema": {
             "type": "string",
-            "title": "JSON schema URL",
-            "format": "uri"
+            "title": "JSON schema URL, for JSON validation and IDE intelligence",
+            "format": "uri",
+            "default": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json"
         },
         "logo": {
             "oneOf": [
@@ -104,7 +106,8 @@
                                     "title": "Color 9",
                                     "$ref": "#/$defs/colors"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "width": {
                             "type": "integer",
@@ -135,7 +138,8 @@
                                     "title": "Set the right padding of the logo",
                                     "minimum": 0
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         },
                         "printRemaining": {
                             "type": "boolean",
@@ -191,7 +195,8 @@
                                         "DIFFUSION"
                                     ]
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
                     },
                     "additionalProperties": false
@@ -284,7 +289,8 @@
                                     "title": "Set the color of the title",
                                     "$ref": "#/$defs/colors"
                                 }
-                            }
+                            },
+                            "additionalProperties": false
                         }
                     ]
                 },
@@ -512,6 +518,7 @@
                                 "additionalProperties": false
                             },
                             {
+                                "title": "No additional properties",
                                 "properties": {
                                     "type": {
                                         "enum": [
@@ -1050,7 +1057,8 @@
                                 },
                                 "additionalProperties": false
                             }
-                        ]
+                        ],
+                        "additionalProperties": false
                     }
                 ]
             }
