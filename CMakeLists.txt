@@ -42,6 +42,7 @@ function(ff_fetch_dep package repo tag)
         "${package}"
         GIT_REPOSITORY "${repo}"
         GIT_TAG "${tag}"
+        GIT_PROGRESS TRUE
     )
     FetchContent_GetProperties("${package}")
     if(NOT ${package}_POPULATED)
