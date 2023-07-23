@@ -127,10 +127,22 @@ static const char* detectWithDdcci(FFlist* result)
     return NULL;
 }
 
+static bool hasBuiltinDisplay(const FFDisplayServerResult* displayServer)
+{
+    FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
+    {
+        if (display->type == FF_DISPLAY_TYPE_BUILTIN || display->type == FF_DISPLAY_TYPE_UNKNOWN)
+            return true;
+    }
+    return false;
+}
+
 const char* ffDetectBrightness(FFlist* result)
 {
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
-    detectWithDisplayServices(displayServer, result);
+
+    if (hasBuiltinDisplay(displayServer))
+        detectWithDisplayServices(displayServer, result);
 
     if (instance.config.allowSlowOperations && displayServer->displays.length > result->length)
         detectWithDdcci(result);
