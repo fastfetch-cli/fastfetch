@@ -89,7 +89,7 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
     else if(strcasecmp(name, "xfwm4") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XFWM4);
     else if(strcasecmp(name, "Marco") == 0 ||
-        strcasecmp(name, "Metacity (Macro)") == 0)
+        strcasecmp(name, "Metacity (Marco)") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MARCO);
     else if(strcasecmp(name, "xmonad") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
