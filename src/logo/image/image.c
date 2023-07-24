@@ -75,16 +75,16 @@ static bool printImageKittyDirect(void)
     }
     ffPrintCharTimes('\n', instance.config.logo.paddingTop);
     ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
+
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&instance.config.logo.source);
-    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D\033[%uA",
+    instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
+    instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
+    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u;%s\033\\\033[9999999D\033[%uA",
         (unsigned) instance.config.logo.width,
         (unsigned) instance.config.logo.height,
         base64.chars,
-        (unsigned) instance.config.logo.paddingTop
+        (unsigned) instance.state.logoHeight
     );
-
-    instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-    instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
 
     return true;
 }
