@@ -66,10 +66,6 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 kill(childPid, SIGTERM);
                 return "poll(&pollfd, 1, timeout) error";
             }
-            else if (pollfd.revents & POLLHUP)
-            {
-                return NULL;
-            }
         }
 
         char str[FF_PIPE_BUFSIZ];
