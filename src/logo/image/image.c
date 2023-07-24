@@ -73,13 +73,14 @@ static bool printImageKittyDirect(void)
         fputs("Logo: `kitty-direct` protocol only works when both `--logo-width` and `--logo-height` being specified\n", stderr);
         return false;
     }
-    ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
     ffPrintCharTimes('\n', instance.config.logo.paddingTop);
+    ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&instance.config.logo.source);
-    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D",
+    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u,C=1;%s\033\\\033[9999999D\033[%uA",
         (unsigned) instance.config.logo.width,
         (unsigned) instance.config.logo.height,
-        base64.chars
+        base64.chars,
+        (unsigned) instance.config.logo.paddingTop
     );
 
     instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
