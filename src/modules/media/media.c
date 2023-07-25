@@ -63,7 +63,7 @@ void ffPrintMedia(FFMediaOptions* options)
         "[Lyric Video]", "[Official Lyric Video]", "[Lyrics]",
         "| Lyric Video", "| Official Lyric Video", "| Lyrics",
     };
-    ffStrbufRemoveStringsA(&songPretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
+    ffStrbufRemoveStrings(&songPretty, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
     ffStrbufTrimRight(&songPretty, ' ');
 
     if(songPretty.length == 0)

@@ -269,24 +269,10 @@ void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str)
         ffStrbufRemoveSubstr(strbuf, i, i + stringLength);
 }
 
-void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
+void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
 {
     for(uint32_t i = 0; i < numStrings; i++)
         ffStrbufRemoveS(strbuf, strings[i]);
-}
-
-void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments)
-{
-    for(uint32_t i = 0; i < numStrings; i++)
-        ffStrbufRemoveS(strbuf, va_arg(arguments, const char*));
-}
-
-void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
-{
-    va_list argp;
-    va_start(argp, numStrings);
-    ffStrbufRemoveStringsV(strbuf, numStrings, argp);
-    va_end(argp);
 }
 
 uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)

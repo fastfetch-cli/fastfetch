@@ -299,7 +299,7 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
         NULL
     });
     ffStrbufSubstrBeforeFirstC(version, '(');
-    ffStrbufRemoveStrings(version, 2, "-release", "release");
+    ffStrbufRemoveStrings(version, 2, (const char*[]) { "-release", "release" });
 }
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);

@@ -80,7 +80,7 @@ static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
         " (TM)", "(TM)",
         " Graphics Adapter", " Graphics", " Series", " Edition"
     };
-    ffStrbufRemoveStringsA(&gpu->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
+    ffStrbufRemoveStrings(&gpu->name, sizeof(removeStrings) / sizeof(removeStrings[0]), removeStrings);
 }
 
 static void pciDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)

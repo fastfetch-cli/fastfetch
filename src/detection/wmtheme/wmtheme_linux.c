@@ -164,7 +164,7 @@ static bool detectOpenbox(const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
         if(strstr(line, "<name>") != 0)
         {
             ffStrbufAppendS(themeOrError, line);
-            ffStrbufRemoveStrings(themeOrError, 2, "<name>", "</name>");
+            ffStrbufRemoveStrings(themeOrError, 2, (const char*[]) { "<name>", "</name>" });
             ffStrbufTrimRight(themeOrError, '\n');
             ffStrbufTrim(themeOrError, ' ');
             break;
