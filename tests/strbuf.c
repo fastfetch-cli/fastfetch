@@ -214,13 +214,116 @@ int main(void)
     ffStrbufReplaceAllC(&strbuf, '1', '-');
     VERIFY(ffStrbufEqualS(&strbuf, "-234567890-234567890-234567890-"));
 
+    //trim
+    ffStrbufTrim(&strbuf, '-');
+    VERIFY(ffStrbufEqualS(&strbuf, "234567890-234567890-234567890"));
+
     ffStrbufDestroy(&strbuf);
 
+    //ffStrbufCreateS
     {
         FF_STRBUF_AUTO_DESTROY testCreate = ffStrbufCreateS("TEST");
         VERIFY(ffStrbufEqualS(&testCreate, "TEST"));
     }
 
+    //ffStrbufCreateStatic
+    ffStrbufInitStatic(&strbuf, "TEST");
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated == 0);
+
+    ffStrbufDestroy(&strbuf);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 0);
+
+    //ffStrbufCreateStatic / Allocate
+    ffStrbufInitStatic(&strbuf, "TEST");
+    ffStrbufEnsureFree(&strbuf, 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated > 0);
+
+    //ffStrbufCreateStatic / Append
+    ffStrbufInitStatic(&strbuf, "TEST");
+    ffStrbufAppendS(&strbuf, "_TEST");
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST_TEST"));
+    VERIFY(strbuf.length == 9);
+    VERIFY(strbuf.allocated >= 10);
+    ffStrbufDestroy(&strbuf);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 0);
+
+    //ffStrbufCreateStatic / Clear
+    ffStrbufInitStatic(&strbuf, "TEST");
+    ffStrbufClear(&strbuf);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / Set
+    ffStrbufInitStatic(&strbuf, "TEST"); // static
+    ffStrbufSetStatic(&strbuf, "test");
+    VERIFY(ffStrbufEqualS(&strbuf, "test"));
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / Set
+    ffStrbufInitS(&strbuf, "TEST"); // allocated
+    ffStrbufSetStatic(&strbuf, "test");
+    VERIFY(ffStrbufEqualS(&strbuf, "test"));
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / TrimL
+    ffStrbufInitStatic(&strbuf, "_TEST_");
+    ffStrbufTrimLeft(&strbuf, '_');
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST_"));
+    VERIFY(strbuf.length == 5);
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / TrimR
+    ffStrbufInitStatic(&strbuf, "_TEST_");
+    ffStrbufTrimRight(&strbuf, '_');
+    VERIFY(ffStrbufEqualS(&strbuf, "_TEST"));
+    VERIFY(strbuf.length == 5);
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / Substr
+    ffStrbufInitStatic(&strbuf, "__TEST__");
+    ffStrbufRemoveSubstr(&strbuf, 0, 6);
+    VERIFY(ffStrbufEqualS(&strbuf, "__"));
+    VERIFY(strbuf.length == 2);
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / Substr
+    ffStrbufInitStatic(&strbuf, "__TEST__");
+    ffStrbufRemoveSubstr(&strbuf, 2, 8);
+    VERIFY(ffStrbufEqualS(&strbuf, "__"));
+    VERIFY(strbuf.length == 2);
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / Substr
+    ffStrbufInitStatic(&strbuf, "__TEST__");
+    ffStrbufRemoveSubstr(&strbuf, 2, 6);
+    VERIFY(ffStrbufEqualS(&strbuf, "____"));
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreateStatic / Substr
+    ffStrbufInitStatic(&strbuf, "__TEST__");
+    ffStrbufReplaceAllC(&strbuf, '_', '-');
+    VERIFY(ffStrbufEqualS(&strbuf, "--TEST--"));
+    VERIFY(strbuf.length == 8);
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
     //Success
-    puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);
+    puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

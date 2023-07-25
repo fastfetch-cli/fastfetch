@@ -30,15 +30,13 @@ typedef struct FFstrbuf
 
 static inline void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
-void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
-FF_C_NODISCARD uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
-
 void ffStrbufClear(FFstrbuf* strbuf);
 
+static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value);
 void ffStrbufAppendC(FFstrbuf* strbuf, char c);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
@@ -55,7 +53,6 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
-void ffStrbufTrim(FFstrbuf* strbuf, char c);
 
 void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
 void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str);
@@ -69,8 +66,6 @@ FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
-void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c);
-void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c);
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
 void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
@@ -93,6 +88,12 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
     FFstrbuf strbuf;
     ffStrbufInitA(&strbuf, allocate);
     return strbuf;
+}
+
+static inline void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src)
+{
+    ffStrbufInitA(strbuf, src->allocated);
+    ffStrbufAppend(strbuf, src);
 }
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateCopy(const FFstrbuf* src)
@@ -152,6 +153,32 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateF(const char* format, ...)
     return strbuf;
 }
 
+static inline void ffStrbufDestroy(FFstrbuf* strbuf)
+{
+    extern char* CHAR_NULL_PTR;
+
+    if(strbuf->allocated == 0)
+    {
+        strbuf->length = 0;
+        strbuf->chars = CHAR_NULL_PTR;
+        return;
+    }
+
+    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
+    strbuf->allocated = strbuf->length = 0;
+    free(strbuf->chars);
+    strbuf->chars = CHAR_NULL_PTR;
+}
+
+FF_C_NODISCARD static inline uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
+{
+    assert(strbuf != NULL);
+    if(strbuf->allocated == 0)
+        return 0;
+
+    return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
+}
+
 static inline void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 {
     strbuf->length = (uint32_t) strlen(strbuf->chars);
@@ -185,6 +212,30 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreate()
     FFstrbuf strbuf;
     ffStrbufInit(&strbuf);
     return strbuf;
+}
+
+static inline void ffStrbufInitStatic(FFstrbuf* strbuf, const char* str)
+{
+    ffStrbufInit(strbuf);
+    strbuf->allocated = 0;
+    strbuf->length = (uint32_t) strlen(str);
+    strbuf->chars = (char*) str;
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateStatic(const char* str)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitStatic(&strbuf, str);
+    return strbuf;
+}
+
+static inline void ffStrbufSetStatic(FFstrbuf* strbuf, const char* value)
+{
+    if(strbuf->allocated > 0)
+        ffStrbufDestroy(strbuf);
+
+    if(value != NULL)
+        ffStrbufInitStatic(strbuf, value);
 }
 
 static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* str)
@@ -322,6 +373,16 @@ static inline FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf,
     return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
 }
 
+static inline void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c)
+{
+    ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
+}
+
+static inline void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c)
+{
+    ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
+}
+
 static inline FF_C_NODISCARD bool ffStrbufStartsWithC(const FFstrbuf* strbuf, char c)
 {
     return strbuf->chars[0] == c;
@@ -403,15 +464,10 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCase(const FFstrbuf* strbuf
     return ffStrbufEndsWithIgnCaseNS(strbuf, end->length, end->chars);
 }
 
-static inline void ffStrbufDestroy(FFstrbuf* strbuf)
+static inline void ffStrbufTrim(FFstrbuf* strbuf, char c)
 {
-    if(strbuf->allocated == 0) return;
-
-    extern char* CHAR_NULL_PTR;
-    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
-    strbuf->allocated = strbuf->length = 0;
-    free(strbuf->chars);
-    strbuf->chars = CHAR_NULL_PTR;
+    ffStrbufTrimRight(strbuf, c);
+    ffStrbufTrimLeft(strbuf, c);
 }
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))

@@ -12,10 +12,7 @@
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 #include "util/platform/FFPlatform.h"
-
-static inline void ffUnused(int dummy, ...) { (void) dummy; }
-#define FF_UNUSED(...) ffUnused(0, __VA_ARGS__);
-#define FF_MAYBE_UNUSED __attribute__ ((__unused__))
+#include "util/unused.h"
 
 #include "modules/options.h"
 #include "logo/option.h"
