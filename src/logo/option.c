@@ -18,7 +18,7 @@ void ffInitLogoOptions(FFLogoOptions* options)
     options->preserveAspectRadio = false;
 
     options->chafaFgOnly = false;
-    ffStrbufInitS(&options->chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
+    ffStrbufInitStatic(&options->chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
     options->chafaCanvasMode = UINT32_MAX;
     options->chafaColorSpace = UINT32_MAX;
     options->chafaDitherMode = UINT32_MAX;

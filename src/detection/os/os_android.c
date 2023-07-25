@@ -3,11 +3,11 @@
 
 void ffDetectOSImpl(FFOSResult* os)
 {
-    ffStrbufInitS(&os->name, "Android");
+    ffStrbufInitStatic(&os->name, "Android");
 
-    ffStrbufInitS(&os->prettyName, "Android");
+    ffStrbufInitStatic(&os->prettyName, "Android");
 
-    ffStrbufInitS(&os->id, "android");
+    ffStrbufInitStatic(&os->id, "android");
 
     ffStrbufInit(&os->version);
     ffSettingsGetAndroidProperty("ro.build.version.release", &os->version);

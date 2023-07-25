@@ -103,8 +103,8 @@ static void detectWMPlugin(FFstrbuf* name)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufInitS(&ds->wmProcessName, "WindowServer");
-    ffStrbufInitS(&ds->wmPrettyName, "Quartz Compositor");
+    ffStrbufInitStatic(&ds->wmProcessName, "WindowServer");
+    ffStrbufInitStatic(&ds->wmPrettyName, "Quartz Compositor");
     ffStrbufInit(&ds->wmProtocolName);
 
     if(instance.config.allowSlowOperations)
@@ -117,9 +117,8 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     }
 
     ffStrbufInit(&ds->deProcessName);
-    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInitStatic(&ds->dePrettyName, "Aqua");
     ffStrbufInit(&ds->deVersion);
-    ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
     detectDisplays(ds);

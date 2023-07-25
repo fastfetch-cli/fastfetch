@@ -59,7 +59,7 @@ void ffInitWeatherOptions(FFWeatherOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);
-    ffStrbufInitS(&options->outputFormat, "%t+-+%C+(%l)");
+    ffStrbufInitStatic(&options->outputFormat, "%t+-+%C+(%l)");
     options->timeout = 0;
 }
 

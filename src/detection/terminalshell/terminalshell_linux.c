@@ -363,11 +363,11 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
-        ffStrbufInitS(&result.shellPrettyName, "PowerShell");
+        ffStrbufInitStatic(&result.shellPrettyName, "PowerShell");
     else if(ffStrbufEqualS(&result.shellProcessName, "nu"))
-        ffStrbufInitS(&result.shellPrettyName, "nushell");
+        ffStrbufInitStatic(&result.shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
-        ffStrbufInitS(&result.shellPrettyName, "xonsh");
+        ffStrbufInitStatic(&result.shellPrettyName, "xonsh");
     else
     {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
@@ -376,21 +376,21 @@ const FFTerminalShellResult* ffDetectTerminalShell()
 
 
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
-        ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
+        ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
 
     #if defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
-        ffStrbufInitS(&result.terminalPrettyName, "gnome-terminal");
+        ffStrbufInitStatic(&result.terminalPrettyName, "gnome-terminal");
 
     #elif defined(__APPLE__)
 
     else if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result.terminalProcessName, "iTermServer-"))
-        ffStrbufInitS(&result.terminalPrettyName, "iTerm");
+        ffStrbufInitStatic(&result.terminalPrettyName, "iTerm");
     else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
-        ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
+        ffStrbufInitStatic(&result.terminalPrettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
-        ffStrbufInitS(&result.terminalPrettyName, "Warp");
+        ffStrbufInitStatic(&result.terminalPrettyName, "Warp");
 
     #endif
 

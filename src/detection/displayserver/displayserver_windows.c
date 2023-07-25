@@ -145,13 +145,13 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     BOOL enabled;
     if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled == TRUE)
     {
-        ffStrbufInitS(&ds->wmProcessName, "dwm.exe");
-        ffStrbufInitS(&ds->wmPrettyName, "Desktop Window Manager");
+        ffStrbufInitStatic(&ds->wmProcessName, "dwm.exe");
+        ffStrbufInitStatic(&ds->wmPrettyName, "Desktop Window Manager");
     }
     else
     {
-        ffStrbufInitS(&ds->wmProcessName, "internal");
-        ffStrbufInitS(&ds->wmPrettyName, "internal");
+        ffStrbufInitStatic(&ds->wmProcessName, "explorer.exe");
+        ffStrbufInitStatic(&ds->wmPrettyName, "Windows Explorer");
     }
     ffStrbufInit(&ds->wmProtocolName);
     ffStrbufInit(&ds->deProcessName);
@@ -169,13 +169,13 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         ffStrbufEqualS(&os->version, "2022") ||
         ffStrbufEqualS(&os->version, "2019") ||
         ffStrbufEqualS(&os->version, "2016")
-    ) ffStrbufSetS(&ds->dePrettyName, "Fluent");
+    ) ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
     else if(
         ffStrbufEqualS(&os->version, "8") ||
         ffStrbufEqualS(&os->version, "8.1") ||
         ffStrbufEqualS(&os->version, "2012 R2") ||
         ffStrbufEqualS(&os->version, "2012")
-    ) ffStrbufSetS(&ds->dePrettyName, "Metro");
+    ) ffStrbufSetStatic(&ds->dePrettyName, "Metro");
     else
-        ffStrbufSetS(&ds->dePrettyName, "Aero");
+        ffStrbufSetStatic(&ds->dePrettyName, "Aero");
 }

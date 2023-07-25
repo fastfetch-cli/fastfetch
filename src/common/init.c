@@ -36,7 +36,7 @@ static void defaultConfig(void)
 
     ffStrbufInit(&instance.config.colorKeys);
     ffStrbufInit(&instance.config.colorTitle);
-    ffStrbufInitS(&instance.config.keyValueSeparator, ": ");
+    ffStrbufInitStatic(&instance.config.keyValueSeparator, ": ");
     instance.config.processingTimeout = 1000;
 
     #if defined(__linux__) || defined(__FreeBSD__)

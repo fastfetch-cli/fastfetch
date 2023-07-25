@@ -334,18 +334,18 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         result->terminalPid = pid;
 
     if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "WindowsTerminal"))
-        ffStrbufSetS(&result->terminalPrettyName, ffStrbufContainIgnCaseS(&result->terminalExe, ".WindowsTerminalPreview_")
+        ffStrbufSetStatic(&result->terminalPrettyName, ffStrbufContainIgnCaseS(&result->terminalExe, ".WindowsTerminalPreview_")
             ? "Windows Terminal Preview"
             : "Windows Terminal"
         );
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "conhost"))
-        ffStrbufSetS(&result->terminalPrettyName, "Console Window Host");
+        ffStrbufSetStatic(&result->terminalPrettyName, "Console Window Host");
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "Code"))
-        ffStrbufSetS(&result->terminalPrettyName, "Visual Studio Code");
+        ffStrbufSetStatic(&result->terminalPrettyName, "Visual Studio Code");
     else if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "explorer"))
-        ffStrbufSetS(&result->terminalPrettyName, "Windows Explorer");
+        ffStrbufSetStatic(&result->terminalPrettyName, "Windows Explorer");
     else if(ffStrbufEqualS(&result->terminalPrettyName, "wezterm-gui"))
-        ffStrbufInitS(&result->terminalPrettyName, "WezTerm");
+        ffStrbufSetStatic(&result->terminalPrettyName, "WezTerm");
 
     return ppid;
 }
