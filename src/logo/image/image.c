@@ -79,7 +79,7 @@ static bool printImageKittyDirect(void)
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&instance.config.logo.source);
     instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
     instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
-    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u;%s\033\\\033[9999999D\033[%uA",
+    printf("\033_Ga=T,f=100,t=f,c=%u,r=%u;%s\033\\\033[9999999D\n\033[%uA",
         (unsigned) instance.config.logo.width,
         (unsigned) instance.config.logo.height,
         base64.chars,
