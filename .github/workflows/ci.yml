@@ -114,7 +114,7 @@ jobs:
           languages: c
 
       - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' .
 
       - name: build project
         run: cmake --build . --target package
