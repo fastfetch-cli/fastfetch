@@ -319,6 +319,7 @@ set(LIBFASTFETCH_SRC
     src/modules/media/media.c
     src/modules/terminal/terminal.c
     src/modules/terminalfont/terminalfont.c
+    src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
     src/modules/title/title.c
     src/modules/uptime/uptime.c
@@ -378,6 +379,7 @@ if(LINUX)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -421,6 +423,7 @@ elseif(ANDROID)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -472,6 +475,7 @@ elseif(BSD)
         src/detection/temps/temps_bsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -517,6 +521,7 @@ elseif(APPLE)
         src/detection/temps/temps_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -561,6 +566,7 @@ elseif(WIN32)
         src/detection/swap/swap_windows.c
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
+        src/detection/terminalsize/terminalsize_windows.c
         src/detection/temps/temps_windows.cpp
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_windows.c

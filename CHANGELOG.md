@@ -29,6 +29,7 @@ Features:
 * Support iTerm non-ascii font detection (Terminal, macOS)
 * Add option `--title-color-user`, `--title-color-at` and `--title-color-host` (Title)
 * Add Exherbo logo and package manager count (Packages, Linux, #503)
+* Add module `Terminal Size` which prints the number of terminal width and height in charactors and pixels
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)

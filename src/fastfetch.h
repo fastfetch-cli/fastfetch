@@ -82,6 +82,7 @@ typedef struct FFconfig
     FFCursorOptions cursor;
     FFTerminalOptions terminal;
     FFTerminalFontOptions terminalFont;
+    FFTerminalSizeOptions terminalSize;
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
     FFCustomOptions custom;

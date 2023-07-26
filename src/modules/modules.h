@@ -44,6 +44,7 @@
 #include "modules/swap/swap.h"
 #include "modules/terminal/terminal.h"
 #include "modules/terminalfont/terminalfont.h"
+#include "modules/terminalsize/terminalsize.h"
 #include "modules/theme/theme.h"
 #include "modules/title/title.h"
 #include "modules/uptime/uptime.h"

@@ -971,6 +971,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(ffParseCursorCommandOptions(&instance.config.cursor, key, value)) {}
     else if(ffParseTerminalCommandOptions(&instance.config.terminal, key, value)) {}
     else if(ffParseTerminalFontCommandOptions(&instance.config.terminalFont, key, value)) {}
+    else if(ffParseTerminalSizeCommandOptions(&instance.config.terminalSize, key, value)) {}
     else if(ffParseCPUCommandOptions(&instance.config.cpu, key, value)) {}
     else if(ffParseCPUUsageCommandOptions(&instance.config.cpuUsage, key, value)) {}
     else if(ffParseGPUCommandOptions(&instance.config.gpu, key, value)) {}
@@ -1182,6 +1183,8 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
         ffPrintTerminal(&instance.config.terminal);
     else if(ffStrEqualsIgnCase(line, FF_TERMINALFONT_MODULE_NAME))
         ffPrintTerminalFont(&instance.config.terminalFont);
+    else if(ffStrEqualsIgnCase(line, FF_TERMINALSIZE_MODULE_NAME))
+        ffPrintTerminalSize(&instance.config.terminalSize);
     else if(ffStrEqualsIgnCase(line, FF_CPU_MODULE_NAME))
         ffPrintCPU(&instance.config.cpu);
     else if(ffStrEqualsIgnCase(line, FF_CPUUSAGE_MODULE_NAME))

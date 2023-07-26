@@ -107,30 +107,25 @@ bool ffPathExists(const char* path, FFPathType type)
     return false;
 }
 
-void ffGetTerminalResponse(const char* request, const char* format, ...)
+const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
     struct termios oldTerm, newTerm;
     if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
-        return;
+        return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
 
     newTerm = oldTerm;
     newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
     if(tcsetattr(STDIN_FILENO, TCSANOW, &newTerm) == -1)
-        return;
+        return "tcsetattr(STDIN_FILENO, TCSANOW, &newTerm)";
 
     fputs(request, stdout);
     fflush(stdout);
 
-    struct pollfd pfd;
-    pfd.fd = STDIN_FILENO;
-    pfd.events = POLLIN;
-    pfd.revents = 0;
-
     //Give the terminal 35ms to respond
-    if(poll(&pfd, 1, 35) <= 0)
+    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, 35) <= 0)
     {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
-        return;
+        return "poll() timeout or failed";
     }
 
     char buffer[512];
@@ -139,7 +134,7 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
 
     if(readed <= 0)
-        return;
+        return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
 
     buffer[readed] = '\0';
 
@@ -147,6 +142,8 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     va_start(args, format);
     vsscanf(buffer, format, args);
     va_end(args);
+
+    return NULL;
 }
 
 bool ffSuppressIO(bool suppress)

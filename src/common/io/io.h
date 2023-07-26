@@ -83,10 +83,8 @@ typedef enum FFPathType
 
 bool ffPathExists(const char* path, FFPathType pathType);
 
-#ifndef _WIN32
-    FF_C_SCANF(2, 3)
-    void ffGetTerminalResponse(const char* request, const char* format, ...);
-#endif
+FF_C_SCANF(2, 3)
+const char* ffGetTerminalResponse(const char* request, const char* format, ...);
 
 // Not thread safe!
 bool ffSuppressIO(bool suppress);

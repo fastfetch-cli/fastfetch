@@ -188,6 +188,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* module)
             return
                 tryModule(type, module, FF_TERMINAL_MODULE_NAME, ffParseTerminalJsonObject) ||
                 tryModule(type, module, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontJsonObject) ||
+                tryModule(type, module, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeJsonObject) ||
                 tryModule(type, module, FF_TITLE_MODULE_NAME, ffParseTitleJsonObject) ||
                 tryModule(type, module, FF_THEME_MODULE_NAME, ffParseThemeJsonObject) ||
                 false;
