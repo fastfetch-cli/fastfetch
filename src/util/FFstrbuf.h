@@ -272,6 +272,13 @@ static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* _
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
+static inline void ffStrbufPrepend(FFstrbuf* strbuf, FFstrbuf* value)
+{
+    if(value == NULL)
+        return;
+    ffStrbufPrependNS(strbuf, value->length, value->chars);
+}
+
 static inline void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
 {
     if(value == NULL)
