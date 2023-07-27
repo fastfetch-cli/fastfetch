@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
+#include "util/mallocHelper.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -9,11 +10,11 @@
 
 static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
 {
-    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+    FF_AUTO_CLOSE_FILE FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
         return "fopen(\"/proc/cpuinfo\", \"r\") failed";
 
-    char* line = NULL;
+    FF_AUTO_FREE char* line = NULL;
     size_t len = 0;
 
     while(getline(&line, &len, cpuinfo) != -1)
@@ -33,11 +34,6 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) //For POWER
         );
     }
-
-    if(line != NULL)
-        free(line);
-
-    fclose(cpuinfo);
 
     return NULL;
 }
