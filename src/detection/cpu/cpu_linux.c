@@ -8,6 +8,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef __ANDROID__
+#include "common/settings.h"
+
+static void detectAndroid(FFCPUResult* cpu)
+{
+    if (cpu->name.length == 0)
+        ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name);
+    if (cpu->vendor.length == 0)
+    {
+        if (!ffSettingsGetAndroidProperty("ro.soc.manufacturer", &cpu->vendor))
+            ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor);
+    }
+}
+#endif
+
 static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
 {
     FF_AUTO_CLOSE_FILE FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
@@ -143,6 +158,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             ffStrbufAppendC(&cpu->name, ' ');
         ffStrbufAppend(&cpu->name, &cpuIsa);
     }
+
+    #ifdef __ANDROID__
+    detectAndroid(cpu);
+    #endif
 
     return NULL;
 }
