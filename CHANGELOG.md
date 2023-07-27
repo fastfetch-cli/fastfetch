@@ -30,6 +30,8 @@ Features:
 * Add option `--title-color-user`, `--title-color-at` and `--title-color-host` (Title)
 * Add Exherbo logo and package manager count (Packages, Linux, #503)
 * Add module `Terminal Size` which prints the number of terminal width and height in charactors and pixels
+* Add new option `--temperature-unit`
+* Better CPU and Host detection for Android (Android)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)
