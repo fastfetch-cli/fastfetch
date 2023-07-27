@@ -394,7 +394,7 @@ elseif(ANDROID)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
-        src/detection/bios/bios_nosupport.c
+        src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/board/board_android.c
         src/detection/brightness/brightness_nosupport.c
