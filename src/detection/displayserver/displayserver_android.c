@@ -1,17 +1,10 @@
 #include "displayserver.h"
+#include "common/settings.h"
 
 #include "common/processing.h"
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
+static void detectWithDumpsys(FFDisplayServerResult* ds)
 {
-    ffStrbufInit(&ds->wmProcessName);
-    ffStrbufInit(&ds->wmPrettyName);
-    ffStrbufInit(&ds->wmProtocolName);
-    ffStrbufInit(&ds->deProcessName);
-    ffStrbufInit(&ds->dePrettyName);
-    ffStrbufInit(&ds->deVersion);
-    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 0);
-
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     if (ffProcessAppendStdOut(&buf, (char* []) {
         "/system/bin/dumpsys",
@@ -73,7 +66,50 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
                 0
             );
         }
-        
+
         index = nextIndex + 1;
     }
+}
+
+static bool detectWithGetprop(FFDisplayServerResult* ds)
+{
+    // Only for MiUI
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    ;
+    if (ffSettingsGetAndroidProperty("persist.sys.miui_resolution", &buffer) &&
+        ffStrbufContainC(&buffer, ','))
+    {
+        // 1440,3200,560 => width,height,ppi
+        uint32_t width = ffStrbufToUInt16(&buffer, 0);
+        ffStrbufSubstrAfterFirstC(&buffer, ',');
+        uint32_t height = ffStrbufToUInt16(&buffer, 0);
+        return ffdsAppendDisplay(ds,
+            width,
+            height,
+            0,
+            0,
+            0,
+            0,
+            0,
+            FF_DISPLAY_TYPE_BUILTIN,
+            false,
+            0
+        );
+    }
+
+    return false;
+}
+
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
+{
+    ffStrbufInitStatic(&ds->wmProcessName, "WindowManager");
+    ffStrbufInitStatic(&ds->wmPrettyName, "Window Manager");
+    ffStrbufInit(&ds->wmProtocolName);
+    ffStrbufInit(&ds->deProcessName);
+    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInit(&ds->deVersion);
+    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 0);
+
+    if (!detectWithGetprop(ds))
+        detectWithDumpsys(ds);
 }
