@@ -77,16 +77,23 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
         ffStrbufAppendF(result, "%.*f %s", instance.config.sizeNdigits, size, prefixes[counter]);
 }
 
-void ffParseSize(uint64_t bytes, FFBinaryPrefixType binaryPrefix, FFstrbuf* result)
+void ffParseSize(uint64_t bytes, FFstrbuf* result)
 {
-    if(binaryPrefix == FF_BINARY_PREFIX_TYPE_IEC)
-        parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
-    else if(binaryPrefix == FF_BINARY_PREFIX_TYPE_SI)
-        parseSize(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
-    else if(binaryPrefix == FF_BINARY_PREFIX_TYPE_JEDEC)
-        parseSize(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
-    else
-        parseSize(result, bytes, 1024, (const char*[]) {"B", NULL});
+    switch (instance.config.binaryPrefixType)
+    {
+        case FF_BINARY_PREFIX_TYPE_IEC:
+            parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
+            break;
+        case FF_BINARY_PREFIX_TYPE_SI:
+            parseSize(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
+            break;
+        case FF_BINARY_PREFIX_TYPE_JEDEC:
+            parseSize(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
+            break;
+        default:
+            parseSize(result, bytes, 1024, (const char*[]) {"B", NULL});
+            break;
+    }
 }
 
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)

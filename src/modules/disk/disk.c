@@ -28,10 +28,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesUsed, instance.config.binaryPrefixType, &usedPretty);
+    ffParseSize(disk->bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesTotal, instance.config.binaryPrefixType, &totalPretty);
+    ffParseSize(disk->bytesTotal, &totalPretty);
 
     uint8_t bytesPercentage = disk->bytesTotal > 0 ? (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0) : 0;
 

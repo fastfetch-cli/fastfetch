@@ -47,10 +47,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
-                ffParseSize(gpu->dedicated.used, instance.config.binaryPrefixType, &output);
+                ffParseSize(gpu->dedicated.used, &output);
                 ffStrbufAppendS(&output, " / ");
             }
-            ffParseSize(gpu->dedicated.total, instance.config.binaryPrefixType, &output);
+            ffParseSize(gpu->dedicated.total, &output);
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");

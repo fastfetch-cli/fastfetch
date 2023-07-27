@@ -20,10 +20,10 @@ void ffPrintSwap(FFSwapOptions* options)
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesUsed, instance.config.binaryPrefixType, &usedPretty);
+    ffParseSize(storage.bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesTotal, instance.config.binaryPrefixType, &totalPretty);
+    ffParseSize(storage.bytesTotal, &totalPretty);
 
     uint8_t percentage = storage.bytesTotal == 0
         ? 0
