@@ -2,6 +2,7 @@
 #include "common/parsing.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/parsing.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
@@ -39,7 +40,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
 
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
-            ffStrbufAppendF(&output, " - %.1f°C", gpu->temperature);
+        {
+            ffStrbufAppendS(&output, " - ");
+            ffParseTemperature(gpu->temperature, &output);
+        }
 
         if(gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.total != 0)
         {

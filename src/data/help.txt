@@ -69,6 +69,7 @@ Display options:
     --no-buffer <?value>:        Set if the stdout application buffer should be disabled. Default is false
     --size-ndigits <value>:      Set the number of digits to keep after the decimal point when formatting sizes
     --size-max-prefix <value>:   Set the largest binary prefix to use when formatting sizes. Default is YB
+    --temperature-unit <value>:  Set the unit of the temperature. Must be one of C, F and K. Default is C
 
 General module options:
     --<module>-format <format>:    Set the format string to use for each specific module.

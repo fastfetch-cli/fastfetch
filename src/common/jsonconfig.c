@@ -409,6 +409,21 @@ const char* ffParseDisplayJsonConfig(void)
             if (error) return error;
             config->sizeMaxPrefix = (uint8_t) value;
         }
+        else if (ffStrEqualsIgnCase(key, "temperatureUnit"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
+                { "C", FF_TEMPERATURE_UNIT_CELSIUS },
+                { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
+                { "K", FF_TEMPERATURE_UNIT_KELVIN },
+                {},
+            });
+            if (error) return error;
+            config->temperatureUnit = (FFTemperatureUnit) value;
+        }
         else if (ffStrEqualsIgnCase(key, "percentType"))
             config->percentType = (uint32_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "noBuffer"))

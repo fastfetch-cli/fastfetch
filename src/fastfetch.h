@@ -24,6 +24,13 @@ typedef enum FFBinaryPrefixType
     FF_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 kB, 1024 K = 1 MB, ...
 } FFBinaryPrefixType;
 
+typedef enum FFTemperatureUnit
+{
+    FF_TEMPERATURE_UNIT_CELSIUS,
+    FF_TEMPERATURE_UNIT_FAHRENHEIT,
+    FF_TEMPERATURE_UNIT_KELVIN,
+} FFTemperatureUnit;
+
 typedef struct FFconfig
 {
     FFLogoOptions logo;
@@ -43,6 +50,7 @@ typedef struct FFconfig
     FFBinaryPrefixType binaryPrefixType;
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
+    FFTemperatureUnit temperatureUnit;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;

@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/bar.h"
+#include "common/parsing.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
@@ -54,7 +55,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
             if(str.length > 0)
                 ffStrbufAppendS(&str, " - ");
 
-            ffStrbufAppendF(&str, "%.1f°C", result->temperature);
+            ffParseTemperature(result->temperature, &str);
         }
 
         ffStrbufPutTo(&str, stdout);

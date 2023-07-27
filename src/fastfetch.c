@@ -935,6 +935,18 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             {}
         });
     }
+    else if(ffStrEqualsIgnCase(key, "--temperature-unit"))
+    {
+        instance.config.temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
+            { "C", FF_TEMPERATURE_UNIT_CELSIUS },
+            { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+            { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+            { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
+            { "K", FF_TEMPERATURE_UNIT_KELVIN },
+            {},
+        });
+    }
     else if(ffStrEqualsIgnCase(key, "--percent-type"))
         instance.config.percentType = ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))

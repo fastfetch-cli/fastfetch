@@ -1,5 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/parsing.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
@@ -31,26 +32,31 @@ void ffPrintCPU(FFCPUOptions* options)
         {
             ffPrintLogoAndKey(FF_CPU_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
 
+            FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+
             if(cpu.name.length > 0)
-                ffStrbufWriteTo(&cpu.name, stdout);
+                ffStrbufAppend(&str, &cpu.name);
             else if(cpu.vendor.length > 0)
             {
-                ffStrbufWriteTo(&cpu.vendor, stdout);
-                fputs(" CPU", stdout);
+                ffStrbufAppend(&str, &cpu.vendor);
+                ffStrbufAppendS(&str, " CPU");
             }
             else
-                fputs("CPU", stdout);
+                ffStrbufAppendS(&str, "Unknown");
 
             if(cpu.coresOnline > 1)
-                printf(" (%u)", cpu.coresOnline);
+                ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
             if(cpu.frequencyMax > 0.0)
-                printf(" @ %.9g GHz", cpu.frequencyMax);
+                ffStrbufAppendF(&str, " @ %.9g GHz", cpu.frequencyMax);
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
-                printf(" - %.1f°C", cpu.temperature);
+            {
+                ffStrbufAppendS(&str, " - ");
+                ffParseTemperature(cpu.temperature, &str);
+            }
 
-            putchar('\n');
+            ffStrbufPutTo(&str, stdout);
         }
         else
         {
