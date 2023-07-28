@@ -233,11 +233,34 @@ fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
 fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
-######################
-# Configure config.h #
-######################
+configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
+configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 
-configure_file(src/fastfetch_config.h.in fastfetch_config.h)
+####################
+# Ascii image data #
+####################
+
+function(fastfetch_load_raw_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}")                                  # Remove trailing newline
+    string(JSON TEMP SET "{}" "${TEMP}" "0")                                       # Encode raw strings using JSON_SET
+    string(REGEX REPLACE "^\\{[ \t\r\n]*" "" TEMP "${TEMP}")                       # Remove JSON braces
+    string(REGEX REPLACE "[ \t\r\n]*:[ \t\r\n]*0[ \t\r\n]*\\}$" "" TEMP "${TEMP}") # Remove trailing ` : 0 }`
+    if(NOT "${TEMP}" MATCHES "^\"[^\n]*\"")
+        message(FATAL_ERROR "Internal error: unexpected output: '${TEMP}'")
+    endif()
+    set(${OUTVAR} "${TEMP}" PARENT_SCOPE)
+endfunction(fastfetch_load_raw_text)
+
+file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
+foreach(file ${LOGO_FILES})
+    fastfetch_load_raw_text("${file}" content)
+    get_filename_component(file "${file}" NAME_WLE)
+    string(TOUPPER "${file}" file)
+    string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" DATATEXT_LOGO_${file} "${content}")
+endforeach()
+
+configure_file(src/logo/builtin.h.in src_logo_builtin.h @ONLY)
 
 #######################
 # libfastfetch target #

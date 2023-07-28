@@ -1,4 +1,5 @@
 #include "logo.h"
+#include "src_logo_builtin.h" // Generated with `src/logo/builtin.h`
 
 #define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true;
 // The names of small logo must end with `_small` or `-small`
@@ -335,25 +336,25 @@ static const FFlogo* getLogoBSD(void)
     FF_LOGO_INIT
     FF_LOGO_NAMES("bsd")
     FF_LOGO_LINES(
-"$1             ,        ,\n"
-"            /(        )`\n"
-"            \\ \\___   / |\n"
-"            /- _  `-/  '\n"
-"           ($2/\\/ \\ $1\\   /\\\n"
-"           $2/ /   | `    $1\\\n"
-"           $3O O   $2) $1/    |\n"
-"           $2`-^--'$1`<     '\n"
-"          (_.)  _  )   /\n"
-"           `.___/`    /\n"
-"             `-----' /\n"
-"$4<----.     __ / __   \\\n"
-"$4<----|====$1O)))$4==$1) \\) /$4====|\n"
-"<----'    $1`--' `.__,' \\\n"
-"             |        |\n"
-"              \\       /       /\\\n"
-"         $5______$1( (_  / \\______/\n"
-"       $5,'  ,-----'   |\n"
-"       `--{__________)\n"
+        "$1             ,        ,\n"
+        "            /(        )`\n"
+        "            \\ \\___   / |\n"
+        "            /- _  `-/  '\n"
+        "           ($2/\\/ \\ $1\\   /\\\n"
+        "           $2/ /   | `    $1\\\n"
+        "           $3O O   $2) $1/    |\n"
+        "           $2`-^--'$1`<     '\n"
+        "          (_.)  _  )   /\n"
+        "           `.___/`    /\n"
+        "             `-----' /\n"
+        "$4<----.     __ / __   \\\n"
+        "$4<----|====$1O)))$4==$1) \\) /$4====|\n"
+        "<----'    $1`--' `.__,' \\\n"
+        "             |        |\n"
+        "              \\       /       /\\\n"
+        "         $5______$1( (_  / \\______/\n"
+        "       $5,'  ,-----'   |\n"
+        "       `--{__________)\n"
     )
     FF_LOGO_COLORS(
         "31",
@@ -1724,6 +1725,24 @@ static const FFlogo* getLogoWindows(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoWindows95(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Windows 9x", "Windows 95")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_WINDOWS95)
+    FF_LOGO_COLORS(
+        "36", //cyan
+        "34", //blue
+        "33", //yellow
+        "32", //green
+        "31",
+        "30"
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoNixOS(void)
 {
     FF_LOGO_INIT
@@ -2759,6 +2778,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoWindows11Small,
         getLogoWindows8,
         getLogoWindows,
+        getLogoWindows95,
         getLogoNixOS,
         getLogoNixOsOld,
         getLogoNixOsSmall,

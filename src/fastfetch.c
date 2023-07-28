@@ -6,6 +6,7 @@
 #include "common/jsonconfig.h"
 #include "util/stringUtils.h"
 #include "logo/logo.h"
+#include "fastfetch_datatext.h"
 
 #include <stdlib.h>
 #include <ctype.h>
