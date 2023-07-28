@@ -41,6 +41,20 @@ const FFlogo* ffLogoBuiltinGetUnknown(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoAIX(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("aix")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_AIX)
+    FF_LOGO_COLORS(
+        "32", // green
+        "37" // yellow
+    )
+    FF_LOGO_COLOR_KEYS("32"); // green
+    FF_LOGO_COLOR_TITLE("37"); // yellow
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoAlmaLinux(void)
 {
     FF_LOGO_INIT
@@ -328,6 +342,25 @@ static const FFlogo* getLogoArcoLinux(void)
     )
     FF_LOGO_COLOR_KEYS("34"); //green
     FF_LOGO_COLOR_TITLE("34"); //green
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAsahi(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("asahi", "asahi-linux")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ASAHI)
+    FF_LOGO_COLORS(
+        "33", //yellow
+        "32", //green
+        "31", //red
+        "38", //cyan
+        "37", //magenta
+        "36", //cyan
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("33"); //yellow
+    FF_LOGO_COLOR_TITLE("32"); //green
     FF_LOGO_RETURN
 }
 
@@ -1103,8 +1136,6 @@ static const FFlogo* getLogoGentooSmall(void)
     FF_LOGO_RETURN
 }
 
-#define FF_RAW_STRING(x) #x
-
 static const FFlogo* getLogoGhostBSD(void)
 {
     FF_LOGO_INIT
@@ -1129,6 +1160,61 @@ static const FFlogo* getLogoGhostBSD(void)
     )
     FF_LOGO_COLOR_KEYS("34"); //blue
     FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoGnome(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Gnome")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_GNOME)
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoGNU(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("GNU")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_GNU)
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoHaiku(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Haiku")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_HAIKU)
+    FF_LOGO_COLORS(
+        "31", //red
+        "33", //yellow
+        "37", //white
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("33"); //yellow
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoHaikuSmall(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("Haiku-small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_HAIKU_SMALL)
+    FF_LOGO_COLORS(
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("33"); //yellow
     FF_LOGO_RETURN
 }
 
@@ -1302,6 +1388,20 @@ static const FFlogo* getLogoLinuxSmall(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoLMDE(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("LMDE")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_LMDE)
+    FF_LOGO_COLORS(
+        "32", //green
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoMacOS(void)
 {
     FF_LOGO_INIT
@@ -1422,6 +1522,20 @@ static const FFlogo* getLogoMacOS2Small(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoMandriva(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("mandriva", "mandrake")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_MANDRIVA)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "33" //yellow
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("33"); //yellow
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoManjaro(void)
 {
     FF_LOGO_INIT
@@ -1468,6 +1582,21 @@ static const FFlogo* getLogoManjaroSmall(void)
     )
     FF_LOGO_COLOR_KEYS("32"); //green
     FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoMinix(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("minix")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_MINIX)
+    FF_LOGO_COLORS(
+        "31", //red
+        "37", //white
+        "33" //yellow
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("33"); //yellow
     FF_LOGO_RETURN
 }
 
@@ -1842,6 +1971,20 @@ static const FFlogo* getLogoNixOsSmall(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoNetBSD(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("netbsd");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_NETBSD)
+    FF_LOGO_COLORS(
+        "35", // blue
+        "37" // white
+    )
+    FF_LOGO_COLOR_KEYS("35"); // blue
+    FF_LOGO_COLOR_TITLE("37"); // white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoNobara(void)
 {
     FF_LOGO_INIT
@@ -1869,6 +2012,63 @@ static const FFlogo* getLogoNobara(void)
         "37" // white
     )
     FF_LOGO_COLOR_KEYS("37"); // white
+    FF_LOGO_COLOR_TITLE("37"); // white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoNomadBSD(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("nomadbsd");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_NOMADBSD)
+    FF_LOGO_COLORS(
+        "34" // blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); // blue
+    FF_LOGO_COLOR_TITLE("37"); // white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenKylin(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("openkylin", "open-kylin");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_OPENKYLIN)
+    FF_LOGO_COLORS(
+        "32", // cyan
+        "37" // white
+    )
+    FF_LOGO_COLOR_KEYS("32"); // cyan
+    FF_LOGO_COLOR_TITLE("37"); // white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenBSD(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("openbsd");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_OPENBSD)
+    FF_LOGO_COLORS(
+        "33", // blue
+        "37", // white
+        "36", // yellow
+        "31" // red
+    )
+    FF_LOGO_COLOR_KEYS("33"); // blue
+    FF_LOGO_COLOR_TITLE("37"); // white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenBSDSmall(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("openbsd_small", "openbsd-small");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_OPENBSD_SMALL)
+    FF_LOGO_COLORS(
+        "33", // blue
+        "37" // white
+    )
+    FF_LOGO_COLOR_KEYS("33"); // blue
     FF_LOGO_COLOR_TITLE("37"); // white
     FF_LOGO_RETURN
 }
@@ -1984,6 +2184,19 @@ static const FFlogo* getLogoOpenSuseTumbleweed(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoOpenSuseTumbleweed2(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("opensuse_tumbleweed2")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_OPENSUSETUMBLEWEED2)
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoOpenMandriva(void)
 {
     FF_LOGO_INIT
@@ -2011,15 +2224,38 @@ static const FFlogo* getLogoOpenMandriva(void)
         "        `:oyhhhhhhhhhhhhhhhhhhyo:`\n"
         "            .:+syhhhhhhhhys+:-`\n"
         "                ``....``"
-
-
-
     )
     FF_LOGO_COLORS(
         "34" //blue
     )
     FF_LOGO_COLOR_KEYS("34"); //blue
     FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOpenWrt(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("openwrt")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_OPENWRT)
+    FF_LOGO_COLORS(
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOracle(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("oracle", "oracle linux")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ORACLE)
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
 
@@ -2432,11 +2668,34 @@ static const FFlogo* getLogoSlackwareSmall(void)
         "| |________/\n"
         "|____________"
     )
+    FF_LOGO_COLOR_KEYS("33"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoSolaris(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("solaris")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_SOLARIS)
     FF_LOGO_COLORS(
-        "34" //blue
+        "33" //green
     )
-    FF_LOGO_COLOR_KEYS("34"); //blue
-    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_COLOR_KEYS("33"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoSolarisSmall(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("solaris-small", "solaris_small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_SOLARIS_SMALL)
+    FF_LOGO_COLORS(
+        "33" //green
+    )
+    FF_LOGO_COLOR_KEYS("33"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
 
@@ -2513,27 +2772,27 @@ static const FFlogo* getLogoUbuntu(void)
     FF_LOGO_INIT
     FF_LOGO_NAMES("ubuntu", "ubuntu-linux")
     FF_LOGO_LINES(
- "                            ....\n"
- "              .',:clooo:  .:looooo:.\n"
- "           .;looooooooc  .oooooooooo'\n"
- "        .;looooool:,''.  :ooooooooooc\n"
- "       ;looool;.         'oooooooooo,\n"
- "      ;clool'             .cooooooc.  ,,\n"
- "         ...                ......  .:oo,\n"
- "  .;clol:,.                        .loooo'\n"
- " :ooooooooo,                        'ooool\n"
- "'ooooooooooo.                        loooo.\n"
- "'ooooooooool                         coooo.\n"
- " ,loooooooc.                        .loooo.\n"
- "   .,;;;'.                          ;ooooc\n"
- "       ...                         ,ooool.\n"
- "    .cooooc.              ..',,'.  .cooo.\n"
- "      ;ooooo:.           ;oooooooc.  :l.\n"
- "       .coooooc,..      coooooooooo.\n"
- "         .:ooooooolc:. .ooooooooooo'\n"
- "           .':loooooo;  ,oooooooooc\n"
- "               ..';::c'  .;loooo:'\n"
- "                             ."
+        "                            ....\n"
+        "              .',:clooo:  .:looooo:.\n"
+        "           .;looooooooc  .oooooooooo'\n"
+        "        .;looooool:,''.  :ooooooooooc\n"
+        "       ;looool;.         'oooooooooo,\n"
+        "      ;clool'             .cooooooc.  ,,\n"
+        "         ...                ......  .:oo,\n"
+        "  .;clol:,.                        .loooo'\n"
+        " :ooooooooo,                        'ooool\n"
+        "'ooooooooooo.                        loooo.\n"
+        "'ooooooooool                         coooo.\n"
+        " ,loooooooc.                        .loooo.\n"
+        "   .,;;;'.                          ;ooooc\n"
+        "       ...                         ,ooool.\n"
+        "    .cooooc.              ..',,'.  .cooo.\n"
+        "      ;ooooo:.           ;oooooooc.  :l.\n"
+        "       .coooooc,..      coooooooooo.\n"
+        "         .:ooooooolc:. .ooooooooooo'\n"
+        "           .':loooooo;  ,oooooooooc\n"
+        "               ..';::c'  .;loooo:'\n"
+        "                             ."
     )
     FF_LOGO_COLORS(
         "31", //red
@@ -2541,6 +2800,35 @@ static const FFlogo* getLogoUbuntu(void)
     )
     FF_LOGO_COLOR_KEYS("31"); //red
     FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoUbuntuKylin(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu kylin", "ubuntu-kylin")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_UBUNTUKYLIN)
+    FF_LOGO_COLORS(
+        "31", //red
+        "37", //white
+        "33" //yellow
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoUbuntuMate(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu mate", "ubuntu-mate")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_UBUNTUMATE)
+    FF_LOGO_COLORS(
+        "32", //green
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
 
@@ -2596,6 +2884,32 @@ static const FFlogo* getLogoUbuntuSmall(void)
     )
     FF_LOGO_COLOR_KEYS("31"); //red
     FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoUbuntu2Small(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("ubuntu2_small", "ubuntu2-small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_UBUNTU2_SMALL)
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoUOS(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("UOS")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_UOS)
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("33"); //yellow
     FF_LOGO_RETURN
 }
 
@@ -2721,6 +3035,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
 {
     static GetLogoMethod logoMethods[] = {
         ffLogoBuiltinGetUnknown,
+        getLogoAIX,
         getLogoAlmaLinux,
         getLogoAlpine,
         getLogoAlpineSmall,
@@ -2731,6 +3046,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoArcoLinux,
         getLogoArtix,
         getLogoArtixSmall,
+        getLogoAsahi,
         getLogoBedrock,
         getLogoBSD,
         getLogoCachyOS,
@@ -2758,18 +3074,25 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoGentoo,
         getLogoGentooSmall,
         getLogoGhostBSD,
+        getLogoGnome,
+        getLogoGNU,
+        getLogoHaiku,
+        getLogoHaikuSmall,
         getLogoKDENeon,
         getLogoKISSLinux,
         getLogoKubuntu,
         getLogoLangitKetujuh,
         getLogoLinux,
         getLogoLinuxSmall,
+        getLogoLMDE,
         getLogoMacOS,
         getLogoMacOSSmall,
         getLogoMacOS2,
         getLogoMacOS2Small,
+        getLogoMandriva,
         getLogoManjaro,
         getLogoManjaroSmall,
+        getLogoMinix,
         getLogoMint,
         getLogoMintSmall,
         getLogoMintOld,
@@ -2782,12 +3105,20 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoNixOS,
         getLogoNixOsOld,
         getLogoNixOsSmall,
+        getLogoNomadBSD,
+        getLogoNetBSD,
         getLogoNobara,
+        getLogoOpenBSD,
+        getLogoOpenBSDSmall,
+        getLogoOpenKylin,
         getLogoOpenSuse,
         getLogoOpenSuseSmall,
         getLogoOpenSuseLeap,
         getLogoOpenSuseTumbleweed,
+        getLogoOpenSuseTumbleweed2,
         getLogoOpenMandriva,
+        getLogoOpenWrt,
+        getLogoOracle,
         getLogoPop,
         getLogoPopSmall,
         getLogoParabola,
@@ -2800,13 +3131,19 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoRedstarOS,
         getLogoRockyLinux,
         getLogoRosaLinux,
+        getLogoSolaris,
+        getLogoSolarisSmall,
         getLogoSlackware,
         getLogoSlackwareSmall,
         getLogoSolus,
         getLogoSteamOS,
         getLogoUbuntu,
+        getLogoUbuntuKylin,
+        getLogoUbuntuMate,
         getLogoUbuntuOld,
         getLogoUbuntuSmall,
+        getLogoUbuntu2Small,
+        getLogoUOS,
         getLogoVanilla,
         getLogoVoid,
         getLogoVoidSmall,
