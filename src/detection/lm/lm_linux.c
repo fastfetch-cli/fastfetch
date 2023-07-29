@@ -16,8 +16,15 @@ static const char* getGdmVersion(FFstrbuf* version)
         "--version",
         NULL
     });
-    if (error)
-        return error;
+    if (error || version->length == 0)
+    {
+        error = ffProcessAppendStdOut(version, (char* const[]) {
+            "gdm3",
+            "--version",
+            NULL
+        });
+        if (error || version->length == 0) return "Failed to get GDM version";
+    }
 
     // GDM 44.1
     ffStrbufSubstrAfterFirstC(version, ' ');
