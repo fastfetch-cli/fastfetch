@@ -45,7 +45,7 @@ Logo:
 * Change the special handling of `kitty` protocol with `.png` image file to a new image protocol `kitty-direct`. This is the fastest image protocol because fastfetch doesn't need to pre-encode the image to base64 or something and the image content doesn't need to be transmitted via tty. Note:
     1. Although konsole was said to support `kitty` image protocol, it doesn't support `kitty-direct`
     2. wezterm support more image formats other than `.png` (tested with `.jpg` and `.webp`)
-* Add `Windows 95`
+* Add `Windows 95` and more
 
 # 1.12.2
 
