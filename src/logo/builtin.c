@@ -1228,6 +1228,36 @@ static const FFlogo* getLogoOracle(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoOrchid(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("orchid")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ORCHID)
+    FF_LOGO_COLORS(
+        "37", //white
+        "35", //magenta
+        "35" //magenta
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoOrchidSmall(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("orchid_small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ORCHID_SMALL)
+    FF_LOGO_COLORS(
+        "37", //white
+        "35", //magenta
+        "35" //magenta
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoParabola(void)
 {
     FF_LOGO_INIT
@@ -1703,6 +1733,8 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoOpenSuseTumbleweed2,
         getLogoOpenMandriva,
         getLogoOpenWrt,
+        getLogoOrchid,
+        getLogoOrchidSmall,
         getLogoOracle,
         getLogoPop,
         getLogoPopSmall,

@@ -96,7 +96,7 @@ Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsa
 
 ##### Builtin logos
 ```
-AIX, Asahi, AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, BSD, CachyOS, CentOS, CRUX, Crystal, Debian, Deepin, Devuan, Endeavour, Enso, Exherbo, Fedora, FreeBSD, Garuda, Garuda Dragon, Gentoo, GhostBSD, GNU, Gnome, Haiku, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, LMDE, MacOS, Mandriva, Manjaro, NetBSD, Mint, Minix, MSYS2, NixOS, Nobara, NomadBSD, OpenBSD, OpenKylin, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, OpenWrt, Oracle, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solaris, Solus, SteamOS, Ubuntu, Ubuntu Kylin, UOS, Vanilla, Void, Windows, Windows 11, Windows 8, Windows 95, Zorin
+AIX, Asahi, AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, BSD, CachyOS, CentOS, CRUX, Crystal, Debian, Deepin, Devuan, Endeavour, Enso, Exherbo, Fedora, FreeBSD, Garuda, Garuda Dragon, Gentoo, GhostBSD, GNU, Gnome, Haiku, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, LMDE, MacOS, Mandriva, Manjaro, NetBSD, Mint, Minix, MSYS2, NixOS, Nobara, NomadBSD, OpenBSD, OpenKylin, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, OpenWrt, Orchid, Oracle, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solaris, Solus, SteamOS, Ubuntu, Ubuntu Kylin, UOS, Vanilla, Void, Windows, Windows 11, Windows 8, Windows 95, Zorin
 ```
 
 ##### Package managers
