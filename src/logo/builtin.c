@@ -1509,6 +1509,37 @@ static const FFlogo* getLogoUbuntu(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoUbuntuBudgie(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu-budgie")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_UBUNTU_BUDGIE)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37", //white
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoUbuntuGnome(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ubuntu-gnome")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_UBUNTU_GNOME)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "35", //magenta
+        "37", //white
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("35"); //magenta
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoUbuntuKylin(void)
 {
     FF_LOGO_INIT
@@ -1755,6 +1786,8 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoSolus,
         getLogoSteamOS,
         getLogoUbuntu,
+        getLogoUbuntuBudgie,
+        getLogoUbuntuGnome,
         getLogoUbuntuKylin,
         getLogoUbuntuMate,
         getLogoUbuntuOld,
