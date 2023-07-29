@@ -429,3 +429,15 @@ uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
     unsigned long result = strtoul(strbuf->chars, &str_end, 10);
     return str_end == strbuf->chars || result > UINT16_MAX ? defaultValue : (uint16_t)result;
 }
+
+void ffStrbufUpperCase(FFstrbuf* strbuf)
+{
+    for (uint32_t i = 0; i < strbuf->length; ++i)
+        strbuf->chars[i] = (char) toupper(strbuf->chars[i]);
+}
+
+void ffStrbufLowerCase(FFstrbuf* strbuf)
+{
+    for (uint32_t i = 0; i < strbuf->length; ++i)
+        strbuf->chars[i] = (char) tolower(strbuf->chars[i]);
+}
