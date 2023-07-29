@@ -517,6 +517,19 @@ static const FFlogo* getLogoGaruda(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoGarudaDragon()
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("garudadragon", "garuda-dragon", "garuda-linux-dragon")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_GARUDA_DRAGON)
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoGarudaSmall(void)
 {
     FF_LOGO_INIT_SMALL
@@ -1641,6 +1654,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoFreeBSD,
         getLogoFreeBSDSmall,
         getLogoGaruda,
+        getLogoGarudaDragon,
         getLogoGarudaSmall,
         getLogoGentoo,
         getLogoGentooSmall,
