@@ -1,0 +1,19 @@
+             $2...-:::::-...
+          .-MMMMMMMMMMMMMMM-.
+      .-MMMM$1`..-:::::::-..`$2MMMM-.
+    .:MMMM$1.:MMMMMMMMMMMMMMM:.$2MMMM:.
+   -MMM$1-M---MMMMMMMMMMMMMMMMMMM.$2MMM-
+ `:MMM$1:MM`  :MMMM:....::-...-MMMM:$2MMM:`
+ :MMM$1:MMM`  :MM:`  ``    ``  `:MMM:$2MMM:
+.MMM$1.MMMM`  :MM.  -MM.  .MM-  `MMMM.$2MMM.
+:MMM$1:MMMM`  :MM.  -MM-  .MM:  `MMMM-$2MMM:
+:MMM$1:MMMM`  :MM.  -MM-  .MM:  `MMMM:$2MMM:
+:MMM$1:MMMM`  :MM.  -MM-  .MM:  `MMMM-$2MMM:
+.MMM$1.MMMM`  :MM:--:MM:--:MM:  `MMMM.$2MMM.
+ :MMM$1:MMM-  `-MMMMMMMMMMMM-`  -MMM-$2MMM:
+  :MMM$1:MMM:`                `:MMM:$2MMM:
+   .MMM$1.MMMM:--------------:MMMM.$2MMM.
+     '-MMMM$1.-MMMMMMMMMMMMMMM-.$2MMMM-'
+       '.-MMMM$1``--:::::--``$2MMMM-.'
+            '-MMMMMMMMMMMMM-'
+               ``-:::::-``
