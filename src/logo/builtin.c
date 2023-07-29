@@ -1,5 +1,5 @@
 #include "logo.h"
-#include "src_logo_builtin.h" // Generated with `src/logo/builtin.h`
+#include "logo_builtin.h"
 
 #define FF_LOGO_INIT static FFlogo logo; static bool init = false; if(init) return &logo; init = true;
 // The names of small logo must end with `_small` or `-small`

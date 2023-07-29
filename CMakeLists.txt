@@ -253,14 +253,15 @@ function(fastfetch_load_raw_text FILENAME OUTVAR)
 endfunction(fastfetch_load_raw_text)
 
 file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
+set(LOGO_BUILTIN_H "#pragma once\n\n")
 foreach(file ${LOGO_FILES})
     fastfetch_load_raw_text("${file}" content)
     get_filename_component(file "${file}" NAME_WLE)
     string(TOUPPER "${file}" file)
-    string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" DATATEXT_LOGO_${file} "${content}")
+    string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" content "${content}")
+    set(LOGO_BUILTIN_H "${LOGO_BUILTIN_H}#define FASTFETCH_DATATEXT_LOGO_${file} ${content}\n")
 endforeach()
-
-configure_file(src/logo/builtin.h.in src_logo_builtin.h @ONLY)
+file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 
 #######################
 # libfastfetch target #

@@ -541,6 +541,8 @@ void ffLogoBuiltinList(void)
         }
 
         putchar('\n');
+        puts(logo->data);
+        putchar('\n');
         ++methods;
     }
 }
