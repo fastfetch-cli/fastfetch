@@ -309,6 +309,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "konsole"))
         return getTerminalVersionKonsole(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "yakuake"))
+        return getExeVersionGeneral(exe, version);//yakuake 22.12.3
+
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
         return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
 

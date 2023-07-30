@@ -32,6 +32,7 @@ Features:
 * Add module `Terminal Size` which prints the number of terminal width and height in charactors and pixels
 * Add new option `--temperature-unit`
 * Better CPU and Host detection for Android (Android)
+* Support yakuake terminal version & font detection (Terminal, Linux)
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)

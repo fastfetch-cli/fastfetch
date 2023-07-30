@@ -70,14 +70,18 @@ static void detectFromConfigFile(const char* configFile, const char* start, FFTe
         ffFontInitPango(&terminalFont->font, fontName.chars);
 }
 
-static void detectKonsole(FFTerminalFontResult* terminalFont)
+static void detectKonsole(FFTerminalFontResult* terminalFont, const char* rcFile)
 {
     FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreate();
-    ffParsePropFileConfig("konsolerc", "DefaultProfile =", &profile);
+    if(!ffParsePropFileConfig(rcFile, "DefaultProfile =", &profile))
+    {
+        ffStrbufAppendF(&terminalFont->error, "Configuration \".config/%s\" doesn't exist", rcFile);
+        return;
+    }
 
     if(profile.length == 0)
     {
-        ffStrbufAppendS(&terminalFont->error, "Couldn't find \"DefaultProfile=%[^\\n]\" in \".config/konsolerc\"");
+        ffStrbufAppendS(&terminalFont->error, "Built-in profile is used");
         return;
     }
 
@@ -228,7 +232,9 @@ static void detectXterm(FFTerminalFontResult* terminalFont)
 void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "konsole"))
-        detectKonsole(terminalFont);
+        detectKonsole(terminalFont, "konsolerc");
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "yakuake"))
+        detectKonsole(terminalFont, "yakuakerc");
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "xfce4-terminal"))
         detectXFCETerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "lxterminal"))
