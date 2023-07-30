@@ -104,31 +104,31 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform)
 {
-    ffStrbufEnsureFree(&platform->userName, 64);
-    DWORD len = (DWORD) ffStrbufGetFree(&platform->userName);
-    if(GetUserNameA(platform->userName.chars, &len))
-        platform->userName.length = (uint32_t) len;
+    wchar_t buffer[128];
+    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    if(GetUserNameW(buffer, &len))
+        ffStrbufSetWS(&platform->userName, buffer);
 }
 
 static void getHostName(FFPlatform* platform)
 {
-    ffStrbufEnsureFree(&platform->hostName, 64);
-    DWORD len = (DWORD) ffStrbufGetFree(&platform->hostName);
-    if(GetComputerNameExA(ComputerNameDnsHostname, platform->hostName.chars, &len))
-        platform->hostName.length = (uint32_t) len;
+    wchar_t buffer[128];
+    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    if(GetComputerNameExW(ComputerNameDnsHostname, buffer, &len))
+        ffStrbufSetWS(&platform->hostName, buffer);
 }
 
 static void getDomainName(FFPlatform* platform)
 {
-    ffStrbufEnsureFree(&platform->domainName, 64);
-    DWORD len = (DWORD) ffStrbufGetFree(&platform->domainName);
-    if(GetComputerNameExA(ComputerNameDnsDomain, platform->domainName.chars, &len))
-        platform->domainName.length = (uint32_t) len;
+    wchar_t buffer[128];
+    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    if(GetComputerNameExW(ComputerNameDnsDomain, buffer, &len))
+        ffStrbufSetWS(&platform->domainName, buffer);
 }
 
 static void getSystemName(FFPlatform* platform)
 {
-    ffStrbufAppendS(&platform->systemName, "Windows_NT");
+    ffStrbufAppendS(&platform->systemName, getenv("OS"));
 }
 
 static void getSystemReleaseAndVersion(FFPlatform* platform)
