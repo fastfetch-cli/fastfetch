@@ -41,6 +41,7 @@ static void defaultConfig(void)
     #if defined(__linux__) || defined(__FreeBSD__)
     ffStrbufInit(&instance.config.playerName);
     ffStrbufInit(&instance.config.osFile);
+    instance.config.dsForceDrm = false;
     #elif defined(_WIN32)
     instance.config.wmiTimeout = 5000;
     #endif

@@ -869,6 +869,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffOptionParseString(key, value, &instance.config.playerName);
     else if (ffStrEqualsIgnCase(key, "--os-file"))
         ffOptionParseString(key, value, &instance.config.osFile);
+    else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
+        instance.config.dsForceDrm = ffOptionParseBoolean(value);
     #elif defined(_WIN32)
     else if (ffStrEqualsIgnCase(key, "--wmi-timeout"))
         instance.config.wmiTimeout = ffOptionParseInt32(key, value);

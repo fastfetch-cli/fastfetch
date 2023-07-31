@@ -75,25 +75,28 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     ffStrbufInit(&ds->deVersion);
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
 
-    //We try wayland as our prefered display server, as it supports the most features.
-    //This method can't detect the name of our WM / DE
-    ffdsConnectWayland(ds);
+    if (!instance.config.dsForceDrm)
+    {
+        //We try wayland as our prefered display server, as it supports the most features.
+        //This method can't detect the name of our WM / DE
+        ffdsConnectWayland(ds);
 
-    //Try the x11 libs, from most feature rich to least.
-    //We use the display list to detect if a connection is needed.
-    //They respect wmProtocolName, and only detect display if it is set.
+        //Try the x11 libs, from most feature rich to least.
+        //We use the display list to detect if a connection is needed.
+        //They respect wmProtocolName, and only detect display if it is set.
 
-    if(ds->displays.length == 0)
-        ffdsConnectXcbRandr(ds);
+        if(ds->displays.length == 0)
+            ffdsConnectXcbRandr(ds);
 
-    if(ds->displays.length == 0)
-        ffdsConnectXrandr(ds);
+        if(ds->displays.length == 0)
+            ffdsConnectXrandr(ds);
 
-    if(ds->displays.length == 0)
-        ffdsConnectXcb(ds);
+        if(ds->displays.length == 0)
+            ffdsConnectXcb(ds);
 
-    if(ds->displays.length == 0)
-        ffdsConnectXlib(ds);
+        if(ds->displays.length == 0)
+            ffdsConnectXlib(ds);
+    }
 
     //This display detection method is display server independent.
     //Use it if all connections failed

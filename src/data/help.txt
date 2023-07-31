@@ -26,6 +26,7 @@ General options:
     --pipe <?value>:                  Disable logo and all escape sequences
     --wmi-timeout <num>:              Set the timeout (ms) for WMI queries. Windows only. Default is 5000
     --processing-timeout <num>:       Set the timeout (ms) when waiting for child processes. Default is 1000
+    --ds-force-drm <?value>:          Set if only DRM should be used to detect displays. Default is false
 
 Logo options:
     -l,--logo <logo>:                      Set the logo; if default, the name of a builtin logo or a path to a file

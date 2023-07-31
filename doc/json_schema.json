@@ -240,9 +240,15 @@
                     "type": "string",
                     "title": "Set the path to the file containing OS information. Linux only"
                 },
+                "dsForceDrm": {
+                    "type": "boolean",
+                    "title": "Force display detection to use `/sys/class/drm`. Linux only",
+                    "default": false
+                },
                 "wmiTimeout": {
                     "type": "integer",
-                    "title": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only"
+                    "title": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only",
+                    "default": 5000
                 }
             },
             "additionalProperties": false
