@@ -46,7 +46,6 @@ void ffPrintTitle(FFTitleOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, host},
         });
     }
-    instance.state.titleLength = instance.state.platform.userName.length + host->length + 1;
 }
 
 void ffInitTitleOptions(FFTitleOptions* options)

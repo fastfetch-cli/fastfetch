@@ -7,9 +7,9 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <locale.h>
 #ifdef _WIN32
     #include <windows.h>
-    #include <locale.h>
     #include "util/windows/unicode.h"
 #else
     #include <signal.h>
@@ -24,7 +24,6 @@ static void initState(FFstate* state)
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
-    state->titleLength = 0;
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
@@ -153,6 +152,9 @@ void ffInitInstance(void)
     #ifdef WIN32
         //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
         setlocale(LC_ALL, ".UTF8");
+    #else
+        // used for mbsrtowcs in Module `separator`
+        setlocale(LC_ALL, "");
     #endif
 
     initState(&instance.state);

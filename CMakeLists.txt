@@ -607,11 +607,17 @@ elseif(WIN32)
     )
 endif()
 
+include(CheckFunctionExists)
+check_function_exists(wcwidth HAVE_WCWIDTH)
+if(NOT HAVE_WCWIDTH)
+    list(APPEND LIBFASTFETCH_SRC src/util/wcwidth.c)
+endif()
+
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
 
-target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 endif()
@@ -619,6 +625,10 @@ endif()
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
+endif()
+
+if(HAVE_WCWIDTH)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WCWIDTH)
 endif()
 
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)

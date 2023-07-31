@@ -153,7 +153,6 @@ typedef struct FFstate
     uint32_t logoWidth;
     uint32_t logoHeight;
     uint32_t keysHeight;
-    uint32_t titleLength;
 
     FFPlatform platform;
     yyjson_doc* configDoc;
