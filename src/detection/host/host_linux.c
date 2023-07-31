@@ -50,10 +50,13 @@ const char* ffDetectHost(FFHostResult* host)
 
     if(host->productFamily.length == 0 && host->productName.length == 0)
     {
+        const char* wslDistroName = getenv("WSL_DISTRO_NAME");
         //On WSL, the real host can't be detected. Instead use WSL as host.
-        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
+        if(wslDistroName != NULL || getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
         {
             ffStrbufAppendS(&host->productName, "Windows Subsystem for Linux");
+            if (wslDistroName)
+                ffStrbufAppendF(&host->productName, " - %s", wslDistroName);
             ffStrbufAppendS(&host->productFamily, "WSL");
 
             FF_STRBUF_AUTO_DESTROY wslVer = ffStrbufCreate(); //Wide charactors
