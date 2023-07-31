@@ -132,16 +132,17 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
-        strcasecmp(name, "sh")            == 0 || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
-        strcasecmp(name, "sudo")          == 0 ||
-        strcasecmp(name, "su")            == 0 ||
-        strcasecmp(name, "doas")          == 0 ||
-        strcasecmp(name, "strace")        == 0 ||
-        strcasecmp(name, "sshd")          == 0 ||
-        strcasecmp(name, "gdb")           == 0 ||
-        strcasecmp(name, "lldb")          == 0 ||
-        strcasecmp(name, "guake-wrapped") == 0 ||
-        strcasestr(name, "debug")         != NULL
+        strcasecmp(name, "sh")                   == 0 || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
+        strcasecmp(name, "sudo")                 == 0 ||
+        strcasecmp(name, "su")                   == 0 ||
+        strcasecmp(name, "strace")               == 0 ||
+        strcasecmp(name, "sshd")                 == 0 ||
+        strcasecmp(name, "gdb")                  == 0 ||
+        strcasecmp(name, "lldb")                 == 0 ||
+        strcasecmp(name, "guake-wrapped")        == 0 ||
+        strcasestr(name, "debug")             != NULL ||
+        strcasestr(name, "command-not-found") != NULL ||
+        ffStrEndsWith(name, ".sh")
     ) {
         getTerminalShell(result, ppid);
         return;
