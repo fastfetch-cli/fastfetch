@@ -143,16 +143,20 @@ static const char* detectWifiWithLibnm(FFlist* result)
         item->conn.signalQuality = ffnm_access_point_get_strength(ap);
         item->conn.rxRate = ffnm_access_point_get_max_bitrate(ap);
 
-        if(instance.config.allowSlowOperations)
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
+        if(!ffProcessAppendStdOut(&output, (char* const[]){
+            "iw",
+            "dev",
+            item->inf.description.chars,
+            "link",
+            NULL
+        }))
         {
-            FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
-            if(!ffProcessAppendStdOut(&output, (char* const[]){
-                "iw",
-                "dev",
-                item->inf.description.chars,
-                "link",
-                NULL
-            }) && ffParsePropLines(output.chars, "tx bitrate: ", &item->conn.protocol))
+            if(ffParsePropLines(output.chars, "rx bitrate: ", &item->conn.protocol))
+            {
+                sscanf(item->conn.protocol.chars, "%lf", &item->conn.rxRate);
+            }
+            if(ffParsePropLines(output.chars, "tx bitrate: ", &item->conn.protocol))
             {
                 if(ffStrbufContainS(&item->conn.protocol, " HE-MCS "))
                     ffStrbufSetS(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
@@ -162,6 +166,8 @@ static const char* detectWifiWithLibnm(FFlist* result)
                     ffStrbufSetS(&item->conn.protocol, "802.11n (Wi-Fi 4)");
                 else
                     ffStrbufSetS(&item->conn.protocol, "802.11a/b/g");
+
+                sscanf(item->conn.protocol.chars, "%lf", &item->conn.txRate);
             }
         }
 
@@ -171,28 +177,28 @@ static const char* detectWifiWithLibnm(FFlist* result)
 
         if ((flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpaFlags == NM_802_11_AP_SEC_NONE)
             && (rsnFlags == NM_802_11_AP_SEC_NONE))
-            ffStrbufAppendS(&item->conn.security, "WEP ");
+            ffStrbufAppendS(&item->conn.security, "WEP/");
         if (wpaFlags != NM_802_11_AP_SEC_NONE)
-            ffStrbufAppendS(&item->conn.security, "WPA ");
+            ffStrbufAppendS(&item->conn.security, "WPA/");
         if ((rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_PSK)
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)) {
-            ffStrbufAppendS(&item->conn.security, "WPA2 ");
+            ffStrbufAppendS(&item->conn.security, "WPA2/");
         }
         if (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_SAE) {
-            ffStrbufAppendS(&item->conn.security, "WPA3 ");
+            ffStrbufAppendS(&item->conn.security, "WPA3/");
         }
         if ((rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_OWE)
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_OWE_TM)) {
-            ffStrbufAppendS(&item->conn.security, "OWE ");
+            ffStrbufAppendS(&item->conn.security, "OWE/");
         }
         if ((wpaFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)) {
-            ffStrbufAppendS(&item->conn.security, "802.1X ");
+            ffStrbufAppendS(&item->conn.security, "802.1X/");
         }
         if (!item->conn.security.length)
             ffStrbufAppendS(&item->conn.security, "Insecure");
         else
-            ffStrbufTrimRight(&item->conn.security, ' ');
+            ffStrbufTrimRight(&item->conn.security, '/');
     }
 
     ffg_object_unref(client);
