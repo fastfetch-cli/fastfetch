@@ -144,7 +144,7 @@ Module specific options:
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use
     --opengl-library <value>:                Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
-    --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
+    --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, /bin/sh for *nix
     --command-key <str>:                     Set the module key to display
     --command-text <str>:                    Set the command text to be executed
     --colors-symbol <str>:                   Set the symbol to be printed by Colors module. Default is block

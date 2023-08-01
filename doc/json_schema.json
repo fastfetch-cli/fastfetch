@@ -692,7 +692,7 @@
                                         "const": "command"
                                     },
                                     "shell": {
-                                        "title": "Set the shell program to execute the command text\nDefault: cmd for Windows, csh for FreeBSD, bash for others",
+                                        "title": "Set the shell program to execute the command text\nDefault: cmd for Windows, /bin/sh for *nix",
                                         "type": "string"
                                     },
                                     "text": {

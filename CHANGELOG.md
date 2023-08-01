@@ -11,6 +11,7 @@ Changes:
 * Remove the special handling of Command module (it can be set once in the triditional `config.conf`). Use JSON config with Command module instead
 * Change `--wm-theme-*` to `--wmtheme-*`. Affect `key` and `format`
 * Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format`
+* Module `Command` uses `/bin/sh` as the default shell on systems other than Windows 
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a phycial machine

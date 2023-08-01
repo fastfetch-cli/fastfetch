@@ -39,13 +39,11 @@ void ffInitCommandOptions(FFCommandOptions* options)
     options->moduleName = FF_COMMAND_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    ffStrbufInitS(&options->shell,
+    ffStrbufInitStatic(&options->shell,
         #ifdef _WIN32
-        "cmd"
-        #elif defined(__FreeBSD__)
-        "csh"
+        "cmd.exe"
         #else
-        "bash"
+        "/bin/sh"
         #endif
     );
 
