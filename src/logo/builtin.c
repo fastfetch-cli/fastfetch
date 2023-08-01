@@ -1417,6 +1417,20 @@ static const FFlogo* getLogoRosaLinux(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoProxmox(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("proxmox")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_PROXMOX)
+    FF_LOGO_COLORS(
+        "37", //blue
+        "38;5;202"
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("38;5;202"); //white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoSlackware(void)
 {
     FF_LOGO_INIT
@@ -1771,6 +1785,7 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoPopSmall,
         getLogoParabola,
         getLogoParabolaSmall,
+        getLogoProxmox,
         getLogoRaspbian,
         getLogoRaspbianSmall,
         getLogoReborn,
