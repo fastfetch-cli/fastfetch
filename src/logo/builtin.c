@@ -380,6 +380,32 @@ static const FFlogo* getLogoDevuanSmall(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoElementary(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("elementary")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ELEMENTARY)
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoElementarySmall(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("elementary_small", "elementary-small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ELEMENTARY_SMALL)
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoDeepin(void)
 {
     FF_LOGO_INIT
@@ -1036,6 +1062,32 @@ static const FFlogo* getLogoNixOsSmall(void)
     )
     FF_LOGO_COLOR_KEYS("34"); //blue
     FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoMX(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("mx");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_MX)
+    FF_LOGO_COLORS(
+        "37" // white
+    )
+    FF_LOGO_COLOR_KEYS("34"); // blue
+    FF_LOGO_COLOR_TITLE("36"); // cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoMXSmall(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("mx_small", "mx-small");
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_MX_SMALL)
+    FF_LOGO_COLORS(
+        "37" // white
+    )
+    FF_LOGO_COLOR_KEYS("34"); // blue
+    FF_LOGO_COLOR_TITLE("36"); // cyan
     FF_LOGO_RETURN
 }
 
@@ -1715,10 +1767,12 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoCentOSSmall,
         getLogoCRUX,
         getLogoCrystalLinux,
+        getLogoElementary,
+        getLogoElementarySmall,
         getLogoDebian,
+        getLogoDebianSmall,
         getLogoDevuan,
         getLogoDevuanSmall,
-        getLogoDebianSmall,
         getLogoDeepin,
         getLogoEndeavour,
         getLogoEnso,
@@ -1766,6 +1820,8 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoNixOsOld,
         getLogoNixOsSmall,
         getLogoNomadBSD,
+        getLogoMX,
+        getLogoMXSmall,
         getLogoNetBSD,
         getLogoNobara,
         getLogoOpenBSD,
