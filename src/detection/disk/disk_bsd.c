@@ -45,7 +45,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
         #endif
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
-        disk->bytesUsed = disk->bytesTotal - ((uint64_t)fs->f_bavail * fs->f_bsize);
+        disk->bytesUsed = disk->bytesTotal - ((uint64_t)fs->f_bfree * fs->f_bsize);
 
         disk->filesTotal = (uint32_t) fs->f_files;
         disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs->f_ffree);

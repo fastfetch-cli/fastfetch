@@ -42,6 +42,7 @@ Bugfixes:
 * Properly detect CPU on POWER (CPU, Linux)
 * Fix compatibility with Fig (Terminal, macOS)
 * Fix option `--title-fqdn` doesn't work (Title)
+* Fix used spaces calculation (Disk, Linux / BSD / macOS, #508)
 
 Logo:
 * Change the special handling of `kitty` protocol with `.png` image file to a new image protocol `kitty-direct`. This is the fastest image protocol because fastfetch doesn't need to pre-encode the image to base64 or something and the image content doesn't need to be transmitted via tty. Note:
