@@ -96,7 +96,11 @@ static inline void ffUnsuppressIO(bool* suppressed)
     *suppressed = false;
 }
 
-#define FF_SUPPRESS_IO() bool __attribute__((__cleanup__(ffUnsuppressIO), __unused__)) io_suppressed__ = ffSuppressIO(true)
+#ifdef NDEBUG
+    #define FF_SUPPRESS_IO() bool __attribute__((__cleanup__(ffUnsuppressIO), __unused__)) io_suppressed__ = ffSuppressIO(true)
+#else
+    #define FF_SUPPRESS_IO()
+#endif
 
 void ffListFilesRecursively(const char* path);
 
