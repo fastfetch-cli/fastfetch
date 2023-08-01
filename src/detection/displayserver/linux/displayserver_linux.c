@@ -1,5 +1,4 @@
 #include "displayserver_linux.h"
-#include "common/io/io.h"
 #include "util/stringUtils.h"
 
 #include <dirent.h>
@@ -82,25 +81,21 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         //This method can't detect the name of our WM / DE
         ffdsConnectWayland(ds);
 
+        //Try the x11 libs, from most feature rich to least.
+        //We use the display list to detect if a connection is needed.
+        //They respect wmProtocolName, and only detect display if it is set.
+
         if(ds->displays.length == 0)
-        {
-            //Try the x11 libs, from most feature rich to least.
-            //We use the display list to detect if a connection is needed.
-            //They respect wmProtocolName, and only detect display if it is set.
-
-            FF_SUPPRESS_IO(); // #505
-
             ffdsConnectXcbRandr(ds);
 
-            if(ds->displays.length == 0)
-                ffdsConnectXrandr(ds);
+        if(ds->displays.length == 0)
+            ffdsConnectXrandr(ds);
 
-            if(ds->displays.length == 0)
-                ffdsConnectXcb(ds);
+        if(ds->displays.length == 0)
+            ffdsConnectXcb(ds);
 
-            if(ds->displays.length == 0)
-                ffdsConnectXlib(ds);
-        }
+        if(ds->displays.length == 0)
+            ffdsConnectXlib(ds);
     }
 
     //This display detection method is display server independent.
