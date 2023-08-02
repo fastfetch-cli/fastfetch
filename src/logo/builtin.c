@@ -72,9 +72,79 @@ static const FFlogo* getLogoAlpineSmall(void)
     FF_LOGO_NAMES("alpine_small", "alpine-linux-small")
     FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ALPINE_SMALL)
     FF_LOGO_COLORS(
-        "34" //blue
+        "34", //blue
+        "37" //white
     )
     FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAlpine2Small(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("alpine2_small", "alpine-linux2-small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ALPINE2_SMALL)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("35"); //magenta
+    FF_LOGO_COLOR_TITLE("34"); //blue
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAlter(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Alter")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ALTER)
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAmazon(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Amazon")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_AMAZON)
+    FF_LOGO_COLORS(
+        "33", //yellow
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("33"); //yellow
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAmogOS(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("AmogOS")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_AMOGOS)
+    FF_LOGO_COLORS(
+        "37", //white
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAnarchy(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Anarchy")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ANARCHY)
+    FF_LOGO_COLORS(
+        "37", //white
+        "34" //blue
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
     FF_LOGO_COLOR_TITLE("34"); //blue
     FF_LOGO_RETURN
 }
@@ -109,7 +179,7 @@ static const FFlogo* getLogoAndroidSmall(void)
 static const FFlogo* getLogoArch(void)
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("arch", "archlinux", "arch-linux")
+    FF_LOGO_NAMES("arch", "archlinux", "arch-linux", "archmerge")
     FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCH)
     FF_LOGO_COLORS(
         "36", //cyan
@@ -506,7 +576,7 @@ static const FFlogo* getLogoFedoraOld(void)
 static const FFlogo* getLogoFreeBSD(void)
 {
     FF_LOGO_INIT
-    FF_LOGO_NAMES("freebsd")
+    FF_LOGO_NAMES("freebsd", "HardenedBSD")
     FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_FREEBSD)
     FF_LOGO_COLORS(
         "37", //white
@@ -1750,6 +1820,11 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoAlmaLinux,
         getLogoAlpine,
         getLogoAlpineSmall,
+        getLogoAlpine2Small,
+        getLogoAlter,
+        getLogoAmazon,
+        getLogoAmogOS,
+        getLogoAnarchy,
         getLogoAndroid,
         getLogoAndroidSmall,
         getLogoArch,
