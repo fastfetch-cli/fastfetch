@@ -432,6 +432,34 @@ static const FFlogo* getLogoArcoLinuxSmall(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoArseLinux(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("arse", "arselinux", "arse-linux")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARSELINUX)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArya(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Arya")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARYA)
+    FF_LOGO_COLORS(
+        "32", //green
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoAsahi(void)
 {
     FF_LOGO_INIT
@@ -448,6 +476,48 @@ static const FFlogo* getLogoAsahi(void)
     )
     FF_LOGO_COLOR_KEYS("33"); //yellow
     FF_LOGO_COLOR_TITLE("32"); //green
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAster(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("aster")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ASTER)
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAsteroidOS(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("AsteroidOS")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ASTEROIDOS)
+    FF_LOGO_COLORS(
+        "38;5;160",
+        "38;5;208",
+        "38;5;202",
+        "38;5;214"
+    )
+    FF_LOGO_COLOR_KEYS("38;5;160");
+    FF_LOGO_COLOR_TITLE("38;5;208");
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAstOS(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("astOS")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ASTOS)
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("37"); //white
+    FF_LOGO_COLOR_TITLE("37"); //white
     FF_LOGO_RETURN
 }
 
@@ -2035,7 +2105,12 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoArtix,
         getLogoArtixSmall,
         getLogoArtix2Small,
+        getLogoArseLinux,
+        getLogoArya,
         getLogoAsahi,
+        getLogoAster,
+        getLogoAsteroidOS,
+        getLogoAstOS,
         getLogoBedrock,
         getLogoBSD,
         getLogoCachyOS,

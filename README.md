@@ -95,9 +95,8 @@ Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsa
 ```
 
 ##### Builtin logos
-```
-AIX, AlmaLinux, Alpine, Alter, Amazon, Amogos, Anarchy, Android, Antergos, AntiX, Aosc OS, Aperture, Apricity, Arch, ArchBox, Archcraft, Arco, Artix, Asahi, BSD, Bedrock, CRUX, CachyOS, CentOS, Crystal, Debian, Deepin, Devuan, Elementary, Endeavour, Enso, Exherbo, Fedora, FreeBSD, GNU, Garuda, Garuda Dragon, Gentoo, GhostBSD, Gnome, Haiku, KDE Neon, KISS, Kubuntu, LMDE, LangitKetujuh, Linux, MSYS2, MX, MacOS, Mandriva, Manjaro, Minix, Mint, NetBSD, NixOS, Nobara, NomadBSD, OpenBSD, OpenKylin, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, OpenWrt, Oracle, Orchid, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solaris, Solus, SteamOS, UOS, Ubuntu, Ubuntu Kylin, Vanilla, Void, Windows, Windows 11, Windows 8, Windows 95, Zorin
-```
+
+See files in <https://github.com/fastfetch-cli/fastfetch/tree/dev/src/logo/ascii>
 
 ##### Package managers
 ```
