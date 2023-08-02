@@ -96,7 +96,7 @@ Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsa
 
 ##### Builtin logos
 ```
-AIX, Alter, Amazon, Amogos, Anarchy, Asahi, AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, BSD, CachyOS, CentOS, CRUX, Crystal, Debian, Deepin, Devuan, Elementary, Endeavour, Enso, Exherbo, Fedora, FreeBSD, Garuda, Garuda Dragon, Gentoo, GhostBSD, GNU, Gnome, Haiku, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, LMDE, MacOS, Mandriva, Manjaro, NetBSD, Mint, Minix, MX, MSYS2, NixOS, Nobara, NomadBSD, OpenBSD, OpenKylin, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, OpenWrt, Orchid, Oracle, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solaris, Solus, SteamOS, Ubuntu, Ubuntu Kylin, UOS, Vanilla, Void, Windows, Windows 11, Windows 8, Windows 95, Zorin
+AIX, AlmaLinux, Alpine, Alter, Amazon, Amogos, Anarchy, Android, Antergos, AntiX, Aosc OS, Aperture, Apricity, Arch, ArchBox, Archcraft, Arco, Artix, Asahi, BSD, Bedrock, CRUX, CachyOS, CentOS, Crystal, Debian, Deepin, Devuan, Elementary, Endeavour, Enso, Exherbo, Fedora, FreeBSD, GNU, Garuda, Garuda Dragon, Gentoo, GhostBSD, Gnome, Haiku, KDE Neon, KISS, Kubuntu, LMDE, LangitKetujuh, Linux, MSYS2, MX, MacOS, Mandriva, Manjaro, Minix, Mint, NetBSD, NixOS, Nobara, NomadBSD, OpenBSD, OpenKylin, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, OpenWrt, Oracle, Orchid, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solaris, Solus, SteamOS, UOS, Ubuntu, Ubuntu Kylin, Vanilla, Void, Windows, Windows 11, Windows 8, Windows 95, Zorin
 ```
 
 ##### Package managers

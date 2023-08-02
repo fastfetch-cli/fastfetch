@@ -176,6 +176,140 @@ static const FFlogo* getLogoAndroidSmall(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoAntergos(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Antergos")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ANTERGOS)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAntix(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("antiX")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ANTIX)
+    FF_LOGO_COLORS(
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("31"); //red
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAoscOsRetro(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Aosc OS/Retro", "aoscosretro")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_AOSCOSRETRO)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAoscOsRetro_small(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Aosc OS/Retro_small", "aoscosretro_small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_AOSCOSRETRO_SMALL)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAoscOS(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Aosc OS", "aoscos")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_AOSCOS)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoAperture(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Aperture")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_APERTURE)
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoApricity(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Apricity")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_APRICITY)
+    FF_LOGO_COLORS(
+        "37" //white
+    )
+    FF_LOGO_COLOR_KEYS("34"); //blue
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArchBox(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ArchBox")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCHBOX)
+    FF_LOGO_COLORS(
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("32"); //green
+    FF_LOGO_COLOR_TITLE("37"); //white
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArchcraft(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Archcraft")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCHCRAFT)
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArchcraft2(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("Archcraft2")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCHCRAFT2)
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoArch(void)
 {
     FF_LOGO_INIT
@@ -197,6 +331,34 @@ static const FFlogo* getLogoArchSmall(void)
     FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCH_SMALL)
     FF_LOGO_COLORS(
         "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArchlabs(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ARCHlabs")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCHLABS)
+    FF_LOGO_COLORS(
+        "36", //cyan
+        "31" //red
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("31"); //red
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArchStrike(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("ArchStrike")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCHSTRIKE)
+    FF_LOGO_COLORS(
+        "36", //cyan
+        "30" //black
     )
     FF_LOGO_COLOR_KEYS("36"); //cyan
     FF_LOGO_COLOR_TITLE("36"); //cyan
@@ -229,11 +391,38 @@ static const FFlogo* getLogoArtixSmall(void)
     FF_LOGO_RETURN
 }
 
+static const FFlogo* getLogoArtix2Small(void)
+{
+    FF_LOGO_INIT_SMALL
+    FF_LOGO_NAMES("artix2_small", "artixlinux2_small", "artix-linux2-small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARTIX2_SMALL)
+    FF_LOGO_COLORS(
+        "36" //cyan
+    )
+    FF_LOGO_COLOR_KEYS("36"); //cyan
+    FF_LOGO_COLOR_TITLE("36"); //cyan
+    FF_LOGO_RETURN
+}
+
 static const FFlogo* getLogoArcoLinux(void)
 {
     FF_LOGO_INIT
     FF_LOGO_NAMES("arco", "arcolinux", "arco-linux")
     FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCO)
+    FF_LOGO_COLORS(
+        "34", //blue
+        "32" //green
+    )
+    FF_LOGO_COLOR_KEYS("34"); //green
+    FF_LOGO_COLOR_TITLE("34"); //green
+    FF_LOGO_RETURN
+}
+
+static const FFlogo* getLogoArcoLinuxSmall(void)
+{
+    FF_LOGO_INIT
+    FF_LOGO_NAMES("arco_small", "arcolinux_small", "arco-linux_small")
+    FF_LOGO_LINES(FASTFETCH_DATATEXT_LOGO_ARCO_SMALL)
     FF_LOGO_COLORS(
         "34", //blue
         "32" //green
@@ -1086,8 +1275,8 @@ static const FFlogo* getLogoWindows95(void)
         "34", //blue
         "33", //yellow
         "32", //green
-        "31",
-        "30"
+        "31", //red
+        "30" //black
     )
     FF_LOGO_COLOR_KEYS("36"); //cyan
     FF_LOGO_COLOR_TITLE("34"); //blue
@@ -1827,11 +2016,25 @@ GetLogoMethod* ffLogoBuiltinGetAll(void)
         getLogoAnarchy,
         getLogoAndroid,
         getLogoAndroidSmall,
+        getLogoAntergos,
+        getLogoAntix,
+        getLogoAoscOsRetro,
+        getLogoAoscOsRetro_small,
+        getLogoAoscOS,
+        getLogoAperture,
+        getLogoApricity,
+        getLogoArchBox,
+        getLogoArchcraft,
+        getLogoArchcraft2,
         getLogoArch,
         getLogoArchSmall,
+        getLogoArchlabs,
+        getLogoArchStrike,
         getLogoArcoLinux,
+        getLogoArcoLinuxSmall,
         getLogoArtix,
         getLogoArtixSmall,
+        getLogoArtix2Small,
         getLogoAsahi,
         getLogoBedrock,
         getLogoBSD,

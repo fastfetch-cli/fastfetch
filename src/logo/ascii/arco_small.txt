@@ -1,0 +1,11 @@
+${c1}          A
+         ooo
+        ooooo
+       ooooooo
+      ooooooooo
+     ooooo ooooo
+    ooooo   ooooo
+   ooooo     ooooo
+  ooooo  ${c2}<oooooooo>${c1}
+ ooooo      ${c2}<oooooo>${c1}
+ooooo          ${c2}<oooo>
