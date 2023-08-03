@@ -2,6 +2,7 @@
 
 #include "util/FFstrbuf.h"
 
+#define FASTFETCH_LOGO_MAX_NAMES 9
 #define FASTFETCH_LOGO_MAX_COLORS 9 //two digits would make parsing much more complicated (index 1 - 9)
 
 typedef enum FFLogoType

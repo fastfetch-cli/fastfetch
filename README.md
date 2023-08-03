@@ -96,7 +96,7 @@ Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsa
 
 ##### Builtin logos
 
-See files in <https://github.com/fastfetch-cli/fastfetch/tree/dev/src/logo/ascii>
+See files in <src/logo/ascii>
 
 ##### Package managers
 ```

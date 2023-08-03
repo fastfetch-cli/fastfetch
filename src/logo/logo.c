@@ -187,8 +187,11 @@ static void logoApplyColors(const FFlogo* logo)
 
 static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small)
 {
-    for(const char** logoName = logo->names; *logoName != NULL; ++logoName)
-    {
+    for(
+        const char* const* logoName = logo->names;
+        *logoName != NULL && logoName <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
+        ++logoName
+    ) {
         if(small)
         {
             uint32_t logoNameLength = (uint32_t) (strlen(*logoName) - strlen("_small"));
@@ -206,10 +209,8 @@ static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size)
     if (name->length == 0)
         return NULL;
 
-    for(GetLogoMethod* methods = ffLogoBuiltinGetAll(); *methods; ++methods)
+    for(const FFlogo* logo = ffLogoBuiltins; logo < ffLogoBuiltins + ffLogoBuiltinLength; ++logo)
     {
-        const FFlogo* logo = (*methods)();
-
         switch (size)
         {
             case FF_LOGO_SIZE_NORMAL:
@@ -253,7 +254,7 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size)
     if(logo != NULL)
         return logo;
 
-    return ffLogoBuiltinGetUnknown();
+    return &ffLogoBuiltins[0]; // Unknown
 }
 
 static inline void logoApplyColorsDetected(void)
@@ -267,14 +268,14 @@ static void logoPrintStruct(const FFlogo* logo)
 
     FFLogoOptions* options = &instance.config.logo;
 
-    const char** colors = logo->builtinColors;
+    const char* const* colors = logo->colors;
     for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
     {
         if(options->colors[i].length == 0)
             ffStrbufAppendS(&options->colors[i], *colors);
     }
 
-    ffLogoPrintChars(logo->data, true);
+    ffLogoPrintChars(logo->lines, true);
 }
 
 static void logoPrintNone(void)
@@ -499,13 +500,11 @@ void ffLogoPrintRemaining(void)
 
 void ffLogoBuiltinPrint(void)
 {
-    GetLogoMethod* methods = ffLogoBuiltinGetAll();
     FFLogoOptions* options = &instance.config.logo;
 
-    while(*methods != NULL)
+    for(const FFlogo* logo = ffLogoBuiltins; logo < ffLogoBuiltins + ffLogoBuiltinLength; ++logo)
     {
-        const FFlogo* logo = (*methods)();
-        printf("\033[%sm%s:\033[0m\n", logo->builtinColors[0], logo->names[0]);
+        printf("\033[%sm%s:\033[0m\n", logo->colors[0], logo->names[0]);
         logoPrintStruct(logo);
         ffLogoPrintRemaining();
 
@@ -515,43 +514,30 @@ void ffLogoBuiltinPrint(void)
         for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
             ffStrbufClear(&options->colors[i]);
 
-        puts("\n");
-        ++methods;
+        putchar('\n');
     }
 }
 
 void ffLogoBuiltinList(void)
 {
-    GetLogoMethod* methods = ffLogoBuiltinGetAll();
-
-    uint32_t counter = 0;
-
-    while(*methods != NULL)
+    for(uint32_t counter = 0; counter < ffLogoBuiltinLength; ++counter)
     {
-        const FFlogo* logo = (*methods)();
-        const char** names = logo->names;
-
+        const FFlogo* logo = &ffLogoBuiltins[counter];
         printf("%u)%s ", counter, counter < 10 ? " " : "");
-        ++counter;
 
-        while(*names != NULL)
-        {
+        for(
+            const char* const* names = logo->names;
+            *names != NULL && names <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
+            ++names
+        )
             printf("\"%s\" ", *names);
-            ++names;
-        }
 
         putchar('\n');
-        ++methods;
     }
 }
 
 void ffLogoBuiltinListAutocompletion(void)
 {
-    GetLogoMethod* methods = ffLogoBuiltinGetAll();
-
-    while(*methods != NULL)
-    {
-        printf("%s\n", (*methods)()->names[0]);
-        ++methods;
-    }
+    for(const FFlogo* logo = ffLogoBuiltins; logo < ffLogoBuiltins + ffLogoBuiltinLength; ++logo)
+        printf("%s\n", logo->names[0]);
 }

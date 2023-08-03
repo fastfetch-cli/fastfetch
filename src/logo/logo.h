@@ -7,22 +7,20 @@
 
 typedef struct FFlogo
 {
-    const char* data;
-    const char** names; //Null terminated
-    const char** builtinColors; //Null terminated
+    const char* lines;
+    const char* names[FASTFETCH_LOGO_MAX_NAMES];
+    const char* colors[FASTFETCH_LOGO_MAX_COLORS];
     const char* colorKeys;
     const char* colorTitle;
-    bool small;
+    bool small; // The names of small logo must end with `_small` or `-small`
 } FFlogo;
-
-typedef const FFlogo*(*GetLogoMethod)();
 
 //logo.c
 void ffLogoPrintChars(const char* data, bool doColorReplacement);
 
 //builtin.c
-const FFlogo* ffLogoBuiltinGetUnknown();
-GetLogoMethod* ffLogoBuiltinGetAll();
+extern const FFlogo ffLogoBuiltins[];
+extern const uint32_t ffLogoBuiltinLength;
 
 //image/image.c
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError);
