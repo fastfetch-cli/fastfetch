@@ -271,7 +271,7 @@
 #--opengl-library auto
 
 # GPU hide options
-# Sets weather to hide certain gpu types
+# Sets whether to hide certain gpu types
 # Must be either true or false
 # Default is false.
 #--gpu-hide-integrated
