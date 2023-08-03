@@ -3,7 +3,11 @@
     "$defs": {
         "colors": {
             "type": "string",
-            "enum": ["reset_", "bright_", "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+            "enum": [
+                "reset_", "bright_", "dim_",
+                "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default",
+                "bright_black", "bright_red", "bright_green", "bright_yellow", "bright_blue", "bright_magenta", "bright_cyan", "bright_white"
+            ]
         },
         "key": {
             "title": "Key of the module",

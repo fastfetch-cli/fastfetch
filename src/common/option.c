@@ -1,4 +1,5 @@
 #include "common/option.h"
+#include "common/color.h"
 #include "util/stringUtils.h"
 
 // Return start position of the inner key if the argument key belongs to the module specified, NULL otherwise
@@ -138,16 +139,26 @@ void ffOptionParseColor(const char* value, FFstrbuf* buffer)
         #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
             if(strncasecmp(value, #prefix, strlen(#prefix)) == 0) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
 
-        FF_APPEND_COLOR_CODE_COND(reset_, "0;")
-        else FF_APPEND_COLOR_CODE_COND(bright_, "1;")
-        else FF_APPEND_COLOR_CODE_COND(black, "30")
-        else FF_APPEND_COLOR_CODE_COND(red, "31")
-        else FF_APPEND_COLOR_CODE_COND(green, "32")
-        else FF_APPEND_COLOR_CODE_COND(yellow, "33")
-        else FF_APPEND_COLOR_CODE_COND(blue, "34")
-        else FF_APPEND_COLOR_CODE_COND(magenta, "35")
-        else FF_APPEND_COLOR_CODE_COND(cyan, "36")
-        else FF_APPEND_COLOR_CODE_COND(white, "37")
+        FF_APPEND_COLOR_CODE_COND(reset_, FF_COLOR_MODE_RESET)
+        else FF_APPEND_COLOR_CODE_COND(bright_, FF_COLOR_MODE_BOLD)
+        else FF_APPEND_COLOR_CODE_COND(dim_, FF_COLOR_MODE_DIM)
+        else FF_APPEND_COLOR_CODE_COND(black, FF_COLOR_FG_BLACK)
+        else FF_APPEND_COLOR_CODE_COND(red, FF_COLOR_FG_RED)
+        else FF_APPEND_COLOR_CODE_COND(green, FF_COLOR_FG_GREEN)
+        else FF_APPEND_COLOR_CODE_COND(yellow, FF_COLOR_FG_YELLOW)
+        else FF_APPEND_COLOR_CODE_COND(blue, FF_COLOR_FG_BLUE)
+        else FF_APPEND_COLOR_CODE_COND(magenta, FF_COLOR_FG_MAGENTA)
+        else FF_APPEND_COLOR_CODE_COND(cyan, FF_COLOR_FG_CYAN)
+        else FF_APPEND_COLOR_CODE_COND(white, FF_COLOR_FG_WHITE)
+        else FF_APPEND_COLOR_CODE_COND(default, FF_COLOR_FG_DEFAULT)
+        else FF_APPEND_COLOR_CODE_COND(light_black, FF_COLOR_FG_LIGHT_BLACK)
+        else FF_APPEND_COLOR_CODE_COND(light_red, FF_COLOR_FG_LIGHT_RED)
+        else FF_APPEND_COLOR_CODE_COND(light_green, FF_COLOR_FG_LIGHT_GREEN)
+        else FF_APPEND_COLOR_CODE_COND(light_yellow, FF_COLOR_FG_LIGHT_YELLOW)
+        else FF_APPEND_COLOR_CODE_COND(light_blue, FF_COLOR_FG_LIGHT_BLUE)
+        else FF_APPEND_COLOR_CODE_COND(light_magenta, FF_COLOR_FG_LIGHT_MAGENTA)
+        else FF_APPEND_COLOR_CODE_COND(light_cyan, FF_COLOR_FG_LIGHT_CYAN)
+        else FF_APPEND_COLOR_CODE_COND(light_white, FF_COLOR_FG_LIGHT_WHITE)
         else
         {
             ffStrbufAppendC(buffer, *value);
