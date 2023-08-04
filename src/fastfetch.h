@@ -39,6 +39,8 @@ typedef struct FFconfig
     FFstrbuf colorKeys;
     FFstrbuf colorTitle;
 
+    bool brightColor;
+
     FFstrbuf keyValueSeparator;
 
     bool showErrors;

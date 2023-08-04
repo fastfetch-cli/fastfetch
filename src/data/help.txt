@@ -58,6 +58,7 @@ Display options:
     -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
     --color-keys <color>:        Set the color of the keys
     --color-title <color>:       Set the color of the title
+    --bright-color <?value>:     Set if the keys, title and ASCII logo should be printed in bright color. Default is true
     -c,--color <color>:          Set the color of both the keys and title
     --separator <str>:           Set the separator between key and value. Default is a colon with a space
     --set <key=value>:           Hard set the value of a key

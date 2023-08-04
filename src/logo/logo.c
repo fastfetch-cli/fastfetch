@@ -19,7 +19,10 @@ typedef enum FFLogoSize
 static void ffLogoPrintCharsRaw(const char* data, size_t length)
 {
     FFLogoOptions* options = &instance.config.logo;
-    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+
+    if (instance.config.brightColor)
+        fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+
     ffPrintCharTimes('\n', options->paddingTop);
     ffPrintCharTimes(' ', options->paddingLeft);
     fwrite(data, length, 1, stdout);
@@ -34,7 +37,9 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
     uint32_t currentlineLength = 0;
 
-    fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+    if (instance.config.brightColor)
+        fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+
     ffPrintCharTimes('\n', options->paddingTop);
     ffPrintCharTimes(' ', options->paddingLeft);
 

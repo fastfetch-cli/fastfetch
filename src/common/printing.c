@@ -12,7 +12,10 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFstrb
 
     if(!instance.config.pipe)
     {
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+        if (instance.config.brightColor)
+            fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+
         if(customKeyColor != NULL && customKeyColor->length > 0)
             ffPrintColor(customKeyColor);
         else

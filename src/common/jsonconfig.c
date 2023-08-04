@@ -379,6 +379,8 @@ const char* ffParseDisplayJsonConfig(void)
             else
                 return "display.color must be either a string or an object";
         }
+        else if (ffStrEqualsIgnCase(key, "brightColor"))
+            config->brightColor = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
         {
             int value;

@@ -10,7 +10,8 @@ static inline void printTitlePart(const FFstrbuf* content, const FFstrbuf* color
 {
     if(!instance.config.pipe)
     {
-        fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+        if (instance.config.brightColor)
+            fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
         ffPrintColor(color->length > 0 ? color : &instance.config.colorTitle);
     }
 

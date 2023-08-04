@@ -35,6 +35,7 @@ static void defaultConfig(void)
 
     ffStrbufInit(&instance.config.colorKeys);
     ffStrbufInit(&instance.config.colorTitle);
+    instance.config.brightColor = true;
     ffStrbufInitStatic(&instance.config.keyValueSeparator, ": ");
     instance.config.processingTimeout = 1000;
 

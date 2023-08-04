@@ -304,6 +304,11 @@
                         }
                     ]
                 },
+                "brightColor": {
+                    "title": "Set if the keys, title and ASCII logo should be printed in bright color",
+                    "type": "boolean",
+                    "default": true
+                },
                 "binaryPrefix": {
                     "type": "string",
                     "title": "Set the binary prefix to used when printing bytes",

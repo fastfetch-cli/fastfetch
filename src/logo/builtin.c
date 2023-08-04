@@ -30,12 +30,12 @@ const FFlogo ffLogoBuiltins[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_ALMALINUX,
         .colors = {
             FF_COLOR_FG_RED,
-            FF_COLOR_MODE_BOLD FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_YELLOW,
             FF_COLOR_FG_BLUE,
-            FF_COLOR_MODE_BOLD FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_LIGHT_GREEN,
             FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_MODE_BOLD FF_COLOR_FG_YELLOW,
+        .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_RED,
     },
     // Alpine
@@ -416,7 +416,7 @@ const FFlogo ffLogoBuiltins[] = {
         .names = {"Astra", "Astra Linux", "astralinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_ASTRA_LINUX,
         .colors = {
-            FF_COLOR_MODE_BOLD FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_RED,
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_RED,
@@ -1565,9 +1565,9 @@ const FFlogo ffLogoBuiltins[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_HYBRID,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_MODE_BOLD FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_LIGHT_BLUE,
         },
-        .colorKeys = FF_COLOR_MODE_BOLD FF_COLOR_FG_BLUE,
+        .colorKeys = FF_COLOR_FG_LIGHT_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     // HydroOS
@@ -2735,7 +2735,7 @@ const FFlogo ffLogoBuiltins[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_PENGWIN,
         .colors = {
             FF_COLOR_FG_MAGENTA,
-            FF_COLOR_MODE_BOLD FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_LIGHT_MAGENTA,
             FF_COLOR_FG_MAGENTA,
         },
     },

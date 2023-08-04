@@ -906,6 +906,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         optionCheckString(key, value, &instance.config.colorTitle);
         ffOptionParseColor(value, &instance.config.colorTitle);
     }
+    else if(ffStrEqualsIgnCase(key, "--bright-color"))
+        instance.config.brightColor = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--color"))
     {
         optionCheckString(key, value, &instance.config.colorKeys);
