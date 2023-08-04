@@ -3394,7 +3394,7 @@ const FFlogo ffLogoBuiltins[] = {
     // Tails
     {
         .names = {"Tails"},
-        .lines = FF_COLOR_FG_MAGENTA,
+        .lines = FASTFETCH_DATATEXT_LOGO_TAILS,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
@@ -3405,7 +3405,7 @@ const FFlogo ffLogoBuiltins[] = {
         .names = {"TeArch"},
         .lines = FASTFETCH_DATATEXT_LOGO_TEARCH,
         .colors = {
-            FF_COLOR_BG_256 "39",
+            FF_COLOR_FG_256 "39",
             FF_COLOR_FG_WHITE,
         },
     },
