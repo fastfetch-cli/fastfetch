@@ -1,0 +1,20 @@
+              00xxxx0
+          00xxxxxx0
+       0xxxxxxxxx         000000
+     0xxxxxxxxxx        xxxxxxxxxx0
+   0xxxxxxxxxxx0       xxxxxxxxxxxxx0
+  0xxxxxxxxxxxx0      0xxxxxxxxxxxxxx0
+ 0xxxxxxxxxxxxx0      0xxxxxxxxxxxxxxx0
+0xxxxxxxxxxxxxxx       xxxxxxxxxxxxxxxx0
+xxxxxxxxxxxxxxxx0      0xxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxx       0xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxx       xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxx0       xxxxxxxxxxxxxx
+0xxxxxxxxxxxxxxxxxx0      0xxxxxxxxxxxx0
+ 0xxxxxxxxxxxxxxxxxx       xxxxxxxxxxx0
+  0xxxxxxxxxxxxxxxxx       xxxxxxxxxx0
+   0xxxxxxxxxxxxxxxx       xxxxxxxxx0
+     0xxxxxxxxxxxx0       0xxxxxxx0
+        0xxxxxxx0         xxxxxx0
+                        0xxx00
+                      x00

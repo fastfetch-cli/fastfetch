@@ -75,6 +75,15 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
+    if(strstr(xdgConfigDirs, "cinnamon") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Cinnamon");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Cinnamon");
+        ffStrbufSetS(&result->id, "ubuntu-cinnamon");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
     if(strstr(xdgConfigDirs, "mate") != NULL)
     {
         ffStrbufSetS(&result->name, "Ubuntu MATE");
@@ -89,6 +98,24 @@ static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->name, "Ubuntu Studio");
         ffStrbufSetS(&result->prettyName, "Ubuntu Studio");
         ffStrbufSetS(&result->id, "ubuntu-studio");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "sway") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Sway");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Sway");
+        ffStrbufSetS(&result->id, "ubuntu-sway");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(strstr(xdgConfigDirs, "touch") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Touch");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Touch");
+        ffStrbufSetS(&result->id, "ubuntu-touch");
         ffStrbufSetS(&result->idLike, "ubuntu");
         return;
     }
