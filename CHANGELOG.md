@@ -4,20 +4,20 @@ This release introduces a new configuration file format: JSON config. Please ref
 
 Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
-* Remove `--shell-version` and `--terminal-version`. They are always enabled
+* Remove `--shell-version` and `--terminal-version`. They are always enabled (Terminal / Shell)
 * Remove `--*-error-format`, which seems to be useless
 * Remove `--display-detect-name`. Display name is always detected, and will be printed if multiple displays are detected
 * Deprecate `--set` and `--set-keyless`; they may be removed in future releases. Use JSON config with Custom module instead
 * Remove the special handling of Command module (it can be set once in the triditional `config.conf`). Use JSON config with Command module instead
-* Change `--wm-theme-*` to `--wmtheme-*`. Affect `key` and `format`
-* Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format`
-* Module `Command` uses `/bin/sh` as the default shell on systems other than Windows 
+* Change `--wm-theme-*` to `--wmtheme-*`. Affect `key` and `format` (WMTheme)
+* Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format` (TerminalFont)
+* Module `Command` uses `/bin/sh` as the default shell on systems other than Windows  (Command)
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a phycial machine
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
 * Support `--*-key-color` option to change the key color of specified module
-* Support `--colors-symbol` and `--colors-padding-left`
+* Support `--colors-symbol` and `--colors-padding-left` (Colors)
 * Add LM (Login Manager) module. Currently requires systemd installed (thus Linux only)
 * Add `--wmi-timeout` option (Windows)
 * Add `--logo-type small` to search for small logos
@@ -48,7 +48,7 @@ Logo:
 * Change the special handling of `kitty` protocol with `.png` image file to a new image protocol `kitty-direct`. This is the fastest image protocol because fastfetch doesn't need to pre-encode the image to base64 or something and the image content doesn't need to be transmitted via tty. Note:
     1. Although konsole was said to support `kitty` image protocol, it doesn't support `kitty-direct`
     2. wezterm support more image formats other than `.png` (tested with `.jpg` and `.webp`)
-* Add `Windows 95` and more
+* Port all logos supported by neo(wo)fetch. Fastfetch now has 350 builtin logos in total.
 
 # 1.12.2
 
