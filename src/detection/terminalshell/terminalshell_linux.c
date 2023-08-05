@@ -369,6 +369,8 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufInitStatic(&result.shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
         ffStrbufInitStatic(&result.shellPrettyName, "xonsh");
+    else if(ffStrbufEqualS(&result.shellProcessName, ".kitty-wrapped"))
+        ffStrbufInitStatic(&result.shellPrettyName, "kitty"); // #510
     else
     {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
