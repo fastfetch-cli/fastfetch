@@ -141,6 +141,7 @@ Module specific options:
     --localip-compact <?value>:              Show all IPs in one line. Default is false
     --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url:                          The URL of public IP detection server to be used.
+    --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use

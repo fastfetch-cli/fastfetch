@@ -222,7 +222,7 @@
 #--publicip-timeout 0
 
 # Weather location option:
-# Sets location to be used. It must be URI encoded.
+# Sets the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
 # Default is empty (guessing by public IP)
 #--weather-location "Location"
 
