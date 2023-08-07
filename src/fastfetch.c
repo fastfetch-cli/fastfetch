@@ -619,11 +619,23 @@ static bool parseConfigFile(FFdata* data, const char* path)
     return true;
 }
 
-static void generateConfigFile(bool force)
+static void generateConfigFile(bool force, const char* type)
 {
     FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0);
     // Paths generated in `init.c/initConfigDirs` end with `/`
-    ffStrbufAppendS(filename, "fastfetch/config.conf");
+    bool isJsonc = false;
+    if (type)
+    {
+        if (ffStrEqualsIgnCase(type, "jsonc"))
+            isJsonc = true;
+        else if (!ffStrEqualsIgnCase(type, "conf"))
+        {
+            fputs("config type can only be `jsonc` or `conf`\n", stderr);
+            exit(1);
+        }
+    }
+
+    ffStrbufAppendS(filename, isJsonc ? "fastfetch/config.jsonc" : "fastfetch/config.conf");
 
     if (!force && ffPathExists(filename->chars, FF_PATHTYPE_FILE))
     {
@@ -632,7 +644,10 @@ static void generateConfigFile(bool force)
     }
     else
     {
-        ffWriteFileData(filename->chars, sizeof(FASTFETCH_DATATEXT_CONFIG_USER), FASTFETCH_DATATEXT_CONFIG_USER);
+        ffWriteFileData(
+            filename->chars,
+            isJsonc ? strlen(FASTFETCH_DATATEXT_CONFIG_USER_JSONC) : strlen(FASTFETCH_DATATEXT_CONFIG_USER),
+            isJsonc ? FASTFETCH_DATATEXT_CONFIG_USER_JSONC : FASTFETCH_DATATEXT_CONFIG_USER);
         printf("A sample config file has been written in `%s`\n", filename->chars);
         exit(0);
     }
@@ -843,9 +858,9 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(ffStrEqualsIgnCase(key, "--load-config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
-        generateConfigFile(false);
+        generateConfigFile(false, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
-        generateConfigFile(true);
+        generateConfigFile(true, value);
     else if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
         instance.config.multithreading = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--stat"))

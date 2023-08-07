@@ -18,7 +18,7 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 With customization and speed being two competing goals, this project actually builds two executables:
 
-* The main one is `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent by modifying `$XDG_CONFIG_HOME/fastfetch/config.conf`. To view the available options, run `fastfetch --help`.
+* The main one is `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent by modifying `$XDG_CONFIG_HOME/fastfetch/config.conf`. Use `fastfetch --gen-config conf` to generate one. To view the available options, run `fastfetch --help`.
 * The second executable is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
 
 Currently, the performance difference is measurable, but too small to be recognizable by humans. But with more options planned, the leap will get bigger over time and on slow machines this might actually make a difference.
@@ -26,6 +26,10 @@ Currently, the performance difference is measurable, but too small to be recogni
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
 Logos can be heavily customized too; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
+
+### Customization with new JSONC format
+
+A new, structure based, and user-friendly config file format was introduced in v2.0.0. This format is based on [JSONC](https://jsonc.org/). [See more details in Wiki](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration)
 
 ## Dependencies
 

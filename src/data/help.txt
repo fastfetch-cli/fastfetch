@@ -1,21 +1,21 @@
 Usage: fastfetch <options>
 
 Informative options:
-    -h,--help:             Show this message
-    -h,--help <command>:   Show help for a specific command
-    -v,--version:          Show the version of fastfetch
-    --list-config-paths:   List search paths of config files
-    --list-data-paths:     List search paths of presets and logos
-    --list-logos:          List available logos
-    --list-modules:        List available modules
-    --list-presets:        List presets fastfetch knows about; they can be loaded with --load-config (+)
-    --list-features:       List the supported features fastfetch was compiled with (mainly for development)
-    --print-logos:         Print available logos
-    --print-config-system: Print the default system config
-    --print-config-user:   Print the default user config
-    --print-structure:     Print the default structure
-    --gen-config:          Generate a sample config file in the default path
-    --gen-config-force:    Generate a sample config file in the default path. Overwrite the existing one
+    -h,--help:                  Show this message
+    -h,--help <command>:        Show help for a specific command
+    -v,--version:               Show the version of fastfetch
+    --list-config-paths:        List search paths of config files
+    --list-data-paths:          List search paths of presets and logos
+    --list-logos:               List available logos
+    --list-modules:             List available modules
+    --list-presets:             List presets fastfetch knows about; they can be loaded with --load-config (+)
+    --list-features:            List the supported features fastfetch was compiled with (mainly for development)
+    --print-logos:              Print available logos
+    --print-config-system:      Print the default system config
+    --print-config-user:        Print the default user config
+    --print-structure:          Print the default structure
+    --gen-config <?type>:       Generate a sample config file in the default path. Param `type` can be `jsonc` or `conf`
+    --gen-config-force <?type>: Generate a sample config file in the default path. Overwrite the existing one
 
 General options:
     --load-config <file>:             Load a config file or preset (+)
