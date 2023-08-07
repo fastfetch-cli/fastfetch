@@ -30,6 +30,6 @@ enum FFTempType
     FF_TEMP_MEMORY,
 };
 
-const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result);
+const char *ffDetectCoreTemps(enum FFTempType type, double* result);
 
 #endif

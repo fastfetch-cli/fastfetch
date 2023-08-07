@@ -11,7 +11,8 @@ Changes:
 * Remove the special handling of Command module (it can be set once in the triditional `config.conf`). Use JSON config with Command module instead
 * Change `--wm-theme-*` to `--wmtheme-*`. Affect `key` and `format` (WMTheme)
 * Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format` (TerminalFont)
-* Module `Command` uses `/bin/sh` as the default shell on systems other than Windows  (Command)
+* Module `Command` uses `/bin/sh` as the default shell on systems other than Windows (Command)
+* Fix M2 CPU temperature detection (CPU, macOS)
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a phycial machine

@@ -8,32 +8,23 @@
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
-    FF_LIST_AUTO_DESTROY temps = ffListCreate(sizeof(FFTempValue));
+    double result = 0;
+    const char* error;
 
     if(ffStrbufStartsWithS(gpuName, "Apple M1"))
-        ffDetectCoreTemps(FF_TEMP_GPU_M1X, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_GPU_M1X, &result);
     else if(ffStrbufStartsWithS(gpuName, "Apple M2"))
-        ffDetectCoreTemps(FF_TEMP_GPU_M2X, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_GPU_M2X, &result);
     else if(ffStrbufStartsWithS(gpuName, "Intel"))
-        ffDetectCoreTemps(FF_TEMP_GPU_INTEL, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_GPU_INTEL, &result);
     else if(ffStrbufStartsWithS(gpuName, "Radeon") || ffStrbufStartsWithS(gpuName, "AMD"))
-        ffDetectCoreTemps(FF_TEMP_GPU_AMD, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_GPU_AMD, &result);
     else
-        ffDetectCoreTemps(FF_TEMP_GPU_UNKNOWN, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_GPU_UNKNOWN, &result);
 
-    if(temps.length == 0)
+    if(error)
         return FF_GPU_TEMP_UNSET;
 
-    double result = 0;
-    for(uint32_t i = 0; i < temps.length; ++i)
-    {
-        FFTempValue* tempValue = (FFTempValue*)ffListGet(&temps, i);
-        result += tempValue->value;
-        //TODO: do we really need this?
-        ffStrbufDestroy(&tempValue->name);
-        ffStrbufDestroy(&tempValue->deviceClass);
-    }
-    result /= temps.length;
     return result;
 }
 
@@ -99,10 +90,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 gpu->type = FF_GPU_TYPE_DISCRETE;
         }
 
-        if(options->temp)
-            gpu->temperature = detectGpuTemp(&gpu->name);
-        else
-            gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->temperature = options->temp ? detectGpuTemp(&gpu->name) : FF_GPU_TEMP_UNSET;
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
