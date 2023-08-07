@@ -249,7 +249,7 @@ static const char* detectWifiWithIoctls(FFlist* result)
         if(!ffAppendFileBuffer(path.chars, &item->inf.status) || !ffStrbufEqualS(&item->inf.status, "up"))
             continue;
 
-        int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+        FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
         if(sock < 0)
             continue;
 
@@ -262,7 +262,7 @@ static const char* detectWifiWithIoctls(FFlist* result)
         if(ioctl(sock, SIOCGIWESSID, &iwr) >= 0)
             ffStrbufRecalculateLength(&item->conn.ssid);
 
-        if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0)
+        if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0 && !ffStrEqualsIgnCase(iwr.u.name, "IEEE 802.11"))
         {
             if(ffStrStartsWithIgnCase(iwr.u.name, "IEEE "))
                 ffStrbufSetS(&item->conn.protocol, iwr.u.name + strlen("IEEE "));
@@ -277,9 +277,16 @@ static const char* detectWifiWithIoctls(FFlist* result)
             ffStrbufTrimRight(&item->conn.macAddress, '-');
         }
 
-        //FIXME: doesn't work
-        if(ioctl(sock, SIOCGIWSPY, &iwr) >= 0)
-            item->conn.signalQuality = iwr.u.qual.level;
+        struct iw_statistics stats;
+        iwr.u.data.pointer = &stats;
+        iwr.u.data.length = sizeof(stats);
+        iwr.u.data.flags = 0;
+
+        if(ioctl(sock, SIOCGIWSTATS, &iwr) >= 0)
+        {
+            int8_t level = (int8_t) stats.qual.level; // https://stackoverflow.com/questions/18079771/wireless-h-how-do-i-print-out-the-signal-level
+            item->conn.signalQuality = level >= -50 ? 100 : level <= -100 ? 0 : (level + 100) * 2;
+        }
 
         //FIXME: doesn't work
         struct iw_encode_ext iwe;
@@ -311,8 +318,6 @@ static const char* detectWifiWithIoctls(FFlist* result)
                     break;
             }
         }
-
-        close(sock);
     }
     if_freenameindex(infs);
 
