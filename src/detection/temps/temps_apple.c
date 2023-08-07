@@ -358,15 +358,14 @@ const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
         break;
 
     case FF_TEMP_CPU_M2X:
-        detectTemp(conn, "Tp05", "CPU efficient core 1", result);
-        detectTemp(conn, "Tp0D", "CPU efficient core 2", result);
-        detectTemp(conn, "Tp0j", "CPU efficient core 3", result);
-        detectTemp(conn, "Tp0r", "CPU efficient core 4", result);
-
-        detectTemp(conn, "Tp01", "CPU performance core 1", result);
-        detectTemp(conn, "Tp09", "CPU performance core 2", result);
-        detectTemp(conn, "Tp0f", "CPU performance core 3", result);
-        detectTemp(conn, "Tp0n", "CPU performance core 4", result);
+        detectTemp(conn, "Tp0A", "CPU core 1", result);
+        detectTemp(conn, "Tp0D", "CPU core 2", result);
+        detectTemp(conn, "Tp0E", "CPU core 3", result);
+        detectTemp(conn, "Tp01", "CPU core 4", result);
+        detectTemp(conn, "Tp02", "CPU core 5", result);
+        detectTemp(conn, "Tp05", "CPU core 6", result);
+        detectTemp(conn, "Tp06", "CPU core 7", result);
+        detectTemp(conn, "Tp09", "CPU core 8", result);
         break;
 
     case FF_TEMP_GPU_INTEL:
@@ -392,7 +391,7 @@ const char *ffDetectCoreTemps(enum FFTempType type, FFlist *result)
 
     case FF_TEMP_GPU_M2X:
         detectTemp(conn, "Tg0f", "GPU 1", result);
-        detectTemp(conn, "Tg0n", "GPU 2", result);
+        detectTemp(conn, "Tg0j", "GPU 2", result);
         break;
 
     case FF_TEMP_BATTERY:
