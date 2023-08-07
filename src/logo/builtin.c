@@ -252,6 +252,17 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Arch2
+    {
+        .names = {"arch2", "archlinux2", "arch-linux2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ARCH2,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
     // ArchSmall
     {
         .names = {"arch_small", "archlinux_small", "arch-linux-small"},
@@ -1173,6 +1184,15 @@ const FFlogo ffLogoBuiltins[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // EvolutionOS
+    {
+        .names = {"EvolutionOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
     },
     // Exherbo
     {
