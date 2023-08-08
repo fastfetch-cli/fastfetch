@@ -356,6 +356,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
+    src/util/edidHelper.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
     src/util/platform/FFPlatform.c
@@ -394,7 +395,7 @@ if(LINUX)
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
-        src/detection/nativeresolution/nativeresolution_nosupport.c
+        src/detection/nativeresolution/nativeresolution_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
