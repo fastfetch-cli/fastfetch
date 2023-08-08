@@ -157,6 +157,12 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* module)
                 false;
         }
 
+        case 'N': {
+            return
+                tryModule(type, module, FF_NATIVERESOLUTION_MODULE_NAME, ffParseNativeResolutionJsonObject) ||
+                false;
+        }
+
         case 'O': {
             return
                 tryModule(type, module, FF_OPENCL_MODULE_NAME, ffParseOpenCLJsonObject) ||
