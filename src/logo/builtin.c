@@ -2660,6 +2660,16 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Panwah
+    {
+        .names = {"Panwah"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PANWAH,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_BLACK,
+        },
+    },
     // Parabola
     {
         .names = {"parabola", "parabola-gnulinux"},
