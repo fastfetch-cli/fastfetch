@@ -3578,6 +3578,15 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // UbuntuUnity
+    {
+        .names = {"ubuntu unity", "ubuntu-unity"},
+        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_UNITY,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Ubuntu2Small
     {
         .names = {"ubuntu2_small", "ubuntu2-small"},
