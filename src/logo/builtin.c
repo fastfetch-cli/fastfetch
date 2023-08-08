@@ -2985,6 +2985,7 @@ const FFlogo ffLogoBuiltins[] = {
         .names = {"Reborn", "Reborn OS", "reborn-os", "rebornos", "rebornos-linux", "reborn-os-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_REBORN,
         .colors = {
+            FF_COLOR_FG_BLACK,
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_CYAN,
         },
