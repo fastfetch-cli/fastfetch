@@ -4,8 +4,8 @@
 
 #include "common/option.h"
 
-typedef struct FFPhysicalDisplayOptions
+typedef struct FFMonitorOptions
 {
     const char* moduleName;
     FFModuleArgs moduleArgs;
-} FFPhysicalDisplayOptions;
+} FFMonitorOptions;

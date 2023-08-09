@@ -349,6 +349,7 @@
 #--shell-key Shell
 #--display-key Display {1}
 #--brightness-key Brightness ({1})
+#--monitor-key Monitor
 #--de-key DE
 #--wm-key WM
 #--wmtheme-key WM Theme
@@ -372,7 +373,6 @@
 #--publicip-key Public IP
 #--wifi-key Wifi
 #--weather-key Weather
-#--physicaldisplay-key Physical Display
 #--player-key Media Player
 #--media-key Media
 #--datetime-key Date Time
@@ -422,7 +422,7 @@
 #--localip-format
 #--publicip-format
 #--weather-format
-#--physicaldisplay-format
+#--monitor-format
 #--player-format
 #--media-format
 #--datetime-format
@@ -469,7 +469,7 @@
 #--localip-key-color
 #--publicip-key-color
 #--weather-key-color
-#--physicaldisplay-key-color
+#--monitor-key-color
 #--player-key-color
 #--media-key-color
 #--datetime-key-color

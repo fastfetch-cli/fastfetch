@@ -1,4 +1,4 @@
-#include "physicaldisplay.h"
+#include "monitor.h"
 
 #include "common/io/io.h"
 #include "util/edidHelper.h"
@@ -16,7 +16,7 @@ static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
         SetupDiDestroyDeviceInfoList(*hdev);
 }
 
-const char* ffDetectPhysicalDisplay(FFlist* results)
+const char* ffDetectMonitor(FFlist* results)
 {
     //https://learn.microsoft.com/en-us/windows/win32/power/enumerating-battery-devices
     HDEVINFO hdev __attribute__((__cleanup__(wrapSetupDiDestroyDeviceInfoList))) =
@@ -36,7 +36,7 @@ const char* ffDetectPhysicalDisplay(FFlist* results)
         ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
-        FFPhysicalDisplayResult* display = (FFPhysicalDisplayResult*) ffListAdd(results);
+        FFMonitorResult* display = (FFMonitorResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
         ffStrbufInit(&display->name);

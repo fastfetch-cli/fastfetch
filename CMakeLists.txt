@@ -328,7 +328,7 @@ set(LIBFASTFETCH_SRC
     src/modules/locale/locale.c
     src/modules/localip/localip.c
     src/modules/memory/memory.c
-    src/modules/physicaldisplay/physicaldisplay.c
+    src/modules/monitor/monitor.c
     src/modules/opencl/opencl.c
     src/modules/opengl/opengl.c
     src/modules/os/os.c
@@ -395,7 +395,7 @@ if(LINUX)
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
-        src/detection/physicaldisplay/physicaldisplay_linux.c
+        src/detection/monitor/monitor_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -441,7 +441,7 @@ elseif(ANDROID)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
-        src/detection/physicaldisplay/physicaldisplay_nosupport.c
+        src/detection/monitor/monitor_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
@@ -493,7 +493,7 @@ elseif(BSD)
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
-        src/detection/physicaldisplay/physicaldisplay_nosupport.c
+        src/detection/monitor/monitor_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -541,7 +541,7 @@ elseif(APPLE)
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
-        src/detection/physicaldisplay/physicaldisplay_apple.c
+        src/detection/monitor/monitor_apple.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
@@ -588,7 +588,7 @@ elseif(WIN32)
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
-        src/detection/physicaldisplay/physicaldisplay_windows.c
+        src/detection/monitor/monitor_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c

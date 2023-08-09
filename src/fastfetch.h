@@ -110,7 +110,7 @@ typedef struct FFconfig
     FFWeatherOptions weather;
     FFPlayerOptions player;
     FFMediaOptions media;
-    FFPhysicalDisplayOptions nativeResolution;
+    FFMonitorOptions nativeResolution;
     FFDateTimeOptions dateTime;
     FFVulkanOptions vulkan;
     FFOpenGLOptions openGL;

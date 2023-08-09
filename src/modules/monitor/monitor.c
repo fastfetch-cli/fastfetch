@@ -1,35 +1,34 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "detection/physicaldisplay/physicaldisplay.h"
-#include "modules/physicaldisplay/physicaldisplay.h"
+#include "detection/monitor/monitor.h"
+#include "modules/monitor/monitor.h"
 #include "util/stringUtils.h"
 
 #include <math.h>
 
-#define FF_PHYSICALDISPLAY_DISPLAY_NAME "Physical Display"
-#define FF_PHYSICALDISPLAY_NUM_FORMAT_ARGS 7
+#define FF_MONITOR_NUM_FORMAT_ARGS 7
 
-void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
+void ffPrintMonitor(FFMonitorOptions* options)
 {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalDisplayResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFMonitorResult));
 
-    const char* error = ffDetectPhysicalDisplay(&result);
+    const char* error = ffDetectMonitor(&result);
 
     if(error)
     {
-        ffPrintError(FF_PHYSICALDISPLAY_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
     if(!result.length)
     {
-        ffPrintError(FF_PHYSICALDISPLAY_DISPLAY_NAME, 0, &options->moduleArgs, "No physical display detected");
+        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, "No physical display detected");
         return;
     }
 
     uint8_t index = 0;
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
-    FF_LIST_FOR_EACH(FFPhysicalDisplayResult, display, result)
+    FF_LIST_FOR_EACH(FFMonitorResult, display, result)
     {
         double inch = sqrt(display->physicalWidth * display->physicalWidth + display->physicalHeight * display->physicalHeight) / 25.4;
         double ppi = sqrt(display->width * display->width + display->height * display->height) / inch;
@@ -39,7 +38,7 @@ void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
             ffStrbufClear(&key);
             if(options->moduleArgs.key.length == 0)
             {
-                ffStrbufAppendF(&key, "%s (%s)", FF_PHYSICALDISPLAY_DISPLAY_NAME, display->name.chars);
+                ffStrbufAppendF(&key, "%s (%s)", FF_MONITOR_MODULE_NAME, display->name.chars);
             }
             else
             {
@@ -57,7 +56,7 @@ void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_PHYSICALDISPLAY_DISPLAY_NAME, index, &options->moduleArgs, FF_PHYSICALDISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormat(FF_MONITOR_MODULE_NAME, index, &options->moduleArgs, FF_MONITOR_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->height},
@@ -72,15 +71,15 @@ void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
     }
 }
 
-void ffInitPhysicalDisplayOptions(FFPhysicalDisplayOptions* options)
+void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    options->moduleName = FF_PHYSICALDISPLAY_MODULE_NAME;
+    options->moduleName = FF_MONITOR_MODULE_NAME;
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
-bool ffParsePhysicalDisplayCommandOptions(FFPhysicalDisplayOptions* options, const char* key, const char* value)
+bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, const char* value)
 {
-    const char* subKey = ffOptionTestPrefix(key, FF_PHYSICALDISPLAY_MODULE_NAME);
+    const char* subKey = ffOptionTestPrefix(key, FF_MONITOR_MODULE_NAME);
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
@@ -88,15 +87,15 @@ bool ffParsePhysicalDisplayCommandOptions(FFPhysicalDisplayOptions* options, con
     return false;
 }
 
-void ffDestroyPhysicalDisplayOptions(FFPhysicalDisplayOptions* options)
+void ffDestroyMonitorOptions(FFMonitorOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePhysicalDisplayJsonObject(yyjson_val* module)
+void ffParseMonitorJsonObject(yyjson_val* module)
 {
-    FFPhysicalDisplayOptions __attribute__((__cleanup__(ffDestroyPhysicalDisplayOptions))) options;
-    ffInitPhysicalDisplayOptions(&options);
+    FFMonitorOptions __attribute__((__cleanup__(ffDestroyMonitorOptions))) options;
+    ffInitMonitorOptions(&options);
 
     if (module)
     {
@@ -111,9 +110,9 @@ void ffParsePhysicalDisplayJsonObject(yyjson_val* module)
             if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
                 continue;
 
-            ffPrintError(FF_PHYSICALDISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
         }
     }
 
-    ffPrintPhysicalDisplay(&options);
+    ffPrintMonitor(&options);
 }

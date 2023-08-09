@@ -1,4 +1,4 @@
-#include "physicaldisplay.h"
+#include "monitor.h"
 
 #include "common/io/io.h"
 #include "util/edidHelper.h"
@@ -6,7 +6,7 @@
 
 #include <dirent.h>
 
-const char* ffDetectPhysicalDisplay(FFlist* results)
+const char* ffDetectMonitor(FFlist* results)
 {
     const char* drmDirPath = "/sys/class/drm/";
 
@@ -46,7 +46,7 @@ const char* ffDetectPhysicalDisplay(FFlist* results)
                 if (tmp) plainName = tmp + 1;
             }
 
-            FFPhysicalDisplayResult* display = (FFPhysicalDisplayResult*) ffListAdd(results);
+            FFMonitorResult* display = (FFMonitorResult*) ffListAdd(results);
             display->width = width;
             display->height = height;
             ffStrbufInitS(&display->name, plainName);

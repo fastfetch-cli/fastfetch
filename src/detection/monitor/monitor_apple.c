@@ -1,4 +1,4 @@
-#include "physicaldisplay.h"
+#include "monitor.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/apple/cf_helpers.h"
 #include "util/apple/ddcci.h"
@@ -23,18 +23,18 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                     width <= 0 || height <= 0)
                     continue;
 
-                FFPhysicalDisplayResult* physicalDisplay = (FFPhysicalDisplayResult*) ffListAdd(results);
-                physicalDisplay->width = (uint32_t) width;
-                physicalDisplay->height = (uint32_t) height;
-                ffStrbufInit(&physicalDisplay->name);
+                FFMonitorResult* monitor = (FFMonitorResult*) ffListAdd(results);
+                monitor->width = (uint32_t) width;
+                monitor->height = (uint32_t) height;
+                ffStrbufInit(&monitor->name);
 
                 CFDictionaryRef productNames;
                 if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
-                    ffCfDictGetString(productNames, CFSTR("en_US"), &physicalDisplay->name);
+                    ffCfDictGetString(productNames, CFSTR("en_US"), &monitor->name);
 
                 CGSize size = CGDisplayScreenSize((CGDirectDisplayID) display->id);
-                physicalDisplay->physicalWidth = (uint32_t) (size.width + 0.5);
-                physicalDisplay->physicalHeight = (uint32_t) (size.height + 0.5);
+                monitor->physicalWidth = (uint32_t) (size.width + 0.5);
+                monitor->physicalHeight = (uint32_t) (size.height + 0.5);
             }
         }
     }
@@ -91,7 +91,7 @@ static const char* detectWithDdcci(FFlist* results)
         ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
-        FFPhysicalDisplayResult* display = (FFPhysicalDisplayResult*) ffListAdd(results);
+        FFMonitorResult* display = (FFMonitorResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
         ffStrbufInit(&display->name);
@@ -101,7 +101,7 @@ static const char* detectWithDdcci(FFlist* results)
     return NULL;
 }
 
-const char* ffDetectPhysicalDisplay(FFlist* results)
+const char* ffDetectMonitor(FFlist* results)
 {
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
 
