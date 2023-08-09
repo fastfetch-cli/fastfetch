@@ -7,7 +7,7 @@
 #include <math.h>
 
 #define FF_PHYSICALDISPLAY_DISPLAY_NAME "Physical Display"
-#define FF_PHYSICALDISPLAY_NUM_FORMAT_ARGS 6
+#define FF_PHYSICALDISPLAY_NUM_FORMAT_ARGS 7
 
 void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
 {
@@ -32,6 +32,7 @@ void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
     FF_LIST_FOR_EACH(FFPhysicalDisplayResult, display, result)
     {
         double inch = sqrt(display->physicalWidth * display->physicalWidth + display->physicalHeight * display->physicalHeight) / 25.4;
+        double ppi = sqrt(display->width * display->width + display->height * display->height) / inch;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -48,9 +49,9 @@ void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
             }
             ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
-            printf("%upx x %upx", display->width, display->height);
+            printf("%ux%u px", display->width, display->height);
             if (inch > 0)
-                printf(" - %umm x %umm (%.2f inches)\n", display->physicalWidth, display->physicalHeight, inch);
+                printf(" - %ux%u mm (%.2f inches, %.2f ppi)\n", display->physicalWidth, display->physicalHeight, inch, ppi);
             else
                 putchar('\n');
         }
@@ -63,6 +64,7 @@ void ffPrintPhysicalDisplay(FFPhysicalDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT, &display->physicalWidth},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->physicalHeight},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &inch},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &ppi},
             });
         }
 

@@ -401,7 +401,8 @@ static inline void printCommandHelp(const char* command)
             "Display native resolution height in pixels",
             "Display physical width in millimeters",
             "Display physical height in millimeters",
-            "Display physical length in inches"
+            "Display physical diagonal length in inches",
+            "Display physical pixels per inch (PPI)"
         );
     }
     else if(ffStrEqualsIgnCase(command, "player-format"))
