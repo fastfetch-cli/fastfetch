@@ -787,7 +787,11 @@ if(ENABLE_PCI_MEMORY)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_PCI_MEMORY)
 endif()
 
-if(APPLE)
+if(LINUX)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+    )
+elseif(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
