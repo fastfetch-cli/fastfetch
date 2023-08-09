@@ -1,6 +1,7 @@
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/apple/cf_helpers.h"
+#include "util/edidHelper.h"
 
 #include <CoreGraphics/CoreGraphics.h>
 
@@ -32,26 +33,6 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
     }
 
     return NULL;
-}
-
-static void getNameFromEdid(uint8_t edid[128], FFstrbuf* name)
-{
-    // https://github.com/jinksong/read_edid/blob/master/parse-edid/parse-edid.c
-    for (uint32_t i = 0x36; i < 0x7E; i += 0x12)
-    { // read through descriptor blocks...
-        if (edid[i] == 0x00)
-        { // not a timing descriptor
-            if (edid[i+3] == 0xfc)
-            { // Model Name tag
-                for (uint32_t j = 0; j < 13; j++)
-                {
-                    if (edid[i + 5 + j] == 0x0a)
-                        return;
-                    ffStrbufAppendC(name, (char) edid[i + 5 + j]);
-                }
-            }
-        }
-    }
 }
 
 // https://github.com/waydabber/m1ddc
@@ -120,7 +101,7 @@ static const char* detectWithDdcci(FFlist* result)
 
             uint8_t edid[128] = {};
             if (IOAVServiceReadI2C(service, 0x50, 0x00, edid, sizeof(edid)) == KERN_SUCCESS)
-                getNameFromEdid(edid, &brightness->name);
+                ffEdidGetName(edid, &brightness->name);
         }
     }
 

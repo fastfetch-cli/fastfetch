@@ -4,7 +4,9 @@
 #define FF_INCLUDED_EDID_HELPER_H
 
 #include <stdint.h>
+#include "util/FFstrbuf.h"
 
-void ffEdidGetNativeResolution(uint8_t edid[128], uint32_t* width, uint32_t* height);
+void ffEdidGetPhycialDisplay(uint8_t edid[128], uint32_t* width, uint32_t* height);
+void ffEdidGetName(uint8_t edid[128], FFstrbuf* name);
 
 #endif
