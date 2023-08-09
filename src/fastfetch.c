@@ -193,6 +193,13 @@ static inline void printCommandHelp(const char* command)
             "Screen rotation"
         );
     }
+    else if(ffStrEqualsIgnCase(command, "brightness-format"))
+    {
+        constructAndPrintCommandHelpFormat("brightness", "{}", 2,
+            "Screen brightness",
+            "Screen name"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "de-format"))
     {
         constructAndPrintCommandHelpFormat("de", "{2} {3}", 3,

@@ -64,8 +64,8 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         else
         {
             ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->value},
-                {FF_FORMAT_ARG_TYPE_FLOAT, &item->name}
+                {FF_FORMAT_ARG_TYPE_FLOAT, &item->value},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
             });
         }
 
