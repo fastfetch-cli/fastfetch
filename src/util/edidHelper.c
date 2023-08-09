@@ -26,3 +26,9 @@ void ffEdidGetName(const uint8_t edid[128], FFstrbuf* name)
         }
     }
 }
+
+void ffEdidGetPhycialSize(const uint8_t edid[128], uint32_t* width, uint32_t* height)
+{
+    *width = (((uint32_t) edid[68] & 0xF0) << 4) + edid[66];
+    *height = (((uint32_t) edid[68] & 0x0F) << 8) + edid[67];
+}

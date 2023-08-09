@@ -36,13 +36,12 @@ const char* ffDetectPhycialDisplay(FFlist* results)
         ffEdidGetPhycialResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
-        wchar_t wName[MAX_PATH] = {}; // MONITOR\BOE09F9
-        if (!SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_HARDWAREID, NULL, (BYTE*) wName, sizeof(wName), NULL)) continue;
-
         FFPhycialDisplayResult* display = (FFPhycialDisplayResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
-        ffStrbufInitWS(&display->name, wcschr(wName, L'\\') + 1);
+        ffStrbufInit(&display->name);
+        ffEdidGetName(edidData, &display->name);
+        ffEdidGetPhycialSize(edidData, &display->phycialWidth, &display->phycialHeight);
     }
     return NULL;
 }

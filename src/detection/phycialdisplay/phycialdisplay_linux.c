@@ -50,6 +50,7 @@ const char* ffDetectPhycialDisplay(FFlist* results)
             display->width = width;
             display->height = height;
             ffStrbufInitS(&display->name, plainName);
+            ffEdidGetPhycialSize(edidData, &display->phycialWidth, &display->phycialHeight);
         }
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);

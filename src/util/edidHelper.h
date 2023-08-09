@@ -8,5 +8,6 @@
 
 void ffEdidGetName(const uint8_t edid[128], FFstrbuf* name);
 void ffEdidGetPhycialResolution(const uint8_t edid[128], uint32_t* width, uint32_t* height);
+void ffEdidGetPhycialSize(const uint8_t edid[128], uint32_t* width, uint32_t* height); // in mm
 
 #endif

@@ -4,6 +4,8 @@
 #include "modules/phycialdisplay/phycialdisplay.h"
 #include "util/stringUtils.h"
 
+#include <math.h>
+
 #define FF_PHYCIALDISPLAY_DISPLAY_NAME "Phycial Display"
 #define FF_PHYCIALDISPLAY_NUM_FORMAT_ARGS 3
 
@@ -29,6 +31,8 @@ void ffPrintPhycialDisplay(FFPhycialDisplayOptions* options)
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     FF_LIST_FOR_EACH(FFPhycialDisplayResult, display, result)
     {
+        double inch = sqrt(display->phycialWidth * display->phycialWidth + display->phycialHeight * display->phycialHeight) / 25.4;
+
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffStrbufClear(&key);
@@ -44,7 +48,7 @@ void ffPrintPhycialDisplay(FFPhycialDisplayOptions* options)
             }
             ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
-            printf("%ux%u\n", display->width, display->height);
+            printf("%upx x %upx - %umm x %umm (%.2f inches)\n", display->width, display->height, display->phycialWidth, display->phycialHeight, inch);
         }
         else
         {
@@ -52,6 +56,9 @@ void ffPrintPhycialDisplay(FFPhycialDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->height},
+                {FF_FORMAT_ARG_TYPE_UINT, &display->phycialWidth},
+                {FF_FORMAT_ARG_TYPE_UINT, &display->phycialHeight},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &inch},
             });
         }
 

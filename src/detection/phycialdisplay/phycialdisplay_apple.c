@@ -31,6 +31,10 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                 CFDictionaryRef productNames;
                 if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
                     ffCfDictGetString(productNames, CFSTR("en_US"), &phycialDisplay->name);
+
+                CGSize size = CGDisplayScreenSize((CGDirectDisplayID) display->id);
+                phycialDisplay->phycialWidth = (uint32_t) (size.width + 0.5);
+                phycialDisplay->phycialHeight = (uint32_t) (size.height + 0.5);
             }
         }
     }
@@ -83,14 +87,16 @@ static const char* detectWithDdcci(FFlist* results)
             continue;
 
         uint32_t width, height;
-        ffEdidGetPhycialResolution(CFDataGetBytePtr(edid), &width, &height);
+        const uint8_t* edidData = CFDataGetBytePtr(edid);
+        ffEdidGetPhycialResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
         FFPhycialDisplayResult* display = (FFPhycialDisplayResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
         ffStrbufInit(&display->name);
-        ffEdidGetName(CFDataGetBytePtr(edid), &display->name);
+        ffEdidGetName(edidData, &display->name);
+        ffEdidGetPhycialSize(edidData, &display->phycialWidth, &display->phycialHeight);
     }
     return NULL;
 }
