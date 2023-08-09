@@ -1,4 +1,4 @@
-#include "nativeresolution.h"
+#include "phycialdisplay.h"
 
 #include "common/io/io.h"
 #include "util/edidHelper.h"
@@ -6,7 +6,7 @@
 
 #include <dirent.h>
 
-const char* ffDetectNativeResolution(FFlist* results)
+const char* ffDetectPhycialDisplay(FFlist* results)
 {
     const char* drmDirPath = "/sys/class/drm/";
 
@@ -36,7 +36,7 @@ const char* ffDetectNativeResolution(FFlist* results)
         }
 
         uint32_t width, height;
-        ffEdidGetNativeResolution(edidData, &width, &height);
+        ffEdidGetPhycialDisplay(edidData, &width, &height);
         if (width != 0 && height != 0)
         {
             const char* plainName = entry->d_name;
@@ -46,7 +46,7 @@ const char* ffDetectNativeResolution(FFlist* results)
                 if (tmp) plainName = tmp + 1;
             }
 
-            FFNativeResolutionResult* display = (FFNativeResolutionResult*) ffListAdd(results);
+            FFPhycialDisplayResult* display = (FFPhycialDisplayResult*) ffListAdd(results);
             display->width = width;
             display->height = height;
             ffStrbufInitS(&display->name, plainName);
