@@ -48,7 +48,11 @@ void ffPrintPhycialDisplay(FFPhycialDisplayOptions* options)
             }
             ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
 
-            printf("%upx x %upx - %umm x %umm (%.2f inches)\n", display->width, display->height, display->phycialWidth, display->phycialHeight, inch);
+            printf("%upx x %upx", display->width, display->height);
+            if (inch > 0)
+                printf(" - %umm x %umm (%.2f inches)\n", display->phycialWidth, display->phycialHeight, inch);
+            else
+                putchar('\n');
         }
         else
         {
