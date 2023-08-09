@@ -1,4 +1,4 @@
-#include "phycialdisplay.h"
+#include "physicaldisplay.h"
 
 #include "common/io/io.h"
 #include "util/edidHelper.h"
@@ -16,7 +16,7 @@ static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
         SetupDiDestroyDeviceInfoList(*hdev);
 }
 
-const char* ffDetectPhycialDisplay(FFlist* results)
+const char* ffDetectPhysicalDisplay(FFlist* results)
 {
     //https://learn.microsoft.com/en-us/windows/win32/power/enumerating-battery-devices
     HDEVINFO hdev __attribute__((__cleanup__(wrapSetupDiDestroyDeviceInfoList))) =
@@ -33,15 +33,15 @@ const char* ffDetectPhycialDisplay(FFlist* results)
         uint8_t edidData[256] = {};
         if (!ffRegReadData(hKey, L"EDID", edidData, sizeof(edidData), NULL)) continue;
         uint32_t width, height;
-        ffEdidGetPhycialResolution(edidData, &width, &height);
+        ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
-        FFPhycialDisplayResult* display = (FFPhycialDisplayResult*) ffListAdd(results);
+        FFPhysicalDisplayResult* display = (FFPhysicalDisplayResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
-        ffEdidGetPhycialSize(edidData, &display->phycialWidth, &display->phycialHeight);
+        ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
     }
     return NULL;
 }

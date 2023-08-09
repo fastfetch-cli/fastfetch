@@ -15,7 +15,7 @@ Changes:
 * Fix M2 CPU temperature detection (CPU, macOS)
 
 Features:
-* FreeBSD support is improved greatly, and actually tested in a phycial machine
+* FreeBSD support is improved greatly, and actually tested in a physical machine
 * Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
 * Support `--*-key-color` option to change the key color of specified module
 * Support `--colors-symbol` and `--colors-padding-left` (Colors)

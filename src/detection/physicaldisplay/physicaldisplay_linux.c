@@ -1,4 +1,4 @@
-#include "phycialdisplay.h"
+#include "physicaldisplay.h"
 
 #include "common/io/io.h"
 #include "util/edidHelper.h"
@@ -6,7 +6,7 @@
 
 #include <dirent.h>
 
-const char* ffDetectPhycialDisplay(FFlist* results)
+const char* ffDetectPhysicalDisplay(FFlist* results)
 {
     const char* drmDirPath = "/sys/class/drm/";
 
@@ -36,7 +36,7 @@ const char* ffDetectPhycialDisplay(FFlist* results)
         }
 
         uint32_t width, height;
-        ffEdidGetPhycialResolution(edidData, &width, &height);
+        ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width != 0 && height != 0)
         {
             const char* plainName = entry->d_name;
@@ -46,11 +46,11 @@ const char* ffDetectPhycialDisplay(FFlist* results)
                 if (tmp) plainName = tmp + 1;
             }
 
-            FFPhycialDisplayResult* display = (FFPhycialDisplayResult*) ffListAdd(results);
+            FFPhysicalDisplayResult* display = (FFPhysicalDisplayResult*) ffListAdd(results);
             display->width = width;
             display->height = height;
             ffStrbufInitS(&display->name, plainName);
-            ffEdidGetPhycialSize(edidData, &display->phycialWidth, &display->phycialHeight);
+            ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
         }
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);

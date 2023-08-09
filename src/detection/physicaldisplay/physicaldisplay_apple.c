@@ -1,4 +1,4 @@
-#include "phycialdisplay.h"
+#include "physicaldisplay.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/apple/cf_helpers.h"
 #include "util/apple/ddcci.h"
@@ -23,18 +23,18 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                     width <= 0 || height <= 0)
                     continue;
 
-                FFPhycialDisplayResult* phycialDisplay = (FFPhycialDisplayResult*) ffListAdd(results);
-                phycialDisplay->width = (uint32_t) width;
-                phycialDisplay->height = (uint32_t) height;
-                ffStrbufInit(&phycialDisplay->name);
+                FFPhysicalDisplayResult* physicalDisplay = (FFPhysicalDisplayResult*) ffListAdd(results);
+                physicalDisplay->width = (uint32_t) width;
+                physicalDisplay->height = (uint32_t) height;
+                ffStrbufInit(&physicalDisplay->name);
 
                 CFDictionaryRef productNames;
                 if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
-                    ffCfDictGetString(productNames, CFSTR("en_US"), &phycialDisplay->name);
+                    ffCfDictGetString(productNames, CFSTR("en_US"), &physicalDisplay->name);
 
                 CGSize size = CGDisplayScreenSize((CGDirectDisplayID) display->id);
-                phycialDisplay->phycialWidth = (uint32_t) (size.width + 0.5);
-                phycialDisplay->phycialHeight = (uint32_t) (size.height + 0.5);
+                physicalDisplay->physicalWidth = (uint32_t) (size.width + 0.5);
+                physicalDisplay->physicalHeight = (uint32_t) (size.height + 0.5);
             }
         }
     }
@@ -88,20 +88,20 @@ static const char* detectWithDdcci(FFlist* results)
 
         uint32_t width, height;
         const uint8_t* edidData = CFDataGetBytePtr(edid);
-        ffEdidGetPhycialResolution(edidData, &width, &height);
+        ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
-        FFPhycialDisplayResult* display = (FFPhycialDisplayResult*) ffListAdd(results);
+        FFPhysicalDisplayResult* display = (FFPhysicalDisplayResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
-        ffEdidGetPhycialSize(edidData, &display->phycialWidth, &display->phycialHeight);
+        ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
     }
     return NULL;
 }
 
-const char* ffDetectPhycialDisplay(FFlist* results)
+const char* ffDetectPhysicalDisplay(FFlist* results)
 {
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
 

@@ -159,7 +159,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* module)
 
         case 'N': {
             return
-                tryModule(type, module, FF_PHYCIALDISPLAY_MODULE_NAME, ffParsePhycialDisplayJsonObject) ||
+                tryModule(type, module, FF_PHYSICALDISPLAY_MODULE_NAME, ffParsePhysicalDisplayJsonObject) ||
                 false;
         }
 

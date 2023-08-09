@@ -393,6 +393,17 @@ static inline void printCommandHelp(const char* command)
             "Connection Security algorithm"
         );
     }
+    else if(ffStrEqualsIgnCase(command, "physicaldisplay-format"))
+    {
+        constructAndPrintCommandHelpFormat("physicaldisplay", "{}", 6,
+            "Display name",
+            "Display native resolution width in pixels",
+            "Display native resolution height in pixels",
+            "Display physical width in millimeters",
+            "Display physical height in millimeters",
+            "Display physical length in inches"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "player-format"))
     {
         constructAndPrintCommandHelpFormat("player", "{}", 4,
@@ -1018,7 +1029,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(ffParseWeatherCommandOptions(&instance.config.weather, key, value)) {}
     else if(ffParsePlayerCommandOptions(&instance.config.player, key, value)) {}
     else if(ffParseMediaCommandOptions(&instance.config.media, key, value)) {}
-    else if(ffParsePhycialDisplayCommandOptions(&instance.config.nativeResolution, key, value)) {}
+    else if(ffParsePhysicalDisplayCommandOptions(&instance.config.nativeResolution, key, value)) {}
     else if(ffParseDateTimeCommandOptions(&instance.config.dateTime, key, value)) {}
     else if(ffParseVulkanCommandOptions(&instance.config.vulkan, key, value)) {}
     else if(ffParseOpenGLCommandOptions(&instance.config.openGL, key, value)) {}
@@ -1252,8 +1263,8 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
         ffPrintPlayer(&instance.config.player);
     else if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
         ffPrintMedia(&instance.config.media);
-    else if(ffStrEqualsIgnCase(line, FF_PHYCIALDISPLAY_MODULE_NAME))
-        ffPrintPhycialDisplay(&instance.config.nativeResolution);
+    else if(ffStrEqualsIgnCase(line, FF_PHYSICALDISPLAY_MODULE_NAME))
+        ffPrintPhysicalDisplay(&instance.config.nativeResolution);
     else if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
         ffPrintDateTime(&instance.config.dateTime);
     else if(ffStrEqualsIgnCase(line, FF_COLORS_MODULE_NAME))
