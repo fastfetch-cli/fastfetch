@@ -132,6 +132,7 @@ typedef struct XrandrData
 
     //Init per screen
     uint32_t defaultRefreshRate;
+    uint32_t defaultRotation;
     XRRScreenResources* screenResources;
 } XrandrData;
 
@@ -223,7 +224,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         data->defaultRefreshRate,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
-        0,
+        data->defaultRotation,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitorInfo->primary,
@@ -259,10 +260,30 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
     if(screenConfiguration != NULL)
     {
         data->defaultRefreshRate = (uint32_t) data->ffXRRConfigCurrentRate(screenConfiguration);
+        Rotation rotation = 0;
+        data->ffXRRConfigCurrentConfiguration(screenConfiguration, &rotation);
+        switch (rotation)
+        {
+            case RR_Rotate_90:
+                data->defaultRotation = 90;
+                break;
+            case RR_Rotate_180:
+                data->defaultRotation = 180;
+                break;
+            case RR_Rotate_270:
+                data->defaultRotation = 270;
+                break;
+            default:
+                data->defaultRotation = 0;
+                break;
+        }
         data->ffXRRFreeScreenConfigInfo(screenConfiguration);
     }
     else
+    {
         data->defaultRefreshRate = 0;
+        data->defaultRotation = 0;
+    }
 
     //Init screen resources
     data->screenResources = data->ffXRRGetScreenResources(data->display, RootWindowOfScreen(screen));
@@ -282,7 +303,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         data->defaultRefreshRate,
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
-        0,
+        data->defaultRotation,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
@@ -301,6 +322,7 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
 
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenInfo,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentConfiguration,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResources,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);

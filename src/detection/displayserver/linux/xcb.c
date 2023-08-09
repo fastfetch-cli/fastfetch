@@ -184,6 +184,7 @@ typedef struct XcbRandrData
 
     //init per screen
     uint32_t defaultRefreshRate;
+    uint32_t defaultRotation;
     xcb_randr_get_screen_resources_reply_t* screenResources;
 } XcbRandrData;
 
@@ -316,7 +317,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         data->defaultRefreshRate,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
-        0,
+        data->defaultRotation,
         &name,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitor->primary,
@@ -356,11 +357,28 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
     if(screenInfoReply != NULL)
     {
         data->defaultRefreshRate = screenInfoReply->rate;
+        switch (screenInfoReply->rotation)
+        {
+            case XCB_RANDR_ROTATION_ROTATE_90:
+                data->defaultRotation = 90;
+                break;
+            case XCB_RANDR_ROTATION_ROTATE_180:
+                data->defaultRotation = 180;
+                break;
+            case XCB_RANDR_ROTATION_ROTATE_270:
+                data->defaultRotation = 270;
+                break;
+            default:
+                data->defaultRotation = 0;
+                break;
+        }
         free(screenInfoReply);
     }
     else
+    {
         data->defaultRefreshRate = 0;
-
+        data->defaultRotation = 0;
+    }
     //Init screen resources. They are used to iterate over all modes. xcbRandrHandleMode checks for " == NULL", to fail as late as possible.
     xcb_randr_get_screen_resources_cookie_t screenResourcesCookie = data->ffxcb_randr_get_screen_resources(data->connection, screen->root);
     data->screenResources = data->ffxcb_randr_get_screen_resources_reply(data->connection, screenResourcesCookie, NULL);
@@ -381,7 +399,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         data->defaultRefreshRate,
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,
-        0,
+        data->defaultRotation,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
