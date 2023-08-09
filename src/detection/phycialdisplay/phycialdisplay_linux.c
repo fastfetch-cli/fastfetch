@@ -36,7 +36,7 @@ const char* ffDetectPhycialDisplay(FFlist* results)
         }
 
         uint32_t width, height;
-        ffEdidGetPhycialDisplay(edidData, &width, &height);
+        ffEdidGetPhycialResolution(edidData, &width, &height);
         if (width != 0 && height != 0)
         {
             const char* plainName = entry->d_name;

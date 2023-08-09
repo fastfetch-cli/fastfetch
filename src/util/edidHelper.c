@@ -1,6 +1,6 @@
 #include "edidHelper.h"
 
-void ffEdidGetPhycialDisplay(const uint8_t edid[128], uint32_t* width, uint32_t* height)
+void ffEdidGetPhycialResolution(const uint8_t edid[128], uint32_t* width, uint32_t* height)
 {
     const int dtd = 54;
     *width = (((uint32_t) edid[dtd + 4] >> 4) << 8) | edid[dtd + 2];

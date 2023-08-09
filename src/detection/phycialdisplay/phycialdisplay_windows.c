@@ -33,7 +33,7 @@ const char* ffDetectPhycialDisplay(FFlist* results)
         uint8_t edidData[256] = {};
         if (!ffRegReadData(hKey, L"EDID", edidData, sizeof(edidData), NULL)) continue;
         uint32_t width, height;
-        ffEdidGetPhycialDisplay(edidData, &width, &height);
+        ffEdidGetPhycialResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
         wchar_t wName[MAX_PATH] = {}; // MONITOR\BOE09F9
