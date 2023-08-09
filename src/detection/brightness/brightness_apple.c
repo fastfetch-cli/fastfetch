@@ -1,19 +1,10 @@
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/apple/cf_helpers.h"
+#include "util/apple/ddcci.h"
 #include "util/edidHelper.h"
 
-#include <CoreGraphics/CoreGraphics.h>
-
 extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float *brightness) __attribute__((weak_import));
-
-// DDC/CI
-typedef CFTypeRef IOAVServiceRef;
-extern IOAVServiceRef IOAVServiceCreate(CFAllocatorRef allocator) __attribute__((weak_import));
-extern IOAVServiceRef IOAVServiceCreateWithService(CFAllocatorRef allocator, io_service_t service) __attribute__((weak_import));
-extern IOReturn IOAVServiceCopyEDID(IOAVServiceRef service, CFDataRef* x2) __attribute__((weak_import));
-extern IOReturn IOAVServiceReadI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize) __attribute__((weak_import));
-extern IOReturn IOAVServiceWriteI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize) __attribute__((weak_import));
 
 // Works for internal display
 static const char* detectWithDisplayServices(const FFDisplayServerResult* displayServer, FFlist* result)
@@ -23,12 +14,15 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
 
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
-        float value;
-        if(DisplayServicesGetBrightness((CGDirectDisplayID) display->id, &value) == kCGErrorSuccess)
+        if (display->type == FF_DISPLAY_TYPE_BUILTIN || display->type == FF_DISPLAY_TYPE_UNKNOWN)
         {
-            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-            brightness->value = value * 100;
-            ffStrbufInitCopy(&brightness->name, &display->name);
+            float value;
+            if(DisplayServicesGetBrightness((CGDirectDisplayID) display->id, &value) == kCGErrorSuccess)
+            {
+                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                brightness->value = value * 100;
+                ffStrbufInitCopy(&brightness->name, &display->name);
+            }
         }
     }
 
@@ -108,22 +102,11 @@ static const char* detectWithDdcci(FFlist* result)
     return NULL;
 }
 
-static bool hasBuiltinDisplay(const FFDisplayServerResult* displayServer)
-{
-    FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
-    {
-        if (display->type == FF_DISPLAY_TYPE_BUILTIN || display->type == FF_DISPLAY_TYPE_UNKNOWN)
-            return true;
-    }
-    return false;
-}
-
 const char* ffDetectBrightness(FFlist* result)
 {
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
 
-    if (hasBuiltinDisplay(displayServer))
-        detectWithDisplayServices(displayServer, result);
+    detectWithDisplayServices(displayServer, result);
 
     if (instance.config.allowSlowOperations && displayServer->displays.length > result->length)
         detectWithDdcci(result);

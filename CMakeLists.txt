@@ -541,7 +541,7 @@ elseif(APPLE)
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
-        src/detection/phycialdisplay/phycialdisplay_nosupport.c
+        src/detection/phycialdisplay/phycialdisplay_apple.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c

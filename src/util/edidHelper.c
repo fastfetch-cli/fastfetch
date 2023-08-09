@@ -1,13 +1,13 @@
 #include "edidHelper.h"
 
-void ffEdidGetPhycialDisplay(uint8_t edid[128], uint32_t* width, uint32_t* height)
+void ffEdidGetPhycialDisplay(const uint8_t edid[128], uint32_t* width, uint32_t* height)
 {
     const int dtd = 54;
     *width = (((uint32_t) edid[dtd + 4] >> 4) << 8) | edid[dtd + 2];
     *height = (((uint32_t) edid[dtd + 7] >> 4) << 8) | edid[dtd + 5];
 }
 
-void ffEdidGetName(uint8_t edid[128], FFstrbuf* name)
+void ffEdidGetName(const uint8_t edid[128], FFstrbuf* name)
 {
     // https://github.com/jinksong/read_edid/blob/master/parse-edid/parse-edid.c
     for (uint32_t i = 0x36; i < 0x7E; i += 0x12)
