@@ -154,6 +154,7 @@ void ffdsConnectXcb(FFDisplayServerResult* result)
 #endif
 
 #ifdef FF_HAVE_XCB_RANDR
+#include "util/edidHelper.h"
 #include <xcb/randr.h>
 
 typedef struct XcbRandrData
@@ -175,7 +176,12 @@ typedef struct XcbRandrData
     FF_LIBRARY_SYMBOL(xcb_randr_get_output_info_reply)
     FF_LIBRARY_SYMBOL(xcb_randr_get_crtc_info)
     FF_LIBRARY_SYMBOL(xcb_randr_get_crtc_info_reply)
-    FF_LIBRARY_SYMBOL(xcb_get_atom_name)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_output_property)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_output_property_reply)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_output_property_data)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_output_property_data_length)
+    FF_LIBRARY_SYMBOL(xcb_intern_atom)
+    FF_LIBRARY_SYMBOL(xcb_intern_atom_reply)
 
     //init once
     xcb_connection_t* connection;
@@ -271,13 +277,25 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
 static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary)
 {
     xcb_randr_get_output_info_cookie_t outputInfoCookie = data->ffxcb_randr_get_output_info(data->connection, output, XCB_CURRENT_TIME);
-    xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, NULL);
+    FF_AUTO_FREE xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, NULL);
     if(outputInfoReply == NULL)
         return false;
 
-    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary);
+    xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen("EDID"), "EDID");
+    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
 
-    free(outputInfoReply);
+    xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
+    FF_AUTO_FREE xcb_randr_get_output_property_reply_t* outputPropertyReply = data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
+    if(outputPropertyReply)
+    {
+        if(data->ffxcb_randr_get_output_property_data_length(outputPropertyReply) >= 128)
+        {
+            ffStrbufClear(name);
+            ffEdidGetName(data->ffxcb_randr_get_output_property_data(outputPropertyReply), name);
+        }
+    }
+
+    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary);
 
     return res;
 }
@@ -418,6 +436,8 @@ void ffdsConnectXcbRandr(FFDisplayServerResult* result)
 
     XcbRandrData data;
 
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_intern_atom,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_intern_atom_reply,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_reply,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_modes_iterator,)
@@ -433,6 +453,10 @@ void ffdsConnectXcbRandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_output_next,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_info,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_info_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_property,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_property_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_property_data,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_output_property_data_length,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_crtc_info,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_crtc_info_reply,)
 
