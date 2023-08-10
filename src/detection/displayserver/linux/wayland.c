@@ -32,6 +32,8 @@ typedef struct WaylandDisplay
     enum wl_output_transform transform;
     FFDisplayType type;
     FFstrbuf name;
+    FFstrbuf description;
+    FFstrbuf vendorAndModelId;
 } WaylandDisplay;
 
 #ifndef __FreeBSD__
@@ -90,6 +92,8 @@ static void waylandOutputGeometryListener(void *data,
 {
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
+    ffStrbufAppendS(&display->vendorAndModelId, make);
+    ffStrbufAppendS(&display->vendorAndModelId, model);
 }
 
 static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
@@ -100,6 +104,13 @@ static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_outp
     else if(ffStrStartsWith(name, "HDMI-") || ffStrStartsWith(name, "DP-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
     ffStrbufAppendS(&display->name, name);
+}
+
+static void waylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED struct wl_output* wl_output, const char* description)
+{
+    WaylandDisplay* display = data;
+    while (*description == ' ') ++description;
+    ffStrbufAppendS(&display->description, description);
 }
 
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
@@ -117,6 +128,8 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         .type = FF_DISPLAY_TYPE_UNKNOWN,
     };
     ffStrbufInit(&display.name);
+    ffStrbufInit(&display.description);
+    ffStrbufInit(&display.vendorAndModelId);
 
     // Dirty hack for #477
     // The order of these callbacks MUST follow `struct wl_output_listener`
@@ -126,7 +139,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         stubListener, // done
         waylandOutputScaleListener, // scale
         waylandOutputNameListener, // name
-        stubListener, // description
+        waylandOutputDescriptionListener, // description
     };
     static_assert(
         sizeof(outputListener) >= sizeof(struct wl_output_listener),
@@ -185,7 +198,10 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
         rotation,
-        &display.name,
+        display.description.length
+            ? &display.description
+            : display.vendorAndModelId.length
+                ? &display.vendorAndModelId : &display.name,
         display.type,
         false,
         0
