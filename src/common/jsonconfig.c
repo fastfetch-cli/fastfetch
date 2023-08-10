@@ -93,10 +93,10 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* module)
         case 'C': {
             return
                 tryModule(type, module, FF_CHASSIS_MODULE_NAME, ffParseChassisJsonObject) ||
-                tryModule(type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
-                tryModule(type, module, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageJsonObject) ||
                 tryModule(type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
                 tryModule(type, module, FF_COLORS_MODULE_NAME, ffParseColorsJsonObject) ||
+                tryModule(type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
+                tryModule(type, module, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageJsonObject) ||
                 tryModule(type, module, FF_CURSOR_MODULE_NAME, ffParseCursorJsonObject) ||
                 tryModule(type, module, FF_CUSTOM_MODULE_NAME, ffParseCustomJsonObject) ||
                 false;
@@ -105,9 +105,9 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* module)
         case 'D': {
             return
                 tryModule(type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
+                tryModule(type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
                 tryModule(type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
                 tryModule(type, module, FF_DISK_MODULE_NAME, ffParseDiskJsonObject) ||
-                tryModule(type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
                 false;
         }
 

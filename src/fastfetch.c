@@ -1185,116 +1185,135 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
         }
     }
 
-    if(ffStrEqualsIgnCase(line, FF_BREAK_MODULE_NAME))
-        ffPrintBreak();
-    else if(ffStrEqualsIgnCase(line, FF_TITLE_MODULE_NAME))
-        ffPrintTitle(&instance.config.title);
-    else if(ffStrEqualsIgnCase(line, FF_SEPARATOR_MODULE_NAME))
-        ffPrintSeparator(&instance.config.separator);
-    else if(ffStrEqualsIgnCase(line, FF_OS_MODULE_NAME))
-        ffPrintOS(&instance.config.os);
-    else if(ffStrEqualsIgnCase(line, FF_HOST_MODULE_NAME))
-        ffPrintHost(&instance.config.host);
-    else if(ffStrEqualsIgnCase(line, FF_BIOS_MODULE_NAME))
-        ffPrintBios(&instance.config.bios);
-    else if(ffStrEqualsIgnCase(line, FF_BOARD_MODULE_NAME))
-        ffPrintBoard(&instance.config.board);
-    else if(ffStrEqualsIgnCase(line, FF_BRIGHTNESS_MODULE_NAME))
-        ffPrintBrightness(&instance.config.brightness);
-    else if(ffStrEqualsIgnCase(line, FF_CHASSIS_MODULE_NAME))
-        ffPrintChassis(&instance.config.chassis);
-    else if(ffStrEqualsIgnCase(line, FF_KERNEL_MODULE_NAME))
-        ffPrintKernel(&instance.config.kernel);
-    else if(ffStrEqualsIgnCase(line, FF_PROCESSES_MODULE_NAME))
-        ffPrintProcesses(&instance.config.processes);
-    else if(ffStrEqualsIgnCase(line, FF_UPTIME_MODULE_NAME))
-        ffPrintUptime(&instance.config.uptime);
-    else if(ffStrEqualsIgnCase(line, FF_PACKAGES_MODULE_NAME))
-        ffPrintPackages(&instance.config.packages);
-    else if(ffStrEqualsIgnCase(line, FF_SHELL_MODULE_NAME))
-        ffPrintShell(&instance.config.shell);
-    else if(ffStrEqualsIgnCase(line, FF_DISPLAY_MODULE_NAME))
-        ffPrintDisplay(&instance.config.display);
-    else if(ffStrEqualsIgnCase(line, FF_DE_MODULE_NAME))
-        ffPrintDE(&instance.config.de);
-    else if(ffStrEqualsIgnCase(line, FF_WM_MODULE_NAME))
-        ffPrintWM(&instance.config.wm);
-    else if(ffStrEqualsIgnCase(line, FF_THEME_MODULE_NAME))
-        ffPrintTheme(&instance.config.theme);
-    else if(ffStrEqualsIgnCase(line, FF_WMTHEME_MODULE_NAME))
-        ffPrintWMTheme(&instance.config.wmTheme);
-    else if(ffStrEqualsIgnCase(line, FF_ICONS_MODULE_NAME))
-        ffPrintIcons(&instance.config.icons);
-    else if(ffStrEqualsIgnCase(line, FF_WALLPAPER_MODULE_NAME))
-        ffPrintWallpaper(&instance.config.wallpaper);
-    else if(ffStrEqualsIgnCase(line, FF_FONT_MODULE_NAME))
-        ffPrintFont(&instance.config.font);
-    else if(ffStrEqualsIgnCase(line, FF_CURSOR_MODULE_NAME))
-        ffPrintCursor(&instance.config.cursor);
-    else if(ffStrEqualsIgnCase(line, FF_TERMINAL_MODULE_NAME))
-        ffPrintTerminal(&instance.config.terminal);
-    else if(ffStrEqualsIgnCase(line, FF_TERMINALFONT_MODULE_NAME))
-        ffPrintTerminalFont(&instance.config.terminalFont);
-    else if(ffStrEqualsIgnCase(line, FF_TERMINALSIZE_MODULE_NAME))
-        ffPrintTerminalSize(&instance.config.terminalSize);
-    else if(ffStrEqualsIgnCase(line, FF_CPU_MODULE_NAME))
-        ffPrintCPU(&instance.config.cpu);
-    else if(ffStrEqualsIgnCase(line, FF_CPUUSAGE_MODULE_NAME))
-        ffPrintCPUUsage(&instance.config.cpuUsage);
-    else if(ffStrEqualsIgnCase(line, FF_CUSTOM_MODULE_NAME))
-        ffPrintCustom(&instance.config.custom);
-    else if(ffStrEqualsIgnCase(line, FF_GPU_MODULE_NAME))
-        ffPrintGPU(&instance.config.gpu);
-    else if(ffStrEqualsIgnCase(line, FF_MEMORY_MODULE_NAME))
-        ffPrintMemory(&instance.config.memory);
-    else if(ffStrEqualsIgnCase(line, FF_SWAP_MODULE_NAME))
-        ffPrintSwap(&instance.config.swap);
-    else if(ffStrEqualsIgnCase(line, FF_DISK_MODULE_NAME))
-        ffPrintDisk(&instance.config.disk);
-    else if(ffStrEqualsIgnCase(line, FF_BATTERY_MODULE_NAME))
-        ffPrintBattery(&instance.config.battery);
-    else if(ffStrEqualsIgnCase(line, FF_POWERADAPTER_MODULE_NAME))
-        ffPrintPowerAdapter(&instance.config.powerAdapter);
-    else if(ffStrEqualsIgnCase(line, FF_LM_MODULE_NAME))
-        ffPrintLM(&instance.config.lm);
-    else if(ffStrEqualsIgnCase(line, FF_LOCALE_MODULE_NAME))
-        ffPrintLocale(&instance.config.locale);
-    else if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))
-        ffPrintLocalIp(&instance.config.localIP);
-    else if(ffStrEqualsIgnCase(line, FF_PUBLICIP_MODULE_NAME))
-        ffPrintPublicIp(&instance.config.publicIP);
-    else if(ffStrEqualsIgnCase(line, FF_WIFI_MODULE_NAME))
-        ffPrintWifi(&instance.config.wifi);
-    else if(ffStrEqualsIgnCase(line, FF_WEATHER_MODULE_NAME))
-        ffPrintWeather(&instance.config.weather);
-    else if(ffStrEqualsIgnCase(line, FF_PLAYER_MODULE_NAME))
-        ffPrintPlayer(&instance.config.player);
-    else if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
-        ffPrintMedia(&instance.config.media);
-    else if(ffStrEqualsIgnCase(line, FF_MONITOR_MODULE_NAME))
-        ffPrintMonitor(&instance.config.nativeResolution);
-    else if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
-        ffPrintDateTime(&instance.config.dateTime);
-    else if(ffStrEqualsIgnCase(line, FF_COLORS_MODULE_NAME))
-        ffPrintColors(&instance.config.colors);
-    else if(ffStrEqualsIgnCase(line, FF_VULKAN_MODULE_NAME))
-        ffPrintVulkan(&instance.config.vulkan);
-    else if(ffStrEqualsIgnCase(line, FF_OPENGL_MODULE_NAME))
-        ffPrintOpenGL(&instance.config.openGL);
-    else if(ffStrEqualsIgnCase(line, FF_OPENCL_MODULE_NAME))
-        ffPrintOpenCL(&instance.config.openCL);
-    else if(ffStrEqualsIgnCase(line, FF_USERS_MODULE_NAME))
-        ffPrintUsers(&instance.config.users);
-    else if(ffStrEqualsIgnCase(line, FF_COMMAND_MODULE_NAME))
-        ffPrintCommand(&instance.config.command);
-    else if(ffStrEqualsIgnCase(line, FF_BLUETOOTH_MODULE_NAME))
-        ffPrintBluetooth(&instance.config.bluetooth);
-    else if(ffStrEqualsIgnCase(line, FF_SOUND_MODULE_NAME))
-        ffPrintSound(&instance.config.sound);
-    else if(ffStrEqualsIgnCase(line, FF_GAMEPAD_MODULE_NAME))
-        ffPrintGamepad(&instance.config.gamepad);
-    else
-        ffPrintErrorString(line, 0, NULL, NULL, "<no implementation provided>");
+    switch (toupper(line[0]))
+    {
+        case 'B':
+            if(ffStrEqualsIgnCase(line, FF_BATTERY_MODULE_NAME))
+                return ffPrintBattery(&instance.config.battery);
+            if(ffStrEqualsIgnCase(line, FF_BIOS_MODULE_NAME))
+                return ffPrintBios(&instance.config.bios);
+            if(ffStrEqualsIgnCase(line, FF_BLUETOOTH_MODULE_NAME))
+                return ffPrintBluetooth(&instance.config.bluetooth);
+            if(ffStrEqualsIgnCase(line, FF_BOARD_MODULE_NAME))
+                return ffPrintBoard(&instance.config.board);
+            if(ffStrEqualsIgnCase(line, FF_BREAK_MODULE_NAME))
+                return ffPrintBreak();
+            if(ffStrEqualsIgnCase(line, FF_BRIGHTNESS_MODULE_NAME))
+                return ffPrintBrightness(&instance.config.brightness);
+        case 'C':
+            if(ffStrEqualsIgnCase(line, FF_CHASSIS_MODULE_NAME))
+                return ffPrintChassis(&instance.config.chassis);
+            if(ffStrEqualsIgnCase(line, FF_COMMAND_MODULE_NAME))
+                return ffPrintCommand(&instance.config.command);
+            if(ffStrEqualsIgnCase(line, FF_CPU_MODULE_NAME))
+                return ffPrintCPU(&instance.config.cpu);
+            if(ffStrEqualsIgnCase(line, FF_CPUUSAGE_MODULE_NAME))
+                return ffPrintCPUUsage(&instance.config.cpuUsage);
+            if(ffStrEqualsIgnCase(line, FF_COLORS_MODULE_NAME))
+                return ffPrintColors(&instance.config.colors);
+            if(ffStrEqualsIgnCase(line, FF_CURSOR_MODULE_NAME))
+                return ffPrintCursor(&instance.config.cursor);
+            if(ffStrEqualsIgnCase(line, FF_CUSTOM_MODULE_NAME))
+                return ffPrintCustom(&instance.config.custom);
+        case 'D':
+            if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
+                return ffPrintDateTime(&instance.config.dateTime);
+            if(ffStrEqualsIgnCase(line, FF_DE_MODULE_NAME))
+                return ffPrintDE(&instance.config.de);
+            if(ffStrEqualsIgnCase(line, FF_DISPLAY_MODULE_NAME))
+                return ffPrintDisplay(&instance.config.display);
+            if(ffStrEqualsIgnCase(line, FF_DISK_MODULE_NAME))
+                return ffPrintDisk(&instance.config.disk);
+        case 'F':
+            if(ffStrEqualsIgnCase(line, FF_FONT_MODULE_NAME))
+                return ffPrintFont(&instance.config.font);
+        case 'G':
+            if(ffStrEqualsIgnCase(line, FF_GAMEPAD_MODULE_NAME))
+                return ffPrintGamepad(&instance.config.gamepad);
+            if(ffStrEqualsIgnCase(line, FF_GPU_MODULE_NAME))
+                return ffPrintGPU(&instance.config.gpu);
+        case 'H':
+            if(ffStrEqualsIgnCase(line, FF_HOST_MODULE_NAME))
+                return ffPrintHost(&instance.config.host);
+        case 'I':
+            if(ffStrEqualsIgnCase(line, FF_ICONS_MODULE_NAME))
+                return ffPrintIcons(&instance.config.icons);
+        case 'K':
+            if(ffStrEqualsIgnCase(line, FF_KERNEL_MODULE_NAME))
+                return ffPrintKernel(&instance.config.kernel);
+        case 'L':
+            if(ffStrEqualsIgnCase(line, FF_LM_MODULE_NAME))
+                return ffPrintLM(&instance.config.lm);
+            if(ffStrEqualsIgnCase(line, FF_LOCALE_MODULE_NAME))
+                return ffPrintLocale(&instance.config.locale);
+            if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))
+                return ffPrintLocalIp(&instance.config.localIP);
+        case 'M':
+            if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
+                return ffPrintMedia(&instance.config.media);
+            if(ffStrEqualsIgnCase(line, FF_MEMORY_MODULE_NAME))
+                return ffPrintMemory(&instance.config.memory);
+            if(ffStrEqualsIgnCase(line, FF_MONITOR_MODULE_NAME))
+                return ffPrintMonitor(&instance.config.nativeResolution);
+        case 'O':
+            if(ffStrEqualsIgnCase(line, FF_OPENCL_MODULE_NAME))
+                return ffPrintOpenCL(&instance.config.openCL);
+            if(ffStrEqualsIgnCase(line, FF_OPENGL_MODULE_NAME))
+                return ffPrintOpenGL(&instance.config.openGL);
+            if(ffStrEqualsIgnCase(line, FF_OS_MODULE_NAME))
+                return ffPrintOS(&instance.config.os);
+        case 'P':
+            if(ffStrEqualsIgnCase(line, FF_PACKAGES_MODULE_NAME))
+                return ffPrintPackages(&instance.config.packages);
+            if(ffStrEqualsIgnCase(line, FF_PLAYER_MODULE_NAME))
+                return ffPrintPlayer(&instance.config.player);
+            if(ffStrEqualsIgnCase(line, FF_POWERADAPTER_MODULE_NAME))
+                return ffPrintPowerAdapter(&instance.config.powerAdapter);
+            if(ffStrEqualsIgnCase(line, FF_PROCESSES_MODULE_NAME))
+                return ffPrintProcesses(&instance.config.processes);
+            if(ffStrEqualsIgnCase(line, FF_PUBLICIP_MODULE_NAME))
+                return ffPrintPublicIp(&instance.config.publicIP);
+        case 'S':
+            if(ffStrEqualsIgnCase(line, FF_SEPARATOR_MODULE_NAME))
+                return ffPrintSeparator(&instance.config.separator);
+            if(ffStrEqualsIgnCase(line, FF_SHELL_MODULE_NAME))
+                return ffPrintShell(&instance.config.shell);
+            if(ffStrEqualsIgnCase(line, FF_SOUND_MODULE_NAME))
+                return ffPrintSound(&instance.config.sound);
+            if(ffStrEqualsIgnCase(line, FF_SWAP_MODULE_NAME))
+                return ffPrintSwap(&instance.config.swap);
+        case 'T':
+            if(ffStrEqualsIgnCase(line, FF_TERMINAL_MODULE_NAME))
+                return ffPrintTerminal(&instance.config.terminal);
+            if(ffStrEqualsIgnCase(line, FF_TERMINALFONT_MODULE_NAME))
+                return ffPrintTerminalFont(&instance.config.terminalFont);
+            if(ffStrEqualsIgnCase(line, FF_TERMINALSIZE_MODULE_NAME))
+                return ffPrintTerminalSize(&instance.config.terminalSize);
+            if(ffStrEqualsIgnCase(line, FF_TITLE_MODULE_NAME))
+                return ffPrintTitle(&instance.config.title);
+            if(ffStrEqualsIgnCase(line, FF_THEME_MODULE_NAME))
+                return ffPrintTheme(&instance.config.theme);
+        case 'U':
+            if(ffStrEqualsIgnCase(line, FF_UPTIME_MODULE_NAME))
+                return ffPrintUptime(&instance.config.uptime);
+            if(ffStrEqualsIgnCase(line, FF_USERS_MODULE_NAME))
+                return ffPrintUsers(&instance.config.users);
+        case 'V':
+            if(ffStrEqualsIgnCase(line, FF_VULKAN_MODULE_NAME))
+                return ffPrintVulkan(&instance.config.vulkan);
+        case 'W':
+            if(ffStrEqualsIgnCase(line, FF_WALLPAPER_MODULE_NAME))
+                return ffPrintWallpaper(&instance.config.wallpaper);
+            if(ffStrEqualsIgnCase(line, FF_WEATHER_MODULE_NAME))
+                return ffPrintWeather(&instance.config.weather);
+            if(ffStrEqualsIgnCase(line, FF_WIFI_MODULE_NAME))
+                return ffPrintWifi(&instance.config.wifi);
+            if(ffStrEqualsIgnCase(line, FF_WM_MODULE_NAME))
+                return ffPrintWM(&instance.config.wm);
+            if(ffStrEqualsIgnCase(line, FF_WMTHEME_MODULE_NAME))
+                return ffPrintWMTheme(&instance.config.wmTheme);
+    }
+    ffPrintErrorString(line, 0, NULL, NULL, "<no implementation provided>");
 }
 
 int main(int argc, const char** argv)
