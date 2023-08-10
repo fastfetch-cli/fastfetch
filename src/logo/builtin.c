@@ -51,7 +51,7 @@ static const FFlogo A[] = {
     // AlpineSmall
     {
         .names = {"alpine_small", "alpine-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ALPINE_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -63,7 +63,7 @@ static const FFlogo A[] = {
     // Alpine2Small
     {
         .names = {"alpine2_small", "alpine-linux2-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ALPINE2_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -129,7 +129,7 @@ static const FFlogo A[] = {
     // AndroidSmall
     {
         .names = {"android-small", "android_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ANDROID_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -218,7 +218,7 @@ static const FFlogo A[] = {
     // AppleSmall
     {
         .names = {"Apple_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -263,6 +263,7 @@ static const FFlogo A[] = {
     // Archcraft2
     {
         .names = {"Archcraft2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARCHCRAFT2,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -284,6 +285,7 @@ static const FFlogo A[] = {
     // Arch2
     {
         .names = {"arch2", "archlinux2", "arch-linux2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARCH2,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -295,7 +297,7 @@ static const FFlogo A[] = {
     // ArchSmall
     {
         .names = {"arch_small", "archlinux_small", "arch-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARCH_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -338,7 +340,7 @@ static const FFlogo A[] = {
     // ArtixSmall
     {
         .names = {"artix_small", "artixlinux_small", "artix-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARTIX_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -349,7 +351,7 @@ static const FFlogo A[] = {
     // Artix2Small
     {
         .names = {"artix2_small", "artixlinux2_small", "artix-linux2-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARTIX2_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -371,7 +373,7 @@ static const FFlogo A[] = {
     // ArcoLinuxSmall
     {
         .names = {"arco_small", "arcolinux_small", "arco-linux_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARCO_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -646,7 +648,7 @@ static const FFlogo C[] = {
     // CachyOSSmall
     {
         .names = {"Cachy_small", "cachyos_small", "cachy-linux-small", "cachyos-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CACHYOS_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -743,7 +745,7 @@ static const FFlogo C[] = {
     // CentOSSmall
     {
         .names = {"Cent_small", "centos_small", "cent-linux_small", "cent-linux-small", "centos-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CENTOS_SMALL,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -823,7 +825,7 @@ static const FFlogo C[] = {
     // CleanjaroSmall
     {
         .names = {"Cleanjaro_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CLEANJARO_SMALL,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -916,7 +918,7 @@ static const FFlogo C[] = {
     // CRUXSmall
     {
         .names = {"CRUX_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CRUX_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1024,7 +1026,7 @@ static const FFlogo D[] = {
     // DebianSmall
     {
         .names = {"Debian_small", "debian-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_DEBIAN_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1066,7 +1068,7 @@ static const FFlogo D[] = {
     // DevuanSmall
     {
         .names = {"Devuan_small", "devuan-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_DEVUAN_SMALL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1110,7 +1112,7 @@ static const FFlogo D[] = {
     // DragonFlySmall
     {
         .names = {"DragonFly_small", "DragonFly-BSD_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_DRAGONFLY_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1122,6 +1124,7 @@ static const FFlogo D[] = {
     // DragonFlyOld
     {
         .names = {"DragonFly_old", "DragonFly-BSD_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_DRAGONFLY_OLD,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1171,7 +1174,7 @@ static const FFlogo E[] = {
     // ElementarySmall
     {
         .names = {"Elementary_small", "elementary-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ELEMENTARY_SMALL,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -1295,7 +1298,7 @@ static const FFlogo F[] = {
     // FedoraSmall
     {
         .names = {"Fedora_small", "fedora-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1306,6 +1309,7 @@ static const FFlogo F[] = {
     // FedoraOld
     {
         .names = {"Fedora_old", "fedora-old", "fedora-linux-old", "fedora-linux_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_OLD,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1369,7 +1373,7 @@ static const FFlogo F[] = {
     // FreeBSDSmall
     {
         .names = {"freebsd_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_FREEBSD_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1448,7 +1452,7 @@ static const FFlogo G[] = {
     // GarudaSmall
     {
         .names = {"Garuda_small", "garudalinux_small", "garuda-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_GARUDA_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1470,7 +1474,7 @@ static const FFlogo G[] = {
     // GentooSmall
     {
         .names = {"Gentoo_small", "gentoo-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_GENTOO_SMALL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1602,7 +1606,7 @@ static const FFlogo H[] = {
     // HaikuSmall
     {
         .names = {"Haiku-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_HAIKU_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -1698,7 +1702,7 @@ static const FFlogo H[] = {
     // HyperbolaSmall
     {
         .names = {"Hyperbola_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_HYPERBOLA_SMALL,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK,
@@ -1798,7 +1802,7 @@ static const FFlogo K[] = {
     // KaliSmall
     {
         .names = {"Kali_small", "Kalilinux_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_KALI_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1985,7 +1989,7 @@ static const FFlogo L[] = {
     // LinuxSmall
     {
         .names = {"Linux_small", "linux-generic_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_LINUX_SMALL,
         .colors = {
             FF_COLOR_FG_BLACK,
@@ -2009,7 +2013,7 @@ static const FFlogo L[] = {
     // LinuxLightSmall
     {
         .names = {"LinuxLite_small", "Linux Lite_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_LINUXLITE_SMALL,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -2032,7 +2036,7 @@ static const FFlogo L[] = {
     // LinuxMintSmall
     {
         .names = {"linuxmint_small", "linux-mint_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MINT_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2044,6 +2048,7 @@ static const FFlogo L[] = {
     // LinuxMintOld
     {
         .names = {"linux-mint_old", "linux-mint-old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MINT_OLD,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2107,7 +2112,7 @@ static const FFlogo M[] = {
     // MacOSSmall
     {
         .names = {"macos_small", "mac_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2122,6 +2127,7 @@ static const FFlogo M[] = {
     // MacOS2
     {
         .names = {"macos2", "mac2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS2,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2136,7 +2142,7 @@ static const FFlogo M[] = {
     // MacOS2Small
     {
         .names = {"macos2_small", "mac2_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS2_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2207,7 +2213,7 @@ static const FFlogo M[] = {
     // ManjaroSmall
     {
         .names = {"manjaro_small", "manjaro-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MANJARO_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2283,7 +2289,7 @@ static const FFlogo M[] = {
     // MintSmall
     {
         .names = {"mint_small", "mint-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MINT_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2295,6 +2301,7 @@ static const FFlogo M[] = {
     // MintOld
     {
         .names = {"mint_old", "mint-old", "mint-linux_old", "mint-linux-old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MINT_OLD,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2433,6 +2440,7 @@ static const FFlogo N[] = {
     // NixOsOld
     {
         .names = {"nixos_old", "nix-old", "nixos-old", "nix_old", "nix-os-old", "nix_os_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_OLD,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -2444,7 +2452,7 @@ static const FFlogo N[] = {
     // NixOsSmall
     {
         .names = {"nixos_small", "nix-small", "nixos-small", "nix_small", "nix-os-small", "nix_os_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -2561,7 +2569,7 @@ static const FFlogo O[] = {
     // OpenBSDSmall
     {
         .names = {"openbsd_small", "openbsd-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_OPENBSD_SMALL,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -2620,7 +2628,7 @@ static const FFlogo O[] = {
     // OpenSuseSmall
     {
         .names = {"opensuse_small", "open_suse_small", "open-suse_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2651,6 +2659,7 @@ static const FFlogo O[] = {
     // OpenSuseTumbleweed2
     {
         .names = {"opensuse_tumbleweed2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED2,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -2712,7 +2721,7 @@ static const FFlogo O[] = {
     // OrchidSmall
     {
         .names = {"orchid_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ORCHID_SMALL,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -2757,7 +2766,7 @@ static const FFlogo O[] = {
     // OSXSmall
     {
         .names = {"OSX_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2806,7 +2815,7 @@ static const FFlogo P[] = {
     // ParabolaSmall
     {
         .names = {"parabola_small", "parabola-gnulinux_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_PARABOLA_SMALL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -2930,7 +2939,7 @@ static const FFlogo P[] = {
     },
     // PNMLinux
     {
-        .names = {"PNM Linux", "WHPNM Linux"},
+        .names = {"PNM Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_PNM_LINUX,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -2953,7 +2962,7 @@ static const FFlogo P[] = {
     // PopSmall
     {
         .names = {"pop_small", "popos_small", "pop_os_small", "pop-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_POP_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -3018,7 +3027,7 @@ static const FFlogo P[] = {
     // PureOSSmall
     {
         .names = {"PureOS_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_PUREOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3095,7 +3104,7 @@ static const FFlogo R[] = {
     // RaspbianSmall
     {
         .names = {"raspbian_small", "raspi_small", "raspberrypi_small", "raspberrypios_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_RASPBIAN_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -3128,7 +3137,7 @@ static const FFlogo R[] = {
     // RebornSmall
     {
         .names = {"Reborn_small", "Reborn OS_small", "reborn-os-small", "rebornos_small", "rebornos-linux-small", "reborn-os-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_REBORN_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -3158,6 +3167,7 @@ static const FFlogo R[] = {
     // RedHatEnterpriseLinux_old
     {
         .names = {"rhel_old", "redhat_old", "redhat-linux_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_RHEL_OLD,
         .colors = {
             FF_COLOR_FG_RED,
@@ -3435,7 +3445,7 @@ static const FFlogo S[] = {
     // SlackwareSmall
     {
         .names = {"slackware-small", "slackware-linux-small", "slackware_small", "slackwarelinux_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_SLACKWARE_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -3485,7 +3495,7 @@ static const FFlogo S[] = {
     // SolarisSmall
     {
         .names = {"solaris-small", "solaris_small", "sunos-small", "sunos_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_SOLARIS_SMALL,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -3563,7 +3573,7 @@ static const FFlogo S[] = {
     // SuseSmall
     {
         .names = {"suse_small", "suse-linux_small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3719,6 +3729,7 @@ static const FFlogo U[] = {
     // UbuntuOld
     {
         .names = {"ubuntu_old", "ubuntu-linux_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD,
         .colors = {
             FF_COLOR_FG_RED,
@@ -3741,7 +3752,7 @@ static const FFlogo U[] = {
     // UbuntuSmall
     {
         .names = {"ubuntu_small", "ubuntu-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -3788,7 +3799,7 @@ static const FFlogo U[] = {
     // Ubuntu2Small
     {
         .names = {"ubuntu2_small", "ubuntu2-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU2_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
@@ -3799,6 +3810,7 @@ static const FFlogo U[] = {
     // Ubuntu2Old
     {
         .names = {"ubuntu2_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU2_OLD,
         .colors = {
             FF_COLOR_FG_RED,
@@ -3925,7 +3937,7 @@ static const FFlogo V[] = {
     // VoidSmall
     {
         .names = {"void_small", "void-linux-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_VOID_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3963,7 +3975,7 @@ static const FFlogo W[] = {
     // Windows11Small
     {
         .names = {"Windows 11_small", "Windows 11-small"},
-        .small = true,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_11_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,

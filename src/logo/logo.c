@@ -218,11 +218,12 @@ static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size)
     {
         switch (size)
         {
+            // Never use alternate logos
             case FF_LOGO_SIZE_NORMAL:
-                if(logo->small) continue;
+                if(logo->type != FF_LOGO_LINE_TYPE_NORMAL) continue;
                 break;
             case FF_LOGO_SIZE_SMALL:
-                if(!logo->small) continue;
+                if(logo->type != FF_LOGO_LINE_TYPE_SMALL_BIT) continue;
                 break;
             default:
                 break;
