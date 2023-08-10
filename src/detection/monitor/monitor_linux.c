@@ -39,17 +39,11 @@ const char* ffDetectMonitor(FFlist* results)
         ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width != 0 && height != 0)
         {
-            const char* plainName = entry->d_name;
-            if (ffStrStartsWith(plainName, "card"))
-            {
-                const char* tmp = strchr(plainName + strlen("card"), '-');
-                if (tmp) plainName = tmp + 1;
-            }
-
             FFMonitorResult* display = (FFMonitorResult*) ffListAdd(results);
             display->width = width;
             display->height = height;
-            ffStrbufInitS(&display->name, plainName);
+            ffStrbufInit(&display->name);
+            ffEdidGetName(edidData, &display->name);
             ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
         }
 
