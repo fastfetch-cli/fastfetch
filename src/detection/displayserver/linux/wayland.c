@@ -207,6 +207,10 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         0
     );
 
+    ffStrbufDestroy(&display.description);
+    ffStrbufDestroy(&display.vendorAndModelId);
+    ffStrbufDestroy(&display.name);
+
     ffThreadMutexUnlock(&mutex);
 }
 
