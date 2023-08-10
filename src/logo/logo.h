@@ -19,8 +19,8 @@ typedef struct FFlogo
 void ffLogoPrintChars(const char* data, bool doColorReplacement);
 
 //builtin.c
-extern const FFlogo ffLogoBuiltins[];
-extern const uint32_t ffLogoBuiltinLength;
+extern const FFlogo* ffLogoBuiltins[];
+extern const FFlogo ffLogoUnknown;
 
 //image/image.c
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError);

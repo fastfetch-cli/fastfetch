@@ -2,17 +2,17 @@
 #include "logo_builtin.h"
 #include "common/color.h"
 
-const FFlogo ffLogoBuiltins[] = {
-    // Unknown
-    {
-        .names = {"unknown", "question mark", "?"},
-        .lines = FASTFETCH_DATATEXT_LOGO_UNKNOWN,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = "",
-        .colorTitle = "",
+const FFlogo ffLogoUnknown = {
+    .names = {"unknown"},
+    .lines = FASTFETCH_DATATEXT_LOGO_UNKNOWN,
+    .colors = {
+        FF_COLOR_FG_WHITE,
     },
+    .colorKeys = "",
+    .colorTitle = "",
+};
+
+static const FFlogo A[] = {
     // AIX
     {
         .names = {"aix"},
@@ -200,6 +200,35 @@ const FFlogo ffLogoBuiltins[] = {
         },
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // Apple
+    {
+        .names = {"Apple"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MACOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // AppleSmall
+    {
+        .names = {"Apple_small"},
+        .small = true,
+        .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
     },
     // Apricity
     {
@@ -433,6 +462,17 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Ataraxia
+    {
+        .names = {"Ataraxia Linux", "Ataraxia"},
+        .lines = FASTFETCH_DATATEXT_LOGO_JANUSLINUX,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
     // Athena
     {
         .names = {"Athena"},
@@ -444,6 +484,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo B[] = {
     // Bedrock
     {
         .names = {"bedrock", "bedrocklinux", "bedrock-linux"},
@@ -547,7 +592,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Bonsai
     {
-        .names = {"bonsai"},
+        .names = {"Bonsai"},
         .lines = FASTFETCH_DATATEXT_LOGO_BONSAI,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -559,7 +604,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // BSD
     {
-        .names = {"bsd"},
+        .names = {"BSD"},
         .lines = FASTFETCH_DATATEXT_LOGO_BSD,
         .colors = {
             FF_COLOR_FG_RED,
@@ -581,9 +626,14 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo C[] = {
     // CachyOS
     {
-        .names = {"cachy", "cachyos", "cachy-linux", "cachyos-linux"},
+        .names = {"Cachy", "cachyos", "cachy-linux", "cachyos-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_CACHYOS,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -595,7 +645,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CachyOSSmall
     {
-        .names = {"cachy_small", "cachyos_small", "cachy-linux-small", "cachyos-linux-small"},
+        .names = {"Cachy_small", "cachyos_small", "cachy-linux-small", "cachyos-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_CACHYOS_SMALL,
         .colors = {
@@ -617,7 +667,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CalinixOS
     {
-        .names = {"calinix", "calinixos"},
+        .names = {"Calinix", "calinixos"},
         .lines = FASTFETCH_DATATEXT_LOGO_CALINIXOS,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -627,7 +677,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CalinixOSSmall
     {
-        .names = {"calinix_small", "calinixos_small"},
+        .names = {"Calinix_small", "calinixos_small"},
         .lines = FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -657,7 +707,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CelOS
     {
-        .names = {"cel", "celos", "cel-linux", "celos-linux"},
+        .names = {"Cel", "celos", "cel-linux", "celos-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_CELOS,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -678,7 +728,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CentOS
     {
-        .names = {"cent", "centos", "cent-linux", "centos-linux"},
+        .names = {"Cent", "centos", "cent-linux", "centos-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_CENTOS,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -692,7 +742,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CentOSSmall
     {
-        .names = {"cent_small", "centos_small", "cent-linux_small", "cent-linux-small", "centos-linux-small"},
+        .names = {"Cent_small", "centos_small", "cent-linux_small", "cent-linux-small", "centos-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_CENTOS_SMALL,
         .colors = {
@@ -772,7 +822,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CleanjaroSmall
     {
-        .names = {"cleanjaro_small"},
+        .names = {"Cleanjaro_small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_CLEANJARO_SMALL,
         .colors = {
@@ -841,7 +891,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // ContainerLinux
     {
-        .names = {"Container Linux by CoreOS", "ContainerLinux", "Container Linux"},
+        .names = {"ContainerLinux", "Container Linux", "Container Linux by CoreOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_CONTAINER_LINUX,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -878,7 +928,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // CrystalLinux
     {
-        .names = {"crystal", "Crystal", "crystal-linux", "Crystal-Linux"},
+        .names = {"Crystal", "Crystal", "crystal-linux", "Crystal-Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_CRYSTAL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -931,6 +981,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo D[] = {
     // dahlia
     {
         .names = {"dahlia"},
@@ -957,7 +1012,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Debian
     {
-        .names = {"debian", "debian-linux"},
+        .names = {"Debian", "debian-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_DEBIAN,
         .colors = {
             FF_COLOR_FG_RED,
@@ -968,7 +1023,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // DebianSmall
     {
-        .names = {"debian_small", "debian-linux-small"},
+        .names = {"Debian_small", "debian-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_DEBIAN_SMALL,
         .colors = {
@@ -1000,7 +1055,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Devuan
     {
-        .names = {"devuan", "devuan-linux"},
+        .names = {"Devuan", "devuan-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_DEVUAN,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1010,7 +1065,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // DevuanSmall
     {
-        .names = {"devuan_small", "devuan-linux-small"},
+        .names = {"Devuan_small", "devuan-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_DEVUAN_SMALL,
         .colors = {
@@ -1098,9 +1153,14 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_LIGHT_GREEN,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo E[] = {
     // Elementary
     {
-        .names = {"elementary"},
+        .names = {"Elementary"},
         .lines = FASTFETCH_DATATEXT_LOGO_ELEMENTARY,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -1110,7 +1170,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // ElementarySmall
     {
-        .names = {"elementary_small", "elementary-small"},
+        .names = {"Elementary_small", "elementary-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_ELEMENTARY_SMALL,
         .colors = {
@@ -1143,7 +1203,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Endeavour
     {
-        .names = {"endeavour", "endeavour-linux", "endeavouros", "endeavouros-linux"},
+        .names = {"Endeavour", "endeavour-linux", "endeavouros", "endeavouros-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1166,7 +1226,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Enso
     {
-        .names = {"enso", "uqc"},
+        .names = {"Enso"},
         .lines = FASTFETCH_DATATEXT_LOGO_ENSO,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -1196,7 +1256,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Exherbo
     {
-        .names = {"exherbo", "exherbo-linux"},
+        .names = {"Exherbo", "exherbo-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_EXHERBO,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1216,9 +1276,14 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo F[] = {
     // Fedora
     {
-        .names = {"fedora", "fedora-linux"},
+        .names = {"Fedora", "fedora-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1229,7 +1294,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // FedoraSmall
     {
-        .names = {"fedora_small", "fedora-linux-small"},
+        .names = {"Fedora_small", "fedora-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_SMALL,
         .colors = {
@@ -1240,7 +1305,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // FedoraOld
     {
-        .names = {"fedora_old", "fedora-old", "fedora-linux-old", "fedora-linux_old"},
+        .names = {"Fedora_old", "fedora-old", "fedora-linux-old", "fedora-linux_old"},
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_OLD,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1292,7 +1357,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // FreeBSD
     {
-        .names = {"freebsd", "HardenedBSD"},
+        .names = {"Freebsd"},
         .lines = FASTFETCH_DATATEXT_LOGO_FREEBSD,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -1344,6 +1409,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo G[] = {
     // GalliumOS
     {
         .names = {"GalliumOS"},
@@ -1357,7 +1427,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Garuda
     {
-        .names = {"garuda", "garuda-linux"},
+        .names = {"Garuda", "garuda-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_GARUDA,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1367,7 +1437,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // GarudaDragon
     {
-        .names = {"garudadragon", "garuda-dragon", "garuda-linux-dragon"},
+        .names = {"GarudaDragon", "garuda-dragon", "garuda-linux-dragon"},
         .lines = FASTFETCH_DATATEXT_LOGO_GARUDA_DRAGON,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1377,7 +1447,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // GarudaSmall
     {
-        .names = {"garuda_small", "garudalinux_small", "garuda-linux-small"},
+        .names = {"Garuda_small", "garudalinux_small", "garuda-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_GARUDA_SMALL,
         .colors = {
@@ -1388,7 +1458,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Gentoo
     {
-        .names = {"gentoo", "gentoo-linux"},
+        .names = {"Gentoo", "gentoo-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_GENTOO,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1399,7 +1469,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // GentooSmall
     {
-        .names = {"gentoo_small", "gentoo-linux-small"},
+        .names = {"Gentoo_small", "gentoo-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_GENTOO_SMALL,
         .colors = {
@@ -1411,7 +1481,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // GhostBSD
     {
-        .names = {"ghostbsd"},
+        .names = {"GhostBSD"},
         .lines = FASTFETCH_DATATEXT_LOGO_GHOSTBSD,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1511,6 +1581,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo H[] = {
     // Haiku
     {
         .names = {"Haiku"},
@@ -1559,15 +1634,25 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // HardenedBSD
+    {
+        .names = {"HardenedBSD"},
+        .lines = FASTFETCH_DATATEXT_LOGO_FREEBSD,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Hash
     {
         .names = {"Hash"},
         .lines = FASTFETCH_DATATEXT_LOGO_HASH,
         .colors = {
             FF_COLOR_FG_256 "123",
+            FF_COLOR_FG_256 "123",
         },
-        .colorKeys = FF_COLOR_FG_256 "123",
-        .colorTitle = FF_COLOR_FG_256 "123",
     },
     // Huayra
     {
@@ -1621,6 +1706,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo I[] = {
     // Iglunix
     {
         .names = {"Iglunix", "Iglu"},
@@ -1662,9 +1752,14 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo J[] = {
     // januslinux
     {
-        .names = {"januslinux", "janus", "Ataraxia Linux", "Ataraxia"},
+        .names = {"januslinux", "janus"},
         .lines = FASTFETCH_DATATEXT_LOGO_JANUSLINUX,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1673,6 +1768,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo K[] = {
     // Kaisen
     {
         .names = {"Kaisen"},
@@ -1686,7 +1786,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Kali
     {
-        .names = {"Kali", "Kalilinux", "Kali-linux"},
+        .names = {"Kali", "Kalilinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_KALI,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1720,7 +1820,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // KDENeon
     {
-        .names = {"kde", "kde-neon", "neon"},
+        .names = {"KDE", "kde-neon"},
         .lines = FASTFETCH_DATATEXT_LOGO_KDE,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -1742,7 +1842,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // KISSLinux
     {
-        .names = {"kiss", "kiss-linux", "kisslinux"},
+        .names = {"KISS", "kiss-linux", "kisslinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_KISS,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1798,7 +1898,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Kubuntu
     {
-        .names = {"kubuntu", "kubuntu-linux", "kde-ubuntu", "ubuntu-kde", "ubuntu-plasma"},
+        .names = {"Kubuntu", "kubuntu-linux", "kde-ubuntu"},
         .lines = FASTFETCH_DATATEXT_LOGO_KUBUNTU,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1807,6 +1907,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo L[] = {
     // LangitKetujuh
     {
         .names = {"langitketujuh", "l7"},
@@ -1856,7 +1961,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Linspire
     {
-        .names = {"Linspire", "Freespire", "Lindows"},
+        .names = {"Linspire", "Lindows"},
         .lines = FASTFETCH_DATATEXT_LOGO_LINSPIRE,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1867,7 +1972,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Linux
     {
-        .names = {"linux", "linux-generic"},
+        .names = {"Linux", "linux-generic"},
         .lines = FASTFETCH_DATATEXT_LOGO_LINUX,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -1879,7 +1984,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // LinuxSmall
     {
-        .names = {"linux_small", "linux-generic_small"},
+        .names = {"Linux_small", "linux-generic_small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_LINUX_SMALL,
         .colors = {
@@ -1912,6 +2017,40 @@ const FFlogo ffLogoBuiltins[] = {
         },
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // LinuxMint
+    {
+        .names = {"linuxmint", "linux-mint"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MINT,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // LinuxMintSmall
+    {
+        .names = {"linuxmint_small", "linux-mint_small"},
+        .small = true,
+        .lines = FASTFETCH_DATATEXT_LOGO_MINT_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // LinuxMintOld
+    {
+        .names = {"linux-mint_old", "linux-mint-old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MINT_OLD,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
     },
     // Live_Raizo
     {
@@ -1946,9 +2085,14 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo M[] = {
     // MacOS
     {
-        .names = {"macos", "mac", "apple", "darwin", "osx"},
+        .names = {"macos", "mac"},
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -1962,7 +2106,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // MacOSSmall
     {
-        .names = {"macos_small", "mac_small", "apple_small", "darwin_small", "osx_small"},
+        .names = {"macos_small", "mac_small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
         .colors = {
@@ -1977,7 +2121,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // MacOS2
     {
-        .names = {"macos2", "mac2", "apple2", "darwin2", "osx2"},
+        .names = {"macos2", "mac2"},
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS2,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -1991,7 +2135,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // MacOS2Small
     {
-        .names = {"macos2_small", "mac2_small", "apple2_small", "darwin2_small", "osx2_small"},
+        .names = {"macos2_small", "mac2_small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS2_SMALL,
         .colors = {
@@ -2071,21 +2215,9 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
-    // Minix
-    {
-        .names = {"minix"},
-        .lines = FASTFETCH_DATATEXT_LOGO_MINIX,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_YELLOW,
-        },
-        .colorKeys = FF_COLOR_FG_RED,
-        .colorTitle = FF_COLOR_FG_YELLOW,
-    },
     // MassOS
     {
-        .names = {"massos", "mass"},
+        .names = {"MassOS", "mass"},
         .lines = FASTFETCH_DATATEXT_LOGO_MASSOS,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -2139,7 +2271,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Mint
     {
-        .names = {"mint", "linuxmint", "mint-linux", "linux-mint"},
+        .names = {"mint", "mint-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_MINT,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2150,7 +2282,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // MintSmall
     {
-        .names = {"mint_small", "linuxmint_small", "mint-linux-small"},
+        .names = {"mint_small", "mint-linux-small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_MINT_SMALL,
         .colors = {
@@ -2162,7 +2294,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // MintOld
     {
-        .names = {"mint_old", "mint-old", "mint-linux_old", "mint-linux-old", "linux-mint_old", "linux-mint-old"},
+        .names = {"mint_old", "mint-old", "mint-linux_old", "mint-linux-old"},
         .lines = FASTFETCH_DATATEXT_LOGO_MINT_OLD,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2170,6 +2302,18 @@ const FFlogo ffLogoBuiltins[] = {
         },
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // Minix
+    {
+        .names = {"Minix"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MINIX,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_YELLOW,
     },
     // MiracleLinux
     {
@@ -2183,7 +2327,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Msys2
     {
-        .names = {"msys2"},
+        .names = {"Msys2"},
         .lines = FASTFETCH_DATATEXT_LOGO_MSYS2,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -2193,6 +2337,31 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // MX
+    {
+        .names = {"MX"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MX,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // MXSmall
+    {
+        .names = {"MX_small", "mx-small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MX_SMALL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // LAST
+    {},
+};
+
+static const FFlogo N[] = {
     // Namib
     {
         .names = {"Namib"},
@@ -2283,26 +2452,6 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // MX
-    {
-        .names = {"mx"},
-        .lines = FASTFETCH_DATATEXT_LOGO_MX,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_CYAN,
-    },
-    // MXSmall
-    {
-        .names = {"mx_small", "mx-small"},
-        .lines = FASTFETCH_DATATEXT_LOGO_MX_SMALL,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_CYAN,
-    },
     // NetBSD
     {
         .names = {"netbsd"},
@@ -2352,6 +2501,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_RED,
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo O[] = {
     // Obarun
     {
         .names = {"Obarun"},
@@ -2454,7 +2608,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // OpenSuse
     {
-        .names = {"suse", "opensuse", "open_suse", "open-suse", "suse-linux"},
+        .names = {"opensuse", "open_suse", "open-suse"},
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2465,7 +2619,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // OpenSuseSmall
     {
-        .names = {"suse_small", "opensuse_small", "open_suse_small", "open-suse_small"},
+        .names = {"opensuse_small", "open_suse_small", "open-suse_small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_SMALL,
         .colors = {
@@ -2586,6 +2740,40 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // OSX
+    {
+        .names = {"OSX"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MACOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // OSXSmall
+    {
+        .names = {"OSX_small"},
+        .small = true,
+        .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // LAST
+    {},
+};
+
+static const FFlogo P[] = {
     // PacBSD
     {
         .names = {"PacBSD"},
@@ -2837,6 +3025,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo Q[] = {
     // Q4OS
     {
         .names = {"Q4OS"},
@@ -2874,6 +3067,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo R[] = {
     // Radix
     {
         .names = {"Radix"},
@@ -2885,7 +3083,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // Raspbian
     {
-        .names = {"raspbian", "raspi", "raspberrypi", "raspberrypios", "pios"},
+        .names = {"raspbian", "raspi", "raspberrypi", "raspberrypios"},
         .lines = FASTFETCH_DATATEXT_LOGO_RASPBIAN,
         .colors = {
             FF_COLOR_FG_RED,
@@ -2896,7 +3094,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // RaspbianSmall
     {
-        .names = {"raspbian_small", "raspi_small", "raspberrypi_small" "raspberrypios_small" "pios_small"},
+        .names = {"raspbian_small", "raspi_small", "raspberrypi_small", "raspberrypios_small"},
         .small = true,
         .lines = FASTFETCH_DATATEXT_LOGO_RASPBIAN_SMALL,
         .colors = {
@@ -3059,6 +3257,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_256 "202",
     },
+    // LAST
+    {},
+};
+
+static const FFlogo S[] = {
     // Sabayon
     {
         .names = {"Sabayon"},
@@ -3348,6 +3551,25 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Suse
+    {
+        .names = {"suse", "suse-linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SUSE,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_GREEN,
+        },
+    },
+    // SuseSmall
+    {
+        .names = {"suse_small", "suse-linux_small"},
+        .small = true,
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_GREEN,
+        },
+    },
     // Swagarch
     {
         .names = {"Swagarch"},
@@ -3357,6 +3579,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo T[] = {
     // T2
     {
         .names = {"T2"},
@@ -3416,6 +3643,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo U[] = {
     // Ubuntu
     {
         .names = {"ubuntu", "ubuntu-linux"},
@@ -3429,7 +3661,7 @@ const FFlogo ffLogoBuiltins[] = {
     },
     // UbuntuBudgie
     {
-        .names = {"ubuntu-budgie"},
+        .names = {"ubuntu budgie", "ubuntu-budgie"},
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_BUDGIE,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -3494,6 +3726,17 @@ const FFlogo ffLogoBuiltins[] = {
         },
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
+    },
+    // UbuntuKde
+    {
+        .names = {"ubuntu kde", "ubuntu-kde", "ubuntu-plasma"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KUBUNTU,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // UbuntuSmall
     {
@@ -3622,6 +3865,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_256 "52",
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo V[] = {
     // Vanilla
     {
         .names = {"vanilla", "vanilla-os", "vanilla-linux"},
@@ -3685,6 +3933,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo W[] = {
     // WiiLinuxNgx
     {
         .names = {"WiiLinuxNgx"},
@@ -3759,6 +4012,11 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // LAST
+    {},
+};
+
+static const FFlogo X[] = {
     // Xferience
     {
         .names = {"Xferience"},
@@ -3768,6 +4026,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo Y[] = {
     // YiffOS
     {
         .names = {"YiffOS"},
@@ -3777,6 +4040,11 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_256 "92",
         },
     },
+    // LAST
+    {},
+};
+
+static const FFlogo Z[] = {
     // Zorin
     {
         .names = {"zorin", "zorin-linux", "zorinos", "zorinos-linux"},
@@ -3787,6 +4055,10 @@ const FFlogo ffLogoBuiltins[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // LAST
+    {},
 };
 
-const uint32_t ffLogoBuiltinLength = sizeof(ffLogoBuiltins) / sizeof(ffLogoBuiltins[0]);
+const FFlogo* ffLogoBuiltins[] = {
+    A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+};

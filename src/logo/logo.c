@@ -214,7 +214,7 @@ static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size)
     if (name->length == 0)
         return NULL;
 
-    for(const FFlogo* logo = ffLogoBuiltins; logo < ffLogoBuiltins + ffLogoBuiltinLength; ++logo)
+    for(const FFlogo* logo = ffLogoBuiltins[toupper(name->chars[0]) - 'A']; *logo->names; ++logo)
     {
         switch (size)
         {
@@ -259,7 +259,7 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size)
     if(logo != NULL)
         return logo;
 
-    return &ffLogoBuiltins[0]; // Unknown
+    return &ffLogoUnknown;
 }
 
 static inline void logoApplyColorsDetected(void)
@@ -507,42 +507,52 @@ void ffLogoBuiltinPrint(void)
 {
     FFLogoOptions* options = &instance.config.logo;
 
-    for(const FFlogo* logo = ffLogoBuiltins; logo < ffLogoBuiltins + ffLogoBuiltinLength; ++logo)
+    for(uint8_t ch = 0; ch < 26; ++ch)
     {
-        printf("\033[%sm%s:\033[0m\n", logo->colors[0], logo->names[0]);
-        logoPrintStruct(logo);
-        ffLogoPrintRemaining();
+        for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
+        {
+            printf("\033[%sm%s:\033[0m\n", logo->colors[0], logo->names[0]);
+            logoPrintStruct(logo);
+            ffLogoPrintRemaining();
 
-        //reset everything
-        instance.state.logoHeight = 0;
-        instance.state.keysHeight = 0;
-        for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
-            ffStrbufClear(&options->colors[i]);
+            //reset everything
+            instance.state.logoHeight = 0;
+            instance.state.keysHeight = 0;
+            for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
+                ffStrbufClear(&options->colors[i]);
 
-        putchar('\n');
+            putchar('\n');
+        }
     }
 }
 
 void ffLogoBuiltinList(void)
 {
-    for(uint32_t counter = 0; counter < ffLogoBuiltinLength; ++counter)
+    uint32_t counter = 0;
+    for(uint8_t ch = 0; ch < 26; ++ch)
     {
-        const FFlogo* logo = &ffLogoBuiltins[counter];
-        printf("%u)%s ", counter, counter < 10 ? " " : "");
+        for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
+        {
+            ++counter;
+            printf("%u)%s ", counter, counter < 10 ? " " : "");
 
-        for(
-            const char* const* names = logo->names;
-            *names != NULL && names <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
-            ++names
-        )
-            printf("\"%s\" ", *names);
+            for(
+                const char* const* names = logo->names;
+                *names != NULL && names <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
+                ++names
+            )
+                printf("\"%s\" ", *names);
 
-        putchar('\n');
+            putchar('\n');
+        }
     }
 }
 
 void ffLogoBuiltinListAutocompletion(void)
 {
-    for(const FFlogo* logo = ffLogoBuiltins; logo < ffLogoBuiltins + ffLogoBuiltinLength; ++logo)
-        printf("%s\n", logo->names[0]);
+    for(uint8_t ch = 0; ch < 26; ++ch)
+    {
+        for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
+            printf("%s\n", logo->names[0]);
+    }
 }
