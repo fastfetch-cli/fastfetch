@@ -2239,71 +2239,6 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // Windows11
-    {
-        .names = {"Windows 11", "Windows Server 2022"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_11,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_BLUE,
-        },
-        .colorKeys = FF_COLOR_FG_YELLOW,
-        .colorTitle = FF_COLOR_FG_CYAN,
-    },
-    // Windows11Small
-    {
-        .names = {"Windows 11_small", "Windows 11-small"},
-        .small = true,
-        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_11_SMALL,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-        },
-        .colorKeys = FF_COLOR_FG_YELLOW,
-        .colorTitle = FF_COLOR_FG_CYAN,
-    },
-    // Windows8
-    {
-        .names = {"Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_8,
-        .colors = {
-            FF_COLOR_FG_CYAN,
-            FF_COLOR_FG_CYAN,
-            FF_COLOR_FG_CYAN,
-            FF_COLOR_FG_CYAN,
-        },
-        .colorKeys = FF_COLOR_FG_YELLOW,
-        .colorTitle = FF_COLOR_FG_WHITE,
-    },
-    // Windows
-    {
-        .names = {"Windows", "Windows 7", "Windows Server 2008", "Windows Server 2008 R2"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_YELLOW,
-        },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_GREEN,
-    },
-    // Windows95
-    {
-        .names = {"Windows 95", "Windows 9x"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_95,
-        .colors = {
-            FF_COLOR_FG_CYAN,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_BLACK,
-        },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_BLUE,
-    },
     // NixOS
     {
         .names = {"NixOS", "nix", "nixos-linux", "nix-linux", "nix-os", "nix_os", "nix_os_linux"},
@@ -3172,6 +3107,15 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Salix
+    {
+        .names = {"Salix"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SALIX,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_GREEN,
+        },
+    },
     // SambaBOX
     {
         .names = {"SambaBOX", "Profelis SambaBOX"},
@@ -3749,6 +3693,71 @@ const FFlogo ffLogoBuiltins[] = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,
         },
+    },
+    // Windows11
+    {
+        .names = {"Windows 11", "Windows Server 2022"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_11,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // Windows11Small
+    {
+        .names = {"Windows 11_small", "Windows 11-small"},
+        .small = true,
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_11_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // Windows8
+    {
+        .names = {"Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_8,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // Windows
+    {
+        .names = {"Windows", "Windows 7", "Windows Server 2008", "Windows Server 2008 R2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // Windows95
+    {
+        .names = {"Windows 95", "Windows 9x"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_95,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // Xferience
     {
