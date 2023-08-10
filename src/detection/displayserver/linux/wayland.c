@@ -8,9 +8,11 @@
 #include "common/library.h"
 #include "common/io/io.h"
 #include "common/thread.h"
+#include "util/edidHelper.h"
 #include <wayland-client.h>
 #include <sys/socket.h>
 #include <assert.h>
+#include <dirent.h>
 
 typedef struct WaylandData
 {
@@ -34,6 +36,7 @@ typedef struct WaylandDisplay
     FFstrbuf name;
     FFstrbuf description;
     FFstrbuf vendorAndModelId;
+    FFstrbuf edidName;
 } WaylandDisplay;
 
 #ifndef __FreeBSD__
@@ -96,6 +99,46 @@ static void waylandOutputGeometryListener(void *data,
     ffStrbufAppendS(&display->vendorAndModelId, model);
 }
 
+static bool matchDrmConnector(const char* wlName, FFstrbuf* edidName)
+{
+    // https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output-event-name
+    // The doc says that "do not assume that the name is a reflection of an underlying DRM connector, X11 connection, etc."
+    // However I can't find a better method to get the edid data
+    const char* drmDirPath = "/sys/class/drm/";
+
+    DIR* dirp = opendir(drmDirPath);
+    if(dirp == NULL)
+        return false;
+
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        const char* plainName = entry->d_name;
+        if (ffStrStartsWith(plainName, "card"))
+        {
+            const char* tmp = strchr(plainName + strlen("card"), '-');
+            if (tmp) plainName = tmp + 1;
+        }
+        if (ffStrEquals(plainName, wlName))
+        {
+            ffStrbufAppendF(edidName, "%s%s/edid", drmDirPath, entry->d_name);
+
+            uint8_t edidData[128];
+            if(ffReadFileData(edidName->chars, sizeof(edidData), edidData) == sizeof(edidData))
+            {
+                ffStrbufClear(edidName);
+                ffEdidGetName(edidData, edidName);
+                closedir(dirp);
+                return true;
+            }
+            break;
+        }
+    }
+    ffStrbufClear(edidName);
+    closedir(dirp);
+    return false;
+}
+
 static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
 {
     WaylandDisplay* display = data;
@@ -103,6 +146,7 @@ static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_outp
         display->type = FF_DISPLAY_TYPE_BUILTIN;
     else if(ffStrStartsWith(name, "HDMI-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
+    matchDrmConnector(name, &display->edidName);
     ffStrbufAppendS(&display->name, name);
 }
 
@@ -130,6 +174,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
     ffStrbufInit(&display.name);
     ffStrbufInit(&display.description);
     ffStrbufInit(&display.vendorAndModelId);
+    ffStrbufInit(&display.edidName);
 
     // Dirty hack for #477
     // The order of these callbacks MUST follow `struct wl_output_listener`
@@ -198,10 +243,12 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
         rotation,
-        display.description.length
-            ? &display.description
-            : display.vendorAndModelId.length
-                ? &display.vendorAndModelId : &display.name,
+        display.edidName.length
+            ? &display.edidName
+            : display.description.length
+                ? &display.description
+                : display.vendorAndModelId.length
+                    ? &display.vendorAndModelId : &display.name,
         display.type,
         false,
         0
@@ -210,6 +257,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.vendorAndModelId);
     ffStrbufDestroy(&display.name);
+    ffStrbufDestroy(&display.edidName);
 
     ffThreadMutexUnlock(&mutex);
 }
