@@ -1,5 +1,6 @@
 #include "brightness.h"
 #include "common/io/io.h"
+#include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
 #include <dirent.h>
@@ -45,9 +46,29 @@ static const char* detectWithBacklight(FFlist* result)
                 if(realpath(backlightDir.chars, brightness->name.chars))
                 {
                     ffStrbufRecalculateLength(&brightness->name);
-                    ffStrbufSubstrAfterLastC(&brightness->name, '/');
-                    if(ffStrbufStartsWithS(&brightness->name, "card") && isdigit(brightness->name.chars[4]))
-                        ffStrbufSubstrAfterFirstC(&brightness->name, '-');
+                    // if we managed to get edid, use it
+                    ffStrbufAppendS(&brightness->name, "/edid");
+                    uint8_t edidData[128];
+                    if(ffReadFileData(brightness->name.chars, sizeof(edidData), edidData) == sizeof(edidData))
+                    {
+                        ffStrbufClear(&brightness->name);
+                        ffEdidGetName(edidData, &brightness->name);
+                    }
+                    else
+                    {
+                        ffStrbufSubstrBeforeLastC(&brightness->name, '/'); // remove "/edid"
+                        ffStrbufSubstrAfterLastC(&brightness->name, '/'); // try getting DRM connector name
+                        if(ffStrbufStartsWithS(&brightness->name, "0000:"))
+                        {
+                            // PCI address, give up
+                            ffStrbufSetS(&brightness->name, entry->d_name);
+                        }
+                        else
+                        {
+                            if(ffStrbufStartsWithS(&brightness->name, "card") && isdigit(brightness->name.chars[4]))
+                                ffStrbufSubstrAfterFirstC(&brightness->name, '-');
+                        }
+                    }
                 }
                 else
                     ffStrbufInitS(&brightness->name, entry->d_name);
@@ -69,44 +90,6 @@ static const char* detectWithBacklight(FFlist* result)
 #include "util/mallocHelper.h"
 
 #include <ddcutil_c_api.h>
-
-static bool findDrmByEdid(const uint8_t srcEdidData[128], FFstrbuf* result)
-{
-    const char* drmDirPath = "/sys/class/drm/";
-
-    DIR* dirp = opendir(drmDirPath);
-    if(dirp == NULL)
-        return false;
-
-    FF_STRBUF_AUTO_DESTROY drmDir = ffStrbufCreateA(64);
-    ffStrbufAppendS(&drmDir, drmDirPath);
-
-    uint32_t drmDirLength = drmDir.length;
-
-    struct dirent* entry;
-    while((entry = readdir(dirp)) != NULL)
-    {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
-            continue;
-
-        ffStrbufAppendS(&drmDir, entry->d_name);
-        ffStrbufAppendS(&drmDir, "/edid");
-
-        uint8_t edidData[128];
-        if(ffReadFileData(drmDir.chars, sizeof(edidData), edidData) != sizeof(edidData))
-        {
-            ffStrbufSubstrBefore(&drmDir, drmDirLength);
-            continue;
-        }
-        if (memcmp(srcEdidData, edidData, sizeof(edidData)) == 0)
-        {
-            ffStrbufAppendS(result, entry->d_name);
-            closedir(dirp);
-            return true;
-        }
-    }
-    return false;
-}
 
 static const char* detectWithDdcci(FFlist* result)
 {
@@ -141,16 +124,7 @@ static const char* detectWithDdcci(FFlist* result)
 
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
                 brightness->value = (float) current * 100.f / (float) max;
-                ffStrbufInit(&brightness->name);
-                if (findDrmByEdid(display->edid_bytes, &brightness->name))
-                {
-                    if (ffStrbufStartsWithS(&brightness->name, "card"))
-                        ffStrbufSubstrAfterFirstC(&brightness->name, '-');
-                }
-                else
-                {
-                    ffStrbufAppendS(&brightness->name, display->model_name);
-                }
+                ffStrbufInitS(&brightness->name, display->model_name);
             }
             ffddca_close_display(handle);
         }
