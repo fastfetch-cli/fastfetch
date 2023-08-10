@@ -1,4 +1,6 @@
 #include "displayserver_linux.h"
+#include "common/io/io.h"
+#include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
 #include <dirent.h>
@@ -37,14 +39,25 @@ static void parseDRM(FFDisplayServerResult* result)
         int scanned = fscanf(modeFile, "%ux%u", &width, &height);
         if(scanned == 2 && width > 0 && height > 0)
         {
-            const char* plainName = entry->d_name;
-            if (ffStrStartsWith(plainName, "card"))
+            ffStrbufSubstrBefore(&drmDir, drmDirLength);
+            ffStrbufAppendS(&drmDir, entry->d_name);
+            ffStrbufAppendS(&drmDir, "/edid");
+
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+            uint8_t edidData[128];
+            if(ffReadFileData(drmDir.chars, sizeof(edidData), edidData) == sizeof(edidData))
+                ffEdidGetName(edidData, &name);
+            else
             {
-                const char* tmp = strchr(plainName + strlen("card"), '-');
-                if (tmp) plainName = tmp + 1;
+                const char* plainName = entry->d_name;
+                if (ffStrStartsWith(plainName, "card"))
+                {
+                    const char* tmp = strchr(plainName + strlen("card"), '-');
+                    if (tmp) plainName = tmp + 1;
+                }
+                ffStrbufAppendS(&name, plainName);
             }
 
-            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(plainName);
             ffdsAppendDisplay(
                 result,
                 width, height,
