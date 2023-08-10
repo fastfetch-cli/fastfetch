@@ -283,15 +283,17 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
 
     xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen("EDID"), "EDID");
     FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
-
-    xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
-    FF_AUTO_FREE xcb_randr_get_output_property_reply_t* outputPropertyReply = data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
-    if(outputPropertyReply)
+    if(requestAtomReply)
     {
-        if(data->ffxcb_randr_get_output_property_data_length(outputPropertyReply) >= 128)
+        xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
+        FF_AUTO_FREE xcb_randr_get_output_property_reply_t* outputPropertyReply = data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
+        if(outputPropertyReply)
         {
-            ffStrbufClear(name);
-            ffEdidGetName(data->ffxcb_randr_get_output_property_data(outputPropertyReply), name);
+            if(data->ffxcb_randr_get_output_property_data_length(outputPropertyReply) >= 128)
+            {
+                ffStrbufClear(name);
+                ffEdidGetName(data->ffxcb_randr_get_output_property_data(outputPropertyReply), name);
+            }
         }
     }
 

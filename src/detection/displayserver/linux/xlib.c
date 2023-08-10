@@ -109,16 +109,20 @@ void ffdsConnectXlib(FFDisplayServerResult* result)
 #endif //FF_HAVE_X11
 
 #ifdef FF_HAVE_XRANDR
+#include "util/edidHelper.h"
 #include <X11/extensions/Xrandr.h>
 
 typedef struct XrandrData
 {
+    FF_LIBRARY_SYMBOL(XInternAtom)
+    FF_LIBRARY_SYMBOL(XGetAtomName);
     FF_LIBRARY_SYMBOL(XRRGetScreenInfo)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentConfiguration)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
     FF_LIBRARY_SYMBOL(XRRGetMonitors)
     FF_LIBRARY_SYMBOL(XRRGetScreenResources)
     FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
+    FF_LIBRARY_SYMBOL(XRRGetOutputProperty)
     FF_LIBRARY_SYMBOL(XRRGetCrtcInfo)
     FF_LIBRARY_SYMBOL(XRRFreeCrtcInfo)
     FF_LIBRARY_SYMBOL(XRRFreeOutputInfo)
@@ -149,7 +153,7 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
     return data->defaultRefreshRate;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, bool primary)
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -184,7 +188,7 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, bool primary)
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
         rotation,
-        NULL,
+        name,
         FF_DISPLAY_TYPE_UNKNOWN,
         primary,
         0
@@ -194,13 +198,27 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, bool primary)
     return res;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output, bool primary)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary)
 {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
     if(outputInfo == NULL)
         return false;
 
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc, primary);
+    Atom atomEdid = data->ffXInternAtom(data->display, "EDID", true);
+    if (atomEdid != None)
+    {
+        unsigned long nitems = 0;
+        uint8_t* edidData = NULL;
+        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, 0, 0, AnyPropertyType, NULL, NULL, &nitems, NULL, &edidData) == Success)
+        {
+            if (nitems >= 128)
+            {
+                ffStrbufClear(name);
+                ffEdidGetName(edidData, name);
+            }
+        }
+    }
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary);
 
     data->ffXRRFreeOutputInfo(outputInfo);
 
@@ -211,9 +229,10 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
     bool foundOutput = false;
 
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(data->ffXGetAtomName(data->display, monitorInfo->name));
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i], monitorInfo->primary))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary))
             foundOutput = true;
     }
 
@@ -225,7 +244,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
         data->defaultRotation,
-        NULL,
+        &name,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitorInfo->primary,
         0
@@ -320,12 +339,15 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
 
     XrandrData data;
 
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XInternAtom,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XGetAtomName,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenInfo,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentConfiguration,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResources,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputProperty,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetCrtcInfo,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeCrtcInfo,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeOutputInfo,);
