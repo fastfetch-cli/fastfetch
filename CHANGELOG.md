@@ -13,6 +13,7 @@ Changes:
 * Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format` (TerminalFont)
 * Module `Command` uses `/bin/sh` as the default shell on systems other than Windows (Command)
 * Fix M2 CPU temperature detection (CPU, macOS)
+* Detect monitor name when available, instead of using DRM connector name (Display / Brightness, Linux)
 
 Features:
 * FreeBSD support is improved greatly, and actually tested in a physical machine
