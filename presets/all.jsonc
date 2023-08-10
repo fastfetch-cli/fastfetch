@@ -15,6 +15,7 @@
         "shell",
         "display",
         "brightness",
+        "monitor",
         "lm",
         "de",
         "wm",
