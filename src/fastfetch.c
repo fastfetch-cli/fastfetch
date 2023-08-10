@@ -1200,6 +1200,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintBreak();
             if(ffStrEqualsIgnCase(line, FF_BRIGHTNESS_MODULE_NAME))
                 return ffPrintBrightness(&instance.config.brightness);
+            break;
         case 'C':
             if(ffStrEqualsIgnCase(line, FF_CHASSIS_MODULE_NAME))
                 return ffPrintChassis(&instance.config.chassis);
@@ -1215,6 +1216,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintCursor(&instance.config.cursor);
             if(ffStrEqualsIgnCase(line, FF_CUSTOM_MODULE_NAME))
                 return ffPrintCustom(&instance.config.custom);
+            break;
         case 'D':
             if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
                 return ffPrintDateTime(&instance.config.dateTime);
@@ -1224,23 +1226,29 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintDisplay(&instance.config.display);
             if(ffStrEqualsIgnCase(line, FF_DISK_MODULE_NAME))
                 return ffPrintDisk(&instance.config.disk);
+            break;
         case 'F':
             if(ffStrEqualsIgnCase(line, FF_FONT_MODULE_NAME))
                 return ffPrintFont(&instance.config.font);
+            break;
         case 'G':
             if(ffStrEqualsIgnCase(line, FF_GAMEPAD_MODULE_NAME))
                 return ffPrintGamepad(&instance.config.gamepad);
             if(ffStrEqualsIgnCase(line, FF_GPU_MODULE_NAME))
                 return ffPrintGPU(&instance.config.gpu);
+            break;
         case 'H':
             if(ffStrEqualsIgnCase(line, FF_HOST_MODULE_NAME))
                 return ffPrintHost(&instance.config.host);
+            break;
         case 'I':
             if(ffStrEqualsIgnCase(line, FF_ICONS_MODULE_NAME))
                 return ffPrintIcons(&instance.config.icons);
+            break;
         case 'K':
             if(ffStrEqualsIgnCase(line, FF_KERNEL_MODULE_NAME))
                 return ffPrintKernel(&instance.config.kernel);
+            break;
         case 'L':
             if(ffStrEqualsIgnCase(line, FF_LM_MODULE_NAME))
                 return ffPrintLM(&instance.config.lm);
@@ -1248,6 +1256,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintLocale(&instance.config.locale);
             if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))
                 return ffPrintLocalIp(&instance.config.localIP);
+            break;
         case 'M':
             if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
                 return ffPrintMedia(&instance.config.media);
@@ -1255,6 +1264,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintMemory(&instance.config.memory);
             if(ffStrEqualsIgnCase(line, FF_MONITOR_MODULE_NAME))
                 return ffPrintMonitor(&instance.config.nativeResolution);
+            break;
         case 'O':
             if(ffStrEqualsIgnCase(line, FF_OPENCL_MODULE_NAME))
                 return ffPrintOpenCL(&instance.config.openCL);
@@ -1262,6 +1272,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintOpenGL(&instance.config.openGL);
             if(ffStrEqualsIgnCase(line, FF_OS_MODULE_NAME))
                 return ffPrintOS(&instance.config.os);
+            break;
         case 'P':
             if(ffStrEqualsIgnCase(line, FF_PACKAGES_MODULE_NAME))
                 return ffPrintPackages(&instance.config.packages);
@@ -1273,6 +1284,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintProcesses(&instance.config.processes);
             if(ffStrEqualsIgnCase(line, FF_PUBLICIP_MODULE_NAME))
                 return ffPrintPublicIp(&instance.config.publicIP);
+            break;
         case 'S':
             if(ffStrEqualsIgnCase(line, FF_SEPARATOR_MODULE_NAME))
                 return ffPrintSeparator(&instance.config.separator);
@@ -1282,6 +1294,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintSound(&instance.config.sound);
             if(ffStrEqualsIgnCase(line, FF_SWAP_MODULE_NAME))
                 return ffPrintSwap(&instance.config.swap);
+            break;
         case 'T':
             if(ffStrEqualsIgnCase(line, FF_TERMINAL_MODULE_NAME))
                 return ffPrintTerminal(&instance.config.terminal);
@@ -1293,14 +1306,17 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintTitle(&instance.config.title);
             if(ffStrEqualsIgnCase(line, FF_THEME_MODULE_NAME))
                 return ffPrintTheme(&instance.config.theme);
+            break;
         case 'U':
             if(ffStrEqualsIgnCase(line, FF_UPTIME_MODULE_NAME))
                 return ffPrintUptime(&instance.config.uptime);
             if(ffStrEqualsIgnCase(line, FF_USERS_MODULE_NAME))
                 return ffPrintUsers(&instance.config.users);
+            break;
         case 'V':
             if(ffStrEqualsIgnCase(line, FF_VULKAN_MODULE_NAME))
                 return ffPrintVulkan(&instance.config.vulkan);
+            break;
         case 'W':
             if(ffStrEqualsIgnCase(line, FF_WALLPAPER_MODULE_NAME))
                 return ffPrintWallpaper(&instance.config.wallpaper);
@@ -1312,6 +1328,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintWM(&instance.config.wm);
             if(ffStrEqualsIgnCase(line, FF_WMTHEME_MODULE_NAME))
                 return ffPrintWMTheme(&instance.config.wmTheme);
+            break;
     }
     ffPrintErrorString(line, 0, NULL, NULL, "<no implementation provided>");
 }
