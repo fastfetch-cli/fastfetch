@@ -49,7 +49,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                         {
                             if (screen == mainScreen) continue;
                             NSNumber* screenNumber = [screen.deviceDescription valueForKey:@"NSScreenNumber"];
-                            if (screenNumber && screenNumber.longValue == 1)
+                            if (screenNumber && screenNumber.longValue == (long) display->id)
                             {
                                 monitor->hdrCompatible = screen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
                                 break;
@@ -120,7 +120,7 @@ static const char* detectWithDdcci(FFlist* results)
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
         ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
-        monitor->hdrCompatible = false;
+        display->hdrCompatible = false;
     }
     return NULL;
 }
