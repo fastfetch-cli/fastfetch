@@ -19,8 +19,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
     if(CGGetOnlineDisplayList(sizeof(screens) / sizeof(screens[0]), screens, &screenCount) != kCGErrorSuccess)
         return;
 
-    CGDirectDisplayID primary = CGMainDisplayID();
-
     for(uint32_t i = 0; i < screenCount; i++)
     {
         CGDirectDisplayID screen = screens[i];
@@ -63,7 +61,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 (uint32_t)CGDisplayRotation(screen),
                 &name,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
-                screen == primary,
+                CGDisplayIsMain(screen),
                 (uint64_t)screen
             );
             CGDisplayModeRelease(mode);
@@ -103,9 +101,20 @@ static void detectWMPlugin(FFstrbuf* name)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufInitStatic(&ds->wmProcessName, "WindowServer");
-    ffStrbufInitStatic(&ds->wmPrettyName, "Quartz Compositor");
-    ffStrbufInit(&ds->wmProtocolName);
+    {
+        FF_CFTYPE_AUTO_RELEASE CFMachPortRef port = CGWindowServerCreateServerPort();
+        if (port)
+        {
+            ffStrbufInitStatic(&ds->wmProcessName, "WindowServer");
+            ffStrbufInitStatic(&ds->wmPrettyName, "Quartz Compositor");
+        }
+        else
+        {
+            ffStrbufInit(&ds->wmProcessName);
+            ffStrbufInit(&ds->wmPrettyName);
+        }
+    }
+    ffStrbufInitStatic(&ds->wmProtocolName, "Core Graphics");
 
     if(instance.config.allowSlowOperations)
     {
