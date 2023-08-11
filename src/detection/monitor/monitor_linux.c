@@ -3,8 +3,10 @@
 #include "common/io/io.h"
 #include "util/edidHelper.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 
 #include <dirent.h>
+#include <sys/stat.h>
 
 const char* ffDetectMonitor(FFlist* results)
 {
@@ -28,7 +30,14 @@ const char* ffDetectMonitor(FFlist* results)
         ffStrbufAppendS(&drmDir, entry->d_name);
         ffStrbufAppendS(&drmDir, "/edid");
 
-        uint8_t edidData[128];
+        struct stat fileStat;
+        if (stat(drmDir.chars, &fileStat) < 0 || fileStat.st_size == 0 || fileStat.st_size % 128 != 0)
+        {
+            ffStrbufSubstrBefore(&drmDir, drmDirLength);
+            continue;
+        }
+
+        FF_AUTO_FREE uint8_t* edidData = malloc((size_t) fileStat.st_size);
         if(ffReadFileData(drmDir.chars, sizeof(edidData), edidData) != sizeof(edidData))
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
@@ -45,6 +54,7 @@ const char* ffDetectMonitor(FFlist* results)
             ffStrbufInit(&display->name);
             ffEdidGetName(edidData, &display->name);
             ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
+            display->hdrCompatible = ffEdidGetHdrCompatible(edidData, (uint32_t) fileStat.st_size);
         }
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
