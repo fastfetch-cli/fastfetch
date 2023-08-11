@@ -72,3 +72,10 @@ If you cannot do the instructions above, please upload the core dump file:
 * The terminal you used: 
 * Upload the image file here, or paste the image URL: 
 * Does it work with `--logo-width {WIDTH} --logo-height {HEIGHT}`? 
+
+## If fastfetch behaves incorrectly on shell starting
+
+<!-- There are known imcompatibility between fastfetch and p10k instant prompt. The p10k doc clearly states that you should NOT print anything to stdout after p10k-instant-prompt is initialized. You should either put `fastfetch` before initialization of p10k-instant-prompt (recommended), remove it or use `fastfetch --pipe false` -->
+
+* The bug is reproduceable with fresh / clean shell configuration (i.e. `fastfetch` is the single line of `.zshrc` or `~/.config/fish/config.fish`): 
+* Does `sleep 1` before running `fastfetch` work? 
