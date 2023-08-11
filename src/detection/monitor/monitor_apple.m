@@ -106,11 +106,13 @@ static const char* detectWithDdcci(FFlist* results)
         if (IOAVServiceCopyEDID(service, &edid) != KERN_SUCCESS)
             continue;
 
-        if (CFDataGetLength(edid) < 128)
+        uint32_t edidLength = (uint32_t) CFDataGetLength(edid);
+        if (edidLength == 0 || edidLength % 128 != 0)
             continue;
 
         uint32_t width, height;
         const uint8_t* edidData = CFDataGetBytePtr(edid);
+
         ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
 
@@ -120,7 +122,7 @@ static const char* detectWithDdcci(FFlist* results)
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
         ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
-        display->hdrCompatible = false;
+        display->hdrCompatible = ffEdidGetHdrCompatible(edidData, edidLength);
     }
     return NULL;
 }

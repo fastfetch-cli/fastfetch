@@ -49,3 +49,32 @@ void ffEdidGetPhysicalSize(const uint8_t edid[128], uint32_t* width, uint32_t* h
     *width = (((uint32_t) edid[68] & 0xF0) << 4) + edid[66];
     *height = (((uint32_t) edid[68] & 0x0F) << 8) + edid[67];
 }
+
+bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length)
+{
+    if (length <= 128) return false;
+    for (const uint8_t* cta = &edid[128]; cta < &edid[length]; cta += 128)
+    {
+        // https://en.wikipedia.org/wiki/Extended_Display_Identification_Data#CTA_EDID_Timing_Extension_Block
+        if (cta[0] != 0x02 /* CTA EDID */) continue;
+        if (cta[1] < 0x03 /* Version 3 */) continue;
+        const uint8_t offset = cta[2];
+        if (offset <= 4) continue;
+        for (uint8_t i = 4; i < offset;)
+        {
+            uint8_t blkLen = cta[i] & 0x1f;
+            if (blkLen > 0)
+            {
+                uint8_t blkTag = (cta[i] & 0xe0) >> 5;
+                if (blkTag == 0x07 /* Extended Block Type Tag */)
+                {
+                    uint8_t extendedTag = cta[i + 1];
+                    if (extendedTag == 6 /* HDR SMDB */ || extendedTag == 7 /* HDR DMDB */)
+                        return true;
+                }
+            }
+            i += blkLen + 1;
+        }
+    }
+    return false;
+}
