@@ -2656,17 +2656,6 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
-    // OpenSuseTumbleweed2
-    {
-        .names = {"opensuse_tumbleweed2"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED2,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
-    },
     // OpenMandriva
     {
         .names = {"openmandriva", "open-mandriva", "open_mandriva"},
