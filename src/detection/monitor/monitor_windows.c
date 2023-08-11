@@ -2,6 +2,7 @@
 
 #include "common/io/io.h"
 #include "util/edidHelper.h"
+#include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 #include "util/windows/registry.h"
 #include "util/windows/unicode.h"
@@ -30,8 +31,12 @@ const char* ffDetectMonitor(FFlist* results)
         FF_HKEY_AUTO_DESTROY hKey = SetupDiOpenDevRegKey(hdev, &did, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
         if (!hKey) continue;
 
-        uint8_t edidData[256] = {};
-        if (!ffRegReadData(hKey, L"EDID", edidData, sizeof(edidData), NULL)) continue;
+        FF_AUTO_FREE uint8_t* edidData = NULL;
+        uint32_t edidLength = 0;
+        if (!ffRegReadData(hKey, L"EDID", &edidData, &edidLength, NULL)) continue;
+        if (edidLength == 0 || edidLength % 128 != 0)
+            continue;
+
         uint32_t width, height;
         ffEdidGetPhysicalResolution(edidData, &width, &height);
         if (width == 0 || height == 0) continue;
@@ -39,6 +44,7 @@ const char* ffDetectMonitor(FFlist* results)
         FFMonitorResult* display = (FFMonitorResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
+        display->hdrCompatible = ffEdidGetHdrCompatible(edidData, edidLength); // Doesn't work. edidLength is always 128
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
         ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);

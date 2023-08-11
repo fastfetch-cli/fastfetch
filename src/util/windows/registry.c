@@ -64,10 +64,25 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
     return true;
 }
 
-bool ffRegReadData(HKEY hKey, const wchar_t* valueNameW, uint8_t* result, uint32_t bufSize, FFstrbuf* error)
+bool ffRegReadData(HKEY hKey, const wchar_t* valueNameW, uint8_t** result, uint32_t* length, FFstrbuf* error)
 {
-    static_assert(sizeof(DWORD) == sizeof(uint32_t), "");
-    LONG err = RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_BINARY, NULL, result, (DWORD*) &bufSize);
+    assert(result && length);
+    DWORD bufSize = 0;
+    LONG err = RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_BINARY, NULL, NULL, &bufSize);
+    if(err != ERROR_SUCCESS || bufSize == 0)
+    {
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueW(%s, NULL, RRF_RT_REG_BINARY, NULL, NULL, &bufSize) failed", valueNameA.chars);
+        }
+        return false;
+    }
+
+    uint8_t* buf = (uint8_t*) malloc(bufSize);
+    err = RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_BINARY, NULL, buf, &bufSize);
     if(err != ERROR_SUCCESS)
     {
         if(error)
@@ -75,10 +90,13 @@ bool ffRegReadData(HKEY hKey, const wchar_t* valueNameW, uint8_t* result, uint32
             if(!valueNameW)
                 valueNameW = L"(default)";
             FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
-            ffStrbufAppendF(error, "RegGetValueW(%s, NULL, RRF_RT_REG_SZ) failed", valueNameA.chars);
+            ffStrbufAppendF(error, "RegGetValueW(%s, NULL, RRF_RT_REG_BINARY, NULL, length) failed", valueNameA.chars);
         }
+        free(buf);
         return false;
     }
+    *result = buf;
+    *length = bufSize;
     return true;
 }
 
