@@ -95,8 +95,11 @@ static void waylandOutputGeometryListener(void *data,
 {
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
-    ffStrbufAppendS(&display->vendorAndModelId, make);
-    ffStrbufAppendS(&display->vendorAndModelId, model);
+    if (make && !ffStrEqualsIgnCase(make, "unknown") && model && !ffStrEqualsIgnCase(model, "unknown"))
+    {
+        ffStrbufAppendS(&display->vendorAndModelId, make);
+        ffStrbufAppendS(&display->vendorAndModelId, model);
+    }
 }
 
 static bool matchDrmConnector(const char* wlName, FFstrbuf* edidName)
@@ -154,7 +157,8 @@ static void waylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED struct 
 {
     WaylandDisplay* display = data;
     while (*description == ' ') ++description;
-    ffStrbufAppendS(&display->description, description);
+    if (!ffStrEquals(description, "Unknown Display"))
+        ffStrbufAppendS(&display->description, description);
 }
 
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
