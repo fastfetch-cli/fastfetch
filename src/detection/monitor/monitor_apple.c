@@ -12,13 +12,13 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
 
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
-        if (display->type == FF_DISPLAY_TYPE_BUILTIN || display->type == FF_DISPLAY_TYPE_UNKNOWN)
+        if (display->type == FF_DISPLAY_TYPE_BUILTIN)
         {
             CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary((CGDirectDisplayID) display->id);
             if(displayInfo)
             {
                 int width, height;
-                if (ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelWidth"), &width) ||
+                if (ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelWidth"), &width) || // Default resolution (limited by connectors, GPUs, etc.)
                     ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelHeight"), &height) ||
                     width <= 0 || height <= 0)
                     continue;
@@ -26,11 +26,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                 FFMonitorResult* monitor = (FFMonitorResult*) ffListAdd(results);
                 monitor->width = (uint32_t) width;
                 monitor->height = (uint32_t) height;
-                ffStrbufInit(&monitor->name);
-
-                CFDictionaryRef productNames;
-                if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
-                    ffCfDictGetString(productNames, CFSTR("en_US"), &monitor->name);
+                ffStrbufInitCopy(&monitor->name, &display->name);
 
                 CGSize size = CGDisplayScreenSize((CGDirectDisplayID) display->id);
                 monitor->physicalWidth = (uint32_t) (size.width + 0.5);
@@ -80,7 +76,7 @@ static const char* detectWithDdcci(FFlist* results)
         if (!service) continue;
 
         FF_CFTYPE_AUTO_RELEASE CFDataRef edid = NULL;
-        if (IOAVServiceCopyEDID(service, &edid) != KERN_SUCCESS )
+        if (IOAVServiceCopyEDID(service, &edid) != KERN_SUCCESS)
             continue;
 
         if (CFDataGetLength(edid) < 128)
