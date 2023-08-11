@@ -114,7 +114,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
             ffStrbufInit(&ds->wmPrettyName);
         }
     }
-    ffStrbufInitStatic(&ds->wmProtocolName, "Core Graphics");
+    ffStrbufInit(&ds->wmProtocolName);
 
     if(instance.config.allowSlowOperations)
     {
