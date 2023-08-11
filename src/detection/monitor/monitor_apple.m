@@ -4,6 +4,9 @@
 #include "util/apple/ddcci.h"
 #include "util/edidHelper.h"
 
+#import <AppKit/NSScreen.h>
+#import <Foundation/Foundation.h>
+
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
 
 static const char* detectWithDisplayServices(const FFDisplayServerResult* displayServer, FFlist* results)
@@ -31,6 +34,30 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                 CGSize size = CGDisplayScreenSize((CGDirectDisplayID) display->id);
                 monitor->physicalWidth = (uint32_t) (size.width + 0.5);
                 monitor->physicalHeight = (uint32_t) (size.height + 0.5);
+                monitor->hdrCompatible = false;
+
+                if (CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance")))
+                    monitor->hdrCompatible = true;
+                else
+                {
+                    NSScreen* mainScreen = NSScreen.mainScreen;
+                    if (display->primary)
+                        monitor->hdrCompatible = mainScreen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
+                    else
+                    {
+                        for (NSScreen* screen in NSScreen.screens)
+                        {
+                            if (screen == mainScreen) continue;
+                            NSNumber* screenNumber = [screen.deviceDescription valueForKey:@"NSScreenNumber"];
+                            if (screenNumber && screenNumber.longValue == 1)
+                            {
+                                monitor->hdrCompatible = screen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                }
             }
         }
     }
@@ -93,6 +120,7 @@ static const char* detectWithDdcci(FFlist* results)
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
         ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
+        monitor->hdrCompatible = false;
     }
     return NULL;
 }
