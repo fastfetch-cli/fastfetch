@@ -37,6 +37,7 @@ Features:
 * Better CPU and Host detection for Android (Android)
 * Support yakuake terminal version & font detection (Terminal, Linux)
 * Add new option `--bright-color` which can be used to disable the default bright color of keys, title and ASCII logo.
+* Add module `Monitor` which prints physical parameters (native resolutions and demensions) of connected monitors
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)
