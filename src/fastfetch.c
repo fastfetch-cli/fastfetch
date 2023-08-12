@@ -861,10 +861,24 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             fprintf(stderr, "Error: usage: %s <key>=<str>\n", key);
             exit(477);
         }
-        FFCustomValue* customValue = (FFCustomValue*) ffListAdd(&data->customValues);
-        ffStrbufInitS(&customValue->value, &customValueStr.chars[index + 1]);
-        ffStrbufSubstrBefore(&customValueStr, index);
-        ffStrbufInitMove(&customValue->key, &customValueStr);
+
+        FF_STRBUF_AUTO_DESTROY customKey = ffStrbufCreateNS(index, customValueStr.chars);
+
+        FFCustomValue* customValue = NULL;
+        FF_LIST_FOR_EACH(FFCustomValue, x, data->customValues)
+        {
+            if(ffStrbufEqual(&x->key, &customKey))
+            {
+                ffStrbufDestroy(&x->key);
+                ffStrbufDestroy(&x->value);
+                customValue = x;
+                break;
+            }
+        }
+        if(!customValue) customValue = (FFCustomValue*) ffListAdd(&data->customValues);
+        ffStrbufInitMove(&customValue->key, &customKey);
+        ffStrbufSubstrAfter(&customValueStr, index);
+        ffStrbufInitMove(&customValue->value, &customValueStr);
         customValue->printKey = *subkey == '\0';
     }
 
