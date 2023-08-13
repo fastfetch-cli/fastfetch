@@ -38,6 +38,7 @@ Features:
 * Support yakuake terminal version & font detection (Terminal, Linux)
 * Add new option `--bright-color` which can be used to disable the default bright color of keys, title and ASCII logo.
 * Add module `Monitor` which prints physical parameters (native resolutions and demensions) of connected monitors
+* Support path with environment variables for `--logo-source` and `--load-config`.
 
 Bugfixes:
 * Fix possible hanging (TerminalFont, #493)

@@ -361,7 +361,7 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
 
     if(!ffAppendFileBuffer(options->source.chars, &content))
     {
-        fputs("Logo: Failed to load file content from logo source\n", stderr);
+        fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
         return false;
     }
 

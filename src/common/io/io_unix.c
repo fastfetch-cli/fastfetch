@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <poll.h>
 #include <dirent.h>
+#include <wordexp.h>
 
 static void createSubfolders(const char* fileName)
 {
@@ -109,7 +110,20 @@ bool ffPathExists(const char* path, FFPathType type)
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)
 {
-    return false;
+    bool result = false;
+    wordexp_t exp;
+    if(wordexp(in, &exp, WRDE_NOCMD) != 0)
+        return false;
+
+    if (exp.we_wordc == 1)
+    {
+        result = true;
+        ffStrbufSetS(out, exp.we_wordv[0]);
+    }
+
+    wordfree(&exp);
+
+    return result;
 }
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
