@@ -693,9 +693,16 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
     if(isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, value))
         return;
 
-    //Try to load as a relative path
-
     FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
+    if (ffPathExpandEnv(value, &absolutePath))
+    {
+        bool success = isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, absolutePath.chars);
+
+        if(success)
+            return;
+    }
+
+    //Try to load as a relative path
 
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {

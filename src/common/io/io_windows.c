@@ -98,6 +98,18 @@ bool ffPathExists(const char* path, FFPathType type)
     return false;
 }
 
+bool ffPathExpandEnv(const char* in, FFstrbuf* out)
+{
+    DWORD length = ExpandEnvironmentStringsA(in, NULL, 0);
+    if (length <= 1) return false;
+
+    ffStrbufClear(out);
+    ffStrbufEnsureFree(out, (uint32_t)length);
+    ExpandEnvironmentStringsA(in, out->chars, length);
+    out->length = (uint32_t)length - 1;
+    return true;
+}
+
 bool ffSuppressIO(bool suppress)
 {
     (void) suppress; //Not implemented.

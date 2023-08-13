@@ -107,6 +107,11 @@ bool ffPathExists(const char* path, FFPathType type)
     return false;
 }
 
+bool ffPathExpandEnv(const char* in, FFstrbuf* out)
+{
+    return false;
+}
+
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
     struct termios oldTerm, newTerm;

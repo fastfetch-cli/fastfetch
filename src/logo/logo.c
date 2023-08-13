@@ -332,6 +332,11 @@ static void updateLogoPath(void)
         return;
 
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
+    if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
+    {
+        ffStrbufSet(&options->source, &fullPath);
+        return;
+    }
 
     FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance.state.platform.dataDirs)
     {
