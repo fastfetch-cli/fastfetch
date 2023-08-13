@@ -3420,6 +3420,15 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    // Slackel
+    {
+        .names = {"Slackel"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SLACKEL,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_YELLOW,
+        },
+    },
     // Slackware
     {
         .names = {"slackware", "slackware-linux", "slackwarelinux"},
