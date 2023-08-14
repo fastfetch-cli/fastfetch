@@ -1,12 +1,16 @@
 #include "io.h"
 #include "util/stringUtils.h"
+#include "util/unused.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <termios.h>
 #include <poll.h>
 #include <dirent.h>
+
+#if __has_include(<wordexp.h>)
 #include <wordexp.h>
+#endif
 
 static void createSubfolders(const char* fileName)
 {
@@ -108,9 +112,12 @@ bool ffPathExists(const char* path, FFPathType type)
     return false;
 }
 
-bool ffPathExpandEnv(const char* in, FFstrbuf* out)
+bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* out)
 {
     bool result = false;
+
+    #if __has_include(<wordexp.h>) // https://github.com/termux/termux-packages/pull/7056
+
     wordexp_t exp;
     if(wordexp(in, &exp, WRDE_NOCMD) != 0)
         return false;
@@ -122,6 +129,8 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out)
     }
 
     wordfree(&exp);
+
+    #endif
 
     return result;
 }
