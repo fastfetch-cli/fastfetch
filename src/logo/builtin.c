@@ -988,7 +988,7 @@ static const FFlogo C[] = {
 };
 
 static const FFlogo D[] = {
-    // dahlia
+    // Dahlia
     {
         .names = {"dahlia"},
         .lines = FASTFETCH_DATATEXT_LOGO_DAHLIA,
@@ -1503,7 +1503,7 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
-    // gNewSense
+    // GNewSense
     {
         .names = {"gNewSense"},
         .lines = FASTFETCH_DATATEXT_LOGO_GNEWSENSE,
@@ -1761,7 +1761,7 @@ static const FFlogo I[] = {
 };
 
 static const FFlogo J[] = {
-    // januslinux
+    // Januslinux
     {
         .names = {"januslinux", "janus"},
         .lines = FASTFETCH_DATATEXT_LOGO_JANUSLINUX,
