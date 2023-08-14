@@ -825,11 +825,18 @@ elseif(BSD)
         PRIVATE "usbhid"
     )
 elseif(ANDROID)
-    CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
-    if(HAVE_LIBANDROID_WORDEXP)
+    CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
+    if(HAVE_LIBANDROID_WORDEXP_STATIC)
         target_link_libraries(libfastfetch
-            PRIVATE android-wordexp
+            PRIVATE -l:libandroid-wordexp.a
         )
+    else()
+        CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+        if(HAVE_LIBANDROID_WORDEXP)
+            target_link_libraries(libfastfetch
+                PRIVATE android-wordexp
+            )
+        endif()
     endif()
 endif()
 
