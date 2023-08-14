@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <yyjson.h>
+
+#include "3rdparty/yyjson/yyjson.h"
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"

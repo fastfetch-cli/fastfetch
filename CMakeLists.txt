@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
     VERSION 2.0.0
@@ -35,24 +35,6 @@ if(NOT PKG_CONFIG_FOUND)
 endif()
 
 include(CheckIncludeFile)
-
-include(FetchContent)
-function(ff_fetch_dep package repo tag)
-    FetchContent_Declare(
-        "${package}"
-        GIT_REPOSITORY "${repo}"
-        GIT_TAG "${tag}"
-        GIT_PROGRESS TRUE
-    )
-    FetchContent_GetProperties("${package}")
-    if(NOT ${package}_POPULATED)
-        message("-- Fetching dependency ${package}@${tag} from ${repo}")
-        FetchContent_Populate(${package})
-        add_subdirectory(${${package}_SOURCE_DIR} ${${package}_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
-endfunction()
-
-ff_fetch_dep(yyjson "https://github.com/ibireme/yyjson" "0.7.0")
 
 #####################
 # Configure options #
@@ -269,6 +251,7 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
+    src/3rdparty/yyjson/yyjson.c
     src/common/bar.c
     src/common/font.c
     src/common/format.c
@@ -847,7 +830,6 @@ target_include_directories(libfastfetch
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
-    PRIVATE yyjson
 )
 
 ######################
@@ -862,7 +844,6 @@ target_compile_definitions(fastfetch
 )
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
-    PRIVATE yyjson
 )
 
 add_executable(flashfetch
@@ -873,7 +854,6 @@ target_compile_definitions(flashfetch
 )
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
-    PRIVATE yyjson
 )
 
 if(WIN32)
