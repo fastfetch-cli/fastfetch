@@ -1,6 +1,6 @@
-# 2.0.0
+# 2.0.0 (beta)
 
-This release introduces a new configuration file format: JSON config. Please refer to 
+Fastfetch v2 introduces a new configuration file format: JSON config. Please refer to <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for details.
 
 Changes:
 * Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
