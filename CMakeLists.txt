@@ -630,11 +630,6 @@ if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 endif()
 
-CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
-if(HAVE_UTMPX_H)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
-endif()
-
 if(HAVE_WCWIDTH)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WCWIDTH)
 endif()
