@@ -824,6 +824,13 @@ elseif(BSD)
     target_link_libraries(libfastfetch
         PRIVATE "usbhid"
     )
+elseif(ANDROID)
+    CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+    if(HAVE_LIBANDROID_WORDEXP)
+        target_link_libraries(libfastfetch
+            PRIVATE android-wordexp
+        )
+    endif()
 endif()
 
 target_include_directories(libfastfetch
