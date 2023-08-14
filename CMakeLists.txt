@@ -630,11 +630,6 @@ if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 endif()
 
-CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
-if(HAVE_UTMPX_H)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
-endif()
-
 if(HAVE_WCWIDTH)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WCWIDTH)
 endif()
@@ -829,6 +824,20 @@ elseif(BSD)
     target_link_libraries(libfastfetch
         PRIVATE "usbhid"
     )
+elseif(ANDROID)
+    CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
+    if(HAVE_LIBANDROID_WORDEXP_STATIC)
+        target_link_libraries(libfastfetch
+            PRIVATE -l:libandroid-wordexp.a
+        )
+    else()
+        CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+        if(HAVE_LIBANDROID_WORDEXP)
+            target_link_libraries(libfastfetch
+                PRIVATE android-wordexp
+            )
+        endif()
+    endif()
 endif()
 
 target_include_directories(libfastfetch
