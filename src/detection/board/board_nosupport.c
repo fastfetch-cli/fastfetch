@@ -1,10 +1,6 @@
 #include "board.h"
 
-void ffDetectBoard(FFBoardResult* board)
+const char* ffDetectBoard(FF_MAYBE_UNUSED FFBoardResult* board)
 {
-    ffStrbufInitS(&board->error, "Not supported on this platform");
-
-    ffStrbufInit(&board->boardName);
-    ffStrbufInit(&board->boardVendor);
-    ffStrbufInit(&board->boardVersion);
+    return "Not supported on this platform";
 }

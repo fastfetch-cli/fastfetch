@@ -1,5 +1,6 @@
 #include "FFPlatform_private.h"
 #include "util/stringUtils.h"
+#include "common/io/io.h"
 
 void ffPlatformInit(FFPlatform* platform)
 {
@@ -68,55 +69,21 @@ void ffPlatformDestroy(FFPlatform* platform)
 
 void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path)
 {
-    FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
-    ffStrbufInitA(buffer, 64);
-    ffStrbufAppendS(buffer, path);
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
+    if (!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
+        return;
+
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateS(path);
+    ffStrbufEnsureEndsWithC(&buffer, '/');
+    if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
 }
 
 void ffPlatformPathAddHome(FFlist* dirs, const FFPlatform* platform, const char* suffix)
 {
-    FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
-    ffStrbufInitA(buffer, 64);
-    ffStrbufAppend(buffer, &platform->homeDir);
-    ffStrbufAppendS(buffer, suffix);
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
-}
-
-void ffPlatformPathAddEnv(FFlist* dirs, const char* env)
-{
-    const char* envValue = getenv(env);
-    if(!ffStrSet(envValue))
-        return;
-
-    FFstrbuf value;
-    ffStrbufInitA(&value, 64);
-    ffStrbufAppendS(&value, envValue);
-
-    uint32_t startIndex = 0;
-    while (startIndex < value.length)
-    {
-        #ifdef _WIN32
-        const char separator = ';';
-        #else
-        const char separator = ':';
-        #endif
-
-        uint32_t colonIndex = ffStrbufNextIndexC(&value, startIndex, separator);
-        value.chars[colonIndex] = '\0';
-
-        if(!ffStrSet(value.chars + startIndex))
-        {
-            startIndex = colonIndex + 1;
-            continue;
-        }
-
-        ffPlatformPathAddAbsolute(dirs, value.chars + startIndex);
-
-        startIndex = colonIndex + 1;
-    }
-
-    ffStrbufDestroy(&value);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateA(64);
+    ffStrbufAppend(&buffer, &platform->homeDir);
+    ffStrbufAppendS(&buffer, suffix);
+    ffStrbufEnsureEndsWithC(&buffer, '/');
+    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
 }

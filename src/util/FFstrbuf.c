@@ -16,35 +16,6 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate)
     ffStrbufClear(strbuf);
 }
 
-void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src)
-{
-    ffStrbufInitA(strbuf, src->allocated);
-    ffStrbufAppend(strbuf, src);
-}
-
-void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
-{
-    if (src)
-    {
-        strbuf->allocated = src->allocated;
-        strbuf->chars = src->chars;
-        strbuf->length = src->length;
-        ffStrbufInit(src);
-    }
-    else
-        ffStrbufInit(strbuf);
-}
-
-void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
-{
-    assert(format != NULL);
-
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufInitVF(strbuf, format, arguments);
-    va_end(arguments);
-}
-
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 {
     assert(format != NULL);
@@ -56,18 +27,9 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     strbuf->length = (uint32_t)len;
 }
 
-uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
-{
-    assert(strbuf != NULL);
-    if(strbuf->allocated == 0)
-        return 0;
-
-    return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
-}
-
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 {
-    if(ffStrbufGetFree(strbuf) >= free)
+    if(ffStrbufGetFree(strbuf) >= free && !(strbuf->allocated == 0 && strbuf->length > 0))
         return;
 
     uint32_t allocate = strbuf->allocated;
@@ -79,8 +41,12 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
 
     if(strbuf->allocated == 0)
     {
-        strbuf->chars = malloc(sizeof(*strbuf->chars) * allocate);
-        strbuf->chars[0] = '\0';
+        char* newbuf = malloc(sizeof(*strbuf->chars) * allocate);
+        if(strbuf->length == 0)
+            *newbuf = '\0';
+        else
+            memcpy(newbuf, strbuf->chars, strbuf->length + 1);
+        strbuf->chars = newbuf;
     }
     else
         strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * allocate);
@@ -236,7 +202,7 @@ void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 {
-    if(strbuf->length == 0) //`allocated == 0` implies `length == 0`
+    if(strbuf->length == 0)
         return;
 
     uint32_t index = 0;
@@ -245,6 +211,14 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 
     if(index == 0)
         return;
+
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        strbuf->length -= index;
+        strbuf->chars += index;
+        return;
+    }
 
     memmove(strbuf->chars, strbuf->chars + index, strbuf->length - index);
     strbuf->length -= index;
@@ -259,13 +233,14 @@ void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
     while(ffStrbufEndsWithC(strbuf, c))
         --strbuf->length;
 
-    strbuf->chars[strbuf->length] = '\0';
-}
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
+        return;
+    }
 
-void ffStrbufTrim(FFstrbuf* strbuf, char c)
-{
-    ffStrbufTrimRight(strbuf, c);
-    ffStrbufTrimLeft(strbuf, c);
+    strbuf->chars[strbuf->length] = '\0';
 }
 
 void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex)
@@ -279,6 +254,7 @@ void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endInd
         return;
     }
 
+    ffStrbufEnsureFree(strbuf, 0);
     memmove(strbuf->chars + startIndex, strbuf->chars + endIndex, strbuf->length - endIndex);
     strbuf->length -= (endIndex - startIndex);
     strbuf->chars[strbuf->length] = '\0';
@@ -292,24 +268,10 @@ void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str)
         ffStrbufRemoveSubstr(strbuf, i, i + stringLength);
 }
 
-void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
+void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[])
 {
     for(uint32_t i = 0; i < numStrings; i++)
         ffStrbufRemoveS(strbuf, strings[i]);
-}
-
-void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments)
-{
-    for(uint32_t i = 0; i < numStrings; i++)
-        ffStrbufRemoveS(strbuf, va_arg(arguments, const char*));
-}
-
-void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...)
-{
-    va_list argp;
-    va_start(argp, numStrings);
-    ffStrbufRemoveStringsV(strbuf, numStrings, argp);
-    va_end(argp);
 }
 
 uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
@@ -343,6 +305,10 @@ uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace)
 {
+    if (strbuf->length == 0)
+        return;
+
+    ffStrbufEnsureFree(strbuf, 0);
     for (char *current_pos = strchr(strbuf->chars, find); current_pos; current_pos = strchr(current_pos + 1, find))
         *current_pos = replace;
 }
@@ -352,18 +318,15 @@ void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
     if(strbuf->length <= index)
         return;
 
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
+        return;
+    }
+
     strbuf->length = index;
     strbuf->chars[strbuf->length] = '\0';
-}
-
-void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c)
-{
-    ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
-}
-
-void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c)
-{
-    ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
 }
 
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
@@ -371,6 +334,14 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
     if(index >= strbuf->length)
     {
         ffStrbufClear(strbuf);
+        return;
+    }
+
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        strbuf->length -= index;
+        strbuf->chars += index;
         return;
     }
 
@@ -459,12 +430,14 @@ uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
     return str_end == strbuf->chars || result > UINT16_MAX ? defaultValue : (uint16_t)result;
 }
 
-void ffStrbufDestroy(FFstrbuf* strbuf)
+void ffStrbufUpperCase(FFstrbuf* strbuf)
 {
-    if(strbuf->allocated == 0) return;
+    for (uint32_t i = 0; i < strbuf->length; ++i)
+        strbuf->chars[i] = (char) toupper(strbuf->chars[i]);
+}
 
-    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
-    strbuf->allocated = strbuf->length = 0;
-    free(strbuf->chars);
-    strbuf->chars = CHAR_NULL_PTR;
+void ffStrbufLowerCase(FFstrbuf* strbuf)
+{
+    for (uint32_t i = 0; i < strbuf->length; ++i)
+        strbuf->chars[i] = (char) tolower(strbuf->chars[i]);
 }

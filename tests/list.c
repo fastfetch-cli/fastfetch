@@ -87,6 +87,12 @@ int main(void)
     n = 999;
     VERIFY(ffListFirstIndexComp(&list, &n, numEqualsAdapter) == list.length);
 
+    // ffListContains
+    n = 10;
+    VERIFY(ffListContains(&list, &n, numEqualsAdapter));
+    n = 999;
+    VERIFY(!ffListContains(&list, &n, numEqualsAdapter));
+
     //shift
     VERIFY(ffListShift(&list, &n));
     VERIFY(n == 1);
@@ -107,6 +113,13 @@ int main(void)
     VERIFY(list.elementSize == sizeof(uint32_t));
     VERIFY(list.capacity == 0);
     VERIFY(list.length == 0);
+
+    {
+        FF_LIST_AUTO_DESTROY test = ffListCreate(1);
+        VERIFY(test.elementSize = 1);
+        VERIFY(test.capacity == 0);
+        VERIFY(test.length == 0);
+    }
 
     //Success
     puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);

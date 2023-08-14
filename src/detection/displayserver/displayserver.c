@@ -8,8 +8,11 @@ bool ffdsAppendDisplay(
     double refreshRate,
     uint32_t scaledWidth,
     uint32_t scaledHeight,
+    uint32_t rotation,
     FFstrbuf* name,
-    FFDisplayType type)
+    FFDisplayType type,
+    bool primary,
+    uint64_t id)
 {
     if(width == 0 || height == 0)
         return false;
@@ -20,17 +23,20 @@ bool ffdsAppendDisplay(
     display->refreshRate = refreshRate;
     display->scaledWidth = scaledWidth;
     display->scaledHeight = scaledHeight;
+    display->rotation = rotation;
     ffStrbufInitMove(&display->name, name);
     display->type = type;
+    display->primary = primary;
+    display->id = id;
 
     return true;
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance);
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
-const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance)
+const FFDisplayServerResult* ffConnectDisplayServer()
 {
     FF_DETECTION_INTERNAL_GUARD(FFDisplayServerResult,
-        ffConnectDisplayServerImpl(&result, instance);
+        ffConnectDisplayServerImpl(&result);
     );
 }

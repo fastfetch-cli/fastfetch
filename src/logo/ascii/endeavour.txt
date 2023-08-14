@@ -1,0 +1,15 @@
+                     $2./$1o$3.
+                   $2./$1sssso$3-
+                 $2`:$1osssssss+$3-
+               $2`:+$1sssssssssso$3/.
+             $2`-/o$1ssssssssssssso$3/.
+           $2`-/+$1sssssssssssssssso$3+:`
+         $2`-:/+$1sssssssssssssssssso$3+/.
+       $2`.://o$1sssssssssssssssssssso$3++-
+      $2.://+$1ssssssssssssssssssssssso$3++:
+    $2.:///o$1ssssssssssssssssssssssssso$3++:
+  $2`:////$1ssssssssssssssssssssssssssso$3+++.
+$2`-////+$1ssssssssssssssssssssssssssso$3++++-
+ $2`..-+$1oosssssssssssssssssssssssso$3+++++/`
+   $3./++++++++++++++++++++++++++++++/:.
+  `:::::::::::::::::::::::::------``

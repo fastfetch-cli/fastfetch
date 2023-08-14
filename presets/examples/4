@@ -4,4 +4,4 @@
 --logo arch_small
 --logo-padding-right 1
 --separator "  "
---structure Date:Time:Break:Player:Media
+--structure DateTime:Break:Player:Media

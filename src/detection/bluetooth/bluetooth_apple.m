@@ -2,18 +2,15 @@
 
 #import <IOBluetooth/IOBluetooth.h>
 
-void ffDetectBluetoothImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFBluetoothResult* bluetooth)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
 {
     NSArray<IOBluetoothDevice*>* ioDevices = IOBluetoothDevice.pairedDevices;
     if(!ioDevices)
-    {
-        ffStrbufAppendS(&bluetooth->error, "IOBluetoothDevice.pairedDevices failed");
-        return;
-    }
+        return "IOBluetoothDevice.pairedDevices failed";
 
     for(IOBluetoothDevice* ioDevice in ioDevices)
     {
-        FFBluetoothDevice* device = ffListAdd(&bluetooth->devices);
+        FFBluetoothDevice* device = ffListAdd(devices);
         ffStrbufInitS(&device->name, ioDevice.name.UTF8String);
         ffStrbufInitS(&device->address, ioDevice.addressString.UTF8String);
         ffStrbufInit(&device->type);
@@ -90,4 +87,6 @@ void ffDetectBluetoothImpl(FF_MAYBE_UNUSED const FFinstance* instance, FFBluetoo
             ffStrbufTrimRight(&device->type, ',');
         }
     }
+
+    return NULL;
 }

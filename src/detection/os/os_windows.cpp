@@ -1,8 +1,8 @@
 extern "C" {
 #include "os.h"
 #include "common/library.h"
-#include "util/windows/unicode.h"
 }
+#include "util/windows/unicode.hpp"
 #include "util/windows/wmi.hpp"
 
 static const char* getOsNameByWmi(FFstrbuf* osName)
@@ -13,9 +13,13 @@ static const char* getOsNameByWmi(FFstrbuf* osName)
 
     if(FFWmiRecord record = query.next())
     {
-        record.getString(L"Caption", osName);
-        ffStrbufTrimRight(osName, ' ');
-        return NULL;
+        if(auto vtCaption = record.get(L"Caption"))
+        {
+            ffStrbufSetWSV(osName, vtCaption.get<std::wstring_view>());
+            ffStrbufTrimRight(osName, ' ');
+            return NULL;
+        }
+        return "Get Caption failed";
     }
 
     return "No WMI result returned";
@@ -30,16 +34,14 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(winbrand, BrandingFormatString);
 
     const wchar_t* rawName = ffBrandingFormatString(L"%WINDOWS_LONG%");
-        ffStrbufSetWS(osName, rawName);
-        GlobalFree((HGLOBAL)rawName);
-        return NULL;
+    ffStrbufSetWS(osName, rawName);
+    GlobalFree((HGLOBAL)rawName);
+    return NULL;
 }
 
 extern "C"
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->id);

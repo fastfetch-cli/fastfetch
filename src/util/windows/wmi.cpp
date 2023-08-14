@@ -1,5 +1,6 @@
 #include "wmi.hpp"
 #include "util/windows/com.hpp"
+#include "util/windows/unicode.hpp"
 
 #include <synchapi.h>
 #include <wchar.h>
@@ -11,9 +12,9 @@ namespace
     struct bstr_t
     {
         explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
-        ~bstr_t() noexcept { SysFreeString(_bstr); }
-        explicit operator const wchar_t*() const noexcept { return _bstr; }
-        operator BSTR() const noexcept { return _bstr; }
+        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
+        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
+        operator BSTR(void) const noexcept { return _bstr; }
 
         private:
             BSTR _bstr;
@@ -125,27 +126,11 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace 
     }
 }
 
-static void ffBstrToStrbuf(BSTR bstr, FFstrbuf* strbuf)
-{
-    int len = (int)SysStringLen(bstr);
-    if(len <= 0)
-    {
-        ffStrbufClear(strbuf);
-        return;
-    }
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, bstr, len, nullptr, 0, nullptr, nullptr);
-    ffStrbufEnsureFree(strbuf, (uint32_t)size_needed);
-    WideCharToMultiByte(CP_UTF8, 0, bstr, len, strbuf->chars, size_needed, nullptr, nullptr);
-    strbuf->length = (uint32_t)size_needed;
-    strbuf->chars[size_needed] = '\0';
-}
-
 bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     CIMTYPE type;
     if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)) || vtProp.vt != VT_BSTR)
@@ -168,11 +153,11 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
                     else if(FAILED(pDateTime->GetFileTime(VARIANT_TRUE, &dateStr)))
                         result = false;
                     else
-                        ffBstrToStrbuf(dateStr, strbuf);
+                        ffStrbufSetNWS(strbuf, SysStringLen(dateStr), dateStr);
                 }
                 else
                 {
-                    ffBstrToStrbuf(vtProp.bstrVal, strbuf);
+                    ffStrbufSetNWS(strbuf, SysStringLen(vtProp.bstrVal), vtProp.bstrVal);
                 }
                 break;
 
@@ -180,13 +165,12 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
                 ffStrbufAppendS(strbuf, vtProp.pcVal);
                 break;
 
-            case VT_LPWSTR: // TODO
+            case VT_LPWSTR:
             default:
-                result = false;
+                ffStrbufSetWS(strbuf, vtProp.bstrVal);
                 break;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
 
@@ -194,8 +178,7 @@ bool FFWmiRecord::getSigned(const wchar_t* key, int64_t* integer)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     CIMTYPE type;
     if(FAILED(obj->Get(key, 0, &vtProp, &type, nullptr)))
@@ -221,7 +204,6 @@ bool FFWmiRecord::getSigned(const wchar_t* key, int64_t* integer)
             default: *integer = 0; result = false;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
 
@@ -229,8 +211,7 @@ bool FFWmiRecord::getUnsigned(const wchar_t* key, uint64_t* integer)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     if(FAILED(obj->Get(key, 0, &vtProp, nullptr, nullptr)))
     {
@@ -255,7 +236,6 @@ bool FFWmiRecord::getUnsigned(const wchar_t* key, uint64_t* integer)
             default: *integer = 0; result = false;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }
 
@@ -263,8 +243,7 @@ bool FFWmiRecord::getReal(const wchar_t* key, double* real)
 {
     bool result = true;
 
-    VARIANT vtProp;
-    VariantInit(&vtProp);
+    FFWmiVariant vtProp;
 
     if(FAILED(obj->Get(key, 0, &vtProp, nullptr, nullptr)))
     {
@@ -291,6 +270,5 @@ bool FFWmiRecord::getReal(const wchar_t* key, double* real)
             default: *real = NAN; result = false;
         }
     }
-    VariantClear(&vtProp);
     return result;
 }

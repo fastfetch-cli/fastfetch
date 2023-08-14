@@ -9,7 +9,7 @@ extern "C" {
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 
-const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FF_MAYBE_UNUSED FFlist* devices /* List of FFSoundDevice */)
+const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 {
     const char* error = ffInitCom();
     if (error)

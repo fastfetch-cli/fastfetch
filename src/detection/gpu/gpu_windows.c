@@ -9,7 +9,7 @@ static int isGpuNameEqual(const FFGPUResult* gpu, const FFstrbuf* name)
     return ffStrbufEqual(&gpu->name, name);
 }
 
-const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* instance)
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(displayDevice) };
     wchar_t regKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Control\\Video\\{";
@@ -29,7 +29,7 @@ const char* ffDetectGPUImpl(FFlist* gpus, FF_MAYBE_UNUSED const FFinstance* inst
         {
             // DeviceKey can be empty. See #484
             FF_STRBUF_AUTO_DESTROY gpuName = ffStrbufCreateWS(displayDevice.DeviceString);
-            if (ffListFirstIndexComp(gpus, &gpuName, (void*) isGpuNameEqual) != gpus->length) continue;
+            if (ffListContains(gpus, &gpuName, (void*) isGpuNameEqual)) continue;
         }
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);

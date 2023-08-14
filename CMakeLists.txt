@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
 
 project(fastfetch
-    VERSION 1.12.2
+    VERSION 2.0.0
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -22,10 +22,6 @@ elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-if(WIN32)
-    enable_language(CXX)
-endif()
-
 #############################
 # Compile time dependencies #
 #############################
@@ -39,6 +35,24 @@ if(NOT PKG_CONFIG_FOUND)
 endif()
 
 include(CheckIncludeFile)
+
+include(FetchContent)
+function(ff_fetch_dep package repo tag)
+    FetchContent_Declare(
+        "${package}"
+        GIT_REPOSITORY "${repo}"
+        GIT_TAG "${tag}"
+        GIT_PROGRESS TRUE
+    )
+    FetchContent_GetProperties("${package}")
+    if(NOT ${package}_POPULATED)
+        message("-- Fetching dependency ${package}@${tag} from ${repo}")
+        FetchContent_Populate(${package})
+        add_subdirectory(${${package}_SOURCE_DIR} ${${package}_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+endfunction()
+
+ff_fetch_dep(yyjson "https://github.com/ibireme/yyjson" "0.7.0")
 
 #####################
 # Configure options #
@@ -70,9 +84,9 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" 
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_LIBCJSON "Enable libcjson" ON "LINUX OR WIN32" OFF)
+cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_BUFFER "Enable stdout buffer" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
+cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -82,7 +96,7 @@ option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by gith
 ####################
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE RelWithDebInfo)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
@@ -102,7 +116,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration")
 
 if(WIN32)
-    set(CMAKE_CXX_STANDARD 11)
+    enable_language(CXX)
+    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
@@ -212,17 +227,42 @@ endfunction(fastfetch_load_text)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config_system.txt DATATEXT_CONFIG_SYSTEM)
 fastfetch_load_text(src/data/config_user.txt DATATEXT_CONFIG_USER)
+fastfetch_load_text(src/data/config_user.jsonc DATATEXT_CONFIG_USER_JSONC)
 fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
 fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
-######################
-# Configure config.h #
-######################
+configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
+configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 
-configure_file(src/fastfetch_config.h.in fastfetch_config.h)
+####################
+# Ascii image data #
+####################
+
+function(fastfetch_load_raw_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}")                                  # Remove trailing newline
+    string(JSON TEMP SET "{}" "${TEMP}" "0")                                       # Encode raw strings using JSON_SET
+    string(REGEX REPLACE "^\\{[ \t\r\n]*" "" TEMP "${TEMP}")                       # Remove JSON braces
+    string(REGEX REPLACE "[ \t\r\n]*:[ \t\r\n]*0[ \t\r\n]*\\}$" "" TEMP "${TEMP}") # Remove trailing ` : 0 }`
+    if(NOT "${TEMP}" MATCHES "^\"[^\n]*\"")
+        message(FATAL_ERROR "Internal error: unexpected output: '${TEMP}'")
+    endif()
+    set(${OUTVAR} "${TEMP}" PARENT_SCOPE)
+endfunction(fastfetch_load_raw_text)
+
+file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
+set(LOGO_BUILTIN_H "#pragma once\n\n")
+foreach(file ${LOGO_FILES})
+    fastfetch_load_raw_text("${file}" content)
+    get_filename_component(file "${file}" NAME_WLE)
+    string(TOUPPER "${file}" file)
+    string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" content "${content}")
+    set(LOGO_BUILTIN_H "${LOGO_BUILTIN_H}#define FASTFETCH_DATATEXT_LOGO_${file} ${content}\n")
+endforeach()
+file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 
 #######################
 # libfastfetch target #
@@ -233,20 +273,21 @@ set(LIBFASTFETCH_SRC
     src/common/font.c
     src/common/format.c
     src/common/init.c
+    src/common/jsonconfig.c
     src/common/library.c
+    src/common/option.c
     src/common/parsing.c
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
-    src/detection/bluetooth/bluetooth.c
+    src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
-    src/detection/cpuUsage/cpuUsage.c
+    src/detection/cpuusage/cpuusage.c
     src/detection/datetime/datetime.c
     src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
-    src/detection/host/host.c
     src/detection/locale/locale.c
     src/detection/media/media.c
     src/detection/opencl/opencl.c
@@ -260,64 +301,67 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im7.c
     src/logo/image/image.c
     src/logo/logo.c
-    src/modules/battery.c
-    src/modules/bios.c
-    src/modules/bluetooth.c
-    src/modules/board.c
-    src/modules/brightness.c
-    src/modules/break.c
-    src/modules/chassis.c
-    src/modules/colors.c
-    src/modules/cpu.c
-    src/modules/cpuUsage.c
-    src/modules/cursor.c
-    src/modules/custom.c
-    src/modules/command.c
-    src/modules/date.c
-    src/modules/datetime.c
-    src/modules/de.c
-    src/modules/disk.c
-    src/modules/font.c
-    src/modules/gpu.c
-    src/modules/host.c
-    src/modules/icons.c
-    src/modules/gamepad.c
-    src/modules/kernel.c
-    src/modules/locale.c
-    src/modules/localip.c
-    src/modules/memory.c
-    src/modules/opencl.c
-    src/modules/opengl.c
-    src/modules/os.c
-    src/modules/packages.c
-    src/modules/player.c
-    src/modules/poweradapter.c
-    src/modules/processes.c
-    src/modules/publicip.c
-    src/modules/display.c
-    src/modules/separator.c
-    src/modules/shell.c
-    src/modules/sound.c
-    src/modules/swap.c
-    src/modules/media.c
-    src/modules/terminal.c
-    src/modules/terminalfont.c
-    src/modules/theme.c
-    src/modules/time.c
-    src/modules/title.c
-    src/modules/uptime.c
-    src/modules/users.c
-    src/modules/vulkan.c
-    src/modules/wallpaper.c
-    src/modules/weather.c
-    src/modules/wifi.c
-    src/modules/wm.c
-    src/modules/wmtheme.c
+    src/logo/option.c
+    src/modules/battery/battery.c
+    src/modules/bios/bios.c
+    src/modules/bluetooth/bluetooth.c
+    src/modules/board/board.c
+    src/modules/brightness/brightness.c
+    src/modules/break/break.c
+    src/modules/chassis/chassis.c
+    src/modules/colors/colors.c
+    src/modules/cpu/cpu.c
+    src/modules/cpuusage/cpuusage.c
+    src/modules/cursor/cursor.c
+    src/modules/custom/custom.c
+    src/modules/command/command.c
+    src/modules/datetime/datetime.c
+    src/modules/de/de.c
+    src/modules/disk/disk.c
+    src/modules/font/font.c
+    src/modules/gpu/gpu.c
+    src/modules/host/host.c
+    src/modules/icons/icons.c
+    src/modules/gamepad/gamepad.c
+    src/modules/kernel/kernel.c
+    src/modules/lm/lm.c
+    src/modules/locale/locale.c
+    src/modules/localip/localip.c
+    src/modules/memory/memory.c
+    src/modules/monitor/monitor.c
+    src/modules/opencl/opencl.c
+    src/modules/opengl/opengl.c
+    src/modules/os/os.c
+    src/modules/packages/packages.c
+    src/modules/processes/processes.c
+    src/modules/player/player.c
+    src/modules/poweradapter/poweradapter.c
+    src/modules/publicip/publicip.c
+    src/modules/display/display.c
+    src/modules/separator/separator.c
+    src/modules/shell/shell.c
+    src/modules/sound/sound.c
+    src/modules/swap/swap.c
+    src/modules/media/media.c
+    src/modules/terminal/terminal.c
+    src/modules/terminalfont/terminalfont.c
+    src/modules/terminalsize/terminalsize.c
+    src/modules/theme/theme.c
+    src/modules/title/title.c
+    src/modules/uptime/uptime.c
+    src/modules/users/users.c
+    src/modules/vulkan/vulkan.c
+    src/modules/wallpaper/wallpaper.c
+    src/modules/weather/weather.c
+    src/modules/wifi/wifi.c
+    src/modules/wm/wm.c
+    src/modules/wmtheme/wmtheme.c
+    src/util/edidHelper.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
-    src/util/FFvaluestore.c
     src/util/platform/FFPlatform.c
     src/util/stringUtils.c
+    src/util/smbiosHelper.c
 )
 
 if(LINUX)
@@ -332,7 +376,7 @@ if(LINUX)
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
-        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
@@ -346,10 +390,12 @@ if(LINUX)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/lm/lm_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/monitor/monitor_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -361,6 +407,7 @@ if(LINUX)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -375,24 +422,26 @@ elseif(ANDROID)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
-        src/detection/bios/bios_nosupport.c
+        src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
-        src/detection/board/board_nosupport.c
+        src/detection/board/board_android.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cursor/cursor_nosupport.c
-        src/detection/cpuUsage/cpuUsage_linux.c
+        src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
-        src/detection/displayserver/displayserver_nosupport.c
+        src/detection/displayserver/displayserver_android.c
         src/detection/font/font_nosupport.c
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
+        src/detection/lm/lm_nosupport.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
+        src/detection/monitor/monitor_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
@@ -403,6 +452,7 @@ elseif(ANDROID)
         src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -421,11 +471,11 @@ elseif(BSD)
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
-        src/detection/board/board_nosupport.c
-        src/detection/brightness/brightness_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/board/board_bsd.c
+        src/detection/brightness/brightness_bsd.c
+        src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
-        src/detection/cpuUsage/cpuUsage_bsd.c
+        src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -437,11 +487,13 @@ elseif(BSD)
         src/detection/gpu/gpu_linux.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
+        src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
+        src/detection/monitor/monitor_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -450,14 +502,15 @@ elseif(BSD)
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_bsd.c
-        src/detection/temps/temps_linux.c
+        src/detection/temps/temps_bsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_bsd.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -474,7 +527,7 @@ elseif(APPLE)
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
-        src/detection/cpuUsage/cpuUsage_apple.c
+        src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
@@ -482,11 +535,13 @@ elseif(APPLE)
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
         src/detection/host/host_apple.c
+        src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
+        src/detection/monitor/monitor_apple.m
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
@@ -497,6 +552,7 @@ elseif(APPLE)
         src/detection/temps/temps_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -517,9 +573,9 @@ elseif(WIN32)
         src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_windows.cpp
         src/detection/cpu/cpu_windows.c
-        src/detection/cpuUsage/cpuUsage_windows.c
+        src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
         src/detection/displayserver/displayserver_windows.c
@@ -527,10 +583,12 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
+        src/detection/lm/lm_nosupport.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
+        src/detection/monitor/monitor_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
@@ -540,6 +598,7 @@ elseif(WIN32)
         src/detection/swap/swap_windows.c
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
+        src/detection/terminalsize/terminalsize_windows.c
         src/detection/temps/temps_windows.cpp
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_windows.c
@@ -556,11 +615,17 @@ elseif(WIN32)
     )
 endif()
 
+include(CheckFunctionExists)
+check_function_exists(wcwidth HAVE_WCWIDTH)
+if(NOT HAVE_WCWIDTH)
+    list(APPEND LIBFASTFETCH_SRC src/util/wcwidth.c)
+endif()
+
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
 
-target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 endif()
@@ -568,6 +633,10 @@ endif()
 CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX_H)
 if(HAVE_UTMPX_H)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX_H)
+endif()
+
+if(HAVE_WCWIDTH)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WCWIDTH)
 endif()
 
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
@@ -702,9 +771,9 @@ ff_lib_enable(PULSE
     "libpulse"
     "Pulse"
 )
-ff_lib_enable(LIBCJSON
-    "libcjson"
-    "CJson"
+ff_lib_enable(DDCUTIL
+    "ddcutil"
+    "Ddcutil"
 )
 
 if(ENABLE_THREADS)
@@ -714,11 +783,15 @@ if(ENABLE_THREADS)
     endif()
 endif()
 
-if(ENABLE_BUFFER)
-    target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_BUFFER)
+if(ENABLE_PCI_MEMORY)
+    target_compile_definitions(libfastfetch PRIVATE FF_USE_PCI_MEMORY)
 endif()
 
-if(APPLE)
+if(LINUX)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+    )
+elseif(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
@@ -750,6 +823,11 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
+        PRIVATE "dxva2"
+    )
+elseif(BSD)
+    target_link_libraries(libfastfetch
+        PRIVATE "usbhid"
     )
 endif()
 
@@ -760,6 +838,7 @@ target_include_directories(libfastfetch
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
+    PRIVATE yyjson
 )
 
 ######################
@@ -774,6 +853,7 @@ target_compile_definitions(fastfetch
 )
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
+    PRIVATE yyjson
 )
 
 add_executable(flashfetch
@@ -784,12 +864,8 @@ target_compile_definitions(flashfetch
 )
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
+    PRIVATE yyjson
 )
-
-if(ENABLE_BUFFER) # FF_ENABLE_BUFFER is used in fastfetch.c
-    target_compile_definitions(fastfetch PRIVATE FF_ENABLE_BUFFER)
-    target_compile_definitions(flashfetch PRIVATE FF_ENABLE_BUFFER)
-endif()
 
 if(WIN32)
     set(TARGET_NAME fastfetch)
@@ -836,12 +912,6 @@ include(GNUInstallDirs)
 install(
     TARGETS fastfetch flashfetch
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
-)
-
-install(
-    FILES "${CMAKE_SOURCE_DIR}/src/data/config_system.txt"
-    DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}/${CMAKE_PROJECT_NAME}"
-    RENAME "config.conf"
 )
 
 install(

@@ -4,13 +4,10 @@
 #include "detection/internal.h"
 #include "detection/terminalshell/terminalshell.h"
 
-static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectAlacritty(FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
-
-    FFstrbuf fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"family:", &fontName},
@@ -18,11 +15,11 @@ static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* te
     };
 
     // alacritty parses config files in this order
-    ffParsePropFileConfigValues(instance, "alacritty/alacritty.yml", 2, fontQuery);
+    ffParsePropFileConfigValues("alacritty/alacritty.yml", 2, fontQuery);
     if(fontName.length == 0 || fontSize.length == 0)
-        ffParsePropFileConfigValues(instance, "alacritty.yml", 2, fontQuery);
+        ffParsePropFileConfigValues("alacritty.yml", 2, fontQuery);
     if(fontName.length == 0 || fontSize.length == 0)
-        ffParsePropFileConfigValues(instance, ".alacritty.yml", 2, fontQuery);
+        ffParsePropFileConfigValues(".alacritty.yml", 2, fontQuery);
 
     //by default alacritty uses its own font called alacritty
     if(fontName.length == 0)
@@ -33,15 +30,11 @@ static void detectAlacritty(const FFinstance* instance, FFTerminalFontResult* te
         ffStrbufAppendS(&fontSize, "11");
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
-
-    ffStrbufDestroy(&fontName);
-    ffStrbufDestroy(&fontSize);
 }
 
 FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 {
-    FFstrbuf fontName;
-    ffStrbufInit(&fontName);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/vconsole.conf", "Font =", &fontName);
 
@@ -61,116 +54,86 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
         ffFontInitCopy(&terminalFont->font, fontName.chars);
     else
         ffStrbufAppendS(&terminalFont->error, "Couldn't find Font in "FASTFETCH_TARGET_DIR_ETC"/vconsole.conf");
-
-    ffStrbufDestroy(&fontName);
 }
 
 #if defined(_WIN32) || defined(__linux__)
 
-#ifdef FF_HAVE_LIBCJSON
-
 #include "common/library.h"
 #include "common/processing.h"
 
-#include <cjson/cJSON.h>
 #include <stdlib.h>
+#include <yyjson.h>
 
-typedef struct CJSONData
+static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* size)
 {
-    FF_LIBRARY_SYMBOL(cJSON_Parse)
-    FF_LIBRARY_SYMBOL(cJSON_IsObject)
-    FF_LIBRARY_SYMBOL(cJSON_GetObjectItemCaseSensitive)
-    FF_LIBRARY_SYMBOL(cJSON_IsString)
-    FF_LIBRARY_SYMBOL(cJSON_GetStringValue)
-    FF_LIBRARY_SYMBOL(cJSON_IsNumber)
-    FF_LIBRARY_SYMBOL(cJSON_GetNumberValue)
-    FF_LIBRARY_SYMBOL(cJSON_IsArray)
-    FF_LIBRARY_SYMBOL(cJSON_Delete)
+    yyjson_val* font = yyjson_obj_get(profile, "font");
+    if (!font)
+        return "yyjson_obj_get(profile, \"font\"); failed";
 
-    cJSON* root;
-} CJSONData;
+    if (!yyjson_is_obj(font))
+        return "yyjson_is_obj(font) returns false";
 
-static const char* detectWTProfile(CJSONData* cjsonData, cJSON* profile, FFstrbuf* name, double* size)
-{
-    if(!cjsonData->ffcJSON_IsObject(profile))
-        return "cJSON_IsObject(profile) returns false";
-
-    cJSON* font = cjsonData->ffcJSON_GetObjectItemCaseSensitive(profile, "font");
-    if(!cjsonData->ffcJSON_IsObject(font))
-        return "cJSON_IsObject(font) returns false";
-
-    if(name->length == 0)
+    if (name->length == 0)
     {
-        cJSON* pface = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "face");
-        if(cjsonData->ffcJSON_IsString(pface))
-            ffStrbufAppendS(name, cjsonData->ffcJSON_GetStringValue(pface));
+        yyjson_val* pface = yyjson_obj_get(font, "face");
+        if(yyjson_is_str(pface))
+            ffStrbufAppendS(name, unsafe_yyjson_get_str(pface));
     }
-    if(*size < 0)
+
+    if (*size < 0)
     {
-        cJSON* psize = cjsonData->ffcJSON_GetObjectItemCaseSensitive(font, "size");
-        if(cjsonData->ffcJSON_IsNumber(psize))
-            *size = cjsonData->ffcJSON_GetNumberValue(psize);
+        yyjson_val* psize = yyjson_obj_get(font, "size");
+        if (yyjson_is_num(psize))
+            *size = yyjson_get_num(psize);
     }
     return NULL;
 }
 
-static inline void wrapCjsonFree(CJSONData* data)
+static inline void wrapYyjsonFree(yyjson_doc** doc)
 {
-    assert(data);
-    if (data->root)
-        data->ffcJSON_Delete(data->root);
+    assert(doc);
+    if (*doc)
+        yyjson_doc_free(*doc);
 }
 
-static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* content, FFstrbuf* name, double* size)
+static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* size)
 {
-    FF_LIBRARY_LOAD(libcjson, &instance->config.libcJSON, "dlopen libcjson" FF_LIBRARY_EXTENSION " failed", "libcjson"FF_LIBRARY_EXTENSION, 1)
-    CJSONData __attribute__((__cleanup__(wrapCjsonFree))) cjsonData = {}; // Make sure cjsonData is destroyed before libcjson is dlclosed
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Parse, cJSON_Parse@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsObject, cJSON_IsObject@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetObjectItemCaseSensitive, cJSON_GetObjectItemCaseSensitive@8)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsString, cJSON_IsString@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetStringValue, cJSON_GetStringValue@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsNumber, cJSON_IsNumber@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_GetNumberValue, cJSON_GetNumberValue@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_IsArray, cJSON_IsArray@4)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE2(libcjson, cjsonData, cJSON_Delete, cJSON_Delete@4)
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    if (!doc)
+        return "Failed to parse WT JSON config file";
 
-    cJSON* root = cjsonData.root = cjsonData.ffcJSON_Parse(content->chars);
-    if(!cjsonData.ffcJSON_IsObject(root))
-        return "cJSON_Parse() failed";
+    yyjson_val* const root = yyjson_doc_get_root(doc);
+    assert(root);
 
-    cJSON* profiles = cjsonData.ffcJSON_GetObjectItemCaseSensitive(root, "profiles");
-    if(!cjsonData.ffcJSON_IsObject(profiles))
-        return "cJSON_GetObjectItemCaseSensitive(root, \"profiles\") failed";
+    yyjson_val* profiles = yyjson_obj_get(root, "profiles");
+    if (!profiles)
+        return "yyjson_obj_get(root, \"profiles\") failed";
 
-    FF_STRBUF_AUTO_DESTROY wtProfileId;
-    ffStrbufInitS(&wtProfileId, getenv("WT_PROFILE_ID"));
+    FF_STRBUF_AUTO_DESTROY wtProfileId = ffStrbufCreateS(getenv("WT_PROFILE_ID"));
     ffStrbufTrim(&wtProfileId, '\'');
-    if(wtProfileId.length > 0)
+    if (wtProfileId.length > 0)
     {
-        cJSON* list = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "list");
-        if(cjsonData.ffcJSON_IsArray(list))
+        yyjson_val* list = yyjson_obj_get(profiles, "list");
+        if (yyjson_is_arr(list))
         {
-            cJSON* profile;
-            cJSON_ArrayForEach(profile, list)
+            yyjson_val* profile;
+            size_t idx, max;
+            yyjson_arr_foreach(list, idx, max, profile)
             {
-                if(!cjsonData.ffcJSON_IsObject(profile))
-                    continue;
-                cJSON* guid = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profile, "guid");
-                if(!cjsonData.ffcJSON_IsString(guid))
-                    continue;
-                if(ffStrbufCompS(&wtProfileId, cjsonData.ffcJSON_GetStringValue(guid)) == 0)
+                yyjson_val* guid = yyjson_obj_get(profile, "guid");
+
+                if(ffStrbufEqualS(&wtProfileId, yyjson_get_str(guid)))
                 {
-                    detectWTProfile(&cjsonData, profile, name, size);
+                    detectWTProfile(profile, name, size);
                     break;
                 }
             }
         }
     }
 
-    cJSON* defaults = cjsonData.ffcJSON_GetObjectItemCaseSensitive(profiles, "defaults");
-    if(defaults)
-        detectWTProfile(&cjsonData, defaults, name, size);
+    yyjson_val* defaults = yyjson_obj_get(profiles, "defaults");
+    if (defaults)
+        detectWTProfile(defaults, name, size);
 
     if(name->length == 0)
         ffStrbufSetS(name, "Cascadia Mono");
@@ -185,11 +148,10 @@ static const char* detectFromWTImpl(const FFinstance* instance, FFstrbuf* conten
     #include <shlobj.h>
 #endif
 
-static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
+static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
-    FF_STRBUF_AUTO_DESTROY json;
-    ffStrbufInit(&json);
+    FF_STRBUF_AUTO_DESTROY json = ffStrbufCreate();
     const char* error = NULL;
 
     #ifdef _WIN32
@@ -258,10 +220,9 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY name;
-    ffStrbufInit(&name);
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
     double size = -1;
-    error = detectFromWTImpl(instance, &json, &name, &size);
+    error = detectFromWTImpl(&json, &name, &size);
 
     if(error)
         ffStrbufAppendS(&terminalFont->error, error);
@@ -273,32 +234,21 @@ static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbu
     }
 }
 
-#else //FF_HAVE_CJSON
 
-static void detectFromWindowsTeriminal(const FFinstance* instance, const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
-{
-    FF_UNUSED(instance, terminalExe, terminalFont);
-    ffStrbufAppendS(&terminalFont->error, "Fastfetch was built without libcJSON support");
-}
-
-#endif //FF_HAVE_CJSON
 
 #endif //defined(_WIN32) || defined(__linux__)
 
-FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFontResult* result)
+FF_MAYBE_UNUSED static bool detectKitty(FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
-
-    FF_STRBUF_AUTO_DESTROY fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"font_family ", &fontName},
         {"font_size ", &fontSize},
     };
 
-    if(!ffParsePropFileConfigValues(instance, "kitty/kitty.conf", 2, fontQuery))
+    if(!ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery))
         return false;
 
     if(fontName.length == 0)
@@ -311,20 +261,17 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFinstance* instance, FFTerminalFo
     return true;
 }
 
-static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* result)
+static void detectTerminator(FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY useSystemFont;
-    ffStrbufInit(&useSystemFont);
-
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
+    FF_STRBUF_AUTO_DESTROY useSystemFont = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"use_system_font =", &useSystemFont},
         {"font =", &fontName},
     };
 
-    if(!ffParsePropFileConfigValues(instance, "terminator/config", 2, fontQuery))
+    if(!ffParsePropFileConfigValues("terminator/config", 2, fontQuery))
     {
         ffStrbufAppendS(&result->error, "Couldn't read Terminator config file");
         return;
@@ -342,10 +289,9 @@ static void detectTerminator(const FFinstance* instance, FFTerminalFontResult* r
         ffFontInitPango(&result->font, fontName.chars);
 }
 
-static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
+static bool detectWezterm(FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){
         "wezterm",
@@ -370,20 +316,17 @@ static bool detectWezterm(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminal
     return true;
 }
 
-static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFontResult* result)
+static bool detectTabby(FFTerminalFontResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY fontName;
-    ffStrbufInit(&fontName);
-
-    FF_STRBUF_AUTO_DESTROY fontSize;
-    ffStrbufInit(&fontSize);
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
         {"font: ", &fontName},
         {"fontSize: ", &fontSize},
     };
 
-    if(!ffParsePropFileConfigValues(instance, "tabby/config.yaml", 2, fontQuery))
+    if(!ffParsePropFileConfigValues("tabby/config.yaml", 2, fontQuery))
         return false;
 
     if(fontName.length == 0)
@@ -396,24 +339,24 @@ static bool detectTabby(FF_MAYBE_UNUSED const FFinstance* instance, FFTerminalFo
     return true;
 }
 
-void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
+void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
-static bool detectTerminalFontCommon(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+static bool detectTerminalFontCommon(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "alacritty"))
-        detectAlacritty(instance, terminalFont);
+        detectAlacritty(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "terminator"))
-        detectTerminator(instance, terminalFont);
+        detectTerminator(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "wezterm-gui"))
-        detectWezterm(instance, terminalFont);
+        detectWezterm(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "tabby"))
-        detectTabby(instance, terminalFont);
+        detectTabby(terminalFont);
 
     #ifndef _WIN32
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/pts/"))
         ffStrbufAppendS(&terminalFont->error, "Terminal font detection is not supported on PTS");
-    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
-        detectKitty(instance, terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalPrettyName, "kitty"))
+        detectKitty(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
     #endif
@@ -422,7 +365,7 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
     //Used by both Linux (WSL) and Windows
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "Windows Terminal") ||
         ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "WindowsTerminal.exe"))
-        detectFromWindowsTeriminal(instance, &terminalShell->terminalExe, terminalFont);
+        detectFromWindowsTeriminal(&terminalShell->terminalExe, terminalFont);
     #endif
 
     else
@@ -431,20 +374,18 @@ static bool detectTerminalFontCommon(const FFinstance* instance, const FFTermina
     return true;
 }
 
-const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance)
+bool ffDetectTerminalFont(FFTerminalFontResult* result)
 {
-    FF_DETECTION_INTERNAL_GUARD(FFTerminalFontResult,
-        ffStrbufInitA(&result.error, 0);
+    const FFTerminalShellResult* terminalShell = ffDetectTerminalShell();
 
-        const FFTerminalShellResult* terminalShell = ffDetectTerminalShell(instance);
+    if(terminalShell->terminalProcessName.length == 0)
+        ffStrbufAppendS(&result->error, "Terminal font needs successful terminal detection");
 
-        if(terminalShell->terminalProcessName.length == 0)
-            ffStrbufAppendS(&result.error, "Terminal font needs successful terminal detection");
+    else if(!detectTerminalFontCommon(terminalShell, result))
+        ffDetectTerminalFontPlatform(terminalShell, result);
 
-        else if(!detectTerminalFontCommon(instance, terminalShell, &result))
-            ffDetectTerminalFontPlatform(instance, terminalShell, &result);
+    if(result->error.length == 0 && result->font.pretty.length == 0)
+        ffStrbufAppendF(&result->error, "Unknown terminal: %s", terminalShell->terminalProcessName.chars);
 
-        if(result.error.length == 0 && result.font.pretty.length == 0)
-            ffStrbufAppendF(&result.error, "Unknown terminal: %s", terminalShell->terminalProcessName.chars);
-    );
+    return result->error.length == 0;
 }

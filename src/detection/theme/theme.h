@@ -5,6 +5,6 @@
 
 #include "fastfetch.h"
 
-const char* ffDetectTheme(const FFinstance* instance, FFstrbuf* result);
+const char* ffDetectTheme(FFstrbuf* result);
 
 #endif

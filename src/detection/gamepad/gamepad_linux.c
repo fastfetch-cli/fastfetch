@@ -1,23 +1,23 @@
 #include "gamepad.h"
 #include "common/io/io.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 #include <ctype.h>
 
-const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */)
+const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 {
     DIR* dirp = opendir("/sys/class/input/");
     if(dirp == NULL)
         return "opendir(\"/sys/class/input/\") == NULL";
 
-    FF_STRBUF_AUTO_DESTROY path;
-    ffStrbufInitS(&path, "/sys/class/input/");
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/class/input/");
     uint32_t baseLen = path.length;
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(strncmp(entry->d_name, "js", 2) != 0)
+        if(!ffStrStartsWith(entry->d_name, "js"))
             continue;
         if(!isdigit(entry->d_name[2]))
             continue;

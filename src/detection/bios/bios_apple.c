@@ -3,14 +3,8 @@
 
 #include <IOKit/IOKitLib.h>
 
-void ffDetectBios(FFBiosResult* bios)
+const char* ffDetectBios(FFBiosResult* bios)
 {
-    ffStrbufInit(&bios->error);
-    ffStrbufInit(&bios->biosDate);
-    ffStrbufInit(&bios->biosRelease);
-    ffStrbufInit(&bios->biosVendor);
-    ffStrbufInit(&bios->biosVersion);
-
     io_registry_entry_t registryEntry;
 
     #ifndef __aarch64__
@@ -23,20 +17,17 @@ void ffDetectBios(FFBiosResult* bios)
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
         {
             IOObjectRelease(registryEntry);
-            ffStrbufAppendS(&bios->error, "IORegistryEntryCreateCFProperties(registryEntry) failed");
-            return;
+            return "IORegistryEntryCreateCFProperties(registryEntry) failed";
         }
 
-        ffCfDictGetString(properties, CFSTR("vendor"), &bios->biosVendor);
-        ffCfDictGetString(properties, CFSTR("version"), &bios->biosVersion);
-        ffCfDictGetString(properties, CFSTR("release-date"), &bios->biosDate);
-        if(!ffStrbufContainC(&bios->biosDate, '-'))
-            ffStrbufAppendS(&bios->biosRelease, "Efi-");
-        ffStrbufAppend(&bios->biosRelease, &bios->biosVersion);
+        ffCfDictGetString(properties, CFSTR("vendor"), &bios->vendor);
+        ffCfDictGetString(properties, CFSTR("version"), &bios->version);
+        ffCfDictGetString(properties, CFSTR("release-date"), &bios->date);
+        ffStrbufAppendS(&bios->release, "Efi");
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
-        return;
+        return NULL;
     }
 
     #else
@@ -47,8 +38,8 @@ void ffDetectBios(FFBiosResult* bios)
         CFMutableDictionaryRef properties;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
-            ffCfDictGetString(properties, CFSTR("manufacturer"), &bios->biosVendor);
-            ffCfDictGetString(properties, CFSTR("time-stamp"), &bios->biosDate);
+            ffCfDictGetString(properties, CFSTR("manufacturer"), &bios->vendor);
+            ffCfDictGetString(properties, CFSTR("time-stamp"), &bios->date);
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
@@ -59,13 +50,24 @@ void ffDetectBios(FFBiosResult* bios)
         CFMutableDictionaryRef properties;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
         {
-            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->biosRelease);
-            ffStrbufAppend(&bios->biosVersion, &bios->biosRelease);
-            ffStrbufSubstrAfterFirstC(&bios->biosVersion, '-');
+            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->version);
+            uint32_t index = ffStrbufFirstIndexC(&bios->version, '-');
+            if (index != bios->version.length)
+            {
+                ffStrbufAppendNS(&bios->release, index, bios->version.chars);
+                ffStrbufRemoveSubstr(&bios->version, 0, index + 1);
+            }
+            else
+            {
+                ffStrbufAppendS(&bios->release, "iBoot");
+            }
             CFRelease(properties);
         }
         IOObjectRelease(registryEntry);
+        return NULL;
     }
 
     #endif
+
+    return "Failed to query bios info";
 }

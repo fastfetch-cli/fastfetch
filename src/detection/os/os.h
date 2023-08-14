@@ -19,6 +19,6 @@ typedef struct FFOSResult
     FFstrbuf buildID;
 } FFOSResult;
 
-const FFOSResult* ffDetectOS(const FFinstance* instance);
+const FFOSResult* ffDetectOS();
 
 #endif

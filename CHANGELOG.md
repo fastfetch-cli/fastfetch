@@ -1,3 +1,63 @@
+# 2.0.0 (beta)
+
+Fastfetch v2 introduces a new configuration file format: JSON config. Please refer to <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for details.
+
+Changes:
+* Drop the dependency of cJSON. We now use [yyjson](https://ibireme.github.io/yyjson/doc/doxygen/html/index.html) to parse JSON documents.
+* Remove `--shell-version` and `--terminal-version`. They are always enabled (Terminal / Shell)
+* Remove `--*-error-format`, which seems to be useless
+* Remove `--display-detect-name`. Display name is always detected, and will be printed if multiple displays are detected
+* Deprecate `--set` and `--set-keyless`; they may be removed in future releases. Use JSON config with Custom module instead
+* Remove the special handling of Command module (it can be set once in the triditional `config.conf`). Use JSON config with Command module instead
+* Change `--wm-theme-*` to `--wmtheme-*`. Affect `key` and `format` (WMTheme)
+* Change `--terminal-font-*` to `--terminalfont-*`. Affect `key` and `format` (TerminalFont)
+* Module `Command` uses `/bin/sh` as the default shell on systems other than Windows (Command)
+* Fix M2 CPU temperature detection (CPU, macOS)
+* Detect monitor name when available, instead of using DRM connector name (Display / Brightness, Linux)
+
+Features:
+* FreeBSD support is improved greatly, and actually tested in a physical machine
+* Add `--no-buffer` option for easier debugging. CMake option `ENABLE_BUFFER` is removed and always enabled.
+* Support `--*-key-color` option to change the key color of specified module
+* Support `--colors-symbol` and `--colors-padding-left` (Colors)
+* Add LM (Login Manager) module. Currently requires systemd installed (thus Linux only)
+* Add `--wmi-timeout` option (Windows)
+* Add `--logo-type small` to search for small logos
+* Support detecting brightness of external displays with DDC/CI (guard behind `--allow-slow-operations`) (Brightness)
+* Add option `--size-ndigits` and `--size-max-prefix` (#494)
+* Add option `--processing-timeout` to the timeout when waiting for child processes.
+* Public IP module prints the IP location if `--publicip-url` is not set (PublicIP)
+* Add option `--localip-default-route-only` (LocalIP)
+* Add option `--weather-location` (Weather)
+* Support iTerm non-ascii font detection (Terminal, macOS)
+* Add option `--title-color-user`, `--title-color-at` and `--title-color-host` (Title)
+* Add Exherbo logo and package manager count (Packages, Linux, #503)
+* Add module `Terminal Size` which prints the number of terminal width and height in charactors and pixels
+* Add new option `--temperature-unit`
+* Better CPU and Host detection for Android (Android)
+* Support yakuake terminal version & font detection (Terminal, Linux)
+* Add new option `--bright-color` which can be used to disable the default bright color of keys, title and ASCII logo.
+* Add module `Monitor` which prints physical parameters (native resolutions and demensions) of connected monitors
+* Support path with environment variables for `--logo-source` and `--load-config`.
+
+Bugfixes:
+* Fix possible hanging (TerminalFont, #493)
+* Fix heap-buffer-overflow reading (DisplayServer, Linux)
+* Fix false errors when built without libnm support (Wifi, Linux)
+* Properly detect CPU on POWER (CPU, Linux)
+* Fix compatibility with Fig (Terminal, macOS)
+* Fix option `--title-fqdn` doesn't work (Title)
+* Fix used spaces calculation (Disk, Linux / BSD / macOS, #508)
+* Fix `--brightness-format` (Brightness)
+* Fix specifying `--set-keyless` with the same key second time won't override the value set before (#517)
+* Fix specifying `--color` second time won't clear the value set before (#517)
+
+Logo:
+* Change the special handling of `kitty` protocol with `.png` image file to a new image protocol `kitty-direct`. This is the fastest image protocol because fastfetch doesn't need to pre-encode the image to base64 or something and the image content doesn't need to be transmitted via tty. Note:
+    1. Although konsole was said to support `kitty` image protocol, it doesn't support `kitty-direct`
+    2. wezterm support more image formats other than `.png` (tested with `.jpg` and `.webp`)
+* Port all logos supported by neo(wo)fetch. Fastfetch now has 350 builtin logos in total.
+
 # 1.12.2
 
 Features:

@@ -14,12 +14,6 @@ typedef struct FFBluetoothDevice
     bool connected;
 } FFBluetoothDevice;
 
-typedef struct FFBluetoothResult
-{
-    FFstrbuf error;
-    FFlist devices; // List of FFBluetoothDevice
-} FFBluetoothResult;
-
-const FFBluetoothResult* ffDetectBluetooth(const FFinstance* instance);
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */);
 
 #endif

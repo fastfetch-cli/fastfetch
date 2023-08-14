@@ -1,15 +1,16 @@
 #include "io.h"
+#include "util/stringUtils.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <termios.h>
 #include <poll.h>
 #include <dirent.h>
+#include <wordexp.h>
 
 static void createSubfolders(const char* fileName)
 {
-    FFstrbuf path;
-    ffStrbufInit(&path);
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     while(*fileName != '\0')
     {
@@ -18,8 +19,6 @@ static void createSubfolders(const char* fileName)
             mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
         ++fileName;
     }
-
-    ffStrbufDestroy(&path);
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
@@ -109,30 +108,43 @@ bool ffPathExists(const char* path, FFPathType type)
     return false;
 }
 
-void ffGetTerminalResponse(const char* request, const char* format, ...)
+bool ffPathExpandEnv(const char* in, FFstrbuf* out)
+{
+    bool result = false;
+    wordexp_t exp;
+    if(wordexp(in, &exp, WRDE_NOCMD) != 0)
+        return false;
+
+    if (exp.we_wordc == 1)
+    {
+        result = true;
+        ffStrbufSetS(out, exp.we_wordv[0]);
+    }
+
+    wordfree(&exp);
+
+    return result;
+}
+
+const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
     struct termios oldTerm, newTerm;
     if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
-        return;
+        return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
 
     newTerm = oldTerm;
     newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
     if(tcsetattr(STDIN_FILENO, TCSANOW, &newTerm) == -1)
-        return;
+        return "tcsetattr(STDIN_FILENO, TCSANOW, &newTerm)";
 
     fputs(request, stdout);
     fflush(stdout);
 
-    struct pollfd pfd;
-    pfd.fd = STDIN_FILENO;
-    pfd.events = POLLIN;
-    pfd.revents = 0;
-
     //Give the terminal 35ms to respond
-    if(poll(&pfd, 1, 35) <= 0)
+    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, 35) <= 0)
     {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
-        return;
+        return "poll() timeout or failed";
     }
 
     char buffer[512];
@@ -141,7 +153,7 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
 
     if(readed <= 0)
-        return;
+        return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
 
     buffer[readed] = '\0';
 
@@ -149,6 +161,8 @@ void ffGetTerminalResponse(const char* request, const char* format, ...)
     va_start(args, format);
     vsscanf(buffer, format, args);
     va_end(args);
+
+    return NULL;
 }
 
 bool ffSuppressIO(bool suppress)
@@ -197,7 +211,7 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
     {
         if(entry->d_type == DT_DIR)
         {
-            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
                 continue;
 
             ffStrbufAppendS(folder, entry->d_name);
@@ -218,9 +232,7 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
 void ffListFilesRecursively(const char* path)
 {
-    FFstrbuf folder;
-    ffStrbufInitS(&folder, path);
+    FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
     listFilesRecursively(&folder, 0, NULL);
-    ffStrbufDestroy(&folder);
 }

@@ -19,6 +19,10 @@ static bool isPhysicalDevice(FFstrbuf* device)
 {
     #ifndef __ANDROID__ //On Android, `/dev` is not accessable, so that the following checks always fail
 
+    //https://askubuntu.com/a/1289123
+    if(ffStrbufEqualS(device, "/cow"))
+        return true;
+
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(ffStrbufEqualS(device, "drvfs"))
         return true;
@@ -116,8 +120,7 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
     if(stat(device->chars, &deviceStat) != 0)
         return;
 
-    FF_STRBUF_AUTO_DESTROY basePath;
-    ffStrbufInit(&basePath);
+    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
 
     //Try partlabel first
     ffStrbufSetS(&basePath, "/dev/disk/by-partlabel/");
@@ -194,23 +197,19 @@ static void detectStats(FFDisk* disk)
         memset(&fs, 0, sizeof(struct statvfs)); //Set all values to 0, so our values get initialized to 0 too
 
     disk->bytesTotal = fs.f_blocks * fs.f_frsize;
-    disk->bytesUsed = disk->bytesTotal - (fs.f_bavail * fs.f_frsize);
+    disk->bytesUsed = disk->bytesTotal - (fs.f_bfree * fs.f_frsize);
 
     disk->filesTotal = (uint32_t) fs.f_files;
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
 }
 
-void ffDetectDisksImpl(FFDiskResult* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     FILE* mountsFile = fopen("/proc/mounts", "r");
     if(mountsFile == NULL)
-    {
-        ffStrbufAppendS(&disks->error, "fopen(\"/proc/mounts\", \"r\") == NULL");
-        return;
-    }
+        return "fopen(\"/proc/mounts\", \"r\") == NULL";
 
-    FF_LIST_AUTO_DESTROY devices;
-    ffListInit(&devices, sizeof(FFstrbuf));
+    FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
     char* line = NULL;
     size_t len = 0;
@@ -233,7 +232,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         }
 
         //We have a valid device, add it to the list
-        FFDisk* disk = ffListAdd(&disks->disks);
+        FFDisk* disk = ffListAdd(disks);
 
         //detect mountpoint
         ffStrbufInit(&disk->mountpoint);
@@ -261,4 +260,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ffStrbufDestroy(device);
 
     fclose(mountsFile);
+
+    return NULL;
 }

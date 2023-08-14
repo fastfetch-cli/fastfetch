@@ -15,37 +15,26 @@ static double getFrequency(const char* propName)
 
 static double detectCpuTemp(const FFstrbuf* cpuName)
 {
-    FF_LIST_AUTO_DESTROY temps;
-    ffListInit(&temps, sizeof(FFTempValue));
+    double result = 0;
 
+    const char* error = NULL;
     if(ffStrbufStartsWithS(cpuName, "Apple M1"))
-        ffDetectCoreTemps(FF_TEMP_CPU_M1X, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_CPU_M1X, &result);
     else if(ffStrbufStartsWithS(cpuName, "Apple M2"))
-        ffDetectCoreTemps(FF_TEMP_CPU_M2X, &temps);
-    else //TODO: PPC?
-        ffDetectCoreTemps(FF_TEMP_CPU_X64, &temps);
+        error = ffDetectCoreTemps(FF_TEMP_CPU_M2X, &result);
+    else // PPC?
+        error = ffDetectCoreTemps(FF_TEMP_CPU_X64, &result);
 
-    if(temps.length == 0)
+    if(error)
         return FF_CPU_TEMP_UNSET;
 
-    double result = 0;
-    for(uint32_t i = 0; i < temps.length; ++i)
-    {
-        FFTempValue* tempValue = (FFTempValue*)ffListGet(&temps, i);
-        result += tempValue->value;
-        //TODO: do we really need this?
-        ffStrbufDestroy(&tempValue->name);
-        ffStrbufDestroy(&tempValue->deviceClass);
-    }
-    result /= temps.length;
     return result;
 }
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    FF_UNUSED(instance);
-
-    ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
+    if (ffSysctlGetString("machdep.cpu.brand_string", &cpu->name) != NULL)
+        return "sysctlbyname(machdep.cpu.brand_string) failed";
     ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
@@ -65,8 +54,7 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     if(cpu->frequencyMax == 0.0)
         cpu->frequencyMax = getFrequency("hw.cpufrequency");
 
-    if (instance->config.cpuTemp)
-        cpu->temperature = detectCpuTemp(&cpu->name);
-    else
-        cpu->temperature = FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? detectCpuTemp(&cpu->name) : FF_CPU_TEMP_UNSET;
+
+    return NULL;
 }

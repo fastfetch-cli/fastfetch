@@ -45,7 +45,7 @@ typedef struct FFDBusData
     DBusConnection* connection;
 } FFDBusData;
 
-const char* ffDBusLoadData(const FFinstance* instance, DBusBusType busType, FFDBusData* data); //Returns an error message or NULL on success
+const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data); //Returns an error message or NULL on success
 bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result);
 bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result);
 bool ffDBusGetByte(FFDBusData* dbus, DBusMessageIter* iter, uint8_t* result);

@@ -15,10 +15,21 @@ const char* ffDetectSmbiosTemp(double* current, double* critical)
 
     if(FFWmiRecord record = query.next())
     {
-        if (current && record.getReal(L"CurrentTemperature", current)) // In tenth of degrees Kelvin
-            *current = *current / 10 - 273.15;
-        if (critical && record.getReal(L"CriticalTripPoint", critical)) // In tenth of degrees Kelvin
-            *critical = *critical / 10 - 273.15;
+        if (current)
+        {
+            if(auto vtCurrent = record.get(L"CurrentTemperature"))
+                *current = vtCurrent.get<int32_t>() / 10 - 273.15; // In tenth of degrees Kelvin
+            else
+                *current = 0.0/0.0;
+        }
+
+        if (critical)
+        {
+            if(auto vtCritical = record.get(L"CriticalTripPoint"))
+                *critical = vtCritical.get<int32_t>() / 10 - 273.15; // In tenth of degrees Kelvin
+            else
+                *critical = 0.0/0.0;
+        }
     }
 
     return "No WMI result returned";

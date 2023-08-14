@@ -58,9 +58,9 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     data->ffXFree(wmWindow);
 }
 
-void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXlib(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(x11, &instance->config.libX11, , "libX11" FF_LIBRARY_EXTENSION, 7, "libX11-xcb" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(x11, &instance.config.libX11, , "libX11" FF_LIBRARY_EXTENSION, 7, "libX11-xcb" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(x11, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(x11, XCloseDisplay,)
 
@@ -83,8 +83,11 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
             0,
             (uint32_t) WidthOfScreen(screen),
             (uint32_t) HeightOfScreen(screen),
+            0,
             NULL,
-            FF_DISPLAY_TYPE_UNKNOWN
+            FF_DISPLAY_TYPE_UNKNOWN,
+            false,
+            0
         );
     }
 
@@ -97,25 +100,29 @@ void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
 
 #else
 
-void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXlib(FFDisplayServerResult* result)
 {
     //Do nothing. WM / DE detection will use environment vars to detect as much as possible.
-    FF_UNUSED(instance, result);
+    FF_UNUSED(result);
 }
 
 #endif //FF_HAVE_X11
 
 #ifdef FF_HAVE_XRANDR
+#include "util/edidHelper.h"
 #include <X11/extensions/Xrandr.h>
 
 typedef struct XrandrData
 {
+    FF_LIBRARY_SYMBOL(XInternAtom)
+    FF_LIBRARY_SYMBOL(XGetAtomName);
     FF_LIBRARY_SYMBOL(XRRGetScreenInfo)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentConfiguration)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
     FF_LIBRARY_SYMBOL(XRRGetMonitors)
     FF_LIBRARY_SYMBOL(XRRGetScreenResources)
     FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
+    FF_LIBRARY_SYMBOL(XRRGetOutputProperty)
     FF_LIBRARY_SYMBOL(XRRGetCrtcInfo)
     FF_LIBRARY_SYMBOL(XRRFreeCrtcInfo)
     FF_LIBRARY_SYMBOL(XRRFreeOutputInfo)
@@ -129,36 +136,24 @@ typedef struct XrandrData
 
     //Init per screen
     uint32_t defaultRefreshRate;
+    uint32_t defaultRotation;
     XRRScreenResources* screenResources;
 } XrandrData;
 
-static bool xrandrHandleModeInfo(XrandrData* data, XRRModeInfo* modeInfo)
-{
-    double refreshRate = (double) modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
-
-    return ffdsAppendDisplay(
-        data->result,
-        (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height,
-        refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
-        (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height,
-        NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
-    );
-}
-
-static bool xrandrHandleMode(XrandrData* data, RRMode mode)
+static double xrandrHandleMode(XrandrData* data, RRMode mode)
 {
     for(int i = 0; i < data->screenResources->nmode; i++)
     {
         if(data->screenResources->modes[i].id == mode)
-            return xrandrHandleModeInfo(data, &data->screenResources->modes[i]);
+        {
+            XRRModeInfo* modeInfo = &data->screenResources->modes[i];
+            return (double) modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
+        }
     }
-    return false;
+    return data->defaultRefreshRate;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -168,29 +163,62 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc)
     if(crtcInfo == NULL)
         return false;
 
-    bool res = xrandrHandleMode(data, crtcInfo->mode);
-    res = res ? true : ffdsAppendDisplay(
+    uint32_t rotation;
+    switch (crtcInfo->rotation)
+    {
+        case RR_Rotate_90:
+            rotation = 90;
+            break;
+        case RR_Rotate_180:
+            rotation = 180;
+            break;
+        case RR_Rotate_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
+    bool res = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
-        data->defaultRefreshRate,
+        xrandrHandleMode(data, crtcInfo->mode),
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
-        NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
+        rotation,
+        name,
+        FF_DISPLAY_TYPE_UNKNOWN,
+        primary,
+        0
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
     return res;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary)
 {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
     if(outputInfo == NULL)
         return false;
 
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc);
+    Atom atomEdid = data->ffXInternAtom(data->display, "EDID", true);
+    if (atomEdid != None)
+    {
+        unsigned long nitems = 0;
+        uint8_t* edidData = NULL;
+        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, 0, 0, AnyPropertyType, NULL, NULL, &nitems, NULL, &edidData) == Success)
+        {
+            if (nitems >= 128)
+            {
+                ffStrbufClear(name);
+                ffEdidGetName(edidData, name);
+            }
+        }
+    }
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary);
 
     data->ffXRRFreeOutputInfo(outputInfo);
 
@@ -201,9 +229,10 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
     bool foundOutput = false;
 
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(data->ffXGetAtomName(data->display, monitorInfo->name));
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i]))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary))
             foundOutput = true;
     }
 
@@ -214,8 +243,11 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         data->defaultRefreshRate,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
-        NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
+        data->defaultRotation,
+        &name,
+        FF_DISPLAY_TYPE_UNKNOWN,
+        !!monitorInfo->primary,
+        0
     );
 }
 
@@ -247,10 +279,30 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
     if(screenConfiguration != NULL)
     {
         data->defaultRefreshRate = (uint32_t) data->ffXRRConfigCurrentRate(screenConfiguration);
+        Rotation rotation = 0;
+        data->ffXRRConfigCurrentConfiguration(screenConfiguration, &rotation);
+        switch (rotation)
+        {
+            case RR_Rotate_90:
+                data->defaultRotation = 90;
+                break;
+            case RR_Rotate_180:
+                data->defaultRotation = 180;
+                break;
+            case RR_Rotate_270:
+                data->defaultRotation = 270;
+                break;
+            default:
+                data->defaultRotation = 0;
+                break;
+        }
         data->ffXRRFreeScreenConfigInfo(screenConfiguration);
     }
     else
+    {
         data->defaultRefreshRate = 0;
+        data->defaultRotation = 0;
+    }
 
     //Init screen resources
     data->screenResources = data->ffXRRGetScreenResources(data->display, RootWindowOfScreen(screen));
@@ -270,25 +322,32 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         data->defaultRefreshRate,
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
+        data->defaultRotation,
         NULL,
-        FF_DISPLAY_TYPE_UNKNOWN
+        FF_DISPLAY_TYPE_UNKNOWN,
+        false,
+        0
     );
 }
 
-void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXrandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xrandr, &instance->config.libXrandr, , "libXrandr" FF_LIBRARY_EXTENSION, 3)
+    FF_LIBRARY_LOAD(xrandr, &instance.config.libXrandr, , "libXrandr" FF_LIBRARY_EXTENSION, 3)
 
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XOpenDisplay,)
     FF_LIBRARY_LOAD_SYMBOL(xrandr, XCloseDisplay,)
 
     XrandrData data;
 
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XInternAtom,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XGetAtomName,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenInfo,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentConfiguration,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResources,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputProperty,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetCrtcInfo,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeCrtcInfo,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeOutputInfo,);
@@ -320,10 +379,10 @@ void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result
 
 #else
 
-void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectXrandr(FFDisplayServerResult* result)
 {
     //Do nothing here. There are more x11 implementaions to come.
-    FF_UNUSED(instance, result);
+    FF_UNUSED(result);
 }
 
 #endif // FF_HAVE_XRANDR

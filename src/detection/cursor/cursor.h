@@ -12,6 +12,6 @@ typedef struct FFCursorResult
     FFstrbuf error;
 } FFCursorResult;
 
-void ffDetectCursor(const FFinstance* instance, FFCursorResult* result);
+void ffDetectCursor(FFCursorResult* result);
 
 #endif

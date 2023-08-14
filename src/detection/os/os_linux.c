@@ -75,6 +75,15 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
+    if(strstr(xdgConfigDirs, "cinnamon") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Cinnamon");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Cinnamon");
+        ffStrbufSetS(&result->id, "ubuntu-cinnamon");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
     if(strstr(xdgConfigDirs, "mate") != NULL)
     {
         ffStrbufSetS(&result->name, "Ubuntu MATE");
@@ -92,17 +101,35 @@ static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->idLike, "ubuntu");
         return;
     }
-}
 
-static void detectOS(FFOSResult* os, const FFinstance* instance)
-{
-    if(instance->config.osFile.length > 0)
+    if(strstr(xdgConfigDirs, "sway") != NULL)
     {
-        parseFile(instance->config.osFile.chars, os);
+        ffStrbufSetS(&result->name, "Ubuntu Sway");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Sway");
+        ffStrbufSetS(&result->id, "ubuntu-sway");
+        ffStrbufSetS(&result->idLike, "ubuntu");
         return;
     }
 
-    if(instance->config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
+    if(strstr(xdgConfigDirs, "touch") != NULL)
+    {
+        ffStrbufSetS(&result->name, "Ubuntu Touch");
+        ffStrbufSetS(&result->prettyName, "Ubuntu Touch");
+        ffStrbufSetS(&result->id, "ubuntu-touch");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+}
+
+static void detectOS(FFOSResult* os)
+{
+    if(instance.config.osFile.length > 0)
+    {
+        parseFile(instance.config.osFile.chars, os);
+        return;
+    }
+
+    if(instance.config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
     {
         if(os->id.length == 0)
             ffStrbufAppendS(&os->id, "bedrock");
@@ -127,7 +154,7 @@ static void detectOS(FFOSResult* os, const FFinstance* instance)
     parseFile(FASTFETCH_TARGET_DIR_ETC"/lsb-release", os);
 }
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->prettyName);
@@ -140,7 +167,7 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->codename);
     ffStrbufInit(&os->buildID);
 
-    detectOS(os, instance);
+    detectOS(os);
 
     if(ffStrbufIgnCaseCompS(&os->id, "ubuntu") == 0)
         getUbuntuFlavour(os);

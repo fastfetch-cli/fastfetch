@@ -8,7 +8,7 @@
 #define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
 #endif
 
-const char* ffDetectSound(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFSoundDevice */)
+const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 {
     AudioDeviceID mainDeviceId;
     UInt32 dataSize = sizeof(mainDeviceId);

@@ -4,10 +4,8 @@
 
 #include <time.h>
 
-const FFDateTimeResult* ffDetectDateTime(const FFinstance* instance)
+const FFDateTimeResult* ffDetectDateTime(void)
 {
-    FF_UNUSED(instance); //We may need it later for additional configuration
-
     static FFDateTimeResult result;
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;

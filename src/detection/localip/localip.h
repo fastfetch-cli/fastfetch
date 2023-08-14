@@ -11,8 +11,13 @@ typedef struct FFLocalIpResult
     FFstrbuf ipv4;
     FFstrbuf ipv6;
     FFstrbuf mac;
+    bool defaultRoute;
+
+    #ifdef _WIN32
+    uint32_t ifIndex;
+    #endif
 } FFLocalIpResult;
 
-const char* ffDetectLocalIps(const FFinstance* instance, FFlist* results);
+const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results);
 
 #endif

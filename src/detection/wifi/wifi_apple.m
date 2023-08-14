@@ -2,10 +2,8 @@
 
 #import <CoreWLAN/CoreWLAN.h>
 
-const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
+const char* ffDetectWifi(FFlist* result)
 {
-    FF_UNUSED(instance);
-
     NSArray<CWInterface*>* interfaces = CWWiFiClient.sharedWiFiClient.interfaces;
     if(!interfaces)
         return "CWWiFiClient.sharedWiFiClient.interfaces is nil";

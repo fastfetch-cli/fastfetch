@@ -132,16 +132,17 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
-        strcasecmp(name, "sh")            == 0 || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
-        strcasecmp(name, "sudo")          == 0 ||
-        strcasecmp(name, "su")            == 0 ||
-        strcasecmp(name, "doas")          == 0 ||
-        strcasecmp(name, "strace")        == 0 ||
-        strcasecmp(name, "sshd")          == 0 ||
-        strcasecmp(name, "gdb")           == 0 ||
-        strcasecmp(name, "lldb")          == 0 ||
-        strcasecmp(name, "guake-wrapped") == 0 ||
-        strcasestr(name, "debug")         != NULL
+        strcasecmp(name, "sh")                   == 0 || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
+        strcasecmp(name, "sudo")                 == 0 ||
+        strcasecmp(name, "su")                   == 0 ||
+        strcasecmp(name, "strace")               == 0 ||
+        strcasecmp(name, "sshd")                 == 0 ||
+        strcasecmp(name, "gdb")                  == 0 ||
+        strcasecmp(name, "lldb")                 == 0 ||
+        strcasecmp(name, "guake-wrapped")        == 0 ||
+        strcasestr(name, "debug")             != NULL ||
+        strcasestr(name, "command-not-found") != NULL ||
+        ffStrEndsWith(name, ".sh")
     ) {
         getTerminalShell(result, ppid);
         return;
@@ -152,6 +153,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "bash")      == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
+        strcasecmp(name, "mksh")      == 0 ||
+        strcasecmp(name, "oksh")      == 0 ||
         strcasecmp(name, "csh")       == 0 ||
         strcasecmp(name, "tcsh")      == 0 ||
         strcasecmp(name, "fish")      == 0 ||
@@ -171,6 +174,12 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         getTerminalShell(result, ppid);
         return;
     }
+
+    #ifdef __APPLE__
+    // https://github.com/fastfetch-cli/fastfetch/discussions/501
+    if (ffStrEndsWith(name, " (figterm)"))
+        getProcessNameAndPpid(ppid, name, &ppid);
+    #endif
 
     result->terminalPid = (uint32_t) pid;
     ffStrbufSetS(&result->terminalProcessName, name);
@@ -208,6 +217,11 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("WT_SESSION") != NULL ||
         getenv("WT_PROFILE_ID") != NULL
     )) term = "Windows Terminal";
+
+    //ConEmu
+    if(!ffStrSet(term) && (
+        getenv("ConEmuPID") != NULL
+    )) term = "ConEmu";
     #endif
 
     //Alacritty
@@ -237,15 +251,6 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
 
-    #ifdef __linux__
-    if(!ffStrSet(term))
-    {
-        //We are in WSL but not in Windows Terminal
-        if(getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
-            term = "conhost";
-    }
-    #endif
-
     //Normal Terminal
     if(!ffStrSet(term))
         term = getenv("TERM");
@@ -262,9 +267,9 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResult* result)
+static void getUserShellFromEnv(FFTerminalShellResult* result)
 {
-    ffStrbufSet(&result->userShellExe, &instance->state.platform.userShell);
+    ffStrbufSet(&result->userShellExe, &instance.state.platform.userShell);
     if(result->userShellExe.length == 0)
         return;
 
@@ -281,8 +286,7 @@ static void getUserShellFromEnv(const FFinstance* instance, FFTerminalShellResul
 
 static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
-    FFstrbuf command;
-    ffStrbufInit(&command);
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreate();
     ffStrbufAppendS(&command, "printf \"%s\" \"$");
     ffStrbufAppendTransformS(&command, exeName, toupper);
     ffStrbufAppendS(&command, "_VERSION\"");
@@ -296,9 +300,7 @@ static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
         NULL
     });
     ffStrbufSubstrBeforeFirstC(version, '(');
-    ffStrbufRemoveStrings(version, 2, "-release", "release");
-
-    ffStrbufDestroy(&command);
+    ffStrbufRemoveStrings(version, 2, (const char*[]) { "-release", "release" });
 }
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
@@ -312,10 +314,8 @@ static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* versio
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
-const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
+const FFTerminalShellResult* ffDetectTerminalShell()
 {
-    FF_UNUSED(instance);
-
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
@@ -353,47 +353,47 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
     getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
-    getUserShellFromEnv(instance, &result);
+    getUserShellFromEnv(&result);
 
     ffStrbufClear(&result.shellVersion);
-    if(instance->config.shellVersion)
-    {
-        getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
+    getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
-        if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
-            getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
-        else
-            ffStrbufSet(&result.userShellVersion, &result.shellVersion);
-    }
+    if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
+        getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
+    else
+        ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
-        ffStrbufInitS(&result.shellPrettyName, "PowerShell");
+        ffStrbufInitStatic(&result.shellPrettyName, "PowerShell");
     else if(ffStrbufEqualS(&result.shellProcessName, "nu"))
-        ffStrbufInitS(&result.shellPrettyName, "nushell");
+        ffStrbufInitStatic(&result.shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
-        ffStrbufInitS(&result.shellPrettyName, "xonsh");
+        ffStrbufInitStatic(&result.shellPrettyName, "xonsh");
     else
     {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
         ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
     }
 
+
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
-        ffStrbufInitS(&result.terminalPrettyName, "WezTerm");
+        ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
+    else if(ffStrbufEqualS(&result.terminalProcessName, ".kitty-wrapped"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "kitty"); // #510
 
     #if defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
-        ffStrbufInitS(&result.terminalPrettyName, "gnome-terminal");
+        ffStrbufInitStatic(&result.terminalPrettyName, "gnome-terminal");
 
     #elif defined(__APPLE__)
 
     else if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result.terminalProcessName, "iTermServer-"))
-        ffStrbufInitS(&result.terminalPrettyName, "iTerm");
+        ffStrbufInitStatic(&result.terminalPrettyName, "iTerm");
     else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
-        ffStrbufInitS(&result.terminalPrettyName, "Apple Terminal");
+        ffStrbufInitStatic(&result.terminalPrettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
-        ffStrbufInitS(&result.terminalPrettyName, "Warp");
+        ffStrbufInitStatic(&result.terminalPrettyName, "Warp");
 
     #endif
 
@@ -403,9 +403,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(const FFinstance* instance)
         ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);
 
     ffStrbufInit(&result.terminalVersion);
-
-    if(instance->config.terminalVersion)
-        fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
+    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
     ffThreadMutexUnlock(&mutex);
     return &result;

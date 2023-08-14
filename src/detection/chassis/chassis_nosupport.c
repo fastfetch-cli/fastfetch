@@ -1,10 +1,6 @@
 #include "chassis.h"
 
-void ffDetectChassis(FFChassisResult* result)
+const char* ffDetectChassis(FF_MAYBE_UNUSED FFChassisResult* result)
 {
-    ffStrbufInitS(&result->error, "Not supported on this platform");
-
-    ffStrbufInit(&result->chassisType);
-    ffStrbufInit(&result->chassisVendor);
-    ffStrbufInit(&result->chassisVersion);
+    return "Not supported on this platform";
 }

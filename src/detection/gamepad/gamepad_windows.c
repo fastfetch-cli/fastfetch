@@ -87,7 +87,7 @@ static const char* detectKnownGamepad(uint32_t vendorId, uint32_t productId)
     }
 }
 
-const char* ffDetectGamepad(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */)
+const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 {
     UINT nDevices = 0;
     if (GetRawInputDeviceList(NULL, &nDevices, sizeof(RAWINPUTDEVICELIST)))

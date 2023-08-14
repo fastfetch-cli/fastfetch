@@ -5,14 +5,14 @@
 
 #include "detection/displayserver/displayserver.h"
 
-void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result);
+void ffdsConnectWayland(FFDisplayServerResult* result);
 
-void ffdsConnectXcbRandr(const FFinstance* instance, FFDisplayServerResult* result);
-void ffdsConnectXcb(const FFinstance* instance, FFDisplayServerResult* result);
+void ffdsConnectXcbRandr(FFDisplayServerResult* result);
+void ffdsConnectXcb(FFDisplayServerResult* result);
 
-void ffdsConnectXrandr(const FFinstance* instance, FFDisplayServerResult* result);
-void ffdsConnectXlib(const FFinstance* instance, FFDisplayServerResult* result);
+void ffdsConnectXrandr(FFDisplayServerResult* result);
+void ffdsConnectXlib(FFDisplayServerResult* result);
 
-void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result);
+void ffdsDetectWMDE(FFDisplayServerResult* result);
 
 #endif

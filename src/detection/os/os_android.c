@@ -1,15 +1,13 @@
 #include "os.h"
 #include "common/settings.h"
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
-    FF_UNUSED(instance);
+    ffStrbufInitStatic(&os->name, "Android");
 
-    ffStrbufInitS(&os->name, "Android");
+    ffStrbufInitStatic(&os->prettyName, "Android");
 
-    ffStrbufInitS(&os->prettyName, "Android");
-
-    ffStrbufInitS(&os->id, "android");
+    ffStrbufInitStatic(&os->id, "android");
 
     ffStrbufInit(&os->version);
     ffSettingsGetAndroidProperty("ro.build.version.release", &os->version);

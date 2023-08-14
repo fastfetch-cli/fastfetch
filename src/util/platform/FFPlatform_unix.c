@@ -1,10 +1,38 @@
 #include "FFPlatform_private.h"
 #include "util/stringUtils.h"
 #include "fastfetch_config.h"
+#include "common/io/io.h"
 
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/utsname.h>
+
+static void platformPathAddEnv(FFlist* dirs, const char* env)
+{
+    const char* envValue = getenv(env);
+    if(!ffStrSet(envValue))
+        return;
+
+    FF_STRBUF_AUTO_DESTROY value = ffStrbufCreateA(64);
+    ffStrbufAppendS(&value, envValue);
+
+    uint32_t startIndex = 0;
+    while (startIndex < value.length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(&value, startIndex, ':');
+        value.chars[colonIndex] = '\0';
+
+        if(!ffStrSet(value.chars + startIndex))
+        {
+            startIndex = colonIndex + 1;
+            continue;
+        }
+
+        ffPlatformPathAddAbsolute(dirs, value.chars + startIndex);
+
+        startIndex = colonIndex + 1;
+    }
+}
 
 static void getHomeDir(FFPlatform* platform, const struct passwd* pwd)
 {
@@ -30,7 +58,7 @@ static void getCacheDir(FFPlatform* platform)
 
 static void getConfigDirs(FFPlatform* platform)
 {
-    ffPlatformPathAddEnv(&platform->configDirs, "XDG_CONFIG_HOME");
+    platformPathAddEnv(&platform->configDirs, "XDG_CONFIG_HOME");
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
 
     #if defined(__APPLE__)
@@ -39,7 +67,7 @@ static void getConfigDirs(FFPlatform* platform)
     #endif
 
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
-    ffPlatformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
+    platformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
 
     #if !defined(__APPLE__)
         ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC "/xdg/");
@@ -51,7 +79,7 @@ static void getConfigDirs(FFPlatform* platform)
 
 static void getDataDirs(FFPlatform* platform)
 {
-    ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
+    platformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
 
     #if defined(__APPLE__)
@@ -59,7 +87,7 @@ static void getDataDirs(FFPlatform* platform)
     #endif
 
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
-    ffPlatformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
+    platformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/local/share/");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/share/");
 }

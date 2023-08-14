@@ -14,9 +14,9 @@ typedef struct PowerAdapterResult
     int watts;
 } PowerAdapterResult;
 
-const char* ffDetectPowerAdapterImpl(FFinstance* instance, FFlist* results);
+const char* ffDetectPowerAdapterImpl(FFlist* results);
 
-#define FF_POWER_ADAPTER_UNSET -2
-#define FF_POWER_ADAPTER_NOT_CONNECTED -1
+#define FF_POWERADAPTER_UNSET -2
+#define FF_POWERADAPTER_NOT_CONNECTED -1
 
 #endif

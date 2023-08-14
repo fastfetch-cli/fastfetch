@@ -1,15 +1,19 @@
 #include "host.h"
-#include "common/sysctl.h"
+#include "common/settings.h"
+#include "util/smbiosHelper.h"
 
-void ffDetectHostImpl(FFHostResult* host)
+const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufInit(&host->error);
+    ffSettingsGetFreeBSDKenv("smbios.system.product", &host->productName);
+    ffCleanUpSmbiosValue(&host->productName);
+    ffSettingsGetFreeBSDKenv("smbios.system.family", &host->productFamily);
+    ffCleanUpSmbiosValue(&host->productFamily);
+    ffSettingsGetFreeBSDKenv("smbios.system.version", &host->productVersion);
+    ffCleanUpSmbiosValue(&host->productVersion);
+    ffSettingsGetFreeBSDKenv("smbios.system.sku", &host->productSku);
+    ffCleanUpSmbiosValue(&host->productSku);
+    ffSettingsGetFreeBSDKenv("smbios.system.maker", &host->sysVendor);
+    ffCleanUpSmbiosValue(&host->sysVendor);
 
-    ffStrbufInit(&host->productName);
-    ffStrbufInit(&host->productFamily);
-    ffStrbufInit(&host->productVersion);
-    ffStrbufInit(&host->productSku);
-    ffStrbufInit(&host->sysVendor);
-
-    ffStrbufAppendS(&host->error, ffSysctlGetString("hw.fdt.model", &host->productName));
+    return NULL;
 }

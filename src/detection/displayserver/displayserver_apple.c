@@ -12,7 +12,7 @@
 
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
 
-static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
+static void detectDisplays(FFDisplayServerResult* ds)
 {
     CGDirectDisplayID screens[128];
     uint32_t screenCount;
@@ -40,9 +40,8 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 }
             }
 
-            FF_STRBUF_AUTO_DESTROY name;
-            ffStrbufInit(&name);
-            if(detectName && CoreDisplay_DisplayCreateInfoDictionary)
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+            if(CoreDisplay_DisplayCreateInfoDictionary)
             {
                 CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
                 if(displayInfo)
@@ -59,8 +58,11 @@ static void detectDisplays(FFDisplayServerResult* ds, bool detectName)
                 refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
+                (uint32_t)CGDisplayRotation(screen),
                 &name,
-                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL
+                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
+                CGDisplayIsMain(screen),
+                (uint64_t)screen
             );
             CGDisplayModeRelease(mode);
         }
@@ -97,15 +99,24 @@ static void detectWMPlugin(FFstrbuf* name)
     }
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* instance)
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    FF_UNUSED(instance);
-
-    ffStrbufInitS(&ds->wmProcessName, "WindowServer");
-    ffStrbufInitS(&ds->wmPrettyName, "Quartz Compositor");
+    {
+        FF_CFTYPE_AUTO_RELEASE CFMachPortRef port = CGWindowServerCreateServerPort();
+        if (port)
+        {
+            ffStrbufInitStatic(&ds->wmProcessName, "WindowServer");
+            ffStrbufInitStatic(&ds->wmPrettyName, "Quartz Compositor");
+        }
+        else
+        {
+            ffStrbufInit(&ds->wmProcessName);
+            ffStrbufInit(&ds->wmPrettyName);
+        }
+    }
     ffStrbufInit(&ds->wmProtocolName);
 
-    if(instance->config.allowSlowOperations)
+    if(instance.config.allowSlowOperations)
     {
         FF_STRBUF_AUTO_DESTROY name;
         ffStrbufInit(&name);
@@ -115,10 +126,9 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds, const FFinstance* ins
     }
 
     ffStrbufInit(&ds->deProcessName);
-    ffStrbufInit(&ds->dePrettyName);
+    ffStrbufInitStatic(&ds->dePrettyName, "Aqua");
     ffStrbufInit(&ds->deVersion);
-    ffStrbufAppendS(&ds->dePrettyName, "Aqua");
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
-    detectDisplays(ds, instance->config.displayDetectName);
+    detectDisplays(ds);
 }

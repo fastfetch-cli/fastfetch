@@ -1,21 +1,21 @@
 Usage: fastfetch <options>
 
 Informative options:
-    -h,--help:             Show this message
-    -h,--help <command>:   Show help for a specific command
-    -v,--version:          Show the version of fastfetch
-    --list-config-paths:   List search paths of config files
-    --list-data-paths:     List search paths of presets and logos
-    --list-logos:          List available logos
-    --list-modules:        List available modules
-    --list-presets:        List presets fastfetch knows about; they can be loaded with --load-config (+)
-    --list-features:       List the supported features fastfetch was compiled with (mainly for development)
-    --print-logos:         Print available logos
-    --print-config-system: Print the default system config
-    --print-config-user:   Print the default user config
-    --print-structure:     Print the default structure
-    --gen-config:          Generate a sample config file in the default path
-    --gen-config-force:    Generate a sample config file in the default path. Overwrite the existing one
+    -h,--help:                  Show this message
+    -h,--help <command>:        Show help for a specific command
+    -v,--version:               Show the version of fastfetch
+    --list-config-paths:        List search paths of config files
+    --list-data-paths:          List search paths of presets and logos
+    --list-logos:               List available logos
+    --list-modules:             List available modules
+    --list-presets:             List presets fastfetch knows about; they can be loaded with --load-config (+)
+    --list-features:            List the supported features fastfetch was compiled with (mainly for development)
+    --print-logos:              Print available logos
+    --print-config-system:      Print the default system config
+    --print-config-user:        Print the default user config
+    --print-structure:          Print the default structure
+    --gen-config <?type>:       Generate a sample config file in the default path. Param `type` can be `jsonc` or `conf`
+    --gen-config-force <?type>: Generate a sample config file in the default path. Overwrite the existing one
 
 General options:
     --load-config <file>:             Load a config file or preset (+)
@@ -24,6 +24,9 @@ General options:
     --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
     --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
     --pipe <?value>:                  Disable logo and all escape sequences
+    --wmi-timeout <num>:              Set the timeout (ms) for WMI queries. Windows only. Default is 5000
+    --processing-timeout <num>:       Set the timeout (ms) when waiting for child processes. Default is 1000
+    --ds-force-drm <?value>:          Set if only DRM should be used to detect displays. Default is false
 
 Logo options:
     -l,--logo <logo>:                      Set the logo; if default, the name of a builtin logo or a path to a file
@@ -55,6 +58,7 @@ Display options:
     -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
     --color-keys <color>:        Set the color of the keys
     --color-title <color>:       Set the color of the title
+    --bright-color <?value>:     Set if the keys, title and ASCII logo should be printed in bright color. Default is true
     -c,--color <color>:          Set the color of both the keys and title
     --separator <str>:           Set the separator between key and value. Default is a colon with a space
     --set <key=value>:           Hard set the value of a key
@@ -62,19 +66,22 @@ Display options:
     --show-errors <?value>:      Print occurring errors
     --disable-linewrap <?value>: Whether to disable line wrap during the run
     --hide-cursor <?value>:      Whether to hide the cursor during the run
-    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC.
+    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
+    --percent-type <value>:      Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 1
+    --no-buffer <?value>:        Set if the stdout application buffer should be disabled. Default is false
+    --size-ndigits <value>:      Set the number of digits to keep after the decimal point when formatting sizes
+    --size-max-prefix <value>:   Set the largest binary prefix to use when formatting sizes. Default is YB
+    --temperature-unit <value>:  Set the unit of the temperature. Must be one of C, F and K. Default is C
 
 General module options:
-    --<module>-format <format>: Set the format string to use for each specific module.
-                                To see how a format string works, use fastfetch --help format.
-                                To see help about a specific format string, use fastfetch --help <module>-format.
+    --<module>-format <format>:    Set the format string to use for each specific module.
+                                   To see how a format string works, use fastfetch --help format.
+                                   To see help about a specific format string, use fastfetch --help <module>-format.
 
-    --<module>-key <key>:       Set the key to use for each specific module.
-                                For modules which print multiple lines, the string is parsed as a format string with the index as first character.
+    --<module>-key <key>:          Set the key to use for each specific module.
+                                   For modules which print multiple lines, the string is parsed as a format string with the index as first character.
 
-    --<module>-error <format>:  Set the error format string to use for each specific module.
-                                The error is given as the first and only argument.
-                                Setting this for a module will cause it to appear, even if --show-errors is not given.
+    --<module>-key-color <format>: Override the global `--color-keys` option for each specific module.
 
 Library options: Set the path of a library to load
     --lib-PCI <path>
@@ -97,50 +104,53 @@ Library options: Set the path of a library to load
     --lib-glx <path>
     --lib-osmesa <path>
     --lib-opencl <path>
-    --lib-cjson <path>
     --lib-pulse <path>
     --lib-freetype <path>
+    --lib-ddcutil <path>
 
 Module specific options:
     --title-fqdn <?value>:                   Set if the title should use fully qualified domain name. Default is false
+    --title-color-user <color>:              Set color of the user name (left part). Default is empty (use color of `--color-title`).
+    --title-color-at <color>:                Set color of the @ symbol (middle part). Default is empty (use color of `--color-title`)
+    --title-color-host <color>:              Set color of the host name (right part). Default is empty (use color of `--color-title`)
     --separator-string <str>:                Set the string printed by the separator module
     --os-file <path>:                        Set the path to the file containing OS information
-    --shell-version <?value>:                Set if shell version should be detected and printed
-    --terminal-version <?value>:             Set if terminal version should be detected and printed
     --disk-folders <folders>:                A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
     --disk-show-regular <?value>:            Set if regular volume should be printed. Default is true
-    --disk-show-removable <?value>:          Set if removable volume should be printed. Default is true
+    --disk-show-external <?value>:           Set if external volume should be printed. Default is true
     --disk-show-hidden <?value>:             Set if hidden volumes should be printed. Default is false
     --disk-show-subvolumes <?value>:         Set if subvolumes should be printed. Default is false
     --disk-show-unknown <?value>:            Set if unknown (unable to detect sizes) volumes should be printed. Default is false
     --bluetooth-show-disconnected: <?value>: Set if disconnected bluetooth devices should be printed. Default is false
     --display-compact-type: <?string>:       Set if all displays should be printed in one line. Default is none
     --display-detect-name: <?value>:         Set if display name should be detected and printed (if supported). Default is false
-    --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing
+    --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp  <?value>:                    Detect and display CPU temperature if supported. Default is false
     --gpu-temp  <?value>:                    Detect and display GPU temperature if supported. Default is false
     --gpu-force-vulkan  <?value>:            Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
-    --gpu-hide-integrated <?value>:          Hide integrated GPU if supported. Default is false
-    --gpu-hide-discrete <?value>:            Hide discrete GPU if supported. Default is false
+    --gpu-hide-type <?value>:                Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
     --battery-temp  <?value>:                Detect and display Battery temperature if supported. Default is false
     --localip-show-ipv4 <?value>:            Show IPv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
     --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
     --localip-show-loop <?value>:            Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --localip-name-prefix <str>:             Show IPs with given name prefix only. Default is empty
+    --localip-default-route-only <?value>:   Show ips that are used for default routing only. Default is false
     --localip-compact <?value>:              Show all IPs in one line. Default is false
     --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url:                          The URL of public IP detection server to be used.
+    --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
     --player-name:                           The name of the player to use
-    --gl <value>:                            Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
-    --percent-type <value>:                  Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 1
-    --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, csh for FreeBSD, bash for others
-    --command-key <str>:                     Set the module key to display, can be specified mulitple times
-    --command-text <str>:                    Set the command text to be executed, can be specified mulitple times
+    --opengl-library <value>:                Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
+    --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, /bin/sh for *nix
+    --command-key <str>:                     Set the module key to display
+    --command-text <str>:                    Set the command text to be executed
+    --colors-symbol <str>:                   Set the symbol to be printed by Colors module. Default is block
+    --colors-padding-left <value>:           Set the number of white spaces to print before the symbol. Default is 0
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

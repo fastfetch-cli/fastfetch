@@ -144,27 +144,17 @@ done:
     return true;
 }
 
-bool ffParsePropFileHomeValues(const FFinstance* instance, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
+bool ffParsePropFileHomeValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
-    FFstrbuf absolutePath;
-    ffStrbufInitA(&absolutePath, 64);
-    ffStrbufAppend(&absolutePath, &instance->state.platform.homeDir);
-    ffStrbufAppendC(&absolutePath, '/');
-    ffStrbufAppendS(&absolutePath, relativeFile);
-
-    bool result = ffParsePropFileValues(absolutePath.chars, numQueries, queries);
-
-    ffStrbufDestroy(&absolutePath);
-
-    return result;
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateF("%s/%s", instance.state.platform.homeDir.chars, relativeFile);
+    return ffParsePropFileValues(absolutePath.chars, numQueries, queries);
 }
 
 bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
 {
     bool foundAFile = false;
 
-    FFstrbuf baseDir;
-    ffStrbufInitA(&baseDir, 64);
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
 
     FF_LIST_FOR_EACH(FFstrbuf, dirPrefix, *list)
     {
@@ -188,8 +178,6 @@ bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uin
         if(allSet)
             break;
     }
-
-    ffStrbufDestroy(&baseDir);
 
     return foundAFile;
 }

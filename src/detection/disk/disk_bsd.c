@@ -11,7 +11,8 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         ffStrbufStartsWithS(&disk->mountpoint, "/var") ||
         ffStrbufStartsWithS(&disk->mountpoint, "/tmp") ||
         ffStrbufStartsWithS(&disk->mountpoint, "/proc") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/zroot")
+        ffStrbufStartsWithS(&disk->mountpoint, "/zroot") ||
+        ffStrbufStartsWithS(&disk->mountpoint, "/compat/linux/")
     )
         disk->type = FF_DISK_TYPE_HIDDEN_BIT;
     else if((fs->f_flags & MNT_NOSUID) || !(fs->f_flags & MNT_LOCAL))
@@ -25,17 +26,17 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 void detectFsInfo(struct statfs* fs, FFDisk* disk);
 #endif
 
-void ffDetectDisksImpl(FFDiskResult* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     struct statfs* buf;
 
     int size = getmntinfo(&buf, MNT_WAIT);
     if(size <= 0)
-        ffStrbufAppendS(&disks->error, "getmntinfo() failed");
+        return "getmntinfo(&buf, MNT_WAIT) failed";
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
-        FFDisk* disk = ffListAdd(&disks->disks);
+        FFDisk* disk = ffListAdd(disks);
 
         #ifdef __FreeBSD__
         // f_bavail and f_ffree are signed on FreeBSD...
@@ -44,7 +45,7 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         #endif
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
-        disk->bytesUsed = disk->bytesTotal - ((uint64_t)fs->f_bavail * fs->f_bsize);
+        disk->bytesUsed = disk->bytesTotal - ((uint64_t)fs->f_bfree * fs->f_bsize);
 
         disk->filesTotal = (uint32_t) fs->f_files;
         disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs->f_ffree);
@@ -53,4 +54,6 @@ void ffDetectDisksImpl(FFDiskResult* disks)
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         detectFsInfo(fs, disk);
     }
+
+    return NULL;
 }

@@ -16,6 +16,6 @@ typedef struct FFSoundDevice
     bool active;
 } FFSoundDevice;
 
-const char* ffDetectSound(const FFinstance* instance, FFlist* devices /* List of FFSoundDevice */);
+const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */);
 
 #endif

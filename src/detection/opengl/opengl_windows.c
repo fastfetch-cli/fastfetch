@@ -82,10 +82,8 @@ LRESULT CALLBACK wglHandleWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     }
 }
 
-const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
+const char* ffDetectOpenGL(FFOpenGLResult* result)
 {
-    FF_UNUSED(instance);
-
     MSG msg = {0};
     WNDCLASSW wc = {
         .lpfnWndProc = wglHandleWndProc,

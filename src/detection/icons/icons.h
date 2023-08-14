@@ -5,6 +5,6 @@
 
 #include "fastfetch.h"
 
-const char* ffDetectIcons(const FFinstance* instance, FFstrbuf* result);
+const char* ffDetectIcons(FFstrbuf* result);
 
 #endif

@@ -7,6 +7,7 @@
 
 #define FF_DE_PRETTY_PLASMA "KDE Plasma"
 #define FF_DE_PRETTY_GNOME "Gnome"
+#define FF_DE_PRETTY_GNOME_CLASSIC "Gnome Classic"
 #define FF_DE_PRETTY_XFCE4 "Xfce4"
 #define FF_DE_PRETTY_CINNAMON "Cinnamon"
 #define FF_DE_PRETTY_MATE "Mate"
@@ -29,6 +30,12 @@
 #define FF_WM_PRETTY_WESTON "Weston"
 #define FF_WM_PRETTY_XMONAD "XMonad"
 #define FF_WM_PRETTY_WSLG "WSLg"
+#define FF_WM_PRETTY_TINYWM "TinyWM"
+#define FF_WM_PRETTY_QTILE "Qtile"
+#define FF_WM_PRETTY_HERBSTLUFTWM "herbstluftwm"
+#define FF_WM_PRETTY_ICEWM "IceWM"
+#define FF_WM_PRETTY_SPECTRWM "spectrwm"
+
 
 #define FF_WM_PROTOCOL_TTY "TTY"
 #define FF_WM_PROTOCOL_X11 "X11"
@@ -49,6 +56,9 @@ typedef struct FFDisplayResult
     uint32_t scaledHeight;
     FFstrbuf name;
     FFDisplayType type;
+    uint32_t rotation;
+    bool primary;
+    uint64_t id; // platform dependent
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult
@@ -62,7 +72,7 @@ typedef struct FFDisplayServerResult
     FFlist displays; //List of FFDisplayResult
 } FFDisplayServerResult;
 
-const FFDisplayServerResult* ffConnectDisplayServer(const FFinstance* instance);
+const FFDisplayServerResult* ffConnectDisplayServer();
 
 bool ffdsAppendDisplay(
     FFDisplayServerResult* result,
@@ -71,7 +81,10 @@ bool ffdsAppendDisplay(
     double refreshRate,
     uint32_t scaledWidth,
     uint32_t scaledHeight,
+    uint32_t rotation,
     FFstrbuf* name,
-    FFDisplayType type);
+    FFDisplayType type,
+    bool primary,
+    uint64_t id);
 
 #endif

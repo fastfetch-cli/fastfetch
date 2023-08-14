@@ -16,20 +16,24 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ## Customization
 
-With customization and speed being two competing goals, this project actually builds two executables.
+With customization and speed being two competing goals, this project actually builds two executables:
 
-* The main one being `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent in `$XDG_CONFIG_HOME/fastfetch/config.conf`. To view the available options run `fastfetch --help`.
-* The second executable being built is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
+* The main one is `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent by modifying `$XDG_CONFIG_HOME/fastfetch/config.conf`. Use `fastfetch --gen-config conf` to generate one. To view the available options, run `fastfetch --help`.
+* The second executable is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
 
-At the moment the performance difference is measurable, but too small to be human recognizable. But the leap will get bigger with more and more options coming, and on slow machines this might actually make a difference.
+Currently, the performance difference is measurable, but too small to be recognizable by humans. But with more options planned, the leap will get bigger over time and on slow machines this might actually make a difference.
 
 There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `--load-config <filename>`. They may also serve as a good example for format arguments.
 
-Logos can be heavily customized to. See the [logo documentation](doc/logo.md) for more information.
+Logos can be heavily customized too; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
+
+### Customization with new JSONC format
+
+A new, structure based, and user-friendly config file format was introduced in v2.0.0. This format is based on [JSONC](https://jsonc.org/). [See more details in Wiki](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration)
 
 ## Dependencies
 
-Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most linux distributions.
+Fastfetch dynamically loads needed libraries if they are available. On Linux, its only hard dependencies are `libc` (any implementation of the c standard library), `libdl`, `libm` and [`libpthread`](https://man7.org/linux/man-pages/man7/pthreads.7.html) (if built with multithreading support). They are all shipped with [`glibc`](https://www.gnu.org/software/libc/), which is already installed on most Linux distributions.
 
 The following libraries are used if present at runtime:
 
@@ -55,9 +59,9 @@ The following libraries are used if present at runtime:
 * [`libXFConf`](https://gitlab.xfce.org/xfce/xfconf): Needed for XFWM theme and XFCE Terminal font.
 * [`libsqlite3`](https://www.sqlite.org/index.html): Needed for pkg & rpm package count.
 * [`librpm`](http://rpm.org/): Slower fallback for rpm package count. Needed on openSUSE.
-* [`libcJSON`](https://github.com/DaveGamble/cJSON): Needed for Windows Terminal font ( WSL ).
 * [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection.
 * [`libpulse`](https://freedesktop.org/software/pulseaudio/doxygen/): Used for Sound detection.
+* [`libddcutil`](https://github.com/rockowitz/ddcutil): Used for brightness detection of external displays
 
 ### macOS
 
@@ -73,13 +77,12 @@ For the image logo, iTerm with iterm image protocol should work. Apple Terminal 
 ### Windows
 
 * [`wlanapi`](https://learn.microsoft.com/en-us/windows/win32/api/wlanapi/): A system dll which isn't supported by Windows Server by default. Used for Wifi info detection.
-* [`libcJSON`](https://github.com/DaveGamble/cJSON): Used for Windows Terminal font detection. [`cjson`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-cjson)
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module. Usually has been provided by GPU drivers. [`vulkan-loader`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-loader) [`vulkan-headers`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-vulkan-headers)
 * [`libOpenCL`](https://www.khronos.org/opencl/): OpenCL module. [`opencl-icd`](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-opencl-icd)
 
 Note: In Windows 7, 8 and 8.1, [ConEmu](https://conemu.github.io/en/AnsiEscapeCodes.html) is required to run fastfetch due to [the lack of ASCII escape code native support](https://en.wikipedia.org/wiki/ANSI_escape_code#DOS,_OS/2,_and_Windows). In addition, as fastfetch for Windows targets [UCRT](https://learn.microsoft.com/en-us/cpp/windows/universal-crt-deployment) C runtime library, [it must be installed manually](https://support.microsoft.com/en-us/topic/update-for-universal-c-runtime-in-windows-c0514201-7fe6-95a3-b0a5-287930f3560c) as UCRT is only pre-installed in Windows 10 and later.
 
-For the image logo, only chafa is supported due to [the design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not built by default due to the massive dependencies of imagemagick. You must built it yourself.
+For the image logo, only chafa is supported due to [a design flaw of ConPTY](https://github.com/microsoft/terminal/issues/1173). In addition, chafa support is not included by default due to the massive dependencies of imagemagick. You must built it yourself.
 
 ### Android
 
@@ -92,17 +95,21 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, Gamepad, GPU, Host, Icons, Kernel, Locale, LocalIP, Media, Memory, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator, OS, Shell, Sound, Swap, Terminal, Terminal Font, Theme, Time, Title, Uptime, Vulkan, Wallpaper, Wifi, WM, WMTheme
+Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, Gamepad, GPU, Host, Icons, Kernel, LM, Locale, LocalIP, Media, Memory, Monitor, OpenCL, OpenGL, Packages, Player, Power Adapter, Processes, PublicIP, Separator, OS, Shell, Sound, Swap, Terminal, Terminal Font, Terminal Size, Theme, Time, Title, Uptime, Vulkan, Wallpaper, Wifi, WM, WMTheme
 ```
 
 ##### Builtin logos
+
+<!-- `Content of src/logo/builtin.c`.split('\n').map(x => x.trim()).filter(x => x.startsWith('// ')).map(x => x.slice(3)).sort((a,b)=>a.toUpperCase().localeCompare(b.toUpperCase())).join(', ') -->
 ```
-AlmaLinux, Alpine, Android, Arch, Arco, Artix, Bedrock, CachyOS, CentOS, CRUX, Crystal, Debian, Deepin, Devuan, Endeavour, Enso, Fedora, FreeBSD, Garuda, Gentoo, GhostBSD, KDE Neon, KISS, Kubuntu, LangitKetujuh, Linux, MacOS, Manjaro, Mint, MSYS2, NixOS, Nobara, OpenSUSE, OpenSUSE LEAP, OpenSUSE Tumbleweed, Parabola, Pop!_OS, Raspbian, RebornOS, RedstarOS, Rocky, Rosa, Slackware, Solus, SteamOS, Ubuntu, Vanilla, Void, Windows, Windows 11, Windows 8, Zorin
+AIX, AlmaLinux, Alpine, Alpine2Small, AlpineSmall, Alter, Amazon, AmogOS, Anarchy, Android, AndroidSmall, Antergos, Antix, AoscOS, AoscOsRetro, AoscOsRetro_small, Aperture, Apple, AppleSmall, Apricity, Arch, Arch2, ArchBox, Archcraft, Archcraft2, Archlabs, ArchSmall, ArchStrike, ArcoLinux, ArcoLinuxSmall, ArseLinux, Artix, Artix2Small, ArtixSmall, Arya, Asahi, Aster, AsteroidOS, AstOS, Astra, Ataraxia, Athena, Bedrock, BigLinux, Bitrig, BlackArch, BlackPanther, BLAG, BlankOn, BlueLight, Bodhi, Bonsai, BSD, BunsenLabs, CachyOS, CachyOSSmall, Calculate, CalinixOS, CalinixOSSmall, Carbs, CBL-Mariner, CelOS, Center, CentOS, CentOSSmall, Chakra, ChaletOS, Chapeau, ChonkySealOS, Chrom, Cleanjaro, CleanjaroSmall, ClearLinux, ClearOS, Clover, Cobalt, Condres, ContainerLinux, CRUX, CRUXSmall, CrystalLinux, Cucumber, CutefishOS, CuteOS, CyberOS, Dahlia, DarkOS, Debian, DebianSmall, Deepin, DesaOS, Devuan, DevuanSmall, DietPi, DracOS, DragonFly, DragonFlyOld, DragonFlySmall, Drauger, Droidian, Elementary, ElementarySmall, Elive, EncryptOS, Endeavour, Endless, Enso, EuroLinux, EvolutionOS, Exherbo, ExodiaPredator, Fedora, FedoraOld, FedoraSmall, FemboyOS, Feren, Finnix, Floflis, FreeBSD, FreeBSDSmall, FreeMiNT, Frugalware, Funtoo, GalliumOS, Garuda, GarudaDragon, GarudaSmall, Gentoo, GentooSmall, GhostBSD, Glaucus, GNewSense, Gnome, GNU, GoboLinux, GrapheneOS, Grombyang, Guix, GuixSmall, Haiku, HaikuSmall, HamoniKR, HarDClanZ, HardenedBSD, Hash, Huayra, Hybrid, HydroOS, Hyperbola, HyperbolaSmall, Iglunix, InstantOS, IRIX, Itc, Januslinux, Kaisen, Kali, KaliSmall, KaOS, KDENeon, Kibojoe, KISSLinux, Kogaion, Korora, KrassOS, KSLinux, Kubuntu, LangitKetujuh, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, LAST, Laxeros, LEDE, LibreELEC, Linspire, Linux, LinuxLight, LinuxLightSmall, LinuxMint, LinuxMintOld, LinuxMintSmall, LinuxSmall, Live_Raizo, LMDE, Lunar, MacOS, MacOS2, MacOS2Small, MacOSSmall, Mageia, MageiaSmall, MagpieOS, Mandriva, Manjaro, ManjaroSmall, MassOS, MatuusOS, MaUI, Meowix, Mer, Minix, Mint, MintOld, MintSmall, MiracleLinux, Msys2, MX, MXSmall, Namib, Nekos, Neptune, NetBSD, NetRunner, Nitrux, NixOS, NixOS_small, NixOsOld, NixOsSmall, Nobara, NomadBSD, Nurunner, NuTyX, Obarun, OBRevenge, OmniOS, OpenBSD, OpenBSDSmall, OpenEuler, OpenIndiana, OpenKylin, OpenMamba, OpenMandriva, OpenStage, OpenSuse, OpenSuseLeap, OpenSuseSmall, OpenSuseTumbleweed, OpenWrt, OPNsense, Oracle, Orchid, OrchidSmall, OS_Elbrus, OSMC, OSX, OSXSmall, PacBSD, Panwah, Parabola, ParabolaSmall, Parch, Pardus, Parrot, Parsix, PCBSD, PCLinuxOS, PearOS, Pengwin, Pentoo, Peppermint, PhyOS, Pisi, PNMLinux, Pop, PopSmall, Porteus, PostMarketOS, PostMarketOSSmall, Proxmox, PuffOS, Puppy, PureOS, PureOSSmall, Q4OS, Qubes, Qubyt, Quibian, Radix, Raspbian, RaspbianSmall, RavynOS, Reborn, RebornSmall, RedCore, RedHatEnterpriseLinux, RedHatEnterpriseLinux_old, RedstarOS, Refracted Devuan, Regata, Regolith, RhaymOS, RockyLinux, RockyLinuxSmall, RosaLinux, Sabayon, Sabotage, Sailfish, SalentOS, SalientOS, Salix, SambaBOX, Sasanqua, Scientific, Semc, Septor, Serene, SharkLinux, ShastraOS, Siduction, SkiffOS, Slackel, Slackware, SlackwareSmall, Slitaz, SmartOS, Soda, Solaris, SolarisSmall, Solus, SourceMage, Sparky, Star, SteamOS, StockLinux, Sulin, Suse, SuseSmall, Swagarch, T2, Tails, TeArch, TorizonCore, Trisquel, Twister, Ubuntu, Ubuntu2Old, Ubuntu2Small, UbuntuBudgie, UbuntuCinnamon, UbuntuGnome, UbuntuKde, UbuntuKylin, UbuntuMate, UbuntuOld, UbuntuSmall, UbuntuStudio, UbuntuSway, UbuntuTouch, UbuntuUnity, Ultramarine, Univalent, Univention, UOS, UrukOS, Uwuntu, Vanilla, Venom, Vnux, Void, VoidSmall, Vzlinux, WiiLinuxNgx, Windows, Windows11, Windows11Small, Windows8, Windows95, Xferience, YiffOS, Zorin
 ```
+
+Run `fastfetch --print-logos` to print them
 
 ##### Package managers
 ```
-apk, brew, Chocolatey, dpkg, emerge, eopkg, Flatpak, MacPorts, nix, Pacman, pkg, pkgtool, rpm, scoop, Snap, xbps
+apk, brew, Chocolatey, dpkg, emerge, eopkg, Flatpak, MacPorts, nix, Pacman, paludis, pkg, pkgtool, rpm, scoop, Snap, xbps
 ```
 
 ##### WM themes
@@ -117,7 +124,7 @@ Budgie, Cinnamon, Gnome, KDE Plasma, LXQt, Mate, XFCE4
 
 ##### Terminal fonts
 ```
-Alacritty, Apple Terminal, ConEmu, Deepin Terminal, foot, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, MATE Terminal, mintty, QTerminal, Tabby, Terminator, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal
+Alacritty, Apple Terminal, ConEmu, Deepin Terminal, foot, Gnome Terminal, iTerm2, Kitty, Konsole, LXTerminal, MATE Terminal, mintty, QTerminal, Tabby, Terminator, Termux, Tilix, TTY, Warp, WezTerm, Windows Terminal, XFCE4 Terminal, Yakuake
 ```
 
 ## Building
@@ -140,7 +147,7 @@ Currently GCC or clang is required (MSVC is not supported). MSYS2 with CLANG64 s
 1. Open `MSYS2 / CLANG64` (not `MSYS2 / MSYS`, which targets cygwin C runtime)
 1. Install dependencies
 ```bash
-pacman -Syu mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-pkgconf mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-cjson mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
+pacman -Syu mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-pkgconf mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
 ```
 
 Follow the building instructions of Linux next.

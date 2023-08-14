@@ -3,10 +3,10 @@
 
 #import <Foundation/Foundation.h>
 
-bool ffDetectWmTheme(FF_MAYBE_UNUSED FFinstance* instance, FFstrbuf* themeOrError)
+bool ffDetectWmTheme(FFstrbuf* themeOrError)
 {
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/.GlobalPreferences.plist", instance->state.platform.homeDir.chars];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/.GlobalPreferences.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)

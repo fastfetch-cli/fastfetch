@@ -60,12 +60,12 @@ void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty)
         ffStrbufAppendF(pretty, ".%u", version->patch);
 }
 
-static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, uint8_t prefixesLength, const char** prefixes)
+static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const char** prefixes)
 {
-    long double size = (long double) bytes;
+    double size = (double) bytes;
     uint8_t counter = 0;
 
-    while(size >= base && counter < prefixesLength - 1)
+    while(size >= base && counter < instance.config.sizeMaxPrefix && prefixes[counter + 1])
     {
         size /= base;
         counter++;
@@ -73,22 +73,43 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, uint8_t p
 
     if(counter == 0)
         ffStrbufAppendF(result, "%"PRIu64" %s", bytes, prefixes[0]);
-    else if(counter < 3 || (counter == 3 && size < 100.0))
-        ffStrbufAppendF(result, "%.2Lf %s", size, prefixes[counter]);
     else
-        ffStrbufAppendF(result, "%.0Lf %s", size, prefixes[counter]);
+        ffStrbufAppendF(result, "%.*f %s", instance.config.sizeNdigits, size, prefixes[counter]);
 }
 
-void ffParseSize(uint64_t bytes, FFBinaryPrefixType binaryPrefix, FFstrbuf* result)
+void ffParseSize(uint64_t bytes, FFstrbuf* result)
 {
-    if(binaryPrefix == FF_BINARY_PREFIX_TYPE_IEC)
-        parseSize(result, bytes, 1024, 5, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB"});
-    else if(binaryPrefix == FF_BINARY_PREFIX_TYPE_SI)
-        parseSize(result, bytes, 1000, 5, (const char*[]) {"B", "kB", "MB", "GB", "TB"});
-    else if(binaryPrefix == FF_BINARY_PREFIX_TYPE_JEDEC)
-        parseSize(result, bytes, 1024, 5, (const char*[]) {"B", "KB", "MB", "GB", "TB"});
-    else
-        parseSize(result, bytes, 1024, 1, (const char*[]) {"B"});
+    switch (instance.config.binaryPrefixType)
+    {
+        case FF_BINARY_PREFIX_TYPE_IEC:
+            parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
+            break;
+        case FF_BINARY_PREFIX_TYPE_SI:
+            parseSize(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
+            break;
+        case FF_BINARY_PREFIX_TYPE_JEDEC:
+            parseSize(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
+            break;
+        default:
+            parseSize(result, bytes, 1024, (const char*[]) {"B", NULL});
+            break;
+    }
+}
+
+void ffParseTemperature(double celsius, FFstrbuf* buffer)
+{
+    switch (instance.config.temperatureUnit)
+    {
+        case FF_TEMPERATURE_UNIT_CELSIUS:
+            ffStrbufAppendF(buffer, "%.1f°C", celsius);
+            break;
+        case FF_TEMPERATURE_UNIT_FAHRENHEIT:
+            ffStrbufAppendF(buffer, "%.1f°F", celsius * 1.8 + 32);
+            break;
+        case FF_TEMPERATURE_UNIT_KELVIN:
+            ffStrbufAppendF(buffer, "%.1f K", celsius + 273.15);
+            break;
+    }
 }
 
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)

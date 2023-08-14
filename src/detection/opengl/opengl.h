@@ -13,6 +13,6 @@ typedef struct FFOpenGLResult
     FFstrbuf slv;
 } FFOpenGLResult;
 
-const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result);
+const char* ffDetectOpenGL(FFOpenGLResult* result);
 
 #endif

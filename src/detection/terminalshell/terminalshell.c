@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
+#include "util/stringUtils.h"
 
 #ifdef _WIN32
 
@@ -40,17 +41,11 @@ static bool getFileVersion(const char* exePath, FFstrbuf* version)
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
 {
-    bool ok = ffProcessAppendStdOut(version, (char* const[]) {
+    return ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "--version",
         NULL
     }) == NULL;
-    if (ok)
-    {
-        ffStrbufTrim(version, '\n');
-        ffStrbufTrim(version, ' ');
-    }
-    return ok;
 }
 
 static bool getExeVersionGeneral(FFstrbuf* exe, FFstrbuf* version)
@@ -82,7 +77,6 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
         return false;
 
     //fish, version 3.6.0
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
@@ -100,8 +94,37 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
     if(!getExeVersionRaw(exe, version))
         return false;
 
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
+    return true;
+}
+
+static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    //  version         sh (AT&T Research) 93u+ 2012-08-01
+    ffStrbufSubstrAfterLastC(version, ')');
+    ffStrbufTrim(version, ' ');
+    return true;
+}
+
+static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "-c",
+        "echo $OKSH_VERSION",
+        NULL
+    }) != NULL)
+        return false;
+
+    //oksh 7.3
+    ffStrbufSubstrAfterFirstC(version, ' ');
     return true;
 }
 
@@ -117,7 +140,6 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
         NULL
     })) return false;
 
-    ffStrbufTrimRight(version, '\n');
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
@@ -137,6 +159,10 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(strcasecmp(exeName, "nu") == 0)
         return getExeVersionRaw(exe, version); //0.73.0
+    if(strcasecmp(exeName, "ksh") == 0)
+        return getShellVersionKsh(exe, version);
+    if(strcasecmp(exeName, "oksh") == 0)
+        return getShellVersionOksh(exe, version);
     if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
     {
         ffStrbufSetS(version, getenv("XONSH_VERSION"));
@@ -213,6 +239,30 @@ FF_MAYBE_UNUSED static bool getTerminalVersionMateTerminal(FFstrbuf* exe, FFstrb
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionCockpit(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version)) return false;
+
+    //Version: 295\n...
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "-v",
+        NULL
+    })) return false;
+
+    //xterm(273)
+    ffStrbufTrimRight(version, ')');
+    ffStrbufSubstrAfterFirstC(version, '(');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -259,6 +309,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "konsole"))
         return getTerminalVersionKonsole(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "yakuake"))
+        return getExeVersionGeneral(exe, version);//yakuake 22.12.3
+
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
         return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
 
@@ -277,6 +330,12 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "mate-terminal"))
         return getTerminalVersionMateTerminal(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "cockpit-bridge"))
+        return getTerminalVersionCockpit(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "xterm"))
+        return getTerminalVersionXterm(exe, version);
+
     #endif
 
     #ifdef _WIN32
@@ -284,7 +343,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "WindowsTerminal.exe"))
         return getTerminalVersionWindowsTerminal(exe, version);
 
-    if(ffStrbufStartsWithIgnCaseS(processName, "ConEmuC"))
+    if(ffStrbufStartsWithIgnCaseS(processName, "ConEmu"))
         return getTerminalVersionConEmu(exe, version);
 
     #endif
@@ -309,8 +368,8 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         if(termProgram)
         {
             if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
-                (strcmp(termProgram, "vscode") == 0 && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
-                (strcmp(termProgram, "iTerm.app") == 0 && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
+                (ffStrEquals(termProgram, "vscode") && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
+                (ffStrEquals(termProgram, "iTerm.app") && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
             ) {
                 ffStrbufSetS(version, termProgramVersion);
                 return true;

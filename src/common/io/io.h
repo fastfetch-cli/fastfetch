@@ -82,11 +82,10 @@ typedef enum FFPathType
 #define FF_PATHTYPE_ANY (FF_PATHTYPE_FILE | FF_PATHTYPE_DIRECTORY)
 
 bool ffPathExists(const char* path, FFPathType pathType);
+bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
-#ifndef _WIN32
-    FF_C_SCANF(2, 3)
-    void ffGetTerminalResponse(const char* request, const char* format, ...);
-#endif
+FF_C_SCANF(2, 3)
+const char* ffGetTerminalResponse(const char* request, const char* format, ...);
 
 // Not thread safe!
 bool ffSuppressIO(bool suppress);

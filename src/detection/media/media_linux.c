@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
 #include "common/thread.h"
+#include "util/stringUtils.h"
 
 #include <string.h>
 
@@ -61,13 +62,13 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
 
         data->lib->ffdbus_message_iter_next(&dictIterator);
 
-        if(strcmp(key, "xesam:title") == 0)
+        if(ffStrEquals(key, "xesam:title"))
             ffDBusGetValue(data, &dictIterator, &result->song);
-        else if(strcmp(key, "xesam:album") == 0)
+        else if(ffStrEquals(key, "xesam:album"))
             ffDBusGetValue(data, &dictIterator, &result->album);
-        else if(strcmp(key, "xesam:artist") == 0)
+        else if(ffStrEquals(key, "xesam:artist"))
             ffDBusGetValue(data, &dictIterator, &result->artist);
-        else if(strcmp(key, "xesam:url") == 0)
+        else if(ffStrEquals(key, "xesam:url"))
             ffDBusGetValue(data, &dictIterator, &result->url);
 
         if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0 && result->url.length > 0)
@@ -99,20 +100,17 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
     return true;
 }
 
-static void getCustomBus(FFDBusData* data, const FFinstance* instance, FFMediaResult* result)
+static void getCustomBus(FFDBusData* data, const FFstrbuf* playerName, FFMediaResult* result)
 {
-    if(ffStrbufStartsWithS(&instance->config.playerName, FF_DBUS_MPRIS_PREFIX))
+    if(ffStrbufStartsWithS(playerName, FF_DBUS_MPRIS_PREFIX))
     {
-        getBusProperties(data, instance->config.playerName.chars, result);
+        getBusProperties(data, playerName->chars, result);
         return;
     }
 
-    FFstrbuf busName;
-    ffStrbufInit(&busName);
-    ffStrbufAppendS(&busName, FF_DBUS_MPRIS_PREFIX);
-    ffStrbufAppend(&busName, &instance->config.playerName);
+    FF_STRBUF_AUTO_DESTROY busName = ffStrbufCreateS(FF_DBUS_MPRIS_PREFIX);
+    ffStrbufAppend(&busName, playerName);
     getBusProperties(data, busName.chars, result);
-    ffStrbufDestroy(&busName);
 }
 
 static void getBestBus(FFDBusData* data, FFMediaResult* result)
@@ -142,7 +140,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
         const char* busName;
         data->lib->ffdbus_message_iter_get_basic(&arrayIterator, &busName);
 
-        if(strncmp(busName, FF_DBUS_MPRIS_PREFIX, sizeof(FF_DBUS_MPRIS_PREFIX) - 1) != 0)
+        if(!ffStrStartsWith(busName, FF_DBUS_MPRIS_PREFIX))
             FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
 
         if(getBusProperties(data, busName, result))
@@ -154,15 +152,17 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
     data->lib->ffdbus_message_unref(reply);
 }
 
-static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
+static const char* getMedia(FFMediaResult* result)
 {
     FFDBusData data;
-    const char* error = ffDBusLoadData(instance, DBUS_BUS_SESSION, &data);
+    const char* error = ffDBusLoadData(DBUS_BUS_SESSION, &data);
     if(error != NULL)
         return error;
 
-    if(instance->config.playerName.length > 0)
-        getCustomBus(&data, instance, result);
+    // FIXME: This is shared for both player and media module.
+    // However it uses an option in one specific module
+    if(instance.config.playerName.length > 0)
+        getCustomBus(&data, &instance.config.playerName, result);
     else
         getBestBus(&data, result);
 
@@ -171,13 +171,12 @@ static const char* getMedia(const FFinstance* instance, FFMediaResult* result)
 
 #endif
 
-void ffDetectMediaImpl(const FFinstance* instance, FFMediaResult* media)
+void ffDetectMediaImpl(FFMediaResult* media)
 {
     #ifdef FF_HAVE_DBUS
-        const char* error = getMedia(instance, media);
+        const char* error = getMedia(media);
         ffStrbufAppendS(&media->error, error);
     #else
-        FF_UNUSED(instance);
         ffStrbufAppendS(&media->error, "Fastfetch was compiled without DBus support");
     #endif
 }

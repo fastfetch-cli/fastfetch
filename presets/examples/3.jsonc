@@ -1,0 +1,20 @@
+// Load with --load-config examples/3.jsonc
+
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": "debian_small",
+    "display": {
+        "binaryPrefix": "si"
+    },
+    "modules": [
+        "vulkan",
+        "opengl",
+        "opencl",
+        "memory",
+        {
+            "type": "disk",
+            "folders": "/:/home:/boot:/efi"
+        },
+        "localip"
+    ]
+}

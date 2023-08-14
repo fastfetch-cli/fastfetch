@@ -1,29 +1,43 @@
 #include "fastfetch.h"
 #include "common/processing.h"
 #include "common/io/io.h"
+#include "common/time.h"
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
+#include <poll.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <sys/wait.h>
 
-const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
+enum { FF_PIPE_BUFSIZ = 4096 };
+
+static inline void waitpid_wrapper(pid_t* pid)
+{
+    // remove zombie processes
+    if (*pid > 0)
+        waitpid(*pid, NULL, 0);
+}
+
+const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
     int pipes[2];
 
     if(pipe(pipes) == -1)
         return "pipe() failed";
 
-    pid_t childPid = fork();
+    __attribute__((__cleanup__(waitpid_wrapper))) pid_t childPid = fork();
     if(childPid == -1)
         return "fork() failed";
 
     //Child
     if(childPid == 0)
     {
-        dup2(pipes[1], STDOUT_FILENO);
+        dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         close(pipes[0]);
         close(pipes[1]);
-        close(STDERR_FILENO);
+        close(useStdErr ? STDOUT_FILENO : STDERR_FILENO);
         execvp(argv[0], argv);
         exit(901);
     }
@@ -32,18 +46,40 @@ const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
     close(pipes[1]);
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
-    int status = -1;
-    if(waitpid(childPid, &status, 0) < 0)
-        return "waitpid(childPid, &status, 0) failed";
 
-    if (!WIFEXITED(status))
-        return "WIFEXITED(status) == false";
+    int timeout = instance.config.processingTimeout;
+    if (timeout >= 0)
+        fcntl(childPipeFd, F_SETFL, fcntl(childPipeFd, F_GETFL) | O_NONBLOCK);
 
-    if(WEXITSTATUS(status) == 901)
-        return "WEXITSTATUS(status) == 901 ( execvp failed )";
+    do
+    {
+        if (timeout >= 0)
+        {
+            struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
+            if (poll(&pollfd, 1, timeout) == 0)
+            {
+                kill(childPid, SIGTERM);
+                return "poll(&pollfd, 1, timeout) timeout";
+            }
+            else if (pollfd.revents & POLLERR)
+            {
+                kill(childPid, SIGTERM);
+                return "poll(&pollfd, 1, timeout) error";
+            }
+        }
 
-    if(!ffAppendFDBuffer(childPipeFd, buffer))
-        return "ffAppendFDBuffer(childPipeFd, buffer) failed";
+        char str[FF_PIPE_BUFSIZ];
+        while (true)
+        {
+            ssize_t nRead = read(childPipeFd, str, FF_PIPE_BUFSIZ);
+            if (nRead > 0)
+                ffStrbufAppendNS(buffer, (uint32_t) nRead, str);
+            else if (nRead == 0)
+                return NULL;
+            else if (nRead < 0)
+                break;
+        }
+    } while (errno == EAGAIN);
 
     return NULL;
 }

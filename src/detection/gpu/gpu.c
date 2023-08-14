@@ -2,8 +2,6 @@
 #include "detection/internal.h"
 #include "detection/vulkan/vulkan.h"
 
-const char* ffDetectGPUImpl(FFlist* gpus, const FFinstance* instance);
-
 const char* FF_GPU_VENDOR_NAME_APPLE = "Apple";
 const char* FF_GPU_VENDOR_NAME_AMD = "AMD";
 const char* FF_GPU_VENDOR_NAME_INTEL = "Intel";
@@ -32,14 +30,17 @@ const char* ffGetGPUVendorString(unsigned vendorId)
     return NULL;
 }
 
-const FFlist* ffDetectGPU(const FFinstance* instance)
+const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
 {
-    FF_DETECTION_INTERNAL_GUARD(FFlist,
-        ffListInit(&result, sizeof(FFGPUResult));
-        if(instance->config.gpuForceVulkan || ffDetectGPUImpl(&result, instance) != NULL)
-        {
-            const FFVulkanResult* vulkan = ffDetectVulkan(instance);
-            result = vulkan->gpus;
-        }
-    );
+    if (!options->forceVulkan)
+    {
+        const char* error = ffDetectGPUImpl(options, result);
+        if (!error) return NULL;
+    }
+    FFVulkanResult* vulkan = ffDetectVulkan();
+    if (vulkan->error) return "GPU detection failed";
+    ffListDestroy(result);
+    ffListInitMove(result, &vulkan->gpus);
+
+    return NULL;
 }

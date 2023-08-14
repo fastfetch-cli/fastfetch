@@ -58,6 +58,18 @@
 # Default is true.
 #--hide-cursor true
 
+# Processing timeout option:
+# Sets the timeout (ms) when waiting for child processes
+# Must be an integer.
+# Default is 1000
+#--processing-timeout 1000
+
+# WMI timeout option:
+# Sets the timeout (ms) for WMI queries. Windows only
+# Must be an integer.
+# Default is 5000
+#--wmi-timeout 5000
+
 # Logo option:
 # Sets the logo to use.
 # List available logos with "fastfetch --list-logos".
@@ -146,11 +158,44 @@
 # Default is IEC.
 #--binary-prefix IEC
 
+# Size number of digits option:
+# Sets the number of digits to keep after the decimal point when formatting sizes.
+# Must be an possitive integer.
+# Default is 2.
+#--size-ndigits 2
+
+# Size max prefix option:
+# Sets the largest binary prefix to use when formatting sizes.
+# Must be one of B, kB, MB, GB, TB, PB, EB, ZB, YB
+# Default is YB.
+#--size-max-prefix YB
+
+# Disable output buffer option:
+# Sets if the stdout application buffer should be disabled.
+# Must be true or false.
+# Default is false.
+#--no-buffer false
+
 # Title FQDN option:
 # Sets if the title should use the fully qualified domain name.
 # Must be true or false.
 # Default is false.
 #--title-fqdn false
+
+# Title user color option:
+# Sets color of the user name (left part).
+# Default is empty (use color of `--color-title`).
+#--title-color-user
+
+# Title at color option:
+# Sets color of the @ symbol (middle part).
+# Default is empty (use color of `--color-title`).
+#--title-color-at
+
+# Title host color option:
+# Sets color of the host name (right part).
+# Default is empty (use color of `--color-title`).
+#--title-color-host
 
 # Separator option:
 # Sets the string placed between a key and its value.
@@ -176,6 +221,11 @@
 # Default is 0 (disabled).
 #--publicip-timeout 0
 
+# Weather location option:
+# Sets the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
+# Default is empty (guessing by public IP)
+#--weather-location "Location"
+
 # Weather output format option:
 # Sets the weather format to be used. It must be URI encoded.
 # See: https://github.com/chubin/wttr.in#one-line-output
@@ -200,20 +250,28 @@
 # Default is the first match starting with org.mpris.MediaPlayer2.
 #--player-name spotify
 
+# Display server force DRM option
+# Sets if fastfetch should only use `/sys/class/drm` to detect displays if you get issues with the default behavior.
+# Note DRM doesn't support refresh rate or scaled resolution detection.
+# Only supported on Linux.
+# Must be true or false.
+# Default is false.
+#--ds-force-drm false
+
 # Escape bedrock option
 # Sets if fastfetch should escape the bedrock jail, if it detectes that it is running in one
 # Must be true or false.
 # Default is true.
 #--escape-bedrock true
 
-# GL option
+# OpenGL option
 # Sets with opengl context creation library to use
 # Must be either auto, egl, glx or osmesa
 # Default is auto.
-#--gl auto
+#--opengl-library auto
 
 # GPU hide options
-# Sets weather to hide certain gpu types
+# Sets whether to hide certain gpu types
 # Must be either true or false
 # Default is false.
 #--gpu-hide-integrated
@@ -226,23 +284,11 @@
 # Default is false.
 #--gpu-force-vulkan
 
-# Shell option
-# Sets if shell version should be detected and printed
-# Must be either true or false
-# Default is true.
-#--shell-version true
-
-# Terminal option
-# Sets if terminal version should be detected and printed
-# Must be either true or false
-# Default is true.
-#--terminal-version true
-
 # Disk show options
 # Sets if certain types of disk should be printed
 # Must be either true or false
-# Default is false except for --disk-show-removable.
-#--disk-show-removable true
+# Default is false except for --disk-show-external.
+#--disk-show-external true
 #--disk-show-hidden false
 #--disk-show-subvolumes false
 #--disk-show-unknown false
@@ -303,15 +349,16 @@
 #--shell-key Shell
 #--display-key Display {1}
 #--brightness-key Brightness ({1})
+#--monitor-key Monitor
 #--de-key DE
 #--wm-key WM
-#--wm-theme-key WM Theme
+#--wmtheme-key WM Theme
 #--theme-key Theme
 #--icons-key Icons
 #--font-key Font
 #--cursor-key Cursor
 #--terminal-key Terminal
-#--terminal-font-key Terminal Font
+#--terminalfont-key Terminal Font
 #--cpu-key CPU
 #--cpu-usage-key CPU Usage
 #--gpu-key GPU {1}
@@ -320,6 +367,7 @@
 #--disk-key Disk ({1})
 #--battery-key Battery {1}
 #--poweradapter-key Power Adapter {1}
+#--lm-key LM
 #--locale-key Locale
 #--localip-key Local IP ({1})
 #--publicip-key Public IP
@@ -354,13 +402,13 @@
 #--brightness-format
 #--de-format
 #--wm-format
-#--wm-theme-format
+#--wmtheme-format
 #--theme-format
 #--icons-format
 #--font-format
 #--cursor-format
 #--terminal-format
-#--terminal-font-format
+#--terminalfont-format
 #--cpu-format
 #--cpu-usage-format
 #--gpu-format
@@ -369,10 +417,12 @@
 #--disk-format
 #--battery-format
 #--poweradapter-format
+#--lm-format
 #--locale-format
 #--localip-format
 #--publicip-format
 #--weather-format
+#--monitor-format
 #--player-format
 #--media-format
 #--datetime-format
@@ -385,53 +435,52 @@
 #--gamepad-format
 #--wallpaper-format
 
-# Error options:
-# Sets the format string to use if an error occured
-# For information on format strings, see "fastfetch --help format".
-# Each of them take the error as first and only argument.
-# If one of them is set, the module will appear, even if --show-errors is not given.
-#--os-error
-#--host-error
-#--chassis-error
-#--kernel-error
-#--uptime-error
-#--processes-error
-#--packages-error
-#--shell-error
-#--display-error
-#--brightness-error
-#--de-error
-#--wm-error
-#--wm-theme-error
-#--theme-error
-#--icons-error
-#--font-error
-#--cursor-error
-#--terminal-error
-#--terminal-font-error
-#--cpu-error
-#--cpu-usage-error
-#--gpu-error
-#--memory-error
-#--swap-error
-#--disk-error
-#--battery-error
-#--poweradapter-error
-#--locale-error
-#--localip-error
-#--publicip-error
-#--weather-error
-#--player-error
-#--media-error
-#--datetime-error
-#--vulkan-error
-#--opengl-error
-#--opencl-error
-#--users-error
-#--bluetooth-error
-#--sound-error
-#--gamepad-error
-#--wallpaper-error
+# Key color options:
+# Overrides the global `--color-keys` for one specified module
+#--os-key-color
+#--host-key-color
+#--chassis-key-color
+#--kernel-key-color
+#--uptime-key-color
+#--processes-key-color
+#--packages-key-color
+#--shell-key-color
+#--display-key-color
+#--brightness-key-color
+#--de-key-color
+#--wm-key-color
+#--wmtheme-key-color
+#--theme-key-color
+#--icons-key-color
+#--font-key-color
+#--cursor-key-color
+#--terminal-key-color
+#--terminalfont-key-color
+#--cpu-key-color
+#--cpu-usage-key-color
+#--gpu-key-color
+#--memory-key-color
+#--swap-key-color
+#--disk-key-color
+#--battery-key-color
+#--poweradapter-key-color
+#--lm-key-color
+#--locale-key-color
+#--localip-key-color
+#--publicip-key-color
+#--weather-key-color
+#--monitor-key-color
+#--player-key-color
+#--media-key-color
+#--datetime-key-color
+#--vulkan-key-color
+#--opengl-key-color
+#--opencl-key-color
+#--users-key-color
+#--bluetooth-key-color
+#--sound-key-color
+#--gamepad-key-color
+#--wallpaper-key-color
 
 # Library options:
 # Sets an user specific path to a library to load.
@@ -456,6 +505,7 @@
 #--lib-glx /usr/lib/libGLX.so
 #--lib-osmesa /usr/lib/libOSMesa.so
 #--lib-opencl /usr/lib/libOpenCL.so
-#--lib-cjson /usr/lib/libcjson.so
 #--lib-freetype /data/data/com.termux/files/usr/lib
 #--lib-pulse /usr/lib/libpulse.so
+#--lib-ddcutil /usr/lib/libddcutil.so
+#--lib-nm /usr/lib/libnm.so

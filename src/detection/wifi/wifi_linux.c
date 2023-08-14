@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "util/stringUtils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,9 +20,9 @@
     #define NM_802_11_AP_SEC_KEY_MGMT_OWE_TM 0x00001000
 #endif
 
-static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* result)
+static const char* detectWifiWithLibnm(FFlist* result)
 {
-    FF_LIBRARY_LOAD(nm, &instance->config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
+    FF_LIBRARY_LOAD(nm, &instance.config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_new);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_get_devices);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_device_get_iface);
@@ -142,17 +143,20 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
         item->conn.signalQuality = ffnm_access_point_get_strength(ap);
         item->conn.rxRate = ffnm_access_point_get_max_bitrate(ap);
 
-        if(instance->config.allowSlowOperations)
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
+        if(!ffProcessAppendStdOut(&output, (char* const[]){
+            "iw",
+            "dev",
+            item->inf.description.chars,
+            "link",
+            NULL
+        }))
         {
-            FF_STRBUF_AUTO_DESTROY output;
-            ffStrbufInit(&output);
-            if(!ffProcessAppendStdOut(&output, (char* const[]){
-                "iw",
-                "dev",
-                item->inf.description.chars,
-                "link",
-                NULL
-            }) && ffParsePropLines(output.chars, "tx bitrate: ", &item->conn.protocol))
+            if(ffParsePropLines(output.chars, "rx bitrate: ", &item->conn.protocol))
+            {
+                sscanf(item->conn.protocol.chars, "%lf", &item->conn.rxRate);
+            }
+            if(ffParsePropLines(output.chars, "tx bitrate: ", &item->conn.protocol))
             {
                 if(ffStrbufContainS(&item->conn.protocol, " HE-MCS "))
                     ffStrbufSetS(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
@@ -162,6 +166,8 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
                     ffStrbufSetS(&item->conn.protocol, "802.11n (Wi-Fi 4)");
                 else
                     ffStrbufSetS(&item->conn.protocol, "802.11a/b/g");
+
+                sscanf(item->conn.protocol.chars, "%lf", &item->conn.txRate);
             }
         }
 
@@ -171,28 +177,28 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
         if ((flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpaFlags == NM_802_11_AP_SEC_NONE)
             && (rsnFlags == NM_802_11_AP_SEC_NONE))
-            ffStrbufAppendS(&item->conn.security, "WEP ");
+            ffStrbufAppendS(&item->conn.security, "WEP/");
         if (wpaFlags != NM_802_11_AP_SEC_NONE)
-            ffStrbufAppendS(&item->conn.security, "WPA ");
+            ffStrbufAppendS(&item->conn.security, "WPA/");
         if ((rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_PSK)
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)) {
-            ffStrbufAppendS(&item->conn.security, "WPA2 ");
+            ffStrbufAppendS(&item->conn.security, "WPA2/");
         }
         if (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_SAE) {
-            ffStrbufAppendS(&item->conn.security, "WPA3 ");
+            ffStrbufAppendS(&item->conn.security, "WPA3/");
         }
         if ((rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_OWE)
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_OWE_TM)) {
-            ffStrbufAppendS(&item->conn.security, "OWE ");
+            ffStrbufAppendS(&item->conn.security, "OWE/");
         }
         if ((wpaFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)
             || (rsnFlags & NM_802_11_AP_SEC_KEY_MGMT_802_1X)) {
-            ffStrbufAppendS(&item->conn.security, "802.1X ");
+            ffStrbufAppendS(&item->conn.security, "802.1X/");
         }
         if (!item->conn.security.length)
             ffStrbufAppendS(&item->conn.security, "Insecure");
         else
-            ffStrbufTrimRight(&item->conn.security, ' ');
+            ffStrbufTrimRight(&item->conn.security, '/');
     }
 
     ffg_object_unref(client);
@@ -202,22 +208,24 @@ static const char* detectWifiWithLibnm(const FFinstance* instance, FFlist* resul
 
 #endif
 
+#if __has_include(<linux/wireless.h>)
+#define FF_DETECT_WIFI_WITH_IOCTLS
+
 #include "common/io/io.h"
 
 #include <net/if.h>
-#include <linux/wireless.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <linux/wireless.h> //TODO: Don't depend on kernel headers
 
-static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instance, FFlist* result)
+static const char* detectWifiWithIoctls(FFlist* result)
 {
     struct if_nameindex* infs = if_nameindex();
     if(!infs)
         return "if_nameindex() failed";
 
-    FFstrbuf path;
-    ffStrbufInit(&path);
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
     {
@@ -241,7 +249,7 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
         if(!ffAppendFileBuffer(path.chars, &item->inf.status) || !ffStrbufEqualS(&item->inf.status, "up"))
             continue;
 
-        int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+        FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
         if(sock < 0)
             continue;
 
@@ -254,10 +262,10 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
         if(ioctl(sock, SIOCGIWESSID, &iwr) >= 0)
             ffStrbufRecalculateLength(&item->conn.ssid);
 
-        if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0)
+        if(ioctl(sock, SIOCGIWNAME, &iwr) >= 0 && !ffStrEqualsIgnCase(iwr.u.name, "IEEE 802.11"))
         {
-            if(strncasecmp(iwr.u.name, "IEEE ", 5) == 0)
-                ffStrbufSetS(&item->conn.protocol, iwr.u.name + 5);
+            if(ffStrStartsWithIgnCase(iwr.u.name, "IEEE "))
+                ffStrbufSetS(&item->conn.protocol, iwr.u.name + strlen("IEEE "));
             else
                 ffStrbufSetS(&item->conn.protocol, iwr.u.name);
         }
@@ -269,9 +277,16 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
             ffStrbufTrimRight(&item->conn.macAddress, '-');
         }
 
-        //FIXME: doesn't work
-        if(ioctl(sock, SIOCGIWSPY, &iwr) >= 0)
-            item->conn.signalQuality = iwr.u.qual.level;
+        struct iw_statistics stats;
+        iwr.u.data.pointer = &stats;
+        iwr.u.data.length = sizeof(stats);
+        iwr.u.data.flags = 0;
+
+        if(ioctl(sock, SIOCGIWSTATS, &iwr) >= 0)
+        {
+            int8_t level = (int8_t) stats.qual.level; // https://stackoverflow.com/questions/18079771/wireless-h-how-do-i-print-out-the-signal-level
+            item->conn.signalQuality = level >= -50 ? 100 : level <= -100 ? 0 : (level + 100) * 2;
+        }
 
         //FIXME: doesn't work
         struct iw_encode_ext iwe;
@@ -303,21 +318,24 @@ static const char* detectWifiWithIoctls(FF_MAYBE_UNUSED const FFinstance* instan
                     break;
             }
         }
-
-        close(sock);
     }
     if_freenameindex(infs);
-    ffStrbufDestroy(&path);
 
     return NULL;
 }
 
-const char* ffDetectWifi(const FFinstance* instance, FFlist* result)
+#endif
+
+const char* ffDetectWifi(FFlist* result)
 {
     #ifdef FF_HAVE_LIBNM
-    if(!detectWifiWithLibnm(instance, result))
+    if(!detectWifiWithLibnm(result))
         return NULL;
     #endif
 
-    return detectWifiWithIoctls(instance, result);
+    #ifdef FF_DETECT_WIFI_WITH_IOCTLS
+        return detectWifiWithIoctls(result);
+    #endif
+
+    return "linux/wireless.h not found during compilation";
 }

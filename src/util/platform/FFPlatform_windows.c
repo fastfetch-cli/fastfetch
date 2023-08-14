@@ -1,9 +1,11 @@
 #include "FFPlatform_private.h"
+#include "common/io/io.h"
 #include "util/stringUtils.h"
 #include "util/windows/unicode.h"
 
 #include <Windows.h>
 #include <shlobj.h>
+
 static void getHomeDir(FFPlatform* platform)
 {
     PWSTR pPath;
@@ -38,11 +40,11 @@ static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
     PWSTR pPath;
     if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
     {
-        FFstrbuf* buffer = (FFstrbuf*) ffListAdd(dirs);
-        ffStrbufInitWS(buffer, pPath);
-        ffStrbufReplaceAllC(buffer, '\\', '/');
-        ffStrbufEnsureEndsWithC(buffer, '/');
-        FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
+        ffStrbufReplaceAllC(&buffer, '\\', '/');
+        ffStrbufEnsureEndsWithC(&buffer, '/');
+        if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+            ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
     }
     CoTaskMemFree(pPath);
 }
@@ -53,14 +55,18 @@ static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* 
     if(!ffStrSet(value))
         return;
 
-    FFstrbuf* buffer = ffListAdd(dirs);
-    ffStrbufInitA(buffer, 64);
-    ffStrbufAppendS(buffer, value);
-    ffStrbufReplaceAllC(buffer, '\\', '/');
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    ffStrbufAppendS(buffer, suffix);
-    ffStrbufEnsureEndsWithC(buffer, '/');
-    FF_PLATFORM_PATH_UNIQUE(dirs, buffer);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateA(64);
+    ffStrbufAppendS(&buffer, value);
+    ffStrbufReplaceAllC(&buffer, '\\', '/');
+    ffStrbufEnsureEndsWithC(&buffer, '/');
+    if (suffix)
+    {
+        ffStrbufAppendS(&buffer, suffix);
+        ffStrbufEnsureEndsWithC(&buffer, '/');
+    }
+
+    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
 }
 
 static void getConfigDirs(FFPlatform* platform)
@@ -69,11 +75,12 @@ static void getConfigDirs(FFPlatform* platform)
     {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->configDirs, "HOME", ".config/");
-        platformPathAddEnvSuffix(&platform->configDirs, "HOME", "");
+        platformPathAddEnvSuffix(&platform->configDirs, "HOME", NULL);
         platformPathAddEnvSuffix(&platform->configDirs, "MINGW_PREFIX", "etc");
     }
 
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
+    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_ProgramData);
     platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_RoamingAppData);
     platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_LocalAppData);
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
@@ -85,10 +92,11 @@ static void getDataDirs(FFPlatform* platform)
     {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->dataDirs, "HOME", ".local/share/");
-        platformPathAddEnvSuffix(&platform->dataDirs, "HOME", "");
+        platformPathAddEnvSuffix(&platform->dataDirs, "HOME", NULL);
         platformPathAddEnvSuffix(&platform->dataDirs, "MINGW_PREFIX", "share");
     }
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
+    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_ProgramData);
     platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_RoamingAppData);
     platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_LocalAppData);
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
@@ -96,31 +104,31 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform)
 {
-    ffStrbufEnsureFree(&platform->userName, 64);
-    DWORD len = (DWORD) ffStrbufGetFree(&platform->userName);
-    if(GetUserNameA(platform->userName.chars, &len))
-        platform->userName.length = (uint32_t) len;
+    wchar_t buffer[128];
+    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    if(GetUserNameW(buffer, &len))
+        ffStrbufSetWS(&platform->userName, buffer);
 }
 
 static void getHostName(FFPlatform* platform)
 {
-    ffStrbufEnsureFree(&platform->hostName, 64);
-    DWORD len = (DWORD) ffStrbufGetFree(&platform->hostName);
-    if(GetComputerNameExA(ComputerNameDnsHostname, platform->hostName.chars, &len))
-        platform->hostName.length = (uint32_t) len;
+    wchar_t buffer[128];
+    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    if(GetComputerNameExW(ComputerNameDnsHostname, buffer, &len))
+        ffStrbufSetWS(&platform->hostName, buffer);
 }
 
 static void getDomainName(FFPlatform* platform)
 {
-    ffStrbufEnsureFree(&platform->domainName, 64);
-    DWORD len = (DWORD) ffStrbufGetFree(&platform->domainName);
-    if(GetComputerNameExA(ComputerNameDnsDomain, platform->domainName.chars, &len))
-        platform->domainName.length = (uint32_t) len;
+    wchar_t buffer[128];
+    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    if(GetComputerNameExW(ComputerNameDnsDomain, buffer, &len))
+        ffStrbufSetWS(&platform->domainName, buffer);
 }
 
 static void getSystemName(FFPlatform* platform)
 {
-    ffStrbufAppendS(&platform->systemName, "Windows_NT");
+    ffStrbufAppendS(&platform->systemName, getenv("OS"));
 }
 
 static void getSystemReleaseAndVersion(FFPlatform* platform)

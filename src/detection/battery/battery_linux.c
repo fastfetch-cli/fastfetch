@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/io/io.h"
 #include "battery.h"
+#include "util/stringUtils.h"
 
 #include <dirent.h>
 
@@ -8,8 +9,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
 {
     uint32_t dirLength = dir->length;
 
-    FFstrbuf testBatteryBuffer;
-    ffStrbufInit(&testBatteryBuffer);
+    FF_STRBUF_AUTO_DESTROY testBatteryBuffer = ffStrbufCreate();
 
     //type must exist and be "Battery"
     ffStrbufAppendS(dir, "/type");
@@ -17,10 +17,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Battery") != 0)
-    {
-        ffStrbufDestroy(&testBatteryBuffer);
         return;
-    }
 
     //scope may not exist or must not be "Device"
     ffStrbufAppendS(dir, "/scope");
@@ -28,10 +25,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Device") == 0)
-    {
-        ffStrbufDestroy(&testBatteryBuffer);
         return;
-    }
 
     BatteryResult* result = ffListAdd(results);
 
@@ -41,7 +35,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     ffStrbufSubstrBefore(dir, dirLength);
     if(available)
         result->capacity = ffStrbufToDouble(&testBatteryBuffer);
-    ffStrbufDestroy(&testBatteryBuffer);
+
     if(!available)
     {
         result->capacity = 0.0/0.0;
@@ -74,12 +68,13 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     result->temperature = FF_BATTERY_TEMP_UNSET;
 }
 
-const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {
-    FFstrbuf baseDir;
-    ffStrbufInitA(&baseDir, 64);
-    if(instance->config.batteryDir.length > 0)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
+{
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
+
+    if(options->dir.length > 0)
     {
-        ffStrbufAppend(&baseDir, &instance->config.batteryDir);
+        ffStrbufAppend(&baseDir, &options->dir);
         ffStrbufEnsureEndsWithC(&baseDir, '/');
     }
     else
@@ -91,15 +86,12 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {
 
     DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
-    {
-        ffStrbufDestroy(&baseDir);
         return "opendir(batteryDir) == NULL";
-    }
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
             continue;
 
         ffStrbufAppendS(&baseDir, entry->d_name);
@@ -109,11 +101,8 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results) {
 
     closedir(dirp);
 
-    if(results->length == 0) {
-        ffStrbufDestroy(&baseDir);
+    if(results->length == 0)
         return "batteryDir doesn't contain any battery folder";
-    }
 
-    ffStrbufDestroy(&baseDir);
     return NULL;
 }

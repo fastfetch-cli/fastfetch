@@ -30,6 +30,8 @@ static const char* glHandleResult(FFOpenGLResult* result, const GLData* data)
 #endif // FF_HAVE_GL
 
 #ifdef FF_HAVE_EGL
+#include "common/io/io.h"
+
 #include <EGL/egl.h>
 
 typedef struct EGLData
@@ -116,11 +118,11 @@ static const char* eglHandleData(FFOpenGLResult* result, EGLData* data)
     return error;
 }
 
-static const char* eglPrint(FFinstance* instance, FFOpenGLResult* result)
+static const char* eglPrint(FFOpenGLResult* result)
 {
     EGLData eglData;
 
-    FF_LIBRARY_LOAD(egl, &instance->config.libEGL, "dlopen egl failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(egl, &instance.config.libEGL, "dlopen egl failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglInitialize);
@@ -133,6 +135,7 @@ static const char* eglPrint(FFinstance* instance, FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroySurface);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
 
+    FF_SUPPRESS_IO();
     return eglHandleData(result, &eglData);
 }
 
@@ -232,11 +235,11 @@ static const char* glxHandleData(FFOpenGLResult* result, GLXData* data)
     return error;
 }
 
-static const char* glxPrint(FFinstance* instance, FFOpenGLResult* result)
+static const char* glxPrint(FFOpenGLResult* result)
 {
     GLXData data;
 
-    FF_LIBRARY_LOAD(glx, &instance->config.libGLX, "dlopen glx failed", "libGLX" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(glx, &instance.config.libGLX, "dlopen glx failed", "libGLX" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XOpenDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXChooseVisual);
@@ -296,11 +299,11 @@ static const char* osMesaHandleData(FFOpenGLResult* result, OSMesaData* data)
     return error;
 }
 
-static const char* osMesaPrint(FFinstance* instance, FFOpenGLResult* result)
+static const char* osMesaPrint(FFOpenGLResult* result)
 {
     OSMesaData data;
 
-    FF_LIBRARY_LOAD(osmesa, &instance->config.libOSMesa, "dlopen osmesa failed", "libOSMesa" FF_LIBRARY_EXTENSION, 8);
+    FF_LIBRARY_LOAD(osmesa, &instance.config.libOSMesa, "dlopen osmesa failed", "libOSMesa" FF_LIBRARY_EXTENSION, 8);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaCreateContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaMakeCurrent);
@@ -311,32 +314,32 @@ static const char* osMesaPrint(FFinstance* instance, FFOpenGLResult* result)
 
 #endif //FF_HAVE_OSMESA
 
-const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
+const char* ffDetectOpenGL(FFOpenGLResult* result)
 {
     #if FF_HAVE_GL
 
-    if(instance->config.glType == FF_GL_TYPE_GLX)
+    if(instance.config.openGL.library == FF_OPENGL_LIBRARY_GLX)
     {
         #ifdef FF_HAVE_GLX
-            return glxPrint(instance, result);
+            return glxPrint(result);
         #else
             return "fastfetch was compiled without glx support";
         #endif
     }
 
-    if(instance->config.glType == FF_GL_TYPE_EGL)
+    if(instance.config.openGL.library == FF_OPENGL_LIBRARY_EGL)
     {
         #ifdef FF_HAVE_EGL
-            return eglPrint(instance, result);
+            return eglPrint(result);
         #else
             return "fastfetch was compiled without egl support";
         #endif
     }
 
-    if(instance->config.glType == FF_GL_TYPE_OSMESA)
+    if(instance.config.openGL.library == FF_OPENGL_LIBRARY_OSMESA)
     {
         #ifdef FF_HAVE_OSMESA
-            return osMesaPrint(instance, result);
+            return osMesaPrint(result);
         #else
             return "fastfetch was compiled without osmesa support";
         #endif
@@ -345,12 +348,12 @@ const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
     const char* error = ""; // not NULL dummy value
 
     #ifdef FF_HAVE_EGL
-        error = eglPrint(instance, result);
+        error = eglPrint(result);
     #endif
 
     #ifdef FF_HAVE_GLX
         if(error != NULL)
-            error = glxPrint(instance, result);
+            error = glxPrint(result);
     #endif
 
     //We don't use osmesa in auto mode here, because it is a software implementation,
@@ -360,7 +363,7 @@ const char* ffDetectOpenGL(FFinstance* instance, FFOpenGLResult* result)
 
     #else
 
-        FF_UNUSED(instance, result);
+        FF_UNUSED(result);
         return "Fastfetch was built without gl support.";
 
     #endif //FF_HAVE_GL

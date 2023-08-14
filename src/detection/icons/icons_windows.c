@@ -1,7 +1,7 @@
 #include "icons.h"
 #include "util/windows/registry.h"
 
-const char* ffDetectIcons(FF_MAYBE_UNUSED const FFinstance* instance, FFstrbuf* result)
+const char* ffDetectIcons(FFstrbuf* result)
 {
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL))

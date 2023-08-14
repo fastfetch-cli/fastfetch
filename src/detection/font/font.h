@@ -9,8 +9,6 @@
 
 typedef struct FFFontResult
 {
-    FFstrbuf error;
-
     /**
      * Linux / BSD: QT,      GTK2,  GTK3,        GTK4
      * MacOS:       System,  User,  System Mono, User Mono
@@ -21,6 +19,6 @@ typedef struct FFFontResult
     FFstrbuf display;
 } FFFontResult;
 
-const FFFontResult* ffDetectFont(const FFinstance* instance);
+const char* ffDetectFont(FFFontResult* font);
 
 #endif

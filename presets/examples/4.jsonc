@@ -1,0 +1,31 @@
+// Load with --load-config examples/4.jsonc
+
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "source": "arch_small",
+        "padding": {
+            "right": 1
+        }
+    },
+    "display": {
+        "binaryPrefix": "si",
+        "color": "blue",
+        "separator": "  "
+    },
+    "modules": [
+        {
+            "type": "datetime",
+            "key": "Date",
+            "format": "{1}-{3}-{11}"
+        },
+        {
+            "type": "datetime",
+            "key": "Time",
+            "format": "{14}:{17}:{20}"
+        },
+        "break",
+        "player",
+        "media"
+    ]
+}

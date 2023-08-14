@@ -7,7 +7,7 @@
 #include <string.h>
 #import <Foundation/Foundation.h>
 
-static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectIterm2(FFTerminalFontResult* terminalFont)
 {
     const char* profile = getenv("ITERM_PROFILE");
     if (profile == NULL)
@@ -17,7 +17,7 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
     }
 
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.googlecode.iterm2.plist", instance->state.platform.homeDir.chars];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.googlecode.iterm2.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)
@@ -38,6 +38,14 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
             return;
         }
         ffFontInitWithSpace(&terminalFont->font, normalFont.UTF8String);
+
+        NSNumber* useNonAsciiFont = [bookmark valueForKey:@"Use Non-ASCII Font"];
+        if(useNonAsciiFont.boolValue)
+        {
+            NSString* nonAsciiFont = [bookmark valueForKey:@"Non Ascii Font"];
+            if (nonAsciiFont)
+                ffFontInitWithSpace(&terminalFont->fallback, nonAsciiFont.UTF8String);
+        }
         return;
     }
 
@@ -46,8 +54,7 @@ static void detectIterm2(const FFinstance* instance, FFTerminalFontResult* termi
 
 static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
 {
-    FF_STRBUF_AUTO_DESTROY font;
-    ffStrbufInit(&font);
+    FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
     ffOsascript("tell application \"Terminal\" to font name of window frontmost & \" \" & font size of window frontmost", &font);
 
     if(font.length == 0)
@@ -59,10 +66,10 @@ static void detectAppleTerminal(FFTerminalFontResult* terminalFont)
     ffFontInitWithSpace(&terminalFont->font, font.chars);
 }
 
-static void detectWarpTerminal(const FFinstance* instance, FFTerminalFontResult* terminalFont)
+static void detectWarpTerminal(FFTerminalFontResult* terminalFont)
 {
     NSError* error;
-    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/dev.warp.Warp-Stable.plist", instance->state.platform.homeDir.chars];
+    NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/dev.warp.Warp-Stable.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)
@@ -84,13 +91,13 @@ static void detectWarpTerminal(const FFinstance* instance, FFTerminalFontResult*
     ffFontInitValues(&terminalFont->font, fontName.UTF8String, fontSize.UTF8String);
 }
 
-void ffDetectTerminalFontPlatform(const FFinstance* instance, const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
+void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "iterm.app") == 0 ||
         ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "iTermServer-"))
-        detectIterm2(instance, terminalFont);
+        detectIterm2(terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "Apple_Terminal") == 0)
         detectAppleTerminal(terminalFont);
     else if(ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "WarpTerminal") == 0)
-        detectWarpTerminal(instance, terminalFont);
+        detectWarpTerminal(terminalFont);
 }

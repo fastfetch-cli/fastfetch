@@ -97,9 +97,9 @@ typedef struct GSettingsData
     GVariantGetters variantGetters;
 } GSettingsData;
 
-static const GSettingsData* getGSettingsData(const FFinstance* instance)
+static const GSettingsData* getGSettingsData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance->config.libGIO, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance.config.libGIO, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
@@ -123,9 +123,9 @@ static const GSettingsData* getGSettingsData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-FFvariant ffSettingsGetGSettings(const FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
-    const GSettingsData* data = getGSettingsData(instance);
+    const GSettingsData* data = getGSettingsData();
     if(data == NULL)
         return FF_VARIANT_NULL;
 
@@ -152,9 +152,9 @@ FFvariant ffSettingsGetGSettings(const FFinstance* instance, const char* schemaN
     return getGVariantValue(variant, type, &data->variantGetters);
 }
 #else //FF_HAVE_GIO
-FFvariant ffSettingsGetGSettings(const FFinstance* instance, const char* schemaName, const char* path, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const char* key, FFvarianttype type)
 {
-    FF_UNUSED(instance, schemaName, path, key, type)
+    FF_UNUSED(schemaName, path, key, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_GIO
@@ -170,9 +170,9 @@ typedef struct DConfData
     DConfClient* client;
 } DConfData;
 
-static const DConfData* getDConfData(const FFinstance* instance)
+static const DConfData* getDConfData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance->config.libDConf, "libdconf" FF_LIBRARY_EXTENSION, 2);
+    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance.config.libDConf, "libdconf" FF_LIBRARY_EXTENSION, 2);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
@@ -191,9 +191,9 @@ static const DConfData* getDConfData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-FFvariant ffSettingsGetDConf(const FFinstance* instance, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type)
 {
-    const DConfData* data = getDConfData(instance);
+    const DConfData* data = getDConfData();
     if(data == NULL)
         return FF_VARIANT_NULL;
 
@@ -209,23 +209,23 @@ FFvariant ffSettingsGetDConf(const FFinstance* instance, const char* key, FFvari
     return getGVariantValue(variant, type, &data->variantGetters);
 }
 #else //FF_HAVE_DCONF
-FFvariant ffSettingsGetDConf(const FFinstance* instance, const char* key, FFvarianttype type)
+FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type)
 {
-    FF_UNUSED(instance, key, type)
+    FF_UNUSED(key, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_DCONF
 
-FFvariant ffSettingsGet(const FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
+FFvariant ffSettingsGet(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
-    FFvariant gsettings = ffSettingsGetGSettings(instance, gsettingsSchemaName, gsettingsPath, gsettingsKey, type);
+    FFvariant gsettings = ffSettingsGetGSettings(gsettingsSchemaName, gsettingsPath, gsettingsKey, type);
 
     if(
         (type == FF_VARIANT_TYPE_BOOL && gsettings.boolValueSet) ||
         (type != FF_VARIANT_TYPE_BOOL && gsettings.strValue != NULL)
     ) return gsettings;
 
-    return ffSettingsGetDConf(instance, dconfKey, type);
+    return ffSettingsGetDConf(dconfKey, type);
 }
 
 #ifdef FF_HAVE_XFCONF
@@ -241,9 +241,9 @@ typedef struct XFConfData
     FF_LIBRARY_SYMBOL(xfconf_init)
 } XFConfData;
 
-static const XFConfData* getXFConfData(const FFinstance* instance)
+static const XFConfData* getXFConfData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance->config.libXFConf, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance.config.libXFConf, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)
@@ -258,9 +258,9 @@ static const XFConfData* getXFConfData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
+FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
 {
-    const XFConfData* data = getXFConfData(instance);
+    const XFConfData* data = getXFConfData();
     if(data == NULL)
         return FF_VARIANT_NULL;
 
@@ -281,9 +281,9 @@ FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelNam
     return FF_VARIANT_NULL;
 }
 #else //FF_HAVE_XFCONF
-FFvariant ffSettingsGetXFConf(const FFinstance* instance, const char* channelName, const char* propertyName, FFvarianttype type)
+FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
 {
-    FF_UNUSED(instance, channelName, propertyName, type)
+    FF_UNUSED(channelName, propertyName, type)
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_XFCONF
@@ -303,9 +303,9 @@ typedef struct SQLiteData
     FF_LIBRARY_SYMBOL(sqlite3_close)
 } SQLiteData;
 
-static const SQLiteData* getSQLiteData(const FFinstance* instance)
+static const SQLiteData* getSQLiteData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance->config.libSQLite3, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance.config.libSQLite3, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_open_v2)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_prepare_v2)
@@ -319,12 +319,12 @@ static const SQLiteData* getSQLiteData(const FFinstance* instance)
     FF_LIBRARY_DATA_LOAD_RETURN
 }
 
-int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
+int ffSettingsGetSQLite3Int(const char* dbPath, const char* query)
 {
     if(!ffPathExists(dbPath, FF_PATHTYPE_FILE))
         return 0;
 
-    const SQLiteData* data = getSQLiteData(instance);
+    const SQLiteData* data = getSQLiteData();
     if(data == NULL)
         return 0;
 
@@ -354,12 +354,12 @@ int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, cons
     return result;
 }
 
-bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, const char* query, FFstrbuf* result)
+bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result)
 {
     if(!ffPathExists(dbPath, FF_PATHTYPE_FILE))
         return false;
 
-    const SQLiteData* data = getSQLiteData(instance);
+    const SQLiteData* data = getSQLiteData();
     if(data == NULL)
         return false;
 
@@ -389,23 +389,38 @@ bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, 
     return true;
 }
 #else //FF_HAVE_SQLITE3
-int ffSettingsGetSQLite3Int(const FFinstance* instance, const char* dbPath, const char* query)
+int ffSettingsGetSQLite3Int(const char* dbPath, const char* query)
 {
-    FF_UNUSED(instance, dbPath, query)
+    FF_UNUSED(dbPath, query)
     return 0;
 }
-bool ffSettingsGetSQLite3String(const FFinstance* instance, const char* dbPath, const char* query, FFstrbuf* result)
+bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result)
 {
-    FF_UNUSED(instance, dbPath, query, result)
+    FF_UNUSED(dbPath, query, result)
     return false;
 }
 #endif //FF_HAVE_SQLITE3
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
-void ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
+bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
     ffStrbufEnsureFree(result, PROP_VALUE_MAX);
-    result->length += (uint32_t) __system_property_get(propName, result->chars + result->length);
+    int len = __system_property_get(propName, result->chars + result->length);
+    if (len <= 0) return false;
+    result->length += (uint32_t) len;
     result->chars[result->length] = '\0';
+    return true;
 }
-#endif //__ANDROID__
+#elif defined(__FreeBSD__)
+#include <kenv.h>
+bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result)
+{
+    //https://wiki.ghostbsd.org/index.php/Kenv
+    ffStrbufEnsureFree(result, KENV_MVALLEN);
+    int len = kenv(KENV_GET, propName, result->chars + result->length, KENV_MVALLEN);
+    if (len <= 0) return false;
+    result->length += (uint32_t) len;
+    result->chars[result->length] = '\0';
+    return true;
+}
+#endif

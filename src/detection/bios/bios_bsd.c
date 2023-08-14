@@ -1,26 +1,17 @@
 #include "bios.h"
 
-#include <kenv.h>
+#include "common/settings.h"
+#include "util/smbiosHelper.h"
 
-static void kenvLookup(const char* name, FFstrbuf* result)
+const char* ffDetectBios(FFBiosResult* result)
 {
-    ffStrbufEnsureFree(result, 255);
-    int len = kenv(KENV_GET, name, result->chars, 256);
-    if(len > 0)
-        result->length = (uint32_t) len;
-}
-
-void ffDetectBios(FFBiosResult* bios)
-{
-    ffStrbufInit(&bios->error);
-    ffStrbufInit(&bios->biosDate);
-    ffStrbufInit(&bios->biosRelease);
-    ffStrbufInit(&bios->biosVendor);
-    ffStrbufInit(&bios->biosVersion);
-
-    //https://wiki.ghostbsd.org/index.php/Kenv
-    kenvLookup("smbios.bios.reldate", &bios->biosDate);
-    kenvLookup("smbios.system.product", &bios->biosRelease);
-    kenvLookup("smbios.bios.vendor", &bios->biosVendor);
-    kenvLookup("smbios.bios.version", &bios->biosVersion);
+    ffSettingsGetFreeBSDKenv("smbios.bios.reldate", &result->date);
+    ffCleanUpSmbiosValue(&result->date);
+    ffSettingsGetFreeBSDKenv("smbios.bios.revision", &result->release);
+    ffCleanUpSmbiosValue(&result->release);
+    ffSettingsGetFreeBSDKenv("smbios.bios.vendor", &result->vendor);
+    ffCleanUpSmbiosValue(&result->vendor);
+    ffSettingsGetFreeBSDKenv("smbios.bios.version", &result->version);
+    ffCleanUpSmbiosValue(&result->version);
+    return NULL;
 }

@@ -64,6 +64,42 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
     return true;
 }
 
+bool ffRegReadData(HKEY hKey, const wchar_t* valueNameW, uint8_t** result, uint32_t* length, FFstrbuf* error)
+{
+    assert(result && length);
+    DWORD bufSize = 0;
+    LONG err = RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_BINARY, NULL, NULL, &bufSize);
+    if(err != ERROR_SUCCESS || bufSize == 0)
+    {
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueW(%s, NULL, RRF_RT_REG_BINARY, NULL, NULL, &bufSize) failed", valueNameA.chars);
+        }
+        return false;
+    }
+
+    uint8_t* buf = (uint8_t*) malloc(bufSize);
+    err = RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_BINARY, NULL, buf, &bufSize);
+    if(err != ERROR_SUCCESS)
+    {
+        if(error)
+        {
+            if(!valueNameW)
+                valueNameW = L"(default)";
+            FF_STRBUF_AUTO_DESTROY valueNameA = ffStrbufCreateWS(valueNameW);
+            ffStrbufAppendF(error, "RegGetValueW(%s, NULL, RRF_RT_REG_BINARY, NULL, length) failed", valueNameA.chars);
+        }
+        free(buf);
+        return false;
+    }
+    *result = buf;
+    *length = bufSize;
+    return true;
+}
+
 bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error)
 {
     DWORD bufSize = sizeof(*result);
@@ -95,5 +131,26 @@ bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFs
         }
         return false;
     }
+    return true;
+}
+
+bool ffRegGetSubKey(HKEY hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error)
+{
+    DWORD bufSize = 0;
+    if(RegQueryInfoKeyW(hKey, NULL, NULL, NULL, NULL, &bufSize, NULL, NULL, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+    {
+        if (error)
+            ffStrbufAppendS(error, "RegQueryInfoKeyW(hKey) failed");
+        return false;
+    }
+    ++bufSize;
+    wchar_t* FF_AUTO_FREE resultW = (wchar_t*) malloc(bufSize * sizeof(*resultW));
+    if(RegEnumKeyExW(hKey, index, resultW, &bufSize, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+    {
+        if (error)
+            ffStrbufAppendF(error, "RegEnumKeyExW(hKey, %u) failed", (unsigned) index);
+        return false;
+    }
+    ffStrbufSetWS(result, resultW);
     return true;
 }

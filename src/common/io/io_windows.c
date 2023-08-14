@@ -1,10 +1,11 @@
 #include "io.h"
+#include "util/stringUtils.h"
+
+#include <windows.h>
 
 static void createSubfolders(const char* fileName)
 {
-    FF_STRBUF_AUTO_DESTROY path;
-    ffStrbufInit(&path);
-
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     while(*fileName != '\0')
     {
         ffStrbufAppendC(&path, *fileName);
@@ -97,6 +98,18 @@ bool ffPathExists(const char* path, FFPathType type)
     return false;
 }
 
+bool ffPathExpandEnv(const char* in, FFstrbuf* out)
+{
+    DWORD length = ExpandEnvironmentStringsA(in, NULL, 0);
+    if (length <= 1) return false;
+
+    ffStrbufClear(out);
+    ffStrbufEnsureFree(out, (uint32_t)length);
+    ExpandEnvironmentStringsA(in, out->chars, length);
+    out->length = (uint32_t)length - 1;
+    return true;
+}
+
 bool ffSuppressIO(bool suppress)
 {
     (void) suppress; //Not implemented.
@@ -120,7 +133,7 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
     {
         if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
         {
-            if(strcmp(entry.cFileName, ".") == 0 || strcmp(entry.cFileName, "..") == 0)
+            if(ffStrEquals(entry.cFileName, ".") || ffStrEquals(entry.cFileName, ".."))
                 continue;
 
             ffStrbufSubstrBefore(folder, folderLength);
@@ -141,9 +154,62 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
 void ffListFilesRecursively(const char* path)
 {
-    FFstrbuf folder;
-    ffStrbufInitS(&folder, path);
+    FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
     listFilesRecursively(&folder, 0, NULL);
-    ffStrbufDestroy(&folder);
+}
+
+const char* ffGetTerminalResponse(const char* request, const char* format, ...)
+{
+    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD prev_mode;
+    GetConsoleMode(hInput, &prev_mode);
+    SetConsoleMode(hInput, 0);
+
+    FlushConsoleInputBuffer(hInput);
+
+    DWORD bytes = 0;
+    WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), request, (DWORD) strlen(request), &bytes, NULL);
+
+    while (true)
+    {
+        if (WaitForSingleObjectEx(hInput, 35, TRUE) != WAIT_OBJECT_0)
+        {
+            SetConsoleMode(hInput, prev_mode);
+            return "WaitForSingleObject() failed or timeout";
+        }
+
+        // Ignore all unexpected input events
+        INPUT_RECORD record;
+        DWORD len = 0;
+        if (!PeekConsoleInputW(hInput, &record, 1, &len))
+            break;
+
+        if (
+            record.EventType == KEY_EVENT &&
+            record.Event.KeyEvent.uChar.UnicodeChar != L'\r' &&
+            record.Event.KeyEvent.uChar.UnicodeChar != L'\n'
+        )
+            break;
+        else
+            ReadConsoleInputW(hInput, &record, 1, &len);
+    }
+
+    char buffer[512];
+    bytes = 0;
+    ReadFile(hInput, buffer, sizeof(buffer) - 1, &bytes, NULL);
+
+    SetConsoleMode(hInput, prev_mode);
+
+    if(bytes <= 0)
+        return "ReadFile() failed";
+
+    buffer[bytes] = '\0';
+
+    va_list args;
+    va_start(args, format);
+    vsscanf(buffer, format, args);
+    va_end(args);
+
+    return NULL;
 }

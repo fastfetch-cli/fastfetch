@@ -1,7 +1,7 @@
 #include "wallpaper.h"
 #include "util/windows/registry.h"
 
-const char* ffDetectWallpaper(FF_MAYBE_UNUSED const FFinstance* instance, FFstrbuf* result)
+const char* ffDetectWallpaper(FFstrbuf* result)
 {
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Desktop", &hKey, NULL))

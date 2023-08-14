@@ -10,8 +10,9 @@ typedef struct FFTerminalFontResult
 {
     FFstrbuf error;
     FFfont font;
+    FFfont fallback;
 } FFTerminalFontResult;
 
-const FFTerminalFontResult* ffDetectTerminalFont(const FFinstance* instance);
+bool ffDetectTerminalFont(FFTerminalFontResult* result);
 
 #endif

@@ -2,36 +2,36 @@
 #include "common/settings.h"
 #include <ctype.h>
 
-void ffDetectHostImpl(FFHostResult* host)
+const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufInit(&host->error);
-
-    //Family
-
-    ffStrbufInit(&host->productFamily);
+    // http://newandroidbook.com/ddb/
     ffSettingsGetAndroidProperty("ro.product.device", &host->productFamily);
 
-    //Name
+    ffSettingsGetAndroidProperty("ro.product.marketname", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.vendor.product.display", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.config.devicename", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.config.marketing_name", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.product.vendor.model", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.product.oppo_model", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.oppo.market.name", &host->productName)
+        || ffSettingsGetAndroidProperty("ro.product.brand", &host->productName);
 
-    ffStrbufInit(&host->productName);
-
-    ffSettingsGetAndroidProperty("ro.product.brand", &host->productName);
-    if(host->productName.length > 0){
-        host->productName.chars[0] = (char) toupper(host->productName.chars[0]);
-        ffStrbufAppendC(&host->productName, ' ');
+    if (ffSettingsGetAndroidProperty("ro.product.model", &host->productVersion))
+    {
+        if (ffStrbufStartsWithIgnCase(&host->productVersion, &host->productName))
+        {
+            ffStrbufSubstrAfter(&host->productVersion, host->productName.length);
+            ffStrbufTrimLeft(&host->productVersion, ' ');
+        }
     }
 
-    ffSettingsGetAndroidProperty("ro.product.model", &host->productName);
-
-    ffStrbufTrimRight(&host->productName, ' ');
-
-    //Sys vendor
-
-    ffStrbufInit(&host->sysVendor);
     ffSettingsGetAndroidProperty("ro.product.manufacturer", &host->sysVendor);
 
-    //Not implemented
+    if(host->sysVendor.length && !ffStrbufStartsWithIgnCase(&host->productName, &host->sysVendor))
+    {
+        ffStrbufPrependS(&host->productName, " ");
+        ffStrbufPrepend(&host->productName, &host->sysVendor);
+    }
 
-    ffStrbufInitA(&host->productVersion, 0);
-    ffStrbufInitA(&host->productSku, 0);
+    return NULL;
 }

@@ -38,9 +38,9 @@ static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrb
     ffStrbufAppendC(result, ']');
 }
 
-static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* result)
+static const char* detectVulkan(FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, &instance->config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed",
+    FF_LIBRARY_LOAD(vulkan, &instance.config.libVulkan, "dlopen libvulkan"FF_LIBRARY_EXTENSION " failed",
         #ifdef __APPLE__
             "libMoltenVK"FF_LIBRARY_EXTENSION, -1
         #elif defined(_WIN32)
@@ -119,7 +119,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 
     PFN_vkGetPhysicalDeviceMemoryProperties ffvkGetPhysicalDeviceMemoryProperties = NULL;
     PFN_vkGetPhysicalDeviceMemoryProperties2 ffvkGetPhysicalDeviceMemoryProperties2 =
-        instance->config.allowSlowOperations ? (PFN_vkGetPhysicalDeviceMemoryProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties2") : NULL; // 1.1
+        instance.config.allowSlowOperations ? (PFN_vkGetPhysicalDeviceMemoryProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties2") : NULL; // 1.1
     if(!ffvkGetPhysicalDeviceMemoryProperties2)
         ffvkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties");
 
@@ -245,7 +245,7 @@ static const char* detectVulkan(const FFinstance* instance, FFVulkanResult* resu
 
 #endif
 
-const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
+FFVulkanResult* ffDetectVulkan(void)
 {
     static FFVulkanResult result;
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
@@ -265,9 +265,8 @@ const FFVulkanResult* ffDetectVulkan(const FFinstance* instance)
     ffListInit(&result.gpus, sizeof(FFGPUResult));
 
     #ifdef FF_HAVE_VULKAN
-        result.error = detectVulkan(instance, &result);
+        result.error = detectVulkan(&result);
     #else
-        FF_UNUSED(instance);
         result.error = "fastfetch was compiled without vulkan support";
     #endif
 

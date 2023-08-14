@@ -12,6 +12,6 @@ typedef struct FFOpenCLResult
     FFstrbuf vendor;
 } FFOpenCLResult;
 
-const char* ffDetectOpenCL(FFinstance* instance, FFOpenCLResult* result);
+const char* ffDetectOpenCL(FFOpenCLResult* result);
 
 #endif

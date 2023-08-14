@@ -6,7 +6,7 @@
 
 //https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
 //https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes
-static void CoUninitializeWrap()
+static void CoUninitializeWrap(void)
 {
     CoUninitialize();
 }

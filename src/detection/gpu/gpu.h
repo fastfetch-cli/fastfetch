@@ -14,13 +14,6 @@ extern const char* FF_GPU_VENDOR_NAME_AMD;
 extern const char* FF_GPU_VENDOR_NAME_INTEL;
 extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
 
-typedef enum FFGpuType
-{
-    FF_GPU_TYPE_UNKNOWN,
-    FF_GPU_TYPE_INTEGRATED,
-    FF_GPU_TYPE_DISCRETE,
-} FFGpuType;
-
 typedef struct FFGPUMemory
 {
     uint64_t total;
@@ -29,7 +22,7 @@ typedef struct FFGPUMemory
 
 typedef struct FFGPUResult
 {
-    FFGpuType type;
+    FFGPUType type;
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
@@ -40,7 +33,8 @@ typedef struct FFGPUResult
     uint32_t vulkanDeviceId; // Only used for vulkan
 } FFGPUResult;
 
-const FFlist* ffDetectGPU(const FFinstance* instance);
+const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result);
+const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus);
 
 const char* ffGetGPUVendorString(unsigned vendorId);
 

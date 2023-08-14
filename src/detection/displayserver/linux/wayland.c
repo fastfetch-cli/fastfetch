@@ -1,4 +1,5 @@
 #include "displayserver_linux.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -7,9 +8,11 @@
 #include "common/library.h"
 #include "common/io/io.h"
 #include "common/thread.h"
+#include "util/edidHelper.h"
 #include <wayland-client.h>
 #include <sys/socket.h>
 #include <assert.h>
+#include <dirent.h>
 
 typedef struct WaylandData
 {
@@ -20,7 +23,6 @@ typedef struct WaylandData
     FF_LIBRARY_SYMBOL(wl_display_roundtrip)
     struct wl_display* display;
     const struct wl_interface* ffwl_output_interface;
-    bool detectName;
 } WaylandData;
 
 typedef struct WaylandDisplay
@@ -32,7 +34,9 @@ typedef struct WaylandDisplay
     enum wl_output_transform transform;
     FFDisplayType type;
     FFstrbuf name;
-    bool detectName;
+    FFstrbuf description;
+    FFstrbuf vendorAndModelId;
+    FFstrbuf edidName;
 } WaylandDisplay;
 
 #ifndef __FreeBSD__
@@ -43,13 +47,11 @@ static void waylandDetectWM(int fd, FFDisplayServerResult* result)
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
         return;
 
-    FFstrbuf procPath;
-    ffStrbufInit(&procPath);
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreate();
     ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
     ffReadFileBuffer(procPath.chars, &result->wmProcessName);
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
-    ffStrbufDestroy(&procPath);
 }
 #else
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
@@ -93,26 +95,70 @@ static void waylandOutputGeometryListener(void *data,
 {
     WaylandDisplay* display = data;
     display->transform = (enum wl_output_transform) transform;
-    if(display->detectName)
+    if (make && !ffStrEqualsIgnCase(make, "unknown") && model && !ffStrEqualsIgnCase(model, "unknown"))
     {
-        if(make && strcmp(make, "unknown") != 0)
-            ffStrbufAppendS(&display->name, make);
-        if(model && strcmp(model, "unknown") != 0)
+        ffStrbufAppendS(&display->vendorAndModelId, make);
+        ffStrbufAppendS(&display->vendorAndModelId, model);
+    }
+}
+
+static bool matchDrmConnector(const char* wlName, FFstrbuf* edidName)
+{
+    // https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output-event-name
+    // The doc says that "do not assume that the name is a reflection of an underlying DRM connector, X11 connection, etc."
+    // However I can't find a better method to get the edid data
+    const char* drmDirPath = "/sys/class/drm/";
+
+    DIR* dirp = opendir(drmDirPath);
+    if(dirp == NULL)
+        return false;
+
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        const char* plainName = entry->d_name;
+        if (ffStrStartsWith(plainName, "card"))
         {
-            if(display->name.length > 0)
-                ffStrbufAppendC(&display->name, '-');
-            ffStrbufAppendS(&display->name, model);
+            const char* tmp = strchr(plainName + strlen("card"), '-');
+            if (tmp) plainName = tmp + 1;
+        }
+        if (ffStrEquals(plainName, wlName))
+        {
+            ffStrbufAppendF(edidName, "%s%s/edid", drmDirPath, entry->d_name);
+
+            uint8_t edidData[128];
+            if(ffReadFileData(edidName->chars, sizeof(edidData), edidData) == sizeof(edidData))
+            {
+                ffStrbufClear(edidName);
+                ffEdidGetName(edidData, edidName);
+                closedir(dirp);
+                return true;
+            }
+            break;
         }
     }
+    ffStrbufClear(edidName);
+    closedir(dirp);
+    return false;
 }
 
 static void waylandOutputNameListener(void *data, FF_MAYBE_UNUSED struct wl_output *output, const char *name)
 {
     WaylandDisplay* display = data;
-    if(strncmp(name, "eDP-", strlen("eDP-")) == 0)
+    if(ffStrStartsWith(name, "eDP-"))
         display->type = FF_DISPLAY_TYPE_BUILTIN;
-    else if(strncmp(name, "HDMI-", strlen("HDMI-")) == 0 || strncmp(name, "DP-", strlen("DP-")) == 0)
+    else if(ffStrStartsWith(name, "HDMI-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
+    matchDrmConnector(name, &display->edidName);
+    ffStrbufAppendS(&display->name, name);
+}
+
+static void waylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED struct wl_output* wl_output, const char* description)
+{
+    WaylandDisplay* display = data;
+    while (*description == ' ') ++description;
+    if (!ffStrEquals(description, "Unknown Display"))
+        ffStrbufAppendS(&display->description, description);
 }
 
 static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
@@ -122,7 +168,6 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         return;
 
     WaylandDisplay display = {
-        .detectName = wldata->detectName,
         .width = 0,
         .height = 0,
         .refreshRate = 0,
@@ -131,6 +176,9 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         .type = FF_DISPLAY_TYPE_UNKNOWN,
     };
     ffStrbufInit(&display.name);
+    ffStrbufInit(&display.description);
+    ffStrbufInit(&display.vendorAndModelId);
+    ffStrbufInit(&display.edidName);
 
     // Dirty hack for #477
     // The order of these callbacks MUST follow `struct wl_output_listener`
@@ -140,7 +188,7 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
         stubListener, // done
         waylandOutputScaleListener, // scale
         waylandOutputNameListener, // name
-        stubListener, // description
+        waylandOutputDescriptionListener, // description
     };
     static_assert(
         sizeof(outputListener) >= sizeof(struct wl_output_listener),
@@ -172,15 +220,48 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
             break;
     }
 
+    uint32_t rotation;
+    switch(display.transform)
+    {
+        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        case WL_OUTPUT_TRANSFORM_90:
+            rotation = 90;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        case WL_OUTPUT_TRANSFORM_180:
+            rotation = 180;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        case WL_OUTPUT_TRANSFORM_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
     ffdsAppendDisplay(wldata->result,
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
-        &display.name,
-        display.type
+        rotation,
+        display.edidName.length
+            ? &display.edidName
+            : display.description.length
+                ? &display.description
+                : display.vendorAndModelId.length
+                    ? &display.vendorAndModelId : &display.name,
+        display.type,
+        false,
+        0
     );
+
+    ffStrbufDestroy(&display.description);
+    ffStrbufDestroy(&display.vendorAndModelId);
+    ffStrbufDestroy(&display.name);
+    ffStrbufDestroy(&display.edidName);
 
     ffThreadMutexUnlock(&mutex);
 }
@@ -189,13 +270,13 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 {
     WaylandData* wldata = data;
 
-    if(strcmp(interface, wldata->ffwl_output_interface->name) == 0)
+    if(ffStrEquals(interface, wldata->ffwl_output_interface->name))
         waylandOutputHandler(wldata, registry, name, version);
 }
 
-bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
+bool detectWayland(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(wayland, &instance->config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(wayland, &instance.config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)
@@ -215,8 +296,6 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
     data.display = ffwl_display_connect(NULL);
     if(data.display == NULL)
         return false;
-
-    data.detectName = instance->config.displayDetectName;
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
@@ -249,17 +328,15 @@ bool detectWayland(const FFinstance* instance, FFDisplayServerResult* result)
 }
 #endif
 
-void ffdsConnectWayland(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsConnectWayland(FFDisplayServerResult* result)
 {
     //Wayland requires this to be set
     if(getenv("XDG_RUNTIME_DIR") == NULL)
         return;
 
     #ifdef FF_HAVE_WAYLAND
-        if(detectWayland(instance, result))
+        if(detectWayland(result))
             return;
-    #else
-        FF_UNUSED(instance);
     #endif
 
     const char* xdgSessionType = getenv("XDG_SESSION_TYPE");

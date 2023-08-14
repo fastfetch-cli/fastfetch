@@ -60,14 +60,13 @@ const char* colorHexToString(DWORD hex)
     }
 }
 
-bool ffDetectWmTheme(FF_MAYBE_UNUSED FFinstance* instance, FFstrbuf* themeOrError)
+bool ffDetectWmTheme(FFstrbuf* themeOrError)
 {
     {
         FF_HKEY_AUTO_DESTROY hKey = NULL;
         if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL))
         {
-            FF_STRBUF_AUTO_DESTROY theme;
-            ffStrbufInit(&theme);
+            FF_STRBUF_AUTO_DESTROY theme = ffStrbufCreate();
             if(ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, NULL))
             {
                 ffStrbufSubstrBeforeLastC(&theme, '.');

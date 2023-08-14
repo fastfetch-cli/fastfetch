@@ -6,11 +6,11 @@
 #include "detection/displayserver/displayserver.h"
 #include "util/stringUtils.h"
 
-static bool detectWMThemeFromConfigFile(FFinstance* instance, const char* configFile, const char* themeRegex, const char* defaultValue, FFstrbuf* themeOrError)
+static bool detectWMThemeFromConfigFile(const char* configFile, const char* themeRegex, const char* defaultValue, FFstrbuf* themeOrError)
 {
-    if(!ffParsePropFileConfig(instance, configFile, themeRegex, themeOrError))
+    if(!ffParsePropFileConfig(configFile, themeRegex, themeOrError))
     {
-        ffStrbufInitF(themeOrError, "Config file %s doesn't exist", configFile);
+        ffStrbufAppendF(themeOrError, "Config file %s doesn't exist", configFile);
         return false;
     }
 
@@ -40,9 +40,9 @@ static bool detectWMThemeFromConfigFile(FFinstance* instance, const char* config
     return true;
 }
 
-static bool detectWMThemeFromSettings(FFinstance* instance, const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFstrbuf* themeOrError)
+static bool detectWMThemeFromSettings(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGet(instance, dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGet(dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
 
     if(!ffStrSet(theme))
     {
@@ -54,17 +54,17 @@ static bool detectWMThemeFromSettings(FFinstance* instance, const char* dconfKey
     return true;
 }
 
-static bool detectGTKThemeAsWMTheme(FFinstance* instance, FFstrbuf* themeOrError)
+static bool detectGTKThemeAsWMTheme(FFstrbuf* themeOrError)
 {
-    const FFGTKResult* gtk = ffDetectGTK4(instance);
+    const FFGTKResult* gtk = ffDetectGTK4();
     if(gtk->theme.length > 0)
         goto ok;
 
-    gtk = ffDetectGTK3(instance);
+    gtk = ffDetectGTK3();
     if(gtk->theme.length > 0)
         goto ok;
 
-    gtk = ffDetectGTK2(instance);
+    gtk = ffDetectGTK2();
     if(gtk->theme.length > 0)
         goto ok;
 
@@ -76,22 +76,22 @@ ok:
     return true;
 }
 
-static bool detectMutter(FFinstance* instance, FFstrbuf* themeOrError)
+static bool detectMutter(FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGet(instance, "/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGet("/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
     if(ffStrSet(theme))
     {
         ffStrbufAppendS(themeOrError, theme);
         return true;
     }
 
-    return detectGTKThemeAsWMTheme(instance, themeOrError);
+    return detectGTKThemeAsWMTheme(themeOrError);
 }
 
-static bool detectMuffin(FFinstance* instance, FFstrbuf* themeOrError)
+static bool detectMuffin(FFstrbuf* themeOrError)
 {
-    const char* name = ffSettingsGet(instance, "/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
-    const char* theme = ffSettingsGet(instance, "/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
+    const char* name = ffSettingsGet("/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGet("/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
 
     if(name == NULL && theme == NULL)
     {
@@ -115,9 +115,9 @@ static bool detectMuffin(FFinstance* instance, FFstrbuf* themeOrError)
     return true;
 }
 
-static bool detectXFWM4(FFinstance* instance, FFstrbuf* themeOrError)
+static bool detectXFWM4(FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGetXFConf(instance, "xfwm4", "/general/theme", FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGetXFConf("xfwm4", "/general/theme", FF_VARIANT_TYPE_STRING).strValue;
 
     if(theme == NULL)
     {
@@ -129,11 +129,10 @@ static bool detectXFWM4(FFinstance* instance, FFstrbuf* themeOrError)
     return true;
 }
 
-static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
+static bool detectOpenbox(const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
 {
-    FFstrbuf absolutePath;
-    ffStrbufInitA(&absolutePath, 64);
-    ffStrbufAppend(&absolutePath, &instance->state.platform.homeDir);
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(64);
+    ffStrbufAppend(&absolutePath, &instance.state.platform.homeDir);
 
     //TODO: use config dirs
     if(ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
@@ -150,7 +149,6 @@ static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FF
     if(file == NULL)
     {
         ffStrbufAppendF(themeOrError, "Couldn't open \"%s\"", absolutePath.chars);
-        ffStrbufDestroy(&absolutePath);
 
         return false;
     }
@@ -166,7 +164,7 @@ static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FF
         if(strstr(line, "<name>") != 0)
         {
             ffStrbufAppendS(themeOrError, line);
-            ffStrbufRemoveStrings(themeOrError, 2, "<name>", "</name>");
+            ffStrbufRemoveStrings(themeOrError, 2, (const char*[]) { "<name>", "</name>" });
             ffStrbufTrimRight(themeOrError, '\n');
             ffStrbufTrim(themeOrError, ' ');
             break;
@@ -184,17 +182,15 @@ static bool detectOpenbox(FFinstance* instance, const FFstrbuf* dePrettyName, FF
     if(themeOrError->length == 0)
     {
         ffStrbufAppendF(themeOrError, "Couldn't find theme name in \"%s\"", absolutePath.chars);
-        ffStrbufDestroy(&absolutePath);
         return false;
     }
 
-    ffStrbufDestroy(&absolutePath);
     return true;
 }
 
-bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
+bool ffDetectWmTheme(FFstrbuf* themeOrError)
 {
-    const FFDisplayServerResult* wm = ffConnectDisplayServer(instance);
+    const FFDisplayServerResult* wm = ffConnectDisplayServer();
 
     if(wm->wmPrettyName.length == 0)
     {
@@ -203,27 +199,30 @@ bool ffDetectWmTheme(FFinstance* instance, FFstrbuf* themeOrError)
     }
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN) == 0)
-        return detectWMThemeFromConfigFile(instance, "kwinrc", "theme =", "Breeze", themeOrError);
+        return detectWMThemeFromConfigFile("kwinrc", "theme =", "Breeze", themeOrError);
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_XFWM4) == 0)
-        return detectXFWM4(instance, themeOrError);
+        return detectXFWM4(themeOrError);
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUTTER) == 0)
     {
-        if(ffStrbufIgnCaseCompS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) == 0)
-            return detectMutter(instance, themeOrError);
+        if(
+            ffStrbufIgnCaseCompS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) == 0 ||
+            ffStrbufIgnCaseEqualS(&wm->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC)
+        )
+            return detectMutter(themeOrError);
         else
-            return detectGTKThemeAsWMTheme(instance, themeOrError);
+            return detectGTKThemeAsWMTheme(themeOrError);
     }
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUFFIN) == 0)
-        return detectMuffin(instance, themeOrError);
+        return detectMuffin(themeOrError);
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MARCO) == 0)
-        return detectWMThemeFromSettings(instance, "/org/mate/Marco/general/theme", "org.mate.Marco.general", NULL, "theme", themeOrError);
+        return detectWMThemeFromSettings("/org/mate/Marco/general/theme", "org.mate.Marco.general", NULL, "theme", themeOrError);
 
     if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_OPENBOX) == 0)
-        return detectOpenbox(instance, &wm->dePrettyName, themeOrError);
+        return detectOpenbox(&wm->dePrettyName, themeOrError);
 
     ffStrbufAppendS(themeOrError, "Unknown WM: ");
     ffStrbufAppend(themeOrError, &wm->wmPrettyName);

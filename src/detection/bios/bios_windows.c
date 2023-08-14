@@ -1,28 +1,28 @@
 #include "bios.h"
 #include "util/windows/registry.h"
+#include "util/smbiosHelper.h"
 
-void ffDetectBios(FFBiosResult* bios)
+const char* ffDetectBios(FFBiosResult* bios)
 {
-    ffStrbufInit(&bios->error);
-
-    ffStrbufInit(&bios->biosDate);
-    ffStrbufInit(&bios->biosRelease);
-    ffStrbufInit(&bios->biosVendor);
-    ffStrbufInit(&bios->biosVersion);
-
     FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, &bios->error))
-        return;
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL))
+        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\BIOS\", &hKey, NULL) failed";
 
-    if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->biosRelease, &bios->error))
-        return;
-    ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->biosVendor, NULL);
-    ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->biosDate, NULL);
+    if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->version, NULL))
+        return "\"HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\BIOS\\BIOSVersion\" doesn't exist";
+
+    ffCleanUpSmbiosValue(&bios->version);
+    ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->vendor, NULL);
+    ffCleanUpSmbiosValue(&bios->vendor);
+    ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->date, NULL);
+    ffCleanUpSmbiosValue(&bios->date);
 
     uint32_t major, minor;
     if(
         ffRegReadUint(hKey, L"BiosMajorRelease", &major, NULL) &&
         ffRegReadUint(hKey, L"BiosMinorRelease", &minor, NULL)
     )
-        ffStrbufAppendF(&bios->biosVersion, "%u.%u", (unsigned)major, (unsigned)minor);
+        ffStrbufAppendF(&bios->release, "%u.%u", (unsigned)major, (unsigned)minor);
+
+    return NULL;
 }

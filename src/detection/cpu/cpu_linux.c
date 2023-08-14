@@ -2,18 +2,34 @@
 #include "common/io/io.h"
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
+#include "util/mallocHelper.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
-{
-    FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
-    if(cpuinfo == NULL)
-        return;
+#ifdef __ANDROID__
+#include "common/settings.h"
 
-    char* line = NULL;
+static void detectAndroid(FFCPUResult* cpu)
+{
+    if (cpu->name.length == 0)
+        ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name);
+    if (cpu->vendor.length == 0)
+    {
+        if (!ffSettingsGetAndroidProperty("ro.soc.manufacturer", &cpu->vendor))
+            ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor);
+    }
+}
+#endif
+
+static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
+{
+    FF_AUTO_CLOSE_FILE FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+    if(cpuinfo == NULL)
+        return "fopen(\"/proc/cpuinfo\", \"r\") failed";
+
+    FF_AUTO_FREE char* line = NULL;
     size_t len = 0;
 
     while(getline(&line, &len, cpuinfo) != -1)
@@ -29,24 +45,20 @@ static void parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrb
             ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
-            (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) //For Android devices
+            (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) //For POWER
         );
     }
 
-    if(line != NULL)
-        free(line);
-
-    fclose(cpuinfo);
+    return NULL;
 }
 
 static double getGHz(const char* file)
 {
-    FFstrbuf content;
-    ffStrbufInit(&content);
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     if(ffAppendFileBuffer(file, &content))
     {
         double herz = ffStrbufToDouble(&content);
-        ffStrbufDestroy(&content);
 
         //ffStrbufToDouble failed
         if(herz != herz)
@@ -104,26 +116,17 @@ static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    if(instance->config.cpuTemp)
-        cpu->temperature = detectCPUTemp();
-    else
-        cpu->temperature = FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
 
-    FFstrbuf physicalCoresBuffer;
-    ffStrbufInit(&physicalCoresBuffer);
+    FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cpuIsa = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cpuUarch = ffStrbufCreate();
 
-    FFstrbuf cpuMHz;
-    ffStrbufInit(&cpuMHz);
-
-    FFstrbuf cpuIsa;
-    ffStrbufInit(&cpuIsa);
-
-    FFstrbuf cpuUarch;
-    ffStrbufInit(&cpuUarch);
-
-    parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
+    const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
+    if (error) return error;
 
     cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
 
@@ -156,8 +159,9 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
         ffStrbufAppend(&cpu->name, &cpuIsa);
     }
 
-    ffStrbufDestroy(&physicalCoresBuffer);
-    ffStrbufDestroy(&cpuMHz);
-    ffStrbufDestroy(&cpuIsa);
-    ffStrbufDestroy(&cpuUarch);
+    #ifdef __ANDROID__
+    detectAndroid(cpu);
+    #endif
+
+    return NULL;
 }

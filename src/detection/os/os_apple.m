@@ -1,5 +1,6 @@
 #include "os.h"
 #include "common/sysctl.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -78,12 +79,11 @@ static void parseOSXSoftwareLicense(FFOSResult* os)
     char* line = NULL;
     size_t len = 0;
     const char* searchStr = "\\f0\\b SOFTWARE LICENSE AGREEMENT FOR macOS ";
-    const size_t searchLen = strlen(searchStr);
     while(getline(&line, &len, rtf) != EOF)
     {
-        if (strncmp(line, searchStr, searchLen) == 0)
+        if (ffStrStartsWith(line, searchStr))
         {
-            ffStrbufAppendS(&os->codename, line + searchLen);
+            ffStrbufAppendS(&os->codename, line + strlen(searchStr));
             ffStrbufTrimRight(&os->codename, '\n');
             ffStrbufTrimRight(&os->codename, '\\');
             break;
@@ -96,10 +96,8 @@ static void parseOSXSoftwareLicense(FFOSResult* os)
     fclose(rtf);
 }
 
-void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
+void ffDetectOSImpl(FFOSResult* os)
 {
-    FF_UNUSED(instance);
-
     ffStrbufInit(&os->name);
     ffStrbufInit(&os->version);
     ffStrbufInit(&os->buildID);
@@ -107,10 +105,10 @@ void ffDetectOSImpl(FFOSResult* os, const FFinstance* instance)
     ffStrbufInit(&os->prettyName);
     ffStrbufInit(&os->versionID);
 
-    ffStrbufInitA(&os->codename, 0);
-    ffStrbufInitA(&os->idLike, 0);
-    ffStrbufInitA(&os->variant, 0);
-    ffStrbufInitA(&os->variantID, 0);
+    ffStrbufInit(&os->codename);
+    ffStrbufInit(&os->idLike);
+    ffStrbufInit(&os->variant);
+    ffStrbufInit(&os->variantID);
 
     parseSystemVersion(os);
 

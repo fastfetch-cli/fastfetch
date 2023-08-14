@@ -1,33 +1,19 @@
 #include "font.h"
 #include "detection/internal.h"
 
-void ffDetectFontImpl(const FFinstance* instance, FFFontResult* font);
+const char* ffDetectFontImpl(FFFontResult* font);
 
-static void detectFont(const FFinstance* instance, FFFontResult* font)
+const char* ffDetectFont(FFFontResult* font)
 {
-    ffStrbufInit(&font->error);
+    const char* error = ffDetectFontImpl(font);
 
-    for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
-        ffStrbufInit(&font->fonts[i]);
-    ffStrbufInit(&font->display);
-
-    ffDetectFontImpl(instance, font);
-
-    if(font->error.length > 0)
-        return;
+    if(error) return error;
 
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
     {
         if(font->fonts[i].length > 0)
-            return;
+            return NULL;
     }
 
-    ffStrbufAppendS(&font->error, "No fonts found");
-}
-
-const FFFontResult* ffDetectFont(const FFinstance* instance)
-{
-    FF_DETECTION_INTERNAL_GUARD(FFFontResult,
-        detectFont(instance, &result);
-    );
+    return "No fonts found";
 }

@@ -14,6 +14,6 @@ typedef struct FFVulkanResult
     const char* error;
 } FFVulkanResult;
 
-const FFVulkanResult* ffDetectVulkan(const FFinstance* instance);
+FFVulkanResult* ffDetectVulkan();
 
 #endif

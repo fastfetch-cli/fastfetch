@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-static const char* parseEnv()
+static const char* parseEnv(void)
 {
     const char* env;
 
@@ -55,52 +55,64 @@ static const char* parseEnv()
     return NULL;
 }
 
-static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* processName)
+static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
 {
-    if(!ffStrSet(processName))
+    if(!ffStrSet(name))
         return;
 
     if(
-        strcasecmp(processName, "kwin_wayland") == 0 ||
-        strcasecmp(processName, "kwin_wayland_wrapper") == 0 ||
-        strcasecmp(processName, "kwin_x11") == 0 ||
-        strcasecmp(processName, "kwin_x11_wrapper") == 0 ||
-        strcasecmp(processName, "kwin") == 0
+        strcasecmp(name, "kwin_wayland") == 0 ||
+        strcasecmp(name, "kwin_wayland_wrapper") == 0 ||
+        strcasecmp(name, "kwin_x11") == 0 ||
+        strcasecmp(name, "kwin_x11_wrapper") == 0 ||
+        strcasecmp(name, "kwin") == 0
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
     else if(
-        strcasecmp(processName, "gnome-shell") == 0 ||
-        strcasecmp(processName, "gnome shell") == 0 ||
-        strcasecmp(processName, "gnome-session-binary") == 0 ||
-        strcasecmp(processName, "Mutter") == 0
+        strcasecmp(name, "gnome-shell") == 0 ||
+        strcasecmp(name, "gnome shell") == 0 ||
+        strcasecmp(name, "gnome-session-binary") == 0 ||
+        strcasecmp(name, "Mutter") == 0
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
-        strcasecmp(processName, "cinnamon-session") == 0 ||
-        strcasecmp(processName, "Muffin") == 0 ||
-        strcasecmp(processName, "Mutter (Muffin)") == 0
+        strcasecmp(name, "cinnamon-session") == 0 ||
+        strcasecmp(name, "Muffin") == 0 ||
+        strcasecmp(name, "Mutter (Muffin)") == 0
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
-    else if(strcasecmp(processName, "sway") == 0)
+    else if(strcasecmp(name, "sway") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
-    else if(strcasecmp(processName, "weston") == 0)
+    else if(strcasecmp(name, "weston") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WESTON);
-    else if(strcasecmp(processName, "wayfire") == 0)
+    else if(strcasecmp(name, "wayfire") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WAYFIRE);
-    else if(strcasecmp(processName, "openbox") == 0)
+    else if(strcasecmp(name, "openbox") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_OPENBOX);
-    else if(strcasecmp(processName, "xfwm4") == 0)
+    else if(strcasecmp(name, "xfwm4") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XFWM4);
-    else if(strcasecmp(processName, "Marco") == 0)
+    else if(strcasecmp(name, "Marco") == 0 ||
+        strcasecmp(name, "Metacity (Marco)") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MARCO);
-    else if(strcasecmp(processName, "xmonad") == 0)
+    else if(strcasecmp(name, "xmonad") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
-    else if(strcasecmp(processName, "WSLg") == 0)
+    else if(strcasecmp(name, "WSLg") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WSLG);
-    else if( // WMs where the pretty name matches the process name
-        strcasecmp(processName, "dwm") == 0 ||
-        strcasecmp(processName, "bspwm") == 0 ||
-        strcasecmp(processName, "tinywm") == 0
-    ) ffStrbufSetS(&result->wmPrettyName, processName);
+    else if(strcasecmp(name, "dwm") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DWM);
+    else if(strcasecmp(name, "bspwm") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_BSPWM);
+    else if(strcasecmp(name, "tinywm") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_TINYWM);
+    else if(strcasecmp(name, "qtile") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_QTILE);
+    else if(strcasecmp(name, "herbstluftwm") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HERBSTLUFTWM);
+    else if(strcasecmp(name, "icewm") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
+}
 
-    if(result->wmPrettyName.length > 0 && result->wmProcessName.length == 0)
+static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)
+{
+    applyPrettyNameIfWM(result, processName);
+    if(result->wmPrettyName.length > 0)
         ffStrbufSetS(&result->wmProcessName, processName);
 }
 
@@ -109,18 +121,17 @@ static void applyBetterWM(FFDisplayServerResult* result, const char* processName
     if(!ffStrSet(processName))
         return;
 
+    ffStrbufSetS(&result->wmProcessName, processName);
+
     //If it is a known wm, this will set the pretty name
     applyPrettyNameIfWM(result, processName);
-
-    //If it isn't a known wm, we have to set the process name our self
-    ffStrbufSetS(&result->wmProcessName, processName);
 
     //If it isn't a known wm, set the pretty name to the process name
     if(result->wmPrettyName.length == 0)
         ffStrbufAppend(&result->wmPrettyName, &result->wmProcessName);
 }
 
-static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
+static void getKDE(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "plasmashell");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_PLASMA);
@@ -129,9 +140,9 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
         {"X-KDE-PluginInfo-Version =", &result->deVersion}
     });
     if(result->deVersion.length == 0)
-        ffParsePropFileData(instance, "xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData("xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFileData(instance, "xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData("xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
     {
         ffParsePropFileValues("/usr/share/wayland-sessions/plasma.desktop", 1, (FFpropquery[]) {
@@ -139,11 +150,11 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
         });
     }
     if(result->deVersion.length == 0)
-        ffParsePropFileData(instance, "wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData("wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFileData(instance, "wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
+        ffParsePropFileData("wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
 
-    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
     {
         if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "plasmashell",
@@ -157,11 +168,16 @@ static void getKDE(const FFinstance* instance, FFDisplayServerResult* result)
     applyBetterWM(result, getenv("KDEWM"));
 }
 
-static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
+static void getGnome(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "gnome-shell");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
-    ffParsePropFileData(instance, "gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
+    const char* sessionMode = getenv("GNOME_SHELL_SESSION_MODE");
+    if (sessionMode && ffStrEquals(sessionMode, "classic"))
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC);
+    else
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
+
+    ffParsePropFileData("gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
 
     if (result->deVersion.length == 0)
     {
@@ -174,28 +190,23 @@ static void getGnome(const FFinstance* instance, FFDisplayServerResult* result)
     }
 }
 
-static void getCinnamon(const FFinstance* instance, FFDisplayServerResult* result)
+static void getCinnamon(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "cinnamon");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CINNAMON);
-    ffParsePropFileData(instance, "applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
+    ffParsePropFileData("applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
 }
 
-static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
+static void getMate(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "mate-session");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_MATE);
 
-    FFstrbuf major;
-    ffStrbufInit(&major);
+    FF_STRBUF_AUTO_DESTROY major = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY micro = ffStrbufCreate();
 
-    FFstrbuf minor;
-    ffStrbufInit(&minor);
-
-    FFstrbuf micro;
-    ffStrbufInit(&micro);
-
-    ffParsePropFileDataValues(instance, "mate-about/mate-version.xml", 3, (FFpropquery[]) {
+    ffParsePropFileDataValues("mate-about/mate-version.xml", 3, (FFpropquery[]) {
         {"<platform>", &major},
         {"<minor>", &minor},
         {"<micro>", &micro}
@@ -203,11 +214,7 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
 
     ffParseSemver(&result->deVersion, &major, &minor, &micro);
 
-    ffStrbufDestroy(&major);
-    ffStrbufDestroy(&minor);
-    ffStrbufDestroy(&micro);
-
-    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
     {
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "mate-session",
@@ -220,13 +227,13 @@ static void getMate(const FFinstance* instance, FFDisplayServerResult* result)
     }
 }
 
-static void getXFCE4(const FFinstance* instance, FFDisplayServerResult* result)
+static void getXFCE4(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "xfce4-session");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_XFCE4);
-    ffParsePropFileData(instance, "gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
+    ffParsePropFileData("gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
 
-    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
     {
         //This is somewhat slow
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
@@ -241,18 +248,18 @@ static void getXFCE4(const FFinstance* instance, FFDisplayServerResult* result)
     }
 }
 
-static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
+static void getLXQt(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "lxqt-session");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
-    ffParsePropFileData(instance, "gconfig/lxqt.pc", "Version:", &result->deVersion);
+    ffParsePropFileData("gconfig/lxqt.pc", "Version:", &result->deVersion);
 
     if(result->deVersion.length == 0)
-        ffParsePropFileData(instance, "cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
+        ffParsePropFileData("cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
     if(result->deVersion.length == 0)
-        ffParsePropFileData(instance, "cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
+        ffParsePropFileData("cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
 
-    if(result->deVersion.length == 0 && instance->config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
     {
         //This is really, really, really slow. Thank you, LXQt developers
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
@@ -265,23 +272,20 @@ static void getLXQt(const FFinstance* instance, FFDisplayServerResult* result)
         ffParsePropLines(result->deVersion.chars , "liblxqt", &result->deVersion);
     }
 
-    FFstrbuf wmProcessNameBuffer;
-    ffStrbufInit(&wmProcessNameBuffer);
+    FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
 
-    ffParsePropFileConfig(instance, "lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
+    ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
     applyBetterWM(result, wmProcessNameBuffer.chars);
-
-    ffStrbufDestroy(&wmProcessNameBuffer);
 }
 
-static void getBudgie(const FFinstance* instance, FFDisplayServerResult* result)
+static void getBudgie(FFDisplayServerResult* result)
 {
     ffStrbufSetS(&result->deProcessName, "budgie-desktop");
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_BUDGIE);
-    ffParsePropFileData(instance, "budgie/budgie-version.xml", "<str>", &result->deVersion);
+    ffParsePropFileData("budgie/budgie-version.xml", "<str>", &result->deVersion);
 }
 
-static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResult* result, const char* name)
+static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 {
     if(!ffStrSet(name))
         return;
@@ -291,19 +295,19 @@ static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResul
         strcasecmp(name, "plasma") == 0 ||
         strcasecmp(name, "plasmashell") == 0 ||
         strcasecmp(name, "plasmawayland") == 0
-    ) getKDE(instance, result);
+    ) getKDE(result);
 
     else if(
         strcasecmp(name, "Gnome") == 0 ||
         strcasecmp(name, "ubuntu:GNOME") == 0 ||
         strcasecmp(name, "ubuntu") == 0 ||
         strcasecmp(name, "gnome-shell") == 0
-    ) getGnome(instance, result);
+    ) getGnome(result);
 
     else if(
         strcasecmp(name, "X-Cinnamon") == 0 ||
         strcasecmp(name, "Cinnamon") == 0
-    ) getCinnamon(instance, result);
+    ) getCinnamon(result);
 
     else if(
         strcasecmp(name, "XFCE") == 0 ||
@@ -311,26 +315,26 @@ static void applyPrettyNameIfDE(const FFinstance* instance, FFDisplayServerResul
         strcasecmp(name, "XFCE4") == 0 ||
         strcasecmp(name, "X-XFCE4") == 0 ||
         strcasecmp(name, "xfce4-session") == 0
-    ) getXFCE4(instance, result);
+    ) getXFCE4(result);
 
     else if(
         strcasecmp(name, "MATE") == 0 ||
         strcasecmp(name, "X-MATE") == 0 ||
         strcasecmp(name, "mate-session") == 0
-    ) getMate(instance, result);
+    ) getMate(result);
 
     else if(
         strcasecmp(name, "LXQt") == 0 ||
         strcasecmp(name, "X-LXQT") == 0 ||
         strcasecmp(name, "lxqt-session") == 0
-    ) getLXQt(instance, result);
+    ) getLXQt(result);
 
     else if(
         strcasecmp(name, "Budgie") == 0 ||
         strcasecmp(name, "X-Budgie") == 0 ||
         strcasecmp(name, "budgie-desktop") == 0 ||
         strcasecmp(name, "Budgie:GNOME") == 0
-    ) getBudgie(instance, result);
+    ) getBudgie(result);
 }
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
@@ -366,27 +370,20 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     }
 }
 
-static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* result)
+static void getFromProcDir(FFDisplayServerResult* result)
 {
     DIR* proc = opendir("/proc");
     if(proc == NULL)
         return;
 
-    FFstrbuf procPath;
-    ffStrbufInitA(&procPath, 64);
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
     ffStrbufAppendS(&procPath, "/proc/");
 
     uint32_t procPathLength = procPath.length;
 
-    FFstrbuf userID;
-    ffStrbufInit(&userID);
-    ffStrbufAppendF(&userID, "%i", getuid());
-
-    FFstrbuf loginuid;
-    ffStrbufInit(&loginuid);
-
-    FFstrbuf processName;
-    ffStrbufInitA(&processName, 256); //Some processes have large command lines (looking at you chrome)
+    FF_STRBUF_AUTO_DESTROY userID = ffStrbufCreateF("%i", getuid());
+    FF_STRBUF_AUTO_DESTROY loginuid = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY processName = ffStrbufCreateA(256); //Some processes have large command lines (looking at you chrome)
 
     struct dirent* dirent;
     while((dirent = readdir(proc)) != NULL)
@@ -418,24 +415,19 @@ static void getFromProcDir(const FFinstance* instance, FFDisplayServerResult* re
         ffStrbufSubstrBefore(&procPath, procPathLength);
 
         if(result->dePrettyName.length == 0)
-            applyPrettyNameIfDE(instance, result, processName.chars);
+            applyPrettyNameIfDE(result, processName.chars);
 
         if(result->wmPrettyName.length == 0)
-            applyPrettyNameIfWM(result, processName.chars);
+            applyNameIfWM(result, processName.chars);
 
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
     }
 
     closedir(proc);
-
-    ffStrbufDestroy(&processName);
-    ffStrbufDestroy(&loginuid);
-    ffStrbufDestroy(&userID);
-    ffStrbufDestroy(&procPath);
 }
 
-void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
+void ffdsDetectWMDE(FFDisplayServerResult* result)
 {
     //If all connections failed, use the environment variables to detect protocol name
     if(result->wmProtocolName.length == 0)
@@ -459,12 +451,12 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
     else
     {
         //if env is a known WM, use it
-        applyPrettyNameIfWM(result, env);
+        applyNameIfWM(result, env);
     }
 
     //Connecting to a display server only gives WM results, not DE results.
     //If we find it in the environment, use that.
-    applyPrettyNameIfDE(instance, result, env);
+    applyPrettyNameIfDE(result, env);
 
     //If WM was found by connection to the sever, and DE in the environment, we can return
     //This way we never call getFromProcDir(), which has slow initalization time
@@ -472,7 +464,7 @@ void ffdsDetectWMDE(const FFinstance* instance, FFDisplayServerResult* result)
         return;
 
     //Get missing WM / DE from processes.
-    getFromProcDir(instance, result);
+    getFromProcDir(result);
 
     //Return if both wm and de are set, or if env doesn't contain anything
     if(

@@ -28,18 +28,15 @@ typedef struct FFstrbuf
     char* chars;
 } FFstrbuf;
 
+static inline void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
-void ffStrbufInitCopy(FFstrbuf* strbuf, const FFstrbuf* src);
-void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src);
-void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 
-FF_C_NODISCARD uint32_t ffStrbufGetFree(const FFstrbuf* strbuf);
-
 void ffStrbufClear(FFstrbuf* strbuf);
 
+static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value);
 void ffStrbufAppendC(FFstrbuf* strbuf, char c);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
@@ -56,13 +53,10 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
-void ffStrbufTrim(FFstrbuf* strbuf, char c);
 
 void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
 void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str);
-void ffStrbufRemoveStringsA(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[]);
-void ffStrbufRemoveStringsV(FFstrbuf* strbuf, uint32_t numStrings, va_list arguments);
-void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, ...);
+void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[]);
 
 FF_C_NODISCARD uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
 FF_C_NODISCARD uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str);
@@ -72,8 +66,6 @@ FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
-void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c);
-void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c);
 void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
 void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
 void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
@@ -91,7 +83,104 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
 FF_C_NODISCARD uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue);
 
-void ffStrbufDestroy(FFstrbuf* strbuf);
+void ffStrbufUpperCase(FFstrbuf* strbuf);
+void ffStrbufLowerCase(FFstrbuf* strbuf);
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitA(&strbuf, allocate);
+    return strbuf;
+}
+
+static inline void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src)
+{
+    ffStrbufInitA(strbuf, src->allocated);
+    ffStrbufAppend(strbuf, src);
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateCopy(const FFstrbuf* src)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitCopy(&strbuf, src);
+    return strbuf;
+}
+
+// Move the content of `src` into `strbuf`, and left `src` empty
+static inline void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
+{
+    if (src)
+    {
+        strbuf->allocated = src->allocated;
+        strbuf->chars = src->chars;
+        strbuf->length = src->length;
+        ffStrbufInit(src);
+    }
+    else
+        ffStrbufInit(strbuf);
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateMove(FFstrbuf* src)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitMove(&strbuf, src);
+    return strbuf;
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateVF(const char* format, va_list arguments)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitVF(&strbuf, format, arguments);
+    return strbuf;
+}
+
+FF_C_PRINTF(2, 3)
+static inline void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...)
+{
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(strbuf, format, arguments);
+    va_end(arguments);
+}
+
+FF_C_PRINTF(1, 2)
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateF(const char* format, ...)
+{
+    FFstrbuf strbuf;
+
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(&strbuf, format, arguments);
+    va_end(arguments);
+
+    return strbuf;
+}
+
+static inline void ffStrbufDestroy(FFstrbuf* strbuf)
+{
+    extern char* CHAR_NULL_PTR;
+
+    if(strbuf->allocated == 0)
+    {
+        strbuf->length = 0;
+        strbuf->chars = CHAR_NULL_PTR;
+        return;
+    }
+
+    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
+    strbuf->allocated = strbuf->length = 0;
+    free(strbuf->chars);
+    strbuf->chars = CHAR_NULL_PTR;
+}
+
+FF_C_NODISCARD static inline uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
+{
+    assert(strbuf != NULL);
+    if(strbuf->allocated == 0)
+        return 0;
+
+    return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
+}
 
 static inline void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 {
@@ -121,11 +210,35 @@ static inline void ffStrbufInit(FFstrbuf* strbuf)
     strbuf->chars = CHAR_NULL_PTR;
 }
 
-static inline FFstrbuf ffStrbufCreate()
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreate()
 {
-    FFstrbuf result;
-    ffStrbufInit(&result);
-    return result;
+    FFstrbuf strbuf;
+    ffStrbufInit(&strbuf);
+    return strbuf;
+}
+
+static inline void ffStrbufInitStatic(FFstrbuf* strbuf, const char* str)
+{
+    ffStrbufInit(strbuf);
+    strbuf->allocated = 0;
+    strbuf->length = (uint32_t) strlen(str);
+    strbuf->chars = (char*) str;
+}
+
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateStatic(const char* str)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitStatic(&strbuf, str);
+    return strbuf;
+}
+
+static inline void ffStrbufSetStatic(FFstrbuf* strbuf, const char* value)
+{
+    if(strbuf->allocated > 0)
+        ffStrbufDestroy(strbuf);
+
+    if(value != NULL)
+        ffStrbufInitStatic(strbuf, value);
 }
 
 static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* str)
@@ -134,18 +247,39 @@ static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char*
     ffStrbufAppendNS(strbuf, length, str);
 }
 
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateNS(uint32_t length, const char* str)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitNS(&strbuf, length, str);
+    return strbuf;
+}
+
 static inline void ffStrbufInitS(FFstrbuf* strbuf, const char* str)
 {
     ffStrbufInit(strbuf);
     ffStrbufAppendS(strbuf, str);
 }
 
-static inline void ffStrbufAppend(FFstrbuf* strbuf, const FFstrbuf* value)
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateS(const char* str)
+{
+    FFstrbuf strbuf;
+    ffStrbufInitS(&strbuf, str);
+    return strbuf;
+}
+
+static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value)
 {
     assert(value != strbuf);
     if(value == NULL)
         return;
     ffStrbufAppendNS(strbuf, value->length, value->chars);
+}
+
+static inline void ffStrbufPrepend(FFstrbuf* strbuf, FFstrbuf* value)
+{
+    if(value == NULL)
+        return;
+    ffStrbufPrependNS(strbuf, value->length, value->chars);
 }
 
 static inline void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
@@ -249,6 +383,16 @@ static inline FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf,
     return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
 }
 
+static inline void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c)
+{
+    ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
+}
+
+static inline void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c)
+{
+    ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
+}
+
 static inline FF_C_NODISCARD bool ffStrbufStartsWithC(const FFstrbuf* strbuf, char c)
 {
     return strbuf->chars[0] == c;
@@ -328,6 +472,12 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCaseS(const FFstrbuf* strbu
 static inline FF_C_NODISCARD bool ffStrbufEndsWithIgnCase(const FFstrbuf* strbuf, const FFstrbuf* end)
 {
     return ffStrbufEndsWithIgnCaseNS(strbuf, end->length, end->chars);
+}
+
+static inline void ffStrbufTrim(FFstrbuf* strbuf, char c)
+{
+    ffStrbufTrimRight(strbuf, c);
+    ffStrbufTrimLeft(strbuf, c);
 }
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))

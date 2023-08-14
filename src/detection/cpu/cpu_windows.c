@@ -3,23 +3,18 @@
 #include "util/windows/registry.h"
 #include "util/mallocHelper.h"
 
-void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    FF_UNUSED(instance);
-
-    cpu->temperature = FF_CPU_TEMP_UNSET;
-    cpu->coresPhysical = cpu->coresLogical = cpu->coresOnline = 0;
-    cpu->frequencyMax = cpu->frequencyMin = 0;
-    ffStrbufInit(&cpu->name);
-    ffStrbufInit(&cpu->vendor);
-
     {
         DWORD length = 0;
         GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
+        if (length == 0)
+            return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
+
         SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
             pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
 
-        if(pProcessorInfo && GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
+        if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
         {
             for(
                 SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
@@ -36,11 +31,13 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
                 }
             }
         }
+        else
+            return "GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length) failed";
     }
 
     FF_HKEY_AUTO_DESTROY hKey;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
-        return;
+        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
     {
         uint32_t mhz;
@@ -51,6 +48,8 @@ void ffDetectCPUImpl(const FFinstance* instance, FFCPUResult* cpu)
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
     ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
 
-    if(instance->config.cpuTemp)
+    if(options->temp)
         ffDetectSmbiosTemp(&cpu->temperature, NULL);
+
+    return NULL;
 }

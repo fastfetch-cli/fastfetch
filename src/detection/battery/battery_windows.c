@@ -30,22 +30,19 @@ static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
         SetupDiDestroyDeviceInfoList(*hdev);
 }
 
-const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    if(instance->config.allowSlowOperations)
+    if(instance.config.allowSlowOperations)
     {
         //https://learn.microsoft.com/en-us/windows/win32/power/enumerating-battery-devices
         HDEVINFO hdev __attribute__((__cleanup__(wrapSetupDiDestroyDeviceInfoList))) =
-            SetupDiGetClassDevs(&GUID_DEVCLASS_BATTERY, 0, 0, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+            SetupDiGetClassDevsW(&GUID_DEVCLASS_BATTERY, 0, 0, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
         if(hdev == INVALID_HANDLE_VALUE)
-            return "SetupDiGetClassDevs(&GUID_DEVCLASS_BATTERY) failed";
+            return "SetupDiGetClassDevsW(&GUID_DEVCLASS_BATTERY) failed";
 
-        for(DWORD idev = 0;; idev++)
+        SP_DEVICE_INTERFACE_DATA did = { .cbSize = sizeof(did) };
+        for(DWORD idev = 0; SetupDiEnumDeviceInterfaces(hdev, NULL, &GUID_DEVCLASS_BATTERY, idev, &did); idev++)
         {
-            SP_DEVICE_INTERFACE_DATA did = { .cbSize = sizeof(did) };
-            if(!SetupDiEnumDeviceInterfaces(hdev, NULL, &GUID_DEVCLASS_BATTERY, idev, &did))
-                break;
-
             DWORD cbRequired = 0;
             SetupDiGetDeviceInterfaceDetailW(hdev, &did, NULL, 0, &cbRequired, NULL); //Fail with not enough buffer
             SP_DEVICE_INTERFACE_DETAIL_DATA_W* FF_AUTO_FREE pdidd = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)malloc(cbRequired);
@@ -111,7 +108,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
             }
 
             battery->temperature = 0.0/0.0;
-            if(instance->config.batteryTemp)
+            if(options->temp)
             {
                 bqi.InformationLevel = BatteryTemperature;
                 ULONG temp;

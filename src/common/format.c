@@ -25,7 +25,7 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
         ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_BOOL)
-        ffStrbufAppendS(buffer, formatarg->value != NULL ? "true" : "false");
+        ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_LIST)
     {
         const FFlist* list = formatarg->value;
@@ -134,18 +134,14 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
-        FFstrbuf placeholderValue;
-        ffStrbufInit(&placeholderValue);
+        FF_STRBUF_AUTO_DESTROY placeholderValue = ffStrbufCreate();
 
         while(i < formatstr->length && formatstr->chars[i] != '}')
             ffStrbufAppendC(&placeholderValue, formatstr->chars[i++]);
 
          // test if for stop, if so break the loop
         if(placeholderValue.length == 1 && placeholderValue.chars[0] == '-')
-        {
-            ffStrbufDestroy(&placeholderValue);
             break;
-        }
 
         // test for end of an if, if so do nothing
         if(placeholderValue.length == 1 && placeholderValue.chars[0] == '?')
@@ -155,7 +151,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             else
                 --numOpenIfs;
 
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
@@ -167,7 +162,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             else
                 --numOpenNotIfs;
 
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
@@ -182,7 +176,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
                 --numOpenColors;
             }
 
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
@@ -197,7 +190,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             if(index > numArgs)
             {
                 appendInvalidPlaceholder(buffer, "{?", &placeholderValue, i, formatstr->length);
-                ffStrbufDestroy(&placeholderValue);
                 continue;
             }
 
@@ -205,13 +197,11 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             if(formatArgSet(&arguments[index - 1]))
             {
                 ++numOpenIfs;
-                ffStrbufDestroy(&placeholderValue);
                 continue;
             }
 
             // fastforward to the end of the if without printing the in between
             i = ffStrbufNextIndexS(formatstr, i, "{?}") + 2; // 2 is the length of "{?}" - 1 because the loop will increament it again directly after continue
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
@@ -226,7 +216,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             if(index > numArgs)
             {
                 appendInvalidPlaceholder(buffer, "{/", &placeholderValue, i, formatstr->length);
-                ffStrbufDestroy(&placeholderValue);
                 continue;
             }
 
@@ -234,13 +223,11 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             if(!formatArgSet(&arguments[index - 1]))
             {
                 ++numOpenNotIfs;
-                ffStrbufDestroy(&placeholderValue);
                 continue;
             }
 
             // fastforward to the end of the if without printing the in between
             i = ffStrbufNextIndexS(formatstr, i, "{/}") + 2; // 2 is the length of "{/}" - 1 because the loop will increament it again directly after continue
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
@@ -252,7 +239,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             ffStrbufAppendS(buffer, "\033[");
             ffStrbufAppend(buffer, &placeholderValue);
             ffStrbufAppendC(buffer, 'm');
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
@@ -262,13 +248,10 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         if(index > numArgs)
         {
             appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
-            ffStrbufDestroy(&placeholderValue);
             continue;
         }
 
         ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
-
-        ffStrbufDestroy(&placeholderValue);
     }
 
     ffStrbufTrimRight(buffer, ' ');

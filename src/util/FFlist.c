@@ -55,11 +55,3 @@ bool ffListPop(FFlist* list, void* result)
     --list->length;
     return result;
 }
-
-void ffListDestroy(FFlist* list)
-{
-    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
-    list->capacity = list->length = 0;
-    free(list->data);
-    list->data = NULL;
-}

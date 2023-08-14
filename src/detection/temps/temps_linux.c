@@ -11,8 +11,7 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
     uint32_t dirLength = dir->length;
 
-    FF_STRBUF_AUTO_DESTROY valueBuffer;
-    ffStrbufInit(&valueBuffer);
+    FF_STRBUF_AUTO_DESTROY valueBuffer = ffStrbufCreate();
 
     ffStrbufAppendS(dir, "temp1_input");
     if(!ffReadFileBuffer(dir->chars, &valueBuffer))
@@ -42,7 +41,7 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     return value->name.length > 0 || value->deviceClass > 0;
 }
 
-const FFTempsResult* ffDetectTemps()
+const FFTempsResult* ffDetectTemps(void)
 {
     static FFTempsResult result;
     static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
@@ -58,8 +57,7 @@ const FFTempsResult* ffDetectTemps()
 
     ffListInitA(&result.values, sizeof(FFTempValue), 16);
 
-    FFstrbuf baseDir;
-    ffStrbufInitA(&baseDir, 64);
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
     ffStrbufAppendS(&baseDir, "/sys/class/hwmon/");
 
     uint32_t baseDirLength = baseDir.length;
@@ -67,7 +65,6 @@ const FFTempsResult* ffDetectTemps()
     DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
     {
-        ffStrbufDestroy(&baseDir);
         ffThreadMutexUnlock(&mutex);
         return &result;
     }
@@ -94,7 +91,6 @@ const FFTempsResult* ffDetectTemps()
     }
 
     closedir(dirp);
-    ffStrbufDestroy(&baseDir);
 
     ffThreadMutexUnlock(&mutex);
     return &result;

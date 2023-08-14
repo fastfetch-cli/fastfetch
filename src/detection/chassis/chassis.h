@@ -7,12 +7,12 @@
 
 typedef struct FFChassisResult
 {
-    FFstrbuf chassisType;
-    FFstrbuf chassisVendor;
-    FFstrbuf chassisVersion;
-    FFstrbuf error;
+    FFstrbuf type;
+    FFstrbuf vendor;
+    FFstrbuf version;
 } FFChassisResult;
 
-void ffDetectChassis(FFChassisResult* result);
+const char* ffDetectChassis(FFChassisResult* result);
+const char* ffChassisTypeToString(uint32_t type);
 
 #endif

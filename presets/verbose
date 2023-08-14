@@ -3,23 +3,23 @@
 --kernel-format Sysname: {}; Release: {}; Version: {}
 --uptime-format Days: {}; Hours: {}; Minutes: {}; Seconds: {}
 --processes-format Count: {}
---packages-format All: {}; pacman: {}; pacman branch: {}; dpkg: {}; rpm: {}; emerge: {}; eopkg: {}; xbps: {}; apk: {}; flatpak-system: {}; flatpak-user: {}; snap: {}; brew: {}; brew-cask: {}; port: {}; scoop: {}; choco: {}; pkgtool: {}
+--packages-format All: {}; pacman: {}; pacman branch: {}; dpkg: {}; rpm: {}; emerge: {}; eopkg: {}; xbps: {}; apk: {}; flatpak-system: {}; flatpak-user: {}; snap: {}; brew: {}; brew-cask: {}; port: {}; scoop: {}; choco: {}; pkgtool: {}; paludis {}
 --shell-format Process name: {}; Process path: {}; Process exe: {}; Process version: {}; User path: {}; User exe: {}; User version: {}
 --display-format Width: {}; Height: {}; Refresh rate: {}; ScaledWith: {}; ScaledHeight: {}
 --de-format Process name: {}; Pretty name: {}; Version: {}
 --wm-format Process name: {}; Pretty name: {}; Protocol: {}
---wm-theme-format Name: {}
+--wmtheme-format Name: {}
 --theme-format Plasma: {}; Plasma colors: {}; Plasma colors pretty: {}; GTK2: {}; GTK3: {}; GTK4: {}; GTK: {}
 --icons-format Plasma: {}; GTK2: {}; GTK3: {}; GTK4: {}; GTK: {}
 --font-format Font1: {}; Font2: {}; Font3: {}; Font4: {}
 --cursor-format Theme: {}; Size: {}
 --terminal-format Process: {}; Path: {}; Exe: {}
---terminal-font-format Pretty: {}; Name: {}; Size: {}; Styles: {}
+--terminalfont-format Pretty: {}; Name: {}; Size: {}; Styles: {}
 --cpu-format Name: {}, Vendor: {}, CoresPhysical: {}, CoresLogical: {}, CoresOnline: {}, FrequencyMin: {}, FrequencyMax: {}, Temperature: {}
 --cpu-usage-format Percentage: {}
 --gpu-format Vendor: {}; Name: {}; Driver: {}; Temperature: {}; CoreCount: {}; Type: {}
 --memory-format Used: {}; Total: {}; Percentage: {}
---disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; Removable: {}; Hidden: {}; Filesystem: {}; Name: {}
+--disk-format SizeUsed: {}; SizeTotal: {}; SizePercentage: {}; FilesUsed: {}; FilesTotal: {}; FilesPercentage: {}; External: {}; Hidden: {}; Filesystem: {}; Name: {}
 --battery-format Manufactor: {}; Model: {}; Technology: {}; Capacity: {}; Status: {}
 --poweradapter-format Watts: {}; Name: {}; Manufactor: {}; Model: {}; Description: {}
 --player-format Pretty: {}; Name: {}; Bus: {}; Url: {}

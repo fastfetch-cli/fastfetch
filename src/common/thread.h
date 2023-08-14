@@ -19,6 +19,7 @@
             return (FFThreadType)_beginthreadex(NULL, 0, func, data, 0, NULL);
         }
         #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType) static __stdcall unsigned fn ## ThreadMain (void* data) { fn((paramType)data); return 0; }
+        #define FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(fn) static __stdcall unsigned fn ## ThreadMain () { fn(); return 0; }
         static inline void ffThreadDetach(FFThreadType thread) { CloseHandle(thread); }
         static inline void ffThreadJoin(FFThreadType thread) { WaitForSingleObject(thread, 0xffffffff /*INFINITE*/); }
     #else
@@ -34,6 +35,7 @@
             return newThread;
         }
         #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType) static void* fn ## ThreadMain (void* data) { fn((paramType)data); return NULL; }
+        #define FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(fn) static void* fn ## ThreadMain () { fn(); return NULL; }
         static inline void ffThreadDetach(FFThreadType thread) { pthread_detach(thread); }
         static inline void ffThreadJoin(FFThreadType thread) { pthread_join(thread, NULL); }
     #endif

@@ -11,6 +11,6 @@ typedef struct FFGamepadDevice
     FFstrbuf name;
 } FFGamepadDevice;
 
-const char* ffDetectGamepad(const FFinstance* instance, FFlist* devices /* List of FFGamepadDevice */);
+const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */);
 
 #endif

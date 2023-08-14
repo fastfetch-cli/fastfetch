@@ -5,33 +5,18 @@
 
 #include <IOKit/IOKitLib.h>
 
-static double detectBatteryTemp()
+static double detectBatteryTemp(void)
 {
-    FF_LIST_AUTO_DESTROY temps;
-    ffListInit(&temps, sizeof(FFTempValue));
+    double result = 0;
 
-    ffDetectCoreTemps(FF_TEMP_BATTERY, &temps);
-
-    if(temps.length == 0)
+    if(ffDetectCoreTemps(FF_TEMP_BATTERY, &result))
         return FF_BATTERY_TEMP_UNSET;
 
-    double result = 0;
-    for(uint32_t i = 0; i < temps.length; ++i)
-    {
-        FFTempValue* tempValue = (FFTempValue*)ffListGet(&temps, i);
-        result += tempValue->value;
-        //TODO: do we really need this?
-        ffStrbufDestroy(&tempValue->name);
-        ffStrbufDestroy(&tempValue->deviceClass);
-    }
-    result /= temps.length;
     return result;
 }
 
-const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
+const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    FF_UNUSED(instance);
-
     CFMutableDictionaryRef matchDict = IOServiceMatching("AppleSmartBattery");
     if (matchDict == NULL)
         return "IOServiceMatching(\"AppleSmartBattery\") failed";
@@ -93,10 +78,7 @@ const char* ffDetectBatteryImpl(FFinstance* instance, FFlist* results)
         else
             ffStrbufAppendS(&battery->status, "");
 
-        if(instance->config.batteryTemp)
-            battery->temperature = detectBatteryTemp();
-        else
-            battery->temperature = FF_BATTERY_TEMP_UNSET;
+        battery->temperature = options->temp ? detectBatteryTemp() : FF_BATTERY_TEMP_UNSET;
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
