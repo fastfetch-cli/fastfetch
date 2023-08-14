@@ -73,7 +73,7 @@ bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length)
                         return true;
                 }
             }
-            i += blkLen + 1;
+            i += (uint8_t) (blkLen + 1);
         }
     }
     return false;
