@@ -50,7 +50,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
@@ -96,7 +96,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
         bool isExternal = !!(disk->type & FF_DISK_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_TYPE_HIDDEN_BIT);
-        ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &bytesPercentage},

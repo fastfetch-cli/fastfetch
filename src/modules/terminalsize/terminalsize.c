@@ -19,7 +19,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             printf("%u columns x %u rows", result.columns, result.rows);
 
             if (result.width != 0 && result.height != 0)

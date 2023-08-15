@@ -1389,7 +1389,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
                 return ffPrintWMTheme(&instance.config.wmTheme);
             break;
     }
-    ffPrintErrorString(line, 0, NULL, NULL, "<no implementation provided>");
+    ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
 int main(int argc, const char** argv)

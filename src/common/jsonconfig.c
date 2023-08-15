@@ -17,14 +17,19 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
         ffStrbufSetNS(&moduleArgs->key, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
+    else if(ffStrEqualsIgnCase(key, "format"))
+    {
+        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        return true;
+    }
     else if(ffStrEqualsIgnCase(key, "keyColor"))
     {
         ffOptionParseColor(yyjson_get_str(val), &moduleArgs->keyColor);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "format"))
+    else if(ffStrEqualsIgnCase(key, "keyWidth"))
     {
-        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        moduleArgs->keyWidth = (uint32_t) yyjson_get_uint(val);
         return true;
     }
     return false;
@@ -521,5 +526,5 @@ void ffPrintJsonConfig(void)
 {
     const char* error = printJsonConfig();
     if (error)
-        ffPrintErrorString("JsonConfig", 0, NULL, NULL, "%s", error);
+        ffPrintErrorString("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
 }

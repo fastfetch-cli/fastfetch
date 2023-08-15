@@ -27,6 +27,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
+    uint32_t index = 0;
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
     {
         if(options->moduleArgs.key.length == 0)
@@ -35,7 +36,9 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         }
         else
         {
-            ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
+            uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
+            ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name}
             });
         }
@@ -44,7 +47,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
@@ -63,7 +66,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         }
         else
         {
-            ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_FLOAT, &item->value},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
             });
@@ -71,6 +74,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         ffStrbufClear(&key);
         ffStrbufDestroy(&item->name);
+        ++index;
     }
 }
 

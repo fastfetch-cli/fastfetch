@@ -115,7 +115,7 @@ void ffPrintOS(FFOSOptions* options)
         else
             buildOutputDefault(os, &result);
 
-        ffPrintLogoAndKey(FF_OS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&result, stdout);
     }
     else

@@ -17,6 +17,12 @@
             "title": "Color of the module key. Left empty to use `display.color.keys`",
             "$ref": "#/$defs/colors"
         },
+        "keyWidth": {
+            "title": "Width of the module key. Use 0 to use `display.keyWidth`",
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+        },
         "format": {
             "title": "Output format of the module",
             "type": "string"
@@ -314,6 +320,12 @@
                     "type": "boolean",
                     "default": true
                 },
+                "keyWidth": {
+                    "title": "Align the width of keys to number of characters, 0 to disable",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
                 "binaryPrefix": {
                     "type": "string",
                     "title": "Set the binary prefix to used when printing bytes",
@@ -595,6 +607,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -622,6 +637,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -645,6 +663,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -667,6 +688,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -721,6 +745,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -740,6 +767,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "title": "Text to print",
@@ -776,6 +806,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -819,6 +852,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -855,6 +891,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -908,6 +947,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -935,6 +977,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -965,6 +1010,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1008,6 +1056,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -1049,6 +1100,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -1081,6 +1135,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"

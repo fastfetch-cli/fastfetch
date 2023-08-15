@@ -30,7 +30,7 @@ void ffPrintCommand(FFCommandOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+    ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
     ffStrbufPutTo(&result, stdout);
 }
 

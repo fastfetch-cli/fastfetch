@@ -9,7 +9,7 @@ void ffPrintKernel(FFKernelOptions* options)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&instance.state.platform.systemRelease, stdout);
 
         #ifdef _WIN32

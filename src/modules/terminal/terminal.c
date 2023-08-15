@@ -20,7 +20,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if(result->terminalVersion.length)
             printf("%s %s\n", result->terminalPrettyName.chars, result->terminalVersion.chars);

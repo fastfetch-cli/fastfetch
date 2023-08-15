@@ -58,6 +58,7 @@ Display options:
     -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
     --color-keys <color>:        Set the color of the keys
     --color-title <color>:       Set the color of the title
+    --key-width <num>:           Align the width of keys to <num> characters
     --bright-color <?value>:     Set if the keys, title and ASCII logo should be printed in bright color. Default is true
     -c,--color <color>:          Set the color of both the keys and title
     --separator <str>:           Set the separator between key and value. Default is a colon with a space
@@ -82,6 +83,7 @@ General module options:
                                    For modules which print multiple lines, the string is parsed as a format string with the index as first character.
 
     --<module>-key-color <format>: Override the global `--color-keys` option for each specific module.
+    --<module>-key-width <num>:    Override the global `--key-width` option for each specific module.
 
 Library options: Set the path of a library to load
     --lib-PCI <path>

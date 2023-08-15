@@ -29,7 +29,7 @@ void ffPrintTitle(FFTitleOptions* options)
 
     if (options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_TITLE_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         printTitlePart(&instance.state.platform.userName, &options->colorUser);
 
@@ -142,7 +142,7 @@ void ffParseTitleJsonObject(yyjson_val* module)
                 continue;
             }
 
-            ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
         }
     }
 

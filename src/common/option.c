@@ -34,6 +34,11 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseString(argumentKey, value, &result->key);
         return true;
     }
+    else if(ffStrEqualsIgnCase(subKey, "format"))
+    {
+        ffOptionParseString(argumentKey, value, &result->outputFormat);
+        return true;
+    }
     else if(ffStrEqualsIgnCase(subKey, "key-color"))
     {
         if(value == NULL)
@@ -44,9 +49,9 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseColor(value, &result->keyColor);
         return true;
     }
-    else if(ffStrEqualsIgnCase(subKey, "format"))
+    else if(ffStrEqualsIgnCase(subKey, "key-width"))
     {
-        ffOptionParseString(argumentKey, value, &result->outputFormat);
+        result->keyWidth = ffOptionParseUInt32(argumentKey, value);
         return true;
     }
     return false;
@@ -175,6 +180,7 @@ void ffOptionInitModuleArg(FFModuleArgs* args)
     ffStrbufInit(&args->key);
     ffStrbufInit(&args->keyColor);
     ffStrbufInit(&args->outputFormat);
+    args->keyWidth = 0;
 }
 
 void ffOptionDestroyModuleArg(FFModuleArgs* args)

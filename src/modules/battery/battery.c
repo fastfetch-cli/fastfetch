@@ -12,7 +12,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
 {
     if(instance.config.battery.moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         bool showStatus =
             !(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&

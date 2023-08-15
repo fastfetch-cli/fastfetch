@@ -21,7 +21,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)

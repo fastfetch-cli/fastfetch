@@ -32,7 +32,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
             {
                 if(options->moduleArgs.outputFormat.length == 0)
                 {
-                    ffPrintLogoAndKey(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+                    ffPrintLogoAndKey(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
                     if(result->name.length > 0)
                         puts(result->name.chars);

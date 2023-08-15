@@ -12,7 +12,7 @@ void ffPrintCustom(FFCustomOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+    ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
     ffStrbufWriteTo(&options->moduleArgs.outputFormat, stdout);
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }

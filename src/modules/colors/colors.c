@@ -122,7 +122,7 @@ void ffParseColorsJsonObject(yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
+                    ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
                 else
                     options.symbol = (FFColorsSymbol) value;
                 continue;
@@ -134,7 +134,7 @@ void ffParseColorsJsonObject(yyjson_val* module)
                 continue;
             }
 
-            ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
         }
     }
 
