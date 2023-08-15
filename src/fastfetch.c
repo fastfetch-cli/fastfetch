@@ -584,6 +584,7 @@ static bool parseConfigFile(FFdata* data, const char* path)
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
+    FF_STRBUF_AUTO_DESTROY unescaped = ffStrbufCreate();
 
     while ((read = getline(&line, &len, file)) != -1)
     {
@@ -628,7 +629,42 @@ static bool parseConfigFile(FFdata* data, const char* path)
             --lineEnd;
         }
 
-        parseOption(data, lineStart, valueStart);
+        if (strchr(valueStart, '\\'))
+        {
+            // Unescape all `\x`s
+            const char* value = valueStart;
+            while(*value != '\0')
+            {
+                if(*value != '\\')
+                {
+                    ffStrbufAppendC(&unescaped, *value);
+                    ++value;
+                    continue;
+                }
+
+                ++value;
+
+                switch(*value)
+                {
+                    case 'n': ffStrbufAppendC(&unescaped, '\n'); break;
+                    case 't': ffStrbufAppendC(&unescaped, '\t'); break;
+                    case 'e': ffStrbufAppendC(&unescaped, '\e'); break;
+                    case '\\': ffStrbufAppendC(&unescaped, '\\'); break;
+                    default:
+                        ffStrbufAppendC(&unescaped, '\\');
+                        ffStrbufAppendC(&unescaped, *value);
+                        break;
+                }
+
+                ++value;
+            }
+            parseOption(data, lineStart, unescaped.chars);
+            ffStrbufClear(&unescaped);
+        }
+        else
+        {
+            parseOption(data, lineStart, valueStart);
+        }
     }
 
     if(line != NULL)

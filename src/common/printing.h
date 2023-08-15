@@ -13,6 +13,5 @@ FF_C_PRINTF(5, 6) void ffPrintErrorString(const char* moduleName, uint8_t module
 FF_C_PRINTF(4, 5) void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...);
 void ffPrintColor(const FFstrbuf* colorValue);
 void ffPrintCharTimes(char c, uint32_t times);
-void ffPrintUserString(const char* str);
 
 #endif
