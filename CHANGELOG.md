@@ -8,6 +8,9 @@ Changes:
 Features:
 * Add `--key-width` for aligning the left edge of values
 
+Bugfixes:
+* Fix label detection (Disk, Linux)
+
 # 2.0.0-beta
 
 Fastfetch v2 introduces a new configuration file format: JSON config. Please refer to <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for details.
