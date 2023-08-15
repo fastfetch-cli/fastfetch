@@ -68,6 +68,7 @@ static void defaultConfig(void)
     instance.config.multithreading = true;
     instance.config.stat = false;
     instance.config.noBuffer = false;
+    instance.config.keyWidth = 0;
 
     ffInitTitleOptions(&instance.config.title);
     ffInitOSOptions(&instance.config.os);

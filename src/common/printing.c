@@ -46,6 +46,9 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFstrb
 
     if(!instance.config.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
+    if (instance.config.keyWidth > 0)
+        printf("\e[%uG", (unsigned) (instance.config.keyWidth + instance.state.logoWidth));
 }
 
 void ffPrintFormatString(const char* moduleName, uint8_t moduleIndex, const FFstrbuf* customKeyFormat, const FFstrbuf* customKeyColor, const FFstrbuf* format, uint32_t numArgs, const FFformatarg* arguments)

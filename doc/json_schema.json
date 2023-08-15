@@ -221,6 +221,11 @@
                     "title": "Use multiple threads to detect values",
                     "default": true
                 },
+                "thread": {
+                    "type": "boolean",
+                    "title": "Alias of multithreading",
+                    "default": true
+                },
                 "stat": {
                     "type": "boolean",
                     "title": "Show time usage (in ms) for individual modules",

@@ -433,6 +433,8 @@ const char* ffParseDisplayJsonConfig(void)
             config->percentType = (uint32_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "noBuffer"))
             config->noBuffer = yyjson_get_bool(val);
+        else if (ffStrEqualsIgnCase(key, "keyWidth"))
+            config->keyWidth = (uint32_t) yyjson_get_uint(val);
         else
             return "Unknown display property";
     }

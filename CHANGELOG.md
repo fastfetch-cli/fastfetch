@@ -5,7 +5,10 @@ Changes:
     * Previously: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\: *`. Note the backslashs are unescaped twice (once by shell and once by fastfetch).
     * Now: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\\: *`
 
-# 2.0.0 (beta)
+Features:
+* Add `--key-width` for aligning the left edge of values
+
+# 2.0.0-beta
 
 Fastfetch v2 introduces a new configuration file format: JSON config. Please refer to <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for details.
 

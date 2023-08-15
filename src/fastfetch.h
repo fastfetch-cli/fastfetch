@@ -60,6 +60,7 @@ typedef struct FFconfig
     bool stat;
     bool noBuffer;
     int32_t processingTimeout;
+    uint32_t keyWidth;
 
     // Module options that cannot be put in module option structure
     #if defined(__linux__) || defined(__FreeBSD__)
