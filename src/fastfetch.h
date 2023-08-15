@@ -54,6 +54,7 @@ typedef struct FFconfig
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
     FFTemperatureUnit temperatureUnit;
+    uint32_t percentType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;
@@ -147,10 +148,6 @@ typedef struct FFconfig
     FFstrbuf libPulse;
     FFstrbuf libnm;
     FFstrbuf libDdcutil;
-
-    uint32_t percentType;
-
-    bool jsonConfig;
 } FFconfig;
 
 typedef struct FFstate
