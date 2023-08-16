@@ -443,12 +443,18 @@ const char* ffParseDisplayJsonConfig(void)
                 const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
                 if (charElapsed)
                     ffStrbufSetS(&config->barCharElapsed, charElapsed);
+
                 const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
                 if (charTotal)
                     ffStrbufSetS(&config->barCharTotal, charTotal);
+
                 yyjson_val* border = yyjson_obj_get(val, "border");
                 if (border)
                     config->barBorder = yyjson_get_bool(border);
+
+                yyjson_val* width = yyjson_obj_get(val, "width");
+                if (width)
+                    config->barWidth = (uint8_t) yyjson_get_uint(width);
             }
             else
                 return "display.bar must be an object";

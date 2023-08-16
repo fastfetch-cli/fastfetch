@@ -46,7 +46,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffParseSize(disk->bytesTotal, &totalPretty);
 
-    uint8_t bytesPercentage = disk->bytesTotal > 0 ? (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0) : 0;
+    double bytesPercentage = disk->bytesTotal > 0 ? (double) disk->bytesUsed / (double) disk->bytesTotal * 100.0 : 0;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -58,7 +58,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         {
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, bytesPercentage, 0, 5, 8);
+                ffAppendPercentBar(&str, bytesPercentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -67,7 +67,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffAppendPercentNum(&str, (uint8_t) bytesPercentage, 50, 80, str.length > 0);
+                ffAppendPercentNum(&str, bytesPercentage, 50, 80, str.length > 0);
                 ffStrbufAppendC(&str, ' ');
             }
         }

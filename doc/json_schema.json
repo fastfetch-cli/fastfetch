@@ -370,6 +370,12 @@
                             "type": "boolean",
                             "title": "Whether to show a border around the bar",
                             "default": true
+                        },
+                        "width": {
+                            "type": "integer",
+                            "title": "Set the width of the bar",
+                            "minimum": 1,
+                            "default": 10
                         }
                     }
                 },

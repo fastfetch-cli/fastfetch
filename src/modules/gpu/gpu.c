@@ -58,7 +58,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffAppendPercentNum(&output, (uint8_t) (gpu->dedicated.used * 100 / gpu->dedicated.total), 50, 80, false);
+                ffAppendPercentNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, 50, 80, false);
             }
             ffStrbufAppendC(&output, ')');
         }

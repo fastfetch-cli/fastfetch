@@ -56,6 +56,7 @@ typedef struct FFconfig
     FFTemperatureUnit temperatureUnit;
     FFstrbuf barCharElapsed;
     FFstrbuf barCharTotal;
+    uint8_t barWidth;
     bool barBorder;
     uint32_t percentType;
     bool pipe; //disables logo and all escape sequences

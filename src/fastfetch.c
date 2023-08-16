@@ -1051,6 +1051,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffOptionParseString(key, value, &instance.config.barCharElapsed);
     else if(ffStrEqualsIgnCase(key, "--bar-char-total"))
         ffOptionParseString(key, value, &instance.config.barCharTotal);
+    else if(ffStrEqualsIgnCase(key, "--bar-width"))
+        instance.config.barWidth = (uint8_t) ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--bar-border"))
         instance.config.barBorder = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))

@@ -26,11 +26,11 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 if(result->capacity <= 20)
-                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 10, 10, 0);
+                    ffAppendPercentBar(&str, result->capacity, 100, 100, 0);
                 else if(result->capacity <= 50)
-                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 10, 0, 10);
+                    ffAppendPercentBar(&str, result->capacity, 100, 0, 100);
                 else
-                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 0, 10, 10);
+                    ffAppendPercentBar(&str, result->capacity, 0, 100, 100);
             }
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -38,7 +38,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, (uint8_t) result->capacity, 51, 21, str.length > 0);
+                ffAppendPercentNum(&str, result->capacity, 51, 21, str.length > 0);
             }
         }
 

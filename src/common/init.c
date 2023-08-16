@@ -72,6 +72,7 @@ static void defaultConfig(void)
 
     ffStrbufInitStatic(&instance.config.barCharElapsed, "■");
     ffStrbufInitStatic(&instance.config.barCharTotal, "-");
+    instance.config.barWidth = 10;
     instance.config.barBorder = true;
     instance.config.percentType = 1;
 

@@ -51,7 +51,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
             if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, (uint8_t) (item->value + 0.5), 0, 10, 10);
+                ffAppendPercentBar(&str, item->value, 0, 100, 100);
             }
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -59,7 +59,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, (uint8_t) (item->value + 0.5), 10, 10, str.length > 0);
+                ffAppendPercentNum(&str, item->value, 10, 10, str.length > 0);
             }
 
             ffStrbufPutTo(&str, stdout);

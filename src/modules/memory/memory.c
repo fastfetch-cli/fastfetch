@@ -25,9 +25,9 @@ void ffPrintMemory(FFMemoryOptions* options)
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffParseSize(storage.bytesTotal, &totalPretty);
 
-    uint8_t percentage = storage.bytesTotal == 0
+    double percentage = storage.bytesTotal == 0
         ? 0
-        : (uint8_t) (((long double) storage.bytesUsed / (long double) storage.bytesTotal) * 100.0);
+        : (double) storage.bytesUsed / (double) storage.bytesTotal * 100.0;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -40,7 +40,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, percentage, 0, 5, 8);
+                ffAppendPercentBar(&str, percentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -48,7 +48,7 @@ void ffPrintMemory(FFMemoryOptions* options)
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffAppendPercentNum(&str, (uint8_t) percentage, 50, 80, str.length > 0);
+                ffAppendPercentNum(&str, percentage, 50, 80, str.length > 0);
 
             ffStrbufTrimRight(&str, ' ');
             ffStrbufPutTo(&str, stdout);
