@@ -70,6 +70,11 @@ static void defaultConfig(void)
     instance.config.noBuffer = false;
     instance.config.keyWidth = 0;
 
+    ffStrbufInitStatic(&instance.config.barCharElapsed, "■");
+    ffStrbufInitStatic(&instance.config.barCharTotal, "-");
+    instance.config.barBorder = true;
+    instance.config.percentType = 1;
+
     ffInitTitleOptions(&instance.config.title);
     ffInitOSOptions(&instance.config.os);
     ffInitHostOptions(&instance.config.host);
@@ -146,8 +151,6 @@ static void defaultConfig(void)
     ffStrbufInit(&instance.config.libPulse);
     ffStrbufInit(&instance.config.libnm);
     ffStrbufInit(&instance.config.libDdcutil);
-
-    instance.config.percentType = 1;
 }
 
 void ffInitInstance(void)
@@ -273,6 +276,8 @@ static void destroyConfig(void)
     ffStrbufDestroy(&instance.config.colorKeys);
     ffStrbufDestroy(&instance.config.colorTitle);
     ffStrbufDestroy(&instance.config.keyValueSeparator);
+    ffStrbufDestroy(&instance.config.barCharElapsed);
+    ffStrbufDestroy(&instance.config.barCharTotal);
 
     #if defined(__linux__) || defined(__FreeBSD__)
     ffStrbufDestroy(&instance.config.playerName);

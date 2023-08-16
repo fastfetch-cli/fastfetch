@@ -1047,6 +1047,12 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     }
     else if(ffStrEqualsIgnCase(key, "--percent-type"))
         instance.config.percentType = ffOptionParseUInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--bar-char-elapsed"))
+        ffOptionParseString(key, value, &instance.config.barCharElapsed);
+    else if(ffStrEqualsIgnCase(key, "--bar-char-total"))
+        ffOptionParseString(key, value, &instance.config.barCharTotal);
+    else if(ffStrEqualsIgnCase(key, "--bar-border"))
+        instance.config.barBorder = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         instance.config.noBuffer = ffOptionParseBoolean(value);
 

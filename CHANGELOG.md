@@ -7,6 +7,7 @@ Changes:
 
 Features:
 * Add `--key-width` for aligning the left edge of values
+* Add `--bar-char-elapsed`, `--bar-char-total` and `--bar-border` options
 
 Bugfixes:
 * Fix label detection (Disk, Linux)

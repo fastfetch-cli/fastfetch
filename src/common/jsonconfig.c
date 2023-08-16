@@ -436,6 +436,23 @@ const char* ffParseDisplayJsonConfig(void)
         }
         else if (ffStrEqualsIgnCase(key, "percentType"))
             config->percentType = (uint32_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "bar"))
+        {
+            if (yyjson_is_obj(val))
+            {
+                const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
+                if (charElapsed)
+                    ffStrbufSetS(&config->barCharElapsed, charElapsed);
+                const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
+                if (charTotal)
+                    ffStrbufSetS(&config->barCharTotal, charTotal);
+                yyjson_val* border = yyjson_obj_get(val, "border");
+                if (border)
+                    config->barBorder = yyjson_get_bool(border);
+            }
+            else
+                return "display.bar must be an object";
+        }
         else if (ffStrEqualsIgnCase(key, "noBuffer"))
             config->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))

@@ -54,6 +54,9 @@ typedef struct FFconfig
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
     FFTemperatureUnit temperatureUnit;
+    FFstrbuf barCharElapsed;
+    FFstrbuf barCharTotal;
+    bool barBorder;
     uint32_t percentType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;

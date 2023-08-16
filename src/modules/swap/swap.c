@@ -32,12 +32,19 @@ void ffPrintSwap(FFSwapOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (storage.bytesTotal == 0)
-            puts("Disabled");
+        {
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                ffAppendPercentBar(&str, 0, 0, 5, 8);
+                ffStrbufAppendC(&str, ' ');
+            }
+            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                ffStrbufAppendS(&str, "Disabled");
+        }
         else
         {
-            FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, percentage, 0, 5, 8);
@@ -49,10 +56,10 @@ void ffPrintSwap(FFSwapOptions* options)
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffAppendPercentNum(&str, (uint8_t) percentage, 50, 80, str.length > 0);
-
-            ffStrbufTrimRight(&str, ' ');
-            ffStrbufPutTo(&str, stdout);
         }
+
+        ffStrbufTrimRight(&str, ' ');
+        ffStrbufPutTo(&str, stdout);
     }
     else
     {

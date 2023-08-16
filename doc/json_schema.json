@@ -352,6 +352,27 @@
                     "enum": ["CELSIUS", "C", "FAHRENHEIT", "F", "KELVIN", "K"],
                     "default": "C"
                 },
+                "bar": {
+                    "type": "object",
+                    "title": "Set the bar configuration",
+                    "properties": {
+                        "charElapsed": {
+                            "type": "string",
+                            "title": "Set the character to use in elapsed part",
+                            "default": "■"
+                        },
+                        "charTotal": {
+                            "type": "string",
+                            "title": "Set the character to use in total part",
+                            "default": "-"
+                        },
+                        "border": {
+                            "type": "boolean",
+                            "title": "Whether to show a border around the bar",
+                            "default": true
+                        }
+                    }
+                },
                 "percentType": {
                     "type": "number",
                     "title": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
