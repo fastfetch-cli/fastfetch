@@ -6,11 +6,11 @@ Changes:
     * Now: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\\: *`
 
 Features:
-* Add `--key-width` for aligning the left edge of values
+* Add `--key-width` for aligning the left edge of values, supported both for global `--key-width` and specific module `--module-key-width`
 * Add `--bar-char-elapsed`, `--bar-char-total` and `--bar-border` options
 
 Bugfixes:
-* Fix label detection (Disk, Linux)
+* Fix label detection. Use `--disk-key 'Disk ({2})'` to display it (Disk, Linux)
 
 # 2.0.0-beta
 
