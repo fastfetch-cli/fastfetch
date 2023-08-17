@@ -48,7 +48,6 @@ static void defaultConfig(void)
     #endif
 
     instance.config.showErrors = false;
-    instance.config.recache = false;
     instance.config.allowSlowOperations = false;
     instance.config.pipe = !isatty(STDOUT_FILENO);
 

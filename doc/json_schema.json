@@ -161,6 +161,11 @@
                             "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
                             "default": false
                         },
+                        "recache": {
+                            "type": "boolean",
+                            "title": "If true, regenerate image logo cache",
+                            "default": false
+                        },
                         "chafa": {
                             "type": "object",
                             "title": "Chafa configuration. See chafa document for details",

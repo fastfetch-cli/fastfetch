@@ -253,6 +253,7 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 set(LIBFASTFETCH_SRC
     src/3rdparty/yyjson/yyjson.c
     src/common/bar.c
+    src/common/commandoption.c
     src/common/font.c
     src/common/format.c
     src/common/init.c

@@ -7,7 +7,7 @@
 typedef struct FFModuleBaseInfo
 {
     const char* name;
-    void (*parseCommandOptions)(void* options, const char* key, const char* value);
+    bool (*parseCommandOptions)(void* options, const char* key, const char* value);
     void (*parseJsonObject)(void* options, yyjson_val *module);
     void (*printModule)(void* options);
 } FFModuleBaseInfo;
@@ -15,7 +15,7 @@ typedef struct FFModuleBaseInfo
 static inline void ffOptionInitModuleBaseInfo(
     FFModuleBaseInfo* baseInfo,
     const char* name,
-    void* parseCommandOptions, // void (*const parseCommandOptions)(void* options, const char* key, const char* value)
+    void* parseCommandOptions, // bool (*const parseCommandOptions)(void* options, const char* key, const char* value)
     void* parseJsonObject, // void (*const parseJsonObject)(void* options, yyjson_val *module)
     void* printModule // void (*const printModule)(void* options)
 )

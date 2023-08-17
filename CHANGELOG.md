@@ -4,6 +4,8 @@ Changes:
 * Unescape strings only when parsing `.conf` files
     * Previously: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\: *`. Note the backslashs are unescaped twice (once by shell and once by fastfetch).
     * Now: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\\: *`
+* Remove option shortcut `-c` (alias of `--color`), which is more commonly used as alias of `--config`
+* Rename `--recache` to `--logo-recache` (which is used for regenerate image logo cache). Remove option shortcut `-r` (alias of `--recache`).
 
 Features:
 * Add `--key-width` for aligning the left edge of values, supported both for global `--key-width` and specific module `--module-key-width`

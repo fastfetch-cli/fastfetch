@@ -45,7 +45,6 @@ typedef struct FFconfig
     FFstrbuf keyValueSeparator;
 
     bool showErrors;
-    bool recache;
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
