@@ -163,7 +163,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         #ifdef __linux__
         if (ffStrEqualsIgnCase(key, "dir"))
         {
-            ffStrbufSetS(&options.dir, yyjson_get_str(val));
+            ffStrbufSetS(&options->dir, yyjson_get_str(val));
             continue;
         }
         #endif
