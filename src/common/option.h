@@ -21,9 +21,9 @@ static inline void ffOptionInitModuleBaseInfo(
 )
 {
     baseInfo->name = name;
-    baseInfo->parseCommandOptions = parseCommandOptions;
-    baseInfo->parseJsonObject = parseJsonObject;
-    baseInfo->printModule = printModule;
+    baseInfo->parseCommandOptions = (__typeof__(baseInfo->parseCommandOptions)) parseCommandOptions;
+    baseInfo->parseJsonObject = (__typeof__(baseInfo->parseJsonObject)) parseJsonObject;
+    baseInfo->printModule = (__typeof__(baseInfo->printModule)) printModule;
 }
 
 typedef struct FFModuleArgs
