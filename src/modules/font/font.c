@@ -45,7 +45,7 @@ void ffPrintFont(FFFontOptions* options)
 
 void ffInitFontOptions(FFFontOptions* options)
 {
-    options->moduleName = FF_FONT_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -64,11 +64,8 @@ void ffDestroyFontOptions(FFFontOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseFontJsonObject(yyjson_val* module)
+void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
 {
-    FFFontOptions __attribute__((__cleanup__(ffDestroyFontOptions))) options;
-    ffInitFontOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -79,12 +76,10 @@ void ffParseFontJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_FONT_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintFont(&options);
 }

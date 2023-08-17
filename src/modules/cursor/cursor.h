@@ -8,4 +8,4 @@ void ffPrintCursor(FFCursorOptions* options);
 void ffInitCursorOptions(FFCursorOptions* options);
 bool ffParseCursorCommandOptions(FFCursorOptions* options, const char* key, const char* value);
 void ffDestroyCursorOptions(FFCursorOptions* options);
-void ffParseCursorJsonObject(yyjson_val* module);
+void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module);

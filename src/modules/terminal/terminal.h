@@ -8,4 +8,4 @@ void ffPrintTerminal(FFTerminalOptions* options);
 void ffInitTerminalOptions(FFTerminalOptions* options);
 bool ffParseTerminalCommandOptions(FFTerminalOptions* options, const char* key, const char* value);
 void ffDestroyTerminalOptions(FFTerminalOptions* options);
-void ffParseTerminalJsonObject(yyjson_val* module);
+void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module);

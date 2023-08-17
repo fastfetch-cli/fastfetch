@@ -6,6 +6,6 @@
 
 typedef struct FFWMOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFWMOptions;

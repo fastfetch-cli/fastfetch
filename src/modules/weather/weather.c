@@ -55,7 +55,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    options->moduleName = FF_WEATHER_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);
@@ -98,11 +98,8 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options)
     ffStrbufDestroy(&options->outputFormat);
 }
 
-void ffParseWeatherJsonObject(yyjson_val* module)
+void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 {
-    FFWeatherOptions __attribute__((__cleanup__(ffDestroyWeatherOptions))) options;
-    ffInitWeatherOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -113,30 +110,28 @@ void ffParseWeatherJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "location"))
             {
-                ffStrbufSetS(&options.location, yyjson_get_str(val));
+                ffStrbufSetS(&options->location, yyjson_get_str(val));
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "outputFormat"))
             {
-                ffStrbufSetS(&options.outputFormat, yyjson_get_str(val));
+                ffStrbufSetS(&options->outputFormat, yyjson_get_str(val));
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "timeout"))
             {
-                options.timeout = (uint32_t) yyjson_get_uint(val);
+                options->timeout = (uint32_t) yyjson_get_uint(val);
                 continue;
             }
 
-            ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintWeather(&options);
 }

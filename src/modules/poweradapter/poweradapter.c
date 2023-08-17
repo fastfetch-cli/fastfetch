@@ -65,7 +65,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
 {
-    options->moduleName = FF_POWERADAPTER_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -84,11 +84,8 @@ void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePowerAdapterJsonObject(yyjson_val* module)
+void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* module)
 {
-    FFPowerAdapterOptions __attribute__((__cleanup__(ffDestroyPowerAdapterOptions))) options;
-    ffInitPowerAdapterOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -99,12 +96,10 @@ void ffParsePowerAdapterJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintPowerAdapter(&options);
 }

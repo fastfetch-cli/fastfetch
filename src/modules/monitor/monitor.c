@@ -77,7 +77,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    options->moduleName = FF_MONITOR_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -96,11 +96,8 @@ void ffDestroyMonitorOptions(FFMonitorOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMonitorJsonObject(yyjson_val* module)
+void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
 {
-    FFMonitorOptions __attribute__((__cleanup__(ffDestroyMonitorOptions))) options;
-    ffInitMonitorOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -111,12 +108,10 @@ void ffParseMonitorJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintMonitor(&options);
 }

@@ -43,7 +43,7 @@ void ffPrintWM(FFWMOptions* options)
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    options->moduleName = FF_WM_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -62,11 +62,8 @@ void ffDestroyWMOptions(FFWMOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWMJsonObject(yyjson_val* module)
+void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
 {
-    FFWMOptions __attribute__((__cleanup__(ffDestroyWMOptions))) options;
-    ffInitWMOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -77,12 +74,10 @@ void ffParseWMJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_WM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintWM(&options);
 }

@@ -6,6 +6,6 @@
 
 typedef struct FFSwapOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFSwapOptions;

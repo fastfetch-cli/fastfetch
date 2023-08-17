@@ -6,6 +6,6 @@
 
 typedef struct FFGamepadOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFGamepadOptions;

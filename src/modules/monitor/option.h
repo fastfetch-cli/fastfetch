@@ -6,6 +6,6 @@
 
 typedef struct FFMonitorOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFMonitorOptions;

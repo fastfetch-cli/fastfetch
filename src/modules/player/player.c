@@ -75,7 +75,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    options->moduleName = FF_PLAYER_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -94,11 +94,8 @@ void ffDestroyPlayerOptions(FFPlayerOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePlayerJsonObject(yyjson_val* module)
+void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
 {
-    FFPlayerOptions __attribute__((__cleanup__(ffDestroyPlayerOptions))) options;
-    ffInitPlayerOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -109,12 +106,10 @@ void ffParsePlayerJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintPlayer(&options);
 }

@@ -91,7 +91,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    options->moduleName = FF_PUBLICIP_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->url);
@@ -127,11 +127,8 @@ void ffDestroyPublicIpOptions(FFPublicIpOptions* options)
     ffStrbufDestroy(&options->url);
 }
 
-void ffParsePublicIpJsonObject(yyjson_val* module)
+void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
 {
-    FFPublicIpOptions __attribute__((__cleanup__(ffDestroyPublicIpOptions))) options;
-    ffInitPublicIpOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -142,24 +139,22 @@ void ffParsePublicIpJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "url"))
             {
-                ffStrbufSetS(&options.url, yyjson_get_str(val));
+                ffStrbufSetS(&options->url, yyjson_get_str(val));
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "timeout"))
             {
-                options.timeout = (uint32_t) yyjson_get_uint(val);
+                options->timeout = (uint32_t) yyjson_get_uint(val);
                 continue;
             }
 
-            ffPrintError(FF_PUBLICIP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PUBLICIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintPublicIp(&options);
 }

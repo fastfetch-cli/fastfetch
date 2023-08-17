@@ -8,4 +8,4 @@ void ffPrintTheme(FFThemeOptions* options);
 void ffInitThemeOptions(FFThemeOptions* options);
 bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value);
 void ffDestroyThemeOptions(FFThemeOptions* options);
-void ffParseThemeJsonObject(yyjson_val* module);
+void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module);

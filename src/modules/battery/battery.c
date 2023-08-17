@@ -105,7 +105,7 @@ void ffPrintBattery(FFBatteryOptions* options)
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    options->moduleName = FF_BATTERY_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
@@ -147,11 +147,8 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
     #endif
 }
 
-void ffParseBatteryJsonObject(yyjson_val* module)
+void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 {
-    FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
-    ffInitBatteryOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -162,7 +159,7 @@ void ffParseBatteryJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             #ifdef __linux__
@@ -175,13 +172,11 @@ void ffParseBatteryJsonObject(yyjson_val* module)
 
             if (ffStrEqualsIgnCase(key, "temp"))
             {
-                options.temp = yyjson_get_bool(val);
+                options->temp = yyjson_get_bool(val);
                 continue;
             }
 
-            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintBattery(&options);
 }

@@ -44,7 +44,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
 {
-    options->moduleName = FF_CPUUSAGE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -63,11 +63,8 @@ void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCPUUsageJsonObject(yyjson_val* module)
+void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
 {
-    FFCPUUsageOptions __attribute__((__cleanup__(ffDestroyCPUUsageOptions))) options;
-    ffInitCPUUsageOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -78,12 +75,10 @@ void ffParseCPUUsageJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_CPUUSAGE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_CPUUSAGE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintCPUUsage(&options);
 }

@@ -33,7 +33,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    options->moduleName = FF_PROCESSES_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -52,11 +52,8 @@ void ffDestroyProcessesOptions(FFProcessesOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseProcessesJsonObject(yyjson_val* module)
+void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
 {
-    FFProcessesOptions __attribute__((__cleanup__(ffDestroyProcessesOptions))) options;
-    ffInitProcessesOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -67,12 +64,10 @@ void ffParseProcessesJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintProcesses(&options);
 }

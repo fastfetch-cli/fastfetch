@@ -51,7 +51,7 @@ void ffPrintTitle(FFTitleOptions* options)
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    options->moduleName = FF_TITLE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->fqdn = false;
     ffStrbufInit(&options->colorUser);
@@ -101,11 +101,8 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
     ffStrbufDestroy(&options->colorHost);
 }
 
-void ffParseTitleJsonObject(yyjson_val* module)
+void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
 {
-    FFTitleOptions __attribute__((__cleanup__(ffDestroyTitleOptions))) options;
-    ffInitTitleOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -116,12 +113,12 @@ void ffParseTitleJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "fqdn"))
             {
-                options.fqdn = yyjson_get_bool(val);
+                options->fqdn = yyjson_get_bool(val);
                 continue;
             }
 
@@ -132,19 +129,17 @@ void ffParseTitleJsonObject(yyjson_val* module)
 
                 yyjson_val* color = yyjson_obj_get(val, "user");
                 if (color)
-                    ffOptionParseColor(yyjson_get_str(color), &options.colorUser);
+                    ffOptionParseColor(yyjson_get_str(color), &options->colorUser);
                 color = yyjson_obj_get(val, "at");
                 if (color)
-                    ffOptionParseColor(yyjson_get_str(color), &options.colorAt);
+                    ffOptionParseColor(yyjson_get_str(color), &options->colorAt);
                 color = yyjson_obj_get(val, "host");
                 if (color)
-                    ffOptionParseColor(yyjson_get_str(color), &options.colorHost);
+                    ffOptionParseColor(yyjson_get_str(color), &options->colorHost);
                 continue;
             }
 
             ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintTitle(&options);
 }

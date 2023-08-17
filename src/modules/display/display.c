@@ -109,7 +109,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    options->moduleName = FF_DISPLAY_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
@@ -147,11 +147,8 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDisplayJsonObject(yyjson_val* module)
+void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 {
-    FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;
-    ffInitDisplayOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -162,7 +159,7 @@ void ffParseDisplayJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "compactType"))
@@ -175,21 +172,19 @@ void ffParseDisplayJsonObject(yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
                 else
-                    options.compactType = (FFDisplayCompactType) value;
+                    options->compactType = (FFDisplayCompactType) value;
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
             {
-                options.preciseRefreshRate = yyjson_get_bool(val);
+                options->preciseRefreshRate = yyjson_get_bool(val);
                 continue;
             }
 
-            ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintDisplay(&options);
 }

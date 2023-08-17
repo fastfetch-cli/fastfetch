@@ -6,6 +6,6 @@
 
 typedef struct FFBiosOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFBiosOptions;

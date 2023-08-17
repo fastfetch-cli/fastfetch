@@ -6,6 +6,6 @@
 
 typedef struct FFFontOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFFontOptions;

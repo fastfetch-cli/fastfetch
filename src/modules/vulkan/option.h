@@ -6,6 +6,6 @@
 
 typedef struct FFVulkanOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFVulkanOptions;

@@ -6,7 +6,7 @@
 
 typedef struct FFWeatherOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFstrbuf location;

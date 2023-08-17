@@ -80,7 +80,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    options->moduleName = FF_BRIGHTNESS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -99,11 +99,8 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBrightnessJsonObject(yyjson_val* module)
+void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
 {
-    FFBrightnessOptions __attribute__((__cleanup__(ffDestroyBrightnessOptions))) options;
-    ffInitBrightnessOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -114,12 +111,10 @@ void ffParseBrightnessJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintBrightness(&options);
 }

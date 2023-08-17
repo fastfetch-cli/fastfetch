@@ -373,7 +373,7 @@
                         },
                         "width": {
                             "type": "integer",
-                            "title": "Set the width of the bar",
+                            "title": "Set the width of the bar, in number of characters",
                             "minimum": 1,
                             "default": 10
                         }

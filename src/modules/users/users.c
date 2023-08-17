@@ -45,7 +45,7 @@ void ffPrintUsers(FFUsersOptions* options)
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    options->moduleName = FF_USERS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -64,11 +64,8 @@ void ffDestroyUsersOptions(FFUsersOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseUsersJsonObject(yyjson_val* module)
+void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
 {
-    FFUsersOptions __attribute__((__cleanup__(ffDestroyUsersOptions))) options;
-    ffInitUsersOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -79,12 +76,10 @@ void ffParseUsersJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_USERS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintUsers(&options);
 }

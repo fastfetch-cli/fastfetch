@@ -16,7 +16,7 @@ typedef enum FFDiskType
 
 typedef struct FFDiskOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFstrbuf folders;

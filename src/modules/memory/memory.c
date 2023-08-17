@@ -66,7 +66,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    options->moduleName = FF_MEMORY_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -85,11 +85,8 @@ void ffDestroyMemoryOptions(FFMemoryOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMemoryJsonObject(yyjson_val* module)
+void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
 {
-    FFMemoryOptions __attribute__((__cleanup__(ffDestroyMemoryOptions))) options;
-    ffInitMemoryOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -100,12 +97,10 @@ void ffParseMemoryJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintMemory(&options);
 }

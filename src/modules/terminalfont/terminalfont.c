@@ -49,7 +49,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    options->moduleName = FF_TERMINALFONT_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -68,11 +68,8 @@ void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseTerminalFontJsonObject(yyjson_val* module)
+void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module)
 {
-    FFTerminalFontOptions __attribute__((__cleanup__(ffDestroyTerminalFontOptions))) options;
-    ffInitTerminalFontOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -83,12 +80,10 @@ void ffParseTerminalFontJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintTerminalFont(&options);
 }

@@ -9,4 +9,4 @@ void ffPrintBattery(FFBatteryOptions* options);
 void ffInitBatteryOptions(FFBatteryOptions* options);
 bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, const char* value);
 void ffDestroyBatteryOptions(FFBatteryOptions* options);
-void ffParseBatteryJsonObject(yyjson_val* module);
+void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module);

@@ -45,7 +45,7 @@ void ffPrintShell(FFShellOptions* options)
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    options->moduleName = FF_SHELL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -64,11 +64,8 @@ void ffDestroyShellOptions(FFShellOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseShellJsonObject(yyjson_val* module)
+void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
 {
-    FFShellOptions __attribute__((__cleanup__(ffDestroyShellOptions))) options;
-    ffInitShellOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -79,12 +76,10 @@ void ffParseShellJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_SHELL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintShell(&options);
 }

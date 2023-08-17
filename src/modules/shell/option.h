@@ -6,7 +6,7 @@
 
 typedef struct FFShellOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     bool version;

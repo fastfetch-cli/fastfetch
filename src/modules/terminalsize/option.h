@@ -6,6 +6,6 @@
 
 typedef struct FFTerminalSizeOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFTerminalSizeOptions;

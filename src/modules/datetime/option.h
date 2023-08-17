@@ -6,6 +6,6 @@
 
 typedef struct FFDateTimeOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFDateTimeOptions;

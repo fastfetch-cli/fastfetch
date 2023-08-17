@@ -8,4 +8,4 @@ void ffPrintLocale(FFLocaleOptions* options);
 void ffInitLocaleOptions(FFLocaleOptions* options);
 bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, const char* value);
 void ffDestroyLocaleOptions(FFLocaleOptions* options);
-void ffParseLocaleJsonObject(yyjson_val* module);
+void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module);

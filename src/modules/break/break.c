@@ -1,13 +1,28 @@
 #include "common/printing.h"
 #include "modules/break/break.h"
 
-void ffPrintBreak(void)
+void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
     ffLogoPrintLine();
     putchar('\n');
 }
 
-void ffParseBreakJsonObject(FF_MAYBE_UNUSED yyjson_val* module)
+void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
-    return ffPrintBreak();
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BREAK_MODULE_NAME, ffParseBreakCommandOptions, ffParseBreakJsonObject, ffPrintBreak);
+}
+
+bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED const char* key, FF_MAYBE_UNUSED const char* value)
+{
+    return false;
+}
+
+void ffDestroyBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
+{
+}
+
+void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
+{
+    ffPrintBreak(options);
+    return;
 }

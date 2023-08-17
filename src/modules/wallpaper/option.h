@@ -6,6 +6,6 @@
 
 typedef struct FFWallpaperOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFWallpaperOptions;

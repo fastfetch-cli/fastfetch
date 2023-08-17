@@ -8,4 +8,4 @@ void ffPrintWMTheme(FFWMThemeOptions* options);
 void ffInitWMThemeOptions(FFWMThemeOptions* options);
 bool ffParseWMThemeCommandOptions(FFWMThemeOptions* options, const char* key, const char* value);
 void ffDestroyWMThemeOptions(FFWMThemeOptions* options);
-void ffParseWMThemeJsonObject(yyjson_val* module);
+void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module);

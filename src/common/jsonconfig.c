@@ -70,11 +70,13 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline bool tryModule(const char* type, yyjson_val* module, const char* moduleName, void (*const f)(yyjson_val *module))
+static inline bool tryModule(const char* type, yyjson_val* module, void* options)
 {
-    if (ffStrEqualsIgnCase(type, moduleName))
+    FFModuleBaseInfo* baseInfo = (FFModuleBaseInfo*) options;
+    if (ffStrEqualsIgnCase(type, baseInfo->name))
     {
-        f(module);
+        if (module) baseInfo->parseJsonObject(options, module);
+        baseInfo->printModule(options);
         return true;
     }
     return false;
@@ -82,144 +84,145 @@ static inline bool tryModule(const char* type, yyjson_val* module, const char* m
 
 static bool parseModuleJsonObject(const char* type, yyjson_val* module)
 {
+    FFconfig* cfg = &instance.config;
     switch (toupper(type[0]))
     {
         case 'B': {
             return
-                tryModule(type, module, FF_BATTERY_MODULE_NAME, ffParseBatteryJsonObject) ||
-                tryModule(type, module, FF_BIOS_MODULE_NAME, ffParseBiosJsonObject) ||
-                tryModule(type, module, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothJsonObject) ||
-                tryModule(type, module, FF_BOARD_MODULE_NAME, ffParseBoardJsonObject) ||
-                tryModule(type, module, FF_BREAK_MODULE_NAME, ffParseBreakJsonObject) ||
-                tryModule(type, module, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessJsonObject) ||
+                tryModule(type, module, &cfg->battery) ||
+                tryModule(type, module, &cfg->bios) ||
+                tryModule(type, module, &cfg->bluetooth) ||
+                tryModule(type, module, &cfg->board) ||
+                tryModule(type, module, &cfg->break_) ||
+                tryModule(type, module, &cfg->brightness) ||
                 false;
         }
 
         case 'C': {
             return
-                tryModule(type, module, FF_CHASSIS_MODULE_NAME, ffParseChassisJsonObject) ||
-                tryModule(type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
-                tryModule(type, module, FF_COLORS_MODULE_NAME, ffParseColorsJsonObject) ||
-                tryModule(type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
-                tryModule(type, module, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageJsonObject) ||
-                tryModule(type, module, FF_CURSOR_MODULE_NAME, ffParseCursorJsonObject) ||
-                tryModule(type, module, FF_CUSTOM_MODULE_NAME, ffParseCustomJsonObject) ||
+                tryModule(type, module, &cfg->chassis) ||
+                tryModule(type, module, &cfg->command) ||
+                tryModule(type, module, &cfg->colors) ||
+                tryModule(type, module, &cfg->cpu) ||
+                tryModule(type, module, &cfg->cpuUsage) ||
+                tryModule(type, module, &cfg->cursor) ||
+                tryModule(type, module, &cfg->custom) ||
                 false;
         }
 
         case 'D': {
             return
-                tryModule(type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
-                tryModule(type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
-                tryModule(type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
-                tryModule(type, module, FF_DISK_MODULE_NAME, ffParseDiskJsonObject) ||
+                tryModule(type, module, &cfg->dateTime) ||
+                tryModule(type, module, &cfg->de) ||
+                tryModule(type, module, &cfg->display) ||
+                tryModule(type, module, &cfg->disk) ||
                 false;
         }
 
         case 'F': {
             return
-                tryModule(type, module, FF_FONT_MODULE_NAME, ffParseFontJsonObject) ||
+                tryModule(type, module, &cfg->font) ||
                 false;
         }
 
         case 'G': {
             return
-                tryModule(type, module, FF_GAMEPAD_MODULE_NAME, ffParseGamepadJsonObject) ||
-                tryModule(type, module, FF_GPU_MODULE_NAME, ffParseGPUJsonObject) ||
+                tryModule(type, module, &cfg->gamepad) ||
+                tryModule(type, module, &cfg->gpu) ||
                 false;
         }
 
         case 'H': {
             return
-                tryModule(type, module, FF_HOST_MODULE_NAME, ffParseHostJsonObject) ||
+                tryModule(type, module, &cfg->host) ||
                 false;
         }
 
         case 'I': {
             return
-                tryModule(type, module, FF_ICONS_MODULE_NAME, ffParseIconsJsonObject) ||
+                tryModule(type, module, &cfg->icons) ||
                 false;
         }
 
         case 'K': {
             return
-                tryModule(type, module, FF_KERNEL_MODULE_NAME, ffParseKernelJsonObject) ||
+                tryModule(type, module, &cfg->kernel) ||
                 false;
         }
 
         case 'L': {
             return
-                tryModule(type, module, FF_LM_MODULE_NAME, ffParseLMJsonObject) ||
-                tryModule(type, module, FF_LOCALE_MODULE_NAME, ffParseLocaleJsonObject) ||
-                tryModule(type, module, FF_LOCALIP_MODULE_NAME, ffParseLocalIpJsonObject) ||
+                tryModule(type, module, &cfg->lm) ||
+                tryModule(type, module, &cfg->locale) ||
+                tryModule(type, module, &cfg->localIP) ||
                 false;
         }
 
         case 'M': {
             return
-                tryModule(type, module, FF_MEDIA_MODULE_NAME, ffParseMediaJsonObject) ||
-                tryModule(type, module, FF_MEMORY_MODULE_NAME, ffParseMemoryJsonObject) ||
-                tryModule(type, module, FF_MONITOR_MODULE_NAME, ffParseMonitorJsonObject) ||
+                tryModule(type, module, &cfg->media) ||
+                tryModule(type, module, &cfg->memory) ||
+                tryModule(type, module, &cfg->monitor) ||
                 false;
         }
 
         case 'O': {
             return
-                tryModule(type, module, FF_OPENCL_MODULE_NAME, ffParseOpenCLJsonObject) ||
-                tryModule(type, module, FF_OPENGL_MODULE_NAME, ffParseOpenGLJsonObject) ||
-                tryModule(type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
+                tryModule(type, module, &cfg->openCL) ||
+                tryModule(type, module, &cfg->openGL) ||
+                tryModule(type, module, &cfg->os) ||
                 false;
         }
 
         case 'P': {
             return
-                tryModule(type, module, FF_PACKAGES_MODULE_NAME, ffParsePackagesJsonObject) ||
-                tryModule(type, module, FF_PLAYER_MODULE_NAME, ffParsePlayerJsonObject) ||
-                tryModule(type, module, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterJsonObject) ||
-                tryModule(type, module, FF_PROCESSES_MODULE_NAME, ffParseProcessesJsonObject) ||
-                tryModule(type, module, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpJsonObject) ||
+                tryModule(type, module, &cfg->packages) ||
+                tryModule(type, module, &cfg->player) ||
+                tryModule(type, module, &cfg->powerAdapter) ||
+                tryModule(type, module, &cfg->processes) ||
+                tryModule(type, module, &cfg->publicIP) ||
                 false;
         }
 
         case 'S': {
             return
-                tryModule(type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
-                tryModule(type, module, FF_SHELL_MODULE_NAME, ffParseShellJsonObject) ||
-                tryModule(type, module, FF_SOUND_MODULE_NAME, ffParseSoundJsonObject) ||
-                tryModule(type, module, FF_SWAP_MODULE_NAME, ffParseSwapJsonObject) ||
+                tryModule(type, module, &cfg->separator) ||
+                tryModule(type, module, &cfg->shell) ||
+                tryModule(type, module, &cfg->sound) ||
+                tryModule(type, module, &cfg->swap) ||
                 false;
         }
 
         case 'T': {
             return
-                tryModule(type, module, FF_TERMINAL_MODULE_NAME, ffParseTerminalJsonObject) ||
-                tryModule(type, module, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontJsonObject) ||
-                tryModule(type, module, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeJsonObject) ||
-                tryModule(type, module, FF_TITLE_MODULE_NAME, ffParseTitleJsonObject) ||
-                tryModule(type, module, FF_THEME_MODULE_NAME, ffParseThemeJsonObject) ||
+                tryModule(type, module, &cfg->terminal) ||
+                tryModule(type, module, &cfg->terminalFont) ||
+                tryModule(type, module, &cfg->terminalSize) ||
+                tryModule(type, module, &cfg->title) ||
+                tryModule(type, module, &cfg->theme) ||
                 false;
         }
 
         case 'U': {
             return
-                tryModule(type, module, FF_UPTIME_MODULE_NAME, ffParseUptimeJsonObject) ||
-                tryModule(type, module, FF_USERS_MODULE_NAME, ffParseUsersJsonObject) ||
+                tryModule(type, module, &cfg->uptime) ||
+                tryModule(type, module, &cfg->users) ||
                 false;
         }
 
         case 'V': {
             return
-                tryModule(type, module, FF_VULKAN_MODULE_NAME, ffParseVulkanJsonObject) ||
+                tryModule(type, module, &cfg->vulkan) ||
                 false;
         }
 
         case 'W': {
             return
-                tryModule(type, module, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperJsonObject) ||
-                tryModule(type, module, FF_WEATHER_MODULE_NAME, ffParseWeatherJsonObject) ||
-                tryModule(type, module, FF_WM_MODULE_NAME, ffParseWMJsonObject) ||
-                tryModule(type, module, FF_WIFI_MODULE_NAME, ffParseWifiJsonObject) ||
-                tryModule(type, module, FF_WMTHEME_MODULE_NAME, ffParseWMThemeJsonObject) ||
+                tryModule(type, module, &cfg->wallpaper) ||
+                tryModule(type, module, &cfg->weather) ||
+                tryModule(type, module, &cfg->wm) ||
+                tryModule(type, module, &cfg->wifi) ||
+                tryModule(type, module, &cfg->wmTheme) ||
                 false;
         }
 

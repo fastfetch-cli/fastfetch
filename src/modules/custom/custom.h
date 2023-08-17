@@ -8,4 +8,4 @@ void ffPrintCustom(FFCustomOptions* options);
 void ffInitCustomOptions(FFCustomOptions* options);
 bool ffParseCustomCommandOptions(FFCustomOptions* options, const char* key, const char* value);
 void ffDestroyCustomOptions(FFCustomOptions* options);
-void ffParseCustomJsonObject(yyjson_val* module);
+void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module);

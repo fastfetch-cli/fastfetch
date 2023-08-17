@@ -32,7 +32,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    options->moduleName = FF_THEME_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,11 +51,8 @@ void ffDestroyThemeOptions(FFThemeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseThemeJsonObject(yyjson_val* module)
+void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
 {
-    FFThemeOptions __attribute__((__cleanup__(ffDestroyThemeOptions))) options;
-    ffInitThemeOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -66,12 +63,10 @@ void ffParseThemeJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_THEME_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintTheme(&options);
 }

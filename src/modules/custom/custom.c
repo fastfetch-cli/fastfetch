@@ -19,7 +19,7 @@ void ffPrintCustom(FFCustomOptions* options)
 
 void ffInitCustomOptions(FFCustomOptions* options)
 {
-    options->moduleName = FF_CUSTOM_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CUSTOM_MODULE_NAME, ffParseCustomCommandOptions, ffParseCustomJsonObject, ffPrintCustom);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -38,11 +38,8 @@ void ffDestroyCustomOptions(FFCustomOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCustomJsonObject(yyjson_val* module)
+void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)
 {
-    FFCustomOptions __attribute__((__cleanup__(ffDestroyCustomOptions))) options;
-    ffInitCustomOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -53,12 +50,10 @@ void ffParseCustomJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintCustom(&options);
 }

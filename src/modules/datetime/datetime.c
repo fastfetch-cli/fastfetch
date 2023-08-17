@@ -51,7 +51,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    options->moduleName = FF_DATETIME_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -70,11 +70,8 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDateTimeJsonObject(yyjson_val* module)
+void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 {
-    FFDateTimeOptions __attribute__((__cleanup__(ffDestroyDateTimeOptions))) options;
-    ffInitDateTimeOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -85,12 +82,10 @@ void ffParseDateTimeJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintDateTime(&options);
 }

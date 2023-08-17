@@ -6,7 +6,7 @@
 
 typedef struct FFBluetoothOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     bool showDisconnected;

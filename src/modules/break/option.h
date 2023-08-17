@@ -4,8 +4,7 @@
 
 #include "common/option.h"
 
-typedef struct FFPowerAdapterOptions
+typedef struct FFBreakOptions
 {
     FFModuleBaseInfo moduleInfo;
-    FFModuleArgs moduleArgs;
-} FFPowerAdapterOptions;
+} FFBreakOptions;

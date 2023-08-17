@@ -67,7 +67,7 @@ exit:
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    options->moduleName = FF_HOST_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -86,11 +86,8 @@ void ffDestroyHostOptions(FFHostOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseHostJsonObject(yyjson_val* module)
+void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 {
-    FFHostOptions __attribute__((__cleanup__(ffDestroyHostOptions))) options;
-    ffInitHostOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -101,12 +98,10 @@ void ffParseHostJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_HOST_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintHost(&options);
 }

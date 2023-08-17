@@ -8,4 +8,4 @@ void ffPrintDisk(FFDiskOptions* options);
 void ffInitDiskOptions(FFDiskOptions* options);
 bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const char* value);
 void ffDestroyDiskOptions(FFDiskOptions* options);
-void ffParseDiskJsonObject(yyjson_val* module);
+void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module);

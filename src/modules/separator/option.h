@@ -6,7 +6,7 @@
 
 typedef struct FFSeparatorOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
 
     FFstrbuf string;
 } FFSeparatorOptions;

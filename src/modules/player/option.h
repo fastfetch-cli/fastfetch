@@ -6,6 +6,6 @@
 
 typedef struct FFPlayerOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFPlayerOptions;

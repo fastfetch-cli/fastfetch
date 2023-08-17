@@ -57,7 +57,7 @@ void ffPrintColors(FFColorsOptions* options)
 
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    options->moduleName = FF_COLORS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors);
     options->symbol = FF_COLORS_SYMBOL_BLOCK;
     options->paddingLeft = 0;
 }
@@ -94,11 +94,8 @@ void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
 {
 }
 
-void ffParseColorsJsonObject(yyjson_val* module)
+void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 {
-    FFColorsOptions __attribute__((__cleanup__(ffDestroyColorsOptions))) options;
-    ffInitColorsOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -124,19 +121,17 @@ void ffParseColorsJsonObject(yyjson_val* module)
                 if (error)
                     ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
                 else
-                    options.symbol = (FFColorsSymbol) value;
+                    options->symbol = (FFColorsSymbol) value;
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "paddingLeft"))
             {
-                options.paddingLeft = (uint32_t) yyjson_get_uint(val);
+                options->paddingLeft = (uint32_t) yyjson_get_uint(val);
                 continue;
             }
 
             ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintColors(&options);
 }

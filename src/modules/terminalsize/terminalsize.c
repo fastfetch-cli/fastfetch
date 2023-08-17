@@ -41,7 +41,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    options->moduleName = FF_TERMINALSIZE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -60,11 +60,8 @@ void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseTerminalSizeJsonObject(yyjson_val* module)
+void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* module)
 {
-    FFTerminalSizeOptions __attribute__((__cleanup__(ffDestroyTerminalSizeOptions))) options;
-    ffInitTerminalSizeOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -75,12 +72,10 @@ void ffParseTerminalSizeJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintTerminalSize(&options);
 }

@@ -44,7 +44,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    options->moduleName = FF_OPENGL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)
@@ -80,11 +80,8 @@ void ffDestroyOpenGLOptions(FFOpenGLOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseOpenGLJsonObject(yyjson_val* module)
+void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
 {
-    FFOpenGLOptions __attribute__((__cleanup__(ffDestroyOpenGLOptions))) options;
-    ffInitOpenGLOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -95,7 +92,7 @@ void ffParseOpenGLJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             #if defined(__linux__) || defined(__FreeBSD__)
@@ -110,16 +107,14 @@ void ffParseOpenGLJsonObject(yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
                 else
-                    options.library = (FFOpenGLLibrary) value;
+                    options->library = (FFOpenGLLibrary) value;
                 continue;
             }
             #endif
 
-            ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintOpenGL(&options);
 }

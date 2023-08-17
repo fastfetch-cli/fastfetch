@@ -1062,59 +1062,60 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //Module args options//
     ///////////////////////
 
-    else if(ffParseOSCommandOptions(&instance.config.os, key, value)) {}
-    else if(ffParseHostCommandOptions(&instance.config.host, key, value)) {}
-    else if(ffParseOSCommandOptions(&instance.config.os, key, value)) {}
+    else if(ffParseBatteryCommandOptions(&instance.config.battery, key, value)) {}
     else if(ffParseBiosCommandOptions(&instance.config.bios, key, value)) {}
+    else if(ffParseBluetoothCommandOptions(&instance.config.bluetooth, key, value)) {}
     else if(ffParseBoardCommandOptions(&instance.config.board, key, value)) {}
-    else if(ffParseChassisCommandOptions(&instance.config.chassis, key, value)) {}
-    else if(ffParseCommandCommandOptions(&instance.config.command, key, value)) {}
-    else if(ffParseCustomCommandOptions(&instance.config.custom, key, value)) {}
-    else if(ffParseKernelCommandOptions(&instance.config.kernel, key, value)) {}
-    else if(ffParseUptimeCommandOptions(&instance.config.uptime, key, value)) {}
-    else if(ffParseProcessesCommandOptions(&instance.config.processes, key, value)) {}
-    else if(ffParsePackagesCommandOptions(&instance.config.packages, key, value)) {}
-    else if(ffParseShellCommandOptions(&instance.config.shell, key, value)) {}
-    else if(ffParseDisplayCommandOptions(&instance.config.display, key, value)) {}
+    else if(ffParseBreakCommandOptions(&instance.config.break_, key, value)) {}
     else if(ffParseBrightnessCommandOptions(&instance.config.brightness, key, value)) {}
-    else if(ffParseMonitorCommandOptions(&instance.config.nativeResolution, key, value)) {}
-    else if(ffParseDECommandOptions(&instance.config.de, key, value)) {}
-    else if(ffParseWifiCommandOptions(&instance.config.wifi, key, value)) {}
-    else if(ffParseWMCommandOptions(&instance.config.wm, key, value)) {}
-    else if(ffParseWMThemeCommandOptions(&instance.config.wmTheme, key, value)) {}
-    else if(ffParseTitleCommandOptions(&instance.config.title, key, value)) {}
-    else if(ffParseThemeCommandOptions(&instance.config.theme, key, value)) {}
-    else if(ffParseIconsCommandOptions(&instance.config.icons, key, value)) {}
-    else if(ffParseWallpaperCommandOptions(&instance.config.wallpaper, key, value)) {}
-    else if(ffParseFontCommandOptions(&instance.config.font, key, value)) {}
+    else if(ffParseCPUCommandOptions(&instance.config.cpu, key, value)) {}
+    else if(ffParseCPUUsageCommandOptions(&instance.config.cpuUsage, key, value)) {}
+    else if(ffParseChassisCommandOptions(&instance.config.chassis, key, value)) {}
+    else if(ffParseColorsCommandOptions(&instance.config.colors, key, value)) {}
+    else if(ffParseCommandCommandOptions(&instance.config.command, key, value)) {}
     else if(ffParseCursorCommandOptions(&instance.config.cursor, key, value)) {}
+    else if(ffParseCustomCommandOptions(&instance.config.custom, key, value)) {}
+    else if(ffParseDECommandOptions(&instance.config.de, key, value)) {}
+    else if(ffParseDateTimeCommandOptions(&instance.config.dateTime, key, value)) {}
+    else if(ffParseDiskCommandOptions(&instance.config.disk, key, value)) {}
+    else if(ffParseDisplayCommandOptions(&instance.config.display, key, value)) {}
+    else if(ffParseFontCommandOptions(&instance.config.font, key, value)) {}
+    else if(ffParseGPUCommandOptions(&instance.config.gpu, key, value)) {}
+    else if(ffParseGamepadCommandOptions(&instance.config.gamepad, key, value)) {}
+    else if(ffParseHostCommandOptions(&instance.config.host, key, value)) {}
+    else if(ffParseIconsCommandOptions(&instance.config.icons, key, value)) {}
+    else if(ffParseKernelCommandOptions(&instance.config.kernel, key, value)) {}
+    else if(ffParseLocalIpCommandOptions(&instance.config.localIP, key, value)) {}
+    else if(ffParseLocaleCommandOptions(&instance.config.locale, key, value)) {}
+    else if(ffParseMediaCommandOptions(&instance.config.media, key, value)) {}
+    else if(ffParseMemoryCommandOptions(&instance.config.memory, key, value)) {}
+    else if(ffParseMonitorCommandOptions(&instance.config.monitor, key, value)) {}
+    else if(ffParseOSCommandOptions(&instance.config.os, key, value)) {}
+    else if(ffParseOSCommandOptions(&instance.config.os, key, value)) {}
+    else if(ffParseOpenCLCommandOptions(&instance.config.openCL, key, value)) {}
+    else if(ffParseOpenGLCommandOptions(&instance.config.openGL, key, value)) {}
+    else if(ffParsePackagesCommandOptions(&instance.config.packages, key, value)) {}
+    else if(ffParsePlayerCommandOptions(&instance.config.player, key, value)) {}
+    else if(ffParsePowerAdapterCommandOptions(&instance.config.powerAdapter, key, value)) {}
+    else if(ffParseProcessesCommandOptions(&instance.config.processes, key, value)) {}
+    else if(ffParsePublicIpCommandOptions(&instance.config.publicIP, key, value)) {}
+    else if(ffParseSeparatorCommandOptions(&instance.config.separator, key, value)) {}
+    else if(ffParseShellCommandOptions(&instance.config.shell, key, value)) {}
+    else if(ffParseSoundCommandOptions(&instance.config.sound, key, value)) {}
+    else if(ffParseSwapCommandOptions(&instance.config.swap, key, value)) {}
     else if(ffParseTerminalCommandOptions(&instance.config.terminal, key, value)) {}
     else if(ffParseTerminalFontCommandOptions(&instance.config.terminalFont, key, value)) {}
     else if(ffParseTerminalSizeCommandOptions(&instance.config.terminalSize, key, value)) {}
-    else if(ffParseCPUCommandOptions(&instance.config.cpu, key, value)) {}
-    else if(ffParseCPUUsageCommandOptions(&instance.config.cpuUsage, key, value)) {}
-    else if(ffParseGPUCommandOptions(&instance.config.gpu, key, value)) {}
-    else if(ffParseMemoryCommandOptions(&instance.config.memory, key, value)) {}
-    else if(ffParseSwapCommandOptions(&instance.config.swap, key, value)) {}
-    else if(ffParseDiskCommandOptions(&instance.config.disk, key, value)) {}
-    else if(ffParseBatteryCommandOptions(&instance.config.battery, key, value)) {}
-    else if(ffParsePowerAdapterCommandOptions(&instance.config.powerAdapter, key, value)) {}
-    else if(ffParseLocaleCommandOptions(&instance.config.locale, key, value)) {}
-    else if(ffParseLocalIpCommandOptions(&instance.config.localIP, key, value)) {}
-    else if(ffParsePublicIpCommandOptions(&instance.config.publicIP, key, value)) {}
-    else if(ffParseWeatherCommandOptions(&instance.config.weather, key, value)) {}
-    else if(ffParsePlayerCommandOptions(&instance.config.player, key, value)) {}
-    else if(ffParseMediaCommandOptions(&instance.config.media, key, value)) {}
-    else if(ffParseDateTimeCommandOptions(&instance.config.dateTime, key, value)) {}
-    else if(ffParseVulkanCommandOptions(&instance.config.vulkan, key, value)) {}
-    else if(ffParseOpenGLCommandOptions(&instance.config.openGL, key, value)) {}
-    else if(ffParseOpenCLCommandOptions(&instance.config.openCL, key, value)) {}
+    else if(ffParseThemeCommandOptions(&instance.config.theme, key, value)) {}
+    else if(ffParseTitleCommandOptions(&instance.config.title, key, value)) {}
+    else if(ffParseUptimeCommandOptions(&instance.config.uptime, key, value)) {}
     else if(ffParseUsersCommandOptions(&instance.config.users, key, value)) {}
-    else if(ffParseBluetoothCommandOptions(&instance.config.bluetooth, key, value)) {}
-    else if(ffParseSeparatorCommandOptions(&instance.config.separator, key, value)) {}
-    else if(ffParseSoundCommandOptions(&instance.config.sound, key, value)) {}
-    else if(ffParseGamepadCommandOptions(&instance.config.gamepad, key, value)) {}
-    else if(ffParseColorsCommandOptions(&instance.config.colors, key, value)) {}
+    else if(ffParseVulkanCommandOptions(&instance.config.vulkan, key, value)) {}
+    else if(ffParseWMCommandOptions(&instance.config.wm, key, value)) {}
+    else if(ffParseWMThemeCommandOptions(&instance.config.wmTheme, key, value)) {}
+    else if(ffParseWallpaperCommandOptions(&instance.config.wallpaper, key, value)) {}
+    else if(ffParseWeatherCommandOptions(&instance.config.weather, key, value)) {}
+    else if(ffParseWifiCommandOptions(&instance.config.wifi, key, value)) {}
 
     ///////////////////
     //Library options//
@@ -1235,6 +1236,166 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
     }
 }
 
+static inline bool tryModule(const char* type, void* options)
+{
+    FFModuleBaseInfo* baseInfo = (FFModuleBaseInfo*) options;
+    if (ffStrEqualsIgnCase(type, baseInfo->name))
+    {
+        baseInfo->printModule(options);
+        return true;
+    }
+    return false;
+}
+
+static bool parseModuleCommand(const char* type)
+{
+    FFconfig* cfg = &instance.config;
+    switch (toupper(type[0]))
+    {
+        case 'B': {
+            return
+                tryModule(type, &cfg->battery) ||
+                tryModule(type, &cfg->bios) ||
+                tryModule(type, &cfg->bluetooth) ||
+                tryModule(type, &cfg->board) ||
+                tryModule(type, &cfg->break_) ||
+                tryModule(type, &cfg->brightness) ||
+                false;
+        }
+
+        case 'C': {
+            return
+                tryModule(type, &cfg->chassis) ||
+                tryModule(type, &cfg->command) ||
+                tryModule(type, &cfg->colors) ||
+                tryModule(type, &cfg->cpu) ||
+                tryModule(type, &cfg->cpuUsage) ||
+                tryModule(type, &cfg->cursor) ||
+                tryModule(type, &cfg->custom) ||
+                false;
+        }
+
+        case 'D': {
+            return
+                tryModule(type, &cfg->dateTime) ||
+                tryModule(type, &cfg->de) ||
+                tryModule(type, &cfg->display) ||
+                tryModule(type, &cfg->disk) ||
+                false;
+        }
+
+        case 'F': {
+            return
+                tryModule(type, &cfg->font) ||
+                false;
+        }
+
+        case 'G': {
+            return
+                tryModule(type, &cfg->gamepad) ||
+                tryModule(type, &cfg->gpu) ||
+                false;
+        }
+
+        case 'H': {
+            return
+                tryModule(type, &cfg->host) ||
+                false;
+        }
+
+        case 'I': {
+            return
+                tryModule(type, &cfg->icons) ||
+                false;
+        }
+
+        case 'K': {
+            return
+                tryModule(type, &cfg->kernel) ||
+                false;
+        }
+
+        case 'L': {
+            return
+                tryModule(type, &cfg->lm) ||
+                tryModule(type, &cfg->locale) ||
+                tryModule(type, &cfg->localIP) ||
+                false;
+        }
+
+        case 'M': {
+            return
+                tryModule(type, &cfg->media) ||
+                tryModule(type, &cfg->memory) ||
+                tryModule(type, &cfg->monitor) ||
+                false;
+        }
+
+        case 'O': {
+            return
+                tryModule(type, &cfg->openCL) ||
+                tryModule(type, &cfg->openGL) ||
+                tryModule(type, &cfg->os) ||
+                false;
+        }
+
+        case 'P': {
+            return
+                tryModule(type, &cfg->packages) ||
+                tryModule(type, &cfg->player) ||
+                tryModule(type, &cfg->powerAdapter) ||
+                tryModule(type, &cfg->processes) ||
+                tryModule(type, &cfg->publicIP) ||
+                false;
+        }
+
+        case 'S': {
+            return
+                tryModule(type, &cfg->separator) ||
+                tryModule(type, &cfg->shell) ||
+                tryModule(type, &cfg->sound) ||
+                tryModule(type, &cfg->swap) ||
+                false;
+        }
+
+        case 'T': {
+            return
+                tryModule(type, &cfg->terminal) ||
+                tryModule(type, &cfg->terminalFont) ||
+                tryModule(type, &cfg->terminalSize) ||
+                tryModule(type, &cfg->title) ||
+                tryModule(type, &cfg->theme) ||
+                false;
+        }
+
+        case 'U': {
+            return
+                tryModule(type, &cfg->uptime) ||
+                tryModule(type, &cfg->users) ||
+                false;
+        }
+
+        case 'V': {
+            return
+                tryModule(type, &cfg->vulkan) ||
+                false;
+        }
+
+        case 'W': {
+            return
+                tryModule(type, &cfg->wallpaper) ||
+                tryModule(type, &cfg->weather) ||
+                tryModule(type, &cfg->wm) ||
+                tryModule(type, &cfg->wifi) ||
+                tryModule(type, &cfg->wmTheme) ||
+                false;
+        }
+
+        default:
+            return false;
+    }
+}
+
 static void parseStructureCommand(const char* line, FFlist* customValues)
 {
     // handle `--set` and `--set-keyless`
@@ -1252,152 +1413,8 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
         }
     }
 
-    switch (toupper(line[0]))
-    {
-        case 'B':
-            if(ffStrEqualsIgnCase(line, FF_BATTERY_MODULE_NAME))
-                return ffPrintBattery(&instance.config.battery);
-            if(ffStrEqualsIgnCase(line, FF_BIOS_MODULE_NAME))
-                return ffPrintBios(&instance.config.bios);
-            if(ffStrEqualsIgnCase(line, FF_BLUETOOTH_MODULE_NAME))
-                return ffPrintBluetooth(&instance.config.bluetooth);
-            if(ffStrEqualsIgnCase(line, FF_BOARD_MODULE_NAME))
-                return ffPrintBoard(&instance.config.board);
-            if(ffStrEqualsIgnCase(line, FF_BREAK_MODULE_NAME))
-                return ffPrintBreak();
-            if(ffStrEqualsIgnCase(line, FF_BRIGHTNESS_MODULE_NAME))
-                return ffPrintBrightness(&instance.config.brightness);
-            break;
-        case 'C':
-            if(ffStrEqualsIgnCase(line, FF_CHASSIS_MODULE_NAME))
-                return ffPrintChassis(&instance.config.chassis);
-            if(ffStrEqualsIgnCase(line, FF_COMMAND_MODULE_NAME))
-                return ffPrintCommand(&instance.config.command);
-            if(ffStrEqualsIgnCase(line, FF_CPU_MODULE_NAME))
-                return ffPrintCPU(&instance.config.cpu);
-            if(ffStrEqualsIgnCase(line, FF_CPUUSAGE_MODULE_NAME))
-                return ffPrintCPUUsage(&instance.config.cpuUsage);
-            if(ffStrEqualsIgnCase(line, FF_COLORS_MODULE_NAME))
-                return ffPrintColors(&instance.config.colors);
-            if(ffStrEqualsIgnCase(line, FF_CURSOR_MODULE_NAME))
-                return ffPrintCursor(&instance.config.cursor);
-            if(ffStrEqualsIgnCase(line, FF_CUSTOM_MODULE_NAME))
-                return ffPrintCustom(&instance.config.custom);
-            break;
-        case 'D':
-            if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
-                return ffPrintDateTime(&instance.config.dateTime);
-            if(ffStrEqualsIgnCase(line, FF_DE_MODULE_NAME))
-                return ffPrintDE(&instance.config.de);
-            if(ffStrEqualsIgnCase(line, FF_DISPLAY_MODULE_NAME))
-                return ffPrintDisplay(&instance.config.display);
-            if(ffStrEqualsIgnCase(line, FF_DISK_MODULE_NAME))
-                return ffPrintDisk(&instance.config.disk);
-            break;
-        case 'F':
-            if(ffStrEqualsIgnCase(line, FF_FONT_MODULE_NAME))
-                return ffPrintFont(&instance.config.font);
-            break;
-        case 'G':
-            if(ffStrEqualsIgnCase(line, FF_GAMEPAD_MODULE_NAME))
-                return ffPrintGamepad(&instance.config.gamepad);
-            if(ffStrEqualsIgnCase(line, FF_GPU_MODULE_NAME))
-                return ffPrintGPU(&instance.config.gpu);
-            break;
-        case 'H':
-            if(ffStrEqualsIgnCase(line, FF_HOST_MODULE_NAME))
-                return ffPrintHost(&instance.config.host);
-            break;
-        case 'I':
-            if(ffStrEqualsIgnCase(line, FF_ICONS_MODULE_NAME))
-                return ffPrintIcons(&instance.config.icons);
-            break;
-        case 'K':
-            if(ffStrEqualsIgnCase(line, FF_KERNEL_MODULE_NAME))
-                return ffPrintKernel(&instance.config.kernel);
-            break;
-        case 'L':
-            if(ffStrEqualsIgnCase(line, FF_LM_MODULE_NAME))
-                return ffPrintLM(&instance.config.lm);
-            if(ffStrEqualsIgnCase(line, FF_LOCALE_MODULE_NAME))
-                return ffPrintLocale(&instance.config.locale);
-            if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))
-                return ffPrintLocalIp(&instance.config.localIP);
-            break;
-        case 'M':
-            if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
-                return ffPrintMedia(&instance.config.media);
-            if(ffStrEqualsIgnCase(line, FF_MEMORY_MODULE_NAME))
-                return ffPrintMemory(&instance.config.memory);
-            if(ffStrEqualsIgnCase(line, FF_MONITOR_MODULE_NAME))
-                return ffPrintMonitor(&instance.config.nativeResolution);
-            break;
-        case 'O':
-            if(ffStrEqualsIgnCase(line, FF_OPENCL_MODULE_NAME))
-                return ffPrintOpenCL(&instance.config.openCL);
-            if(ffStrEqualsIgnCase(line, FF_OPENGL_MODULE_NAME))
-                return ffPrintOpenGL(&instance.config.openGL);
-            if(ffStrEqualsIgnCase(line, FF_OS_MODULE_NAME))
-                return ffPrintOS(&instance.config.os);
-            break;
-        case 'P':
-            if(ffStrEqualsIgnCase(line, FF_PACKAGES_MODULE_NAME))
-                return ffPrintPackages(&instance.config.packages);
-            if(ffStrEqualsIgnCase(line, FF_PLAYER_MODULE_NAME))
-                return ffPrintPlayer(&instance.config.player);
-            if(ffStrEqualsIgnCase(line, FF_POWERADAPTER_MODULE_NAME))
-                return ffPrintPowerAdapter(&instance.config.powerAdapter);
-            if(ffStrEqualsIgnCase(line, FF_PROCESSES_MODULE_NAME))
-                return ffPrintProcesses(&instance.config.processes);
-            if(ffStrEqualsIgnCase(line, FF_PUBLICIP_MODULE_NAME))
-                return ffPrintPublicIp(&instance.config.publicIP);
-            break;
-        case 'S':
-            if(ffStrEqualsIgnCase(line, FF_SEPARATOR_MODULE_NAME))
-                return ffPrintSeparator(&instance.config.separator);
-            if(ffStrEqualsIgnCase(line, FF_SHELL_MODULE_NAME))
-                return ffPrintShell(&instance.config.shell);
-            if(ffStrEqualsIgnCase(line, FF_SOUND_MODULE_NAME))
-                return ffPrintSound(&instance.config.sound);
-            if(ffStrEqualsIgnCase(line, FF_SWAP_MODULE_NAME))
-                return ffPrintSwap(&instance.config.swap);
-            break;
-        case 'T':
-            if(ffStrEqualsIgnCase(line, FF_TERMINAL_MODULE_NAME))
-                return ffPrintTerminal(&instance.config.terminal);
-            if(ffStrEqualsIgnCase(line, FF_TERMINALFONT_MODULE_NAME))
-                return ffPrintTerminalFont(&instance.config.terminalFont);
-            if(ffStrEqualsIgnCase(line, FF_TERMINALSIZE_MODULE_NAME))
-                return ffPrintTerminalSize(&instance.config.terminalSize);
-            if(ffStrEqualsIgnCase(line, FF_TITLE_MODULE_NAME))
-                return ffPrintTitle(&instance.config.title);
-            if(ffStrEqualsIgnCase(line, FF_THEME_MODULE_NAME))
-                return ffPrintTheme(&instance.config.theme);
-            break;
-        case 'U':
-            if(ffStrEqualsIgnCase(line, FF_UPTIME_MODULE_NAME))
-                return ffPrintUptime(&instance.config.uptime);
-            if(ffStrEqualsIgnCase(line, FF_USERS_MODULE_NAME))
-                return ffPrintUsers(&instance.config.users);
-            break;
-        case 'V':
-            if(ffStrEqualsIgnCase(line, FF_VULKAN_MODULE_NAME))
-                return ffPrintVulkan(&instance.config.vulkan);
-            break;
-        case 'W':
-            if(ffStrEqualsIgnCase(line, FF_WALLPAPER_MODULE_NAME))
-                return ffPrintWallpaper(&instance.config.wallpaper);
-            if(ffStrEqualsIgnCase(line, FF_WEATHER_MODULE_NAME))
-                return ffPrintWeather(&instance.config.weather);
-            if(ffStrEqualsIgnCase(line, FF_WIFI_MODULE_NAME))
-                return ffPrintWifi(&instance.config.wifi);
-            if(ffStrEqualsIgnCase(line, FF_WM_MODULE_NAME))
-                return ffPrintWM(&instance.config.wm);
-            if(ffStrEqualsIgnCase(line, FF_WMTHEME_MODULE_NAME))
-                return ffPrintWMTheme(&instance.config.wmTheme);
-            break;
-    }
-    ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
+    if(!parseModuleCommand(line))
+        ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
 int main(int argc, const char** argv)

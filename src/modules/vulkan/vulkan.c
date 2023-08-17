@@ -45,7 +45,7 @@ void ffPrintVulkan(FFVulkanOptions* options)
 
 void ffInitVulkanOptions(FFVulkanOptions* options)
 {
-    options->moduleName = FF_VULKAN_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -64,11 +64,8 @@ void ffDestroyVulkanOptions(FFVulkanOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseVulkanJsonObject(yyjson_val* module)
+void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
 {
-    FFVulkanOptions __attribute__((__cleanup__(ffDestroyVulkanOptions))) options;
-    ffInitVulkanOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -79,12 +76,10 @@ void ffParseVulkanJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintVulkan(&options);
 }

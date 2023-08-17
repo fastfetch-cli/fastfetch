@@ -8,4 +8,4 @@ void ffPrintOS(FFOSOptions* options);
 void ffInitOSOptions(FFOSOptions* options);
 bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* value);
 void ffDestroyOSOptions(FFOSOptions* options);
-void ffParseOSJsonObject(yyjson_val* module);
+void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module);

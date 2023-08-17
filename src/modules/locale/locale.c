@@ -32,7 +32,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    options->moduleName = FF_LOCALE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,11 +51,8 @@ void ffDestroyLocaleOptions(FFLocaleOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseLocaleJsonObject(yyjson_val* module)
+void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
 {
-    FFLocaleOptions __attribute__((__cleanup__(ffDestroyLocaleOptions))) options;
-    ffInitLocaleOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -66,12 +63,10 @@ void ffParseLocaleJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintLocale(&options);
 }

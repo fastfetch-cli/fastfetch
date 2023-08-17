@@ -41,7 +41,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    options->moduleName = FF_OPENCL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -60,11 +60,8 @@ void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseOpenCLJsonObject(yyjson_val* module)
+void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
 {
-    FFOpenCLOptions __attribute__((__cleanup__(ffDestroyOpenCLOptions))) options;
-    ffInitOpenCLOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -75,12 +72,10 @@ void ffParseOpenCLJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintOpenCL(&options);
 }

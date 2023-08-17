@@ -9,4 +9,4 @@ void ffPrintPlayer(FFPlayerOptions* options);
 void ffInitPlayerOptions(FFPlayerOptions* options);
 bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, const char* value);
 void ffDestroyPlayerOptions(FFPlayerOptions* options);
-void ffParsePlayerJsonObject(yyjson_val* module);
+void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module);

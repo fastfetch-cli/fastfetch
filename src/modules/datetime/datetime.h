@@ -8,4 +8,4 @@ void ffPrintDateTime(FFDateTimeOptions* options);
 void ffInitDateTimeOptions(FFDateTimeOptions* options);
 bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, const char* value);
 void ffDestroyDateTimeOptions(FFDateTimeOptions* options);
-void ffParseDateTimeJsonObject(yyjson_val* module);
+void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module);

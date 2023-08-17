@@ -55,7 +55,7 @@ exit:
 
 void ffInitBiosOptions(FFBiosOptions* options)
 {
-    options->moduleName = FF_BIOS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -74,11 +74,8 @@ void ffDestroyBiosOptions(FFBiosOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBiosJsonObject(yyjson_val* module)
+void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
 {
-    FFBiosOptions __attribute__((__cleanup__(ffDestroyBiosOptions))) options;
-    ffInitBiosOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -89,12 +86,10 @@ void ffParseBiosJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_BIOS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintBios(&options);
 }

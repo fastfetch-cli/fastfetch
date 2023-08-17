@@ -32,7 +32,7 @@ void ffPrintIcons(FFIconsOptions* options)
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    options->moduleName = FF_ICONS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,11 +51,8 @@ void ffDestroyIconsOptions(FFIconsOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseIconsJsonObject(yyjson_val* module)
+void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
 {
-    FFIconsOptions __attribute__((__cleanup__(ffDestroyIconsOptions))) options;
-    ffInitIconsOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -66,12 +63,10 @@ void ffParseIconsJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_ICONS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintIcons(&options);
 }

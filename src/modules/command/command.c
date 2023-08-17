@@ -36,7 +36,7 @@ void ffPrintCommand(FFCommandOptions* options)
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    options->moduleName = FF_COMMAND_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInitStatic(&options->shell,
@@ -79,11 +79,8 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
     ffStrbufDestroy(&options->text);
 }
 
-void ffParseCommandJsonObject(yyjson_val* module)
+void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
 {
-    FFCommandOptions __attribute__((__cleanup__(ffDestroyCommandOptions))) options;
-    ffInitCommandOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -94,24 +91,22 @@ void ffParseCommandJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "shell"))
             {
-                ffStrbufSetS(&options.shell, yyjson_get_str(val));
+                ffStrbufSetS(&options->shell, yyjson_get_str(val));
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "text"))
             {
-                ffStrbufSetS(&options.text, yyjson_get_str(val));
+                ffStrbufSetS(&options->text, yyjson_get_str(val));
                 continue;
             }
 
-            ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintCommand(&options);
 }

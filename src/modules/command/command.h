@@ -8,4 +8,4 @@ void ffPrintCommand(FFCommandOptions* options);
 void ffInitCommandOptions(FFCommandOptions* options);
 bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, const char* value);
 void ffDestroyCommandOptions(FFCommandOptions* options);
-void ffParseCommandJsonObject(yyjson_val* module);
+void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module);

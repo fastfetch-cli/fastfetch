@@ -13,7 +13,7 @@ typedef enum FFDisplayCompactType
 
 typedef struct FFDisplayOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFDisplayCompactType compactType;

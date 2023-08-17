@@ -85,7 +85,7 @@ void ffPrintSound(FFSoundOptions* options)
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    options->moduleName = FF_SOUND_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
@@ -117,11 +117,8 @@ void ffDestroySoundOptions(FFSoundOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseSoundJsonObject(yyjson_val* module)
+void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
 {
-    FFSoundOptions __attribute__((__cleanup__(ffDestroySoundOptions))) options;
-    ffInitSoundOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -132,7 +129,7 @@ void ffParseSoundJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "soundType"))
@@ -145,15 +142,13 @@ void ffParseSoundJsonObject(yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
                 else
-                    options.soundType = (FFSoundType) value;
+                    options->soundType = (FFSoundType) value;
                 continue;
             }
 
-            ffPrintError(FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintSound(&options);
 }

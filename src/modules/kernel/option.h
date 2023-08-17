@@ -6,6 +6,6 @@
 
 typedef struct FFKernelOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFKernelOptions;

@@ -117,7 +117,7 @@ typedef struct FFconfig
     FFWeatherOptions weather;
     FFPlayerOptions player;
     FFMediaOptions media;
-    FFMonitorOptions nativeResolution;
+    FFMonitorOptions monitor;
     FFDateTimeOptions dateTime;
     FFVulkanOptions vulkan;
     FFOpenGLOptions openGL;
@@ -127,6 +127,7 @@ typedef struct FFconfig
     FFSeparatorOptions separator;
     FFSoundOptions sound;
     FFGamepadOptions gamepad;
+    FFBreakOptions break_;
     FFColorsOptions colors;
 
     FFstrbuf libPCI;

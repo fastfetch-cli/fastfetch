@@ -107,7 +107,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    options->moduleName = FF_MEDIA_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -126,11 +126,8 @@ void ffDestroyMediaOptions(FFMediaOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMediaJsonObject(yyjson_val* module)
+void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
 {
-    FFMediaOptions __attribute__((__cleanup__(ffDestroyMediaOptions))) options;
-    ffInitMediaOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -141,12 +138,10 @@ void ffParseMediaJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintMedia(&options);
 }

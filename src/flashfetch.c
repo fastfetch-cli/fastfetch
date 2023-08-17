@@ -62,7 +62,7 @@ int main(void)
     //ffPrintBluetooth(&instance.config.bluetooth);
     //ffPrintSound(&instance.config.sound);
     //ffPrintGamepad(&instance.config.gamepad);
-    ffPrintBreak();
+    ffPrintBreak(&instance.config.break_);
     ffPrintColors(&instance.config.colors);
 
     ffFinish();

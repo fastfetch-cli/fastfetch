@@ -8,4 +8,4 @@ void ffPrintBios(FFBiosOptions* options);
 void ffInitBiosOptions(FFBiosOptions* options);
 bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const char* value);
 void ffDestroyBiosOptions(FFBiosOptions* options);
-void ffParseBiosJsonObject(yyjson_val* module);
+void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module);

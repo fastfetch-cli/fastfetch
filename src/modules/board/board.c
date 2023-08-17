@@ -51,7 +51,7 @@ exit:
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    options->moduleName = FF_BOARD_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -70,11 +70,8 @@ void ffDestroyBoardOptions(FFBoardOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBoardJsonObject(yyjson_val* module)
+void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
 {
-    FFBoardOptions __attribute__((__cleanup__(ffDestroyBoardOptions))) options;
-    ffInitBoardOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -85,12 +82,10 @@ void ffParseBoardJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_BOARD_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintBoard(&options);
 }

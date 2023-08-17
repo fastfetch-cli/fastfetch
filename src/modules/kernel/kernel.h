@@ -8,4 +8,4 @@ void ffPrintKernel(FFKernelOptions* options);
 void ffInitKernelOptions(FFKernelOptions* options);
 bool ffParseKernelCommandOptions(FFKernelOptions* options, const char* key, const char* value);
 void ffDestroyKernelOptions(FFKernelOptions* options);
-void ffParseKernelJsonObject(yyjson_val* module);
+void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module);

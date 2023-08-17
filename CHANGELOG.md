@@ -11,6 +11,7 @@ Features:
 
 Bugfixes:
 * Fix label detection. Use `--disk-key 'Disk ({2})'` to display it (Disk, Linux)
+* Fix some module options were not inited
 
 # 2.0.0-beta
 

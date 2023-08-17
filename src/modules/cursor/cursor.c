@@ -52,7 +52,7 @@ void ffPrintCursor(FFCursorOptions* options)
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    options->moduleName = FF_CURSOR_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -71,11 +71,8 @@ void ffDestroyCursorOptions(FFCursorOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCursorJsonObject(yyjson_val* module)
+void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
 {
-    FFCursorOptions __attribute__((__cleanup__(ffDestroyCursorOptions))) options;
-    ffInitCursorOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -86,12 +83,10 @@ void ffParseCursorJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintCursor(&options);
 }

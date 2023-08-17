@@ -73,7 +73,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    options->moduleName = FF_SWAP_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -92,11 +92,8 @@ void ffDestroySwapOptions(FFSwapOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseSwapJsonObject(yyjson_val* module)
+void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
 {
-    FFSwapOptions __attribute__((__cleanup__(ffDestroySwapOptions))) options;
-    ffInitSwapOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -107,12 +104,10 @@ void ffParseSwapJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_SWAP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintSwap(&options);
 }

@@ -6,6 +6,6 @@
 
 typedef struct FFCustomOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFCustomOptions;

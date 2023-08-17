@@ -8,4 +8,4 @@ void ffPrintOpenCL(FFOpenCLOptions* options);
 void ffInitOpenCLOptions(FFOpenCLOptions* options);
 bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, const char* value);
 void ffDestroyOpenCLOptions(FFOpenCLOptions* options);
-void ffParseOpenCLJsonObject(yyjson_val* module);
+void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module);

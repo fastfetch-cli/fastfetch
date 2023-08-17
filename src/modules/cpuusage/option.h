@@ -6,6 +6,6 @@
 
 typedef struct FFCPUUsageOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFCPUUsageOptions;

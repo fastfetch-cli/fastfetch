@@ -72,7 +72,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    options->moduleName = FF_WIFI_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -91,11 +91,8 @@ void ffDestroyWifiOptions(FFWifiOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWifiJsonObject(yyjson_val* module)
+void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
 {
-    FFWifiOptions __attribute__((__cleanup__(ffDestroyWifiOptions))) options;
-    ffInitWifiOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -106,12 +103,10 @@ void ffParseWifiJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_WIFI_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintWifi(&options);
 }

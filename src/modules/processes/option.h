@@ -6,6 +6,6 @@
 
 typedef struct FFProcessesOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFProcessesOptions;

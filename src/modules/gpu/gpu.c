@@ -121,7 +121,7 @@ void ffPrintGPU(FFGPUOptions* options)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    options->moduleName = FF_GPU_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;
@@ -166,11 +166,8 @@ void ffDestroyGPUOptions(FFGPUOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseGPUJsonObject(yyjson_val* module)
+void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 {
-    FFGPUOptions __attribute__((__cleanup__(ffDestroyGPUOptions))) options;
-    ffInitGPUOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -181,18 +178,18 @@ void ffParseGPUJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
             if (ffStrEqualsIgnCase(key, "temp"))
             {
-                options.temp = yyjson_get_bool(val);
+                options->temp = yyjson_get_bool(val);
                 continue;
             }
 
             if (ffStrEqualsIgnCase(key, "forceVulkan"))
             {
-                options.forceVulkan = yyjson_get_bool(val);
+                options->forceVulkan = yyjson_get_bool(val);
                 continue;
             }
 
@@ -206,15 +203,13 @@ void ffParseGPUJsonObject(yyjson_val* module)
                     {},
                 });
                 if (error)
-                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
+                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
                 else
-                    options.hideType = (FFGPUType) value;
+                    options->hideType = (FFGPUType) value;
                 continue;
             }
 
-            ffPrintError(FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintGPU(&options);
 }

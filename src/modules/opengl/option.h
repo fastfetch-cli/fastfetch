@@ -16,7 +16,7 @@ typedef enum FFOpenGLLibrary
 
 typedef struct FFOpenGLOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     #if defined(__linux__) || defined(__FreeBSD__)

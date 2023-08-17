@@ -6,6 +6,6 @@
 
 typedef struct FFUptimeOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFUptimeOptions;

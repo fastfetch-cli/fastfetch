@@ -77,7 +77,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    options->moduleName = FF_SEPARATOR_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator);
     ffStrbufInit(&options->string);
 }
 
@@ -100,11 +100,8 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
     ffStrbufDestroy(&options->string);
 }
 
-void ffParseSeparatorJsonObject(yyjson_val* module)
+void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 {
-    FFSeparatorOptions __attribute__((__cleanup__(ffDestroySeparatorOptions))) options;
-    ffInitSeparatorOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -117,13 +114,11 @@ void ffParseSeparatorJsonObject(yyjson_val* module)
 
             if (ffStrEqualsIgnCase(key, "string"))
             {
-                ffStrbufSetS(&options.string, yyjson_get_str(val));
+                ffStrbufSetS(&options->string, yyjson_get_str(val));
                 continue;
             }
 
             ffPrintErrorString(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintSeparator(&options);
 }

@@ -139,7 +139,7 @@ void ffPrintOS(FFOSOptions* options)
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    options->moduleName = FF_OS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -158,11 +158,8 @@ void ffDestroyOSOptions(FFOSOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseOSJsonObject(yyjson_val* module)
+void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
 {
-    FFOSOptions __attribute__((__cleanup__(ffDestroyOSOptions))) options;
-    ffInitOSOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -173,12 +170,10 @@ void ffParseOSJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_OS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_OS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintOS(&options);
 }

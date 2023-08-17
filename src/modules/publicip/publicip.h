@@ -10,4 +10,4 @@ void ffPrintPublicIp(FFPublicIpOptions* options);
 void ffInitPublicIpOptions(FFPublicIpOptions* options);
 bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, const char* value);
 void ffDestroyPublicIpOptions(FFPublicIpOptions* options);
-void ffParsePublicIpJsonObject(yyjson_val* module);
+void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module);

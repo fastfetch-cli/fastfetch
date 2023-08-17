@@ -8,4 +8,4 @@ void ffPrintSound(FFSoundOptions* options);
 void ffInitSoundOptions(FFSoundOptions* options);
 bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const char* value);
 void ffDestroySoundOptions(FFSoundOptions* options);
-void ffParseSoundJsonObject(yyjson_val* module);
+void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module);

@@ -6,6 +6,6 @@
 
 typedef struct FFMemoryOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFMemoryOptions;

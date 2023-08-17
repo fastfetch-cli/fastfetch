@@ -8,4 +8,4 @@ void ffPrintWallpaper(FFWallpaperOptions* options);
 void ffInitWallpaperOptions(FFWallpaperOptions* options);
 bool ffParseWallpaperCommandOptions(FFWallpaperOptions* options, const char* key, const char* value);
 void ffDestroyWallpaperOptions(FFWallpaperOptions* options);
-void ffParseWallpaperJsonObject(yyjson_val* module);
+void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module);

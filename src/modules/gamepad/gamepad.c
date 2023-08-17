@@ -51,7 +51,7 @@ void ffPrintGamepad(FFGamepadOptions* options)
 
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
-    options->moduleName = FF_GAMEPAD_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -70,11 +70,8 @@ void ffDestroyGamepadOptions(FFGamepadOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseGamepadJsonObject(yyjson_val* module)
+void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
 {
-    FFGamepadOptions __attribute__((__cleanup__(ffDestroyGamepadOptions))) options;
-    ffInitGamepadOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -85,12 +82,10 @@ void ffParseGamepadJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintGamepad(&options);
 }

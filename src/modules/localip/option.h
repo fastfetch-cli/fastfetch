@@ -17,7 +17,7 @@ typedef enum FFLocalIpType
 
 typedef struct FFLocalIpOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFLocalIpType showType;

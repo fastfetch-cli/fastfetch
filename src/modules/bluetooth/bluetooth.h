@@ -8,4 +8,4 @@ void ffPrintBluetooth(FFBluetoothOptions* options);
 void ffInitBluetoothOptions(FFBluetoothOptions* options);
 bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key, const char* value);
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options);
-void ffParseBluetoothJsonObject(yyjson_val* module);
+void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module);

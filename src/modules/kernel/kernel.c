@@ -32,7 +32,7 @@ void ffPrintKernel(FFKernelOptions* options)
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    options->moduleName = FF_KERNEL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,11 +51,8 @@ void ffDestroyKernelOptions(FFKernelOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseKernelJsonObject(yyjson_val* module)
+void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
 {
-    FFKernelOptions __attribute__((__cleanup__(ffDestroyKernelOptions))) options;
-    ffInitKernelOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -66,12 +63,10 @@ void ffParseKernelJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintKernel(&options);
 }

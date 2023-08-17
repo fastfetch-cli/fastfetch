@@ -6,6 +6,6 @@
 
 typedef struct FFLocaleOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFLocaleOptions;

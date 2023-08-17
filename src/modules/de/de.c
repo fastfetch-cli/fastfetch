@@ -42,7 +42,7 @@ void ffPrintDE(FFDEOptions* options)
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    options->moduleName = FF_DE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -61,11 +61,8 @@ void ffDestroyDEOptions(FFDEOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDEJsonObject(yyjson_val* module)
+void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
 {
-    FFDEOptions __attribute__((__cleanup__(ffDestroyDEOptions))) options;
-    ffInitDEOptions(&options);
-
     if (module)
     {
         yyjson_val *key_, *val;
@@ -76,12 +73,10 @@ void ffParseDEJsonObject(yyjson_val* module)
             if(ffStrEqualsIgnCase(key, "type"))
                 continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
+            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
                 continue;
 
-            ffPrintError(FF_DE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
         }
     }
-
-    ffPrintDE(&options);
 }

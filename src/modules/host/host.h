@@ -8,4 +8,4 @@ void ffPrintHost(FFHostOptions* options);
 void ffInitHostOptions(FFHostOptions* options);
 bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value);
 void ffDestroyHostOptions(FFHostOptions* options);
-void ffParseHostJsonObject(yyjson_val* module);
+void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module);
