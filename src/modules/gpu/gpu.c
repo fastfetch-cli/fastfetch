@@ -168,48 +168,45 @@ void ffDestroyGPUOptions(FFGPUOptions* options)
 
 void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "temp"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "temp"))
-            {
-                options->temp = yyjson_get_bool(val);
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "forceVulkan"))
-            {
-                options->forceVulkan = yyjson_get_bool(val);
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "hideType"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "none", FF_GPU_TYPE_UNKNOWN },
-                    { "intergrated", FF_GPU_TYPE_INTEGRATED },
-                    { "discrete", FF_GPU_TYPE_DISCRETE },
-                    {},
-                });
-                if (error)
-                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
-                else
-                    options->hideType = (FFGPUType) value;
-                continue;
-            }
-
-            ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+            options->temp = yyjson_get_bool(val);
+            continue;
         }
+
+        if (ffStrEqualsIgnCase(key, "forceVulkan"))
+        {
+            options->forceVulkan = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "hideType"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "none", FF_GPU_TYPE_UNKNOWN },
+                { "intergrated", FF_GPU_TYPE_INTEGRATED },
+                { "discrete", FF_GPU_TYPE_DISCRETE },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->hideType = (FFGPUType) value;
+            continue;
+        }
+
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }

@@ -149,34 +149,31 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
 
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        #ifdef __linux__
+        if (ffStrEqualsIgnCase(key, "dir"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            #ifdef __linux__
-            if (ffStrEqualsIgnCase(key, "dir"))
-            {
-                ffStrbufSetS(&options.dir, yyjson_get_str(val));
-                continue;
-            }
-            #endif
-
-            if (ffStrEqualsIgnCase(key, "temp"))
-            {
-                options->temp = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options.dir, yyjson_get_str(val));
+            continue;
         }
+        #endif
+
+        if (ffStrEqualsIgnCase(key, "temp"))
+        {
+            options->temp = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }

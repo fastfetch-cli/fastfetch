@@ -103,43 +103,40 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
 
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "fqdn"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "fqdn"))
-            {
-                options->fqdn = yyjson_get_bool(val);
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "color"))
-            {
-                if (!yyjson_is_obj(val))
-                    continue;
-
-                yyjson_val* color = yyjson_obj_get(val, "user");
-                if (color)
-                    ffOptionParseColor(yyjson_get_str(color), &options->colorUser);
-                color = yyjson_obj_get(val, "at");
-                if (color)
-                    ffOptionParseColor(yyjson_get_str(color), &options->colorAt);
-                color = yyjson_obj_get(val, "host");
-                if (color)
-                    ffOptionParseColor(yyjson_get_str(color), &options->colorHost);
-                continue;
-            }
-
-            ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+            options->fqdn = yyjson_get_bool(val);
+            continue;
         }
+
+        if (ffStrEqualsIgnCase(key, "color"))
+        {
+            if (!yyjson_is_obj(val))
+                continue;
+
+            yyjson_val* color = yyjson_obj_get(val, "user");
+            if (color)
+                ffOptionParseColor(yyjson_get_str(color), &options->colorUser);
+            color = yyjson_obj_get(val, "at");
+            if (color)
+                ffOptionParseColor(yyjson_get_str(color), &options->colorAt);
+            color = yyjson_obj_get(val, "host");
+            if (color)
+                ffOptionParseColor(yyjson_get_str(color), &options->colorHost);
+            continue;
+        }
+
+        ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
 }

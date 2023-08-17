@@ -149,42 +149,39 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
 
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "compactType"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "compactType"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-                    { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-                    { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-                    {},
-                });
-                if (error)
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
-                else
-                    options->compactType = (FFDisplayCompactType) value;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
-            {
-                options->preciseRefreshRate = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
+                { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
+                { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->compactType = (FFDisplayCompactType) value;
+            continue;
         }
+
+        if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
+        {
+            options->preciseRefreshRate = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }

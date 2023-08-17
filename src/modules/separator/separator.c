@@ -102,23 +102,20 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
 
 void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "string"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "string"))
-            {
-                ffStrbufSetS(&options->string, yyjson_get_str(val));
-                continue;
-            }
-
-            ffPrintErrorString(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options->string, yyjson_get_str(val));
+            continue;
         }
+
+        ffPrintErrorString(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
 }

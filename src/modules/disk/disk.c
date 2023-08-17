@@ -261,62 +261,59 @@ void ffDestroyDiskOptions(FFDiskOptions* options)
 
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "folders"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "folders"))
-            {
-                ffStrbufSetS(&options->folders, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showExternal"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
-                else
-                    options->showTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showHidden"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showTypes |= FF_DISK_TYPE_HIDDEN_BIT;
-                else
-                    options->showTypes &= ~FF_DISK_TYPE_HIDDEN_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showSubvolumes"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showTypes |= FF_DISK_TYPE_SUBVOLUME_BIT;
-                else
-                    options->showTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showUnknown"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;
-                else
-                    options->showTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT;
-                continue;
-            }
-
-            ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options->folders, yyjson_get_str(val));
+            continue;
         }
+
+        if (ffStrEqualsIgnCase(key, "showExternal"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showHidden"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_HIDDEN_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_HIDDEN_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showSubvolumes"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_SUBVOLUME_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showUnknown"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT;
+            continue;
+        }
+
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }

@@ -120,20 +120,17 @@ void ffDestroyPackagesOptions(FFPackagesOptions* options)
 
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }

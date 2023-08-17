@@ -100,38 +100,35 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options)
 
 void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "location"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "location"))
-            {
-                ffStrbufSetS(&options->location, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "outputFormat"))
-            {
-                ffStrbufSetS(&options->outputFormat, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "timeout"))
-            {
-                options->timeout = (uint32_t) yyjson_get_uint(val);
-                continue;
-            }
-
-            ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options->location, yyjson_get_str(val));
+            continue;
         }
+
+        if (ffStrEqualsIgnCase(key, "outputFormat"))
+        {
+            ffStrbufSetS(&options->outputFormat, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "timeout"))
+        {
+            options->timeout = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
+        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }

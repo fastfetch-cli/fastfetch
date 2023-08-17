@@ -222,77 +222,74 @@ void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
 
 void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
 {
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "showIpv4"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "showIpv4"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showType |= FF_LOCALIP_TYPE_IPV4_BIT;
-                else
-                    options->showType &= ~FF_LOCALIP_TYPE_IPV4_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showIpv6"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
-                else
-                    options->showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showMac"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
-                else
-                    options->showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showLoop"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showType |= FF_LOCALIP_TYPE_LOOP_BIT;
-                else
-                    options->showType &= ~FF_LOCALIP_TYPE_LOOP_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "compact"))
-            {
-                if (yyjson_get_bool(val))
-                    options->showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
-                else
-                    options->showType &= ~FF_LOCALIP_TYPE_COMPACT_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "namePrefix"))
-            {
-                ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
-            {
-                options->defaultRouteOnly = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_IPV4_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_IPV4_BIT;
+            continue;
         }
+
+        if (ffStrEqualsIgnCase(key, "showIpv6"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showMac"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showLoop"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_LOOP_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_LOOP_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "compact"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_COMPACT_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        {
+            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+        {
+            options->defaultRouteOnly = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
