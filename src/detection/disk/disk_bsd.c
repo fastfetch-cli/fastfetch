@@ -3,8 +3,6 @@
 #include <sys/mount.h>
 
 #ifdef __FreeBSD__
-#include <sys/disklabel.h>
-
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
     if(
@@ -23,9 +21,6 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         disk->type = FF_DISK_TYPE_REGULAR_BIT;
 
     ffStrbufInit(&disk->name);
-    struct disklabel* lab = getdiskbyname(fs->f_mntfromname);
-    if(lab)
-        ffStrbufSetS(&disk->name, lab->d_packname);
 }
 #else
 void detectFsInfo(struct statfs* fs, FFDisk* disk);
