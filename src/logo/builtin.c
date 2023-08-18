@@ -2332,6 +2332,15 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_256 "29",
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // MOS
+    {
+        .names = {"MOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // Msys2
     {
         .names = {"Msys2"},
