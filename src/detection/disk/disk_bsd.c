@@ -3,19 +3,19 @@
 #include <sys/mount.h>
 
 #ifdef __FreeBSD__
+#include "util/stringUtils.h"
+
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
-    if(
-        ffStrbufStartsWithS(&disk->mountpoint, "/boot") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/dev") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/var") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/tmp") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/proc") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/zroot") ||
-        ffStrbufStartsWithS(&disk->mountpoint, "/compat/linux/")
-    )
+    if(ffStrbufEqualS(&disk->filesystem, "zfs"))
+    {
+        disk->type = !ffStrStartsWith(fs->f_mntfromname, "zroot/") || ffStrStartsWith(fs->f_mntfromname, "zroot/ROOT/")
+            ? FF_DISK_TYPE_REGULAR_BIT
+            : FF_DISK_TYPE_SUBVOLUME_BIT;
+    }
+    else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/"))
         disk->type = FF_DISK_TYPE_HIDDEN_BIT;
-    else if((fs->f_flags & MNT_NOSUID) || !(fs->f_flags & MNT_LOCAL))
+    else if(!(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_TYPE_REGULAR_BIT;
