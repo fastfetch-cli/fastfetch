@@ -564,7 +564,7 @@ static bool parseJsoncFile(const char* path)
     {
         if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
         {
-            fprintf(stderr, "ERROR: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
+            fprintf(stderr, "Error: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
             exit(477);
         }
         return false;
@@ -1256,7 +1256,11 @@ int main(int argc, const char** argv)
         }
     }
 
-    if(data.structure.length > 0 || !instance.state.configDoc)
+    const bool useJsonConfig = data.structure.length == 0 && instance.state.configDoc;
+
+    if(useJsonConfig)
+        ffPrintJsonConfig(true);
+    else
     {
         //If we don't have a custom structure, use the default one
         if(data.structure.length == 0)
@@ -1281,9 +1285,9 @@ int main(int argc, const char** argv)
         if (!instance.config.noBuffer) fflush(stdout);
     #endif
 
-    if (data.structure.length == 0 && instance.state.configDoc)
+    if (useJsonConfig)
     {
-        ffPrintJsonConfig();
+        ffPrintJsonConfig(false);
     }
     else
     {

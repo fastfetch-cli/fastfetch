@@ -35,6 +35,8 @@ const char* ffGetCpuUsageResult(double* result)
         if(inUseAll2 != inUseAll1)
         {
             *result = (double)(inUseAll2 - inUseAll1) / (double)(totalAll2 - totalAll1) * 100;
+            inUseAll1 = inUseAll2;
+            totalAll1 = totalAll2;
             return NULL;
         }
         else

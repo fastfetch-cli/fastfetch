@@ -11,6 +11,12 @@ static int status = -1;
 
 void ffPrepareWeather(FFWeatherOptions* options)
 {
+    if (status != -1)
+    {
+        fputs("Error: " FF_WEATHER_MODULE_NAME " can only be used once due to internal limitations\n", stderr);
+        exit(1);
+    }
+
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/");
     if (options->location.length)
         ffStrbufAppend(&path, &options->location);

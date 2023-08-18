@@ -231,7 +231,36 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* module)
     }
 }
 
-static const char* printJsonConfig(void)
+static void prepareModuleJsonObject(const char* type, yyjson_val* module)
+{
+    FFconfig* cfg = &instance.config;
+    switch (type[0])
+    {
+        case 'b': case 'B': {
+            if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME))
+                ffPrepareCPUUsage();
+            break;
+        }
+        case 'p': case 'P': {
+            if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME))
+            {
+                if (module) ffParsePublicIpJsonObject(&cfg->publicIP, module);
+                ffPreparePublicIp(&cfg->publicIP);
+            }
+            break;
+        }
+        case 'w': case 'W': {
+            if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME))
+            {
+                if (module) ffParseWeatherJsonObject(&cfg->weather, module);
+                ffPrepareWeather(&cfg->weather);
+            }
+            break;
+        }
+    }
+}
+
+static const char* printJsonConfig(bool prepare)
 {
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
@@ -248,7 +277,7 @@ static const char* printJsonConfig(void)
     yyjson_arr_foreach(modules, idx, max, item)
     {
         uint64_t ms = 0;
-        if(__builtin_expect(instance.config.stat, false))
+        if(!prepare && instance.config.stat)
             ms = ffTimeGetTick();
 
         yyjson_val* module = item;
@@ -265,10 +294,12 @@ static const char* printJsonConfig(void)
         else
             return "modules must be an array of strings or objects";
 
-        if(!parseModuleJsonObject(type, module))
+        if(prepare)
+            prepareModuleJsonObject(type, module);
+        else if(!parseModuleJsonObject(type, module))
             return "Unknown module type";
 
-        if(__builtin_expect(instance.config.stat, false))
+        if(!prepare && instance.config.stat)
         {
             char str[32];
             int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
@@ -548,9 +579,9 @@ const char* ffParseLibraryJsonConfig(void)
     return NULL;
 }
 
-void ffPrintJsonConfig(void)
+void ffPrintJsonConfig(bool prepare)
 {
-    const char* error = printJsonConfig();
+    const char* error = printJsonConfig(prepare);
     if (error)
         ffPrintErrorString("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
 }

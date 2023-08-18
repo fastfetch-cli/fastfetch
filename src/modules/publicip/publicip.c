@@ -19,6 +19,12 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 
 void ffPreparePublicIp(FFPublicIpOptions* options)
 {
+    if (status != -1)
+    {
+        fputs("Error: " FF_PUBLICIP_DISPLAY_NAME " can only be used once due to internal limitations\n", stderr);
+        exit(1);
+    }
+
     if (options->url.length == 0)
         status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/json", NULL);
     else
