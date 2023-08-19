@@ -1,14 +1,15 @@
 #pragma once
 
 #include "util/FFstrbuf.h"
-#include "3rdparty/yyjson/yyjson.h"
+
+struct yyjson_val;
 
 // Must be the first field of FFModuleOptions
 typedef struct FFModuleBaseInfo
 {
     const char* name;
     bool (*parseCommandOptions)(void* options, const char* key, const char* value);
-    void (*parseJsonObject)(void* options, yyjson_val *module);
+    void (*parseJsonObject)(void* options, struct yyjson_val *module);
     void (*printModule)(void* options);
 } FFModuleBaseInfo;
 

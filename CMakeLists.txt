@@ -69,6 +69,7 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embeded) yyjson library" OFF "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -251,7 +252,6 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/3rdparty/yyjson/yyjson.c
     src/common/bar.c
     src/common/commandoption.c
     src/common/font.c
@@ -605,9 +605,26 @@ if(NOT HAVE_WCWIDTH)
     list(APPEND LIBFASTFETCH_SRC src/3rdparty/mk_wcwidch/wcwidth.c)
 endif()
 
+if(ENABLE_SYSTEM_YYJSON)
+    find_package(yyjson)
+    if(yyjson_FOUND)
+        message(STATUS "System provided yyjson is used")
+    else()
+        message(FATAL_ERROR "ENABLE_SYSTEM_YYJSON is set but system provided yyjson is not found")
+    endif()
+else()
+    list(APPEND LIBFASTFETCH_SRC
+        src/3rdparty/yyjson/yyjson.c
+    )
+endif()
+
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+if(yyjson_FOUND)
+    target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
+    target_link_libraries(libfastfetch PRIVATE yyjson)
+endif()
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE)
 if(WIN32)

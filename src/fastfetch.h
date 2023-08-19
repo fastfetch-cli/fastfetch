@@ -8,7 +8,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "3rdparty/yyjson/yyjson.h"
+#ifdef FF_USE_SYSTEM_YYJSON
+    #include <yyjson.h>
+#else
+    #include "3rdparty/yyjson/yyjson.h"
+#endif
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
