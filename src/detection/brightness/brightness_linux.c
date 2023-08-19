@@ -139,12 +139,9 @@ const char* ffDetectBrightness(FFlist* result)
     detectWithBacklight(result);
 
     #ifdef FF_HAVE_DDCUTIL
-    if (instance.config.allowSlowOperations)
-    {
-        const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
-        if (result->length < displayServer->displays.length)
-            detectWithDdcci(result);
-    }
+    const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
+    if (result->length < displayServer->displays.length)
+        detectWithDdcci(result);
     #endif
 
     return NULL;

@@ -108,8 +108,10 @@ const char* ffDetectBrightness(FFlist* result)
 
     detectWithDisplayServices(displayServer, result);
 
-    if (instance.config.allowSlowOperations && displayServer->displays.length > result->length)
+    #ifdef __aarch64__
+    if (displayServer->displays.length > result->length)
         detectWithDdcci(result);
+    #endif
 
     return NULL;
 }

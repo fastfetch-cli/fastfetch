@@ -76,7 +76,7 @@ const char* ffDetectBrightness(FFlist* result)
     if (hasBuiltinDisplay(displayServer))
         detectWithWmi(result);
 
-    if (instance.config.allowSlowOperations && result->length < displayServer->displays.length)
+    if (result->length < displayServer->displays.length)
         detectWithDdcci(displayServer, result);
     return NULL;
 }
