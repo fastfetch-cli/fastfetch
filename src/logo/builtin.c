@@ -13,6 +13,15 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
+    // AerOS
+    {
+        .names = {"aerOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AEROS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // AIX
     {
         .names = {"aix"},
