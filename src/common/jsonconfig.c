@@ -70,165 +70,21 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline bool tryModule(const char* type, yyjson_val* module, void* options)
+static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
 {
-    FFModuleBaseInfo* baseInfo = (FFModuleBaseInfo*) options;
-    if (ffStrEqualsIgnCase(type, baseInfo->name))
+    if(!isalpha(type[0])) return false;
+
+    for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(type[0]) - 'A']; *modules; ++modules)
     {
-        if (module) baseInfo->parseJsonObject(options, module);
-        baseInfo->printModule(options);
-        return true;
+        FFModuleBaseInfo* baseInfo = *modules;
+        if (ffStrEqualsIgnCase(type, baseInfo->name))
+        {
+            if (jsonVal) baseInfo->parseJsonObject(baseInfo, jsonVal);
+            baseInfo->printModule(baseInfo);
+            return true;
+        }
     }
     return false;
-}
-
-static bool parseModuleJsonObject(const char* type, yyjson_val* module)
-{
-    FFconfig* cfg = &instance.config;
-    switch (toupper(type[0]))
-    {
-        case 'B': {
-            return
-                tryModule(type, module, &cfg->battery) ||
-                tryModule(type, module, &cfg->bios) ||
-                tryModule(type, module, &cfg->bluetooth) ||
-                tryModule(type, module, &cfg->board) ||
-                tryModule(type, module, &cfg->break_) ||
-                tryModule(type, module, &cfg->brightness) ||
-                false;
-        }
-
-        case 'C': {
-            return
-                tryModule(type, module, &cfg->chassis) ||
-                tryModule(type, module, &cfg->command) ||
-                tryModule(type, module, &cfg->colors) ||
-                tryModule(type, module, &cfg->cpu) ||
-                tryModule(type, module, &cfg->cpuUsage) ||
-                tryModule(type, module, &cfg->cursor) ||
-                tryModule(type, module, &cfg->custom) ||
-                false;
-        }
-
-        case 'D': {
-            return
-                tryModule(type, module, &cfg->dateTime) ||
-                tryModule(type, module, &cfg->de) ||
-                tryModule(type, module, &cfg->display) ||
-                tryModule(type, module, &cfg->disk) ||
-                false;
-        }
-
-        case 'F': {
-            return
-                tryModule(type, module, &cfg->font) ||
-                false;
-        }
-
-        case 'G': {
-            return
-                tryModule(type, module, &cfg->gamepad) ||
-                tryModule(type, module, &cfg->gpu) ||
-                false;
-        }
-
-        case 'H': {
-            return
-                tryModule(type, module, &cfg->host) ||
-                false;
-        }
-
-        case 'I': {
-            return
-                tryModule(type, module, &cfg->icons) ||
-                false;
-        }
-
-        case 'K': {
-            return
-                tryModule(type, module, &cfg->kernel) ||
-                false;
-        }
-
-        case 'L': {
-            return
-                tryModule(type, module, &cfg->lm) ||
-                tryModule(type, module, &cfg->locale) ||
-                tryModule(type, module, &cfg->localIP) ||
-                false;
-        }
-
-        case 'M': {
-            return
-                tryModule(type, module, &cfg->media) ||
-                tryModule(type, module, &cfg->memory) ||
-                tryModule(type, module, &cfg->monitor) ||
-                false;
-        }
-
-        case 'O': {
-            return
-                tryModule(type, module, &cfg->openCL) ||
-                tryModule(type, module, &cfg->openGL) ||
-                tryModule(type, module, &cfg->os) ||
-                false;
-        }
-
-        case 'P': {
-            return
-                tryModule(type, module, &cfg->packages) ||
-                tryModule(type, module, &cfg->player) ||
-                tryModule(type, module, &cfg->powerAdapter) ||
-                tryModule(type, module, &cfg->processes) ||
-                tryModule(type, module, &cfg->publicIP) ||
-                false;
-        }
-
-        case 'S': {
-            return
-                tryModule(type, module, &cfg->separator) ||
-                tryModule(type, module, &cfg->shell) ||
-                tryModule(type, module, &cfg->sound) ||
-                tryModule(type, module, &cfg->swap) ||
-                false;
-        }
-
-        case 'T': {
-            return
-                tryModule(type, module, &cfg->terminal) ||
-                tryModule(type, module, &cfg->terminalFont) ||
-                tryModule(type, module, &cfg->terminalSize) ||
-                tryModule(type, module, &cfg->title) ||
-                tryModule(type, module, &cfg->theme) ||
-                false;
-        }
-
-        case 'U': {
-            return
-                tryModule(type, module, &cfg->uptime) ||
-                tryModule(type, module, &cfg->users) ||
-                false;
-        }
-
-        case 'V': {
-            return
-                tryModule(type, module, &cfg->vulkan) ||
-                false;
-        }
-
-        case 'W': {
-            return
-                tryModule(type, module, &cfg->wallpaper) ||
-                tryModule(type, module, &cfg->weather) ||
-                tryModule(type, module, &cfg->wm) ||
-                tryModule(type, module, &cfg->wifi) ||
-                tryModule(type, module, &cfg->wmTheme) ||
-                false;
-        }
-
-        default:
-            return false;
-    }
 }
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module)
