@@ -554,6 +554,19 @@ static void listDataPaths(void)
     }
 }
 
+static void listModules()
+{
+    unsigned count = 0;
+    for (int i = 0; i <= 'Z' - 'A'; ++i)
+    {
+        for (FFModuleBaseInfo** modules = ffModuleInfos[i]; *modules; ++modules)
+        {
+            ++count;
+            printf("%d)%s%s\n", count, count > 9 ? " " : "  ", (*modules)->name);
+        }
+    }
+}
+
 static void parseOption(FFdata* data, const char* key, const char* value);
 
 static bool parseJsoncFile(const char* path)
@@ -856,7 +869,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         const char* subkey = key + strlen("--list");
         if(ffStrEqualsIgnCase(subkey, "-modules"))
         {
-            puts(FASTFETCH_DATATEXT_MODULES);
+            listModules();
             exit(0);
         }
         else if(ffStrEqualsIgnCase(subkey, "-presets"))

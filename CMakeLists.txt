@@ -211,7 +211,6 @@ fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config_system.txt DATATEXT_CONFIG_SYSTEM)
 fastfetch_load_text(src/data/config_user.txt DATATEXT_CONFIG_USER)
 fastfetch_load_text(src/data/config_user.jsonc DATATEXT_CONFIG_USER_JSONC)
-fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
@@ -259,6 +258,7 @@ set(LIBFASTFETCH_SRC
     src/common/init.c
     src/common/jsonconfig.c
     src/common/library.c
+    src/common/modules.c
     src/common/option.c
     src/common/parsing.c
     src/common/printing.c
