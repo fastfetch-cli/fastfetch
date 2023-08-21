@@ -126,6 +126,7 @@ typedef struct FFconfig
     FFTitleOptions title;
     FFUptimeOptions uptime;
     FFUsersOptions users;
+    FFVersionOptions version;
     FFVulkanOptions vulkan;
     FFWMOptions wm;
     FFWMThemeOptions wmTheme;

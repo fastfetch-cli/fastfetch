@@ -14,6 +14,7 @@ Features:
 * Add `--key-width` for aligning the left edge of values, supported both for global `--key-width` and specific module `--module-key-width`
 * Add `--bar-char-elapsed`, `--bar-char-total`, `--bar-width` and `--bar-border` options
 * Add CMake option `ENABLE_SYSTEM_YYJSON`, which allow building fastfetch with system-provided yyjson (for package managers)
+* Add new module `Version`, which prints fastfetch version (like `fastfetch --version`)
 
 Bugfixes:
 * Fix label detection. Use `--disk-key 'Disk ({2})'` to display it (Disk, Linux)

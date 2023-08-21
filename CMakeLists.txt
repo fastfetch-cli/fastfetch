@@ -279,6 +279,7 @@ set(LIBFASTFETCH_SRC
     src/detection/packages/packages.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
+    src/detection/version/version.c
     src/detection/vulkan/vulkan.c
     src/logo/builtin.c
     src/logo/image/im6.c
@@ -334,6 +335,7 @@ set(LIBFASTFETCH_SRC
     src/modules/title/title.c
     src/modules/uptime/uptime.c
     src/modules/users/users.c
+    src/modules/version/version.c
     src/modules/vulkan/vulkan.c
     src/modules/wallpaper/wallpaper.c
     src/modules/weather/weather.c

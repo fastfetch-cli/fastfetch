@@ -123,6 +123,7 @@ static void defaultConfig(void)
     ffInitTitleOptions(&instance.config.title);
     ffInitUptimeOptions(&instance.config.uptime);
     ffInitUsersOptions(&instance.config.users);
+    ffInitVersionOptions(&instance.config.version);
     ffInitVulkanOptions(&instance.config.vulkan);
     ffInitWMOptions(&instance.config.wm);
     ffInitWMThemeOptions(&instance.config.wmTheme);
@@ -335,6 +336,7 @@ static void destroyConfig(void)
     ffDestroyTitleOptions(&instance.config.title);
     ffDestroyUptimeOptions(&instance.config.uptime);
     ffDestroyUsersOptions(&instance.config.users);
+    ffDestroyVersionOptions(&instance.config.version);
     ffDestroyVulkanOptions(&instance.config.vulkan);
     ffDestroyWMOptions(&instance.config.wm);
     ffDestroyWMThemeOptions(&instance.config.wmTheme);

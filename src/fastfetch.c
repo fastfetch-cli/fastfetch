@@ -456,6 +456,17 @@ static inline void printCommandHelp(const char* command)
             "second with leading zero"
         );
     }
+    else if(ffStrEqualsIgnCase(command, "version-format"))
+    {
+        constructAndPrintCommandHelpFormat("version", "{1} {2}{3} (5)", 6,
+            "Project name",
+            "Version",
+            "Version tweak",
+            "Build type (debug or release)",
+            "Architecture",
+            "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "vulkan-format"))
     {
         constructAndPrintCommandHelpFormat("vulkan", "{} (driver), {} (api version)", 3,

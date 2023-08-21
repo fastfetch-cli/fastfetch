@@ -50,6 +50,7 @@
 #include "modules/title/option.h"
 #include "modules/uptime/option.h"
 #include "modules/users/option.h"
+#include "modules/version/option.h"
 #include "modules/vulkan/option.h"
 #include "modules/wallpaper/option.h"
 #include "modules/weather/option.h"

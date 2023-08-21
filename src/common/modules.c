@@ -133,6 +133,7 @@ static FFModuleBaseInfo* U[] = {
 };
 
 static FFModuleBaseInfo* V[] = {
+    (void*) &instance.config.version,
     (void*) &instance.config.vulkan,
     NULL,
 };
