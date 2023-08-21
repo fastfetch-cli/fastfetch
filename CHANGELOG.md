@@ -1,9 +1,8 @@
 # 2.0.2
 
-Fix compiling for MSYS2, no functional changes.
-
 Bugfixes:
 * Workarund [a compiler bug of GCC](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282) (Windows)
+* Fix presets not detected by file name (#529)
 
 # 2.0.1
 

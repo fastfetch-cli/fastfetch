@@ -758,7 +758,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
     FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
     if (ffPathExpandEnv(value, &absolutePath))
     {
-        bool success = isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, absolutePath.chars);
+        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
 
         if(success)
             return;
@@ -773,7 +773,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
         ffStrbufAppendS(&absolutePath, value);
 
-        bool success = isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, absolutePath.chars);
+        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
 
         if(success)
             return;
