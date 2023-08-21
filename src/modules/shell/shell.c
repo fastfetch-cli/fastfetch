@@ -18,7 +18,7 @@ void ffPrintShell(FFShellOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result->shellPrettyName, stdout);
 
         if(result->shellVersion.length > 0)
@@ -45,7 +45,7 @@ void ffPrintShell(FFShellOptions* options)
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    options->moduleName = FF_SHELL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -64,27 +64,19 @@ void ffDestroyShellOptions(FFShellOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseShellJsonObject(yyjson_val* module)
+void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
 {
-    FFShellOptions __attribute__((__cleanup__(ffDestroyShellOptions))) options;
-    ffInitShellOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_SHELL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintShell(&options);
 }

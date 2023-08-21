@@ -30,7 +30,7 @@ void ffPrintHost(FFHostOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_HOST_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
@@ -67,7 +67,7 @@ exit:
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    options->moduleName = FF_HOST_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -86,27 +86,19 @@ void ffDestroyHostOptions(FFHostOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseHostJsonObject(yyjson_val* module)
+void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 {
-    FFHostOptions __attribute__((__cleanup__(ffDestroyHostOptions))) options;
-    ffInitHostOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_HOST_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintHost(&options);
 }

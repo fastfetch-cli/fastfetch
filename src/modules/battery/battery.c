@@ -12,7 +12,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
 {
     if(instance.config.battery.moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         bool showStatus =
             !(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
@@ -26,11 +26,11 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 if(result->capacity <= 20)
-                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 10, 10, 0);
+                    ffAppendPercentBar(&str, result->capacity, 100, 100, 0);
                 else if(result->capacity <= 50)
-                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 10, 0, 10);
+                    ffAppendPercentBar(&str, result->capacity, 100, 0, 100);
                 else
-                    ffAppendPercentBar(&str, (uint8_t)result->capacity, 0, 10, 10);
+                    ffAppendPercentBar(&str, result->capacity, 0, 100, 100);
             }
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -38,7 +38,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, (uint8_t) result->capacity, 51, 21, str.length > 0);
+                ffAppendPercentNum(&str, result->capacity, 51, 21, str.length > 0);
             }
         }
 
@@ -105,7 +105,7 @@ void ffPrintBattery(FFBatteryOptions* options)
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    options->moduleName = FF_BATTERY_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
@@ -147,41 +147,33 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options)
     #endif
 }
 
-void ffParseBatteryJsonObject(yyjson_val* module)
+void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 {
-    FFBatteryOptions __attribute__((__cleanup__(ffDestroyBatteryOptions))) options;
-    ffInitBatteryOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        #ifdef __linux__
+        if (ffStrEqualsIgnCase(key, "dir"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            #ifdef __linux__
-            if (ffStrEqualsIgnCase(key, "dir"))
-            {
-                ffStrbufSetS(&options.dir, yyjson_get_str(val));
-                continue;
-            }
-            #endif
-
-            if (ffStrEqualsIgnCase(key, "temp"))
-            {
-                options.temp = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options->dir, yyjson_get_str(val));
+            continue;
         }
-    }
+        #endif
 
-    ffPrintBattery(&options);
+        if (ffStrEqualsIgnCase(key, "temp"))
+        {
+            options->temp = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url & FetchContent
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.0.0
+    VERSION 2.0.1
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -36,24 +36,6 @@ endif()
 
 include(CheckIncludeFile)
 
-include(FetchContent)
-function(ff_fetch_dep package repo tag)
-    FetchContent_Declare(
-        "${package}"
-        GIT_REPOSITORY "${repo}"
-        GIT_TAG "${tag}"
-        GIT_PROGRESS TRUE
-    )
-    FetchContent_GetProperties("${package}")
-    if(NOT ${package}_POPULATED)
-        message("-- Fetching dependency ${package}@${tag} from ${repo}")
-        FetchContent_Populate(${package})
-        add_subdirectory(${${package}_SOURCE_DIR} ${${package}_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
-endfunction()
-
-ff_fetch_dep(yyjson "https://github.com/ibireme/yyjson" "0.7.0")
-
 #####################
 # Configure options #
 #####################
@@ -87,6 +69,7 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embeded) yyjson library" OFF "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -228,7 +211,6 @@ fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/config_system.txt DATATEXT_CONFIG_SYSTEM)
 fastfetch_load_text(src/data/config_user.txt DATATEXT_CONFIG_USER)
 fastfetch_load_text(src/data/config_user.jsonc DATATEXT_CONFIG_USER_JSONC)
-fastfetch_load_text(src/data/modules.txt DATATEXT_MODULES)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
@@ -270,11 +252,13 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 
 set(LIBFASTFETCH_SRC
     src/common/bar.c
+    src/common/commandoption.c
     src/common/font.c
     src/common/format.c
     src/common/init.c
     src/common/jsonconfig.c
     src/common/library.c
+    src/common/modules.c
     src/common/option.c
     src/common/parsing.c
     src/common/printing.c
@@ -295,6 +279,7 @@ set(LIBFASTFETCH_SRC
     src/detection/packages/packages.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
+    src/detection/version/version.c
     src/detection/vulkan/vulkan.c
     src/logo/builtin.c
     src/logo/image/im6.c
@@ -350,6 +335,7 @@ set(LIBFASTFETCH_SRC
     src/modules/title/title.c
     src/modules/uptime/uptime.c
     src/modules/users/users.c
+    src/modules/version/version.c
     src/modules/vulkan/vulkan.c
     src/modules/wallpaper/wallpaper.c
     src/modules/weather/weather.c
@@ -618,12 +604,29 @@ endif()
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
-    list(APPEND LIBFASTFETCH_SRC src/util/wcwidth.c)
+    list(APPEND LIBFASTFETCH_SRC src/3rdparty/mk_wcwidch/wcwidth.c)
+endif()
+
+if(ENABLE_SYSTEM_YYJSON)
+    find_package(yyjson)
+    if(yyjson_FOUND)
+        message(STATUS "System provided yyjson is used")
+    else()
+        message(FATAL_ERROR "ENABLE_SYSTEM_YYJSON is set but system provided yyjson is not found")
+    endif()
+else()
+    list(APPEND LIBFASTFETCH_SRC
+        src/3rdparty/yyjson/yyjson.c
+    )
 endif()
 
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+if(yyjson_FOUND)
+    target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
+    target_link_libraries(libfastfetch PRIVATE yyjson)
+endif()
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE)
 if(WIN32)
@@ -847,7 +850,6 @@ target_include_directories(libfastfetch
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
-    PRIVATE yyjson
 )
 
 ######################
@@ -862,7 +864,6 @@ target_compile_definitions(fastfetch
 )
 target_link_libraries(fastfetch
     PRIVATE libfastfetch
-    PRIVATE yyjson
 )
 
 add_executable(flashfetch
@@ -873,7 +874,6 @@ target_compile_definitions(flashfetch
 )
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
-    PRIVATE yyjson
 )
 
 if(WIN32)

@@ -8,4 +8,4 @@ void ffPrintLocalIp(FFLocalIpOptions* options);
 void ffInitLocalIpOptions(FFLocalIpOptions* options);
 bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, const char* value);
 void ffDestroyLocalIpOptions(FFLocalIpOptions* options);
-void ffParseLocalIpJsonObject(yyjson_val* module);
+void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module);

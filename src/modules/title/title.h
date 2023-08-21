@@ -8,4 +8,4 @@ void ffPrintTitle(FFTitleOptions* options);
 void ffInitTitleOptions(FFTitleOptions* options);
 bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value);
 void ffDestroyTitleOptions(FFTitleOptions* options);
-void ffParseTitleJsonObject(yyjson_val* module);
+void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module);

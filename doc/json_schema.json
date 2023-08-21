@@ -17,6 +17,12 @@
             "title": "Color of the module key. Left empty to use `display.color.keys`",
             "$ref": "#/$defs/colors"
         },
+        "keyWidth": {
+            "title": "Width of the module key. Use 0 to use `display.keyWidth`",
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+        },
         "format": {
             "title": "Output format of the module",
             "type": "string"
@@ -155,6 +161,11 @@
                             "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
                             "default": false
                         },
+                        "recache": {
+                            "type": "boolean",
+                            "title": "If true, regenerate image logo cache",
+                            "default": false
+                        },
                         "chafa": {
                             "type": "object",
                             "title": "Chafa configuration. See chafa document for details",
@@ -219,6 +230,11 @@
                 "multithreading": {
                     "type": "boolean",
                     "title": "Use multiple threads to detect values",
+                    "default": true
+                },
+                "thread": {
+                    "type": "boolean",
+                    "title": "Alias of multithreading",
                     "default": true
                 },
                 "stat": {
@@ -309,6 +325,12 @@
                     "type": "boolean",
                     "default": true
                 },
+                "keyWidth": {
+                    "title": "Align the width of keys to number of characters, 0 to disable",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
                 "binaryPrefix": {
                     "type": "string",
                     "title": "Set the binary prefix to used when printing bytes",
@@ -334,6 +356,33 @@
                     "title": "Set the unit of the temperature",
                     "enum": ["CELSIUS", "C", "FAHRENHEIT", "F", "KELVIN", "K"],
                     "default": "C"
+                },
+                "bar": {
+                    "type": "object",
+                    "title": "Set the bar configuration",
+                    "properties": {
+                        "charElapsed": {
+                            "type": "string",
+                            "title": "Set the character to use in elapsed part",
+                            "default": "■"
+                        },
+                        "charTotal": {
+                            "type": "string",
+                            "title": "Set the character to use in total part",
+                            "default": "-"
+                        },
+                        "border": {
+                            "type": "boolean",
+                            "title": "Whether to show a border around the bar",
+                            "default": true
+                        },
+                        "width": {
+                            "type": "integer",
+                            "title": "Set the width of the bar, in number of characters",
+                            "minimum": 1,
+                            "default": 10
+                        }
+                    }
                 },
                 "percentType": {
                     "type": "number",
@@ -509,6 +558,7 @@
                             "theme",
                             "uptime",
                             "users",
+                            "version",
                             "vulkan",
                             "wallpaper",
                             "weather",
@@ -577,6 +627,7 @@
                                             "theme",
                                             "uptime",
                                             "users",
+                                            "version",
                                             "vulkan",
                                             "wallpaper",
                                             "wm",
@@ -589,6 +640,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -617,6 +671,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -640,6 +697,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -662,6 +722,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -716,6 +779,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -735,6 +801,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "title": "Text to print",
@@ -771,6 +840,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -814,6 +886,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -850,6 +925,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -903,6 +981,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -930,6 +1011,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -960,6 +1044,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1003,6 +1090,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -1044,6 +1134,9 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
@@ -1076,6 +1169,9 @@
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"

@@ -18,7 +18,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE)
     {
-        ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         int index = 0;
         FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
@@ -43,31 +43,32 @@ void ffPrintDisplay(FFDisplayOptions* options)
     for(uint32_t i = 0; i < dsResult->displays.length; i++)
     {
         FFDisplayResult* result = ffListGet(&dsResult->displays, i);
-        uint8_t moduleIndex = dsResult->displays.length == 1 ? 0 : (uint8_t) (i + 1);
+        uint32_t moduleIndex = dsResult->displays.length == 1 ? 0 : i + 1;
         const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "built-in" : "external";
+
+        ffStrbufClear(&key);
+        if(options->moduleArgs.key.length == 0)
+        {
+            const char* subkey = result->name.length ? result->name.chars : displayType;
+            if (subkey)
+                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, subkey);
+            else if (moduleIndex > 0)
+                ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
+            else
+                ffStrbufAppendS(&key, FF_DISPLAY_MODULE_NAME);
+        }
+        else
+        {
+            ffParseFormatString(&key, &options->moduleArgs.key, 3, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+                {FF_FORMAT_ARG_TYPE_STRING, displayType},
+            });
+        }
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffStrbufClear(&key);
-            if(options->moduleArgs.key.length == 0)
-            {
-                const char* subkey = result->name.length ? result->name.chars : displayType;
-                if (subkey)
-                    ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, subkey);
-                else if (moduleIndex > 0)
-                    ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
-                else
-                    ffStrbufAppendS(&key, FF_DISPLAY_MODULE_NAME);
-            }
-            else
-            {
-                ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
-                    {FF_FORMAT_ARG_TYPE_UINT, &i},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-                    {FF_FORMAT_ARG_TYPE_STRING, displayType},
-                });
-            }
-            ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             printf("%ix%i", result->width, result->height);
 
@@ -91,7 +92,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_DISPLAY_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_DISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_UINT, &result->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->height},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate},
@@ -108,7 +109,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    options->moduleName = FF_DISPLAY_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
@@ -146,49 +147,41 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDisplayJsonObject(yyjson_val* module)
+void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 {
-    FFDisplayOptions __attribute__((__cleanup__(ffDestroyDisplayOptions))) options;
-    ffInitDisplayOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "compactType"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "compactType"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-                    { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-                    { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-                    {},
-                });
-                if (error)
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
-                else
-                    options.compactType = (FFDisplayCompactType) value;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
-            {
-                options.preciseRefreshRate = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
+                { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
+                { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->compactType = (FFDisplayCompactType) value;
+            continue;
         }
-    }
 
-    ffPrintDisplay(&options);
+        if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
+        {
+            options->preciseRefreshRate = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

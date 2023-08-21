@@ -6,6 +6,6 @@
 
 typedef struct FFChassisOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFChassisOptions;

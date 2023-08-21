@@ -10,7 +10,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&device->name, stdout);
 
         if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
@@ -85,7 +85,7 @@ void ffPrintSound(FFSoundOptions* options)
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    options->moduleName = FF_SOUND_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
@@ -117,43 +117,35 @@ void ffDestroySoundOptions(FFSoundOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseSoundJsonObject(yyjson_val* module)
+void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
 {
-    FFSoundOptions __attribute__((__cleanup__(ffDestroySoundOptions))) options;
-    ffInitSoundOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "soundType"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "soundType"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "main", FF_SOUND_TYPE_MAIN },
-                    { "active", FF_SOUND_TYPE_ACTIVE },
-                    { "all", FF_SOUND_TYPE_ALL },
-                    {},
-                });
-                if (error)
-                    ffPrintError(FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
-                else
-                    options.soundType = (FFSoundType) value;
-                continue;
-            }
-
-            ffPrintError(FF_SOUND_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "main", FF_SOUND_TYPE_MAIN },
+                { "active", FF_SOUND_TYPE_ACTIVE },
+                { "all", FF_SOUND_TYPE_ALL },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->soundType = (FFSoundType) value;
+            continue;
         }
-    }
 
-    ffPrintSound(&options);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

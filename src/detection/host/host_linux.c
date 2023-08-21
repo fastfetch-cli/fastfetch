@@ -59,7 +59,7 @@ const char* ffDetectHost(FFHostResult* host)
                 ffStrbufAppendF(&host->productName, " - %s", wslDistroName);
             ffStrbufAppendS(&host->productFamily, "WSL");
 
-            FF_STRBUF_AUTO_DESTROY wslVer = ffStrbufCreate(); //Wide charactors
+            FF_STRBUF_AUTO_DESTROY wslVer = ffStrbufCreate(); //Wide characters
             if(!ffProcessAppendStdOut(&wslVer, (char* const[]){
                 "wsl.exe",
                 "--version",

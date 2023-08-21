@@ -43,7 +43,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     }
 
     const FFDateTimeResult* datetime = ffDetectDateTime();
-    ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+    ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
     //yyyy-MM-dd HH:mm:ss
     printf("%u-%s-%02u %s:%s:%s\n", datetime->year, datetime->monthPretty.chars, datetime->dayInMonth, datetime->hourPretty.chars, datetime->minutePretty.chars, datetime->secondPretty.chars);
@@ -51,7 +51,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    options->moduleName = FF_DATETIME_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -70,27 +70,19 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDateTimeJsonObject(yyjson_val* module)
+void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 {
-    FFDateTimeOptions __attribute__((__cleanup__(ffDestroyDateTimeOptions))) options;
-    ffInitDateTimeOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintDateTime(&options);
 }

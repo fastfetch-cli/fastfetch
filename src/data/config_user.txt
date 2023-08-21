@@ -376,6 +376,7 @@
 #--player-key Media Player
 #--media-key Media
 #--datetime-key Date Time
+#--version-key Version
 #--vulkan-key Vulkan
 #--opengl-key OpenGL
 #--opencl-key OpenCL
@@ -426,6 +427,7 @@
 #--player-format
 #--media-format
 #--datetime-format
+#--version-format
 #--vulkan-format
 #--opengl-format
 #--opencl-format
@@ -473,6 +475,7 @@
 #--player-key-color
 #--media-key-color
 #--datetime-key-color
+#--version-key-color
 #--vulkan-key-color
 #--opengl-key-color
 #--opencl-key-color

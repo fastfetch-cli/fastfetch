@@ -13,7 +13,7 @@ typedef enum FFSoundType
 
 typedef struct FFSoundOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFSoundType soundType;

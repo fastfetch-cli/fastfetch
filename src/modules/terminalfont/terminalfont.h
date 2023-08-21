@@ -8,4 +8,4 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options);
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options);
 bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const char* key, const char* value);
 void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options);
-void ffParseTerminalFontJsonObject(yyjson_val* module);
+void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module);

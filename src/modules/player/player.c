@@ -59,7 +59,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&playerPretty, stdout);
     }
     else
@@ -75,7 +75,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    options->moduleName = FF_PLAYER_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -94,27 +94,19 @@ void ffDestroyPlayerOptions(FFPlayerOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePlayerJsonObject(yyjson_val* module)
+void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
 {
-    FFPlayerOptions __attribute__((__cleanup__(ffDestroyPlayerOptions))) options;
-    ffInitPlayerOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintPlayer(&options);
 }

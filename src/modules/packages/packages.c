@@ -21,7 +21,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         #define FF_PRINT_PACKAGE_NAME(var, name) \
             if(counts.var > 0) \
@@ -99,7 +99,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    options->moduleName = FF_PACKAGES_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -118,27 +118,19 @@ void ffDestroyPackagesOptions(FFPackagesOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParsePackagesJsonObject(yyjson_val* module)
+void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
 {
-    FFPackagesOptions __attribute__((__cleanup__(ffDestroyPackagesOptions))) options;
-    ffInitPackagesOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintPackages(&options);
 }

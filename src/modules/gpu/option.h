@@ -13,7 +13,7 @@ typedef enum FFGPUType
 
 typedef struct FFGPUOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFGPUType hideType;

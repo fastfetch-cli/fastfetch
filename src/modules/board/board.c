@@ -28,7 +28,7 @@ void ffPrintBoard(FFBoardOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.name, stdout);
         if (result.version.length)
             printf(" (%s)", result.version.chars);
@@ -51,7 +51,7 @@ exit:
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    options->moduleName = FF_BOARD_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -70,27 +70,19 @@ void ffDestroyBoardOptions(FFBoardOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBoardJsonObject(yyjson_val* module)
+void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
 {
-    FFBoardOptions __attribute__((__cleanup__(ffDestroyBoardOptions))) options;
-    ffInitBoardOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_BOARD_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintBoard(&options);
 }

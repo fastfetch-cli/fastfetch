@@ -1,9 +1,11 @@
 #include "fastfetch.h"
+#include "common/commandoption.h"
 #include "common/printing.h"
 #include "common/parsing.h"
 #include "common/io/io.h"
 #include "common/time.h"
 #include "common/jsonconfig.h"
+#include "detection/version/version.h"
 #include "util/stringUtils.h"
 #include "logo/logo.h"
 #include "fastfetch_datatext.h"
@@ -455,6 +457,17 @@ static inline void printCommandHelp(const char* command)
             "second with leading zero"
         );
     }
+    else if(ffStrEqualsIgnCase(command, "version-format"))
+    {
+        constructAndPrintCommandHelpFormat("version", "{1} {2}{3} (5)", 6,
+            "Project name",
+            "Version",
+            "Version tweak",
+            "Build type (debug or release)",
+            "Architecture",
+            "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "vulkan-format"))
     {
         constructAndPrintCommandHelpFormat("vulkan", "{} (driver), {} (api version)", 3,
@@ -553,6 +566,19 @@ static void listDataPaths(void)
     }
 }
 
+static void listModules()
+{
+    unsigned count = 0;
+    for (int i = 0; i <= 'Z' - 'A'; ++i)
+    {
+        for (FFModuleBaseInfo** modules = ffModuleInfos[i]; *modules; ++modules)
+        {
+            ++count;
+            printf("%d)%s%s\n", count, count > 9 ? " " : "  ", (*modules)->name);
+        }
+    }
+}
+
 static void parseOption(FFdata* data, const char* key, const char* value);
 
 static bool parseJsoncFile(const char* path)
@@ -563,7 +589,7 @@ static bool parseJsoncFile(const char* path)
     {
         if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
         {
-            fprintf(stderr, "ERROR: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
+            fprintf(stderr, "Error: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
             exit(477);
         }
         return false;
@@ -584,6 +610,7 @@ static bool parseConfigFile(FFdata* data, const char* path)
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
+    FF_STRBUF_AUTO_DESTROY unescaped = ffStrbufCreate();
 
     while ((read = getline(&line, &len, file)) != -1)
     {
@@ -628,7 +655,42 @@ static bool parseConfigFile(FFdata* data, const char* path)
             --lineEnd;
         }
 
-        parseOption(data, lineStart, valueStart);
+        if (strchr(valueStart, '\\'))
+        {
+            // Unescape all `\x`s
+            const char* value = valueStart;
+            while(*value != '\0')
+            {
+                if(*value != '\\')
+                {
+                    ffStrbufAppendC(&unescaped, *value);
+                    ++value;
+                    continue;
+                }
+
+                ++value;
+
+                switch(*value)
+                {
+                    case 'n': ffStrbufAppendC(&unescaped, '\n'); break;
+                    case 't': ffStrbufAppendC(&unescaped, '\t'); break;
+                    case 'e': ffStrbufAppendC(&unescaped, '\e'); break;
+                    case '\\': ffStrbufAppendC(&unescaped, '\\'); break;
+                    default:
+                        ffStrbufAppendC(&unescaped, '\\');
+                        ffStrbufAppendC(&unescaped, *value);
+                        break;
+                }
+
+                ++value;
+            }
+            parseOption(data, lineStart, unescaped.chars);
+            ffStrbufClear(&unescaped);
+        }
+        else
+        {
+            parseOption(data, lineStart, valueStart);
+        }
     }
 
     if(line != NULL)
@@ -733,6 +795,13 @@ static inline void optionCheckString(const char* key, const char* value, FFstrbu
     ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
 }
 
+static void printVersion()
+{
+    FFVersionResult result = {};
+    ffDetectVersion(&result);
+    printf("%s %s%s%s (%s)\n", result.projectName, result.version, result.versionTweak, result.debugMode ? "-debug" : "", result.architecture);
+}
+
 static void parseOption(FFdata* data, const char* key, const char* value)
 {
     ///////////////////////
@@ -746,37 +815,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     }
     else if(ffStrEqualsIgnCase(key, "-v") || ffStrEqualsIgnCase(key, "--version"))
     {
-        #ifndef NDEBUG
-            #define FF_BUILD_TYPE "-debug"
-        #else
-            #define FF_BUILD_TYPE
-        #endif
-
-        #if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64)
-            #define FF_ARCHITECTURE "x86_64"
-        #elif defined(__i386__) || defined(__i386) || defined(__i486__) || defined(__i486) || defined(__i586__) || defined(__i586) || defined(__i686__) || defined(__i686)
-            #define FF_ARCHITECTURE "i386"
-        #elif defined(__aarch64__)
-            #define FF_ARCHITECTURE "aarch64"
-        #elif defined(__arm__)
-            #define FF_ARCHITECTURE "arm"
-        #elif defined(__mips__)
-            #define FF_ARCHITECTURE "mips"
-        #elif defined(__powerpc__) || defined(__powerpc)
-            #define FF_ARCHITECTURE "powerpc"
-        #elif defined(__riscv__) || defined(__riscv)
-            #define FF_ARCHITECTURE "riscv"
-        #elif defined(__s390x__)
-            #define FF_ARCHITECTURE "s390x"
-        #else
-            #define FF_ARCHITECTURE "unknown"
-        #endif
-
-        puts("fastfetch " FASTFETCH_PROJECT_VERSION FASTFETCH_PROJECT_VERSION_TWEAK FF_BUILD_TYPE " (" FF_ARCHITECTURE ")");
-
-        #undef FF_ARCHITECTURE
-        #undef FF_BUILD_TYPE
-
+        printVersion();
         exit(0);
     }
     else if(ffStrEqualsIgnCase(key, "--version-raw"))
@@ -815,7 +854,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         const char* subkey = key + strlen("--list");
         if(ffStrEqualsIgnCase(subkey, "-modules"))
         {
-            puts(FASTFETCH_DATATEXT_MODULES);
+            listModules();
             exit(0);
         }
         else if(ffStrEqualsIgnCase(subkey, "-presets"))
@@ -893,8 +932,6 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //General options//
     ///////////////////
 
-    else if(ffStrEqualsIgnCase(key, "-r") || ffStrEqualsIgnCase(key, "--recache"))
-        instance.config.recache = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--load-config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
@@ -951,24 +988,32 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffOptionParseString(key, value, &data->structure);
     else if(ffStrEqualsIgnCase(key, "--separator"))
         ffOptionParseString(key, value, &instance.config.keyValueSeparator);
-    else if(ffStrEqualsIgnCase(key, "--color-keys"))
+    else if(ffStrStartsWith(key, "--color"))
     {
-        optionCheckString(key, value, &instance.config.colorKeys);
-        ffOptionParseColor(value, &instance.config.colorKeys);
+        const char* subkey = key + strlen("--color");
+        if(*subkey == '\0')
+        {
+            optionCheckString(key, value, &instance.config.colorKeys);
+            ffOptionParseColor(value, &instance.config.colorKeys);
+            ffStrbufSet(&instance.config.colorTitle, &instance.config.colorKeys);
+        }
+        else if(ffStrEqualsIgnCase(subkey, "-keys"))
+        {
+            optionCheckString(key, value, &instance.config.colorKeys);
+            ffOptionParseColor(value, &instance.config.colorKeys);
+        }
+        else if(ffStrEqualsIgnCase(key, "-title"))
+        {
+            optionCheckString(key, value, &instance.config.colorTitle);
+            ffOptionParseColor(value, &instance.config.colorTitle);
+        }
+        else
+            goto error;
     }
-    else if(ffStrEqualsIgnCase(key, "--color-title"))
-    {
-        optionCheckString(key, value, &instance.config.colorTitle);
-        ffOptionParseColor(value, &instance.config.colorTitle);
-    }
+    else if(ffStrEqualsIgnCase(key, "--key-width"))
+        instance.config.keyWidth = ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--bright-color"))
         instance.config.brightColor = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--color"))
-    {
-        optionCheckString(key, value, &instance.config.colorKeys);
-        ffOptionParseColor(value, &instance.config.colorKeys);
-        ffStrbufSet(&instance.config.colorTitle, &instance.config.colorKeys);
-    }
     else if(ffStrEqualsIgnCase(key, "--binary-prefix"))
     {
         instance.config.binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
@@ -1011,64 +1056,20 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         instance.config.percentType = ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         instance.config.noBuffer = ffOptionParseBoolean(value);
-
-    ///////////////////////
-    //Module args options//
-    ///////////////////////
-
-    else if(ffParseOSCommandOptions(&instance.config.os, key, value)) {}
-    else if(ffParseHostCommandOptions(&instance.config.host, key, value)) {}
-    else if(ffParseOSCommandOptions(&instance.config.os, key, value)) {}
-    else if(ffParseBiosCommandOptions(&instance.config.bios, key, value)) {}
-    else if(ffParseBoardCommandOptions(&instance.config.board, key, value)) {}
-    else if(ffParseChassisCommandOptions(&instance.config.chassis, key, value)) {}
-    else if(ffParseCommandCommandOptions(&instance.config.command, key, value)) {}
-    else if(ffParseCustomCommandOptions(&instance.config.custom, key, value)) {}
-    else if(ffParseKernelCommandOptions(&instance.config.kernel, key, value)) {}
-    else if(ffParseUptimeCommandOptions(&instance.config.uptime, key, value)) {}
-    else if(ffParseProcessesCommandOptions(&instance.config.processes, key, value)) {}
-    else if(ffParsePackagesCommandOptions(&instance.config.packages, key, value)) {}
-    else if(ffParseShellCommandOptions(&instance.config.shell, key, value)) {}
-    else if(ffParseDisplayCommandOptions(&instance.config.display, key, value)) {}
-    else if(ffParseBrightnessCommandOptions(&instance.config.brightness, key, value)) {}
-    else if(ffParseMonitorCommandOptions(&instance.config.nativeResolution, key, value)) {}
-    else if(ffParseDECommandOptions(&instance.config.de, key, value)) {}
-    else if(ffParseWifiCommandOptions(&instance.config.wifi, key, value)) {}
-    else if(ffParseWMCommandOptions(&instance.config.wm, key, value)) {}
-    else if(ffParseWMThemeCommandOptions(&instance.config.wmTheme, key, value)) {}
-    else if(ffParseTitleCommandOptions(&instance.config.title, key, value)) {}
-    else if(ffParseThemeCommandOptions(&instance.config.theme, key, value)) {}
-    else if(ffParseIconsCommandOptions(&instance.config.icons, key, value)) {}
-    else if(ffParseWallpaperCommandOptions(&instance.config.wallpaper, key, value)) {}
-    else if(ffParseFontCommandOptions(&instance.config.font, key, value)) {}
-    else if(ffParseCursorCommandOptions(&instance.config.cursor, key, value)) {}
-    else if(ffParseTerminalCommandOptions(&instance.config.terminal, key, value)) {}
-    else if(ffParseTerminalFontCommandOptions(&instance.config.terminalFont, key, value)) {}
-    else if(ffParseTerminalSizeCommandOptions(&instance.config.terminalSize, key, value)) {}
-    else if(ffParseCPUCommandOptions(&instance.config.cpu, key, value)) {}
-    else if(ffParseCPUUsageCommandOptions(&instance.config.cpuUsage, key, value)) {}
-    else if(ffParseGPUCommandOptions(&instance.config.gpu, key, value)) {}
-    else if(ffParseMemoryCommandOptions(&instance.config.memory, key, value)) {}
-    else if(ffParseSwapCommandOptions(&instance.config.swap, key, value)) {}
-    else if(ffParseDiskCommandOptions(&instance.config.disk, key, value)) {}
-    else if(ffParseBatteryCommandOptions(&instance.config.battery, key, value)) {}
-    else if(ffParsePowerAdapterCommandOptions(&instance.config.powerAdapter, key, value)) {}
-    else if(ffParseLocaleCommandOptions(&instance.config.locale, key, value)) {}
-    else if(ffParseLocalIpCommandOptions(&instance.config.localIP, key, value)) {}
-    else if(ffParsePublicIpCommandOptions(&instance.config.publicIP, key, value)) {}
-    else if(ffParseWeatherCommandOptions(&instance.config.weather, key, value)) {}
-    else if(ffParsePlayerCommandOptions(&instance.config.player, key, value)) {}
-    else if(ffParseMediaCommandOptions(&instance.config.media, key, value)) {}
-    else if(ffParseDateTimeCommandOptions(&instance.config.dateTime, key, value)) {}
-    else if(ffParseVulkanCommandOptions(&instance.config.vulkan, key, value)) {}
-    else if(ffParseOpenGLCommandOptions(&instance.config.openGL, key, value)) {}
-    else if(ffParseOpenCLCommandOptions(&instance.config.openCL, key, value)) {}
-    else if(ffParseUsersCommandOptions(&instance.config.users, key, value)) {}
-    else if(ffParseBluetoothCommandOptions(&instance.config.bluetooth, key, value)) {}
-    else if(ffParseSeparatorCommandOptions(&instance.config.separator, key, value)) {}
-    else if(ffParseSoundCommandOptions(&instance.config.sound, key, value)) {}
-    else if(ffParseGamepadCommandOptions(&instance.config.gamepad, key, value)) {}
-    else if(ffParseColorsCommandOptions(&instance.config.colors, key, value)) {}
+    else if(ffStrStartsWithIgnCase(key, "--bar"))
+    {
+        const char* subkey = key + strlen("--bar");
+        if(ffStrEqualsIgnCase(subkey, "-char-elapsed"))
+            ffOptionParseString(key, value, &instance.config.barCharElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "-char-total"))
+            ffOptionParseString(key, value, &instance.config.barCharTotal);
+        else if(ffStrEqualsIgnCase(subkey, "-width"))
+            instance.config.barWidth = (uint8_t) ffOptionParseUInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "-border"))
+            instance.config.barBorder = ffOptionParseBoolean(value);
+        else
+            goto error;
+    }
 
     ///////////////////
     //Library options//
@@ -1129,6 +1130,12 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             goto error;
     }
 
+    ///////////////////////
+    //Module args options//
+    ///////////////////////
+
+    else if(ffParseModuleOptions(key, value)) {}
+
     //////////////////
     //Unknown option//
     //////////////////
@@ -1175,6 +1182,13 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
 
     for(int i = 1; i < argc; i++)
     {
+        const char* key = argv[i];
+        if(*key != '-')
+        {
+            fprintf(stderr, "Error: invalid option: %s. An option must start with `-`\n", key);
+            exit(400);
+        }
+
         if(i == argc - 1 || (
             *argv[i + 1] == '-' &&
             strcasecmp(argv[i], "--separator-string") != 0 // Separator string can start with a -
@@ -1206,152 +1220,8 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
         }
     }
 
-    switch (toupper(line[0]))
-    {
-        case 'B':
-            if(ffStrEqualsIgnCase(line, FF_BATTERY_MODULE_NAME))
-                return ffPrintBattery(&instance.config.battery);
-            if(ffStrEqualsIgnCase(line, FF_BIOS_MODULE_NAME))
-                return ffPrintBios(&instance.config.bios);
-            if(ffStrEqualsIgnCase(line, FF_BLUETOOTH_MODULE_NAME))
-                return ffPrintBluetooth(&instance.config.bluetooth);
-            if(ffStrEqualsIgnCase(line, FF_BOARD_MODULE_NAME))
-                return ffPrintBoard(&instance.config.board);
-            if(ffStrEqualsIgnCase(line, FF_BREAK_MODULE_NAME))
-                return ffPrintBreak();
-            if(ffStrEqualsIgnCase(line, FF_BRIGHTNESS_MODULE_NAME))
-                return ffPrintBrightness(&instance.config.brightness);
-            break;
-        case 'C':
-            if(ffStrEqualsIgnCase(line, FF_CHASSIS_MODULE_NAME))
-                return ffPrintChassis(&instance.config.chassis);
-            if(ffStrEqualsIgnCase(line, FF_COMMAND_MODULE_NAME))
-                return ffPrintCommand(&instance.config.command);
-            if(ffStrEqualsIgnCase(line, FF_CPU_MODULE_NAME))
-                return ffPrintCPU(&instance.config.cpu);
-            if(ffStrEqualsIgnCase(line, FF_CPUUSAGE_MODULE_NAME))
-                return ffPrintCPUUsage(&instance.config.cpuUsage);
-            if(ffStrEqualsIgnCase(line, FF_COLORS_MODULE_NAME))
-                return ffPrintColors(&instance.config.colors);
-            if(ffStrEqualsIgnCase(line, FF_CURSOR_MODULE_NAME))
-                return ffPrintCursor(&instance.config.cursor);
-            if(ffStrEqualsIgnCase(line, FF_CUSTOM_MODULE_NAME))
-                return ffPrintCustom(&instance.config.custom);
-            break;
-        case 'D':
-            if(ffStrEqualsIgnCase(line, FF_DATETIME_MODULE_NAME))
-                return ffPrintDateTime(&instance.config.dateTime);
-            if(ffStrEqualsIgnCase(line, FF_DE_MODULE_NAME))
-                return ffPrintDE(&instance.config.de);
-            if(ffStrEqualsIgnCase(line, FF_DISPLAY_MODULE_NAME))
-                return ffPrintDisplay(&instance.config.display);
-            if(ffStrEqualsIgnCase(line, FF_DISK_MODULE_NAME))
-                return ffPrintDisk(&instance.config.disk);
-            break;
-        case 'F':
-            if(ffStrEqualsIgnCase(line, FF_FONT_MODULE_NAME))
-                return ffPrintFont(&instance.config.font);
-            break;
-        case 'G':
-            if(ffStrEqualsIgnCase(line, FF_GAMEPAD_MODULE_NAME))
-                return ffPrintGamepad(&instance.config.gamepad);
-            if(ffStrEqualsIgnCase(line, FF_GPU_MODULE_NAME))
-                return ffPrintGPU(&instance.config.gpu);
-            break;
-        case 'H':
-            if(ffStrEqualsIgnCase(line, FF_HOST_MODULE_NAME))
-                return ffPrintHost(&instance.config.host);
-            break;
-        case 'I':
-            if(ffStrEqualsIgnCase(line, FF_ICONS_MODULE_NAME))
-                return ffPrintIcons(&instance.config.icons);
-            break;
-        case 'K':
-            if(ffStrEqualsIgnCase(line, FF_KERNEL_MODULE_NAME))
-                return ffPrintKernel(&instance.config.kernel);
-            break;
-        case 'L':
-            if(ffStrEqualsIgnCase(line, FF_LM_MODULE_NAME))
-                return ffPrintLM(&instance.config.lm);
-            if(ffStrEqualsIgnCase(line, FF_LOCALE_MODULE_NAME))
-                return ffPrintLocale(&instance.config.locale);
-            if(ffStrEqualsIgnCase(line, FF_LOCALIP_MODULE_NAME))
-                return ffPrintLocalIp(&instance.config.localIP);
-            break;
-        case 'M':
-            if(ffStrEqualsIgnCase(line, FF_MEDIA_MODULE_NAME))
-                return ffPrintMedia(&instance.config.media);
-            if(ffStrEqualsIgnCase(line, FF_MEMORY_MODULE_NAME))
-                return ffPrintMemory(&instance.config.memory);
-            if(ffStrEqualsIgnCase(line, FF_MONITOR_MODULE_NAME))
-                return ffPrintMonitor(&instance.config.nativeResolution);
-            break;
-        case 'O':
-            if(ffStrEqualsIgnCase(line, FF_OPENCL_MODULE_NAME))
-                return ffPrintOpenCL(&instance.config.openCL);
-            if(ffStrEqualsIgnCase(line, FF_OPENGL_MODULE_NAME))
-                return ffPrintOpenGL(&instance.config.openGL);
-            if(ffStrEqualsIgnCase(line, FF_OS_MODULE_NAME))
-                return ffPrintOS(&instance.config.os);
-            break;
-        case 'P':
-            if(ffStrEqualsIgnCase(line, FF_PACKAGES_MODULE_NAME))
-                return ffPrintPackages(&instance.config.packages);
-            if(ffStrEqualsIgnCase(line, FF_PLAYER_MODULE_NAME))
-                return ffPrintPlayer(&instance.config.player);
-            if(ffStrEqualsIgnCase(line, FF_POWERADAPTER_MODULE_NAME))
-                return ffPrintPowerAdapter(&instance.config.powerAdapter);
-            if(ffStrEqualsIgnCase(line, FF_PROCESSES_MODULE_NAME))
-                return ffPrintProcesses(&instance.config.processes);
-            if(ffStrEqualsIgnCase(line, FF_PUBLICIP_MODULE_NAME))
-                return ffPrintPublicIp(&instance.config.publicIP);
-            break;
-        case 'S':
-            if(ffStrEqualsIgnCase(line, FF_SEPARATOR_MODULE_NAME))
-                return ffPrintSeparator(&instance.config.separator);
-            if(ffStrEqualsIgnCase(line, FF_SHELL_MODULE_NAME))
-                return ffPrintShell(&instance.config.shell);
-            if(ffStrEqualsIgnCase(line, FF_SOUND_MODULE_NAME))
-                return ffPrintSound(&instance.config.sound);
-            if(ffStrEqualsIgnCase(line, FF_SWAP_MODULE_NAME))
-                return ffPrintSwap(&instance.config.swap);
-            break;
-        case 'T':
-            if(ffStrEqualsIgnCase(line, FF_TERMINAL_MODULE_NAME))
-                return ffPrintTerminal(&instance.config.terminal);
-            if(ffStrEqualsIgnCase(line, FF_TERMINALFONT_MODULE_NAME))
-                return ffPrintTerminalFont(&instance.config.terminalFont);
-            if(ffStrEqualsIgnCase(line, FF_TERMINALSIZE_MODULE_NAME))
-                return ffPrintTerminalSize(&instance.config.terminalSize);
-            if(ffStrEqualsIgnCase(line, FF_TITLE_MODULE_NAME))
-                return ffPrintTitle(&instance.config.title);
-            if(ffStrEqualsIgnCase(line, FF_THEME_MODULE_NAME))
-                return ffPrintTheme(&instance.config.theme);
-            break;
-        case 'U':
-            if(ffStrEqualsIgnCase(line, FF_UPTIME_MODULE_NAME))
-                return ffPrintUptime(&instance.config.uptime);
-            if(ffStrEqualsIgnCase(line, FF_USERS_MODULE_NAME))
-                return ffPrintUsers(&instance.config.users);
-            break;
-        case 'V':
-            if(ffStrEqualsIgnCase(line, FF_VULKAN_MODULE_NAME))
-                return ffPrintVulkan(&instance.config.vulkan);
-            break;
-        case 'W':
-            if(ffStrEqualsIgnCase(line, FF_WALLPAPER_MODULE_NAME))
-                return ffPrintWallpaper(&instance.config.wallpaper);
-            if(ffStrEqualsIgnCase(line, FF_WEATHER_MODULE_NAME))
-                return ffPrintWeather(&instance.config.weather);
-            if(ffStrEqualsIgnCase(line, FF_WIFI_MODULE_NAME))
-                return ffPrintWifi(&instance.config.wifi);
-            if(ffStrEqualsIgnCase(line, FF_WM_MODULE_NAME))
-                return ffPrintWM(&instance.config.wm);
-            if(ffStrEqualsIgnCase(line, FF_WMTHEME_MODULE_NAME))
-                return ffPrintWMTheme(&instance.config.wmTheme);
-            break;
-    }
-    ffPrintErrorString(line, 0, NULL, NULL, "<no implementation provided>");
+    if(!ffParseModuleCommand(line))
+        ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
 int main(int argc, const char** argv)
@@ -1384,7 +1254,11 @@ int main(int argc, const char** argv)
         }
     }
 
-    if(data.structure.length > 0 || !instance.state.configDoc)
+    const bool useJsonConfig = data.structure.length == 0 && instance.state.configDoc;
+
+    if(useJsonConfig)
+        ffPrintJsonConfig(true);
+    else
     {
         //If we don't have a custom structure, use the default one
         if(data.structure.length == 0)
@@ -1409,9 +1283,9 @@ int main(int argc, const char** argv)
         if (!instance.config.noBuffer) fflush(stdout);
     #endif
 
-    if (data.structure.length == 0 && instance.state.configDoc)
+    if (useJsonConfig)
     {
-        ffPrintJsonConfig();
+        ffPrintJsonConfig(false);
     }
     else
     {

@@ -8,4 +8,4 @@ void ffPrintUptime(FFUptimeOptions* options);
 void ffInitUptimeOptions(FFUptimeOptions* options);
 bool ffParseUptimeCommandOptions(FFUptimeOptions* options, const char* key, const char* value);
 void ffDestroyUptimeOptions(FFUptimeOptions* options);
-void ffParseUptimeJsonObject(yyjson_val* module);
+void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module);

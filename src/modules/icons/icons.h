@@ -8,4 +8,4 @@ void ffPrintIcons(FFIconsOptions* options);
 void ffInitIconsOptions(FFIconsOptions* options);
 bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const char* value);
 void ffDestroyIconsOptions(FFIconsOptions* options);
-void ffParseIconsJsonObject(yyjson_val* module);
+void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module);

@@ -25,7 +25,7 @@ void ffPrintUptime(FFUptimeOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if(days == 0 && hours == 0 && minutes == 0)
         {
@@ -81,7 +81,7 @@ void ffPrintUptime(FFUptimeOptions* options)
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    options->moduleName = FF_UPTIME_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -100,27 +100,19 @@ void ffDestroyUptimeOptions(FFUptimeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseUptimeJsonObject(yyjson_val* module)
+void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
 {
-    FFUptimeOptions __attribute__((__cleanup__(ffDestroyUptimeOptions))) options;
-    ffInitUptimeOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintUptime(&options);
 }

@@ -19,7 +19,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&locale, stdout);
     }
     else
@@ -32,7 +32,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    options->moduleName = FF_LOCALE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,27 +51,19 @@ void ffDestroyLocaleOptions(FFLocaleOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseLocaleJsonObject(yyjson_val* module)
+void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
 {
-    FFLocaleOptions __attribute__((__cleanup__(ffDestroyLocaleOptions))) options;
-    ffInitLocaleOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintLocale(&options);
 }

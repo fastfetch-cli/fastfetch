@@ -29,7 +29,7 @@ void ffPrintChassis(FFChassisOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.type, stdout);
         if (result.version.length)
             printf(" (%s)", result.version.chars);
@@ -52,7 +52,7 @@ exit:
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    options->moduleName = FF_CHASSIS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -71,27 +71,19 @@ void ffDestroyChassisOptions(FFChassisOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseChassisJsonObject(yyjson_val* module)
+void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
 {
-    FFChassisOptions __attribute__((__cleanup__(ffDestroyChassisOptions))) options;
-    ffInitChassisOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintChassis(&options);
 }

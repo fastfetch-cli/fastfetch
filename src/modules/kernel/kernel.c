@@ -9,7 +9,7 @@ void ffPrintKernel(FFKernelOptions* options)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&instance.state.platform.systemRelease, stdout);
 
         #ifdef _WIN32
@@ -32,7 +32,7 @@ void ffPrintKernel(FFKernelOptions* options)
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    options->moduleName = FF_KERNEL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,27 +51,19 @@ void ffDestroyKernelOptions(FFKernelOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseKernelJsonObject(yyjson_val* module)
+void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
 {
-    FFKernelOptions __attribute__((__cleanup__(ffDestroyKernelOptions))) options;
-    ffInitKernelOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintKernel(&options);
 }

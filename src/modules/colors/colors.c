@@ -57,7 +57,7 @@ void ffPrintColors(FFColorsOptions* options)
 
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    options->moduleName = FF_COLORS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors);
     options->symbol = FF_COLORS_SYMBOL_BLOCK;
     options->paddingLeft = 0;
 }
@@ -94,49 +94,41 @@ void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
 {
 }
 
-void ffParseColorsJsonObject(yyjson_val* module)
+void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 {
-    FFColorsOptions __attribute__((__cleanup__(ffDestroyColorsOptions))) options;
-    ffInitColorsOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "symbol"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "symbol"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "block", FF_COLORS_SYMBOL_BLOCK },
-                    { "circle", FF_COLORS_SYMBOL_CIRCLE },
-                    { "diamond", FF_COLORS_SYMBOL_DIAMOND },
-                    { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
-                    { "square", FF_COLORS_SYMBOL_SQUARE },
-                    { "star", FF_COLORS_SYMBOL_STAR },
-                    {},
-                });
-                if (error)
-                    ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Invalid %s value: %s", key, error);
-                else
-                    options.symbol = (FFColorsSymbol) value;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "paddingLeft"))
-            {
-                options.paddingLeft = (uint32_t) yyjson_get_uint(val);
-                continue;
-            }
-
-            ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, NULL, "Unknown JSON key %s", key);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "block", FF_COLORS_SYMBOL_BLOCK },
+                { "circle", FF_COLORS_SYMBOL_CIRCLE },
+                { "diamond", FF_COLORS_SYMBOL_DIAMOND },
+                { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
+                { "square", FF_COLORS_SYMBOL_SQUARE },
+                { "star", FF_COLORS_SYMBOL_STAR },
+                {},
+            });
+            if (error)
+                ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
+            else
+                options->symbol = (FFColorsSymbol) value;
+            continue;
         }
-    }
 
-    ffPrintColors(&options);
+        if (ffStrEqualsIgnCase(key, "paddingLeft"))
+        {
+            options->paddingLeft = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
+        ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+    }
 }

@@ -10,7 +10,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothDevice* de
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&device->name, stdout);
 
         if(device->battery > 0)
@@ -75,7 +75,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)
 {
-    options->moduleName = FF_BLUETOOTH_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->showDisconnected = false;
 }
@@ -101,33 +101,25 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBluetoothJsonObject(yyjson_val* module)
+void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
 {
-    FFBluetoothOptions __attribute__((__cleanup__(ffDestroyBluetoothOptions))) options;
-    ffInitBluetoothOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "showDisconnected"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "showDisconnected"))
-            {
-                options.showDisconnected = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            options->showDisconnected = yyjson_get_bool(val);
+            continue;
         }
-    }
 
-    ffPrintBluetooth(&options);
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

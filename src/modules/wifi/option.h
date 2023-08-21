@@ -6,6 +6,6 @@
 
 typedef struct FFWifiOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFWifiOptions;

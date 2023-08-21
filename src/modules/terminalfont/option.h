@@ -6,6 +6,6 @@
 
 typedef struct FFTerminalFontOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFTerminalFontOptions;

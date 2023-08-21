@@ -6,6 +6,6 @@
 
 typedef struct FFPowerAdapterOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFPowerAdapterOptions;

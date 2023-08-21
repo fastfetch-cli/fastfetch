@@ -2,11 +2,37 @@
 
 #include "util/FFstrbuf.h"
 
+struct yyjson_val;
+
+// Must be the first field of FFModuleOptions
+typedef struct FFModuleBaseInfo
+{
+    const char* name;
+    bool (*parseCommandOptions)(void* options, const char* key, const char* value);
+    void (*parseJsonObject)(void* options, struct yyjson_val *module);
+    void (*printModule)(void* options);
+} FFModuleBaseInfo;
+
+static inline void ffOptionInitModuleBaseInfo(
+    FFModuleBaseInfo* baseInfo,
+    const char* name,
+    void* parseCommandOptions, // bool (*const parseCommandOptions)(void* options, const char* key, const char* value)
+    void* parseJsonObject, // void (*const parseJsonObject)(void* options, yyjson_val *module)
+    void* printModule // void (*const printModule)(void* options)
+)
+{
+    baseInfo->name = name;
+    baseInfo->parseCommandOptions = (__typeof__(baseInfo->parseCommandOptions)) parseCommandOptions;
+    baseInfo->parseJsonObject = (__typeof__(baseInfo->parseJsonObject)) parseJsonObject;
+    baseInfo->printModule = (__typeof__(baseInfo->printModule)) printModule;
+}
+
 typedef struct FFModuleArgs
 {
     FFstrbuf key;
     FFstrbuf keyColor;
     FFstrbuf outputFormat;
+    uint32_t keyWidth;
 } FFModuleArgs;
 
 typedef struct FFKeyValuePair

@@ -30,7 +30,7 @@ void ffPrintCPU(FFCPUOptions* options)
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(FF_CPU_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
@@ -79,7 +79,7 @@ void ffPrintCPU(FFCPUOptions* options)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    options->moduleName = FF_CPU_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 }
@@ -105,33 +105,25 @@ void ffDestroyCPUOptions(FFCPUOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCPUJsonObject(yyjson_val* module)
+void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 {
-    FFCPUOptions __attribute__((__cleanup__(ffDestroyCPUOptions))) options;
-    ffInitCPUOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "temp"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "temp"))
-            {
-                options.temp = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_CPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            options->temp = yyjson_get_bool(val);
+            continue;
         }
-    }
 
-    ffPrintCPU(&options);
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

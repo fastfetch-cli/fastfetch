@@ -6,6 +6,6 @@
 
 typedef struct FFCursorOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFCursorOptions;

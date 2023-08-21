@@ -6,6 +6,6 @@
 
 typedef struct FFIconsOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFIconsOptions;

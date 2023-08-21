@@ -8,4 +8,4 @@ void ffPrintSeparator(FFSeparatorOptions* options);
 void ffInitSeparatorOptions(FFSeparatorOptions* options);
 bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value);
 void ffDestroySeparatorOptions(FFSeparatorOptions* options);
-void ffParseSeparatorJsonObject(yyjson_val* module);
+void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module);

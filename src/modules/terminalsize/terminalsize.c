@@ -19,7 +19,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
     {
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             printf("%u columns x %u rows", result.columns, result.rows);
 
             if (result.width != 0 && result.height != 0)
@@ -41,7 +41,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    options->moduleName = FF_TERMINALSIZE_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -60,27 +60,19 @@ void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseTerminalSizeJsonObject(yyjson_val* module)
+void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* module)
 {
-    FFTerminalSizeOptions __attribute__((__cleanup__(ffDestroyTerminalSizeOptions))) options;
-    ffInitTerminalSizeOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintTerminalSize(&options);
 }

@@ -30,7 +30,7 @@ void ffPrintBios(FFBiosOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&bios.version, stdout);
         if (bios.release.length)
             printf(" (%s)", bios.release.chars);
@@ -55,7 +55,7 @@ exit:
 
 void ffInitBiosOptions(FFBiosOptions* options)
 {
-    options->moduleName = FF_BIOS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -74,27 +74,19 @@ void ffDestroyBiosOptions(FFBiosOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBiosJsonObject(yyjson_val* module)
+void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
 {
-    FFBiosOptions __attribute__((__cleanup__(ffDestroyBiosOptions))) options;
-    ffInitBiosOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_BIOS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintBios(&options);
 }

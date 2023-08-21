@@ -6,6 +6,6 @@
 
 typedef struct FFBoardOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFBoardOptions;

@@ -7,7 +7,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <yyjson.h>
+
+#ifdef FF_USE_SYSTEM_YYJSON
+    #include <yyjson.h>
+#else
+    #include "3rdparty/yyjson/yyjson.h"
+#endif
 
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
@@ -44,7 +49,6 @@ typedef struct FFconfig
     FFstrbuf keyValueSeparator;
 
     bool showErrors;
-    bool recache;
     bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
@@ -53,11 +57,17 @@ typedef struct FFconfig
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
     FFTemperatureUnit temperatureUnit;
+    FFstrbuf barCharElapsed;
+    FFstrbuf barCharTotal;
+    uint8_t barWidth;
+    bool barBorder;
+    uint32_t percentType;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;
     bool noBuffer;
     int32_t processingTimeout;
+    uint32_t keyWidth;
 
     // Module options that cannot be put in module option structure
     #if defined(__linux__) || defined(__FreeBSD__)
@@ -68,59 +78,61 @@ typedef struct FFconfig
     int32_t wmiTimeout;
     #endif
 
-    FFTitleOptions title;
-    FFOSOptions os;
-    FFHostOptions host;
+    FFBatteryOptions battery;
     FFBiosOptions bios;
+    FFBluetoothOptions bluetooth;
     FFBoardOptions board;
+    FFBreakOptions break_;
     FFBrightnessOptions brightness;
-    FFChassisOptions chassis;
-    FFCommandOptions command;
-    FFKernelOptions kernel;
-    FFUptimeOptions uptime;
-    FFProcessesOptions processes;
-    FFPackagesOptions packages;
-    FFShellOptions shell;
-    FFDisplayOptions display;
-    FFDEOptions de;
-    FFWallpaperOptions wallpaper;
-    FFWifiOptions wifi;
-    FFWMOptions wm;
-    FFWMThemeOptions wmTheme;
-    FFThemeOptions theme;
-    FFIconsOptions icons;
-    FFFontOptions font;
-    FFCursorOptions cursor;
-    FFTerminalOptions terminal;
-    FFTerminalFontOptions terminalFont;
-    FFTerminalSizeOptions terminalSize;
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
-    FFCustomOptions custom;
-    FFGPUOptions gpu;
-    FFMemoryOptions memory;
-    FFSwapOptions swap;
-    FFDiskOptions disk;
-    FFBatteryOptions battery;
-    FFPowerAdapterOptions powerAdapter;
-    FFLMOptions lm;
-    FFLocaleOptions locale;
-    FFLocalIpOptions localIP;
-    FFPublicIpOptions publicIP;
-    FFWeatherOptions weather;
-    FFPlayerOptions player;
-    FFMediaOptions media;
-    FFMonitorOptions nativeResolution;
-    FFDateTimeOptions dateTime;
-    FFVulkanOptions vulkan;
-    FFOpenGLOptions openGL;
-    FFOpenCLOptions openCL;
-    FFUsersOptions users;
-    FFBluetoothOptions bluetooth;
-    FFSeparatorOptions separator;
-    FFSoundOptions sound;
-    FFGamepadOptions gamepad;
+    FFChassisOptions chassis;
     FFColorsOptions colors;
+    FFCommandOptions command;
+    FFCursorOptions cursor;
+    FFCustomOptions custom;
+    FFDEOptions de;
+    FFDateTimeOptions dateTime;
+    FFDiskOptions disk;
+    FFDisplayOptions display;
+    FFFontOptions font;
+    FFGPUOptions gpu;
+    FFGamepadOptions gamepad;
+    FFHostOptions host;
+    FFIconsOptions icons;
+    FFKernelOptions kernel;
+    FFLMOptions lm;
+    FFLocalIpOptions localIP;
+    FFLocaleOptions locale;
+    FFMediaOptions media;
+    FFMemoryOptions memory;
+    FFMonitorOptions monitor;
+    FFOSOptions os;
+    FFOpenCLOptions openCL;
+    FFOpenGLOptions openGL;
+    FFPackagesOptions packages;
+    FFPlayerOptions player;
+    FFPowerAdapterOptions powerAdapter;
+    FFProcessesOptions processes;
+    FFPublicIpOptions publicIP;
+    FFSeparatorOptions separator;
+    FFShellOptions shell;
+    FFSoundOptions sound;
+    FFSwapOptions swap;
+    FFTerminalFontOptions terminalFont;
+    FFTerminalOptions terminal;
+    FFTerminalSizeOptions terminalSize;
+    FFThemeOptions theme;
+    FFTitleOptions title;
+    FFUptimeOptions uptime;
+    FFUsersOptions users;
+    FFVersionOptions version;
+    FFVulkanOptions vulkan;
+    FFWMOptions wm;
+    FFWMThemeOptions wmTheme;
+    FFWallpaperOptions wallpaper;
+    FFWeatherOptions weather;
+    FFWifiOptions wifi;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;
@@ -146,10 +158,6 @@ typedef struct FFconfig
     FFstrbuf libPulse;
     FFstrbuf libnm;
     FFstrbuf libDdcutil;
-
-    uint32_t percentType;
-
-    bool jsonConfig;
 } FFconfig;
 
 typedef struct FFstate
@@ -168,6 +176,7 @@ typedef struct FFinstance
     FFstate state;
 } FFinstance;
 extern FFinstance instance; // Defined in `common/init.c`
+extern FFModuleBaseInfo** ffModuleInfos[];
 
 //////////////////////
 // Init functions //

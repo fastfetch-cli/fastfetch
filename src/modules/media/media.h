@@ -8,4 +8,4 @@ void ffPrintMedia(FFMediaOptions* options);
 void ffInitMediaOptions(FFMediaOptions* options);
 bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const char* value);
 void ffDestroyMediaOptions(FFMediaOptions* options);
-void ffParseMediaJsonObject(yyjson_val* module);
+void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module);

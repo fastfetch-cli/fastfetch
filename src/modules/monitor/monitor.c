@@ -26,27 +26,30 @@ void ffPrintMonitor(FFMonitorOptions* options)
         return;
     }
 
-    uint8_t index = 0;
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+    uint32_t index = 0;
     FF_LIST_FOR_EACH(FFMonitorResult, display, result)
     {
         double inch = sqrt(display->physicalWidth * display->physicalWidth + display->physicalHeight * display->physicalHeight) / 25.4;
         double ppi = sqrt(display->width * display->width + display->height * display->height) / inch;
 
+        ffStrbufClear(&key);
+        if(options->moduleArgs.key.length == 0)
+        {
+            ffStrbufAppendF(&key, "%s (%s)", FF_MONITOR_MODULE_NAME, display->name.chars);
+        }
+        else
+        {
+            uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
+            ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
+            });
+        }
+
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffStrbufClear(&key);
-            if(options->moduleArgs.key.length == 0)
-            {
-                ffStrbufAppendF(&key, "%s (%s)", FF_MONITOR_MODULE_NAME, display->name.chars);
-            }
-            else
-            {
-                ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
-                });
-            }
-            ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             printf("%ux%u px", display->width, display->height);
             if (inch > 0)
@@ -56,7 +59,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_MONITOR_MODULE_NAME, index, &options->moduleArgs, FF_MONITOR_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_MONITOR_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->height},
@@ -68,12 +71,13 @@ void ffPrintMonitor(FFMonitorOptions* options)
         }
 
         ffStrbufDestroy(&display->name);
+        ++index;
     }
 }
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    options->moduleName = FF_MONITOR_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -92,27 +96,19 @@ void ffDestroyMonitorOptions(FFMonitorOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMonitorJsonObject(yyjson_val* module)
+void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
 {
-    FFMonitorOptions __attribute__((__cleanup__(ffDestroyMonitorOptions))) options;
-    ffInitMonitorOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintMonitor(&options);
 }

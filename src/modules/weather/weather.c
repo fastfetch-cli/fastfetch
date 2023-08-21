@@ -11,6 +11,12 @@ static int status = -1;
 
 void ffPrepareWeather(FFWeatherOptions* options)
 {
+    if (status != -1)
+    {
+        fputs("Error: " FF_WEATHER_MODULE_NAME " can only be used once due to internal limitations\n", stderr);
+        exit(1);
+    }
+
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/");
     if (options->location.length)
         ffStrbufAppend(&path, &options->location);
@@ -42,7 +48,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&result, stdout);
     }
     else
@@ -55,7 +61,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    options->moduleName = FF_WEATHER_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);
@@ -98,45 +104,37 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options)
     ffStrbufDestroy(&options->outputFormat);
 }
 
-void ffParseWeatherJsonObject(yyjson_val* module)
+void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 {
-    FFWeatherOptions __attribute__((__cleanup__(ffDestroyWeatherOptions))) options;
-    ffInitWeatherOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "location"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "location"))
-            {
-                ffStrbufSetS(&options.location, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "outputFormat"))
-            {
-                ffStrbufSetS(&options.outputFormat, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "timeout"))
-            {
-                options.timeout = (uint32_t) yyjson_get_uint(val);
-                continue;
-            }
-
-            ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options->location, yyjson_get_str(val));
+            continue;
         }
-    }
 
-    ffPrintWeather(&options);
+        if (ffStrEqualsIgnCase(key, "outputFormat"))
+        {
+            ffStrbufSetS(&options->outputFormat, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "timeout"))
+        {
+            options->timeout = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
+        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

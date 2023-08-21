@@ -62,7 +62,6 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 #include "common/processing.h"
 
 #include <stdlib.h>
-#include <yyjson.h>
 
 static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* size)
 {
@@ -355,7 +354,7 @@ static bool detectTerminalFontCommon(const FFTerminalShellResult* terminalShell,
     #ifndef _WIN32
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/pts/"))
         ffStrbufAppendS(&terminalFont->error, "Terminal font detection is not supported on PTS");
-    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalPrettyName, "kitty"))
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
         detectKitty(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);

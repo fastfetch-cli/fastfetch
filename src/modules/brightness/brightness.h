@@ -8,4 +8,4 @@ void ffPrintBrightness(FFBrightnessOptions* options);
 void ffInitBrightnessOptions(FFBrightnessOptions* options);
 bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value);
 void ffDestroyBrightnessOptions(FFBrightnessOptions* options);
-void ffParseBrightnessJsonObject(yyjson_val* module);
+void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module);

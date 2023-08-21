@@ -28,7 +28,7 @@ void ffPrintLM(FFLMOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_LM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.service, stdout);
         if(result.version.length)
             printf(" %s", result.version.chars);
@@ -51,7 +51,7 @@ void ffPrintLM(FFLMOptions* options)
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    options->moduleName = FF_LM_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -70,27 +70,19 @@ void ffDestroyLMOptions(FFLMOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseLMJsonObject(yyjson_val* module)
+void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
 {
-    FFLMOptions __attribute__((__cleanup__(ffDestroyLMOptions))) options;
-    ffInitLMOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_LM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintLM(&options);
 }

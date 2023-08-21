@@ -18,7 +18,7 @@ void ffPrintWM(FFWMOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_WM_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&result->wmPrettyName, stdout);
 
@@ -43,7 +43,7 @@ void ffPrintWM(FFWMOptions* options)
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    options->moduleName = FF_WM_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -62,27 +62,19 @@ void ffDestroyWMOptions(FFWMOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWMJsonObject(yyjson_val* module)
+void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
 {
-    FFWMOptions __attribute__((__cleanup__(ffDestroyWMOptions))) options;
-    ffInitWMOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_WM_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintWM(&options);
 }

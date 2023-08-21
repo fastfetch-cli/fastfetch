@@ -17,14 +17,19 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
         ffStrbufSetNS(&moduleArgs->key, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
+    else if(ffStrEqualsIgnCase(key, "format"))
+    {
+        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        return true;
+    }
     else if(ffStrEqualsIgnCase(key, "keyColor"))
     {
         ffOptionParseColor(yyjson_get_str(val), &moduleArgs->keyColor);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "format"))
+    else if(ffStrEqualsIgnCase(key, "keyWidth"))
     {
-        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        moduleArgs->keyWidth = (uint32_t) yyjson_get_uint(val);
         return true;
     }
     return false;
@@ -65,165 +70,53 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline bool tryModule(const char* type, yyjson_val* module, const char* moduleName, void (*const f)(yyjson_val *module))
+static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
 {
-    if (ffStrEqualsIgnCase(type, moduleName))
+    if(!isalpha(type[0])) return false;
+
+    for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(type[0]) - 'A']; *modules; ++modules)
     {
-        f(module);
-        return true;
+        FFModuleBaseInfo* baseInfo = *modules;
+        if (ffStrEqualsIgnCase(type, baseInfo->name))
+        {
+            if (jsonVal) baseInfo->parseJsonObject(baseInfo, jsonVal);
+            baseInfo->printModule(baseInfo);
+            return true;
+        }
     }
     return false;
 }
 
-static bool parseModuleJsonObject(const char* type, yyjson_val* module)
+static void prepareModuleJsonObject(const char* type, yyjson_val* module)
 {
-    switch (toupper(type[0]))
+    FFconfig* cfg = &instance.config;
+    switch (type[0])
     {
-        case 'B': {
-            return
-                tryModule(type, module, FF_BATTERY_MODULE_NAME, ffParseBatteryJsonObject) ||
-                tryModule(type, module, FF_BIOS_MODULE_NAME, ffParseBiosJsonObject) ||
-                tryModule(type, module, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothJsonObject) ||
-                tryModule(type, module, FF_BOARD_MODULE_NAME, ffParseBoardJsonObject) ||
-                tryModule(type, module, FF_BREAK_MODULE_NAME, ffParseBreakJsonObject) ||
-                tryModule(type, module, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessJsonObject) ||
-                false;
+        case 'b': case 'B': {
+            if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME))
+                ffPrepareCPUUsage();
+            break;
         }
-
-        case 'C': {
-            return
-                tryModule(type, module, FF_CHASSIS_MODULE_NAME, ffParseChassisJsonObject) ||
-                tryModule(type, module, FF_COMMAND_MODULE_NAME, ffParseCommandJsonObject) ||
-                tryModule(type, module, FF_COLORS_MODULE_NAME, ffParseColorsJsonObject) ||
-                tryModule(type, module, FF_CPU_MODULE_NAME, ffParseCPUJsonObject) ||
-                tryModule(type, module, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageJsonObject) ||
-                tryModule(type, module, FF_CURSOR_MODULE_NAME, ffParseCursorJsonObject) ||
-                tryModule(type, module, FF_CUSTOM_MODULE_NAME, ffParseCustomJsonObject) ||
-                false;
+        case 'p': case 'P': {
+            if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME))
+            {
+                if (module) ffParsePublicIpJsonObject(&cfg->publicIP, module);
+                ffPreparePublicIp(&cfg->publicIP);
+            }
+            break;
         }
-
-        case 'D': {
-            return
-                tryModule(type, module, FF_DATETIME_MODULE_NAME, ffParseDateTimeJsonObject) ||
-                tryModule(type, module, FF_DE_MODULE_NAME, ffParseDEJsonObject) ||
-                tryModule(type, module, FF_DISPLAY_MODULE_NAME, ffParseDisplayJsonObject) ||
-                tryModule(type, module, FF_DISK_MODULE_NAME, ffParseDiskJsonObject) ||
-                false;
+        case 'w': case 'W': {
+            if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME))
+            {
+                if (module) ffParseWeatherJsonObject(&cfg->weather, module);
+                ffPrepareWeather(&cfg->weather);
+            }
+            break;
         }
-
-        case 'F': {
-            return
-                tryModule(type, module, FF_FONT_MODULE_NAME, ffParseFontJsonObject) ||
-                false;
-        }
-
-        case 'G': {
-            return
-                tryModule(type, module, FF_GAMEPAD_MODULE_NAME, ffParseGamepadJsonObject) ||
-                tryModule(type, module, FF_GPU_MODULE_NAME, ffParseGPUJsonObject) ||
-                false;
-        }
-
-        case 'H': {
-            return
-                tryModule(type, module, FF_HOST_MODULE_NAME, ffParseHostJsonObject) ||
-                false;
-        }
-
-        case 'I': {
-            return
-                tryModule(type, module, FF_ICONS_MODULE_NAME, ffParseIconsJsonObject) ||
-                false;
-        }
-
-        case 'K': {
-            return
-                tryModule(type, module, FF_KERNEL_MODULE_NAME, ffParseKernelJsonObject) ||
-                false;
-        }
-
-        case 'L': {
-            return
-                tryModule(type, module, FF_LM_MODULE_NAME, ffParseLMJsonObject) ||
-                tryModule(type, module, FF_LOCALE_MODULE_NAME, ffParseLocaleJsonObject) ||
-                tryModule(type, module, FF_LOCALIP_MODULE_NAME, ffParseLocalIpJsonObject) ||
-                false;
-        }
-
-        case 'M': {
-            return
-                tryModule(type, module, FF_MEDIA_MODULE_NAME, ffParseMediaJsonObject) ||
-                tryModule(type, module, FF_MEMORY_MODULE_NAME, ffParseMemoryJsonObject) ||
-                tryModule(type, module, FF_MONITOR_MODULE_NAME, ffParseMonitorJsonObject) ||
-                false;
-        }
-
-        case 'O': {
-            return
-                tryModule(type, module, FF_OPENCL_MODULE_NAME, ffParseOpenCLJsonObject) ||
-                tryModule(type, module, FF_OPENGL_MODULE_NAME, ffParseOpenGLJsonObject) ||
-                tryModule(type, module, FF_OS_MODULE_NAME, ffParseOSJsonObject) ||
-                false;
-        }
-
-        case 'P': {
-            return
-                tryModule(type, module, FF_PACKAGES_MODULE_NAME, ffParsePackagesJsonObject) ||
-                tryModule(type, module, FF_PLAYER_MODULE_NAME, ffParsePlayerJsonObject) ||
-                tryModule(type, module, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterJsonObject) ||
-                tryModule(type, module, FF_PROCESSES_MODULE_NAME, ffParseProcessesJsonObject) ||
-                tryModule(type, module, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpJsonObject) ||
-                false;
-        }
-
-        case 'S': {
-            return
-                tryModule(type, module, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorJsonObject) ||
-                tryModule(type, module, FF_SHELL_MODULE_NAME, ffParseShellJsonObject) ||
-                tryModule(type, module, FF_SOUND_MODULE_NAME, ffParseSoundJsonObject) ||
-                tryModule(type, module, FF_SWAP_MODULE_NAME, ffParseSwapJsonObject) ||
-                false;
-        }
-
-        case 'T': {
-            return
-                tryModule(type, module, FF_TERMINAL_MODULE_NAME, ffParseTerminalJsonObject) ||
-                tryModule(type, module, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontJsonObject) ||
-                tryModule(type, module, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeJsonObject) ||
-                tryModule(type, module, FF_TITLE_MODULE_NAME, ffParseTitleJsonObject) ||
-                tryModule(type, module, FF_THEME_MODULE_NAME, ffParseThemeJsonObject) ||
-                false;
-        }
-
-        case 'U': {
-            return
-                tryModule(type, module, FF_UPTIME_MODULE_NAME, ffParseUptimeJsonObject) ||
-                tryModule(type, module, FF_USERS_MODULE_NAME, ffParseUsersJsonObject) ||
-                false;
-        }
-
-        case 'V': {
-            return
-                tryModule(type, module, FF_VULKAN_MODULE_NAME, ffParseVulkanJsonObject) ||
-                false;
-        }
-
-        case 'W': {
-            return
-                tryModule(type, module, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperJsonObject) ||
-                tryModule(type, module, FF_WEATHER_MODULE_NAME, ffParseWeatherJsonObject) ||
-                tryModule(type, module, FF_WM_MODULE_NAME, ffParseWMJsonObject) ||
-                tryModule(type, module, FF_WIFI_MODULE_NAME, ffParseWifiJsonObject) ||
-                tryModule(type, module, FF_WMTHEME_MODULE_NAME, ffParseWMThemeJsonObject) ||
-                false;
-        }
-
-        default:
-            return false;
     }
 }
 
-static const char* printJsonConfig(void)
+static const char* printJsonConfig(bool prepare)
 {
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
@@ -240,7 +133,7 @@ static const char* printJsonConfig(void)
     yyjson_arr_foreach(modules, idx, max, item)
     {
         uint64_t ms = 0;
-        if(__builtin_expect(instance.config.stat, false))
+        if(!prepare && instance.config.stat)
             ms = ffTimeGetTick();
 
         yyjson_val* module = item;
@@ -257,10 +150,12 @@ static const char* printJsonConfig(void)
         else
             return "modules must be an array of strings or objects";
 
-        if(!parseModuleJsonObject(type, module))
+        if(prepare)
+            prepareModuleJsonObject(type, module);
+        else if(!parseModuleJsonObject(type, module))
             return "Unknown module type";
 
-        if(__builtin_expect(instance.config.stat, false))
+        if(!prepare && instance.config.stat)
         {
             char str[32];
             int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
@@ -431,8 +326,33 @@ const char* ffParseDisplayJsonConfig(void)
         }
         else if (ffStrEqualsIgnCase(key, "percentType"))
             config->percentType = (uint32_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "bar"))
+        {
+            if (yyjson_is_obj(val))
+            {
+                const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
+                if (charElapsed)
+                    ffStrbufSetS(&config->barCharElapsed, charElapsed);
+
+                const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
+                if (charTotal)
+                    ffStrbufSetS(&config->barCharTotal, charTotal);
+
+                yyjson_val* border = yyjson_obj_get(val, "border");
+                if (border)
+                    config->barBorder = yyjson_get_bool(border);
+
+                yyjson_val* width = yyjson_obj_get(val, "width");
+                if (width)
+                    config->barWidth = (uint8_t) yyjson_get_uint(width);
+            }
+            else
+                return "display.bar must be an object";
+        }
         else if (ffStrEqualsIgnCase(key, "noBuffer"))
             config->noBuffer = yyjson_get_bool(val);
+        else if (ffStrEqualsIgnCase(key, "keyWidth"))
+            config->keyWidth = (uint32_t) yyjson_get_uint(val);
         else
             return "Unknown display property";
     }
@@ -515,9 +435,9 @@ const char* ffParseLibraryJsonConfig(void)
     return NULL;
 }
 
-void ffPrintJsonConfig(void)
+void ffPrintJsonConfig(bool prepare)
 {
-    const char* error = printJsonConfig();
+    const char* error = printJsonConfig(prepare);
     if (error)
-        ffPrintErrorString("JsonConfig", 0, NULL, NULL, "%s", error);
+        ffPrintErrorString("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
 }

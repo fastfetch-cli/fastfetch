@@ -30,7 +30,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         puts(filename);
     }
     else
@@ -44,7 +44,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    options->moduleName = FF_WALLPAPER_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -63,27 +63,19 @@ void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseWallpaperJsonObject(yyjson_val* module)
+void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
 {
-    FFWallpaperOptions __attribute__((__cleanup__(ffDestroyWallpaperOptions))) options;
-    ffInitWallpaperOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintWallpaper(&options);
 }

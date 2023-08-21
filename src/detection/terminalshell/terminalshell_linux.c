@@ -375,12 +375,19 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
     }
 
+    if(result.terminalExeName[0] == '.' && ffStrEndsWith(result.terminalExeName, "-wrapper"))
+    {
+        // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
+        // We use terminalProcessName when detecting version and font, overriding it for simplication
+        ffStrbufSetNS(
+            &result.terminalProcessName,
+            (uint32_t) (strlen(result.terminalExeName) - strlen(".-wrapper")),
+            result.terminalExeName + 1);
+    }
+
 
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
         ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
-    else if(ffStrbufEqualS(&result.terminalProcessName, ".kitty-wrapped"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "kitty"); // #510
-
     #if defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))

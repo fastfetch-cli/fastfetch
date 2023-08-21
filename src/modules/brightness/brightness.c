@@ -27,6 +27,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
+    uint32_t index = 0;
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
     {
         if(options->moduleArgs.key.length == 0)
@@ -35,7 +36,9 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         }
         else
         {
-            ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
+            uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
+            ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name}
             });
         }
@@ -44,11 +47,11 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, (uint8_t) (item->value + 0.5), 0, 10, 10);
+                ffAppendPercentBar(&str, item->value, 0, 100, 100);
             }
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -56,14 +59,14 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, (uint8_t) (item->value + 0.5), 10, 10, str.length > 0);
+                ffAppendPercentNum(&str, item->value, 10, 10, str.length > 0);
             }
 
             ffStrbufPutTo(&str, stdout);
         }
         else
         {
-            ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_FLOAT, &item->value},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
             });
@@ -71,12 +74,13 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         ffStrbufClear(&key);
         ffStrbufDestroy(&item->name);
+        ++index;
     }
 }
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    options->moduleName = FF_BRIGHTNESS_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -95,27 +99,19 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseBrightnessJsonObject(yyjson_val* module)
+void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
 {
-    FFBrightnessOptions __attribute__((__cleanup__(ffDestroyBrightnessOptions))) options;
-    ffInitBrightnessOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintBrightness(&options);
 }

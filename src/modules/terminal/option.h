@@ -6,6 +6,6 @@
 
 typedef struct FFTerminalOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFTerminalOptions;

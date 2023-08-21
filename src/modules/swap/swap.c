@@ -25,22 +25,29 @@ void ffPrintSwap(FFSwapOptions* options)
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffParseSize(storage.bytesTotal, &totalPretty);
 
-    uint8_t percentage = storage.bytesTotal == 0
+    double percentage = storage.bytesTotal == 0
         ? 0
-        : (uint8_t) (((long double) storage.bytesUsed / (long double) storage.bytesTotal) * 100.0);
+        : (double) storage.bytesUsed / (double) storage.bytesTotal * 100.0;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (storage.bytesTotal == 0)
-            puts("Disabled");
-        else
         {
-            FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, percentage, 0, 5, 8);
+                ffAppendPercentBar(&str, 0, 0, 50, 80);
+                ffStrbufAppendC(&str, ' ');
+            }
+            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                ffStrbufAppendS(&str, "Disabled");
+        }
+        else
+        {
+            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                ffAppendPercentBar(&str, percentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -48,11 +55,11 @@ void ffPrintSwap(FFSwapOptions* options)
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffAppendPercentNum(&str, (uint8_t) percentage, 50, 80, str.length > 0);
-
-            ffStrbufTrimRight(&str, ' ');
-            ffStrbufPutTo(&str, stdout);
+                ffAppendPercentNum(&str, percentage, 50, 80, str.length > 0);
         }
+
+        ffStrbufTrimRight(&str, ' ');
+        ffStrbufPutTo(&str, stdout);
     }
     else
     {
@@ -66,7 +73,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    options->moduleName = FF_SWAP_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -85,27 +92,19 @@ void ffDestroySwapOptions(FFSwapOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseSwapJsonObject(yyjson_val* module)
+void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
 {
-    FFSwapOptions __attribute__((__cleanup__(ffDestroySwapOptions))) options;
-    ffInitSwapOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_SWAP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintSwap(&options);
 }

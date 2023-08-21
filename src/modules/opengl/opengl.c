@@ -23,7 +23,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         puts(result.version.chars);
     }
     else
@@ -44,7 +44,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    options->moduleName = FF_OPENGL_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)
@@ -80,46 +80,38 @@ void ffDestroyOpenGLOptions(FFOpenGLOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseOpenGLJsonObject(yyjson_val* module)
+void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
 {
-    FFOpenGLOptions __attribute__((__cleanup__(ffDestroyOpenGLOptions))) options;
-    ffInitOpenGLOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        #if defined(__linux__) || defined(__FreeBSD__)
+        if (ffStrEqualsIgnCase(key, "library"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            #if defined(__linux__) || defined(__FreeBSD__)
-            if (ffStrEqualsIgnCase(key, "library"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "auto", FF_OPENGL_LIBRARY_AUTO },
-                    { "egl", FF_OPENGL_LIBRARY_EGL },
-                    { "glx", FF_OPENGL_LIBRARY_GLX },
-                    { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
-                    {},
-                });
-                if (error)
-                    ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
-                else
-                    options.library = (FFOpenGLLibrary) value;
-                continue;
-            }
-            #endif
-
-            ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "auto", FF_OPENGL_LIBRARY_AUTO },
+                { "egl", FF_OPENGL_LIBRARY_EGL },
+                { "glx", FF_OPENGL_LIBRARY_GLX },
+                { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->library = (FFOpenGLLibrary) value;
+            continue;
         }
-    }
+        #endif
 
-    ffPrintOpenGL(&options);
+        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

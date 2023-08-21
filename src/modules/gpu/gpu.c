@@ -24,7 +24,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(gpu->vendor.length + 1 + gpu->name.length);
 
@@ -58,7 +58,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffAppendPercentNum(&output, (uint8_t) (gpu->dedicated.used * 100 / gpu->dedicated.total), 50, 80, false);
+                ffAppendPercentNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, 50, 80, false);
             }
             ffStrbufAppendC(&output, ')');
         }
@@ -121,7 +121,7 @@ void ffPrintGPU(FFGPUOptions* options)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    options->moduleName = FF_GPU_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;
@@ -166,55 +166,47 @@ void ffDestroyGPUOptions(FFGPUOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseGPUJsonObject(yyjson_val* module)
+void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 {
-    FFGPUOptions __attribute__((__cleanup__(ffDestroyGPUOptions))) options;
-    ffInitGPUOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "temp"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "temp"))
-            {
-                options.temp = yyjson_get_bool(val);
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "forceVulkan"))
-            {
-                options.forceVulkan = yyjson_get_bool(val);
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "hideType"))
-            {
-                int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "none", FF_GPU_TYPE_UNKNOWN },
-                    { "intergrated", FF_GPU_TYPE_INTEGRATED },
-                    { "discrete", FF_GPU_TYPE_DISCRETE },
-                    {},
-                });
-                if (error)
-                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Invalid %s value: %s", key, error);
-                else
-                    options.hideType = (FFGPUType) value;
-                continue;
-            }
-
-            ffPrintError(FF_GPU_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            options->temp = yyjson_get_bool(val);
+            continue;
         }
-    }
 
-    ffPrintGPU(&options);
+        if (ffStrEqualsIgnCase(key, "forceVulkan"))
+        {
+            options->forceVulkan = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "hideType"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "none", FF_GPU_TYPE_UNKNOWN },
+                { "intergrated", FF_GPU_TYPE_INTEGRATED },
+                { "discrete", FF_GPU_TYPE_DISCRETE },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->hideType = (FFGPUType) value;
+            continue;
+        }
+
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

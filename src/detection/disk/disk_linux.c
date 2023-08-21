@@ -122,20 +122,32 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
 
     FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
 
-    //Try partlabel first
-    ffStrbufSetS(&basePath, "/dev/disk/by-partlabel/");
+    //Try label first
+    ffStrbufSetS(&basePath, "/dev/disk/by-label/");
     detectNameFromPath(disk, &deviceStat, &basePath);
 
-    //Try label second
     if(disk->name.length == 0)
     {
-        ffStrbufSetS(&basePath, "/dev/disk/by-label/");
+        //Try partlabel second
+        ffStrbufSetS(&basePath, "/dev/disk/by-partlabel/");
         detectNameFromPath(disk, &deviceStat, &basePath);
     }
 
-    //Use the mountpoint as a last resort
-    if(disk->name.length == 0)
-        ffStrbufAppend(&disk->name, &disk->mountpoint);
+    // Basic\x20data\x20partition
+    for (uint32_t i = ffStrbufFirstIndexS(&disk->name, "\\x");
+        i != disk->name.length;
+        i = ffStrbufNextIndexS(&disk->name, i + 1, "\\x"))
+    {
+        uint32_t len = (uint32_t) strlen("\\x20");
+        if (disk->name.length >= len)
+        {
+            char bak = disk->name.chars[i + len];
+            disk->name.chars[i + len] = '\0';
+            disk->name.chars[i] = (char) strtoul(&disk->name.chars[i + 2], NULL, 16);
+            ffStrbufRemoveSubstr(&disk->name, i + 1, i + len);
+            disk->name.chars[i + 1] = bak;
+        }
+    }
 }
 
 #ifdef __ANDROID__

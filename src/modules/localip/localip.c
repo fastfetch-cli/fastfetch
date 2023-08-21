@@ -13,7 +13,7 @@ static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
     return ffStrbufComp(&left->name, &right->name);
 }
 
-static void formatKey(const FFLocalIpOptions* options, const FFLocalIpResult* ip, FFstrbuf* key)
+static void formatKey(const FFLocalIpOptions* options, const FFLocalIpResult* ip, uint32_t index, FFstrbuf* key)
 {
     if(options->moduleArgs.key.length == 0)
     {
@@ -25,8 +25,10 @@ static void formatKey(const FFLocalIpOptions* options, const FFLocalIpResult* ip
     else
     {
         ffStrbufClear(key);
-        ffParseFormatString(key, &options->moduleArgs.key, 2, (FFformatarg[]){
+        ffParseFormatString(key, &options->moduleArgs.key, 3, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_UINT, &index},
             {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
         });
     }
 }
@@ -78,7 +80,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
     if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
     {
-        ffPrintLogoAndKey(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         bool flag = false;
 
@@ -98,22 +100,23 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+        uint32_t index = 0;
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
             if (options->defaultRouteOnly && !ip->defaultRoute)
                 continue;
 
-            formatKey(options, ip, &key);
+            formatKey(options, ip, results.length == 1 ? 0 : index + 1, &key);
             if(options->moduleArgs.outputFormat.length == 0)
             {
-                ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+                ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
                 printIp(ip, !options->defaultRouteOnly);
                 putchar('\n');
             }
             else
             {
-                ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
+                ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_LOCALIP_NUM_FORMAT_ARGS, (FFformatarg[]){
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
@@ -121,6 +124,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                     {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute},
                 });
             }
+            ++index;
         }
     }
 
@@ -135,7 +139,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    options->moduleName = FF_LOCALIP_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
@@ -216,84 +220,76 @@ void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
     ffStrbufDestroy(&options->namePrefix);
 }
 
-void ffParseLocalIpJsonObject(yyjson_val* module)
+void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
 {
-    FFLocalIpOptions __attribute__((__cleanup__(ffDestroyLocalIpOptions))) options;
-    ffInitLocalIpOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "showIpv4"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "showIpv4"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showType |= FF_LOCALIP_TYPE_IPV4_BIT;
-                else
-                    options.showType &= ~FF_LOCALIP_TYPE_IPV4_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showIpv6"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showType |= FF_LOCALIP_TYPE_IPV6_BIT;
-                else
-                    options.showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showMac"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showType |= FF_LOCALIP_TYPE_MAC_BIT;
-                else
-                    options.showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showLoop"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showType |= FF_LOCALIP_TYPE_LOOP_BIT;
-                else
-                    options.showType &= ~FF_LOCALIP_TYPE_LOOP_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "compact"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
-                else
-                    options.showType &= ~FF_LOCALIP_TYPE_COMPACT_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "namePrefix"))
-            {
-                ffStrbufSetS(&options.namePrefix, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
-            {
-                options.defaultRouteOnly = yyjson_get_bool(val);
-                continue;
-            }
-
-            ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_IPV4_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_IPV4_BIT;
+            continue;
         }
-    }
 
-    ffPrintLocalIp(&options);
+        if (ffStrEqualsIgnCase(key, "showIpv6"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showMac"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showLoop"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_LOOP_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_LOOP_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "compact"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_COMPACT_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        {
+            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+        {
+            options->defaultRouteOnly = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

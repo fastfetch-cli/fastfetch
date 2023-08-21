@@ -6,7 +6,7 @@
 
 typedef struct FFCommandOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFstrbuf shell;

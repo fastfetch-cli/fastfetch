@@ -8,4 +8,4 @@ void ffPrintWM(FFWMOptions* options);
 void ffInitWMOptions(FFWMOptions* options);
 bool ffParseWMCommandOptions(FFWMOptions* options, const char* key, const char* value);
 void ffDestroyWMOptions(FFWMOptions* options);
-void ffParseWMJsonObject(yyjson_val* module);
+void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module);

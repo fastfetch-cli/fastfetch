@@ -8,4 +8,4 @@ void ffPrintDE(FFDEOptions* options);
 void ffInitDEOptions(FFDEOptions* options);
 bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* value);
 void ffDestroyDEOptions(FFDEOptions* options);
-void ffParseDEJsonObject(yyjson_val* module);
+void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module);

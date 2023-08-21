@@ -6,6 +6,6 @@
 
 typedef struct FFOpenCLOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFOpenCLOptions;

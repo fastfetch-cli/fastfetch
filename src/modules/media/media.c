@@ -80,7 +80,7 @@ void ffPrintMedia(FFMediaOptions* options)
         if(artistInSongTitle(&songPretty, &artistPretty))
             ffStrbufClear(&artistPretty);
 
-        ffPrintLogoAndKey(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if(artistPretty.length > 0)
         {
@@ -107,7 +107,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    options->moduleName = FF_MEDIA_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -126,27 +126,19 @@ void ffDestroyMediaOptions(FFMediaOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseMediaJsonObject(yyjson_val* module)
+void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
 {
-    FFMediaOptions __attribute__((__cleanup__(ffDestroyMediaOptions))) options;
-    ffInitMediaOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintMedia(&options);
 }

@@ -698,7 +698,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
     ffStrbufAppendF(&requestData.cacheDir, "%u", requestData.logoPixelHeight);
     ffStrbufAppendC(&requestData.cacheDir, '/');
 
-    if(!instance.config.recache && printCached(&requestData))
+    if(!instance.config.logo.recache && printCached(&requestData))
     {
         ffStrbufDestroy(&requestData.cacheDir);
         return true;

@@ -28,7 +28,7 @@ void ffPrintCursor(FFCursorOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+            ffPrintLogoAndKey(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufWriteTo(&result.theme, stdout);
 
             if(result.size.length > 0)
@@ -52,7 +52,7 @@ void ffPrintCursor(FFCursorOptions* options)
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    options->moduleName = FF_CURSOR_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -71,27 +71,19 @@ void ffDestroyCursorOptions(FFCursorOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseCursorJsonObject(yyjson_val* module)
+void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
 {
-    FFCursorOptions __attribute__((__cleanup__(ffDestroyCursorOptions))) options;
-    ffInitCursorOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintCursor(&options);
 }

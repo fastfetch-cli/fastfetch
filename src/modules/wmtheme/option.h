@@ -6,6 +6,6 @@
 
 typedef struct FFWMThemeOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFWMThemeOptions;

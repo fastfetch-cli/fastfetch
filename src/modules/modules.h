@@ -50,6 +50,7 @@
 #include "modules/title/title.h"
 #include "modules/uptime/uptime.h"
 #include "modules/users/users.h"
+#include "modules/version/version.h"
 #include "modules/vulkan/vulkan.h"
 #include "modules/wallpaper/wallpaper.h"
 #include "modules/weather/weather.h"

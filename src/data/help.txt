@@ -40,6 +40,7 @@ Logo options:
     --logo-padding-right <padding>:        Set the padding on the right of the logo
     --logo-padding-top <padding>:          Set the padding on the top of the logo
     --logo-print-remaining <?value>:       Whether to print the remaining logo, if it has more lines than modules to display
+    --logo-recache <?value>:               If true, regenerate image logo cache
     --file <file>:                         Short for --logo-type file --logo <file>
     --file-raw <file>:                     Short for --logo-type file-raw --logo <file>
     --data <data>:                         Short for --logo-type data --logo <data>
@@ -58,8 +59,9 @@ Display options:
     -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
     --color-keys <color>:        Set the color of the keys
     --color-title <color>:       Set the color of the title
+    --color <color>:             Set the color of both the keys and title
+    --key-width <num>:           Align the width of keys to <num> characters
     --bright-color <?value>:     Set if the keys, title and ASCII logo should be printed in bright color. Default is true
-    -c,--color <color>:          Set the color of both the keys and title
     --separator <str>:           Set the separator between key and value. Default is a colon with a space
     --set <key=value>:           Hard set the value of a key
     --set-keyless <key=value>:   Hard set the value of a key, but don't print the key or the separator
@@ -68,6 +70,10 @@ Display options:
     --hide-cursor <?value>:      Whether to hide the cursor during the run
     --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
     --percent-type <value>:      Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 1
+    --bar-char-elapsed <str>:    Set the character to use in elapsed part. Default is '■'
+    --bar-char-total <str>:      Set the character to use in total part. Default is '-'
+    --bar-width <?num>:          Set the width of the bar, in number of characters. Default is 10
+    --bar-border <?value>:       Whether to show a border around the bar. Default is true
     --no-buffer <?value>:        Set if the stdout application buffer should be disabled. Default is false
     --size-ndigits <value>:      Set the number of digits to keep after the decimal point when formatting sizes
     --size-max-prefix <value>:   Set the largest binary prefix to use when formatting sizes. Default is YB
@@ -82,6 +88,7 @@ General module options:
                                    For modules which print multiple lines, the string is parsed as a format string with the index as first character.
 
     --<module>-key-color <format>: Override the global `--color-keys` option for each specific module.
+    --<module>-key-width <num>:    Override the global `--key-width` option for each specific module.
 
 Library options: Set the path of a library to load
     --lib-PCI <path>

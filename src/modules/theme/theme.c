@@ -19,7 +19,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_THEME_MODULE_NAME, 0, &options->moduleArgs.key, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&theme, stdout);
     }
     else
@@ -32,7 +32,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    options->moduleName = FF_THEME_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -51,27 +51,19 @@ void ffDestroyThemeOptions(FFThemeOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseThemeJsonObject(yyjson_val* module)
+void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
 {
-    FFThemeOptions __attribute__((__cleanup__(ffDestroyThemeOptions))) options;
-    ffInitThemeOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
-        {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
 
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
 
-            ffPrintError(FF_THEME_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
-        }
+        ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
-
-    ffPrintTheme(&options);
 }

@@ -34,8 +34,9 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
     else
     {
-        ffParseFormatString(&key, &options->moduleArgs.key, 1, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint}
+        ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
         });
     }
 
@@ -45,11 +46,11 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffParseSize(disk->bytesTotal, &totalPretty);
 
-    uint8_t bytesPercentage = disk->bytesTotal > 0 ? (uint8_t) (((long double) disk->bytesUsed / (long double) disk->bytesTotal) * 100.0) : 0;
+    double bytesPercentage = disk->bytesTotal > 0 ? (double) disk->bytesUsed / (double) disk->bytesTotal * 100.0 : 0;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(key.chars, 0, NULL, &options->moduleArgs.keyColor);
+        ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
@@ -57,7 +58,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         {
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, bytesPercentage, 0, 5, 8);
+                ffAppendPercentBar(&str, bytesPercentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -66,7 +67,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffAppendPercentNum(&str, (uint8_t) bytesPercentage, 50, 80, str.length > 0);
+                ffAppendPercentNum(&str, bytesPercentage, 50, 80, str.length > 0);
                 ffStrbufAppendC(&str, ' ');
             }
         }
@@ -95,7 +96,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
         bool isExternal = !!(disk->type & FF_DISK_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_TYPE_HIDDEN_BIT);
-        ffPrintFormatString(key.chars, 0, NULL, &options->moduleArgs.keyColor, &options->moduleArgs.outputFormat, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
+        ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_UINT8, &bytesPercentage},
@@ -183,10 +184,9 @@ void ffPrintDisk(FFDiskOptions* options)
     }
 }
 
-
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    options->moduleName = FF_DISK_MODULE_NAME;
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);
@@ -259,69 +259,61 @@ void ffDestroyDiskOptions(FFDiskOptions* options)
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
-void ffParseDiskJsonObject(yyjson_val* module)
+void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 {
-    FFDiskOptions __attribute__((__cleanup__(ffDestroyDiskOptions))) options;
-    ffInitDiskOptions(&options);
-
-    if (module)
+    yyjson_val *key_, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key_, val)
     {
-        yyjson_val *key_, *val;
-        size_t idx, max;
-        yyjson_obj_foreach(module, idx, max, key_, val)
+        const char* key = yyjson_get_str(key_);
+        if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+            continue;
+
+        if (ffStrEqualsIgnCase(key, "folders"))
         {
-            const char* key = yyjson_get_str(key_);
-            if(ffStrEqualsIgnCase(key, "type"))
-                continue;
-
-            if (ffJsonConfigParseModuleArgs(key, val, &options.moduleArgs))
-                continue;
-
-            if (ffStrEqualsIgnCase(key, "folders"))
-            {
-                ffStrbufSetS(&options.folders, yyjson_get_str(val));
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showExternal"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
-                else
-                    options.showTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showHidden"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showTypes |= FF_DISK_TYPE_HIDDEN_BIT;
-                else
-                    options.showTypes &= ~FF_DISK_TYPE_HIDDEN_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showSubvolumes"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showTypes |= FF_DISK_TYPE_SUBVOLUME_BIT;
-                else
-                    options.showTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT;
-                continue;
-            }
-
-            if (ffStrEqualsIgnCase(key, "showUnknown"))
-            {
-                if (yyjson_get_bool(val))
-                    options.showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;
-                else
-                    options.showTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT;
-                continue;
-            }
-
-            ffPrintError(FF_DISK_MODULE_NAME, 0, &options.moduleArgs, "Unknown JSON key %s", key);
+            ffStrbufSetS(&options->folders, yyjson_get_str(val));
+            continue;
         }
-    }
 
-    ffPrintDisk(&options);
+        if (ffStrEqualsIgnCase(key, "showExternal"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_EXTERNAL_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_EXTERNAL_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showHidden"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_HIDDEN_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_HIDDEN_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showSubvolumes"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_SUBVOLUME_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_SUBVOLUME_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showUnknown"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_TYPE_UNKNOWN_BIT;
+            else
+                options->showTypes &= ~FF_DISK_TYPE_UNKNOWN_BIT;
+            continue;
+        }
+
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
 }

@@ -6,7 +6,7 @@
 
 typedef struct FFCPUOptions
 {
-    const char* moduleName;
+    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     bool temp;

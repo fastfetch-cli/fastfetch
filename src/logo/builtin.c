@@ -13,6 +13,15 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
+    // AerOS
+    {
+        .names = {"aerOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AEROS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // AIX
     {
         .names = {"aix"},
@@ -2332,6 +2341,15 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_256 "29",
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // MOS
+    {
+        .names = {"MOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // Msys2
     {
         .names = {"Msys2"},
@@ -3894,6 +3912,16 @@ static const FFlogo V[] = {
     {
         .names = {"Venom"},
         .lines = FASTFETCH_DATATEXT_LOGO_VENOM,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLACK,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    // VenomSmall
+    {
+        .names = {"Venom_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_VENOM_SMALL,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK,
             FF_COLOR_FG_BLUE,

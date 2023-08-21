@@ -8,4 +8,4 @@ void ffPrintSwap(FFSwapOptions* options);
 void ffInitSwapOptions(FFSwapOptions* options);
 bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const char* value);
 void ffDestroySwapOptions(FFSwapOptions* options);
-void ffParseSwapJsonObject(yyjson_val* module);
+void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module);

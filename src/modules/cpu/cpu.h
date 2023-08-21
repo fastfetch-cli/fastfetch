@@ -8,4 +8,4 @@ void ffPrintCPU(FFCPUOptions* options);
 void ffInitCPUOptions(FFCPUOptions* options);
 bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value);
 void ffDestroyCPUOptions(FFCPUOptions* options);
-void ffParseCPUJsonObject(yyjson_val* module);
+void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module);

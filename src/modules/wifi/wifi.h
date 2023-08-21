@@ -8,4 +8,4 @@ void ffPrintWifi(FFWifiOptions* options);
 void ffInitWifiOptions(FFWifiOptions* options);
 bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const char* value);
 void ffDestroyWifiOptions(FFWifiOptions* options);
-void ffParseWifiJsonObject(yyjson_val* module);
+void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module);

@@ -8,4 +8,4 @@ void ffPrintPackages(FFPackagesOptions* options);
 void ffInitPackagesOptions(FFPackagesOptions* options);
 bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, const char* value);
 void ffDestroyPackagesOptions(FFPackagesOptions* options);
-void ffParsePackagesJsonObject(yyjson_val* module);
+void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module);
