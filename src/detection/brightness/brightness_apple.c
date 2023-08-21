@@ -31,7 +31,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
 
 // https://github.com/waydabber/m1ddc
 // Works for Apple Silicon and USB-C adapter connection ( but not HTMI )
-static const char* detectWithDdcci(FFlist* result)
+FF_MAYBE_UNUSED static const char* detectWithDdcci(FFlist* result)
 {
     if (!IOAVServiceCreate || !IOAVServiceReadI2C)
         return "IOAVService is not available";
