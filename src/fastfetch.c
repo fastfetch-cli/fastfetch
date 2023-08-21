@@ -5,6 +5,7 @@
 #include "common/io/io.h"
 #include "common/time.h"
 #include "common/jsonconfig.h"
+#include "detection/version/version.h"
 #include "util/stringUtils.h"
 #include "logo/logo.h"
 #include "fastfetch_datatext.h"
@@ -795,37 +796,10 @@ static inline void optionCheckString(const char* key, const char* value, FFstrbu
 }
 
 static void printVersion()
-    {
-        #ifndef NDEBUG
-            #define FF_BUILD_TYPE "-debug"
-        #else
-            #define FF_BUILD_TYPE
-        #endif
-
-        #if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64)
-            #define FF_ARCHITECTURE "x86_64"
-        #elif defined(__i386__) || defined(__i386) || defined(__i486__) || defined(__i486) || defined(__i586__) || defined(__i586) || defined(__i686__) || defined(__i686)
-            #define FF_ARCHITECTURE "i386"
-        #elif defined(__aarch64__)
-            #define FF_ARCHITECTURE "aarch64"
-        #elif defined(__arm__)
-            #define FF_ARCHITECTURE "arm"
-        #elif defined(__mips__)
-            #define FF_ARCHITECTURE "mips"
-        #elif defined(__powerpc__) || defined(__powerpc)
-            #define FF_ARCHITECTURE "powerpc"
-        #elif defined(__riscv__) || defined(__riscv)
-            #define FF_ARCHITECTURE "riscv"
-        #elif defined(__s390x__)
-            #define FF_ARCHITECTURE "s390x"
-        #else
-            #define FF_ARCHITECTURE "unknown"
-        #endif
-
-        puts("fastfetch " FASTFETCH_PROJECT_VERSION FASTFETCH_PROJECT_VERSION_TWEAK FF_BUILD_TYPE " (" FF_ARCHITECTURE ")");
-
-        #undef FF_ARCHITECTURE
-        #undef FF_BUILD_TYPE
+{
+    FFVersionResult result = {};
+    ffDetectVersion(&result);
+    printf("%s %s%s%s (%s)\n", result.projectName, result.version, result.versionTweak, result.debugMode ? "-debug" : "", result.architecture);
 }
 
 static void parseOption(FFdata* data, const char* key, const char* value)
