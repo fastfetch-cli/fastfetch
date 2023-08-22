@@ -825,6 +825,7 @@ elseif(WIN32)
     )
 elseif(BSD)
     target_link_libraries(libfastfetch
+        PRIVATE "m"
         PRIVATE "usbhid"
     )
 elseif(ANDROID)
