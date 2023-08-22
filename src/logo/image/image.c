@@ -3,6 +3,7 @@
 #include "common/printing.h"
 
 #include <limits.h>
+#include <math.h>
 
 #ifdef __APPLE__
     #include <sys/syslimits.h>
@@ -182,12 +183,6 @@ static inline bool checkAllocationResult(void* data, size_t length)
     }
 
     return true;
-}
-
-static inline uint32_t simpleCeil(double value)
-{
-    uint32_t result = (uint32_t) value;
-    return value == (double) result ? result : result + 1;
 }
 
 static void writeCacheStrbuf(FFLogoRequestData* requestData, const FFstrbuf* value, const char* cacheFileName)
@@ -463,8 +458,8 @@ FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFI
     else if(requestData->logoPixelHeight == 0)
         requestData->logoPixelHeight = (uint32_t) ((double) imageData.image->rows / (double) imageData.image->columns * requestData->logoPixelWidth);
 
-    requestData->logoCharacterWidth = simpleCeil((double) requestData->logoPixelWidth / requestData->characterPixelWidth);
-    requestData->logoCharacterHeight = simpleCeil((double) requestData->logoPixelHeight / requestData->characterPixelHeight);
+    requestData->logoCharacterWidth = (uint32_t) ceil((double) requestData->logoPixelWidth / requestData->characterPixelWidth);
+    requestData->logoCharacterHeight = (uint32_t) ceil((double) requestData->logoPixelHeight / requestData->characterPixelHeight);
 
     if(requestData->logoPixelWidth == 0 || requestData->logoPixelHeight == 0 || requestData->logoCharacterWidth == 0 || requestData->logoCharacterHeight == 0)
     {
@@ -608,8 +603,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop;
 
     //Go to upper left corner
-    fputs("\033[9999999D", stdout);
-    printf("\033[%uA", instance.state.logoHeight);
+    printf("\033[9999999D\033[%uA", instance.state.logoHeight);
     return true;
 }
 
@@ -674,8 +668,8 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
         return false;
     }
 
-    requestData.logoPixelWidth = simpleCeil((double) instance.config.logo.width * requestData.characterPixelWidth);
-    requestData.logoPixelHeight = simpleCeil((double) instance.config.logo.height * requestData.characterPixelHeight);
+    requestData.logoPixelWidth = (uint32_t) ceil((double) instance.config.logo.width * requestData.characterPixelWidth);
+    requestData.logoPixelHeight = (uint32_t) ceil((double) instance.config.logo.height * requestData.characterPixelHeight);
 
     ffStrbufInit(&requestData.cacheDir);
     ffStrbufAppend(&requestData.cacheDir, &instance.state.platform.cacheDir);
@@ -692,11 +686,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
     ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
-
-    ffStrbufAppendF(&requestData.cacheDir, "%u", requestData.logoPixelWidth);
-    ffStrbufAppendC(&requestData.cacheDir, '*');
-    ffStrbufAppendF(&requestData.cacheDir, "%u", requestData.logoPixelHeight);
-    ffStrbufAppendC(&requestData.cacheDir, '/');
+    ffStrbufAppendF(&requestData.cacheDir, "%u*%u/", requestData.logoPixelWidth, requestData.logoPixelHeight);
 
     if(!instance.config.logo.recache && printCached(&requestData))
     {
