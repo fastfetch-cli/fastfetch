@@ -3657,6 +3657,15 @@ static const FFlogo T[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // TuxedoOS
+    {
+        .names = {"Tuxedo OS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TUXEDO_OS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+        },
+    },
     // Twister
     {
         .names = {"Twister"},
