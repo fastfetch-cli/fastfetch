@@ -1002,7 +1002,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             optionCheckString(key, value, &instance.config.colorKeys);
             ffOptionParseColor(value, &instance.config.colorKeys);
         }
-        else if(ffStrEqualsIgnCase(key, "-title"))
+        else if(ffStrEqualsIgnCase(subkey, "-title"))
         {
             optionCheckString(key, value, &instance.config.colorTitle);
             ffOptionParseColor(value, &instance.config.colorTitle);
