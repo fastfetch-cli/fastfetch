@@ -1,6 +1,15 @@
 # Fastfetch
 
-[![CI](https://github.com/fastfetch-cli/fastfetch/actions/workflows/ci.yml/badge.svg)](https://github.com/fastfetch-cli/fastfetch/actions/workflows/ci.yml)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fastfetch-cli/fastfetch/ci.yml)
+![GitHub license](https://img.shields.io/github/license/fastfetch-cli/fastfetch)
+![GitHub contributors](https://img.shields.io/github/contributors/fastfetch-cli/fastfetch)
+![GitHub top language](https://img.shields.io/github/languages/top/fastfetch-cli/fastfetch?logo=c&label=)
+![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/m/fastfetch-cli/fastfetch)  
+![homebrew downloads](https://img.shields.io/homebrew/installs/dm/fastfetch?logo=homebrew)
+![GitHub all releases](https://img.shields.io/github/downloads/fastfetch-cli/fastfetch/total?logo=github)  
+![GitHub release (with filter)](https://img.shields.io/github/v/release/fastfetch-cli/fastfetch?logo=github)
+[![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
+[![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 
 Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written mainly in C, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
