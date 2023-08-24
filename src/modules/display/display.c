@@ -12,7 +12,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
     if(dsResult->displays.length == 0)
     {
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &instance.config.display.moduleArgs, "Couldn't detect display");
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect display");
         return;
     }
 
