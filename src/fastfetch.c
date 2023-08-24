@@ -1053,7 +1053,9 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         });
     }
     else if(ffStrEqualsIgnCase(key, "--percent-type"))
-        instance.config.percentType = ffOptionParseUInt32(key, value);
+        instance.config.percentType = (uint8_t) ffOptionParseUInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--percent-ndigits"))
+        instance.config.percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         instance.config.noBuffer = ffOptionParseBoolean(value);
     else if(ffStrStartsWithIgnCase(key, "--bar"))

@@ -93,7 +93,7 @@ void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
         }
     }
-    ffStrbufAppendF(buffer, "%u%%", (unsigned) (percent + 0.5));
+    ffStrbufAppendF(buffer, "%.*f%%", instance.config.percentNdigits, percent);
 
     if (colored && !instance.config.pipe)
     {

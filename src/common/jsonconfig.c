@@ -325,7 +325,9 @@ const char* ffParseDisplayJsonConfig(void)
             config->temperatureUnit = (FFTemperatureUnit) value;
         }
         else if (ffStrEqualsIgnCase(key, "percentType"))
-            config->percentType = (uint32_t) yyjson_get_uint(val);
+            config->percentType = (uint8_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "percentNdigits"))
+            config->percentNdigits = (uint8_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "bar"))
         {
             if (yyjson_is_obj(val))
