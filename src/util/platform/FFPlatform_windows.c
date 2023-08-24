@@ -6,6 +6,18 @@
 #include <Windows.h>
 #include <shlobj.h>
 
+static void getExePath(FFPlatform* platform)
+{
+    wchar_t exePathW[MAX_PATH];
+    DWORD exePathWLen = GetModuleFileNameW(NULL, exePathW, MAX_PATH);
+    if (exePathWLen == 0 && exePathWLen >= MAX_PATH) return;
+
+    ffStrbufSetNWS(&platform->exePath, exePathWLen, exePathW);
+    if (ffStrbufStartsWithS(&platform->exePath, "\\\\?\\"))
+        ffStrbufSubstrAfter(&platform->exePath, 3);
+    ffStrbufReplaceAllC(&platform->exePath, '\\', '/');
+}
+
 static void getHomeDir(FFPlatform* platform)
 {
     PWSTR pPath;
@@ -213,6 +225,7 @@ static void getSystemArchitecture(FFPlatform* platform)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
+    getExePath(platform);
     getHomeDir(platform);
     getCacheDir(platform);
     getConfigDirs(platform);

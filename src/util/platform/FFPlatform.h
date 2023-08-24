@@ -11,6 +11,7 @@ typedef struct FFPlatform {
     FFstrbuf cacheDir; // Trailing slash included
     FFlist configDirs; // List of FFstrbuf, trailing slash included
     FFlist dataDirs;   // List of FFstrbuf, trailing slash included
+    FFstrbuf exePath; // The real path of current exe
 
     FFstrbuf userName;
     FFstrbuf hostName;

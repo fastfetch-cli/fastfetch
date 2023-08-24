@@ -8,6 +8,7 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->cacheDir);
     ffListInit(&platform->configDirs, sizeof(FFstrbuf));
     ffListInit(&platform->dataDirs, sizeof(FFstrbuf));
+    ffStrbufInit(&platform->exePath);
 
     ffStrbufInit(&platform->userName);
     ffStrbufInit(&platform->hostName);
