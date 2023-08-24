@@ -3,9 +3,11 @@
 Bugfixes:
 * Fix typo in config parsing for --color-title (#534)
 * Fix percent formatting for `--*-format` (#535)
+* Fix loading presets for homebrew (macOS)
 
 Features:
 * Add option `--percent-ndigits`
+* Add command flag `--config` as an alias of `--load-config`
 
 # 2.0.2
 

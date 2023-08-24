@@ -19,6 +19,7 @@ Informative options:
 
 General options:
     --load-config <file>:             Load a config file or preset (+)
+    --config <file>:                  Alias of --load-config (+)
     --multithreading <?value>:        Use multiple threads to detect values
     --stat <?value>:                  Show time usage (in ms) for individual modules
     --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
