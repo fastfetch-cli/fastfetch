@@ -8,6 +8,7 @@ Bugfixes:
 Features:
 * Add option `--percent-ndigits`
 * Add command flag `--config` as an alias of `--load-config`
+* Windows packages now include presets (Windows)
 
 # 2.0.2
 
