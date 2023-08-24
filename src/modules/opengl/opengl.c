@@ -14,7 +14,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.slv);
 
-    const char* error = ffDetectOpenGL(&result);
+    const char* error = ffDetectOpenGL(options, &result);
     if(error)
     {
         ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "%s", error);

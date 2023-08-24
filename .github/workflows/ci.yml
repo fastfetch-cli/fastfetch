@@ -187,7 +187,7 @@ jobs:
         with:
           msystem: CLANG64
           update: true
-          install: git zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
+          install: git mingw-w64-clang-x86_64-7zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-opencl-icd
 
       - name: print msys version
         run: uname -a
@@ -222,13 +222,16 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-$(./fastfetch --version-raw)-Win64.zip *.dll fastfetch.exe flashfetch.exe
+        run: 7z a -tzip -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-Win64.zip *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: create 7z archive
+        run: 7z a -t7z -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-Win64.7z *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-win64
-          path: ./fastfetch-*-Win64.zip
+          path: ./fastfetch-*-Win64.*
 
   win32:
     name: Win32
@@ -248,7 +251,7 @@ jobs:
         with:
           msystem: CLANG32
           update: true
-          install: git zip mingw-w64-clang-i686-cmake mingw-w64-clang-i686-clang mingw-w64-clang-i686-vulkan-loader mingw-w64-clang-i686-opencl-icd
+          install: git mingw-w64-clang-i686-7zip mingw-w64-clang-i686-cmake mingw-w64-clang-i686-clang mingw-w64-clang-i686-vulkan-loader mingw-w64-clang-i686-opencl-icd
 
       - name: print msys version
         run: uname -a
@@ -280,13 +283,16 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-$(./fastfetch --version-raw)-Win32.zip *.dll fastfetch.exe flashfetch.exe
+        run: 7z a -tzip -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-Win32.zip *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: create 7z archive
+        run: 7z a -t7z -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-Win32.7z *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: fastfetch-win32
-          path: ./fastfetch-*-Win32.zip
+          path: ./fastfetch-*-Win32.*
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'

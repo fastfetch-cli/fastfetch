@@ -58,11 +58,11 @@ static inline void printCommandHelp(const char* command)
 {
     if(command == NULL)
         puts(FASTFETCH_DATATEXT_HELP);
-    else if(ffStrEqualsIgnCase(command, "c") || ffStrEqualsIgnCase(command, "color"))
+    else if(ffStrEqualsIgnCase(command, "color"))
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "loadconfig") || ffStrEqualsIgnCase(command, "config"))
+    else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "config"))
         puts(FASTFETCH_DATATEXT_HELP_CONFIG);
     else if(ffStrEqualsIgnCase(command, "os-format"))
     {
@@ -779,6 +779,19 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
             return;
     }
 
+    {
+        //Try exe path
+        ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
+        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+        ffStrbufAppendS(&absolutePath, "/presets/");
+        ffStrbufAppendS(&absolutePath, value);
+
+        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+
+        if(success)
+            return;
+    }
+
     //File not found
 
     fprintf(stderr, "Error: couldn't find config: %s\n", value);
@@ -932,7 +945,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //General options//
     ///////////////////
 
-    else if(ffStrEqualsIgnCase(key, "--load-config"))
+    else if(ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
         generateConfigFile(false, value);
@@ -1002,7 +1015,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             optionCheckString(key, value, &instance.config.colorKeys);
             ffOptionParseColor(value, &instance.config.colorKeys);
         }
-        else if(ffStrEqualsIgnCase(key, "-title"))
+        else if(ffStrEqualsIgnCase(subkey, "-title"))
         {
             optionCheckString(key, value, &instance.config.colorTitle);
             ffOptionParseColor(value, &instance.config.colorTitle);
@@ -1053,7 +1066,9 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         });
     }
     else if(ffStrEqualsIgnCase(key, "--percent-type"))
-        instance.config.percentType = ffOptionParseUInt32(key, value);
+        instance.config.percentType = (uint8_t) ffOptionParseUInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--percent-ndigits"))
+        instance.config.percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         instance.config.noBuffer = ffOptionParseBoolean(value);
     else if(ffStrStartsWithIgnCase(key, "--bar"))

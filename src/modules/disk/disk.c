@@ -92,17 +92,21 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
     else
     {
-        uint8_t filesPercentage = disk->filesTotal > 0 ? (uint8_t) (((double) disk->filesUsed / (double) disk->filesTotal) * 100.0) : 0;
+        FF_STRBUF_AUTO_DESTROY bytesPercentageStr = ffStrbufCreate();
+        ffAppendPercentNum(&bytesPercentageStr, bytesPercentage, 50, 80, false);
+        FF_STRBUF_AUTO_DESTROY filesPercentageStr = ffStrbufCreate();
+        double filesPercentage = disk->filesTotal > 0 ? ((double) disk->filesUsed / (double) disk->filesTotal) * 100.0 : 0;
+        ffAppendPercentNum(&filesPercentageStr, filesPercentage, 50, 80, false);
 
         bool isExternal = !!(disk->type & FF_DISK_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_TYPE_HIDDEN_BIT);
         ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
-            {FF_FORMAT_ARG_TYPE_UINT8, &bytesPercentage},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageStr},
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed},
             {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal},
-            {FF_FORMAT_ARG_TYPE_UINT8, &filesPercentage},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &filesPercentageStr},
             {FF_FORMAT_ARG_TYPE_BOOL, &isExternal},
             {FF_FORMAT_ARG_TYPE_BOOL, &isHidden},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},

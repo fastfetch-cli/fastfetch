@@ -74,6 +74,7 @@ static void defaultConfig(void)
     instance.config.barWidth = 10;
     instance.config.barBorder = true;
     instance.config.percentType = 1;
+    instance.config.percentNdigits = 0;
 
     ffInitBatteryOptions(&instance.config.battery);
     ffInitBiosOptions(&instance.config.bios);

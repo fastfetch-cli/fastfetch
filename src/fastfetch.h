@@ -61,7 +61,8 @@ typedef struct FFconfig
     FFstrbuf barCharTotal;
     uint8_t barWidth;
     bool barBorder;
-    uint32_t percentType;
+    uint8_t percentType;
+    uint8_t percentNdigits;
     bool pipe; //disables logo and all escape sequences
     bool multithreading;
     bool stat;

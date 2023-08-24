@@ -56,10 +56,12 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffAppendPercentNum(&percentageStr, percentage, 50, 80, false);
         ffPrintFormat(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
-            {FF_FORMAT_ARG_TYPE_UINT8, &percentage},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
         });
     }
 }

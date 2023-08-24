@@ -35,7 +35,7 @@ static const char* cglHandlePixelFormat(FFOpenGLResult* result, CGLPixelFormatOb
     return error;
 }
 
-const char* ffDetectOpenGL(FFOpenGLResult* result)
+const char* ffDetectOpenGL(FF_MAYBE_UNUSED FFOpenGLOptions* options, FFOpenGLResult* result)
 {
     CGLPixelFormatObj pixelFormat;
     CGLPixelFormatAttribute attrs[] = {
