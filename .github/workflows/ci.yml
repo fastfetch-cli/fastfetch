@@ -222,7 +222,7 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-$(./fastfetch --version-raw)-Win64.zip *.dll fastfetch.exe flashfetch.exe presets
+        run: zip -r9 fastfetch-$(./fastfetch --version-raw)-Win64.zip *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
@@ -280,7 +280,7 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: zip fastfetch-$(./fastfetch --version-raw)-Win32.zip *.dll fastfetch.exe flashfetch.exe presets
+        run: zip -r9 fastfetch-$(./fastfetch --version-raw)-Win32.zip *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v3
