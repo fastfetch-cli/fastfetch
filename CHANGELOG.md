@@ -1,3 +1,12 @@
+# 2.0.3
+
+Bugfixes:
+* Fix typo in config parsing for --color-title (#534)
+* Fix percent formatting for `--*-format` (#535)
+
+Features:
+* Add option `--percent-ndigits`
+
 # 2.0.2
 
 Bugfixes:
