@@ -43,10 +43,9 @@ void ffPrintBrightness(FFBrightnessOptions* options)
             });
         }
 
-        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-
         if(options->moduleArgs.outputFormat.length == 0)
         {
+            FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
@@ -66,8 +65,10 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         }
         else
         {
+            FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
+            ffAppendPercentNum(&valueStr, item->value, 10, 10, false);
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_FLOAT, &item->value},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
             });
         }

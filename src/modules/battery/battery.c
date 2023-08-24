@@ -10,16 +10,15 @@
 
 static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8_t index)
 {
-    if(instance.config.battery.moduleArgs.outputFormat.length == 0)
+    if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         bool showStatus =
             !(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
-
-        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
         if(result->capacity >= 0)
         {
@@ -62,11 +61,13 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY capacityStr = ffStrbufCreate();
+        ffAppendPercentNum(&capacityStr, result->capacity, 51, 21, false);
         ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result->capacity},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &capacityStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
         });

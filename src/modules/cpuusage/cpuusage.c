@@ -36,8 +36,10 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffAppendPercentNum(&percentageStr, percentage, 50, 80, false);
         ffPrintFormat(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_CPUUSAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &percentage}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr}
         });
     }
 }
