@@ -314,11 +314,11 @@ static const char* osMesaPrint(FFOpenGLResult* result)
 
 #endif //FF_HAVE_OSMESA
 
-const char* ffDetectOpenGL(FFOpenGLResult* result)
+const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
 {
     #if FF_HAVE_GL
 
-    if(instance.config.openGL.library == FF_OPENGL_LIBRARY_GLX)
+    if(options->library == FF_OPENGL_LIBRARY_GLX)
     {
         #ifdef FF_HAVE_GLX
             return glxPrint(result);
@@ -327,7 +327,7 @@ const char* ffDetectOpenGL(FFOpenGLResult* result)
         #endif
     }
 
-    if(instance.config.openGL.library == FF_OPENGL_LIBRARY_EGL)
+    if(options->library == FF_OPENGL_LIBRARY_EGL)
     {
         #ifdef FF_HAVE_EGL
             return eglPrint(result);
@@ -336,7 +336,7 @@ const char* ffDetectOpenGL(FFOpenGLResult* result)
         #endif
     }
 
-    if(instance.config.openGL.library == FF_OPENGL_LIBRARY_OSMESA)
+    if(options->library == FF_OPENGL_LIBRARY_OSMESA)
     {
         #ifdef FF_HAVE_OSMESA
             return osMesaPrint(result);

@@ -82,7 +82,7 @@ LRESULT CALLBACK wglHandleWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     }
 }
 
-const char* ffDetectOpenGL(FFOpenGLResult* result)
+const char* ffDetectOpenGL(FF_MAYBE_UNUSED FFOpenGLOptions* options, FFOpenGLResult* result)
 {
     MSG msg = {0};
     WNDCLASSW wc = {
