@@ -5,7 +5,14 @@
 
 #include <unistd.h>
 #include <pwd.h>
+#include <limits.h>
 #include <sys/utsname.h>
+
+#ifdef __APPLE__
+    #include <libproc.h>
+#elif defined(__FreeBSD__)
+    #include <sys/sysctl.h>
+#endif
 
 static void platformPathAddEnv(FFlist* dirs, const char* env)
 {
@@ -82,7 +89,31 @@ static void getDataDirs(FFPlatform* platform)
     platformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
 
-    #if defined(__APPLE__)
+    // Add ${currentExePath}/../share
+    FF_STRBUF_AUTO_DESTROY exePath = ffStrbufCreateA(PATH_MAX);
+    #ifdef __linux__
+        ssize_t exePathLen = readlink("/proc/self/exe", exePath.chars, exePath.allocated);
+    #elif defined(__APPLE__)
+        int exePathLen = proc_pidpath((int) getpid(), exePath.chars, exePath.allocated);
+    #elif defined(__FreeBSD__)
+        size_t exePathLen = exePath.allocated;
+        if(sysctl(
+            (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()}, 4,
+            exePath.chars, &exePathLen,
+            NULL, 0
+        ))
+            exePathLen = 0;
+    #endif
+    if (exePathLen > 0)
+    {
+        exePath.length = (uint32_t) exePathLen;
+        ffStrbufSubstrBeforeLastC(&exePath, '/');
+        ffStrbufSubstrBeforeLastC(&exePath, '/');
+        ffStrbufAppendS(&exePath, "/share");
+        ffPlatformPathAddAbsolute(&platform->dataDirs, exePath.chars);
+    }
+
+    #ifdef __APPLE__
         ffPlatformPathAddHome(&platform->dataDirs, platform, "Library/Application Support/");
     #endif
 

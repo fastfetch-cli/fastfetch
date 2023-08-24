@@ -48,7 +48,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     if(length > 0)
         exe->length = (uint32_t)length;
 
-    #else
+    #elif defined(__FreeBSD__)
 
     size_t size = exe->allocated;
     if(!sysctl(
