@@ -779,6 +779,19 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
             return;
     }
 
+    {
+        //Try exe path
+        ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
+        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+        ffStrbufAppendS(&absolutePath, "/presets/");
+        ffStrbufAppendS(&absolutePath, value);
+
+        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+
+        if(success)
+            return;
+    }
+
     //File not found
 
     fprintf(stderr, "Error: couldn't find config: %s\n", value);
