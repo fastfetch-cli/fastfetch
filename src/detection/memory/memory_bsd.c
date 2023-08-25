@@ -3,7 +3,7 @@
 
 const char* ffDetectMemory(FFMemoryResult* ram)
 {
-    uint64_t length = sizeof(ram->bytesTotal);
+    size_t length = sizeof(ram->bytesTotal);
     if (sysctl((int[]){ CTL_HW, HW_PHYSMEM }, 2, &ram->bytesTotal, &length, NULL, 0))
         return "Failed to read hw.physmem";
 

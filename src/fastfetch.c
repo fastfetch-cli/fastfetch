@@ -1205,7 +1205,8 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
         }
 
         if(i == argc - 1 || (
-            *argv[i + 1] == '-' &&
+            argv[i + 1][0] == '-' &&
+            argv[i + 1][1] != '\0' && // `-` is used as an alias for `/dev/stdin`
             strcasecmp(argv[i], "--separator-string") != 0 // Separator string can start with a -
         )) {
             parseOption(data, argv[i], NULL);

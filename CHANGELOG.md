@@ -1,3 +1,12 @@
+# 2.0.4
+
+Bugfixes:
+* Fix building on 32-bit FreeBSD (Memory, BSD)
+* Fix `--file-raw` doesn't work (Logo)
+
+Features:
+* Trait `-` as an alias for `/dev/stdin`. Available for `--file`, `--file-raw` and `--raw` (Logo)
+
 # 2.0.3
 
 Bugfixes:

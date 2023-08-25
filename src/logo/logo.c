@@ -359,7 +359,10 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
 
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
 
-    if(!ffAppendFileBuffer(options->source.chars, &content))
+    if(ffStrbufEqualS(&options->source, "-")
+        ? !ffAppendFDBuffer(FFUnixFD2NativeFD(STDIN_FILENO), &content)
+        : !ffAppendFileBuffer(options->source.chars, &content)
+    )
     {
         fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
         return false;
