@@ -126,7 +126,7 @@ logoType:
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_FILE;
         }
-        else if(strcasecmp(key, "raw") == 0)
+        else if(strcasecmp(subKey, "raw") == 0)
         {
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_FILE_RAW;
