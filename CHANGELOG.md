@@ -1,3 +1,9 @@
+# dev
+
+Features:
+* Add option `--disk-use-available` (#543)
+* Add option `--disk-show-readonly`
+
 # 2.0.4
 
 Bugfixes:
