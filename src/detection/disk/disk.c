@@ -22,7 +22,7 @@ const char* ffDetectDisks(FFlist* disks)
     FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
         if(disk->bytesTotal == 0)
-            disk->type |= FF_DISK_TYPE_UNKNOWN_BIT;
+            disk->type |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
     }
 
     return NULL;

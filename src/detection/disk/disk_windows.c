@@ -34,11 +34,11 @@ const char* ffDetectDisksImpl(FFlist* disks)
         disk->bytesUsed = disk->bytesTotal - bytesFree;
 
         if(driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM)
-            disk->type = FF_DISK_TYPE_EXTERNAL_BIT;
+            disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
         else if(driveType == DRIVE_FIXED)
-            disk->type = FF_DISK_TYPE_REGULAR_BIT;
+            disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
         else
-            disk->type = FF_DISK_TYPE_HIDDEN_BIT;
+            disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
 
         ffStrbufInit(&disk->filesystem);
         ffStrbufInit(&disk->name);

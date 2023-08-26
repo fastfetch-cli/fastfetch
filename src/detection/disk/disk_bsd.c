@@ -10,15 +10,15 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
     if(ffStrbufEqualS(&disk->filesystem, "zfs"))
     {
         disk->type = !ffStrStartsWith(fs->f_mntfromname, "zroot/") || ffStrStartsWith(fs->f_mntfromname, "zroot/ROOT/")
-            ? FF_DISK_TYPE_REGULAR_BIT
-            : FF_DISK_TYPE_SUBVOLUME_BIT;
+            ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
+            : FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     }
     else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/"))
-        disk->type = FF_DISK_TYPE_HIDDEN_BIT;
+        disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(!(fs->f_flags & MNT_LOCAL))
-        disk->type = FF_DISK_TYPE_EXTERNAL_BIT;
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
-        disk->type = FF_DISK_TYPE_REGULAR_BIT;
+        disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 
     ffStrbufInit(&disk->name);
 }

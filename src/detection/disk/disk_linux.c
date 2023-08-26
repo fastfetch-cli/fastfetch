@@ -155,11 +155,11 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
 static void detectType(FF_MAYBE_UNUSED const FFlist* devices, FFDisk* currentDisk, FF_MAYBE_UNUSED const char* options)
 {
     if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
-        currentDisk->type = FF_DISK_TYPE_REGULAR_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/mnt/media_rw/"))
-        currentDisk->type = FF_DISK_TYPE_EXTERNAL_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
-        currentDisk->type = FF_DISK_TYPE_HIDDEN_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
 }
 
 #else
@@ -191,13 +191,13 @@ static bool isSubvolume(const FFlist* devices)
 static void detectType(const FFlist* devices, FFDisk* currentDisk, const char* options)
 {
     if(isSubvolume(devices))
-        currentDisk->type = FF_DISK_TYPE_SUBVOLUME_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     else if(strstr(options, "nosuid") != NULL || strstr(options, "nodev") != NULL)
-        currentDisk->type = FF_DISK_TYPE_EXTERNAL_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
-        currentDisk->type = FF_DISK_TYPE_HIDDEN_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else
-        currentDisk->type = FF_DISK_TYPE_REGULAR_BIT;
+        currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
 
 #endif
