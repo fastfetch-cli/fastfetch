@@ -52,11 +52,12 @@ const char* ffDetectDisksImpl(FFlist* disks)
         //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationa#remarks
         UINT errorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 
+        DWORD diskFlags;
         BOOL result = GetVolumeInformationW(mountpoint,
             diskName, sizeof(diskName) / sizeof(*diskName), //Volume name
             NULL, //Serial number
             NULL, //Max component length
-            NULL, //File system flags
+            &diskFlags, //File system flags
             diskFileSystem, sizeof(diskFileSystem) / sizeof(*diskFileSystem)
         );
         SetErrorMode(errorMode);
@@ -65,6 +66,8 @@ const char* ffDetectDisksImpl(FFlist* disks)
         {
             ffStrbufSetWS(&disk->filesystem, diskFileSystem);
             ffStrbufSetWS(&disk->name, diskName);
+            if(diskFlags & FILE_READ_ONLY_VOLUME)
+                disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
         }
 
         //Unsupported

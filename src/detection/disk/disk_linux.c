@@ -215,6 +215,9 @@ static void detectStats(FFDisk* disk)
 
     disk->filesTotal = (uint32_t) fs.f_files;
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
+
+    if(fs.f_flag & ST_RDONLY)
+        disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 }
 
 const char* ffDetectDisksImpl(FFlist* disks)

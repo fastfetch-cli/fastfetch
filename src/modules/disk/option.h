@@ -12,6 +12,7 @@ typedef enum FFDiskVolumeType
     FF_DISK_VOLUME_TYPE_EXTERNAL_BIT = 1 << 2,
     FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT = 1 << 3,
     FF_DISK_VOLUME_TYPE_UNKNOWN_BIT = 1 << 4,
+    FF_DISK_VOLUME_TYPE_READONLY_BIT = 1 << 5,
 } FFDiskVolumeType;
 
 typedef enum FFDiskCalcType

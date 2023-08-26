@@ -100,6 +100,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
+        bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
         ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
@@ -110,7 +111,8 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
             {FF_FORMAT_ARG_TYPE_BOOL, &isExternal},
             {FF_FORMAT_ARG_TYPE_BOOL, &isHidden},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
+            {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly},
         });
     }
 }
@@ -156,7 +158,7 @@ static void printAutodetected(FFDiskOptions* options, const FFlist* disks)
 {
     FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
-        if(!(disk->type & options->showTypes))
+        if(disk->type & ~options->showTypes)
             continue;
 
         printDisk(options, disk);
@@ -194,7 +196,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);
-    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
 }
 
@@ -244,6 +246,15 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
             options->showTypes |= FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
         else
             options->showTypes &= ~FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "show-readonly"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->showTypes |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+        else
+            options->showTypes &= ~FF_DISK_VOLUME_TYPE_READONLY_BIT;
         return true;
     }
 
@@ -316,6 +327,15 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
                 options->showTypes |= FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
             else
                 options->showTypes &= ~FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showReadOnly"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+            else
+                options->showTypes &= ~FF_DISK_VOLUME_TYPE_READONLY_BIT;
             continue;
         }
 

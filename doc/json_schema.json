@@ -884,6 +884,11 @@
                                         "title": "Set if subvolumes should be printed",
                                         "default": false
                                     },
+                                    "showReadOnly": {
+                                        "type": "boolean",
+                                        "title": "Set if read only volumes should be printed",
+                                        "default": false
+                                    },
                                     "showUnknown": {
                                         "type": "boolean",
                                         "title": "Set if unknown (unable to detect sizes) volumes should be printed",
