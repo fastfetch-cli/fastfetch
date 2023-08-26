@@ -25,13 +25,18 @@ const char* ffDetectDisksImpl(FFlist* disks)
         FFDisk* disk = ffListAdd(disks);
         ffStrbufInitWS(&disk->mountpoint, mountpoint);
 
-        uint64_t bytesFree;
-        if(!GetDiskFreeSpaceExW(mountpoint, NULL, (PULARGE_INTEGER)&disk->bytesTotal, (PULARGE_INTEGER)&bytesFree))
+        if(!GetDiskFreeSpaceExW(
+            mountpoint,
+            (PULARGE_INTEGER)&disk->bytesAvailable,
+            (PULARGE_INTEGER)&disk->bytesTotal,
+            (PULARGE_INTEGER)&disk->bytesFree
+        ))
         {
             disk->bytesTotal = 0;
-            bytesFree = 0;
+            disk->bytesFree = 0;
+            disk->bytesAvailable = 0;
         }
-        disk->bytesUsed = disk->bytesTotal - bytesFree;
+        disk->bytesUsed = 0; // To be filled in ./disk.c
 
         if(driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM)
             disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;

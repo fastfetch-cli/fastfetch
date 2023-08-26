@@ -209,7 +209,9 @@ static void detectStats(FFDisk* disk)
         memset(&fs, 0, sizeof(struct statvfs)); //Set all values to 0, so our values get initialized to 0 too
 
     disk->bytesTotal = fs.f_blocks * fs.f_frsize;
-    disk->bytesUsed = disk->bytesTotal - (fs.f_bfree * fs.f_frsize);
+    disk->bytesFree = fs.f_bfree * fs.f_frsize;
+    disk->bytesAvailable = fs.f_bavail * fs.f_frsize;
+    disk->bytesUsed = 0; // To be filled in ./disk.c
 
     disk->filesTotal = (uint32_t) fs.f_files;
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);

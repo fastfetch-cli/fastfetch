@@ -889,6 +889,11 @@
                                         "title": "Set if unknown (unable to detect sizes) volumes should be printed",
                                         "default": false
                                     },
+                                    "useAvailable": {
+                                        "type": "boolean",
+                                        "title": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

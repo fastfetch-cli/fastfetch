@@ -14,6 +14,12 @@ typedef enum FFDiskVolumeType
     FF_DISK_VOLUME_TYPE_UNKNOWN_BIT = 1 << 4,
 } FFDiskVolumeType;
 
+typedef enum FFDiskCalcType
+{
+    FF_DISK_CALC_TYPE_FREE,
+    FF_DISK_CALC_TYPE_AVAILABLE,
+} FFDiskCalcType;
+
 typedef struct FFDiskOptions
 {
     FFModuleBaseInfo moduleInfo;
@@ -21,4 +27,5 @@ typedef struct FFDiskOptions
 
     FFstrbuf folders;
     FFDiskVolumeType showTypes;
+    FFDiskCalcType calcType;
 } FFDiskOptions;

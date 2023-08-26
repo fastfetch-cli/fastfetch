@@ -166,7 +166,7 @@ static void printAutodetected(FFDiskOptions* options, const FFlist* disks)
 void ffPrintDisk(FFDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
-    const char* error = ffDetectDisks(&disks);
+    const char* error = ffDetectDisks(options, &disks);
 
     if(error)
     {
@@ -195,6 +195,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
 
     ffStrbufInit(&options->folders);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    options->calcType = FF_DISK_CALC_TYPE_FREE;
 }
 
 bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const char* value)
@@ -252,6 +253,15 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
             options->showTypes |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
         else
             options->showTypes &= ~FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "use-available"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->calcType = FF_DISK_CALC_TYPE_AVAILABLE;
+        else
+            options->calcType = FF_DISK_CALC_TYPE_FREE;
         return true;
     }
 
@@ -315,6 +325,15 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
                 options->showTypes |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
             else
                 options->showTypes &= ~FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "useAvailable"))
+        {
+            if (yyjson_get_bool(val))
+                options->calcType = FF_DISK_CALC_TYPE_AVAILABLE;
+            else
+                options->calcType = FF_DISK_CALC_TYPE_FREE;
             continue;
         }
 
