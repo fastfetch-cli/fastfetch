@@ -79,12 +79,22 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
             if(disk->filesystem.length)
                 ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
 
+            ffStrbufAppendC(&str, '[');
             if(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
-                ffStrbufAppendS(&str, "[External]");
-            else if(disk->type & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
-                ffStrbufAppendS(&str, "[Subvolume]");
-            else if(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT)
-                ffStrbufAppendS(&str, "[Hidden]");
+                ffStrbufAppendS(&str, "External, ");
+            if(disk->type & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
+                ffStrbufAppendS(&str, "Subvolume, ");
+            if(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT)
+                ffStrbufAppendS(&str, "Hidden, ");
+            if(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT)
+                ffStrbufAppendS(&str, "Read-only, ");
+            if (str.chars[str.length - 1] == '[')
+                ffStrbufSubstrBefore(&str, str.length - 1);
+            else
+            {
+                ffStrbufTrimRight(&str, ' ');
+                str.chars[str.length - 1] = ']';
+            }
         }
 
         ffStrbufTrimRight(&str, ' ');

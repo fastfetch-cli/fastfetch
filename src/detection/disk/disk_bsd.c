@@ -56,7 +56,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         detectFsInfo(fs, disk);
 
-        if(fs->f_flags & MNT_EXRDONLY)
+        if(fs->f_flags & MNT_RDONLY)
             disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
     }
 
