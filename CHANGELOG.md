@@ -1,5 +1,8 @@
 # dev
 
+Bugfixes:
+* Fix segfault when using libxrandr (#544, Display, Linux)
+
 Features:
 * Add option `--disk-use-available` (#543)
 * Add option `--disk-show-readonly`
