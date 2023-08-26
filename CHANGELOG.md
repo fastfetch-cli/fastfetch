@@ -1,7 +1,8 @@
-# dev
+# 2.0.5
 
 Bugfixes:
 * Fix segfault when using libxrandr (#544, Display, Linux)
+* Don't print 0px (#544, Cursor)
 
 Features:
 * Add option `--disk-use-available` (#543)

@@ -31,7 +31,7 @@ void ffPrintCursor(FFCursorOptions* options)
             ffPrintLogoAndKey(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufWriteTo(&result.theme, stdout);
 
-            if(result.size.length > 0)
+            if(result.size.length > 0 && !ffStrbufEqualS(&result.size, "0"))
                 printf(" (%spx)", result.size.chars);
 
             putchar('\n');
