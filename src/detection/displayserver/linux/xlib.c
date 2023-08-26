@@ -220,6 +220,8 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
                 ffEdidGetName(edidData, name);
             }
         }
+        if (edidData)
+            data->ffXFree(edidData);
     }
     bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary);
 
