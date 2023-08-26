@@ -116,6 +116,7 @@ typedef struct XrandrData
 {
     FF_LIBRARY_SYMBOL(XInternAtom)
     FF_LIBRARY_SYMBOL(XGetAtomName);
+    FF_LIBRARY_SYMBOL(XFree);
     FF_LIBRARY_SYMBOL(XRRGetScreenInfo)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentConfiguration)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
@@ -207,9 +208,11 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
     Atom atomEdid = data->ffXInternAtom(data->display, "EDID", true);
     if (atomEdid != None)
     {
-        unsigned long nitems = 0;
+        int actual_format = 0;
+        unsigned long nitems = 0, bytes_after = 0;
+        Atom actual_type = None;
         uint8_t* edidData = NULL;
-        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, 0, 0, AnyPropertyType, NULL, NULL, &nitems, NULL, &edidData) == Success)
+        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, false, false, AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &edidData) == Success)
         {
             if (nitems >= 128)
             {
@@ -228,8 +231,9 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
 static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
 {
     bool foundOutput = false;
-
-    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(data->ffXGetAtomName(data->display, monitorInfo->name));
+    char* xname = data->ffXGetAtomName(data->display, monitorInfo->name);
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(xname);
+    data->ffXFree(xname);
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
         if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary))
@@ -341,6 +345,7 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
 
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XInternAtom,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XGetAtomName,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XFree,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenInfo,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentConfiguration,);
