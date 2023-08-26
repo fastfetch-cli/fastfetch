@@ -10,9 +10,11 @@ typedef struct FFDisk
     FFstrbuf mountpoint;
     FFstrbuf filesystem;
     FFstrbuf name;
-    FFDiskType type;
+    FFDiskVolumeType type;
 
     uint64_t bytesUsed;
+    uint64_t bytesFree;
+    uint64_t bytesAvailable;
     uint64_t bytesTotal;
 
     uint32_t filesUsed;
@@ -23,6 +25,6 @@ typedef struct FFDisk
  * Returns a List of FFDisk, sorted alphabetically by mountpoint.
  * If error is not set, disks contains at least one disk.
  */
-const char* ffDetectDisks(FFlist* result /* list of FFDisk */);
+const char* ffDetectDisks(FFDiskOptions* options, FFlist* result /* list of FFDisk */);
 
 #endif

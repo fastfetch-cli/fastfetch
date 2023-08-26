@@ -7,7 +7,7 @@ static int compareDisks(const void* disk1, const void* disk2)
     return ffStrbufCompAlphabetically(&((const FFDisk*) disk1)->mountpoint, &((const FFDisk*) disk2)->mountpoint);
 }
 
-const char* ffDetectDisks(FFlist* disks)
+const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
 {
     const char* error = ffDetectDisksImpl(disks);
 
@@ -22,7 +22,13 @@ const char* ffDetectDisks(FFlist* disks)
     FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
         if(disk->bytesTotal == 0)
-            disk->type |= FF_DISK_TYPE_UNKNOWN_BIT;
+            disk->type |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
+        else
+        {
+            disk->bytesUsed = disk->bytesTotal - (
+                options->calcType == FF_DISK_CALC_TYPE_FREE ? disk->bytesFree : disk->bytesAvailable
+            );
+        }
     }
 
     return NULL;

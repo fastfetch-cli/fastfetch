@@ -10,15 +10,15 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
     if(ffStrbufEqualS(&disk->filesystem, "zfs"))
     {
         disk->type = !ffStrStartsWith(fs->f_mntfromname, "zroot/") || ffStrStartsWith(fs->f_mntfromname, "zroot/ROOT/")
-            ? FF_DISK_TYPE_REGULAR_BIT
-            : FF_DISK_TYPE_SUBVOLUME_BIT;
+            ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
+            : FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     }
     else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/"))
-        disk->type = FF_DISK_TYPE_HIDDEN_BIT;
+        disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(!(fs->f_flags & MNT_LOCAL))
-        disk->type = FF_DISK_TYPE_EXTERNAL_BIT;
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
-        disk->type = FF_DISK_TYPE_REGULAR_BIT;
+        disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 
     ffStrbufInit(&disk->name);
 }
@@ -45,7 +45,9 @@ const char* ffDetectDisksImpl(FFlist* disks)
         #endif
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
-        disk->bytesUsed = disk->bytesTotal - ((uint64_t)fs->f_bfree * fs->f_bsize);
+        disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;
+        disk->bytesAvailable = (uint64_t)fs->f_bavail * fs->f_bsize;
+        disk->bytesUsed = 0; // To be filled in ./disk.c
 
         disk->filesTotal = (uint32_t) fs->f_files;
         disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs->f_ffree);
@@ -53,6 +55,9 @@ const char* ffDetectDisksImpl(FFlist* disks)
         ffStrbufInitS(&disk->mountpoint, fs->f_mntonname);
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         detectFsInfo(fs, disk);
+
+        if(fs->f_flags & MNT_RDONLY)
+            disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
     }
 
     return NULL;

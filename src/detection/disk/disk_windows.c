@@ -25,20 +25,25 @@ const char* ffDetectDisksImpl(FFlist* disks)
         FFDisk* disk = ffListAdd(disks);
         ffStrbufInitWS(&disk->mountpoint, mountpoint);
 
-        uint64_t bytesFree;
-        if(!GetDiskFreeSpaceExW(mountpoint, NULL, (PULARGE_INTEGER)&disk->bytesTotal, (PULARGE_INTEGER)&bytesFree))
+        if(!GetDiskFreeSpaceExW(
+            mountpoint,
+            (PULARGE_INTEGER)&disk->bytesAvailable,
+            (PULARGE_INTEGER)&disk->bytesTotal,
+            (PULARGE_INTEGER)&disk->bytesFree
+        ))
         {
             disk->bytesTotal = 0;
-            bytesFree = 0;
+            disk->bytesFree = 0;
+            disk->bytesAvailable = 0;
         }
-        disk->bytesUsed = disk->bytesTotal - bytesFree;
+        disk->bytesUsed = 0; // To be filled in ./disk.c
 
         if(driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM)
-            disk->type = FF_DISK_TYPE_EXTERNAL_BIT;
+            disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
         else if(driveType == DRIVE_FIXED)
-            disk->type = FF_DISK_TYPE_REGULAR_BIT;
+            disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
         else
-            disk->type = FF_DISK_TYPE_HIDDEN_BIT;
+            disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
 
         ffStrbufInit(&disk->filesystem);
         ffStrbufInit(&disk->name);
@@ -47,11 +52,12 @@ const char* ffDetectDisksImpl(FFlist* disks)
         //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationa#remarks
         UINT errorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 
+        DWORD diskFlags;
         BOOL result = GetVolumeInformationW(mountpoint,
             diskName, sizeof(diskName) / sizeof(*diskName), //Volume name
             NULL, //Serial number
             NULL, //Max component length
-            NULL, //File system flags
+            &diskFlags, //File system flags
             diskFileSystem, sizeof(diskFileSystem) / sizeof(*diskFileSystem)
         );
         SetErrorMode(errorMode);
@@ -60,6 +66,8 @@ const char* ffDetectDisksImpl(FFlist* disks)
         {
             ffStrbufSetWS(&disk->filesystem, diskFileSystem);
             ffStrbufSetWS(&disk->name, diskName);
+            if(diskFlags & FILE_READ_ONLY_VOLUME)
+                disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
         }
 
         //Unsupported
