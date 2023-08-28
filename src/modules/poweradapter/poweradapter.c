@@ -9,8 +9,7 @@
 
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
-    FFlist results;
-    ffListInit(&results, sizeof(PowerAdapterResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(PowerAdapterResult));
 
     const char* error = ffDetectPowerAdapterImpl(&results);
 
@@ -59,8 +58,6 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
             ffStrbufDestroy(&result->name);
         }
     }
-
-    ffListDestroy(&results);
 }
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)

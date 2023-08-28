@@ -76,8 +76,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
 
 void ffPrintBattery(FFBatteryOptions* options)
 {
-    FFlist results;
-    ffListInitA(&results, sizeof(BatteryResult), 0);
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(BatteryResult));
 
     const char* error = ffDetectBattery(options, &results);
 
@@ -100,8 +99,6 @@ void ffPrintBattery(FFBatteryOptions* options)
         if(results.length == 0)
             ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
     }
-
-    ffListDestroy(&results);
 }
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
