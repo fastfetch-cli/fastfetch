@@ -1,3 +1,8 @@
+# 2.0.6
+
+Features:
+* Add fast path for xfce4 version detection (DE, FreeBSD)
+
 # 2.0.5
 
 Bugfixes:
@@ -11,7 +16,7 @@ Features:
 # 2.0.4
 
 Bugfixes:
-* Fix building on 32-bit FreeBSD (Memory, BSD)
+* Fix building on 32-bit FreeBSD (Memory, FreeBSD)
 * Fix `--file-raw` doesn't work (Logo)
 
 Features:
