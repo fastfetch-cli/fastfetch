@@ -32,7 +32,7 @@ void ffPrintIcons(FFIconsOptions* options)
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

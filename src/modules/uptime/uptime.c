@@ -81,7 +81,7 @@ void ffPrintUptime(FFUptimeOptions* options)
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

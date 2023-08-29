@@ -81,7 +81,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

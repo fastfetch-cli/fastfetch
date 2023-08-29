@@ -79,7 +79,7 @@ void ffPrintCPU(FFCPUOptions* options)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 }

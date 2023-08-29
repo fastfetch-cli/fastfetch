@@ -27,6 +27,7 @@ static void initState(FFstate* state)
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
+    state->resultDoc = NULL;
 }
 
 static void defaultConfig(void)
@@ -234,8 +235,8 @@ void ffStart(void)
             startDetectionThreads();
     #endif
 
-    ffDisableLinewrap = instance.config.disableLinewrap && !instance.config.pipe;
-    ffHideCursor = instance.config.hideCursor && !instance.config.pipe;
+    ffDisableLinewrap = instance.config.disableLinewrap && !instance.config.pipe && !instance.state.resultDoc;
+    ffHideCursor = instance.config.hideCursor && !instance.config.pipe && !instance.state.resultDoc;
 
     #ifdef _WIN32
     if (!instance.config.noBuffer) setvbuf(stdout, NULL, _IOFBF, 4096);
@@ -254,7 +255,7 @@ void ffStart(void)
     #endif
 
     //reset everything to default before we start printing
-    if(!instance.config.pipe)
+    if(!instance.config.pipe && !instance.state.resultDoc)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     if(ffHideCursor)
@@ -375,6 +376,7 @@ static void destroyState(void)
 {
     ffPlatformDestroy(&instance.state.platform);
     yyjson_doc_free(instance.state.configDoc);
+    yyjson_mut_doc_free(instance.state.resultDoc);
 }
 
 void ffDestroyInstance(void)

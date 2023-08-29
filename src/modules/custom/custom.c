@@ -19,7 +19,7 @@ void ffPrintCustom(FFCustomOptions* options)
 
 void ffInitCustomOptions(FFCustomOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CUSTOM_MODULE_NAME, ffParseCustomCommandOptions, ffParseCustomJsonObject, ffPrintCustom);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CUSTOM_MODULE_NAME, ffParseCustomCommandOptions, ffParseCustomJsonObject, ffPrintCustom, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

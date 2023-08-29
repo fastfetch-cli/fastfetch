@@ -46,7 +46,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

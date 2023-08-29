@@ -52,7 +52,7 @@ void ffPrintCursor(FFCursorOptions* options)
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -9,7 +9,7 @@ void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
 
 void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BREAK_MODULE_NAME, ffParseBreakCommandOptions, ffParseBreakJsonObject, ffPrintBreak);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BREAK_MODULE_NAME, ffParseBreakCommandOptions, ffParseBreakJsonObject, ffPrintBreak, NULL);
 }
 
 bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED const char* key, FF_MAYBE_UNUSED const char* value)

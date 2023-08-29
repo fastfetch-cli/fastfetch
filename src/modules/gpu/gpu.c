@@ -121,7 +121,7 @@ void ffPrintGPU(FFGPUOptions* options)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;

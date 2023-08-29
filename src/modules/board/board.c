@@ -51,7 +51,7 @@ exit:
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

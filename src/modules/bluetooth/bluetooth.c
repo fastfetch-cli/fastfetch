@@ -75,7 +75,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->showDisconnected = false;
 }

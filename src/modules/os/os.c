@@ -139,7 +139,7 @@ void ffPrintOS(FFOSOptions* options)
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

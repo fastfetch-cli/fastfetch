@@ -202,7 +202,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);

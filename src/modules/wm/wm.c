@@ -43,7 +43,7 @@ void ffPrintWM(FFWMOptions* options)
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

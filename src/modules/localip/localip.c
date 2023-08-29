@@ -139,7 +139,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;

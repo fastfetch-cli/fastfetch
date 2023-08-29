@@ -52,7 +52,7 @@ exit:
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

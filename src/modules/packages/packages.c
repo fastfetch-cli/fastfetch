@@ -99,7 +99,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

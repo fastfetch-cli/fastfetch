@@ -103,7 +103,7 @@ void ffPrintBattery(FFBatteryOptions* options)
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJson);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
@@ -173,5 +173,39 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(BatteryResult));
+
+    const char* error = ffDetectBattery(options, &results);
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_arr(doc);
+    yyjson_mut_obj_add_val(doc, module, "result", arr);
+
+    FF_LIST_FOR_EACH(BatteryResult, battery, results)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_real(doc, obj, "capacity", battery->capacity);
+        yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &battery->manufacturer);
+        yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &battery->modelName);
+        yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
+        yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
+        yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
+    }
+
+    FF_LIST_FOR_EACH(BatteryResult, battery, results)
+    {
+        ffStrbufDestroy(&battery->manufacturer);
+        ffStrbufDestroy(&battery->modelName);
+        ffStrbufDestroy(&battery->technology);
+        ffStrbufDestroy(&battery->status);
     }
 }

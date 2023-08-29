@@ -33,7 +33,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

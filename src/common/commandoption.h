@@ -5,7 +5,24 @@
 
 #include "fastfetch.h"
 
+typedef struct FFCustomValue
+{
+    bool printKey;
+    FFstrbuf key;
+    FFstrbuf value;
+} FFCustomValue;
+
+// Things only needed by fastfetch
+typedef struct FFdata
+{
+    FFstrbuf structure;
+    FFlist customValues; // List of FFCustomValue
+    bool loadUserConfig;
+} FFdata;
+
 bool ffParseModuleCommand(const char* type);
 bool ffParseModuleOptions(const char* key, const char* value);
+void ffPrepareCommandOption(FFdata* data);
+void ffPrintCommandOption(FFdata* data);
 
 #endif

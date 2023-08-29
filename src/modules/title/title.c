@@ -51,7 +51,7 @@ void ffPrintTitle(FFTitleOptions* options)
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->fqdn = false;
     ffStrbufInit(&options->colorUser);

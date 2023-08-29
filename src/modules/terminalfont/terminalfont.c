@@ -49,7 +49,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

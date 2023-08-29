@@ -77,7 +77,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

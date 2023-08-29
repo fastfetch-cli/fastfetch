@@ -32,7 +32,7 @@ void ffPrintKernel(FFKernelOptions* options)
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

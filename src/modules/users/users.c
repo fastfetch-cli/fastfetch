@@ -45,7 +45,7 @@ void ffPrintUsers(FFUsersOptions* options)
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

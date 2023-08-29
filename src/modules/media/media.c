@@ -107,7 +107,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

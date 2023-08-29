@@ -42,7 +42,7 @@ void ffPrintDE(FFDEOptions* options)
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

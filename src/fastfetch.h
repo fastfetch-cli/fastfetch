@@ -169,6 +169,7 @@ typedef struct FFstate
 
     FFPlatform platform;
     yyjson_doc* configDoc;
+    yyjson_mut_doc* resultDoc;
 } FFstate;
 
 typedef struct FFinstance

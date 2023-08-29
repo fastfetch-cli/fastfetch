@@ -32,7 +32,7 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

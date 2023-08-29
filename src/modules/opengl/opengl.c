@@ -44,7 +44,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)

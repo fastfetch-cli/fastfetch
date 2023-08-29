@@ -97,7 +97,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->url);

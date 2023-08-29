@@ -70,6 +70,20 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
+static inline yyjson_mut_val* genJson(FFModuleBaseInfo* baseInfo)
+{
+    yyjson_mut_doc* doc = instance.state.resultDoc;
+    if (__builtin_expect(!doc, true)) return NULL;
+
+    yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
+    yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
+    if (baseInfo->generateJson)
+        baseInfo->generateJson(baseInfo, doc, module);
+    else
+        yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
+    return module;
+}
+
 static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
 {
     if(!isalpha(type[0])) return false;
@@ -80,7 +94,8 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
         if (ffStrEqualsIgnCase(type, baseInfo->name))
         {
             if (jsonVal) baseInfo->parseJsonObject(baseInfo, jsonVal);
-            baseInfo->printModule(baseInfo);
+            if (!genJson(baseInfo))
+                baseInfo->printModule(baseInfo);
             return true;
         }
     }
@@ -128,6 +143,8 @@ static const char* printJsonConfig(bool prepare)
     if (!modules) return NULL;
     if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
 
+    yyjson_mut_doc* resultDoc = instance.state.resultDoc;
+
     yyjson_val* item;
     size_t idx, max;
     yyjson_arr_foreach(modules, idx, max, item)
@@ -157,16 +174,25 @@ static const char* printJsonConfig(bool prepare)
 
         if(!prepare && instance.config.stat)
         {
-            char str[32];
-            int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-            if(instance.config.pipe)
-                puts(str);
+            ms = ffTimeGetTick() - ms;
+            if (resultDoc)
+            {
+                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(resultDoc->root);
+                yyjson_mut_obj_add_uint(resultDoc, moduleJson, "stat", ms);
+            }
             else
-                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            {
+                char str[32];
+                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
+                if(instance.config.pipe)
+                    puts(str);
+                else
+                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            }
         }
 
         #if defined(_WIN32)
-        if (!instance.config.noBuffer) fflush(stdout);
+        if (!instance.config.noBuffer && !resultDoc) fflush(stdout);
         #endif
     }
 

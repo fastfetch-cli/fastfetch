@@ -61,7 +61,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);

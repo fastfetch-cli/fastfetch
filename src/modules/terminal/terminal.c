@@ -46,7 +46,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -45,7 +45,7 @@ void ffPrintShell(FFShellOptions* options)
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

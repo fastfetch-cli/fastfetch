@@ -57,7 +57,7 @@ void ffPrintColors(FFColorsOptions* options)
 
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors, NULL);
     options->symbol = FF_COLORS_SYMBOL_BLOCK;
     options->paddingLeft = 0;
 }

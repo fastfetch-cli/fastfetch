@@ -31,7 +31,7 @@ void ffPrintVersion(FFVersionOptions* options)
 
 void ffInitVersionOptions(FFVersionOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

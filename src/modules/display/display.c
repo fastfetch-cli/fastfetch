@@ -109,7 +109,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;

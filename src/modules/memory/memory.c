@@ -68,7 +68,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

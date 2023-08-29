@@ -41,7 +41,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

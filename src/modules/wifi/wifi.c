@@ -72,7 +72,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

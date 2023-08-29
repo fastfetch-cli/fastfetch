@@ -44,7 +44,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

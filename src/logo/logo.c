@@ -460,7 +460,7 @@ void ffLogoPrint(void)
     //In pipe mode, we don't have a logo or padding.
     //We also don't need to set main color, because it won't be printed anyway.
     //So we can return quickly here.
-    if(instance.config.pipe)
+    if(instance.config.pipe || instance.state.resultDoc)
     {
         instance.state.logoHeight = 0;
         instance.state.logoWidth = 0;

@@ -51,7 +51,7 @@ void ffPrintLM(FFLMOptions* options)
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

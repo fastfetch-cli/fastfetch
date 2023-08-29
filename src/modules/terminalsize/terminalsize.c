@@ -41,7 +41,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

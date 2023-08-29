@@ -36,7 +36,7 @@ void ffPrintCommand(FFCommandOptions* options)
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInitStatic(&options->shell,

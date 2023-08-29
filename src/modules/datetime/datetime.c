@@ -51,7 +51,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

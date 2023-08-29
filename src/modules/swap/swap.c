@@ -75,7 +75,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

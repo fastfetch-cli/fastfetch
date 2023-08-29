@@ -32,7 +32,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -45,7 +45,7 @@ void ffPrintVulkan(FFVulkanOptions* options)
 
 void ffInitVulkanOptions(FFVulkanOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

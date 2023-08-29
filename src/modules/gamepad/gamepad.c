@@ -51,7 +51,7 @@ void ffPrintGamepad(FFGamepadOptions* options)
 
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

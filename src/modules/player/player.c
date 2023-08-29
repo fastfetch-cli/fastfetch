@@ -75,7 +75,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

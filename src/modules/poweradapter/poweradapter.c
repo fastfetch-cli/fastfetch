@@ -62,7 +62,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

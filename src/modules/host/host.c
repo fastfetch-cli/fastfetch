@@ -67,7 +67,7 @@ exit:
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
