@@ -3,6 +3,9 @@
 Features:
 * Add fast path for xfce4 version detection (DE, FreeBSD)
 
+Bugfixes:
+* Fix `fastfetch --config verbose` doesn't work (#547)
+
 # 2.0.5
 
 Bugfixes:

@@ -360,7 +360,7 @@
 #--terminal-key Terminal
 #--terminalfont-key Terminal Font
 #--cpu-key CPU
-#--cpu-usage-key CPU Usage
+#--cpuusage-key CPU Usage
 #--gpu-key GPU {1}
 #--memory-key Memory
 #--swap-key Swap
@@ -411,7 +411,7 @@
 #--terminal-format
 #--terminalfont-format
 #--cpu-format
-#--cpu-usage-format
+#--cpuusage-format
 #--gpu-format
 #--memory-format
 #--swap-format
@@ -459,7 +459,7 @@
 #--terminal-key-color
 #--terminalfont-key-color
 #--cpu-key-color
-#--cpu-usage-key-color
+#--cpuusage-key-color
 #--gpu-key-color
 #--memory-key-color
 #--swap-key-color

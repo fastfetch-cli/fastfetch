@@ -307,9 +307,9 @@ static inline void printCommandHelp(const char* command)
             "Temperature"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "cpu-usage-format"))
+    else if(ffStrEqualsIgnCase(command, "cpuusage-format"))
     {
-        constructAndPrintCommandHelpFormat("cpu-usage", "{0}%", 1,
+        constructAndPrintCommandHelpFormat("cpuusage", "{0}%", 1,
             "CPU usage without percent mark"
         );
     }
