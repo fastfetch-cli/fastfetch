@@ -86,3 +86,36 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
         ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
+
+void ffGenerateBoardJson(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFBoardResult board;
+    ffStrbufInit(&board.name);
+    ffStrbufInit(&board.vendor);
+    ffStrbufInit(&board.version);
+
+    const char* error = ffDetectBoard(&board);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if (board.name.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "board_name is not set.");
+        goto exit;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_obj_add_strbuf(doc, obj, "name", &board.name);
+    yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &board.vendor);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &board.version);
+
+exit:
+    ffStrbufDestroy(&board.name);
+    ffStrbufDestroy(&board.vendor);
+    ffStrbufDestroy(&board.version);
+}
