@@ -35,7 +35,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     if (ffSysctlGetString("machdep.cpu.brand_string", &cpu->name) != NULL)
         return "sysctlbyname(machdep.cpu.brand_string) failed";
+
     ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
+    if (cpu->vendor.length == 0 && ffStrbufStartsWithS(&cpu->name, "Apple "))
+        ffStrbufAppendS(&cpu->vendor, "Apple");
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
     if(cpu->coresPhysical == 1)
