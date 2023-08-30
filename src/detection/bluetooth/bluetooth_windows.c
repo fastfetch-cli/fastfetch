@@ -7,7 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-sign"
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 {
     BLUETOOTH_DEVICE_SEARCH_PARAMS btsp = {
         .fReturnConnected = TRUE,
@@ -25,7 +25,7 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
         return "BluetoothFindFirstDevice() failed or no devices found";
 
     do {
-        FFBluetoothDevice* device = ffListAdd(devices);
+        FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->address);
         ffStrbufInit(&device->type);
