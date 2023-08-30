@@ -75,7 +75,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, ffGenerateBluetoothJson);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->showDisconnected = false;
 }
@@ -121,5 +121,39 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateBluetoothJson(FF_MAYBE_UNUSED FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBluetoothDevice));
+
+    const char* error = ffDetectBluetooth(&results);
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+    else
+    {
+        yyjson_mut_val* arr = yyjson_mut_arr(doc);
+        yyjson_mut_obj_add_val(doc, module, "result", arr);
+
+        FF_LIST_FOR_EACH(FFBluetoothDevice, item, results)
+        {
+            yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+            yyjson_mut_obj_add_strbuf(doc, obj, "address", &item->address);
+            yyjson_mut_obj_add_uint(doc, obj, "battery", item->battery);
+            yyjson_mut_obj_add_bool(doc, obj, "connected", item->connected);
+            yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+            yyjson_mut_obj_add_strbuf(doc, obj, "type", &item->type);
+        }
+    }
+
+    FF_LIST_FOR_EACH(FFBluetoothDevice, device, results)
+    {
+        ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->type);
+        ffStrbufDestroy(&device->address);
     }
 }
