@@ -32,7 +32,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         if(ioctl(acpifd, ACPIIO_BATT_GET_BATTINFO, &battio) < 0 || (battio.battinfo.state == ACPI_BATT_STAT_NOT_PRESENT))
             continue;
 
-        BatteryResult* battery = ffListAdd(results);
+        FFBatteryResult* battery = ffListAdd(results);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);

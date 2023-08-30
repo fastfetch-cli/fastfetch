@@ -8,7 +8,7 @@
 
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8_t index)
+static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -76,7 +76,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
 
 void ffPrintBattery(FFBatteryOptions* options)
 {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(BatteryResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 
     const char* error = ffDetectBattery(options, &results);
 
@@ -88,7 +88,7 @@ void ffPrintBattery(FFBatteryOptions* options)
     {
         for(uint8_t i = 0; i < (uint8_t) results.length; i++)
         {
-            BatteryResult* result = ffListGet(&results, i);
+            FFBatteryResult* result = ffListGet(&results, i);
             printBattery(options, result, i);
 
             ffStrbufDestroy(&result->manufacturer);
@@ -178,7 +178,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 
 void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(BatteryResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 
     const char* error = ffDetectBattery(options, &results);
     if (error)
@@ -190,7 +190,7 @@ void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjso
     yyjson_mut_val* arr = yyjson_mut_arr(doc);
     yyjson_mut_obj_add_val(doc, module, "result", arr);
 
-    FF_LIST_FOR_EACH(BatteryResult, battery, results)
+    FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_real(doc, obj, "capacity", battery->capacity);
@@ -201,7 +201,7 @@ void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjso
         yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
     }
 
-    FF_LIST_FOR_EACH(BatteryResult, battery, results)
+    FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
     {
         ffStrbufDestroy(&battery->manufacturer);
         ffStrbufDestroy(&battery->modelName);

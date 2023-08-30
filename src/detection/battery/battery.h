@@ -7,7 +7,7 @@
 
 #define FF_BATTERY_TEMP_UNSET (0/0.0)
 
-typedef struct BatteryResult
+typedef struct FFBatteryResult
 {
     FFstrbuf manufacturer;
     FFstrbuf modelName;
@@ -15,7 +15,7 @@ typedef struct BatteryResult
     double capacity;
     FFstrbuf status;
     double temperature;
-} BatteryResult;
+} FFBatteryResult;
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results);
 

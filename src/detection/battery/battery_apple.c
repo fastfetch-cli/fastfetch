@@ -38,7 +38,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         bool boolValue;
         const char* error;
 
-        BatteryResult* battery = ffListAdd(results);
+        FFBatteryResult* battery = ffListAdd(results);
         battery->capacity = 0.0/0.0;
         int currentCapacity, maxCapacity;
 

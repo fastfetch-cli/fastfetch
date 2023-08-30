@@ -27,7 +27,7 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Device") == 0)
         return;
 
-    BatteryResult* result = ffListAdd(results);
+    FFBatteryResult* result = ffListAdd(results);
 
     //capacity must exist and be not empty
     ffStrbufAppendS(dir, "/capacity");
