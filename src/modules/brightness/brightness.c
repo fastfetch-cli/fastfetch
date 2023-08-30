@@ -81,7 +81,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -114,5 +114,39 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
             continue;
 
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateBrightnessJson(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
+
+    const char* error = ffDetectBrightness(&result);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    if(result.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No result is detected.");
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_arr(doc);
+    yyjson_mut_obj_add_val(doc, module, "result", arr);
+
+    FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_obj_add_real(doc, obj, "value", item->value);
+    }
+
+    FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
+    {
+        ffStrbufDestroy(&item->name);
     }
 }
