@@ -56,11 +56,14 @@ static bool printImageIterm(void)
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&buf);
     instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
     instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
-    printf("\033]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\033[9999999D\n\033[%uA",
+    printf("\033]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:",
         (unsigned) instance.config.logo.width,
         (unsigned) instance.config.logo.height,
-        (unsigned) instance.config.logo.preserveAspectRadio,
-        base64.chars,
+        (unsigned) instance.config.logo.preserveAspectRadio
+    );
+    fflush(stdout);
+    ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &base64);
+    printf("\a\033[9999999D\n\033[%uA",
         (unsigned) instance.state.logoHeight
     );
 
