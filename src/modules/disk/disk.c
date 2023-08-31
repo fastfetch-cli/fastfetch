@@ -202,7 +202,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);
@@ -368,5 +368,49 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
+    const char* error = ffDetectDisks(options, &disks);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "result", error);
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+
+    FF_LIST_FOR_EACH(FFDisk, item, disks)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_uint(doc, obj, "bytesAvailable", item->bytesAvailable);
+        yyjson_mut_obj_add_uint(doc, obj, "bytesFree", item->bytesFree);
+        yyjson_mut_obj_add_uint(doc, obj, "bytesTotal", item->bytesTotal);
+        yyjson_mut_obj_add_uint(doc, obj, "bytesUsed", item->bytesUsed);
+        yyjson_mut_obj_add_uint(doc, obj, "filesTotal", item->filesTotal);
+        yyjson_mut_obj_add_uint(doc, obj, "filesUsed", item->filesUsed);
+        yyjson_mut_obj_add_strbuf(doc, obj, "filesystem", &item->filesystem);
+        yyjson_mut_obj_add_strbuf(doc, obj, "mountpoint", &item->mountpoint);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_val* typeArr = yyjson_mut_obj_add_arr(doc, obj, "type");
+        if(item->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "External");
+        if(item->type & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "Subvolume");
+        if(item->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "Hidden");
+        if(item->type & FF_DISK_VOLUME_TYPE_READONLY_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "Read-only");
+    }
+
+    FF_LIST_FOR_EACH(FFDisk, item, disks)
+    {
+        ffStrbufDestroy(&item->mountpoint);
+        ffStrbufDestroy(&item->filesystem);
+        ffStrbufDestroy(&item->name);
     }
 }
