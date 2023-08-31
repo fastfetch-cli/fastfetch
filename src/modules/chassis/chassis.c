@@ -109,8 +109,7 @@ void ffGenerateChassisJson(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut
         goto exit;
     }
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
-    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);

@@ -103,8 +103,7 @@ void ffGenerateCursorJson(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_d
         return;
     }
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
-    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
     yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
 }

@@ -91,8 +91,7 @@ void ffGenerateDateTimeJson(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_m
 {
     const FFDateTimeResult* result = ffDetectDateTime();
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
-    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_uint(doc, obj, "year", result->year);
     yyjson_mut_obj_add_uint(doc, obj, "yearShort", result->yearShort);
     yyjson_mut_obj_add_uint(doc, obj, "month", result->month);

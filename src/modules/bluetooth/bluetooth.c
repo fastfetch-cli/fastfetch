@@ -136,8 +136,7 @@ void ffGenerateBluetoothJson(FF_MAYBE_UNUSED FFBluetoothOptions* options, yyjson
     }
     else
     {
-        yyjson_mut_val* arr = yyjson_mut_arr(doc);
-        yyjson_mut_obj_add_val(doc, module, "result", arr);
+        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
 
         FF_LIST_FOR_EACH(FFBluetoothResult, item, results)
         {

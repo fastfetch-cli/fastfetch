@@ -113,8 +113,7 @@ void ffGenerateBiosJson(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* 
         goto exit;
     }
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
-    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "date", &bios.date);
     yyjson_mut_obj_add_strbuf(doc, obj, "release", &bios.release);
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &bios.vendor);

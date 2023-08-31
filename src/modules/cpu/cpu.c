@@ -149,8 +149,7 @@ void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
     }
     else
     {
-        yyjson_mut_val* obj = yyjson_mut_obj(doc);
-        yyjson_mut_obj_add_val(doc, module, "result", obj);
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
         yyjson_mut_obj_add_strbuf(doc, obj, "cpu", &cpu.name);
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &cpu.vendor);
         yyjson_mut_obj_add_uint(doc, obj, "coresPhysical", cpu.coresPhysical);

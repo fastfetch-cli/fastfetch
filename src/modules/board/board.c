@@ -108,8 +108,7 @@ void ffGenerateBoardJson(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc
         goto exit;
     }
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
-    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &board.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &board.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &board.version);

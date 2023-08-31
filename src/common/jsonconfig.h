@@ -23,3 +23,11 @@ yyjson_api_inline yyjson_mut_val* yyjson_mut_obj_add_obj(yyjson_mut_doc *doc,
     yyjson_mut_obj_add_val(doc, obj, _key, newObj);
     return newObj;
 }
+
+yyjson_api_inline yyjson_mut_val* yyjson_mut_obj_add_arr(yyjson_mut_doc *doc,
+                                                          yyjson_mut_val *obj,
+                                                          const char *_key) {
+    yyjson_mut_val* newArr = yyjson_mut_arr(doc);
+    yyjson_mut_obj_add_val(doc, obj, _key, newArr);
+    return newArr;
+}
