@@ -51,7 +51,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -85,4 +85,32 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 
         ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateDateTimeJson(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFDateTimeResult* result = ffDetectDateTime();
+
+    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_obj_add_uint(doc, obj, "year", result->year);
+    yyjson_mut_obj_add_uint(doc, obj, "yearShort", result->yearShort);
+    yyjson_mut_obj_add_uint(doc, obj, "month", result->month);
+    yyjson_mut_obj_add_strbuf(doc, obj, "monthPretty", &result->monthPretty);
+    yyjson_mut_obj_add_strbuf(doc, obj, "monthName", &result->monthName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "monthNameShort", &result->monthNameShort);
+    yyjson_mut_obj_add_uint(doc, obj, "week", result->week);
+    yyjson_mut_obj_add_strbuf(doc, obj, "weekday", &result->weekday);
+    yyjson_mut_obj_add_strbuf(doc, obj, "weekdaySort", &result->weekdayShort);
+    yyjson_mut_obj_add_uint(doc, obj, "dayInYear", result->dayInYear);
+    yyjson_mut_obj_add_uint(doc, obj, "dayInMonth", result->dayInMonth);
+    yyjson_mut_obj_add_uint(doc, obj, "dayInWeek", result->dayInWeek);
+    yyjson_mut_obj_add_uint(doc, obj, "hour", result->hour);
+    yyjson_mut_obj_add_strbuf(doc, obj, "hourPretty", &result->hourPretty);
+    yyjson_mut_obj_add_uint(doc, obj, "hour12", result->hour12);
+    yyjson_mut_obj_add_strbuf(doc, obj, "hour12Pretty", &result->hour12Pretty);
+    yyjson_mut_obj_add_uint(doc, obj, "minute", result->minute);
+    yyjson_mut_obj_add_strbuf(doc, obj, "minutePretty", &result->minutePretty);
+    yyjson_mut_obj_add_uint(doc, obj, "second", result->second);
+    yyjson_mut_obj_add_strbuf(doc, obj, "secondPretty", &result->secondPretty);
 }
