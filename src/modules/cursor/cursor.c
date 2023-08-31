@@ -52,7 +52,7 @@ void ffPrintCursor(FFCursorOptions* options)
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, ffGenerateCursorJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -86,4 +86,25 @@ void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
 
         ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateCursorJson(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFCursorResult result;
+    ffStrbufInit(&result.error);
+    ffStrbufInit(&result.theme);
+    ffStrbufInit(&result.size);
+
+    ffDetectCursor(&result);
+
+    if (result.error.length)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", result.error.chars);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+    yyjson_mut_obj_add_val(doc, module, "result", obj);
+    yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
+    yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
 }
