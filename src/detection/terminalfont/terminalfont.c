@@ -338,6 +338,35 @@ static bool detectTabby(FFTerminalFontResult* result)
     return true;
 }
 
+static bool detectContour(const FFstrbuf* exe, FFTerminalFontResult* result)
+{
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    if(ffProcessAppendStdOut(&buf, (char* const[]){
+        exe->chars,
+        "font-locator",
+        NULL
+    }))
+    {
+        ffStrbufAppendS(&result->error, "`contour font-locator` failed");
+        return false;
+    }
+
+    //[error] Missing key .logging.enabled. Using default: false.
+    //[error] ...
+    //Matching fonts using  : Fontconfig
+    //Font description      : (family=Sarasa Term SC Nerd weight=Regular slant=Roman spacing=Monospace, strict_spacing=yes)
+    //Number of fonts found : 49
+    //  path /usr/share/fonts/google-noto/NotoSansMono-Regular.ttf Regular Roman
+    //  path ...
+
+    uint32_t index = ffStrbufFirstIndexS(&buf, "Font description      : (family=");
+    if(index >= buf.length) return false;
+    index += strlen("Font description      : (family=");
+    ffStrbufSubstrBefore(&buf, ffStrbufNextIndexS(&buf, index, " weight="));
+    ffFontInitCopy(&result->font, buf.chars + index);
+    return true;
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont);
 
 static bool detectTerminalFontCommon(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
@@ -350,6 +379,8 @@ static bool detectTerminalFontCommon(const FFTerminalShellResult* terminalShell,
         detectWezterm(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "tabby"))
         detectTabby(terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalProcessName, "contour"))
+        detectContour(&terminalShell->terminalExe, terminalFont);
 
     #ifndef _WIN32
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/pts/"))

@@ -2,6 +2,7 @@
 
 Features:
 * Add fast path for xfce4 version detection (DE, FreeBSD)
+* Add contour terminal version and font detection (Terminal / TerminalFont)
 
 Bugfixes:
 * Fix `fastfetch --config verbose` doesn't work (#547)
