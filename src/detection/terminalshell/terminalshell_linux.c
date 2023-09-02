@@ -331,6 +331,8 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     const uint32_t exePathLen = PROC_PIDPATHINFO_MAXSIZE;
     #elif defined(MAXPATH)
     const uint32_t exePathLen = MAXPATH;
+    #elif defined(PATH_MAX)
+    const uint32_t exePathLen = PATH_MAX;
     #else
     const uint32_t exePathLen = 260;
     #endif
