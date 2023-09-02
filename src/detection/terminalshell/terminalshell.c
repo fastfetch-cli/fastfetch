@@ -263,6 +263,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* ver
     return version->length > 0;
 }
 
+static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
+{
+    const char* env = getenv("TERMINAL_VERSION_STRING");
+    if (env)
+    {
+        ffStrbufAppendS(version, env);
+        return true;
+    }
+    if(!getExeVersionRaw(exe, version)) return false;
+    // Contour Terminal Emulator 0.3.12.262
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -360,6 +374,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "alacritty"))
         return getExeVersionGeneral(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "contour"))
+        return getTerminalVersionContour(exe, version);
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)
