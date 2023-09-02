@@ -1,18 +1,9 @@
-    dddddddddddddddddddddddd
-.dddd''''''''''''''''''''''dddd.
-dd:   dddddddddddddddddddd;   dd:
-dd:   ldl:''''''''''''''''    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl: ddddddd;  ddddd;   dd:
-dd:   ldl: '''''''   '''''    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl: ddddddddddddddd;   dd:
-dddd:.'''  '''''''''''''''  dddd:
-   dddddddddddddddddddddddddd;;'
-    '''''''''''''''''''''''''
+      ,coddoc'
+   'cddddddddddc'
+ 'ddd${c2}OWWXXXXXXK${c1}ddo.
+.dddd${c2}OMX${c1}ddddddddddd.
+odddd${c2}OMXk00OkOO${c1}ddddo
+.dddd${c2}OMX${c1}kOOOxOkdddd.
+ .ddd${c2}OWWXXXXXXK${c1}ddd'
+   'dddddddddddd'
+      'cddddd,

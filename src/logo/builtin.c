@@ -1262,6 +1262,16 @@ static const FFlogo E[] = {
         .names = {"EvolutionOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS,
         .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_GREEN,
+        },
+    },
+    // EvolutionOS_old
+    {
+        .names = {"EvolutionOS_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
             FF_COLOR_FG_LIGHT_BLUE,
             FF_COLOR_FG_WHITE,
         },
