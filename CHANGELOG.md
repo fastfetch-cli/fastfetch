@@ -6,6 +6,10 @@ Features:
 Bugfixes:
 * Fix `fastfetch --config verbose` doesn't work (#547)
 
+Logo:
+* support `kitty-direct` / `iterm` without specifying logo width / height. Note: in this case, the entre screen will be cleared.
+* Update EvolutionOS
+
 # 2.0.5
 
 Bugfixes:
