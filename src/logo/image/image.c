@@ -247,19 +247,16 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
 {
     //Calculate character dimensions
     instance.state.logoWidth = requestData->logoCharacterWidth + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-
-    instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop;
-    if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
-        instance.state.logoHeight -= 1;
+    instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop - 1;
 
     //Write cache files
     writeCacheStrbuf(requestData, result, cacheFileName);
 
     if(instance.config.logo.width == 0)
-        writeCacheUint32(requestData, instance.state.logoWidth, FF_CACHE_FILE_WIDTH);
+        writeCacheUint32(requestData, requestData->logoCharacterWidth, FF_CACHE_FILE_WIDTH);
 
     if(instance.config.logo.height == 0)
-        writeCacheUint32(requestData, instance.state.logoHeight, FF_CACHE_FILE_HEIGHT);
+        writeCacheUint32(requestData, requestData->logoCharacterHeight, FF_CACHE_FILE_HEIGHT);
 
     //Write result to stdout
     ffPrintCharTimes('\n', instance.config.logo.paddingTop);
@@ -575,10 +572,7 @@ static uint32_t readCachedUint32(FFLogoRequestData* requestData, const char* cac
     uint32_t result = 0;
 
     if(content.length != sizeof(result))
-    {
-        ffStrbufDestroy(&content);
         return 0;
-    }
 
     memcpy(&result, content.chars, sizeof(result));
 
