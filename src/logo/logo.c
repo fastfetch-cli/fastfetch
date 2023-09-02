@@ -19,16 +19,40 @@ typedef enum FFLogoSize
 static void ffLogoPrintCharsRaw(const char* data, size_t length)
 {
     FFLogoOptions* options = &instance.config.logo;
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
-    if (instance.config.brightColor)
-        fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+    if (!options->width || !options->height)
+    {
+        ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
+            (unsigned) options->paddingTop,
+            (unsigned) options->paddingLeft
+        );
+        ffStrbufAppendNS(&buf, (uint32_t) length, data);
+        ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
-    ffPrintCharTimes('\n', options->paddingTop);
-    ffPrintCharTimes(' ', options->paddingLeft);
-    fwrite(data, length, 1, stdout);
-    instance.state.logoHeight = options->paddingTop + options->height;
-    instance.state.logoWidth = options->paddingLeft + options->width + options->paddingRight;
-    printf("\033[9999999D\n\033[%uA", instance.state.logoHeight);
+        uint16_t X = 0, Y = 0;
+        const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
+        if (error)
+        {
+            fprintf(stderr, "\nLogo (image-raw): fail to query cursor position: %s\n", error);
+            return;
+        }
+        instance.state.logoWidth = X + instance.config.logo.paddingRight;
+        instance.state.logoHeight = Y;
+        fputs("\e[H", stdout);
+    }
+    else
+    {
+        for (uint32_t i = 0; i < options->paddingTop; ++i)
+            ffStrbufAppendC(&buf, '\n');
+        for (uint32_t i = 0; i < options->paddingLeft; ++i)
+            ffStrbufAppendC(&buf, ' ');
+        ffStrbufAppendNS(&buf, (uint32_t) length, data);
+        instance.state.logoHeight = options->paddingTop + options->height;
+        instance.state.logoWidth = options->paddingLeft + options->width + options->paddingRight;
+        ffStrbufAppendF(&buf, "\e[9999999D\n\e[%uA", instance.state.logoHeight);
+        ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
+    }
 }
 
 void ffLogoPrintChars(const char* data, bool doColorReplacement)
@@ -417,15 +441,7 @@ static bool logoTryKnownType(void)
         return logoPrintFileIfExists(false, false);
 
     if(options->type == FF_LOGO_TYPE_IMAGE_RAW)
-    {
-        if(options->width == 0 || options->height == 0)
-        {
-            fputs("both `--logo-width` and `--logo-height` must be specified\n", stderr);
-            return false;
-        }
-
         return logoPrintFileIfExists(false, true);
-    }
 
     return logoPrintImageIfExists(options->type, true);
 }
