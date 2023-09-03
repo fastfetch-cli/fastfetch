@@ -188,17 +188,24 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
         }
     }
 
-    ffPrintCharTimes(' ', options->paddingRight);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
-    //Happens if the last line is the longest
-    if(currentlineLength > instance.state.logoWidth)
-        instance.state.logoWidth = currentlineLength;
+    if(!options->separate)
+    {
+        //Happens if the last line is the longest
+        if(currentlineLength > instance.state.logoWidth)
+            instance.state.logoWidth = currentlineLength;
 
-    instance.state.logoWidth += options->paddingLeft + options->paddingRight;
+        instance.state.logoWidth += options->paddingLeft + options->paddingRight;
 
-    //Go to the leftmost position and go up the height
-    printf("\e[1G\e[%uA", instance.state.logoHeight);
+        //Go to the leftmost position and go up the height
+        printf("\e[1G\e[%uA", instance.state.logoHeight);
+    }
+    else
+    {
+        instance.state.logoWidth = instance.state.logoHeight = 0;
+        ffPrintCharTimes('\n', options->paddingRight);
+    }
 }
 
 static void logoApplyColors(const FFlogo* logo)

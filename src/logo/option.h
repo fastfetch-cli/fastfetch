@@ -36,6 +36,7 @@ typedef struct FFLogoOptions
     bool printRemaining;
     bool preserveAspectRadio;
     bool recache;
+    bool separate;
 
     bool chafaFgOnly;
     FFstrbuf chafaSymbols;

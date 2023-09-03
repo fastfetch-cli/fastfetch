@@ -166,6 +166,11 @@
                             "title": "If true, regenerate image logo cache",
                             "default": false
                         },
+                        "separate": {
+                            "type": "boolean",
+                            "title": "If true, print modules at bottom of the logo",
+                            "default": false
+                        },
                         "chafa": {
                             "type": "object",
                             "title": "Chafa configuration. See chafa document for details",

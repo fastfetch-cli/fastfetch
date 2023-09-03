@@ -51,23 +51,36 @@ static bool printImageIterm(void)
 
     if (!instance.config.logo.width || !instance.config.logo.height)
     {
-        ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH\e]1337;File=inline=1:%s\a",
-            (unsigned) instance.config.logo.paddingTop,
-            (unsigned) instance.config.logo.paddingLeft,
+        if (!instance.config.logo.separate)
+        {
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
+                (unsigned) instance.config.logo.paddingTop,
+                (unsigned) instance.config.logo.paddingLeft
+            );
+        }
+        ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a",
             base64.chars
         );
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
-        uint16_t X = 0, Y = 0;
-        const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
-        if (error)
+        if (!instance.config.logo.separate)
         {
-            fprintf(stderr, "\nLogo (iterm): fail to query cursor position: %s\n", error);
-            return true; // We already printed image logo, don't print ascii logo then
+            uint16_t X = 0, Y = 0;
+            const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
+            if (error)
+            {
+                fprintf(stderr, "\nLogo (iterm): fail to query cursor position: %s\n", error);
+                return true; // We already printed image logo, don't print ascii logo then
+            }
+            instance.state.logoWidth = X + instance.config.logo.paddingRight;
+            instance.state.logoHeight = Y;
+            fputs("\e[H", stdout);
         }
-        instance.state.logoWidth = X + instance.config.logo.paddingRight;
-        instance.state.logoHeight = Y;
-        fputs("\e[H", stdout);
+        else
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+        }
     }
     else
     {
@@ -75,15 +88,24 @@ static bool printImageIterm(void)
             ffStrbufAppendC(&buf, '\n');
         for (uint32_t i = 0; i < instance.config.logo.paddingLeft; ++i)
             ffStrbufAppendC(&buf, ' ');
-        instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-        instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
-        ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n\e[%uA",
+        ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
             (unsigned) instance.config.logo.width,
             (unsigned) instance.config.logo.height,
             (unsigned) instance.config.logo.preserveAspectRadio,
-            base64.chars,
-            (unsigned) instance.state.logoHeight
+            base64.chars
         );
+
+        if (!instance.config.logo.separate)
+        {
+            instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
+            instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
+            ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
+        }
+        else
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+        }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
 
@@ -96,37 +118,56 @@ static bool printImageKittyDirect(void)
 
     if (!instance.config.logo.width || !instance.config.logo.height)
     {
-        // We must clear the entre screen to make sure that terminal buffer won't scroll up
-        printf("\e[2J\e[3J\e[%u;%uH\e_Ga=T,f=100,t=f;%s\e\\",
-            (unsigned) instance.config.logo.paddingTop,
-            (unsigned) instance.config.logo.paddingLeft,
-            base64.chars
-        );
-        fflush(stdout);
-        uint16_t X = 0, Y = 0;
-        const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
-        if (error)
+        if (!instance.config.logo.separate)
         {
-            fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
-            return true; // We already printed image logo, don't print ascii logo then
+            // We must clear the entre screen to make sure that terminal buffer won't scroll up
+            printf("\e[2J\e[3J\e[%u;%uH",
+                (unsigned) instance.config.logo.paddingTop,
+                (unsigned) instance.config.logo.paddingLeft
+            );
         }
-        instance.state.logoWidth = X + instance.config.logo.paddingRight;
-        instance.state.logoHeight = Y;
-        fputs("\e[H", stdout);
+        printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
+        fflush(stdout);
+        if (!instance.config.logo.separate)
+        {
+            uint16_t X = 0, Y = 0;
+            const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
+            if (error)
+            {
+                fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
+                return true; // We already printed image logo, don't print ascii logo then
+            }
+            instance.state.logoWidth = X + instance.config.logo.paddingRight;
+            instance.state.logoHeight = Y;
+            fputs("\e[H", stdout);
+        }
+        else
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+        }
     }
     else
     {
         ffPrintCharTimes('\n', instance.config.logo.paddingTop);
         ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
 
-        instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-        instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
-        printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n\e[%uA",
+        printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n",
             (unsigned) instance.config.logo.width,
             (unsigned) instance.config.logo.height,
-            base64.chars,
-            (unsigned) instance.state.logoHeight
+            base64.chars
         );
+        if (!instance.config.logo.separate)
+        {
+            instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
+            instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
+            printf("\e[%uA", (unsigned) instance.state.logoHeight);
+        }
+        else
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+        }
     }
 
     return true;
