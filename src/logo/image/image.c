@@ -58,6 +58,13 @@ static bool printImageIterm(void)
                 (unsigned) instance.config.logo.paddingLeft
             );
         }
+        else
+        {
+            for (uint32_t i = 0; i < instance.config.logo.paddingTop; ++i)
+                ffStrbufAppendC(&buf, '\n');
+            for (uint32_t i = 0; i < instance.config.logo.paddingLeft; ++i)
+                ffStrbufAppendC(&buf, ' ');
+        }
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a",
             base64.chars
         );
@@ -125,6 +132,11 @@ static bool printImageKittyDirect(void)
                 (unsigned) instance.config.logo.paddingTop,
                 (unsigned) instance.config.logo.paddingLeft
             );
+        }
+        else
+        {
+            ffPrintCharTimes('\n', instance.config.logo.paddingTop);
+            ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
         }
         printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
         fflush(stdout);
