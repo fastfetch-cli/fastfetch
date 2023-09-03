@@ -85,6 +85,8 @@ typedef enum FFPathType
 bool ffPathExists(const char* path, FFPathType pathType);
 bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
+#define FF_IO_TERM_RESP_WAIT_MS 100 // #554
+
 FF_C_SCANF(2, 3)
 const char* ffGetTerminalResponse(const char* request, const char* format, ...);
 

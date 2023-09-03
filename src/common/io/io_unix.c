@@ -146,7 +146,7 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     fflush(stdout);
 
     //Give the terminal 35ms to respond
-    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, 35) <= 0)
+    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
     {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
         return "poll() timeout or failed";

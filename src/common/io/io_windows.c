@@ -171,7 +171,7 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 
     while (true)
     {
-        if (WaitForSingleObjectEx(hInput, 35, TRUE) != WAIT_OBJECT_0)
+        if (WaitForSingleObjectEx(hInput, FF_IO_TERM_RESP_WAIT_MS, TRUE) != WAIT_OBJECT_0)
         {
             SetConsoleMode(hInput, prev_mode);
             return "WaitForSingleObject() failed or timeout";
