@@ -50,7 +50,7 @@ static void ffLogoPrintCharsRaw(const char* data, size_t length)
         ffStrbufAppendNS(&buf, (uint32_t) length, data);
         instance.state.logoHeight = options->paddingTop + options->height;
         instance.state.logoWidth = options->paddingLeft + options->width + options->paddingRight;
-        ffStrbufAppendF(&buf, "\e[9999999D\n\e[%uA", instance.state.logoHeight);
+        ffStrbufAppendF(&buf, "\n\e[%uA", instance.state.logoHeight);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
 }
@@ -197,12 +197,8 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
     instance.state.logoWidth += options->paddingLeft + options->paddingRight;
 
-    //Go to the leftmost position
-    fputs("\033[9999999D", stdout);
-
-    //If the logo height is > 1, go up the height
-    if(instance.state.logoHeight > 0)
-        printf("\033[%uA", instance.state.logoHeight);
+    //Go to the leftmost position and go up the height
+    printf("\e[1G\e[%uA", instance.state.logoHeight);
 }
 
 static void logoApplyColors(const FFlogo* logo)

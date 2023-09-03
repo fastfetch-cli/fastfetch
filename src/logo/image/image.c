@@ -77,7 +77,7 @@ static bool printImageIterm(void)
             ffStrbufAppendC(&buf, ' ');
         instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
         instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
-        ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\e[9999999D\n\e[%uA",
+        ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n\e[%uA",
             (unsigned) instance.config.logo.width,
             (unsigned) instance.config.logo.height,
             (unsigned) instance.config.logo.preserveAspectRadio,
@@ -121,7 +121,7 @@ static bool printImageKittyDirect(void)
 
         instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
         instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
-        printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\e[9999999D\n\e[%uA",
+        printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n\e[%uA",
             (unsigned) instance.config.logo.width,
             (unsigned) instance.config.logo.height,
             base64.chars,
@@ -265,8 +265,7 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), result);
 
     //Go to upper left corner
-    fputs("\033[9999999D", stdout);
-    printf("\033[%uA", instance.state.logoHeight);
+    printf("\e[1G\e[%uA", instance.state.logoHeight);
 }
 
 static bool printImageSixel(FFLogoRequestData* requestData, const ImageData* imageData)
@@ -639,7 +638,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop;
 
     //Go to upper left corner
-    printf("\033[9999999D\033[%uA", instance.state.logoHeight);
+    printf("\e[1G\e[%uA", instance.state.logoHeight);
     return true;
 }
 
