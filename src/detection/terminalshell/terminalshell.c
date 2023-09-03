@@ -310,7 +310,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 {
     #ifdef __ANDROID__
 
-    if(ffStrbufEqualS(processName, "Termux"))
+    if(ffStrbufEqualS(processName, "com.termux"))
         return getTerminalVersionTermux(version);
 
     #endif

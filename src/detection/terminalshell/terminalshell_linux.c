@@ -237,7 +237,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("TERMUX_VERSION") != NULL ||
         getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
         getenv("TMUX_TMPDIR") != NULL
-    )) term = "Termux";
+    )) term = "com.termux";
     #endif
 
     #ifdef __linux__
@@ -390,7 +390,13 @@ const FFTerminalShellResult* ffDetectTerminalShell()
 
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
         ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
-    #if defined(__linux__) || defined(__FreeBSD__)
+
+    #if defined(__ANDROID__)
+
+    else if(ffStrbufEqualS(&result.terminalProcessName, "com.termux"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "Termux");
+
+    #elif defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
         ffStrbufInitStatic(&result.terminalPrettyName, "gnome-terminal");
