@@ -100,6 +100,8 @@ For the image logo, WezTerm with iterm image protocol is known to work, surprisi
 * [`termux-api`](https://github.com/termux/termux-api-package): Used for Wifi / Battery detection. Read [the official doc](https://wiki.termux.com/wiki/Termux:API) for detail or if you hang on these modules (IMPORTANT). [`termux-api`](https://github.com/termux/termux-packages/tree/master/packages/termux-api)
 * [`libandroid-wordexp-static`](https://github.com/termux/termux-packages/tree/master/packages/libandroid-wordexp): `wordexp.h` support for Android.
 
+For the image logo, [Termux Monet](https://github.com/HardcodedCat/termux-monet) supports iterm image protocol.
+
 ## Support status
 All categories not listed here should work without needing a specific implementation.
 
