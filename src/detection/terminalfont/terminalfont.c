@@ -237,7 +237,7 @@ static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFo
 
 #endif //defined(_WIN32) || defined(__linux__)
 
-FF_MAYBE_UNUSED static bool detectKitty(FFTerminalFontResult* result)
+FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
@@ -246,6 +246,23 @@ FF_MAYBE_UNUSED static bool detectKitty(FFTerminalFontResult* result)
         {"font_family ", &fontName},
         {"font_size ", &fontSize},
     };
+
+    if(instance.config.allowSlowOperations)
+    {
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        if(!ffProcessAppendStdOut(&buf, (char* const[]){
+            exe->chars,
+            "+kitten",
+            "query-terminal",
+            NULL,
+        }))
+        {
+            ffParsePropLines(buf.chars, "font_family: ", &fontName);
+            ffParsePropLines(buf.chars, "font_size: ", &fontSize);
+            ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
+            return true;
+        }
+    }
 
     if(!ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery))
         return false;
@@ -386,7 +403,7 @@ static bool detectTerminalFontCommon(const FFTerminalShellResult* terminalShell,
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/pts/"))
         ffStrbufAppendS(&terminalFont->error, "Terminal font detection is not supported on PTS");
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "kitty"))
-        detectKitty(terminalFont);
+        detectKitty(&terminalShell->terminalExe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminalShell->terminalExe, "/dev/tty"))
         detectTTY(terminalFont);
     #endif
