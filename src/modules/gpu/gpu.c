@@ -121,7 +121,7 @@ void ffPrintGPU(FFGPUOptions* options)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;
@@ -208,5 +208,73 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
+    const char* error = ffDetectGPU(options, &gpus);
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        if (gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
+            yyjson_mut_obj_add_int(doc, obj, "coreCount", gpu->coreCount);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "coreCount");
+
+        yyjson_mut_val* dedicatedObj = yyjson_mut_obj_add_obj(doc, obj, "dedicated");
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
+            yyjson_mut_obj_add_uint(doc, dedicatedObj, "total", gpu->dedicated.total);
+        else
+            yyjson_mut_obj_add_null(doc, dedicatedObj, "total");
+
+        if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+            yyjson_mut_obj_add_uint(doc, dedicatedObj, "used", gpu->dedicated.used);
+        else
+            yyjson_mut_obj_add_null(doc, dedicatedObj, "used");
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "driver", &gpu->driver);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &gpu->name);
+
+        yyjson_mut_val* sharedObj = yyjson_mut_obj_add_obj(doc, obj, "shared");
+        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
+            yyjson_mut_obj_add_uint(doc, sharedObj, "total", gpu->shared.total);
+        else
+            yyjson_mut_obj_add_null(doc, sharedObj, "total");
+        if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
+            yyjson_mut_obj_add_uint(doc, sharedObj, "used", gpu->shared.used);
+        else
+            yyjson_mut_obj_add_null(doc, sharedObj, "used");
+
+        if (gpu->temperature == gpu->temperature)
+            yyjson_mut_obj_add_real(doc, obj, "temperature", gpu->temperature);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "temperature");
+
+        const char* type;
+        switch (gpu->type)
+        {
+            case FF_GPU_TYPE_INTEGRATED: type = "Integrated"; break;
+            case FF_GPU_TYPE_DISCRETE: type = "Discrete"; break;
+            default: type = "Unknown"; break;
+        }
+        yyjson_mut_obj_add_str(doc, obj, "type", type);
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &gpu->vendor);
+    }
+
+    FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
+    {
+        ffStrbufDestroy(&gpu->vendor);
+        ffStrbufDestroy(&gpu->name);
+        ffStrbufDestroy(&gpu->driver);
     }
 }
