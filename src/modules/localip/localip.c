@@ -139,7 +139,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
@@ -291,5 +291,44 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateLocalIpJson(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
+
+    const char* error = ffDetectLocalIps(options, &results);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if(results.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect any IPs");
+        goto exit;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", ip->defaultRoute);
+        yyjson_mut_obj_add_strbuf(doc, obj, "ipv4", &ip->ipv4);
+        yyjson_mut_obj_add_strbuf(doc, obj, "ipv6", &ip->ipv6);
+        yyjson_mut_obj_add_strbuf(doc, obj, "mac", &ip->mac);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
+    }
+
+exit:
+    FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
+    {
+        ffStrbufDestroy(&ip->name);
+        ffStrbufDestroy(&ip->ipv4);
+        ffStrbufDestroy(&ip->ipv6);
+        ffStrbufDestroy(&ip->mac);
     }
 }
