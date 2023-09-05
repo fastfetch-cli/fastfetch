@@ -32,7 +32,7 @@ void ffPrintKernel(FFKernelOptions* options)
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -66,4 +66,13 @@ void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
 
         ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateKernelJson(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "architecture", &instance.state.platform.systemArchitecture);
+    yyjson_mut_obj_add_strbuf(doc, obj, "name", &instance.state.platform.systemName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "release", &instance.state.platform.systemRelease);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &instance.state.platform.systemVersion);
 }
