@@ -67,7 +67,7 @@ exit:
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -101,4 +101,41 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateHostJson(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFHostResult host;
+    ffStrbufInit(&host.productFamily);
+    ffStrbufInit(&host.productName);
+    ffStrbufInit(&host.productVersion);
+    ffStrbufInit(&host.productSku);
+    ffStrbufInit(&host.sysVendor);
+    const char* error = ffDetectHost(&host);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if (host.productFamily.length == 0 && host.productName.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "neither product_family nor product_name is set by O.E.M.");
+        goto exit;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "family", &host.productFamily);
+    yyjson_mut_obj_add_strbuf(doc, obj, "name", &host.productName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &host.productVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "sku", &host.productSku);
+    yyjson_mut_obj_add_strbuf(doc, obj, "sysVender", &host.sysVendor);
+
+exit:
+    ffStrbufDestroy(&host.productFamily);
+    ffStrbufDestroy(&host.productName);
+    ffStrbufDestroy(&host.productVersion);
+    ffStrbufDestroy(&host.productSku);
+    ffStrbufDestroy(&host.sysVendor);
 }
