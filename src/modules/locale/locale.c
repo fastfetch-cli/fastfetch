@@ -32,7 +32,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -66,4 +66,18 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
 
         ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateLocaleJson(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
+
+    ffDetectLocale(&locale);
+    if(locale.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No locale found");
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &locale);
 }
