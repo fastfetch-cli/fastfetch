@@ -77,7 +77,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -110,5 +110,35 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
             continue;
 
         ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateMonitorJson(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFMonitorResult));
+
+    const char* error = ffDetectMonitor(&results);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+    }
+    else if(results.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No monitors found");
+    }
+    else
+    {
+        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+        FF_LIST_FOR_EACH(FFMonitorResult, item, results)
+        {
+            yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+            yyjson_mut_obj_add_bool(doc, obj, "hdrCompatible", item->hdrCompatible);
+            yyjson_mut_obj_add_uint(doc, obj, "width", item->width);
+            yyjson_mut_obj_add_uint(doc, obj, "height", item->height);
+            yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+            yyjson_mut_obj_add_uint(doc, obj, "physicalHeight", item->physicalHeight);
+            yyjson_mut_obj_add_uint(doc, obj, "physicalWidth", item->physicalWidth);
+        }
     }
 }
