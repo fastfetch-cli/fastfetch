@@ -75,7 +75,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -109,4 +109,20 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
 
         ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGeneratePlayerJson(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFMediaResult* media = ffDetectMedia();
+
+    if(media->error.length > 0)
+    {
+        yyjson_mut_obj_add_strbuf(doc, module, "error", &media->error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "player", &media->player);
+    yyjson_mut_obj_add_strbuf(doc, obj, "playerId", &media->playerId);
+    yyjson_mut_obj_add_strbuf(doc, obj, "url", &media->url);
 }
