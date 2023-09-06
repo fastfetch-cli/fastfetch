@@ -5,14 +5,14 @@
 
 #include "fastfetch.h"
 
-typedef struct PowerAdapterResult
+typedef struct FFPowerAdapterResult
 {
     FFstrbuf description;
     FFstrbuf name;
     FFstrbuf modelName;
     FFstrbuf manufacturer;
     int watts;
-} PowerAdapterResult;
+} FFPowerAdapterResult;
 
 const char* ffDetectPowerAdapterImpl(FFlist* results);
 

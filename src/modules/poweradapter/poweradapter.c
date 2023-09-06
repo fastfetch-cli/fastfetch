@@ -9,7 +9,7 @@
 
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(PowerAdapterResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
 
     const char* error = ffDetectPowerAdapterImpl(&results);
 
@@ -25,7 +25,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
     {
         for(uint8_t i = 0; i < (uint8_t) results.length; i++)
         {
-            PowerAdapterResult* result = ffListGet(&results, i);
+            FFPowerAdapterResult* result = ffListGet(&results, i);
 
             if(result->watts != FF_POWERADAPTER_UNSET)
             {
@@ -100,7 +100,7 @@ void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* m
 
 void ffGeneratePowerAdapterJson(FF_MAYBE_UNUSED FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(PowerAdapterResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
 
     const char* error = ffDetectPowerAdapterImpl(&results);
 
@@ -115,7 +115,7 @@ void ffGeneratePowerAdapterJson(FF_MAYBE_UNUSED FFPowerAdapterOptions* options, 
     else
     {
         yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-        FF_LIST_FOR_EACH(PowerAdapterResult, item, results)
+        FF_LIST_FOR_EACH(FFPowerAdapterResult, item, results)
         {
             yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
             yyjson_mut_obj_add_strbuf(doc, obj, "description", &item->description);
