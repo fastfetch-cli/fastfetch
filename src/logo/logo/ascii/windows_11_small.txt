@@ -1,9 +1,0 @@
-$1lllllllll  $2lllllllll
-$1lllllllll  $2lllllllll
-$1lllllllll  $2lllllllll
-$1lllllllll  $2lllllllll
-
-$3lllllllll  $4lllllllll
-$3lllllllll  $4lllllllll
-$3lllllllll  $4lllllllll
-$3lllllllll  $4lllllllll
