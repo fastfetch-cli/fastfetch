@@ -1,0 +1,21 @@
+                     'c'
+                    'kKk,
+                   .dKKKx.
+                  .oKXKXKd.
+                 .l0XXXXKKo.
+                 c0KXXXXKX0l.
+                :0XKKOxxOKX0l.
+               :OXKOc. .c0XX0l.
+              :OK0o. $2...$1'dKKX0l.
+             :OX0c  $2;xOx'$1'dKXX0l.
+            :0KKo.$2.o0XXKd'.$1lKXX0l.
+           c0XKd.$2.oKXXXXKd..$1oKKX0l.
+         .c0XKk;$2.l0K0OO0XKd..$1oKXXKo.
+        .l0XXXk:$2,dKx,.'l0XKo.$1.kXXXKo.
+       .o0XXXX0d,$2:x;   .oKKx'$1.dXKXXKd.
+      .oKXXXXKK0c.$2;.    :00c'$1cOXXXXXKd.
+     .dKXXXXXXXXk,$2.     cKx'$1'xKXXXXXXKx'
+    'xKXXXXK0kdl:.     $2.ok; $1.cdk0KKXXXKx'
+   'xKK0koc,..         $2'c, $1    ..,cok0KKk,
+  ,xko:'.             $2.. $1           .':okx;
+ .,'.                                   .',.

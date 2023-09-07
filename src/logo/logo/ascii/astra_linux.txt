@@ -1,0 +1,22 @@
+                  AA
+                 AaaA
+                Aa${c2}/\\${c1}aA
+${c1}               Aa${c2}/${c1}aa${c2}\\${c1}aA
+${c1}              Aa${c2}/${c1}aAAa${c2}\\${c1}aA
+${c1}             aA${c2}/${c1}aaAAaa${c2}\\${c1}Aa
+${c1}            aA${c2}/${c1}aaAAAAaa${c2}\\${c1}Aa
+${c1}  aaaaaaAAAAa${c2}/${c1}aaAAAAAAaa${c2}\\${c1}aAAAAaaaaa
+${c1}aAAa${c2}-----${c1}aaaaaAAAAAAAAAAaaaaa${c2}-----${c1}aAAa
+${c1}  aAA${c2}\ ${c1}aAAAAAAAAAAAAAAAAAAAAAAa${c2} /${c1}AAa
+${c1}    aAa${c2}\\${c1}aAAA${c2}\\${c1}AAAA${c2}\\${c1}AAAA${c2}\\${c1}AAA${c2}\\${c1}AAa${c2}/${c1}aAa
+${c1}      aAa${c2}\\${c1}aA${c2}\\\\${c1}AAA${c2}\\\\${c1}AAA${c2}\\\\${c1}AA${c2}\\\\/${c1}aAa
+${c1}       aAA${c2}\\${c1}aA${c2}\\\\${c1}AAA${c2}\\\\${c1}AAA${c2}\\\\${c1}Aa${c2}/${c1}AAa
+${c1}         aA${c2}\\${c1}aA${c2}\\\\${c1}AAA${c2}\\\\${c1}AAA${c2}\\\\/${c1}Aa
+${c1}         aA${c2}/${c1}AA${c2}\\\\\\${c1}AA${c2}\\\\\\${c1}AA${c2}\\\\\\${c1}Aa
+${c1}        aA${c2}/\\${c1}AAa${c2}\\\\\\${c1}Aa${c2}\\\\\\${c1}Aa${c2}\\\\\\${c1}Aa
+${c1}        aA${c2}/\\\\${c1}AAa${c2}\\\\/\\${c1}a${c2}\\\\\\${c1}Aa${c2}\\\\${c1}Aa
+${c1}       aA${c2}/${c1}a${c2}\\\\\\${c1}Aa${c2}\\/${c1}AA${c2}\\\\\\\\\\${c1}Aa${c2}\\\\${c1}Aa
+${c1}       aA${c2}/${c1}aA${c2}\\\\/${c1}aAa  aAa${c2}\\\\\\${c1}Aa${c2}\\${c1}Aa
+${c1}      aA${c2}/\\${c1}A${c2}\\/${c1}Aa        aA${c2}\\\\${c1}A${c2}\\\\${c1}Aa
+${c1}      A${c2}|/${c1}aaAa            aAaa${c2}\\|${c1}A
+${c1}     aAaa                    aaAa
