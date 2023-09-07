@@ -83,6 +83,27 @@ const char* ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result)
     return "TypeID is neither 'CFNumber' nor 'CFData'";
 }
 
+const char* ffCfDictGetData(CFDictionaryRef dict, CFStringRef key, uint32_t offset, uint32_t size, uint8_t* result, uint32_t* length)
+{
+    CFTypeRef cf = (CFTypeRef)CFDictionaryGetValue(dict, key);
+    if(cf == NULL)
+        return "CFDictionaryGetValue() failed";
+
+    if(CFGetTypeID(cf) != CFDataGetTypeID())
+        return "TypeID is not 'CFData'";
+
+    CFIndex trueLength = CFDataGetLength((CFDataRef)cf);
+
+    if(trueLength < offset + size)
+        return "Data length is less than offset + size";
+
+    if(length)
+        *length = (uint32_t) trueLength;
+
+    CFDataGetBytes((CFDataRef)cf, CFRangeMake(offset, size), result);
+    return NULL;
+}
+
 const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryRef* result)
 {
     CFDictionaryRef cf = (CFDictionaryRef)CFDictionaryGetValue(dict, key);
