@@ -139,7 +139,7 @@ void ffPrintOS(FFOSOptions* options)
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -173,4 +173,27 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
 
         ffPrintError(FF_OS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateOSJson(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFOSResult* os = ffDetectOS();
+
+    if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Could not detect OS");
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "buildID", &os->buildID);
+    yyjson_mut_obj_add_strbuf(doc, obj, "codename", &os->codename);
+    yyjson_mut_obj_add_strbuf(doc, obj, "id", &os->id);
+    yyjson_mut_obj_add_strbuf(doc, obj, "idLike", &os->idLike);
+    yyjson_mut_obj_add_strbuf(doc, obj, "name", &os->name);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &os->prettyName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "variant", &os->variant);
+    yyjson_mut_obj_add_strbuf(doc, obj, "variantID", &os->variantID);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &os->version);
+    yyjson_mut_obj_add_strbuf(doc, obj, "versionID", &os->versionID);
 }
