@@ -20,11 +20,33 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-
-    ffStrbufInit(&disk->name);
 }
-#else
-void detectFsInfo(struct statfs* fs, FFDisk* disk);
+#elif __APPLE__
+#include <sys/attr.h>
+#include <unistd.h>
+
+struct VolAttrBuf {
+    uint32_t       length;
+    attrreference_t volNameRef;
+    char            volNameSpace[MAXPATHLEN];
+} __attribute__((aligned(4), packed));
+
+void detectFsInfo(struct statfs* fs, FFDisk* disk)
+{
+    if(fs->f_flags & MNT_DONTBROWSE)
+        disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+    else if(fs->f_flags & MNT_REMOVABLE)
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    else
+        disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+
+    struct VolAttrBuf attrBuf;
+    if (getattrlist(fs->f_mntonname, &(struct attrlist) {
+        .bitmapcount = ATTR_BIT_MAP_COUNT,
+        .volattr = ATTR_VOL_INFO | ATTR_VOL_NAME,
+    }, &attrBuf, sizeof(attrBuf), 0) == 0)
+        ffStrbufInitNS(&disk->name, attrBuf.volNameRef.attr_length - 1 /* excluding '\0' */, attrBuf.volNameSpace);
+}
 #endif
 
 const char* ffDetectDisksImpl(FFlist* disks)
@@ -58,6 +80,8 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
         ffStrbufInitS(&disk->mountpoint, fs->f_mntonname);
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
+        ffStrbufInit(&disk->name);
+        disk->type = 0;
         detectFsInfo(fs, disk);
 
         if(fs->f_flags & MNT_RDONLY)

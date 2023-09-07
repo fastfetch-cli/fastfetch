@@ -515,7 +515,6 @@ elseif(APPLE)
         src/detection/cpu/cpu_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
-        src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
