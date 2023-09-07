@@ -2,17 +2,6 @@
 #include "common/sysctl.h"
 #include "detection/temps/temps_apple.h"
 
-static double getFrequency(const char* propName)
-{
-    double herz = (double) ffSysctlGetInt64(propName, 0);
-    if(herz <= 0.0)
-        return herz;
-
-    herz /= 1000.0; //to KHz
-    herz /= 1000.0; //to MHz
-    return herz / 1000.0; //to GHz
-}
-
 static double detectCpuTemp(const FFstrbuf* cpuName)
 {
     double result = 0;
@@ -52,10 +41,17 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if(cpu->coresOnline == 1)
         cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
-    cpu->frequencyMin = getFrequency("hw.cpufrequency_min");
-    cpu->frequencyMax = getFrequency("hw.cpufrequency_max");
-    if(cpu->frequencyMax == 0.0)
-        cpu->frequencyMax = getFrequency("hw.cpufrequency");
+    cpu->frequencyMin = ffSysctlGetInt64("hw.cpufrequency_min", 0) / 1000.0 / 1000.0 / 1000.0;
+    cpu->frequencyMax = ffSysctlGetInt64("hw.cpufrequency_max", 0);
+    if(cpu->frequencyMax > 0.0)
+        cpu->frequencyMax /= 1000.0 * 1000.0 * 1000.0;
+    else
+    {
+        unsigned current = 0;
+        size_t size = sizeof(current);
+        if (sysctl((int[]){ CTL_HW, HW_CPU_FREQ }, 2, &current, &size, NULL, 0) == 0)
+            cpu->frequencyMax = (double) current / 1000.0 / 1000.0 / 1000.0;
+    }
 
     cpu->temperature = options->temp ? detectCpuTemp(&cpu->name) : FF_CPU_TEMP_UNSET;
 
