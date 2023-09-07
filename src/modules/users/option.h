@@ -8,4 +8,6 @@ typedef struct FFUsersOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    bool compact;
 } FFUsersOptions;

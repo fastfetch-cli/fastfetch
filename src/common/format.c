@@ -12,6 +12,8 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
         ffStrbufAppendF(buffer, "%i", *(int*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT)
         ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT64)
+        ffStrbufAppendF(buffer, "%" PRIu64, *(uint64_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT16)
         ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
