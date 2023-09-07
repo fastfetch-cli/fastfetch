@@ -1,4 +1,5 @@
 #include "disk.h"
+#include "util/mallocHelper.h"
 
 #include <sys/mount.h>
 
@@ -28,11 +29,14 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk);
 
 const char* ffDetectDisksImpl(FFlist* disks)
 {
-    struct statfs* buf;
+    int size = getfsstat(NULL, 0, MNT_WAIT);
 
-    int size = getmntinfo(&buf, MNT_WAIT);
     if(size <= 0)
-        return "getmntinfo(&buf, MNT_WAIT) failed";
+        return "getfsstat(NULL, 0, MNT_WAIT) failed";
+
+    FF_AUTO_FREE struct statfs* buf = malloc(sizeof(*buf) * (unsigned) size);
+    if(getfsstat(buf, (int) (sizeof(*buf) * (unsigned) size), MNT_NOWAIT) <= 0)
+        return "getfsstat(buf, size, MNT_NOWAIT) failed";
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
