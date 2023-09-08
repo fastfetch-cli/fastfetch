@@ -9,3 +9,4 @@ void ffInitPackagesOptions(FFPackagesOptions* options);
 bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, const char* value);
 void ffDestroyPackagesOptions(FFPackagesOptions* options);
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module);
+void ffGeneratePackagesJson(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);

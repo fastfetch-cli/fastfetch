@@ -102,7 +102,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -136,4 +136,47 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
 
         ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGeneratePackagesJson(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFPackagesResult counts = {};
+    ffStrbufInit(&counts.pacmanBranch);
+
+    const char* error = ffDetectPackages(&counts);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+
+    #define FF_APPEND_PACKAGE_COUNT(name) yyjson_mut_obj_add_uint(doc, obj, #name, counts.name);
+
+    FF_APPEND_PACKAGE_COUNT(all)
+    FF_APPEND_PACKAGE_COUNT(apk)
+    FF_APPEND_PACKAGE_COUNT(brew)
+    FF_APPEND_PACKAGE_COUNT(brewCask)
+    FF_APPEND_PACKAGE_COUNT(choco)
+    FF_APPEND_PACKAGE_COUNT(dpkg)
+    FF_APPEND_PACKAGE_COUNT(emerge)
+    FF_APPEND_PACKAGE_COUNT(eopkg)
+    FF_APPEND_PACKAGE_COUNT(flatpakSystem)
+    FF_APPEND_PACKAGE_COUNT(flatpakUser)
+    FF_APPEND_PACKAGE_COUNT(nixDefault)
+    FF_APPEND_PACKAGE_COUNT(nixSystem)
+    FF_APPEND_PACKAGE_COUNT(nixUser)
+    FF_APPEND_PACKAGE_COUNT(pacman)
+    FF_APPEND_PACKAGE_COUNT(paludis)
+    FF_APPEND_PACKAGE_COUNT(pkg)
+    FF_APPEND_PACKAGE_COUNT(pkgtool)
+    FF_APPEND_PACKAGE_COUNT(port)
+    FF_APPEND_PACKAGE_COUNT(rpm)
+    FF_APPEND_PACKAGE_COUNT(scoop)
+    FF_APPEND_PACKAGE_COUNT(snap)
+    FF_APPEND_PACKAGE_COUNT(winget)
+    FF_APPEND_PACKAGE_COUNT(xbps)
+    yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
