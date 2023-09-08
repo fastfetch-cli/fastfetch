@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 22
+#define FF_PACKAGES_NUM_FORMAT_ARGS 24
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -63,6 +63,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(pkgtool)
         FF_PRINT_PACKAGE(paludis)
+        FF_PRINT_PACKAGE(winget)
 
         putchar('\n');
     }
@@ -91,6 +92,8 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.scoop},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.choco},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pkgtool},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.paludis},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.winget},
         });
     }
 

@@ -1,4 +1,5 @@
 #include "packages.h"
+#include "common/processing.h"
 #include "util/stringUtils.h"
 
 #include <handleapi.h>
@@ -62,7 +63,7 @@ static void detectChoco(FF_MAYBE_UNUSED FFPackagesResult* result)
     result->choco = getNumElements(chocoPath, FILE_ATTRIBUTE_DIRECTORY, "choco");
 }
 
-static void detectPacman(FF_MAYBE_UNUSED FFPackagesResult* result)
+static void detectPacman(FFPackagesResult* result)
 {
     const char* msystemPrefix = getenv("MSYSTEM_PREFIX");
     if(!msystemPrefix)
@@ -75,9 +76,40 @@ static void detectPacman(FF_MAYBE_UNUSED FFPackagesResult* result)
     result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY, NULL);
 }
 
+static void detectWinget(FFPackagesResult* result)
+{
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&buffer, (char* []) {
+        "winget.exe",
+        "list",
+        "--disable-interactivity",
+        NULL,
+    }))
+        return;
+
+    uint32_t index = ffStrbufFirstIndexS(&buffer, "--\r\n"); // Ignore garbage and table headers
+    if (index == buffer.length)
+        return;
+
+    uint32_t count = 0;
+    for (
+        index += strlen("--\r\n");
+        (index = ffStrbufNextIndexC(&buffer, index, '\n')) < buffer.length;
+        ++index
+    )
+        ++count;
+
+    if (buffer.chars[buffer.length - 1] != '\n') // count last line
+        ++count;
+
+    result->winget = count;
+}
+
 void ffDetectPackagesImpl(FFPackagesResult* result)
 {
     detectScoop(result);
     detectChoco(result);
     detectPacman(result);
+    if (instance.config.allowSlowOperations)
+        detectWinget(result);
 }
