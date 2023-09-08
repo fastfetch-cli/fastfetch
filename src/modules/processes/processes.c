@@ -33,7 +33,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -67,4 +67,18 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
 
         ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateProcessesJson(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    uint32_t result;
+    const char* error = ffDetectProcesses(&result);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_obj_add_uint(doc, module, "result", result);
 }
