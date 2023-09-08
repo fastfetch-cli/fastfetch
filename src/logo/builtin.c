@@ -195,6 +195,17 @@ static const FFlogo A[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_AOSCOS,
         .colors = {
             FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+        },
+    },
+    // AoscOS_old
+    {
+        .names = {"Aosc OS_old", "aoscos_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AOSCOS_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
@@ -1281,7 +1292,6 @@ static const FFlogo E[] = {
         .names = {"EvolutionOS_old"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS_OLD,
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_LIGHT_BLUE,
             FF_COLOR_FG_WHITE,
