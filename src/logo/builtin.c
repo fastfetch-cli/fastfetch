@@ -22,6 +22,17 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // Afterglow
+    {
+        .names = {"Afterglow"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AFTERGLOW,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // AIX
     {
         .names = {"aix"},
