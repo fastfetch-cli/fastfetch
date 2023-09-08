@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <wtsapi32.h>
 
-static uint64_t to_ms(uint64_t ret)
+static inline uint64_t to_ms(uint64_t ret)
 {
     ret -= 116444736000000000ull;
     return ret / 10000ull;

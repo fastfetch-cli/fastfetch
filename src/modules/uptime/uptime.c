@@ -8,9 +8,9 @@
 
 void ffPrintUptime(FFUptimeOptions* options)
 {
-    uint64_t uptime;
+    FFUptimeResult result;
 
-    const char* error = ffDetectUptime(&uptime);
+    const char* error = ffDetectUptime(&result);
 
     if(error)
     {
@@ -18,10 +18,17 @@ void ffPrintUptime(FFUptimeOptions* options)
         return;
     }
 
-    uint32_t days    = (uint32_t)  uptime / 86400;
-    uint32_t hours   = (uint32_t) (uptime - (days * 86400)) / 3600;
-    uint32_t minutes = (uint32_t) (uptime - (days * 86400) - (hours * 3600)) / 60;
-    uint32_t seconds = (uint32_t)  uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
+    uint64_t uptime = result.uptime;
+
+    uint32_t milliseconds = (uint32_t) (uptime % 1000);
+    uptime /= 1000;
+    uint32_t seconds = (uint32_t) (uptime % 60);
+    uptime /= 60;
+    uint32_t minutes = (uint32_t) (uptime % 60);
+    uptime /= 60;
+    uint32_t hours = (uint32_t) (uptime % 24);
+    uptime /= 24;
+    uint32_t days = (uint32_t) uptime;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -74,7 +81,10 @@ void ffPrintUptime(FFUptimeOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &days},
             {FF_FORMAT_ARG_TYPE_UINT, &hours},
             {FF_FORMAT_ARG_TYPE_UINT, &minutes},
-            {FF_FORMAT_ARG_TYPE_UINT, &seconds}
+            {FF_FORMAT_ARG_TYPE_UINT, &seconds},
+            {FF_FORMAT_ARG_TYPE_UINT, &milliseconds},
+            {FF_FORMAT_ARG_TYPE_UINT64, &result.uptime},
+            {FF_FORMAT_ARG_TYPE_UINT64, &result.bootTime},
         });
     }
 }
