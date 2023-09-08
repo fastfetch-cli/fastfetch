@@ -8,7 +8,7 @@
 typedef struct FFUserResult
 {
     FFstrbuf name;
-    FFstrbuf hostname;
+    FFstrbuf hostName;
     FFstrbuf clientIp;
     FFstrbuf tty;
     uint64_t loginTime; // ms

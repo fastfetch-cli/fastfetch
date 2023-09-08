@@ -27,7 +27,7 @@ const char* ffDetectUsers(FFlist* users)
 
         FFUserResult* user = (FFUserResult*) ffListAdd(users);
         ffStrbufInitWS(&user->name, session->pUserName);
-        ffStrbufInitWS(&user->hostname, session->pHostName);
+        ffStrbufInitWS(&user->hostName, session->pHostName);
 
         DWORD bytes = 0;
         PWTS_CLIENT_ADDRESS address = NULL;

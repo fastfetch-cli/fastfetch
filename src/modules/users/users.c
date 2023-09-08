@@ -51,8 +51,8 @@ void ffPrintUsers(FFUsersOptions* options)
                 ffPrintLogoAndKey(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
                 FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateCopy(&user->name);
-                if(user->hostname.length)
-                    ffStrbufAppendF(&result, "@%s", user->hostname.chars);
+                if(user->hostName.length)
+                    ffStrbufAppendF(&result, "@%s", user->hostName.chars);
 
                 if(user->loginTime)
                 {
@@ -74,7 +74,7 @@ void ffPrintUsers(FFUsersOptions* options)
 
             ffPrintFormat(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_USERS_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->name},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostname},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostName},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->tty},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->clientIp},
                 {FF_FORMAT_ARG_TYPE_UINT64, &user->loginTime},
@@ -85,7 +85,7 @@ void ffPrintUsers(FFUsersOptions* options)
     FF_LIST_FOR_EACH(FFUserResult, user, users)
     {
         ffStrbufDestroy(&user->clientIp);
-        ffStrbufDestroy(&user->hostname);
+        ffStrbufDestroy(&user->hostName);
         ffStrbufDestroy(&user->tty);
         ffStrbufDestroy(&user->name);
     }
@@ -93,7 +93,7 @@ void ffPrintUsers(FFUsersOptions* options)
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->compact = true;
@@ -140,5 +140,38 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateUsersJson(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
+
+    const char* error = ffDetectUsers(&results);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFUserResult, user, results)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_strbuf(doc, obj, "clientIp", &user->clientIp);
+        yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &user->hostName);
+        yyjson_mut_obj_add_uint(doc, obj, "loginTime", user->loginTime);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &user->name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "tty", &user->tty);
+    }
+
+exit:
+    FF_LIST_FOR_EACH(FFUserResult, user, results)
+    {
+        ffStrbufDestroy(&user->clientIp);
+        ffStrbufDestroy(&user->hostName);
+        ffStrbufDestroy(&user->tty);
+        ffStrbufDestroy(&user->name);
     }
 }
