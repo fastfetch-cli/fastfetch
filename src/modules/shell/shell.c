@@ -45,7 +45,7 @@ void ffPrintShell(FFShellOptions* options)
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -79,4 +79,24 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
 
         ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateShellJson(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFTerminalShellResult* result = ffDetectTerminalShell();
+
+    if(result->shellProcessName.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect shell");
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->shellExe);
+    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->shellExeName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->shellVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "userShellExe", &result->userShellExe);
+    yyjson_mut_obj_add_strcpy(doc, obj, "userShellExeName", result->userShellExeName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "userShellVersion", &result->userShellVersion);
 }
