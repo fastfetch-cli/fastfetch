@@ -4,7 +4,7 @@
 #include "modules/uptime/uptime.h"
 #include "util/stringUtils.h"
 
-#define FF_UPTIME_NUM_FORMAT_ARGS 4
+#define FF_UPTIME_NUM_FORMAT_ARGS 7
 
 void ffPrintUptime(FFUptimeOptions* options)
 {

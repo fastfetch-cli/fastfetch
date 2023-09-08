@@ -111,7 +111,8 @@ static bool printImageIterm(void)
         else
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+            for (uint32_t i = 0; i < instance.config.logo.paddingRight; ++i)
+                ffStrbufAppendC(&buf, '\n');
         }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
