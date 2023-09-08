@@ -210,11 +210,11 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
 static void logoApplyColors(const FFlogo* logo)
 {
-    if(instance.config.colorKeys.length == 0)
-        ffStrbufAppendS(&instance.config.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[0]);
-
     if(instance.config.colorTitle.length == 0)
-        ffStrbufAppendS(&instance.config.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[1]);
+        ffStrbufAppendS(&instance.config.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
+
+    if(instance.config.colorKeys.length == 0)
+        ffStrbufAppendS(&instance.config.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
 }
 
 static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small)
