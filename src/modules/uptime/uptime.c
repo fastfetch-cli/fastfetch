@@ -91,7 +91,7 @@ void ffPrintUptime(FFUptimeOptions* options)
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -125,4 +125,20 @@ void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
 
         ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateUptimeJson(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFUptimeResult result;
+    const char* error = ffDetectUptime(&result);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_uint(doc, obj, "uptime", result.uptime);
+    yyjson_mut_obj_add_uint(doc, obj, "bootTime", result.bootTime);
 }
