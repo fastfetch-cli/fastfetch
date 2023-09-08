@@ -199,6 +199,7 @@ void ffGenerateDisplayJson(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut
     FF_LIST_FOR_EACH(FFDisplayResult, item, dsResult->displays)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_uint(doc, obj, "width", item->width);
         yyjson_mut_obj_add_uint(doc, obj, "height", item->height);
         yyjson_mut_obj_add_uint(doc, obj, "id", item->id);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
@@ -219,6 +220,5 @@ void ffGenerateDisplayJson(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut
                 yyjson_mut_obj_add_str(doc, obj, "type", "Unknown");
                 break;
         }
-        yyjson_mut_obj_add_uint(doc, obj, "scaledWidth", item->width);
     }
 }

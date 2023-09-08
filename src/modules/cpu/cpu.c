@@ -162,4 +162,7 @@ void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         else
             yyjson_mut_obj_add_null(doc, obj, "temperature");
     }
+
+    ffStrbufDestroy(&cpu.name);
+    ffStrbufDestroy(&cpu.vendor);
 }
