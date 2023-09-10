@@ -141,4 +141,9 @@ void ffGenerateMonitorJson(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut
             yyjson_mut_obj_add_uint(doc, obj, "physicalWidth", item->physicalWidth);
         }
     }
+
+    FF_LIST_FOR_EACH(FFMonitorResult, item, results)
+    {
+        ffStrbufDestroy(&item->name);
+    }
 }
