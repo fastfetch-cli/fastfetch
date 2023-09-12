@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: install required packages
         run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev
@@ -54,7 +54,7 @@ jobs:
       ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: install required packages
         run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev
@@ -103,7 +103,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: install required packages
         run: brew install vulkan-loader molten-vk imagemagick chafa
@@ -148,7 +148,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: run VM
         uses: vmactions/freebsd-vm@v0
@@ -180,7 +180,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
@@ -244,7 +244,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
