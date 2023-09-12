@@ -85,7 +85,7 @@ void ffPrintSound(FFSoundOptions* options)
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
@@ -147,5 +147,34 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
+    const char* error = ffDetectSound(&result);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    if(result.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No active sound devices found");
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFSoundDevice, item, result)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_bool(doc, obj, "active", item->active);
+        yyjson_mut_obj_add_bool(doc, obj, "main", item->main);
+        yyjson_mut_obj_add_uint(doc, obj, "volume", item->volume);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
     }
 }
