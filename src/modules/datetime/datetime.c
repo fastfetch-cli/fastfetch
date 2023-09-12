@@ -1,52 +1,144 @@
+#include "common/time.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "detection/datetime/datetime.h"
 #include "modules/datetime/datetime.h"
 #include "util/stringUtils.h"
+
+#include <time.h>
 
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
 
-void ffPrintDateTimeFormat(const char* moduleName, const FFModuleArgs* moduleArgs)
+typedef struct FFDateTimeResult
 {
-    const FFDateTimeResult* result = ffDetectDateTime();
-    ffPrintFormat(moduleName, 0, moduleArgs, FF_DATETIME_NUM_FORMAT_ARGS, (FFformatarg[]) {
-        {FF_FORMAT_ARG_TYPE_UINT16, &result->year}, // 1
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->yearShort}, // 2
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->month}, // 3
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->monthPretty}, // 4
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->monthName}, // 5
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->monthNameShort}, // 6
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->week}, // 7
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->weekday}, // 8
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->weekdayShort}, // 9
-        {FF_FORMAT_ARG_TYPE_UINT16, &result->dayInYear}, // 10
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->dayInMonth}, // 11
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->dayInWeek}, // 12
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->hour}, // 13
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->hourPretty}, // 14
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->hour12}, // 15
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->hour12Pretty}, // 16
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->minute}, // 17
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->minutePretty}, // 18
-        {FF_FORMAT_ARG_TYPE_UINT8, &result->second}, // 19
-        {FF_FORMAT_ARG_TYPE_STRBUF, &result->secondPretty} // 20
+    //Examples for 21.02.2022 - 15:18:37
+    uint16_t year; //2022
+    uint8_t yearShort; //22
+    uint8_t month; //2
+    FFstrbuf monthPretty; //02
+    FFstrbuf monthName; //February
+    FFstrbuf monthNameShort; //Feb
+    uint8_t week; //8
+    FFstrbuf weekday; //Monday
+    FFstrbuf weekdayShort; //Mon
+    uint16_t dayInYear; //52
+    uint8_t dayInMonth; //21
+    uint8_t dayInWeek; //1
+    uint8_t hour; //15
+    FFstrbuf hourPretty; //15
+    uint8_t hour12; //3
+    FFstrbuf hour12Pretty; //03
+    uint8_t minute; //18
+    FFstrbuf minutePretty; //18
+    uint8_t second; //37
+    FFstrbuf secondPretty; //37
+} FFDateTimeResult;
+
+void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
+{
+    FFDateTimeResult result;
+
+    result.year = (uint16_t) (tm->tm_year + 1900);
+    result.yearShort = (uint8_t) (result.year % 100);
+    result.month = (uint8_t) (tm->tm_mon + 1);
+
+    ffStrbufInitA(&result.monthPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.monthPretty.length = (uint32_t) strftime(result.monthPretty.chars, ffStrbufGetFree(&result.monthPretty), "%m", tm);
+
+    ffStrbufInitA(&result.monthName, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.monthName.length = (uint32_t) strftime(result.monthName.chars, ffStrbufGetFree(&result.monthName), "%B", tm);
+
+    ffStrbufInitA(&result.monthNameShort, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.monthNameShort.length = (uint32_t) strftime(result.monthNameShort.chars, ffStrbufGetFree(&result.monthNameShort), "%b", tm);
+
+    result.week = (uint8_t) (tm->tm_yday / 7 + 1);
+
+    ffStrbufInitA(&result.weekday, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.weekday.length = (uint32_t) strftime(result.weekday.chars, ffStrbufGetFree(&result.weekday), "%A", tm);
+
+    ffStrbufInitA(&result.weekdayShort, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.weekdayShort.length = (uint32_t) strftime(result.weekdayShort.chars, ffStrbufGetFree(&result.weekdayShort), "%a", tm);
+
+    result.dayInYear = (uint8_t) (tm->tm_yday + 1);
+    result.dayInMonth = (uint8_t) tm->tm_mday;
+    result.dayInWeek = tm->tm_wday == 0 ? 7 : (uint8_t) tm->tm_wday;
+
+    result.hour = (uint8_t) tm->tm_hour;
+
+    ffStrbufInitA(&result.hourPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.hourPretty.length = (uint32_t) strftime(result.hourPretty.chars, ffStrbufGetFree(&result.hourPretty), "%H", tm);
+
+    result.hour12 = (uint8_t) (result.hour % 12);
+
+    ffStrbufInitA(&result.hour12Pretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.hour12Pretty.length = (uint32_t) strftime(result.hour12Pretty.chars, ffStrbufGetFree(&result.hour12Pretty), "%I", tm);
+
+    result.minute = (uint8_t) tm->tm_min;
+
+    ffStrbufInitA(&result.minutePretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.minutePretty.length = (uint32_t) strftime(result.minutePretty.chars, ffStrbufGetFree(&result.minutePretty), "%M", tm);
+
+    result.second = (uint8_t) tm->tm_sec;
+
+    ffStrbufInitA(&result.secondPretty, FASTFETCH_STRBUF_DEFAULT_ALLOC);
+    result.secondPretty.length = (uint32_t) strftime(result.secondPretty.chars, ffStrbufGetFree(&result.secondPretty), "%S", tm);
+
+    ffPrintFormat(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_DATETIME_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        {FF_FORMAT_ARG_TYPE_UINT16, &result.year}, // 1
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.yearShort}, // 2
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.month}, // 3
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.monthPretty}, // 4
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.monthName}, // 5
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.monthNameShort}, // 6
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.week}, // 7
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.weekday}, // 8
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.weekdayShort}, // 9
+        {FF_FORMAT_ARG_TYPE_UINT16, &result.dayInYear}, // 10
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInMonth}, // 11
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInWeek}, // 12
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour}, // 13
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.hourPretty}, // 14
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour12}, // 15
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.hour12Pretty}, // 16
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.minute}, // 17
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.minutePretty}, // 18
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.second}, // 19
+        {FF_FORMAT_ARG_TYPE_STRBUF, &result.secondPretty} // 20
     });
+
+    ffStrbufDestroy(&result.hour12Pretty);
+    ffStrbufDestroy(&result.hourPretty);
+    ffStrbufDestroy(&result.minutePretty);
+    ffStrbufDestroy(&result.monthName);
+    ffStrbufDestroy(&result.monthNameShort);
+    ffStrbufDestroy(&result.monthPretty);
+    ffStrbufDestroy(&result.secondPretty);
+    ffStrbufDestroy(&result.weekday);
+    ffStrbufDestroy(&result.weekdayShort);
 }
 
 void ffPrintDateTime(FFDateTimeOptions* options)
 {
+    uint64_t msNow = ffTimeGetNow();
+    time_t sNow = msNow / 1000;
+    struct tm* tm = localtime(&sNow);
+
     if(options->moduleArgs.outputFormat.length > 0)
     {
-        ffPrintDateTimeFormat(FF_DATETIME_DISPLAY_NAME, &options->moduleArgs);
+        ffPrintDateTimeFormat(tm, &options->moduleArgs);
         return;
     }
 
-    const FFDateTimeResult* datetime = ffDetectDateTime();
+    char buffer[32];
+    if (strftime(buffer, sizeof(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
+    {
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "strftime() failed");
+        return;
+    }
+
     ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-    //yyyy-MM-dd HH:mm:ss
-    printf("%u-%s-%02u %s:%s:%s\n", datetime->year, datetime->monthPretty.chars, datetime->dayInMonth, datetime->hourPretty.chars, datetime->minutePretty.chars, datetime->secondPretty.chars);
+    puts(buffer);
 }
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
@@ -89,27 +181,5 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 
 void ffGenerateDateTimeJson(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    const FFDateTimeResult* result = ffDetectDateTime();
-
-    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_uint(doc, obj, "year", result->year);
-    yyjson_mut_obj_add_uint(doc, obj, "yearShort", result->yearShort);
-    yyjson_mut_obj_add_uint(doc, obj, "month", result->month);
-    yyjson_mut_obj_add_strbuf(doc, obj, "monthPretty", &result->monthPretty);
-    yyjson_mut_obj_add_strbuf(doc, obj, "monthName", &result->monthName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "monthNameShort", &result->monthNameShort);
-    yyjson_mut_obj_add_uint(doc, obj, "week", result->week);
-    yyjson_mut_obj_add_strbuf(doc, obj, "weekday", &result->weekday);
-    yyjson_mut_obj_add_strbuf(doc, obj, "weekdaySort", &result->weekdayShort);
-    yyjson_mut_obj_add_uint(doc, obj, "dayInYear", result->dayInYear);
-    yyjson_mut_obj_add_uint(doc, obj, "dayInMonth", result->dayInMonth);
-    yyjson_mut_obj_add_uint(doc, obj, "dayInWeek", result->dayInWeek);
-    yyjson_mut_obj_add_uint(doc, obj, "hour", result->hour);
-    yyjson_mut_obj_add_strbuf(doc, obj, "hourPretty", &result->hourPretty);
-    yyjson_mut_obj_add_uint(doc, obj, "hour12", result->hour12);
-    yyjson_mut_obj_add_strbuf(doc, obj, "hour12Pretty", &result->hour12Pretty);
-    yyjson_mut_obj_add_uint(doc, obj, "minute", result->minute);
-    yyjson_mut_obj_add_strbuf(doc, obj, "minutePretty", &result->minutePretty);
-    yyjson_mut_obj_add_uint(doc, obj, "second", result->second);
-    yyjson_mut_obj_add_strbuf(doc, obj, "secondPretty", &result->secondPretty);
+    yyjson_mut_obj_add_uint(doc, module, "result", ffTimeGetNow());
 }

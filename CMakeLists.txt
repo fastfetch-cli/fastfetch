@@ -267,7 +267,6 @@ set(LIBFASTFETCH_SRC
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
-    src/detection/datetime/datetime.c
     src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
@@ -627,7 +626,7 @@ if(yyjson_FOUND)
     target_link_libraries(libfastfetch PRIVATE yyjson)
 endif()
 
-target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE)
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 endif()
