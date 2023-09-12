@@ -46,7 +46,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -80,4 +80,23 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
 
         ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateTerminalJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFTerminalShellResult* result = ffDetectTerminalShell();
+
+    if(result->terminalProcessName.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect terminal");
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->terminalExe);
+    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->terminalExeName);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", result->terminalPid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->terminalPrettyName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->terminalProcessName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->terminalVersion);
 }

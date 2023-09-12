@@ -92,9 +92,10 @@ void ffGenerateShellJson(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->shellExe);
     yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->shellExeName);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", result->shellPid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->shellVersion);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShellExe", &result->userShellExe);
     yyjson_mut_obj_add_strcpy(doc, obj, "userShellExeName", result->userShellExeName);
