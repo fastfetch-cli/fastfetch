@@ -8,7 +8,7 @@
 
 void ffPrintVersion(FFVersionOptions* options)
 {
-    FFVersionResult result = {};
+    FFVersionResult result;
     ffDetectVersion(&result);
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -31,7 +31,7 @@ void ffPrintVersion(FFVersionOptions* options)
 
 void ffInitVersionOptions(FFVersionOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -65,4 +65,18 @@ void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
 
         ffPrintError(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateVersionJson(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFVersionResult result;
+    ffDetectVersion(&result);
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_str(doc, obj, "projectName", result.projectName);
+    yyjson_mut_obj_add_str(doc, obj, "architecture", result.architecture);
+    yyjson_mut_obj_add_str(doc, obj, "version", result.version);
+    yyjson_mut_obj_add_str(doc, obj, "versionTweak", result.versionTweak);
+    yyjson_mut_obj_add_str(doc, obj, "cmakeBuiltType", result.cmakeBuiltType);
+    yyjson_mut_obj_add_bool(doc, obj, "debugMode", result.debugMode);
 }
