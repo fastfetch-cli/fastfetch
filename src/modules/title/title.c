@@ -51,7 +51,7 @@ void ffPrintTitle(FFTitleOptions* options)
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJson);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->fqdn = false;
     ffStrbufInit(&options->colorUser);
@@ -139,4 +139,14 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
 
         ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateTitleJson(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
+    yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "domainName", &instance.state.platform.domainName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
 }
