@@ -149,4 +149,5 @@ void ffGenerateTitleJson(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
     yyjson_mut_obj_add_strbuf(doc, obj, "domainName", &instance.state.platform.domainName);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
+    yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }

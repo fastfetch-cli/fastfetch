@@ -158,14 +158,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "shell-format"))
     {
-        constructAndPrintCommandHelpFormat("shell", "{3} {4}", 7,
+        constructAndPrintCommandHelpFormat("shell", "{3} {4}", 6,
             "Shell process name",
             "Shell path with exe name",
             "Shell exe name",
             "Shell version",
-            "User shell path with exe name",
-            "User shell exe name",
-            "User shell version"
+            "Shell pid",
+            "Shell pretty name"
         );
     }
     else if(ffStrEqualsIgnCase(command, "display-format"))

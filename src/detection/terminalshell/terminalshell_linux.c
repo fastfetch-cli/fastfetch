@@ -269,18 +269,12 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
 
 static void getUserShellFromEnv(FFTerminalShellResult* result)
 {
-    ffStrbufSet(&result->userShellExe, &instance.state.platform.userShell);
-    if(result->userShellExe.length == 0)
-        return;
-
-    setExeName(&result->userShellExe, &result->userShellExeName);
-
     //If shell detection via processes failed
-    if(result->shellProcessName.length == 0 && result->userShellExe.length > 0)
+    if(result->shellProcessName.length == 0 && instance.state.platform.userShell.length > 0)
     {
-        ffStrbufAppendS(&result->shellProcessName, result->userShellExeName);
-        ffStrbufSet(&result->shellExe, &result->userShellExe);
+        ffStrbufSet(&result->shellExe, &instance.state.platform.userShell);
         setExeName(&result->shellExe, &result->shellExeName);
+        ffStrbufAppendS(&result->shellProcessName, result->shellExeName);
     }
 }
 
@@ -348,10 +342,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     result.terminalExeName = result.terminalExe.chars;
     result.terminalPid = 0;
 
-    ffStrbufInit(&result.userShellExe);
-    result.userShellExeName = result.userShellExe.chars;
-    ffStrbufInit(&result.userShellVersion);
-
     getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
@@ -359,11 +349,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
 
     ffStrbufClear(&result.shellVersion);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
-
-    if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
-        getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
-    else
-        ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
         ffStrbufInitStatic(&result.shellPrettyName, "PowerShell");

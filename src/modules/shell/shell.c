@@ -4,7 +4,7 @@
 #include "modules/shell/shell.h"
 #include "util/stringUtils.h"
 
-#define FF_SHELL_NUM_FORMAT_ARGS 7
+#define FF_SHELL_NUM_FORMAT_ARGS 6
 
 void ffPrintShell(FFShellOptions* options)
 {
@@ -36,9 +36,8 @@ void ffPrintShell(FFShellOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
             {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->userShellExeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellVersion}
+            {FF_FORMAT_ARG_TYPE_UINT, &result->shellPid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellPrettyName},
         });
     }
 }
@@ -97,7 +96,4 @@ void ffGenerateShellJson(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->shellPid);
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->shellVersion);
-    yyjson_mut_obj_add_strbuf(doc, obj, "userShellExe", &result->userShellExe);
-    yyjson_mut_obj_add_strcpy(doc, obj, "userShellExeName", result->userShellExeName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "userShellVersion", &result->userShellVersion);
 }
