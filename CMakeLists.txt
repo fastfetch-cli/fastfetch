@@ -276,6 +276,7 @@ set(LIBFASTFETCH_SRC
     src/detection/opencl/opencl.c
     src/detection/os/os.c
     src/detection/packages/packages.c
+    src/detection/publicip/publicip.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
