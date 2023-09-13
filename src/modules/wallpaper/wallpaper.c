@@ -44,7 +44,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -78,4 +78,16 @@ void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
 
         ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateWallpaperJson(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
+    const char* error = ffDetectWallpaper(&fullpath);
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
 }
