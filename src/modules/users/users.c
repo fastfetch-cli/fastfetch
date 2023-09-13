@@ -96,7 +96,7 @@ void ffInitUsersOptions(FFUsersOptions* options)
     ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    options->compact = true;
+    options->compact = false;
 }
 
 bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const char* value)
