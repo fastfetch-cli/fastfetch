@@ -1,15 +1,32 @@
-# 2.0.6
+# 2.1.0
+
+This release introduces a new output format: JSON result
+
+Changes:
+* Users module detects and prints user login time by default. Specifying `--users-compact` to disable it
+* Fastfetch now requires yyjson 0.7.1 or later, which is embeded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
+* Reduced information supported by `--terminal-format`, `--shell-format`
 
 Features:
+* Add `--format json`, which prints system information as JSON format
 * Add fast path for xfce4 version detection (DE, FreeBSD)
-* Add contour terminal version and font detection (Terminal / TerminalFont)
+* Support contour terminal version and font detection (Terminal / TerminalFont)
+* Support `kitty-direct` / `iterm` without specifying logo width / height. Note: in this case, the entre screen will be cleared.
+* Support new flag `--logo-separate`. If true, print modules at bottom of the logo
+* Support Apple Silicon CPU frequency detection (CPU, macOS)
+* Support user login time detection (Users)
+* Support winget package manager detection, guarded behind `--allow-slow-operations` (Packages, Windows)
 
 Bugfixes:
 * Fix `fastfetch --config verbose` doesn't work (#547)
+* Fix short read when reading from stdin (Logo)
+* Fix `poll() timeout or failed` error when image is very large (Logo)
+* Fix Termux Monet terminal version detection (Terminal)
 
 Logo:
-* support `kitty-direct` / `iterm` without specifying logo width / height. Note: in this case, the entre screen will be cleared.
 * Update EvolutionOS
+* Update AOSC OS
+* Add Afterglow
 
 # 2.0.5
 
