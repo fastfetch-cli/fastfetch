@@ -1,5 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "detection/gpu/gpu.h"
 #include "detection/vulkan/vulkan.h"
 #include "modules/vulkan/vulkan.h"
 #include "util/stringUtils.h"
@@ -45,7 +46,7 @@ void ffPrintVulkan(FFVulkanOptions* options)
 
 void ffInitVulkanOptions(FFVulkanOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -78,5 +79,38 @@ void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
             continue;
 
         ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateVulkanJson(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFVulkanResult* result = ffDetectVulkan();
+
+    if(result->error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", result->error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "apiVersion", &result->apiVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "conformanceVersion", &result->conformanceVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "driver", &result->driver);
+    yyjson_mut_val* gpus = yyjson_mut_obj_add_arr(doc, obj, "gpus");
+    FF_LIST_FOR_EACH(FFGPUResult, vulkanGpu, result->gpus)
+    {
+        yyjson_mut_val* gpuObj = yyjson_mut_arr_add_obj(doc, gpus);
+        yyjson_mut_obj_add_str(doc, gpuObj, "type", vulkanGpu->type == FF_GPU_TYPE_UNKNOWN ? "Unknown" : vulkanGpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "vendor", &vulkanGpu->vendor);
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "name", &vulkanGpu->name);
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "driver", &vulkanGpu->driver);
+        yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");
+        yyjson_mut_val* dedicatedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
+        yyjson_mut_obj_add_uint(doc, dedicatedMemory, "total", vulkanGpu->dedicated.total);
+        yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", vulkanGpu->dedicated.used);
+        yyjson_mut_val* sharedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
+        yyjson_mut_obj_add_uint(doc, sharedMemory, "total", vulkanGpu->shared.total);
+        yyjson_mut_obj_add_uint(doc, sharedMemory, "used", vulkanGpu->shared.used);
+        yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", vulkanGpu->vulkanDeviceId);
     }
 }
