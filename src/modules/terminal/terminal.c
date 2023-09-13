@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#define FF_TERMINAL_NUM_FORMAT_ARGS 10
+#define FF_TERMINAL_NUM_FORMAT_ARGS 6
 
 void ffPrintTerminal(FFTerminalOptions* options)
 {
@@ -33,13 +33,9 @@ void ffPrintTerminal(FFTerminalOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalExe},
             {FF_FORMAT_ARG_TYPE_STRING, result->terminalExeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellProcessName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->userShellExeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellVersion}
+            {FF_FORMAT_ARG_TYPE_UINT, &result->terminalPid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalPrettyName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalVersion},
         });
     }
 }
@@ -93,10 +89,10 @@ void ffGenerateTerminalJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_m
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->terminalProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->terminalExe);
     yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->terminalExeName);
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->terminalPid);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->terminalPrettyName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->terminalProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->terminalVersion);
 }

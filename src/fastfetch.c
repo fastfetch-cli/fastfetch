@@ -262,13 +262,9 @@ static inline void printCommandHelp(const char* command)
             "Terminal process name",
             "Terminal path with exe name",
             "Terminal exe name",
-            "Shell process name",
-            "Shell path with exe name",
-            "Shell exe name",
-            "Shell version",
-            "User shell path with exe name",
-            "User shell exe name",
-            "User shell version"
+            "Terminal pid",
+            "Terminal pretty name",
+            "Terminal version"
         );
     }
     else if(ffStrEqualsIgnCase(command, "terminalfont-format"))
