@@ -2,6 +2,7 @@
 #include "common/time.h"
 
 #include <sys/sysctl.h>
+#include <sys/time.h>
 
 const char* ffDetectUptime(FFUptimeResult* result)
 {
