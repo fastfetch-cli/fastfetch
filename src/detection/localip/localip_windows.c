@@ -70,14 +70,16 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
-    // Start with a 16 KB buffer and resize if needed -
-    // multiple attempts in case interfaces change while
+    // Multiple attempts in case interfaces change while
     // we are in the middle of querying them.
-    DWORD adapter_addresses_buffer_size = 16 * 1024;
-    for (int attempts = 0; attempts != 3; ++attempts)
+    DWORD adapter_addresses_buffer_size = 0;
+    for (int attempts = 0;; ++attempts)
     {
-        adapter_addresses = (IP_ADAPTER_ADDRESSES*)realloc(adapter_addresses, adapter_addresses_buffer_size);
-        assert(adapter_addresses);
+        if (adapter_addresses_buffer_size)
+        {
+            adapter_addresses = (IP_ADAPTER_ADDRESSES*)realloc(adapter_addresses, adapter_addresses_buffer_size);
+            assert(adapter_addresses);
+        }
 
         DWORD error = GetAdaptersAddresses(
             options->showType & FF_LOCALIP_TYPE_IPV4_BIT
@@ -90,7 +92,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
         if (error == ERROR_SUCCESS)
             break;
-        else if (ERROR_BUFFER_OVERFLOW == error)
+        else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4)
             continue;
         else
             return "GetAdaptersAddresses() failed";
