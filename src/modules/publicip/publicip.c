@@ -42,7 +42,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, ffGeneratePublicIpJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->url);
@@ -105,4 +105,25 @@ void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
 
         ffPrintError(FF_PUBLICIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGeneratePublicIpJson(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFPublicIpResult result;
+    ffStrbufInit(&result.ip);
+    ffStrbufInit(&result.location);
+    const char* error = ffDetectPublicIp(options, &result);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "ip", &result.ip);
+    yyjson_mut_obj_add_strbuf(doc, obj, "location", &result.location);
+
+    ffStrbufDestroy(&result.ip);
+    ffStrbufDestroy(&result.location);
 }
