@@ -16,7 +16,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
 
     if (error)
     {
-        ffPrintError(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, error);
+        ffPrintError(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
