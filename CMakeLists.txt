@@ -281,6 +281,7 @@ set(LIBFASTFETCH_SRC
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
     src/detection/vulkan/vulkan.c
+    src/detection/weather/weather.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c
