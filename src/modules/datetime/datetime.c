@@ -120,7 +120,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
 void ffPrintDateTime(FFDateTimeOptions* options)
 {
     uint64_t msNow = ffTimeGetNow();
-    time_t sNow = msNow / 1000;
+    time_t sNow = (time_t) (msNow / 1000);
     struct tm* tm = localtime(&sNow);
 
     if(options->moduleArgs.outputFormat.length > 0)

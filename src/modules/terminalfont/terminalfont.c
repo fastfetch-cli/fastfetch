@@ -119,4 +119,8 @@ void ffGenerateTerminalFontJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjs
         yyjson_mut_arr_add_strbuf(doc, fallbackStyles, style);
     }
     yyjson_mut_obj_add_strbuf(doc, fallback, "pretty", &result.fallback.pretty);
+
+    ffStrbufDestroy(&result.error);
+    ffFontDestroy(&result.font);
+    ffFontDestroy(&result.fallback);
 }

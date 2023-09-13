@@ -177,4 +177,10 @@ void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
     }
+
+    FF_LIST_FOR_EACH(FFSoundDevice, device, result)
+    {
+        ffStrbufDestroy(&device->identifier);
+        ffStrbufDestroy(&device->name);
+    }
 }
