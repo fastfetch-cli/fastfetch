@@ -104,13 +104,35 @@ void ffGenerateVulkanJson(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_d
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "vendor", &vulkanGpu->vendor);
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "name", &vulkanGpu->name);
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "driver", &vulkanGpu->driver);
+
         yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");
-        yyjson_mut_val* dedicatedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
-        yyjson_mut_obj_add_uint(doc, dedicatedMemory, "total", vulkanGpu->dedicated.total);
-        yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", vulkanGpu->dedicated.used);
-        yyjson_mut_val* sharedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
-        yyjson_mut_obj_add_uint(doc, sharedMemory, "total", vulkanGpu->shared.total);
-        yyjson_mut_obj_add_uint(doc, sharedMemory, "used", vulkanGpu->shared.used);
+
+        {
+            yyjson_mut_val* dedicatedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
+            if (vulkanGpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "total", vulkanGpu->dedicated.total);
+            else
+                yyjson_mut_obj_add_null(doc, dedicatedMemory, "total");
+
+            if (vulkanGpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", vulkanGpu->dedicated.total);
+            else
+                yyjson_mut_obj_add_null(doc, dedicatedMemory, "used");
+        }
+
+        {
+            yyjson_mut_val* sharedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
+            if (vulkanGpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, sharedMemory, "total", vulkanGpu->shared.total);
+            else
+                yyjson_mut_obj_add_null(doc, sharedMemory, "total");
+
+            if (vulkanGpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, sharedMemory, "used", vulkanGpu->shared.used);
+            else
+                yyjson_mut_obj_add_null(doc, sharedMemory, "used");
+        }
+
         yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", vulkanGpu->vulkanDeviceId);
     }
 }

@@ -230,7 +230,9 @@ void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         else
             yyjson_mut_obj_add_null(doc, obj, "coreCount");
 
-        yyjson_mut_val* dedicatedObj = yyjson_mut_obj_add_obj(doc, obj, "dedicated");
+        yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, obj, "memory");
+
+        yyjson_mut_val* dedicatedObj = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
             yyjson_mut_obj_add_uint(doc, dedicatedObj, "total", gpu->dedicated.total);
         else
@@ -244,7 +246,7 @@ void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         yyjson_mut_obj_add_strbuf(doc, obj, "driver", &gpu->driver);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &gpu->name);
 
-        yyjson_mut_val* sharedObj = yyjson_mut_obj_add_obj(doc, obj, "shared");
+        yyjson_mut_val* sharedObj = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
         if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
             yyjson_mut_obj_add_uint(doc, sharedObj, "total", gpu->shared.total);
         else
