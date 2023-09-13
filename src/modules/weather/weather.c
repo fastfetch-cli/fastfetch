@@ -33,7 +33,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, ffGenerateWeatherJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);
@@ -109,4 +109,18 @@ void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 
         ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateWeatherJson(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+    const char* error = ffDetectWeather(options, &result);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
