@@ -4,7 +4,7 @@ This release introduces a new output format: JSON result
 
 Changes:
 * Users module detects and prints user login time by default. Specifying `--users-compact` to disable it
-* Fastfetch now requires yyjson 0.7.1 or later, which is embeded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
+* Fastfetch now requires yyjson 0.8.0 or later, which is embeded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
 * Reduced information supported by `--terminal-format`, `--shell-format`
 
 Features:

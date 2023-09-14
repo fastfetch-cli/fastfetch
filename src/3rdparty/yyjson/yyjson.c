@@ -3484,8 +3484,6 @@ static_inline void pow10_table_get_exp(i32 exp10, i32 *exp2) {
 
 
 
-#if !YYJSON_DISABLE_READER
-
 /*==============================================================================
  * JSON Character Matcher
  *============================================================================*/
@@ -3678,6 +3676,8 @@ static_inline bool digi_is_digit_or_fp(u8 d) {
 }
 
 
+
+#if !YYJSON_DISABLE_READER
 
 /*==============================================================================
  * Hex Character Reader
