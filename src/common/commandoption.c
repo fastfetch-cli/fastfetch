@@ -93,6 +93,8 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
 
 void ffPrintCommandOption(FFdata* data)
 {
+    yyjson_mut_doc* resultDoc = instance.state.resultDoc;
+
     //Parse the structure and call the modules
     uint32_t startIndex = 0;
     while (startIndex < data->structure.length)
@@ -101,19 +103,29 @@ void ffPrintCommandOption(FFdata* data)
         data->structure.chars[colonIndex] = '\0';
 
         uint64_t ms = 0;
-        if(__builtin_expect(instance.config.stat, false))
+        if(instance.config.stat)
             ms = ffTimeGetTick();
 
         parseStructureCommand(data->structure.chars + startIndex, &data->customValues);
 
-        if(__builtin_expect(instance.config.stat, false))
+        if(instance.config.stat)
         {
-            char str[32];
-            int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-            if(instance.config.pipe)
-                puts(str);
+            ms = ffTimeGetTick() - ms;
+
+            if (resultDoc)
+            {
+                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(resultDoc->root);
+                yyjson_mut_obj_add_uint(resultDoc, moduleJson, "stat", ms);
+            }
             else
-                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            {
+                char str[32];
+                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
+                if(instance.config.pipe)
+                    puts(str);
+                else
+                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+            }
         }
 
         #if defined(_WIN32)
