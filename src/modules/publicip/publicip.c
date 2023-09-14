@@ -24,7 +24,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     {
         ffPrintLogoAndKey(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.location.length)
-            printf("%s (%s)", result.ip.chars, result.location.chars);
+            printf("%s (%s)\n", result.ip.chars, result.location.chars);
         else
             ffStrbufPutTo(&result.ip, stdout);
     }
