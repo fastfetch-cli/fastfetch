@@ -1192,6 +1192,16 @@ static const FFlogo D[] = {
 };
 
 static const FFlogo E[] = {
+    // Elbrus
+    {
+        .names = {"elbrus"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ELBRUS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Elementary
     {
         .names = {"Elementary"},
