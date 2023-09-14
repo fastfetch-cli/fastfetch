@@ -24,9 +24,11 @@ Bugfixes:
 * Fix Termux Monet terminal version detection (Terminal)
 
 Logo:
+* Add Afterglow
+* Add Elbrus
 * Update EvolutionOS
 * Update AOSC OS
-* Add Afterglow
+* Update Ubuntu_old
 
 # 2.0.5
 
