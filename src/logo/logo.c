@@ -43,10 +43,8 @@ static void ffLogoPrintCharsRaw(const char* data, size_t length)
     }
     else
     {
-        for (uint32_t i = 0; i < options->paddingTop; ++i)
-            ffStrbufAppendC(&buf, '\n');
-        for (uint32_t i = 0; i < options->paddingLeft; ++i)
-            ffStrbufAppendC(&buf, ' ');
+        ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+        ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
         ffStrbufAppendNS(&buf, (uint32_t) length, data);
         instance.state.logoHeight = options->paddingTop + options->height;
         instance.state.logoWidth = options->paddingLeft + options->width + options->paddingRight;
@@ -106,11 +104,11 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
         }
 
         //We have an escape sequence direclty as bytes. We print it, but don't increase the line length
-        if(*data == '\033' && *(data + 1) == '[')
+        if(*data == '\e' && *(data + 1) == '[')
         {
             const char* start = data;
 
-            fputs("\033[", stdout);
+            fputs("\e[", stdout);
             data += 2;
 
             while(isdigit(*data) || *data == ';')

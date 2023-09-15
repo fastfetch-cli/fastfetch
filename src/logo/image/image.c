@@ -11,7 +11,7 @@
     #include <windows.h>
 #endif
 
-static FFstrbuf base64Encode(FFstrbuf* in)
+static FFstrbuf base64Encode(const FFstrbuf* in)
 {
     const char* base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -37,8 +37,9 @@ static FFstrbuf base64Encode(FFstrbuf* in)
 
 static bool printImageIterm(void)
 {
+    const FFLogoOptions* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    if(!ffAppendFileBuffer(instance.config.logo.source.chars, &buf))
+    if(!ffAppendFileBuffer(options->source.chars, &buf))
     {
         fputs("Logo: Failed to load image file\n", stderr);
         return false;
@@ -49,28 +50,26 @@ static bool printImageIterm(void)
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&buf);
     ffStrbufClear(&buf);
 
-    if (!instance.config.logo.width || !instance.config.logo.height)
+    if (!options->width || !options->height)
     {
-        if (!instance.config.logo.separate)
+        if (!options->separate)
         {
             ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
-                (unsigned) instance.config.logo.paddingTop,
-                (unsigned) instance.config.logo.paddingLeft
+                (unsigned) options->paddingTop,
+                (unsigned) options->paddingLeft
             );
         }
         else
         {
-            for (uint32_t i = 0; i < instance.config.logo.paddingTop; ++i)
-                ffStrbufAppendC(&buf, '\n');
-            for (uint32_t i = 0; i < instance.config.logo.paddingLeft; ++i)
-                ffStrbufAppendC(&buf, ' ');
+            ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+            ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
         }
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a",
             base64.chars
         );
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
-        if (!instance.config.logo.separate)
+        if (!options->separate)
         {
             uint16_t X = 0, Y = 0;
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
@@ -79,40 +78,37 @@ static bool printImageIterm(void)
                 fprintf(stderr, "\nLogo (iterm): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
-            instance.state.logoWidth = X + instance.config.logo.paddingRight;
+            instance.state.logoWidth = X + options->paddingRight;
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
         else
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+            ffPrintCharTimes('\n', options->paddingRight);
         }
     }
     else
     {
-        for (uint32_t i = 0; i < instance.config.logo.paddingTop; ++i)
-            ffStrbufAppendC(&buf, '\n');
-        for (uint32_t i = 0; i < instance.config.logo.paddingLeft; ++i)
-            ffStrbufAppendC(&buf, ' ');
+        ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+        ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
-            (unsigned) instance.config.logo.width,
-            (unsigned) instance.config.logo.height,
-            (unsigned) instance.config.logo.preserveAspectRadio,
+            (unsigned) options->width,
+            (unsigned) options->height,
+            (unsigned) options->preserveAspectRadio,
             base64.chars
         );
 
-        if (!instance.config.logo.separate)
+        if (!options->separate)
         {
-            instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-            instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
+            instance.state.logoWidth = options->width + options->paddingLeft + options->paddingRight;
+            instance.state.logoHeight = options->paddingTop + options->height;
             ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
         }
         else
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            for (uint32_t i = 0; i < instance.config.logo.paddingRight; ++i)
-                ffStrbufAppendC(&buf, '\n');
+            ffStrbufAppendNC(&buf, options->paddingRight, '\n');
         }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
@@ -122,26 +118,27 @@ static bool printImageIterm(void)
 
 static bool printImageKittyDirect(void)
 {
-    FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&instance.config.logo.source);
+    const FFLogoOptions* options = &instance.config.logo;
+    FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&options->source);
 
-    if (!instance.config.logo.width || !instance.config.logo.height)
+    if (!options->width || !options->height)
     {
-        if (!instance.config.logo.separate)
+        if (!options->separate)
         {
             // We must clear the entre screen to make sure that terminal buffer won't scroll up
             printf("\e[2J\e[3J\e[%u;%uH",
-                (unsigned) instance.config.logo.paddingTop,
-                (unsigned) instance.config.logo.paddingLeft
+                (unsigned) options->paddingTop,
+                (unsigned) options->paddingLeft
             );
         }
         else
         {
-            ffPrintCharTimes('\n', instance.config.logo.paddingTop);
-            ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
+            ffPrintCharTimes('\n', options->paddingTop);
+            ffPrintCharTimes(' ', options->paddingLeft);
         }
         printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
         fflush(stdout);
-        if (!instance.config.logo.separate)
+        if (!options->separate)
         {
             uint16_t X = 0, Y = 0;
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
@@ -150,36 +147,36 @@ static bool printImageKittyDirect(void)
                 fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
-            instance.state.logoWidth = X + instance.config.logo.paddingRight;
+            instance.state.logoWidth = X + options->paddingRight;
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
         else
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+            ffPrintCharTimes('\n', options->paddingRight);
         }
     }
     else
     {
-        ffPrintCharTimes('\n', instance.config.logo.paddingTop);
-        ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
+        ffPrintCharTimes('\n', options->paddingTop);
+        ffPrintCharTimes(' ', options->paddingLeft);
 
         printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n",
-            (unsigned) instance.config.logo.width,
-            (unsigned) instance.config.logo.height,
+            (unsigned) options->width,
+            (unsigned) options->height,
             base64.chars
         );
-        if (!instance.config.logo.separate)
+        if (!options->separate)
         {
-            instance.state.logoWidth = instance.config.logo.width + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-            instance.state.logoHeight = instance.config.logo.paddingTop + instance.config.logo.height;
+            instance.state.logoWidth = options->width + options->paddingLeft + options->paddingRight;
+            instance.state.logoHeight = options->paddingTop + options->height;
             printf("\e[%uA", (unsigned) instance.state.logoHeight);
         }
         else
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffPrintCharTimes('\n', instance.config.logo.paddingRight);
+            ffPrintCharTimes('\n', options->paddingRight);
         }
     }
 
@@ -299,22 +296,23 @@ static void writeCacheUint32(FFLogoRequestData* requestData, uint32_t value, con
 
 static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName)
 {
+    const FFLogoOptions* options = &instance.config.logo;
     //Calculate character dimensions
-    instance.state.logoWidth = requestData->logoCharacterWidth + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-    instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop - 1;
+    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
 
     //Write cache files
     writeCacheStrbuf(requestData, result, cacheFileName);
 
-    if(instance.config.logo.width == 0)
+    if(options->width == 0)
         writeCacheUint32(requestData, requestData->logoCharacterWidth, FF_CACHE_FILE_WIDTH);
 
-    if(instance.config.logo.height == 0)
+    if(options->height == 0)
         writeCacheUint32(requestData, requestData->logoCharacterHeight, FF_CACHE_FILE_HEIGHT);
 
     //Write result to stdout
-    ffPrintCharTimes('\n', instance.config.logo.paddingTop);
-    ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
+    ffPrintCharTimes('\n', options->paddingTop);
+    ffPrintCharTimes(' ', options->paddingLeft);
     fflush(stdout);
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), result);
 

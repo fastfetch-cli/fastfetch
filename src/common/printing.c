@@ -112,9 +112,7 @@ void ffPrintColor(const FFstrbuf* colorValue)
     if(colorValue->length == 0)
         return;
 
-    fputs("\033[", stdout);
-    ffStrbufWriteTo(colorValue, stdout);
-    fputc('m', stdout);
+    printf("\e[%sm", colorValue->chars);
 }
 
 void ffPrintCharTimes(char c, uint32_t times)
