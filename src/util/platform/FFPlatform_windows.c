@@ -184,7 +184,7 @@ static void getSystemReleaseAndVersion(FFPlatform* platform)
     ffStrbufEnsureFree(&platform->systemVersion, 256);
     bufSize = (DWORD) ffStrbufGetFree(&platform->systemVersion);
     if(RegGetValueA(hKey, NULL, "DisplayVersion", RRF_RT_REG_SZ, NULL, platform->systemVersion.chars, &bufSize) == ERROR_SUCCESS)
-        platform->systemVersion.length = (uint32_t) bufSize;
+        platform->systemVersion.length = (uint32_t) bufSize - 1;
 
     RegCloseKey(hKey);
 }
