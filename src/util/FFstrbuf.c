@@ -73,6 +73,14 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c)
     strbuf->chars[strbuf->length] = '\0';
 }
 
+void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c)
+{
+    ffStrbufEnsureFree(strbuf, num);
+    memset(&strbuf->chars[strbuf->length], c, num);
+    strbuf->length += num;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 {
     if(value == NULL || length == 0)
