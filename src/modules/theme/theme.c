@@ -32,7 +32,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

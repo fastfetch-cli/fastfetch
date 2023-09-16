@@ -9,3 +9,4 @@ void ffInitThemeOptions(FFThemeOptions* options);
 bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value);
 void ffDestroyThemeOptions(FFThemeOptions* options);
 void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module);
+void ffGenerateThemeJson(FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
