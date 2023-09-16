@@ -56,7 +56,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
         exe->chars, &size,
         NULL, 0
     ))
-        exe->length = (uint32_t)size;
+        exe->length = (uint32_t)size - 1;
 
     #endif
 
