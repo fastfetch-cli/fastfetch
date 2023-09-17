@@ -87,13 +87,17 @@ static void detectNameFromPath(FFDisk* disk, const struct stat* deviceStat, FFst
     closedir(dir);
 }
 
-static void detectName(FFDisk* disk, const struct mntent* device)
+static void detectName(FFDisk* disk)
 {
     struct stat deviceStat;
-    if(stat(device->mnt_fsname, &deviceStat) != 0)
+    if(stat(disk->mountFrom.chars, &deviceStat) != 0)
         return;
 
-    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
+    //Detect external devices. Code is put here to reuse deviceStat
+    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreateS("/dev/disk/by-id/");
+    detectNameFromPath(disk, &deviceStat, &basePath);
+    disk->type = ffStrbufStartsWithS(&disk->name, "usb-") ? FF_DISK_VOLUME_TYPE_EXTERNAL_BIT : FF_DISK_VOLUME_TYPE_NONE;
+    ffStrbufClear(&disk->name);
 
     //Try label first
     ffStrbufSetS(&basePath, "/dev/disk/by-label/");
@@ -176,12 +180,10 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
     return false;
 }
 
-static void detectType(const FFlist* disks, FFDisk* currentDisk, const struct mntent* options)
+static void detectType(const FFlist* disks, FFDisk* currentDisk)
 {
     if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-    else if(strstr(options->mnt_opts, MNTOPT_NOSUID) != NULL || strstr(options->mnt_opts, "nodev") != NULL)
-        currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else
@@ -237,10 +239,11 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
         //detect name
         ffStrbufInit(&disk->name);
-        detectName(disk, device);
+        detectName(disk); // Also detects external devices
 
         //detect type
-        detectType(disks, disk, device);
+        if (disk->type == FF_DISK_VOLUME_TYPE_NONE)
+            detectType(disks, disk);
 
         //Detects stats
         detectStats(disk);
