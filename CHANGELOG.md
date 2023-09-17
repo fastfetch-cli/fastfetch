@@ -22,6 +22,8 @@ Bugfixes:
 * Fix short read when reading from stdin (Logo)
 * Fix `poll() timeout or failed` error when image is very large (Logo)
 * Fix Termux Monet terminal version detection (Terminal)
+* Fix zpool volumes detection (Disk, Linux)
+* Fix external volumes detection (Disk, Linux)
 
 Logo:
 * Add Afterglow
