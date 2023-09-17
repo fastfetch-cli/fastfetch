@@ -25,6 +25,12 @@ const char* ffDetectDisksImpl(FFlist* disks)
         FFDisk* disk = ffListAdd(disks);
         ffStrbufInitWS(&disk->mountpoint, mountpoint);
 
+        wchar_t volumeName[64];
+        if(GetVolumeNameForVolumeMountPointW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
+            ffStrbufInitWS(&disk->mountFrom, volumeName);
+        else
+            ffStrbufInit(&disk->mountFrom);
+
         if(!GetDiskFreeSpaceExW(
             mountpoint,
             (PULARGE_INTEGER)&disk->bytesAvailable,
