@@ -144,23 +144,14 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
     if(ffStrbufEqualS(&currentDisk->mountFrom, "drvfs")) // WSL Windows drives
         return false;
 
-    //Filter all disks which device was already found. This catches BTRFS subvolumes.
-    for(uint32_t i = 0; i < disks->length - 1; i++)
-    {
-        const FFDisk* otherDevice = ffListGet(disks, i);
-
-        if(ffStrbufEqual(&currentDisk->mountFrom, &otherDevice->mountFrom))
-            return true;
-    }
-
     if(ffStrbufEqualS(&currentDisk->filesystem, "zfs"))
     {
         //ZFS subvolumes
-        uint32_t index = ffStrbufFirstIndexC(&currentDisk->filesystem, '/');
-        if (index == currentDisk->filesystem.length)
+        uint32_t index = ffStrbufFirstIndexC(&currentDisk->mountFrom, '/');
+        if (index == currentDisk->mountFrom.length)
             return false;
 
-        FF_STRBUF_AUTO_DESTROY zpoolName = ffStrbufCreateNS(index, currentDisk->filesystem.chars);
+        FF_STRBUF_AUTO_DESTROY zpoolName = ffStrbufCreateNS(index, currentDisk->mountFrom.chars);
         for(uint32_t i = 0; i < disks->length - 1; i++)
         {
             const FFDisk* otherDevice = ffListGet(disks, i);
@@ -169,6 +160,17 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
         }
 
         return false;
+    }
+    else
+    {
+        //Filter all disks which device was already found. This catches BTRFS subvolumes.
+        for(uint32_t i = 0; i < disks->length - 1; i++)
+        {
+            const FFDisk* otherDevice = ffListGet(disks, i);
+
+            if(ffStrbufEqual(&currentDisk->mountFrom, &otherDevice->mountFrom))
+                return true;
+        }
     }
 
     return false;
