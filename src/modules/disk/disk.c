@@ -194,6 +194,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
     {
+        ffStrbufDestroy(&disk->mountFrom);
         ffStrbufDestroy(&disk->mountpoint);
         ffStrbufDestroy(&disk->filesystem);
         ffStrbufDestroy(&disk->name);
@@ -387,16 +388,24 @@ void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_
     FF_LIST_FOR_EACH(FFDisk, item, disks)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_uint(doc, obj, "bytesAvailable", item->bytesAvailable);
-        yyjson_mut_obj_add_uint(doc, obj, "bytesFree", item->bytesFree);
-        yyjson_mut_obj_add_uint(doc, obj, "bytesTotal", item->bytesTotal);
-        yyjson_mut_obj_add_uint(doc, obj, "bytesUsed", item->bytesUsed);
-        yyjson_mut_obj_add_uint(doc, obj, "filesTotal", item->filesTotal);
-        yyjson_mut_obj_add_uint(doc, obj, "filesUsed", item->filesUsed);
-        yyjson_mut_obj_add_strbuf(doc, obj, "filesystem", &item->filesystem);
+
+        yyjson_mut_val* bytes = yyjson_mut_obj_add_obj(doc, obj, "bytes");
+        yyjson_mut_obj_add_uint(doc, bytes, "available", item->bytesAvailable);
+        yyjson_mut_obj_add_uint(doc, bytes, "free", item->bytesFree);
+        yyjson_mut_obj_add_uint(doc, bytes, "total", item->bytesTotal);
+        yyjson_mut_obj_add_uint(doc, bytes, "used", item->bytesUsed);
+
+        yyjson_mut_val* files = yyjson_mut_obj_add_obj(doc, obj, "files");
+        yyjson_mut_obj_add_uint(doc, files, "total", item->filesTotal);
+        yyjson_mut_obj_add_uint(doc, files, "used", item->filesUsed);
+
+        yyjson_mut_obj_add_strbuf(doc, files, "filesystem", &item->filesystem);
         yyjson_mut_obj_add_strbuf(doc, obj, "mountpoint", &item->mountpoint);
+        yyjson_mut_obj_add_strbuf(doc, obj, "mountFrom", &item->mountFrom);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_val* typeArr = yyjson_mut_obj_add_arr(doc, obj, "type");
+        if(item->type & FF_DISK_VOLUME_TYPE_REGULAR_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "Regular");
         if(item->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
             yyjson_mut_arr_add_str(doc, typeArr, "External");
         if(item->type & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
@@ -410,6 +419,7 @@ void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_
     FF_LIST_FOR_EACH(FFDisk, item, disks)
     {
         ffStrbufDestroy(&item->mountpoint);
+        ffStrbufDestroy(&item->mountFrom);
         ffStrbufDestroy(&item->filesystem);
         ffStrbufDestroy(&item->name);
     }

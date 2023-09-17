@@ -7,6 +7,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <mntent.h>
+#include <sys/mount.h>
 
 #ifdef __USE_LARGEFILE64
     #define stat stat64
@@ -15,72 +17,43 @@
     #define readdir readdir64
 #endif
 
-static bool isPhysicalDevice(FFstrbuf* device)
+static bool isPhysicalDevice(const struct mntent* device)
 {
     #ifndef __ANDROID__ //On Android, `/dev` is not accessable, so that the following checks always fail
 
-    //https://askubuntu.com/a/1289123
-    if(ffStrbufEqualS(device, "/cow"))
+    //Always show the root path
+    if(ffStrEquals(device->mnt_dir, "/"))
         return true;
 
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
-    if(ffStrbufEqualS(device, "drvfs"))
+    if(ffStrEquals(device->mnt_fsname, "drvfs"))
         return true;
 
-    //ZFS root pool. The format is rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>
-    if(ffStrbufStartsWithS(device, "rpool/"))
+    //ZFS pool
+    if(ffStrEquals(device->mnt_type, "zfs"))
         return true;
+
+    //Pseudo filesystems don't have a device in /dev
+    if(!ffStrStartsWith(device->mnt_fsname, "/dev/"))
+        return false;
+
+    if(
+        ffStrStartsWith(device->mnt_fsname + 5, "loop") || //Ignore loop devices
+        ffStrStartsWith(device->mnt_fsname + 5, "ram")  || //Ignore ram devices
+        ffStrStartsWith(device->mnt_fsname + 5, "fd")      //Ignore fd devices
+    ) return false;
 
     struct stat deviceStat;
-    if(stat(device->chars, &deviceStat) != 0)
+    if(stat(device->mnt_fsname, &deviceStat) != 0)
         return false;
 
     //Ignore all devices that are not block devices
     if(!S_ISBLK(deviceStat.st_mode))
         return false;
 
-    //Pseudo filesystems don't have a device in /dev
-    if(!ffStrbufStartsWithS(device, "/dev/"))
-        return false;
-
     #endif // __ANDROID__
 
-    if(
-        ffStrbufStartsWithS(device, "/dev/loop") || //Ignore loop devices
-        ffStrbufStartsWithS(device, "/dev/ram")  || //Ignore ram devices
-        ffStrbufStartsWithS(device, "/dev/fd")      //Ignore fd devices
-    ) return false;
-
     return true;
-}
-
-static void appendNextEntry(FFstrbuf* buffer, char** source)
-{
-    //Read the current entry into the buffer
-    while(**source != '\0' && !isspace(**source))
-    {
-        //After a backslash the next 3 characters are octal ascii codes
-        if(**source == '\\' && strnlen(*source, 4) == 4)
-        {
-            char octal[4] = {0};
-            strncpy(octal, *source + 1, 3);
-
-            long value = strtol(octal, NULL, 8); //Returns 0 on error, so no need to check endptr
-            if(value > 0 && value < CHAR_MAX)
-            {
-                ffStrbufAppendC(buffer, (char) value);
-                *source += 4;
-                continue;
-            }
-        }
-
-        ffStrbufAppendC(buffer, **source);
-        ++*source;
-    }
-
-    //Skip whitespace
-    while(isspace(**source))
-        ++*source;
 }
 
 static void detectNameFromPath(FFDisk* disk, const struct stat* deviceStat, FFstrbuf* basePath)
@@ -114,10 +87,10 @@ static void detectNameFromPath(FFDisk* disk, const struct stat* deviceStat, FFst
     closedir(dir);
 }
 
-static void detectName(FFDisk* disk, const FFstrbuf* device)
+static void detectName(FFDisk* disk, const struct mntent* device)
 {
     struct stat deviceStat;
-    if(stat(device->chars, &deviceStat) != 0)
+    if(stat(device->mnt_fsname, &deviceStat) != 0)
         return;
 
     FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
@@ -132,6 +105,8 @@ static void detectName(FFDisk* disk, const FFstrbuf* device)
         ffStrbufSetS(&basePath, "/dev/disk/by-partlabel/");
         detectNameFromPath(disk, &deviceStat, &basePath);
     }
+
+    if (disk->name.length == 0) return;
 
     // Basic\x20data\x20partition
     for (uint32_t i = ffStrbufFirstIndexS(&disk->name, "\\x");
@@ -164,35 +139,46 @@ static void detectType(FF_MAYBE_UNUSED const FFlist* devices, FFDisk* currentDis
 
 #else
 
-static bool isSubvolume(const FFlist* devices)
+static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
 {
-    const FFstrbuf* current = ffListGet(devices, devices->length - 1);
-
-    if(ffStrbufEqualS(current, "drvfs")) // WSL Windows drives
+    if(ffStrbufEqualS(&currentDisk->mountFrom, "drvfs")) // WSL Windows drives
         return false;
 
     //Filter all disks which device was already found. This catches BTRFS subvolumes.
-    for(uint32_t i = 0; i < devices->length - 1; i++)
+    for(uint32_t i = 0; i < disks->length - 1; i++)
     {
-        const FFstrbuf* otherDevice = ffListGet(devices, i);
+        const FFDisk* otherDevice = ffListGet(disks, i);
 
-        if(ffStrbufEqual(current, otherDevice))
+        if(ffStrbufEqual(&currentDisk->mountFrom, &otherDevice->mountFrom))
             return true;
     }
 
-    //ZFS subvolumes: rpool/<POOL_NAME>/<VOLUME_NAME>/<SUBVOLUME_NAME>.
-    //Test if the third slash is present.
-    if(ffStrbufStartsWithS(current, "rpool/") && ffStrHasNChars(current->chars, '/', 3))
-        return true;
+    if(ffStrbufEqualS(&currentDisk->filesystem, "zfs"))
+    {
+        //ZFS subvolumes
+        uint32_t index = ffStrbufFirstIndexC(&currentDisk->filesystem, '/');
+        if (index == currentDisk->filesystem.length)
+            return false;
+
+        FF_STRBUF_AUTO_DESTROY zpoolName = ffStrbufCreateNS(index, currentDisk->filesystem.chars);
+        for(uint32_t i = 0; i < disks->length - 1; i++)
+        {
+            const FFDisk* otherDevice = ffListGet(disks, i);
+            if(ffStrbufEqualS(&otherDevice->filesystem, "zfs") && ffStrbufStartsWith(&otherDevice->mountFrom, &zpoolName))
+                return true;
+        }
+
+        return false;
+    }
 
     return false;
 }
 
-static void detectType(const FFlist* devices, FFDisk* currentDisk, const char* options)
+static void detectType(const FFlist* disks, FFDisk* currentDisk, const struct mntent* options)
 {
-    if(isSubvolume(devices))
+    if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-    else if(strstr(options, "nosuid") != NULL || strstr(options, "nodev") != NULL)
+    else if(strstr(options->mnt_opts, MNTOPT_NOSUID) != NULL || strstr(options->mnt_opts, "nodev") != NULL)
         currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
@@ -222,61 +208,43 @@ static void detectStats(FFDisk* disk)
 
 const char* ffDetectDisksImpl(FFlist* disks)
 {
-    FILE* mountsFile = fopen("/proc/mounts", "r");
+    FILE* mountsFile = setmntent("/proc/mounts", "r");
     if(mountsFile == NULL)
-        return "fopen(\"/proc/mounts\", \"r\") == NULL";
+        return "setmntent(\"/proc/mounts\", \"r\") == NULL";
 
     FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
-    char* line = NULL;
-    size_t len = 0;
+    struct mntent* device;
 
-    while(getline(&line, &len, mountsFile) != EOF)
+    while((device = getmntent(mountsFile)))
     {
-        //Format of the file: "<device> <mountpoint> <filesystem> <options> ..." (Same as fstab)
-        char* currentPos = line;
-
-        //detect device
-        FFstrbuf* device = ffListAdd(&devices);
-        ffStrbufInit(device);
-        appendNextEntry(device, &currentPos);
-
         if(!isPhysicalDevice(device))
-        {
-            ffStrbufDestroy(device);
-            devices.length--;
             continue;
-        }
 
         //We have a valid device, add it to the list
         FFDisk* disk = ffListAdd(disks);
 
+        //detect mountFrom
+        ffStrbufInitS(&disk->mountFrom, device->mnt_fsname);
+
         //detect mountpoint
-        ffStrbufInit(&disk->mountpoint);
-        appendNextEntry(&disk->mountpoint, &currentPos);
+        ffStrbufInitS(&disk->mountpoint, device->mnt_dir);
 
         //detect filesystem
-        ffStrbufInit(&disk->filesystem);
-        appendNextEntry(&disk->filesystem, &currentPos);
+        ffStrbufInitS(&disk->filesystem, device->mnt_type);
 
         //detect name
         ffStrbufInit(&disk->name);
         detectName(disk, device);
 
         //detect type
-        detectType(&devices, disk, currentPos);
+        detectType(disks, disk, device);
 
         //Detects stats
         detectStats(disk);
     }
 
-    if(line != NULL)
-        free(line);
-
-    FF_LIST_FOR_EACH(FFstrbuf, device, devices)
-        ffStrbufDestroy(device);
-
-    fclose(mountsFile);
+    endmntent(mountsFile);
 
     return NULL;
 }

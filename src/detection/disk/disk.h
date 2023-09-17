@@ -7,6 +7,7 @@
 
 typedef struct FFDisk
 {
+    FFstrbuf mountFrom;
     FFstrbuf mountpoint;
     FFstrbuf filesystem;
     FFstrbuf name;

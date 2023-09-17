@@ -78,6 +78,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
         disk->filesTotal = (uint32_t) fs->f_files;
         disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs->f_ffree);
 
+        ffStrbufInitS(&disk->mountFrom, fs->f_mntfromname);
         ffStrbufInitS(&disk->mountpoint, fs->f_mntonname);
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         ffStrbufInit(&disk->name);
