@@ -1140,7 +1140,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             ffOptionParseString(key, value, &instance.config.libOSMesa);
         else if(ffStrEqualsIgnCase(subkey, "-opencl"))
             ffOptionParseString(key, value, &instance.config.libOpenCL);
-        else if(ffStrEqualsIgnCase(key, "-pulse"))
+        else if(ffStrEqualsIgnCase(subkey, "-pulse"))
             ffOptionParseString(key, value, &instance.config.libPulse);
         else if(ffStrEqualsIgnCase(subkey, "-nm"))
             ffOptionParseString(key, value, &instance.config.libnm);
