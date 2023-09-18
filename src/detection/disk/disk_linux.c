@@ -133,7 +133,7 @@ static void detectName(FFDisk* disk)
 
 #ifdef __ANDROID__
 
-static void detectType(FF_MAYBE_UNUSED const FFlist* devices, FFDisk* currentDisk, FF_MAYBE_UNUSED const char* options)
+static void detectType(FF_MAYBE_UNUSED const FFlist* disks, FFDisk* currentDisk)
 {
     if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
@@ -253,8 +253,6 @@ const char* ffDetectDisksImpl(FFlist* disks)
     FILE* mountsFile = setmntent("/proc/mounts", "r");
     if(mountsFile == NULL)
         return "setmntent(\"/proc/mounts\", \"r\") == NULL";
-
-    FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFstrbuf));
 
     struct mntent* device;
 
