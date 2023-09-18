@@ -23,9 +23,10 @@ static inline void printTitlePart(const FFstrbuf* content, const FFstrbuf* color
 
 void ffPrintTitle(FFTitleOptions* options)
 {
-    FFstrbuf* host = options->fqdn ?
-        &instance.state.platform.domainName :
-        &instance.state.platform.hostName;
+    FF_STRBUF_AUTO_DESTROY hostName = ffStrbufCreateCopy(&instance.state.platform.hostName);
+
+    if (!options->fqdn)
+        ffStrbufSubstrBeforeFirstC(&hostName, '.');
 
     if (options->moduleArgs.outputFormat.length == 0)
     {
@@ -37,14 +38,14 @@ void ffPrintTitle(FFTitleOptions* options)
             ffPrintColor(&options->colorAt);
         putchar('@');
 
-        printTitlePart(host, &options->colorHost);
+        printTitlePart(&hostName, &options->colorHost);
         putchar('\n');
     }
     else
     {
         ffPrintFormat(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_TITLE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, host},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &hostName},
         });
     }
 }
@@ -147,7 +148,6 @@ void ffGenerateTitleJson(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
     yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "domainName", &instance.state.platform.domainName);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }

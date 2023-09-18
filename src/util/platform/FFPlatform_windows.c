@@ -130,12 +130,11 @@ static void getHostName(FFPlatform* platform)
         ffStrbufSetWS(&platform->hostName, buffer);
 }
 
-static void getDomainName(FFPlatform* platform)
+static void getUserShell(FFPlatform* platform)
 {
-    wchar_t buffer[128];
-    DWORD len = sizeof(buffer) / sizeof(*buffer);
-    if(GetComputerNameExW(ComputerNameDnsDomain, buffer, &len))
-        ffStrbufSetWS(&platform->domainName, buffer);
+    // Works in MSYS2
+    ffStrbufAppendS(&platform->userShell, getenv("SHELL"));
+    ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
 }
 
 static void getSystemName(FFPlatform* platform)
@@ -233,7 +232,7 @@ void ffPlatformInitImpl(FFPlatform* platform)
 
     getUserName(platform);
     getHostName(platform);
-    getDomainName(platform);
+    getUserShell(platform);
 
     getSystemName(platform);
     getSystemReleaseAndVersion(platform);

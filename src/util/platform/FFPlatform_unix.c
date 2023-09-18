@@ -141,37 +141,8 @@ static void getUserName(FFPlatform* platform, const struct passwd* pwd)
 
 static void getHostName(FFPlatform* platform, const struct utsname* uts)
 {
-    char hostname[256];
-    if(gethostname(hostname, sizeof(hostname)) == 0)
-        ffStrbufAppendS(&platform->hostName, hostname);
-
-    if(platform->hostName.length == 0)
-        ffStrbufAppendS(&platform->hostName, uts->nodename);
+    ffStrbufAppendS(&platform->hostName, uts->nodename);
 }
-
-#ifdef __linux__
-#include <netdb.h>
-static void getDomainName(FFPlatform* platform)
-{
-    struct addrinfo hints = {0};
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_CANONNAME;
-
-    struct addrinfo* info = NULL;
-
-    if(getaddrinfo(platform->hostName.chars, "80", &hints, &info) != 0)
-        return;
-
-    struct addrinfo* current = info;
-    while(platform->domainName.length == 0 && current != NULL)
-    {
-        ffStrbufAppendS(&platform->domainName, current->ai_canonname);
-        current = current->ai_next;
-    }
-
-    freeaddrinfo(info);
-}
-#endif
 
 static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
 {
@@ -198,11 +169,6 @@ void ffPlatformInitImpl(FFPlatform* platform)
 
     getUserName(platform, pwd);
     getHostName(platform, &uts);
-
-    #ifdef __linux__
-        getDomainName(platform);
-    #endif
-
     getUserShell(platform, pwd);
 
     ffStrbufAppendS(&platform->systemName, uts.sysname);

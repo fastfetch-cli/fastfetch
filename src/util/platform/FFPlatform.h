@@ -15,7 +15,6 @@ typedef struct FFPlatform {
 
     FFstrbuf userName;
     FFstrbuf hostName;
-    FFstrbuf domainName;
     FFstrbuf userShell;
 
     FFstrbuf systemName;

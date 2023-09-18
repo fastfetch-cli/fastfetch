@@ -12,7 +12,6 @@ void ffPlatformInit(FFPlatform* platform)
 
     ffStrbufInit(&platform->userName);
     ffStrbufInit(&platform->hostName);
-    ffStrbufInit(&platform->domainName);
     ffStrbufInit(&platform->userShell);
 
     ffStrbufInit(&platform->systemName);
@@ -21,9 +20,6 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->systemArchitecture);
 
     ffPlatformInitImpl(platform);
-
-    if(platform->domainName.length == 0)
-        ffStrbufAppend(&platform->domainName, &platform->hostName);
 
     if(platform->systemName.length == 0)
     {
@@ -59,7 +55,6 @@ void ffPlatformDestroy(FFPlatform* platform)
 
     ffStrbufDestroy(&platform->userName);
     ffStrbufDestroy(&platform->hostName);
-    ffStrbufDestroy(&platform->domainName);
     ffStrbufDestroy(&platform->userShell);
 
     ffStrbufDestroy(&platform->systemArchitecture);

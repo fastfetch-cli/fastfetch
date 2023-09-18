@@ -29,7 +29,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
     uint32_t titleLength = 1 // @
         + getWcsWidth(&platform->userName, wstr, &state) // user name
-        + (fqdn ? platform->domainName.length : platform->hostName.length); // host name
+        + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
     ffLogoPrintLine();
 
     if(options->string.length == 0)
