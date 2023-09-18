@@ -1,5 +1,6 @@
 #include "disk.h"
 
+#include "common/io/io.h"
 #include "util/stringUtils.h"
 
 #include <limits.h>
@@ -58,7 +59,7 @@ static bool isPhysicalDevice(const struct mntent* device)
 
 static void detectNameFromPath(FFDisk* disk, const struct stat* deviceStat, FFstrbuf* basePath)
 {
-    DIR* dir = opendir(basePath->chars);
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(basePath->chars);
     if(dir == NULL)
         return;
 
@@ -83,8 +84,6 @@ static void detectNameFromPath(FFDisk* disk, const struct stat* deviceStat, FFst
         ffStrbufAppendS(&disk->name, entry->d_name);
         break;
     }
-
-    closedir(dir);
 }
 
 static void detectName(FFDisk* disk)
@@ -93,8 +92,11 @@ static void detectName(FFDisk* disk)
     if(stat(disk->mountFrom.chars, &deviceStat) != 0)
         return;
 
-    //Detect external devices. Code is put here to reuse deviceStat
-    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreateS("/dev/disk/by-id/");
+    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
+
+    //Detect USB devices. Code is put here to reuse deviceStat
+    //https://stackoverflow.com/a/73302717
+    ffStrbufAppendS(&basePath, "/dev/disk/by-id/");
     detectNameFromPath(disk, &deviceStat, &basePath);
     disk->type = ffStrbufStartsWithS(&disk->name, "usb-") ? FF_DISK_VOLUME_TYPE_EXTERNAL_BIT : FF_DISK_VOLUME_TYPE_NONE;
     ffStrbufClear(&disk->name);
@@ -180,9 +182,45 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
     return false;
 }
 
+static bool isRemovable(FFDisk* currentDisk)
+{
+    // https://stackoverflow.com/a/73302025
+    // Note my USB mobile hard disk isn't detected as removable, but my USB flash disk does.
+    // USB devices should be handled in detectName
+    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreateS("/sys/block/");
+
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(basePath.chars);
+    if(dir == NULL)
+        return false;
+
+    uint32_t index = ffStrbufLastIndexC(&currentDisk->mountFrom, '/');
+    const char* partitionName = index == currentDisk->mountFrom.length ? NULL : currentDisk->mountFrom.chars + index + 1;
+    if (!partitionName || !*partitionName) return false;
+
+    struct dirent* entry;
+    while((entry = readdir(dir)) != NULL)
+    {
+        if(entry->d_name[0] == '.')
+            continue;
+
+        if (!ffStrStartsWith(partitionName, entry->d_name)) continue;
+
+        // /sys/block/sdx/removable
+        ffStrbufAppendS(&basePath, entry->d_name);
+        ffStrbufAppendS(&basePath, "/removable");
+
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        return ffReadFileBuffer(basePath.chars, &buffer) && ffStrbufEqualS(&buffer, "1");
+    }
+
+    return false;
+}
+
 static void detectType(const FFlist* disks, FFDisk* currentDisk)
 {
-    if(isSubvolume(disks, currentDisk))
+    if(isRemovable(currentDisk))
+        currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    else if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
