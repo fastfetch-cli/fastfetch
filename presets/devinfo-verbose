@@ -1,3 +1,0 @@
---load-config devinfo
---load-config all
---load-config verbose

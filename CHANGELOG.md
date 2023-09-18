@@ -6,6 +6,7 @@ Changes:
 * Users module detects and prints user login time by default. Specifying `--users-compact` to disable it
 * Fastfetch now requires yyjson 0.8.0 or later, which is embeded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
 * Reduced information supported by `--terminal-format`, `--shell-format`
+* Some config presets (`devinfo` and `verbose`) are obseleted and removed. They are barely maintained and can be replaced with `--format json` now.
 
 Features:
 * Add `--format json`, which prints system information as JSON format
@@ -18,6 +19,7 @@ Features:
 * Support winget package manager detection, guarded behind `--allow-slow-operations` (Packages, Windows)
 
 Bugfixes:
+* Fix fastfetch hanging in specific environment (#561)
 * Fix `fastfetch --config verbose` doesn't work (#547)
 * Fix short read when reading from stdin (Logo)
 * Fix `poll() timeout or failed` error when image is very large (Logo)
