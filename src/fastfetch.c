@@ -1274,7 +1274,7 @@ int main(int argc, const char** argv)
 
     if (instance.state.resultDoc)
     {
-        yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_ALLOW_INF_AND_NAN | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+        yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
     }
 
     ffFinish();

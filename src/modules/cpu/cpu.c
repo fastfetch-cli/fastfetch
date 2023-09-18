@@ -157,10 +157,7 @@ void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         yyjson_mut_obj_add_uint(doc, obj, "coresOnline", cpu.coresOnline);
         yyjson_mut_obj_add_real(doc, obj, "frequencyMin", cpu.frequencyMin);
         yyjson_mut_obj_add_real(doc, obj, "frequencyMax", cpu.frequencyMax);
-        if (cpu.temperature == cpu.temperature)
-            yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
-        else
-            yyjson_mut_obj_add_null(doc, obj, "temperature");
+        yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
     }
 
     ffStrbufDestroy(&cpu.name);

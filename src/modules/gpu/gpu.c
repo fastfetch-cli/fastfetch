@@ -256,10 +256,7 @@ void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         else
             yyjson_mut_obj_add_null(doc, sharedObj, "used");
 
-        if (gpu->temperature == gpu->temperature)
-            yyjson_mut_obj_add_real(doc, obj, "temperature", gpu->temperature);
-        else
-            yyjson_mut_obj_add_null(doc, obj, "temperature");
+        yyjson_mut_obj_add_null(doc, obj, "temperature");
 
         const char* type;
         switch (gpu->type)
