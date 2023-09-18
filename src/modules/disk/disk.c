@@ -399,7 +399,7 @@ void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_
         yyjson_mut_obj_add_uint(doc, files, "total", item->filesTotal);
         yyjson_mut_obj_add_uint(doc, files, "used", item->filesUsed);
 
-        yyjson_mut_obj_add_strbuf(doc, files, "filesystem", &item->filesystem);
+        yyjson_mut_obj_add_strbuf(doc, obj, "filesystem", &item->filesystem);
         yyjson_mut_obj_add_strbuf(doc, obj, "mountpoint", &item->mountpoint);
         yyjson_mut_obj_add_strbuf(doc, obj, "mountFrom", &item->mountFrom);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
