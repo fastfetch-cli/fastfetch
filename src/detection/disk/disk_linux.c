@@ -52,6 +52,18 @@ static bool isPhysicalDevice(const struct mntent* device)
     if(!S_ISBLK(deviceStat.st_mode))
         return false;
 
+    #else
+
+    //Pseudo filesystems don't have a device in /dev
+    if(!ffStrStartsWith(device->mnt_fsname, "/dev/"))
+        return false;
+
+    if(
+        ffStrStartsWith(device->mnt_fsname + 5, "loop") || //Ignore loop devices
+        ffStrStartsWith(device->mnt_fsname + 5, "ram")  || //Ignore ram devices
+        ffStrStartsWith(device->mnt_fsname + 5, "fd")      //Ignore fd devices
+    ) return false;
+
     #endif // __ANDROID__
 
     return true;
@@ -98,7 +110,8 @@ static void detectName(FFDisk* disk)
     //https://stackoverflow.com/a/73302717
     ffStrbufAppendS(&basePath, "/dev/disk/by-id/");
     detectNameFromPath(disk, &deviceStat, &basePath);
-    disk->type = ffStrbufStartsWithS(&disk->name, "usb-") ? FF_DISK_VOLUME_TYPE_EXTERNAL_BIT : FF_DISK_VOLUME_TYPE_NONE;
+    if (ffStrbufStartsWithS(&disk->name, "usb-"))
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     ffStrbufClear(&disk->name);
 
     //Try label first
@@ -263,6 +276,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
         //We have a valid device, add it to the list
         FFDisk* disk = ffListAdd(disks);
+        disk->type = FF_DISK_VOLUME_TYPE_NONE;
 
         //detect mountFrom
         ffStrbufInitS(&disk->mountFrom, device->mnt_fsname);
