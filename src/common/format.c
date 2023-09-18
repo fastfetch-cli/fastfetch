@@ -256,7 +256,5 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
     }
 
-    ffStrbufTrimRight(buffer, ' ');
-
     ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }
