@@ -72,8 +72,9 @@ static const char* detectWithBacklight(FFlist* result)
                 }
                 else
                     ffStrbufInitS(&brightness->name, entry->d_name);
-                double maxBrightness = ffStrbufToDouble(&buffer);
-                brightness->value = (float) (actualBrightness * 100 / maxBrightness);
+                brightness->max = ffStrbufToDouble(&buffer);
+                brightness->min = 0;
+                brightness->current = actualBrightness;
             }
         }
         ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
@@ -123,7 +124,9 @@ static const char* detectWithDdcci(FFlist* result)
                 ffddca_free_any_vcp_value(vcpValue);
 
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-                brightness->value = (float) current * 100.f / (float) max;
+                brightness->max = max;
+                brightness->min = 0;
+                brightness->current = current;
                 ffStrbufInitS(&brightness->name, display->model_name);
             }
             ffddca_close_display(handle);

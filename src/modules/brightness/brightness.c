@@ -5,7 +5,7 @@
 #include "modules/brightness/brightness.h"
 #include "util/stringUtils.h"
 
-#define FF_BRIGHTNESS_NUM_FORMAT_ARGS 2
+#define FF_BRIGHTNESS_NUM_FORMAT_ARGS 5
 
 void ffPrintBrightness(FFBrightnessOptions* options)
 {
@@ -43,6 +43,8 @@ void ffPrintBrightness(FFBrightnessOptions* options)
             });
         }
 
+        const double percent = (item->current - item->min) / (item->max - item->min) * 100;
+
         if(options->moduleArgs.outputFormat.length == 0)
         {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
@@ -50,7 +52,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
             if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, item->value, 0, 100, 100);
+                ffAppendPercentBar(&str, percent, 0, 100, 100);
             }
 
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -58,7 +60,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, item->value, 10, 10, str.length > 0);
+                ffAppendPercentNum(&str, percent, 10, 10, str.length > 0);
             }
 
             ffStrbufPutTo(&str, stdout);
@@ -66,10 +68,13 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
-            ffAppendPercentNum(&valueStr, item->value, 10, 10, false);
+            ffAppendPercentNum(&valueStr, percent, 10, 10, false);
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->max},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->min},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->current},
             });
         }
 
@@ -142,7 +147,9 @@ void ffGenerateBrightnessJson(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjs
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
-        yyjson_mut_obj_add_real(doc, obj, "value", item->value);
+        yyjson_mut_obj_add_real(doc, obj, "max", item->max);
+        yyjson_mut_obj_add_real(doc, obj, "min", item->min);
+        yyjson_mut_obj_add_real(doc, obj, "current", item->current);
     }
 
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)

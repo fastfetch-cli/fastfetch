@@ -9,7 +9,7 @@
 typedef struct FFBrightnessResult
 {
     FFstrbuf name;
-    float value;
+    double min, max, current;
 } FFBrightnessResult;
 
 const char* ffDetectBrightness(FFlist* result); // list of FFBrightnessResult
