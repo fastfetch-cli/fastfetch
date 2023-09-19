@@ -631,6 +631,8 @@ endif()
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
+elseif(APPLE)
+    target_compile_definitions(libfastfetch PUBLIC _DARWIN_C_SOURCE)
 endif()
 
 if(HAVE_WCWIDTH)
