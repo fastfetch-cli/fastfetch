@@ -7,6 +7,8 @@ Changes:
 * Fastfetch now requires yyjson 0.8.0 or later, which is embeded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
 * Reduced information supported by `--terminal-format`, `--shell-format`
 * Some config presets (`devinfo` and `verbose`) are obseleted and removed. They are barely maintained and can be replaced with `--format json` now.
+* Custom strings in `--module-key` and `--module-format` are no longer trimmed.
+* `/boot` is hidden by default (FreeBSD, Disk)
 
 Features:
 * Add `--format json`, which prints system information as JSON format
@@ -33,6 +35,7 @@ Logo:
 * Update EvolutionOS
 * Update AOSC OS
 * Update Ubuntu_old
+* Update Windows 11_small
 
 # 2.0.5
 
