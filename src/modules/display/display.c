@@ -85,6 +85,9 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
                 printf(" (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
+            if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
+                fputs(result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]", stdout);
+
             if(moduleIndex > 0 && result->primary)
                 printf(" *");
 
