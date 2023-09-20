@@ -378,7 +378,7 @@ static bool detectContour(const FFstrbuf* exe, FFTerminalFontResult* result)
 
     uint32_t index = ffStrbufFirstIndexS(&buf, "Font description      : (family=");
     if(index >= buf.length) return false;
-    index += strlen("Font description      : (family=");
+    index += (uint32_t) strlen("Font description      : (family=");
     ffStrbufSubstrBefore(&buf, ffStrbufNextIndexS(&buf, index, " weight="));
     ffFontInitCopy(&result->font, buf.chars + index);
     return true;
