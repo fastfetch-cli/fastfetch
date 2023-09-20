@@ -197,6 +197,9 @@ static uint32_t getSnap(FFstrbuf* baseDir)
 {
     uint32_t result = getNumElements(baseDir, "/snap", DT_DIR);
 
+    if (result == 0)
+        result = getNumElements(baseDir, "/var/lib/snapd/snap", DT_DIR);
+
     //Accounting for the /snap/bin folder
     return result > 0 ? result - 1 : 0;
 }

@@ -29,6 +29,7 @@ Bugfixes:
 * Fix Termux Monet terminal version detection (Terminal)
 * Fix zpool volumes detection (Disk, Linux)
 * Fix external volumes detection (Disk, Linux)
+* Fix snap package number detection on systems other than Ubuntu (Packages, Linux)
 
 Logo:
 * Add Afterglow
