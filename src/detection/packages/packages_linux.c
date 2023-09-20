@@ -265,7 +265,7 @@ static uint32_t getRpmFromLibrpm(void)
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
     packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
-    packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: ");
+    packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed");
     packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
     packageCounts->flatpakSystem += getFlatpak(baseDir, "/var/lib/flatpak");
