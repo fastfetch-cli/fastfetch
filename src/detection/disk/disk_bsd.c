@@ -1,20 +1,19 @@
 #include "disk.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <sys/mount.h>
 
 #ifdef __FreeBSD__
-#include "util/stringUtils.h"
-
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
     if(ffStrbufEqualS(&disk->filesystem, "zfs"))
     {
-        disk->type = !ffStrStartsWith(fs->f_mntfromname, "zroot/") || ffStrStartsWith(fs->f_mntfromname, "zroot/ROOT/")
+        disk->type = !ffStrbufStartsWithS(&disk->mountFrom, "zroot/") || ffStrbufStartsWithS(&disk->mountFrom, "zroot/ROOT/")
             ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
             : FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     }
-    else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/"))
+    else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(!(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
@@ -35,13 +34,13 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
     if(fs->f_flags & MNT_DONTBROWSE)
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-    else if(fs->f_flags & MNT_REMOVABLE)
+    else if(fs->f_flags & MNT_REMOVABLE || !(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 
     struct VolAttrBuf attrBuf;
-    if (getattrlist(fs->f_mntonname, &(struct attrlist) {
+    if (getattrlist(disk->mountpoint.chars, &(struct attrlist) {
         .bitmapcount = ATTR_BIT_MAP_COUNT,
         .volattr = ATTR_VOL_INFO | ATTR_VOL_NAME,
     }, &attrBuf, sizeof(attrBuf), 0) == 0)
@@ -62,6 +61,9 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
+        if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
+            continue;
+
         FFDisk* disk = ffListAdd(disks);
 
         #ifdef __FreeBSD__
