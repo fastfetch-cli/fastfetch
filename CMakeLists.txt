@@ -67,6 +67,7 @@ cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embeded) yyjson library" OFF "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
@@ -98,10 +99,13 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration")
 
-if(WIN32)
+if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
+endif()
+
+if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
 
@@ -121,8 +125,8 @@ if(NOT WIN32)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -rdynamic")
 endif()
 
-
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Enabling LTO")
     include(CheckIPOSupported)
     check_ipo_supported(RESULT IPO_SUPPORTED)
     if(IPO_SUPPORTED)
@@ -601,6 +605,11 @@ elseif(WIN32)
     )
 endif()
 
+if(ENABLE_DIRECTX_HEADERS)
+    message(STATUS "Enabling DirectX headers for WSL")
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
+endif()
+
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
@@ -623,6 +632,7 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
     target_link_libraries(libfastfetch PRIVATE yyjson)
@@ -775,6 +785,10 @@ ff_lib_enable(DDCUTIL
     "ddcutil"
     "Ddcutil"
 )
+ff_lib_enable(DIRECTX_HEADERS
+    "DirectX-Headers"
+    "DirectX-Headers"
+)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
@@ -878,6 +892,12 @@ target_compile_definitions(flashfetch
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+# Prevent fastfetch from linking to libstdc++
+set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
+set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

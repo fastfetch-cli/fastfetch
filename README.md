@@ -71,6 +71,7 @@ The following libraries are used if present at runtime:
 * [`libnm`](https://networkmanager.dev/docs/libnm/latest/): Used for Wifi detection.
 * [`libpulse`](https://freedesktop.org/software/pulseaudio/doxygen/): Used for Sound detection.
 * [`libddcutil`](https://github.com/rockowitz/ddcutil): Used for brightness detection of external displays
+* [`DirectX-Headers`](https://github.com/microsoft/DirectX-Headers): Used for GPU detection in WSL
 
 ### macOS
 

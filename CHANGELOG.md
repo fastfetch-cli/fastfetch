@@ -20,6 +20,7 @@ Features:
 * Support user login time detection (Users)
 * Support winget package manager detection, guarded behind `--allow-slow-operations` (Packages, Windows)
 * Print monitor type (built-in or external) (Display)
+* Support full GPU detection in WSL (Linux, GPU)
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)

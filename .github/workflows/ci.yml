@@ -13,11 +13,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04]
-        compiler: [gcc, clang, "musl-gcc"]
+        compiler: [
+          { cc: gcc, cxx: "g++" },
+          { cc: clang, cxx: "clang++" },
+          { cc: "musl-gcc", cxx: "musl-g++" }
+        ]
         enableFeatures: [ON, OFF]
         exclude:
           # The feature libraries are all build against glibc, so they can't be used with musl
-          - compiler: "musl-gcc"
+          - compiler: { cc: "musl-gcc", cxx: "musl-g++" }
             enableFeatures: ON
     runs-on: ${{ matrix.os }}
     steps:
@@ -25,12 +29,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev
+        run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev directx-headers-dev
 
       - name: configure project
         env:
-          CC: ${{ matrix.compiler }}
-        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_LIBPCI=${{ matrix.enableFeatures }} -DENABLE_VULKAN=${{ matrix.enableFeatures }} -DENABLE_WAYLAND=${{ matrix.enableFeatures }} -DENABLE_XCB_RANDR=${{ matrix.enableFeatures }} -DENABLE_XCB=${{ matrix.enableFeatures }} -DENABLE_XRANDR=${{ matrix.enableFeatures }} -DENABLE_X11=${{ matrix.enableFeatures }} -DENABLE_GIO=${{ matrix.enableFeatures }} -DENABLE_DCONF=${{ matrix.enableFeatures }} -DENABLE_DBUS=${{ matrix.enableFeatures }} -DENABLE_XFCONF=${{ matrix.enableFeatures }} -DENABLE_SQLITE3=${{ matrix.enableFeatures }} -DENABLE_RPM=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK7=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK6=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} -DENABLE_ZLIB=${{ matrix.enableFeatures }} -DENABLE_EGL=${{ matrix.enableFeatures }} -DENABLE_GLX=${{ matrix.enableFeatures }} -DENABLE_OSMESA=${{ matrix.enableFeatures }} -DENABLE_OPENCL=${{ matrix.enableFeatures }} -DENABLE_LIBNM=${{ matrix.enableFeatures }} -DENABLE_PULSE=${{ matrix.enableFeatures }} -DENABLE_JSONC=${{ matrix.enableFeatures }} .
+          CC: ${{ matrix.compiler.cc }}
+          CXX: ${{ matrix.compiler.cxx }}
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_LIBPCI=${{ matrix.enableFeatures }} -DENABLE_VULKAN=${{ matrix.enableFeatures }} -DENABLE_WAYLAND=${{ matrix.enableFeatures }} -DENABLE_XCB_RANDR=${{ matrix.enableFeatures }} -DENABLE_XCB=${{ matrix.enableFeatures }} -DENABLE_XRANDR=${{ matrix.enableFeatures }} -DENABLE_X11=${{ matrix.enableFeatures }} -DENABLE_GIO=${{ matrix.enableFeatures }} -DENABLE_DCONF=${{ matrix.enableFeatures }} -DENABLE_DBUS=${{ matrix.enableFeatures }} -DENABLE_XFCONF=${{ matrix.enableFeatures }} -DENABLE_SQLITE3=${{ matrix.enableFeatures }} -DENABLE_RPM=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK7=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK6=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} -DENABLE_ZLIB=${{ matrix.enableFeatures }} -DENABLE_EGL=${{ matrix.enableFeatures }} -DENABLE_GLX=${{ matrix.enableFeatures }} -DENABLE_OSMESA=${{ matrix.enableFeatures }} -DENABLE_OPENCL=${{ matrix.enableFeatures }} -DENABLE_LIBNM=${{ matrix.enableFeatures }} -DENABLE_PULSE=${{ matrix.enableFeatures }} -DENABLE_JSONC=${{ matrix.enableFeatures }} -DENABLE_DIRECTX_HEADERS=${{ matrix.enableFeatures }} .
 
       - name: build project
         run: cmake --build .
@@ -39,7 +44,7 @@ jobs:
         run: ctest
 
       - name: run fastfetch
-        run: ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
+        run: ./fastfetch --stat --show-errors --no-buffer --load-config presets/all
 
       - name: run flashfetch
         run: ./flashfetch
@@ -57,7 +62,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev
+        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev rpm librpm-dev libzstd-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev directx-headers-dev
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2

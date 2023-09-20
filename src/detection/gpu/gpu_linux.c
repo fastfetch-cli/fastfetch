@@ -311,6 +311,12 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
+    #ifdef FF_HAVE_DIRECTX_HEADERS
+        const char* ffGPUDetectByDirectX(const FFGPUOptions* options, FFlist* gpus);
+        if (!ffGPUDetectByDirectX(options, gpus))
+            return NULL;
+    #endif
+
     #ifdef FF_HAVE_LIBPCI
         return pciDetectGPUs(options, gpus);
     #else
