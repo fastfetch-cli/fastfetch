@@ -10,6 +10,10 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     if(moduleName == NULL)
         return;
 
+    //This is used as a magic value for hiding keys
+    if(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " "))
+        return;
+
     if(!instance.config.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
