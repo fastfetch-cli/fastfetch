@@ -87,6 +87,9 @@ jobs:
       - name: run flashfetch
         run: time ./flashfetch
 
+      - name: print dependencies
+        run: ldd fastfetch
+
       - name: run tests
         run: ctest
 
@@ -136,6 +139,9 @@ jobs:
       - name: run flashfetch
         run: time ./flashfetch
 
+      - name: print dependencies
+        run: otool -L fastfetch
+
       - name: run tests
         run: ctest
 
@@ -166,6 +172,7 @@ jobs:
             ./fastfetch --list-features
             time ./fastfetch --disable-linewrap false --hide-cursor false --show-errors --no-buffer --load-config presets/all
             time ./flashfetch
+            ldd fastfetch
             ctest
 
       - name: upload artifacts
@@ -222,6 +229,9 @@ jobs:
 
       - name: run flashfetch
         run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
 
       - name: run tests
         run: ctest
@@ -283,6 +293,9 @@ jobs:
 
       - name: run flashfetch
         run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
 
       - name: run tests
         run: ctest
