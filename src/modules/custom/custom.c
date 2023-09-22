@@ -12,7 +12,7 @@ void ffPrintCustom(FFCustomOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+    ffPrintLogoAndKey(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
     ffStrbufWriteTo(&options->moduleArgs.outputFormat, stdout);
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
@@ -21,6 +21,7 @@ void ffInitCustomOptions(FFCustomOptions* options)
 {
     ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CUSTOM_MODULE_NAME, ffParseCustomCommandOptions, ffParseCustomJsonObject, ffPrintCustom, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
 }
 
 bool ffParseCustomCommandOptions(FFCustomOptions* options, const char* key, const char* value)
