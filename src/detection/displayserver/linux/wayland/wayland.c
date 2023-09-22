@@ -21,7 +21,8 @@ static FF_LIBRARY_SYMBOL(wl_display_get_fd);
 static FF_LIBRARY_SYMBOL(wl_display_roundtrip);
 static FF_LIBRARY_SYMBOL(wl_display_disconnect);
 static FF_LIBRARY_SYMBOL(wl_proxy_get_version);
-static FF_LIBRARY_SYMBOL(wl_proxy_marshal_flags);
+static FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor); //Only needed with old wayland headers
+static FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned); //Only needed with old wayland headers
 static FF_LIBRARY_SYMBOL(wl_proxy_add_listener);
 static FF_LIBRARY_SYMBOL(wl_proxy_destroy);
 static const struct wl_interface* ffwl_registry_interface;
@@ -36,7 +37,8 @@ static const struct wl_interface* ffwp_fractional_scale_v1_interface;
 #define wl_display_roundtrip ffwl_display_roundtrip
 #define wl_display_disconnect ffwl_display_disconnect
 #define wl_proxy_get_version ffwl_proxy_get_version
-#define wl_proxy_marshal_flags ffwl_proxy_marshal_flags
+#define wl_proxy_marshal_constructor ffwl_proxy_marshal_constructor
+#define wl_proxy_marshal_constructor_versioned ffwl_proxy_marshal_constructor_versioned
 #define wl_proxy_add_listener ffwl_proxy_add_listener
 #define wl_proxy_destroy ffwl_proxy_destroy
 #define wl_registry_interface (*ffwl_registry_interface)
@@ -45,6 +47,11 @@ static const struct wl_interface* ffwp_fractional_scale_v1_interface;
 #define wl_surface_interface (*ffwl_surface_interface)
 #define wp_fractional_scale_manager_v1_interface (*ffwp_fractional_scale_manager_v1_interface)
 #define wp_fractional_scale_v1_interface (*ffwp_fractional_scale_v1_interface)
+
+#ifdef WL_MARSHAL_FLAG_DESTROY
+    static FF_LIBRARY_SYMBOL(wl_proxy_marshal_flags);
+    #define wl_proxy_marshal_flags ffwl_proxy_marshal_flags
+#endif
 
 #include <wayland-client-protocol.h>
 #include "wayland-fractional-scale-v1.h"
@@ -469,13 +476,18 @@ bool detectWayland(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_display_roundtrip, "wl_display_roundtrip", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_display_disconnect, "wl_display_disconnect", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_get_version, "wl_proxy_get_version", false);
-    FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_marshal_flags, "wl_proxy_marshal_flags", false);
+    FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_marshal_constructor, "wl_proxy_marshal_constructor", false);
+    FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_marshal_constructor_versioned, "wl_proxy_marshal_constructor_versioned", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_add_listener, "wl_proxy_add_listener", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_destroy, "wl_proxy_destroy", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_registry_interface, "wl_registry_interface", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_output_interface, "wl_output_interface", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_compositor_interface, "wl_compositor_interface", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_surface_interface, "wl_surface_interface", false);
+
+    #ifdef WL_MARSHAL_FLAG_DESTROY
+        FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_marshal_flags, "wl_proxy_marshal_flags", false);
+    #endif
 
     bool success = detectWaylandImpl(result);
 
