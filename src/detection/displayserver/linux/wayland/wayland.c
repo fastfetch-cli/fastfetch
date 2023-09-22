@@ -16,6 +16,10 @@
 
 #include <wayland-client-core.h>
 
+#if WAYLAND_VERSION_MINOR >= 20
+    #define WL_HAVE_PROXY_MARSHAL_FLAGS
+#endif
+
 static FF_LIBRARY_SYMBOL(wl_display_connect);
 static FF_LIBRARY_SYMBOL(wl_display_get_fd);
 static FF_LIBRARY_SYMBOL(wl_display_roundtrip);
@@ -48,13 +52,16 @@ static const struct wl_interface* ffwp_fractional_scale_v1_interface;
 #define wp_fractional_scale_manager_v1_interface (*ffwp_fractional_scale_manager_v1_interface)
 #define wp_fractional_scale_v1_interface (*ffwp_fractional_scale_v1_interface)
 
-#ifdef WL_MARSHAL_FLAG_DESTROY
+#ifdef WL_HAVE_PROXY_MARSHAL_FLAGS
     static FF_LIBRARY_SYMBOL(wl_proxy_marshal_flags);
     #define wl_proxy_marshal_flags ffwl_proxy_marshal_flags
 #endif
 
 #include <wayland-client-protocol.h>
-#include "wayland-fractional-scale-v1.h"
+
+#ifdef WL_HAVE_PROXY_MARSHAL_FLAGS
+    #include "wayland-fractional-scale-v1.h"
+#endif
 
 typedef struct WaylandGlobals
 {
@@ -320,6 +327,8 @@ static void addOutputListeners(FFlist* outputs, FFlist* displays)
         addOutputListener(displays, *(struct wl_output**)ffListGet(outputs, i));
 }
 
+#ifdef WL_HAVE_PROXY_MARSHAL_FLAGS
+
 static void waylandFractionalScaleListener(void *data, FF_MAYBE_UNUSED struct wp_fractional_scale_v1 *wp_fractional_scale_v1, uint32_t scale)
 {
     uint32_t* preferredScale = data;
@@ -346,6 +355,13 @@ static void addFractionalScaleListener(WaylandGlobals* globals, uint32_t* prefer
     wp_fractional_scale_v1_add_listener(globals->fractionalScale, &fractionalScaleListener, preferredScale);
 }
 
+#else
+static void addFractionalScaleListener(WaylandGlobals* globals, uint32_t* preferredScale)
+{
+    FF_UNUSED(globals, preferredScale);
+}
+#endif
+
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)
 {
     WaylandGlobals* globals = data;
@@ -370,8 +386,11 @@ static void addRegistryListener(struct wl_registry* registry, WaylandGlobals* gl
 
 static void destroyGlobals(WaylandGlobals* globals)
 {
-    if(globals->fractionalScale) wp_fractional_scale_v1_destroy(globals->fractionalScale);
-    if(globals->fractionalScaleManager) wp_fractional_scale_manager_v1_destroy(globals->fractionalScaleManager);
+    #ifdef WL_HAVE_PROXY_MARSHAL_FLAGS
+        if(globals->fractionalScale) wp_fractional_scale_v1_destroy(globals->fractionalScale);
+        if(globals->fractionalScaleManager) wp_fractional_scale_manager_v1_destroy(globals->fractionalScaleManager);
+    #endif
+
     if(globals->surface) wl_surface_destroy(globals->surface);
     if(globals->compositor) wl_compositor_destroy(globals->compositor);
 
@@ -485,7 +504,7 @@ bool detectWayland(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_compositor_interface, "wl_compositor_interface", false);
     FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_surface_interface, "wl_surface_interface", false);
 
-    #ifdef WL_MARSHAL_FLAG_DESTROY
+    #ifdef WL_HAVE_PROXY_MARSHAL_FLAGS
         FF_LIBRARY_LOAD_SYMBOL_STR(wayland, ffwl_proxy_marshal_flags, "wl_proxy_marshal_flags", false);
     #endif
 
