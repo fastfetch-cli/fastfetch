@@ -17,6 +17,8 @@ typedef enum FFColorsSymbol
 typedef struct FFColorsOptions
 {
     FFModuleBaseInfo moduleInfo;
+    FFModuleArgs moduleArgs;
+
     FFColorsSymbol symbol;
     uint32_t paddingLeft;
 } FFColorsOptions;

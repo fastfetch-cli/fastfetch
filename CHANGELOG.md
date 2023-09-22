@@ -23,6 +23,7 @@ Features:
 * Support full GPU detection in WSL (Linux, GPU)
 * Add `--module-key " "` as a special case for hiding keys
 * Support `--title-format`. See `fastfetch --help title-format` for detail
+* Support `--colors-key`
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)
