@@ -23,11 +23,10 @@ Features:
 * Support full GPU detection in WSL (Linux, GPU)
 * Add `--module-key " "` as a special case for hiding keys
 * Support `--title-format`. See `fastfetch --help title-format` for detail
-* Support `--colors-key`
+* Support `--colors-key` (Colors)
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)
-* Fix `fastfetch --config verbose` doesn't work (#547)
 * Fix short read when reading from stdin (Logo)
 * Fix `poll() timeout or failed` error when image is very large (Logo)
 * Fix Termux Monet terminal version detection (Terminal)
