@@ -4,48 +4,67 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-#define FF_TITLE_NUM_FORMAT_ARGS 2
+#define FF_TITLE_NUM_FORMAT_ARGS 8
 
-static inline void printTitlePart(const FFstrbuf* content, const FFstrbuf* color)
+static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
 {
-    if(!instance.config.pipe)
+    if (!instance.config.pipe)
     {
         if (instance.config.brightColor)
-            fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
-        ffPrintColor(color->length > 0 ? color : &instance.config.colorTitle);
+            ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_BOLT);
+        if (color->length > 0)
+            ffStrbufAppendF(output, "\e[%sm", color->chars);
+        else if (instance.config.colorTitle.length > 0)
+            ffStrbufAppendF(output, "\e[%sm", instance.config.colorTitle.chars);
     }
 
-    ffStrbufWriteTo(content, stdout);
+    ffStrbufAppend(output, text);
 
     if(!instance.config.pipe)
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+        ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
 void ffPrintTitle(FFTitleOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY hostName = ffStrbufCreateCopy(&instance.state.platform.hostName);
+    FF_STRBUF_AUTO_DESTROY userNameColored = ffStrbufCreate();
+    appendText(&userNameColored, &instance.state.platform.userName, &options->colorUser);
 
+    FF_STRBUF_AUTO_DESTROY hostName = ffStrbufCreateCopy(&instance.state.platform.hostName);
     if (!options->fqdn)
         ffStrbufSubstrBeforeFirstC(&hostName, '.');
 
+    FF_STRBUF_AUTO_DESTROY hostNameColored = ffStrbufCreate();
+    appendText(&hostNameColored, &hostName, &options->colorHost);
+
+    FF_STRBUF_AUTO_DESTROY atColored = ffStrbufCreate();
+    if (!instance.config.pipe && options->colorAt.length > 0)
+    {
+        ffStrbufAppendF(&atColored, "\e[%sm", options->colorAt.chars);
+        ffStrbufAppendC(&atColored, '@');
+        ffStrbufAppendS(&atColored, FASTFETCH_TEXT_MODIFIER_RESET);
+    }
+    else
+        ffStrbufAppendC(&atColored, '@');
+
     if (options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(options->moduleArgs.key.length == 0 ? NULL : FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        printTitlePart(&instance.state.platform.userName, &options->colorUser);
-
-        if (!instance.config.pipe && options->colorAt.length > 0)
-            ffPrintColor(&options->colorAt);
-        putchar('@');
-
-        printTitlePart(&hostName, &options->colorHost);
-        putchar('\n');
+        ffStrbufWriteTo(&userNameColored, stdout);
+        ffStrbufWriteTo(&atColored, stdout);
+        ffStrbufPutTo(&hostNameColored, stdout);
     }
     else
     {
         ffPrintFormat(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_TITLE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &hostName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.homeDir},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.exePath},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userShell},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &userNameColored},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &atColored},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &hostNameColored},
         });
     }
 }
@@ -54,6 +73,8 @@ void ffInitTitleOptions(FFTitleOptions* options)
 {
     ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJson);
     ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+
     options->fqdn = false;
     ffStrbufInit(&options->colorUser);
     ffStrbufInit(&options->colorAt);
@@ -146,8 +167,8 @@ void ffGenerateTitleJson(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }

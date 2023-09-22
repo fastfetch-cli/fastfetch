@@ -22,6 +22,7 @@ Features:
 * Print monitor type (built-in or external) (Display)
 * Support full GPU detection in WSL (Linux, GPU)
 * Add `--module-key " "` as a special case for hiding keys
+* Support `--title-format`. See `fastfetch --help title-format` for detail
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)

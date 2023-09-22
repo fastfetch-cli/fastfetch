@@ -49,6 +49,19 @@ static inline void printCommandHelp(const char* command)
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
     else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "config"))
         puts(FASTFETCH_DATATEXT_HELP_CONFIG);
+    else if(ffStrEqualsIgnCase(command, "title-format"))
+    {
+        constructAndPrintCommandHelpFormat("title", "{6}{7}{8}", 8,
+            "User name",
+            "Host name",
+            "Home directory",
+            "Executable path of current process",
+            "User's default shell",
+            "User name (colored)",
+            "@ symbol (colored)",
+            "Host name (colored)"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "os-format"))
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,

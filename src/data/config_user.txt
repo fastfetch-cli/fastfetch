@@ -391,6 +391,7 @@
 # For information on format strings, see "fastfetch --help format".
 # To see the parameter they take and their default value, see "fastfetch --help *-format", e.g. "fastfetch --help os-format".
 # An empty format string (As they are currently below) will behave as if it was not set.
+#--title-format
 #--os-format
 #--host-format
 #--chassis-format
@@ -439,6 +440,7 @@
 
 # Key color options:
 # Overrides the global `--color-keys` for one specified module
+#--title-key-color
 #--os-key-color
 #--host-key-color
 #--chassis-key-color
