@@ -73,6 +73,11 @@ static inline void ffLibraryUnload(void** handle)
 #define FF_LIBRARY_LOAD_SYMBOL_PTR(library, varName, symbolName, returnValue) \
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName)->ff ## symbolName, symbolName, returnValue);
 
+#define FF_LIBRARY_LOAD_SYMBOL_STR(library, target, name, returnValue) \
+    target = dlsym(library, name); \
+    if(target == NULL) \
+        return returnValue;
+
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 
 #endif

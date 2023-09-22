@@ -368,7 +368,7 @@ if(LINUX)
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
-        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
