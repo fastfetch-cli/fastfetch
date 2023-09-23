@@ -935,7 +935,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //General options//
     ///////////////////
 
-    else if(ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
         generateConfigFile(false, value);
