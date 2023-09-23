@@ -175,4 +175,5 @@ void ffPlatformInitImpl(FFPlatform* platform)
     ffStrbufAppendS(&platform->systemRelease, uts.release);
     ffStrbufAppendS(&platform->systemVersion, uts.version);
     ffStrbufAppendS(&platform->systemArchitecture, uts.machine);
+    ffStrbufInit(&platform->systemVersion);
 }

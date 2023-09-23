@@ -21,6 +21,7 @@ typedef struct FFPlatform {
     FFstrbuf systemRelease;
     FFstrbuf systemVersion;
     FFstrbuf systemArchitecture;
+    FFstrbuf systemDisplayVersion;
 } FFPlatform;
 
 void ffPlatformInit(FFPlatform* platform);

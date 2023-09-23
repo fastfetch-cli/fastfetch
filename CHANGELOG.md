@@ -25,6 +25,7 @@ Features:
 * Support `--title-format`. See `fastfetch --help title-format` for detail
 * Support `--colors-key` (Colors)
 * Add `-c` as a shortcut of `--load-config`. Note it was used as the shortcut of `--color` before 2.0.5
+* Support Windows Service Pack version detection (Kernel, Windows)
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)
