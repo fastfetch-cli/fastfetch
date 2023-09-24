@@ -459,7 +459,9 @@ static inline void printCommandHelp(const char* command)
             "Version tweak",
             "Build type (debug or release)",
             "Architecture",
-            "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)"
+            "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)",
+            "Date time when compiling",
+            "Compiler used"
         );
     }
     else if(ffStrEqualsIgnCase(command, "vulkan-format"))

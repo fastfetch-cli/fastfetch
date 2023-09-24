@@ -4,7 +4,7 @@
 #include "modules/version/version.h"
 #include "util/stringUtils.h"
 
-#define FF_VERSION_NUM_FORMAT_ARGS 6
+#define FF_VERSION_NUM_FORMAT_ARGS 8
 
 void ffPrintVersion(FFVersionOptions* options)
 {
@@ -25,6 +25,8 @@ void ffPrintVersion(FFVersionOptions* options)
             {FF_FORMAT_ARG_TYPE_STRING, result.debugMode ? "debug" : "release"},
             {FF_FORMAT_ARG_TYPE_STRING, result.architecture},
             {FF_FORMAT_ARG_TYPE_STRING, result.cmakeBuiltType},
+            {FF_FORMAT_ARG_TYPE_STRING, result.compileTime},
+            {FF_FORMAT_ARG_TYPE_STRING, result.compiler},
         });
     }
 }
@@ -78,5 +80,7 @@ void ffGenerateVersionJson(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut
     yyjson_mut_obj_add_str(doc, obj, "version", result.version);
     yyjson_mut_obj_add_str(doc, obj, "versionTweak", result.versionTweak);
     yyjson_mut_obj_add_str(doc, obj, "cmakeBuiltType", result.cmakeBuiltType);
+    yyjson_mut_obj_add_str(doc, obj, "compileTime", result.compileTime);
+    yyjson_mut_obj_add_str(doc, obj, "compiler", result.compiler);
     yyjson_mut_obj_add_bool(doc, obj, "debugMode", result.debugMode);
 }

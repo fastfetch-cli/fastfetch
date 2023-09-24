@@ -12,6 +12,8 @@ typedef struct FFVersionResult
     const char* version;
     const char* versionTweak;
     const char* cmakeBuiltType;
+    const char* compileTime;
+    const char* compiler;
     bool debugMode;
 } FFVersionResult;
 

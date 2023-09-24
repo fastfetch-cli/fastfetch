@@ -20,6 +20,9 @@
     #define FF_ARCHITECTURE "unknown"
 #endif
 
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
+
 void ffDetectVersion(FFVersionResult* version)
 {
     version->projectName = FASTFETCH_PROJECT_NAME;
@@ -27,6 +30,16 @@ void ffDetectVersion(FFVersionResult* version)
     version->version = FASTFETCH_PROJECT_VERSION;
     version->versionTweak = FASTFETCH_PROJECT_VERSION_TWEAK;
     version->cmakeBuiltType = FASTFETCH_PROJECT_CMAKE_BUILD_TYPE;
+    version->compileTime = __DATE__ ", " __TIME__;
+    #ifdef __clang__
+        version->compiler = "clang " FF_STR(__clang_major__) "." FF_STR(__clang_minor__) "." FF_STR(__clang_patchlevel__);
+    #elif defined(__GNUC__)
+        version->compiler = "gcc " FF_STR(__GNUC__) "." FF_STR(__GNUC_MINOR__) "." FF_STR(__GNUC_PATCHLEVEL__);
+    #elif defined(_MSC_VER)
+        version->compiler = "msvc " FF_STR(_MSC_VER);
+    #else
+        version->compiler = "unknown";
+    #endif
     #ifndef NDEBUG
         version->debugMode = true;
     #else
