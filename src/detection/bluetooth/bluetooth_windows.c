@@ -33,9 +33,14 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
         device->connected = !!btdi.fConnected;
 
         ffStrbufSetWS(&device->name, btdi.szName);
-        for (uint32_t i = 0; i < sizeof(btdi.Address.rgBytes) / sizeof(btdi.Address.rgBytes); ++i)
-            ffStrbufAppendF(&device->address, "%X:", btdi.Address.rgBytes[i]);
-        ffStrbufTrimRight(&device->name, ':');
+
+        ffStrbufAppendF(&device->address, "%02x:%02x:%02x:%02x:%02x:%02x",
+            btdi.Address.rgBytes[0],
+            btdi.Address.rgBytes[1],
+            btdi.Address.rgBytes[2],
+            btdi.Address.rgBytes[3],
+            btdi.Address.rgBytes[4],
+            btdi.Address.rgBytes[5]);
         //https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned%20Numbers.pdf
 
         if(BitTest(&btdi.ulClassofDevice, 13))
