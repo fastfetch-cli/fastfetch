@@ -25,7 +25,7 @@ const char* ffDetectChassis(FFChassisResult* result)
 
     if(result->type.length)
     {
-        const char* typeStr = ffChassisTypeToString(ffStrbufToUInt16(&result->type, 9999));
+        const char* typeStr = ffChassisTypeToString((uint32_t) ffStrbufToUInt(&result->type, 9999));
         if(typeStr)
             ffStrbufSetS(&result->type, typeStr);
     }

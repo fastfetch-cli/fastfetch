@@ -128,7 +128,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
     if (error) return error;
 
-    cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
+    cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, 1);
 
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();

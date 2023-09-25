@@ -123,7 +123,7 @@ int main(void)
     //toNumber
 
     VERIFY(ffStrbufToDouble(&strbuf) == 123456789.0);
-    VERIFY(ffStrbufToUInt16(&strbuf, 999) == 999); //overflow
+    VERIFY(ffStrbufToUInt(&strbuf, 999) == 123456789);
 
     //countC
 
