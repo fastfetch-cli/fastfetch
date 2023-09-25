@@ -10,6 +10,10 @@ struct yyjson_mut_val;
 typedef struct FFModuleBaseInfo
 {
     const char* name;
+    // A dirty polymorphic implementation in C.
+    // This is UB, because `void*` is not compatible with `FF*Options*`.
+    // However we can't do it better unless we move to C++, so that `option` becomes a `this` pointer
+    // https://stackoverflow.com/questions/559581/casting-a-function-pointer-to-another-type
     bool (*parseCommandOptions)(void* options, const char* key, const char* value);
     void (*parseJsonObject)(void* options, struct yyjson_val *module);
     void (*printModule)(void* options);
