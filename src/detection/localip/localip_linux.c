@@ -228,61 +228,6 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);
 
-    #ifdef __linux__
-    {
-        FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/class/net/");
-        uint32_t baseLen = path.length;
-
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        FF_LIST_FOR_EACH(FFLocalIpResult, ip, *results)
-        {
-            ffStrbufAppend(&path, &ip->name);
-            ffStrbufAppendS(&path, "/statistics/");
-            uint32_t statLen = path.length;
-
-            ffStrbufAppendS(&path, "rx_bytes");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.rxBytes = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "tx_bytes");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.txBytes = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "rx_packets");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.rxPackets = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "tx_packets");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.txPackets = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "rx_errors");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.rxErrors = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "tx_errors");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.txErrors = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "rx_dropped");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.rxDrops = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, statLen);
-
-            ffStrbufAppendS(&path, "tx_dropped");
-            if (ffReadFileBuffer(path.chars, &buffer))
-                ip->ioCounters.txDrops = ffStrbufToUInt(&buffer, 0);
-            ffStrbufSubstrBefore(&path, baseLen);
-        }
-    }
-    #endif
-
     char iface[16 /*IF_NAMESIZE*/ + 1];
     if (getDefaultRoute(iface))
     {

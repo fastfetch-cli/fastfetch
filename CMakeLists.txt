@@ -387,6 +387,7 @@ if(LINUX)
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
         src/detection/monitor/monitor_linux.c
+        src/detection/netusage/netusage_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
