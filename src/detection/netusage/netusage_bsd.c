@@ -2,6 +2,7 @@
 
 #include "common/io/io.h"
 #include "common/netif/netif.h"
+#include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 
 #include <net/if.h>
