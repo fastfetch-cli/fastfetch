@@ -580,6 +580,7 @@ elseif(WIN32)
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
         src/detection/monitor/monitor_windows.c
+        src/detection/netusage/netusage_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c

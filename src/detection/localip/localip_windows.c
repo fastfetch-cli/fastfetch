@@ -46,7 +46,6 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
         ffStrbufInit(&ip->mac);
         ip->defaultRoute = false;
         ip->ifIndex = ifIndex;
-        ip->ioCounters = (FFLocalIpIoCounters) {};
     }
     else
     {
@@ -140,24 +139,6 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
                 addNewIp(results, name, addressBuffer, AF_INET6, newIp, adapter->IfIndex);
                 newIp = false;
-            }
-        }
-
-        if (newIp)
-        {
-            MIB_IF_ROW2 ifRow = { .InterfaceIndex = adapter->IfIndex };
-            if (GetIfEntry2(&ifRow) == NO_ERROR)
-            {
-                ((FFLocalIpResult*) ffListGet(results, results->length - 1))->ioCounters = (FFLocalIpIoCounters) {
-                    .txBytes = ifRow.OutOctets,
-                    .rxBytes = ifRow.InOctets,
-                    .txPackets = (ifRow.OutUcastPkts + ifRow.OutNUcastPkts),
-                    .rxPackets = (ifRow.InUcastPkts + ifRow.InNUcastPkts),
-                    .rxErrors = ifRow.InErrors,
-                    .txErrors = ifRow.OutErrors,
-                    .rxDrops = ifRow.InDiscards,
-                    .txDrops = ifRow.OutDiscards,
-                };
             }
         }
     }
