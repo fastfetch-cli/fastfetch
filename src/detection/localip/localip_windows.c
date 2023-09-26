@@ -70,13 +70,13 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             return "GetAdaptersAddresses() failed";
     }
 
-    uint32_t defaultRouteIfIndex = (uint32_t)-1;
-    ffNetifGetDefaultRoute(&defaultRouteIfIndex);
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRoute();
 
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
-        if (options->defaultRouteOnly && adapter->IfIndex != defaultRouteIfIndex)
+        bool isDefaultRoute = adapter->IfIndex == defaultRouteIfIndex;
+        if (options->defaultRouteOnly && !isDefaultRoute)
             continue;
 
         bool isLoop = adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK;
@@ -96,7 +96,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = adapter->PhysicalAddress;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, name, addressBuffer, -1, newIp, adapter->IfIndex == defaultRouteIfIndex);
+            addNewIp(results, name, addressBuffer, -1, newIp, isDefaultRoute);
             newIp = false;
         }
 
@@ -107,7 +107,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, AF_INET, newIp, adapter->IfIndex == defaultRouteIfIndex);
+                addNewIp(results, name, addressBuffer, AF_INET, newIp, isDefaultRoute);
                 newIp = false;
             }
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
@@ -115,7 +115,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, AF_INET6, newIp, adapter->IfIndex == defaultRouteIfIndex);
+                addNewIp(results, name, addressBuffer, AF_INET6, newIp, isDefaultRoute);
                 newIp = false;
             }
         }

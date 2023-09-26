@@ -2,6 +2,7 @@
 
 #include "common/io/io.h"
 
+#include <net/if.h>
 #include <net/if_dl.h>
 #include <net/route.h>
 #include <netinet/in.h>
@@ -38,9 +39,7 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
     return NULL;
 }
 
-
-
-bool ffNetifGetDefaultRoute(FFstrbuf* iface)
+bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1])
 {
     //https://github.com/hashPirate/copenheimer-masscan-fork/blob/36f1ed9f7b751a7dccd5ed27874e2e703db7d481/src/rawsock-getif.c#L104
 
@@ -86,7 +85,9 @@ bool ffNetifGetDefaultRoute(FFstrbuf* iface)
             struct sockaddr_dl* sdl = (struct sockaddr_dl *)get_rt_address(&rtmsg.hdr, RTA_IFP);
             if (sdl)
             {
-                ffStrbufSetNS(iface, sdl->sdl_nlen, sdl->sdl_data);
+                assert(sdl->sdl_nlen <= IF_NAMESIZE);
+                memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);
+                iface[sdl->sdl_nlen] = '\0';
                 return true;
             }
             return false;
