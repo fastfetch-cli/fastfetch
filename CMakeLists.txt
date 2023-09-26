@@ -486,6 +486,7 @@ elseif(BSD)
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/monitor/monitor_nosupport.c
+        src/detection/netusage/netusage_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -533,6 +534,7 @@ elseif(APPLE)
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/monitor/monitor_apple.m
+        src/detection/netusage/netusage_bsd.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
