@@ -82,7 +82,7 @@ static FFModuleBaseInfo* M[] = {
 };
 
 static FFModuleBaseInfo* N[] = {
-    (void*) &instance.config.netUsage,
+    (void*) &instance.config.netIo,
     NULL,
 };
 

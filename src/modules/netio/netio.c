@@ -1,26 +1,26 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
-#include "detection/netusage/netusage.h"
-#include "modules/netusage/netusage.h"
+#include "detection/netio/netio.h"
+#include "modules/netio/netio.h"
 #include "util/stringUtils.h"
 
-#define FF_NETUSAGE_DISPLAY_NAME "Net Usage"
-#define FF_NETUSAGE_NUM_FORMAT_ARGS 12
+#define FF_NETIO_DISPLAY_NAME "Network IO"
+#define FF_NETIO_NUM_FORMAT_ARGS 12
 
-static int sortInfs(const FFNetUsageIoCounters* left, const FFNetUsageIoCounters* right)
+static int sortInfs(const FFNetIOResult* left, const FFNetIOResult* right)
 {
     return ffStrbufComp(&left->name, &right->name);
 }
 
-static void formatKey(const FFNetUsageOptions* options, FFNetUsageIoCounters* inf, uint32_t index, FFstrbuf* key)
+static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_t index, FFstrbuf* key)
 {
     if(options->moduleArgs.key.length == 0)
     {
         if(!inf->name.length)
             ffStrbufSetF(&inf->name, "unknown %u", (unsigned) index);
 
-        ffStrbufSetF(key, FF_NETUSAGE_DISPLAY_NAME " (%s)", inf->name.chars);
+        ffStrbufSetF(key, FF_NETIO_DISPLAY_NAME " (%s)", inf->name.chars);
     }
     else
     {
@@ -32,14 +32,14 @@ static void formatKey(const FFNetUsageOptions* options, FFNetUsageIoCounters* in
     }
 }
 
-void ffPrintNetUsage(FFNetUsageOptions* options)
+void ffPrintNetIO(FFNetIOOptions* options)
 {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetUsageIoCounters));
-    const char* error = ffDetectNetUsage(&result, options);
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
+    const char* error = ffDetectNetIO(&result, options);
 
     if(error)
     {
-        ffPrintError(FF_NETUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_NETIO_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
@@ -50,7 +50,7 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
 
-    FF_LIST_FOR_EACH(FFNetUsageIoCounters, inf, result)
+    FF_LIST_FOR_EACH(FFNetIOResult, inf, result)
     {
         formatKey(options, inf, result.length == 1 ? 0 : index + 1, &key);
         ffStrbufClear(&buffer);
@@ -60,9 +60,9 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             ffParseSize(inf->rxBytes, &buffer);
-            ffStrbufAppendS(&buffer, "/s (in) - ");
+            ffStrbufAppendS(&buffer, "/s (IN) - ");
             ffParseSize(inf->txBytes, &buffer);
-            ffStrbufAppendS(&buffer, "/s (out)");
+            ffStrbufAppendS(&buffer, "/s (OUT)");
             if (!options->defaultRouteOnly && inf->defaultRoute)
                 ffStrbufAppendS(&buffer, " *");
             ffStrbufPutTo(&buffer, stdout);
@@ -75,7 +75,7 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
             ffParseSize(inf->txBytes, &buffer2);
             ffStrbufAppendS(&buffer2, "/s");
 
-            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETUSAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
+            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETIO_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer2},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name},
@@ -93,24 +93,24 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
         ++index;
     }
 
-    FF_LIST_FOR_EACH(FFNetUsageIoCounters, inf, result)
+    FF_LIST_FOR_EACH(FFNetIOResult, inf, result)
     {
         ffStrbufDestroy(&inf->name);
     }
 }
 
-void ffInitNetUsageOptions(FFNetUsageOptions* options)
+void ffInitNetIOOptions(FFNetIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETUSAGE_MODULE_NAME, ffParseNetUsageCommandOptions, ffParseNetUsageJsonObject, ffPrintNetUsage, ffGenerateNetUsageJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
     options->defaultRouteOnly = false;
 }
 
-bool ffParseNetUsageCommandOptions(FFNetUsageOptions* options, const char* key, const char* value)
+bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const char* value)
 {
-    const char* subKey = ffOptionTestPrefix(key, FF_NETUSAGE_MODULE_NAME);
+    const char* subKey = ffOptionTestPrefix(key, FF_NETIO_MODULE_NAME);
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
@@ -130,13 +130,13 @@ bool ffParseNetUsageCommandOptions(FFNetUsageOptions* options, const char* key, 
     return false;
 }
 
-void ffDestroyNetUsageOptions(FFNetUsageOptions* options)
+void ffDestroyNetIOOptions(FFNetIOOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
     ffStrbufDestroy(&options->namePrefix);
 }
 
-void ffParseNetUsageJsonObject(FFNetUsageOptions* options, yyjson_val* module)
+void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
 {
     yyjson_val *key_, *val;
     size_t idx, max;
@@ -161,14 +161,14 @@ void ffParseNetUsageJsonObject(FFNetUsageOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_NETUSAGE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
 
-void ffGenerateNetUsageJson(FFNetUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateNetIOJson(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetUsageIoCounters));
-    const char* error = ffDetectNetUsage(&result, options);
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
+    const char* error = ffDetectNetIO(&result, options);
 
     if(error)
     {
@@ -177,7 +177,7 @@ void ffGenerateNetUsageJson(FFNetUsageOptions* options, yyjson_mut_doc* doc, yyj
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-    FF_LIST_FOR_EACH(FFNetUsageIoCounters, counter, result)
+    FF_LIST_FOR_EACH(FFNetIOResult, counter, result)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &counter->name);
@@ -192,7 +192,7 @@ void ffGenerateNetUsageJson(FFNetUsageOptions* options, yyjson_mut_doc* doc, yyj
         yyjson_mut_obj_add_uint(doc, obj, "txDrops", counter->txDrops);
     }
 
-    FF_LIST_FOR_EACH(FFNetUsageIoCounters, inf, result)
+    FF_LIST_FOR_EACH(FFNetIOResult, inf, result)
     {
         ffStrbufDestroy(&inf->name);
     }

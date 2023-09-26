@@ -397,9 +397,9 @@ static inline void printCommandHelp(const char* command)
             "Public IP address"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "netusage-format"))
+    else if(ffStrEqualsIgnCase(command, "netio-format"))
     {
-        constructAndPrintCommandHelpFormat("netusage", "{}", 3,
+        constructAndPrintCommandHelpFormat("netio", "{}", 3,
             "Size of data received per second (formatted)",
             "Size of data sent per second (formatted)",
             "Interface name",

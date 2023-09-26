@@ -31,7 +31,7 @@
 #include "modules/media/media.h"
 #include "modules/memory/memory.h"
 #include "modules/monitor/monitor.h"
-#include "modules/netusage/netusage.h"
+#include "modules/netio/netio.h"
 #include "modules/opengl/opengl.h"
 #include "modules/opencl/opencl.h"
 #include "modules/os/os.h"

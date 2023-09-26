@@ -27,7 +27,7 @@ Features:
 * Add `-c` as a shortcut of `--load-config`. Note it was used as the shortcut of `--color` before 2.0.5
 * Support Windows Service Pack version detection (Kernel, Windows)
 * Support Debian point releases detection (OS, Linux)
-* Add new module `NetUsage` which prints network throughput (usage) of specified interface. Note this module costs about 1 second to finish.
+* Add new module `NetIO` which prints network throughput (usage) of specified interface. Note this module costs about 1 second to finish.
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)

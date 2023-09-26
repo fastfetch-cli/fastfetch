@@ -31,7 +31,7 @@
 #include "modules/media/option.h"
 #include "modules/memory/option.h"
 #include "modules/monitor/option.h"
-#include "modules/netusage/option.h"
+#include "modules/netio/option.h"
 #include "modules/opengl/option.h"
 #include "modules/opencl/option.h"
 #include "modules/os/option.h"

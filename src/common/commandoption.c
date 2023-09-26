@@ -60,8 +60,8 @@ void ffPrepareCommandOption(FFdata* data)
     if(ffStrbufContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME))
         ffPrepareCPUUsage();
 
-    if(ffStrbufContainIgnCaseS(&data->structure, FF_NETUSAGE_MODULE_NAME))
-        ffPrepareNetUsage(&instance.config.netUsage);
+    if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
+        ffPrepareNetIO(&instance.config.netIo);
 
     if(instance.config.multithreading)
     {

@@ -1,26 +1,26 @@
-#include "netusage.h"
+#include "netio.h"
 
 #include "common/time.h"
 
-const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options);
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options);
 
 static FFlist ioCounters1;
 static uint64_t time1;
 
-void ffPrepareNetUsage(FFNetUsageOptions* options)
+void ffPrepareNetIO(FFNetIOOptions* options)
 {
-    ffListInit(&ioCounters1, sizeof(FFNetUsageIoCounters));
-    ffNetUsageGetIoCounters(&ioCounters1, options);
+    ffListInit(&ioCounters1, sizeof(FFNetIOResult));
+    ffNetIOGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();
 }
 
-const char* ffDetectNetUsage(FFlist* result, FFNetUsageOptions* options)
+const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options)
 {
     const char* error = NULL;
     if (time1 == 0)
     {
-        ffListInit(&ioCounters1, sizeof(FFNetUsageIoCounters));
-        error = ffNetUsageGetIoCounters(&ioCounters1, options);
+        ffListInit(&ioCounters1, sizeof(FFNetIOResult));
+        error = ffNetIOGetIoCounters(&ioCounters1, options);
         if (error)
             return error;
         time1 = ffTimeGetNow();
@@ -36,7 +36,7 @@ const char* ffDetectNetUsage(FFlist* result, FFNetUsageOptions* options)
         time2 = ffTimeGetNow();
     }
 
-    error = ffNetUsageGetIoCounters(result, options);
+    error = ffNetIOGetIoCounters(result, options);
     if (error)
         return error;
 
@@ -45,13 +45,13 @@ const char* ffDetectNetUsage(FFlist* result, FFNetUsageOptions* options)
 
     for (uint32_t i = 0; i < result->length; ++i)
     {
-        FFNetUsageIoCounters* icPrev = (FFNetUsageIoCounters*)ffListGet(&ioCounters1, i);
-        FFNetUsageIoCounters* icCurr = (FFNetUsageIoCounters*)ffListGet(result, i);
+        FFNetIOResult* icPrev = (FFNetIOResult*)ffListGet(&ioCounters1, i);
+        FFNetIOResult* icCurr = (FFNetIOResult*)ffListGet(result, i);
         if (!ffStrbufEqual(&icPrev->name, &icCurr->name))
             return "Network interface name changed";
 
-        static_assert(sizeof(FFNetUsageIoCounters) - offsetof(FFNetUsageIoCounters, txBytes) == sizeof(uint64_t) * 8, "Unexpected struct FFNetUsageIoCounters layout");
-        for (size_t off = offsetof(FFNetUsageIoCounters, txBytes); off < sizeof(FFNetUsageIoCounters); off += sizeof(uint64_t))
+        static_assert(sizeof(FFNetIOResult) - offsetof(FFNetIOResult, txBytes) == sizeof(uint64_t) * 8, "Unexpected struct FFNetIOResult layout");
+        for (size_t off = offsetof(FFNetIOResult, txBytes); off < sizeof(FFNetIOResult); off += sizeof(uint64_t))
         {
             uint64_t* prevValue = (uint64_t*) ((uint8_t*) icPrev + off);
             uint64_t* currValue = (uint64_t*) ((uint8_t*) icCurr + off);

@@ -150,8 +150,8 @@ Module specific options:
     --localip-name-prefix <str>:             Show interfaces with given interface name prefix only. Default is empty
     --localip-default-route-only <?value>:   Show the interface that is used for default routing only. Default is false
     --localip-compact <?value>:              Show all IPs in one line. Default is false
-    --netusage-name-prefix <str>:            Show interfaces with given name prefix only. Default is empty
-    --netusage-default-route-only <?value>:  Show the interfac that is used for default routing only. Default is false
+    --netio-name-prefix <str>:            Show interfaces with given name prefix only. Default is empty
+    --netio-default-route-only <?value>:  Show the interfac that is used for default routing only. Default is false
     --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url:                          The URL of public IP detection server to be used.
     --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).

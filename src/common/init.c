@@ -106,7 +106,7 @@ static void defaultConfig(void)
     ffInitMediaOptions(&instance.config.media);
     ffInitMemoryOptions(&instance.config.memory);
     ffInitMonitorOptions(&instance.config.monitor);
-    ffInitNetUsageOptions(&instance.config.netUsage);
+    ffInitNetIOOptions(&instance.config.netIo);
     ffInitOSOptions(&instance.config.os);
     ffInitOpenCLOptions(&instance.config.openCL);
     ffInitOpenGLOptions(&instance.config.openGL);
@@ -320,7 +320,7 @@ static void destroyConfig(void)
     ffDestroyMediaOptions(&instance.config.media);
     ffDestroyMemoryOptions(&instance.config.memory);
     ffDestroyMonitorOptions(&instance.config.monitor);
-    ffDestroyNetUsageOptions(&instance.config.netUsage);
+    ffDestroyNetIOOptions(&instance.config.netIo);
     ffDestroyOSOptions(&instance.config.os);
     ffDestroyOpenCLOptions(&instance.config.openCL);
     ffDestroyOpenGLOptions(&instance.config.openGL);

@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-typedef struct FFNetUsageIoCounters
+typedef struct FFNetIOResult
 {
     FFstrbuf name;
     bool defaultRoute;
@@ -12,6 +12,6 @@ typedef struct FFNetUsageIoCounters
     uint64_t txErrors;
     uint64_t rxDrops;
     uint64_t txDrops;
-} FFNetUsageIoCounters;
+} FFNetIOResult;
 
-const char* ffDetectNetUsage(FFlist* result, FFNetUsageOptions* options);
+const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options);

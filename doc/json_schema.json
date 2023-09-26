@@ -558,7 +558,7 @@
                             "media",
                             "memory",
                             "monitor",
-                            "netusage",
+                            "netio",
                             "opencl",
                             "opengl",
                             "os",
@@ -1024,7 +1024,7 @@
                                 "title": "Network throughput (usage)",
                                 "properties": {
                                     "type": {
-                                        "const": "netusage"
+                                        "const": "netio"
                                     },
                                     "namePrefix": {
                                         "title": "Show IPs with given name prefix only",

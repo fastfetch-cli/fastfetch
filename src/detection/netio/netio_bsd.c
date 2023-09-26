@@ -1,4 +1,4 @@
-#include "netusage.h"
+#include "netio.h"
 
 #include "common/io/io.h"
 #include "common/netif/netif.h"
@@ -12,7 +12,7 @@
 #include <sys/sysctl.h>
 #include <sys/socket.h>
 
-const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 {
     size_t bufSize = 0;
     if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0 }, 6, NULL, &bufSize, 0, 0) < 0)
@@ -43,8 +43,8 @@ const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
         if (options->namePrefix.length && strncmp(sdl->sdl_data, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        FFNetUsageIoCounters* counters = (FFNetUsageIoCounters*) ffListAdd(result);
-        *counters = (FFNetUsageIoCounters) {
+        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        *counters = (FFNetIOResult) {
             .name = ffStrbufCreateNS(sdl->sdl_nlen, sdl->sdl_data),
             .txBytes = ifm->ifm_data.ifi_obytes,
             .rxBytes = ifm->ifm_data.ifi_ibytes,

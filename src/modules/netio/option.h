@@ -4,11 +4,11 @@
 
 #include "common/option.h"
 
-typedef struct FFNetUsageOptions
+typedef struct FFNetIOOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFstrbuf namePrefix;
     bool defaultRouteOnly;
-} FFNetUsageOptions;
+} FFNetIOOptions;

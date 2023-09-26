@@ -1,4 +1,4 @@
-#include "netusage.h"
+#include "netio.h"
 
 #include "common/netif/netif.h"
 #include "util/mallocHelper.h"
@@ -7,7 +7,7 @@
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 
-const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
@@ -54,8 +54,8 @@ const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
         MIB_IF_ROW2 ifRow = { .InterfaceIndex = adapter->IfIndex };
         if (GetIfEntry2(&ifRow) == NO_ERROR)
         {
-            FFNetUsageIoCounters* counters = (FFNetUsageIoCounters*) ffListAdd(result);
-            *counters = (FFNetUsageIoCounters) {
+            FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+            *counters = (FFNetIOResult) {
                 .name = ffStrbufCreateS(name),
                 .txBytes = ifRow.OutOctets,
                 .rxBytes = ifRow.InOctets,

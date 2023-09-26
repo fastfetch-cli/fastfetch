@@ -113,10 +113,10 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
             break;
         }
         case 'n': case 'N': {
-            if (ffStrEqualsIgnCase(type, FF_NETUSAGE_MODULE_NAME))
+            if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME))
             {
-                if (module) ffParseNetUsageJsonObject(&cfg->netUsage, module);
-                ffPrepareNetUsage(&cfg->netUsage);
+                if (module) ffParseNetIOJsonObject(&cfg->netIo, module);
+                ffPrepareNetIO(&cfg->netIo);
             }
             break;
         }

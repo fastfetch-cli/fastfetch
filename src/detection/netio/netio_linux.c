@@ -1,4 +1,4 @@
-#include "netusage.h"
+#include "netio.h"
 
 #include "common/io/io.h"
 #include "common/netif/netif.h"
@@ -6,7 +6,7 @@
 
 #include <net/if.h>
 
-const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/net");
     if (!dirp) return "opendir(\"/sys/class/net\") == NULL";
@@ -33,7 +33,7 @@ const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
         if(!ffReadFileBuffer(path.chars, &buffer) || !ffStrbufEqualS(&buffer, "up"))
             continue;
 
-        FFNetUsageIoCounters* counters = (FFNetUsageIoCounters*) ffListAdd(result);
+        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
         ffStrbufInitS(&counters->name, entry->d_name);
         counters->defaultRoute = isDefaultRoute;
 
