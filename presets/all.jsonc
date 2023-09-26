@@ -51,6 +51,7 @@
         "sound",
         "gamepad",
         "weather",
+        "netusage",
         "version",
         "break",
         "colors"

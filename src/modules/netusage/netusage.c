@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_NETUSAGE_DISPLAY_NAME "Net Usage"
-#define FF_NETUSAGE_NUM_FORMAT_ARGS 1
+#define FF_NETUSAGE_NUM_FORMAT_ARGS 12
 
 static int sortInfs(const FFNetUsageIoCounters* left, const FFNetUsageIoCounters* right)
 {
@@ -71,11 +71,15 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
         {
             ffStrbufClear(&buffer2);
             ffParseSize(inf->rxBytes, &buffer);
+            ffStrbufAppendS(&buffer, "/s");
             ffParseSize(inf->txBytes, &buffer2);
+            ffStrbufAppendS(&buffer2, "/s");
+
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETUSAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer2},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name},
+                {FF_FORMAT_ARG_TYPE_BOOL, &inf->defaultRoute},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txBytes},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxBytes},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txPackets},
@@ -84,7 +88,6 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txErrors},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxDrops},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txDrops},
-                {FF_FORMAT_ARG_TYPE_BOOL, &inf->defaultRoute},
             });
         }
         ++index;
@@ -178,6 +181,7 @@ void ffGenerateNetUsageJson(FFNetUsageOptions* options, yyjson_mut_doc* doc, yyj
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &counter->name);
+        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", counter->defaultRoute);
         yyjson_mut_obj_add_uint(doc, obj, "txBytes", counter->txBytes);
         yyjson_mut_obj_add_uint(doc, obj, "rxBytes", counter->rxBytes);
         yyjson_mut_obj_add_uint(doc, obj, "txPackets", counter->txPackets);
@@ -186,7 +190,6 @@ void ffGenerateNetUsageJson(FFNetUsageOptions* options, yyjson_mut_doc* doc, yyj
         yyjson_mut_obj_add_uint(doc, obj, "txErrors", counter->txErrors);
         yyjson_mut_obj_add_uint(doc, obj, "rxDrops", counter->rxDrops);
         yyjson_mut_obj_add_uint(doc, obj, "txDrops", counter->txDrops);
-        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", counter->defaultRoute);
     }
 
     FF_LIST_FOR_EACH(FFNetUsageIoCounters, inf, result)

@@ -381,16 +381,29 @@ static inline void printCommandHelp(const char* command)
             "Locale code"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "local-ip-format"))
+    else if(ffStrEqualsIgnCase(command, "localip-format"))
     {
-        constructAndPrintCommandHelpFormat("local-ip", "{}", 1,
-            "Local IP address"
+        constructAndPrintCommandHelpFormat("localip", "{}", 5,
+            "Local IPv4 address",
+            "Local IPv6 address",
+            "Physical (MAC) address",
+            "Interface name",
+            "Is default route"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "public-ip-format"))
+    else if(ffStrEqualsIgnCase(command, "publicip-format"))
     {
-        constructAndPrintCommandHelpFormat("public-ip", "{}", 1,
+        constructAndPrintCommandHelpFormat("publicip", "{}", 1,
             "Public IP address"
+        );
+    }
+    else if(ffStrEqualsIgnCase(command, "netusage-format"))
+    {
+        constructAndPrintCommandHelpFormat("netusage", "{}", 3,
+            "Size of data received per second (formatted)",
+            "Size of data sent per second (formatted)",
+            "Interface name",
+            "Is default route"
         );
     }
     else if(ffStrEqualsIgnCase(command, "wifi-format"))

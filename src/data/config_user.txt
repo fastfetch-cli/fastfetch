@@ -370,6 +370,7 @@
 #--lm-key LM
 #--locale-key Locale
 #--localip-key Local IP ({1})
+#--netusage-key Net Usage ({1})
 #--publicip-key Public IP
 #--wifi-key Wifi
 #--weather-key Weather
@@ -422,6 +423,7 @@
 #--lm-format
 #--locale-format
 #--localip-format
+#--netusage-format
 #--publicip-format
 #--weather-format
 #--monitor-format
@@ -471,6 +473,7 @@
 #--lm-key-color
 #--locale-key-color
 #--localip-key-color
+#--netusage-key-color
 #--publicip-key-color
 #--weather-key-color
 #--monitor-key-color

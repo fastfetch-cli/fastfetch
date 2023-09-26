@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
-#define FF_LOCALIP_NUM_FORMAT_ARGS 2
+#define FF_LOCALIP_NUM_FORMAT_ARGS 5
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
