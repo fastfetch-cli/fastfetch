@@ -35,7 +35,7 @@ static void formatKey(const FFNetUsageOptions* options, FFNetUsageIoCounters* in
 void ffPrintNetUsage(FFNetUsageOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetUsageIoCounters));
-    const char* error = ffDetectNetUsage(&result);
+    const char* error = ffDetectNetUsage(&result, options);
 
     if(error)
     {
@@ -63,6 +63,8 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
             ffStrbufAppendS(&buffer, "/s (in) - ");
             ffParseSize(inf->txBytes, &buffer);
             ffStrbufAppendS(&buffer, "/s (out)");
+            if (!options->defaultRouteOnly && inf->defaultRoute)
+                ffStrbufAppendS(&buffer, " *");
             ffStrbufPutTo(&buffer, stdout);
         }
         else
@@ -82,9 +84,15 @@ void ffPrintNetUsage(FFNetUsageOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txErrors},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxDrops},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txDrops},
+                {FF_FORMAT_ARG_TYPE_BOOL, &inf->defaultRoute},
             });
         }
         ++index;
+    }
+
+    FF_LIST_FOR_EACH(FFNetUsageIoCounters, inf, result)
+    {
+        ffStrbufDestroy(&inf->name);
     }
 }
 
@@ -92,6 +100,9 @@ void ffInitNetUsageOptions(FFNetUsageOptions* options)
 {
     ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETUSAGE_MODULE_NAME, ffParseNetUsageCommandOptions, ffParseNetUsageJsonObject, ffPrintNetUsage, ffGenerateNetUsageJson);
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly = false;
 }
 
 bool ffParseNetUsageCommandOptions(FFNetUsageOptions* options, const char* key, const char* value)
@@ -101,12 +112,25 @@ bool ffParseNetUsageCommandOptions(FFNetUsageOptions* options, const char* key, 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
+    {
+        ffOptionParseString(key, value, &options->namePrefix);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
+    {
+        options->defaultRouteOnly = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
 void ffDestroyNetUsageOptions(FFNetUsageOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
 }
 
 void ffParseNetUsageJsonObject(FFNetUsageOptions* options, yyjson_val* module)
@@ -122,14 +146,26 @@ void ffParseNetUsageJsonObject(FFNetUsageOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        {
+            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+        {
+            options->defaultRouteOnly = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_NETUSAGE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
 
-void ffGenerateNetUsageJson(FF_MAYBE_UNUSED FFNetUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateNetUsageJson(FFNetUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetUsageIoCounters));
-    const char* error = ffDetectNetUsage(&result);
+    const char* error = ffDetectNetUsage(&result, options);
 
     if(error)
     {
@@ -150,6 +186,11 @@ void ffGenerateNetUsageJson(FF_MAYBE_UNUSED FFNetUsageOptions* options, yyjson_m
         yyjson_mut_obj_add_uint(doc, obj, "txErrors", counter->txErrors);
         yyjson_mut_obj_add_uint(doc, obj, "rxDrops", counter->rxDrops);
         yyjson_mut_obj_add_uint(doc, obj, "txDrops", counter->txDrops);
+        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", counter->defaultRoute);
+    }
 
+    FF_LIST_FOR_EACH(FFNetUsageIoCounters, inf, result)
+    {
+        ffStrbufDestroy(&inf->name);
     }
 }

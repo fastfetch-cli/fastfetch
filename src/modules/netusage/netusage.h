@@ -4,7 +4,7 @@
 
 #define FF_NETUSAGE_MODULE_NAME "NetUsage"
 
-void ffPrepareNetUsage();
+void ffPrepareNetUsage(FFNetUsageOptions* options);
 
 void ffPrintNetUsage(FFNetUsageOptions* options);
 void ffInitNetUsageOptions(FFNetUsageOptions* options);

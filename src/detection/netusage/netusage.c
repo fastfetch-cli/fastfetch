@@ -2,30 +2,32 @@
 
 #include "common/time.h"
 
-const char* ffNetUsageGetIoCounters(FFlist* result);
+const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options);
 
 static FFlist ioCounters1;
 static uint64_t time1;
 
-void ffPrepareNetUsage(void)
+void ffPrepareNetUsage(FFNetUsageOptions* options)
 {
     ffListInit(&ioCounters1, sizeof(FFNetUsageIoCounters));
-    ffNetUsageGetIoCounters(&ioCounters1);
+    ffNetUsageGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();
 }
 
-const char* ffDetectNetUsage(FFlist* result)
+const char* ffDetectNetUsage(FFlist* result, FFNetUsageOptions* options)
 {
     const char* error = NULL;
     if (time1 == 0)
     {
         ffListInit(&ioCounters1, sizeof(FFNetUsageIoCounters));
-        error = ffNetUsageGetIoCounters(&ioCounters1);
+        error = ffNetUsageGetIoCounters(&ioCounters1, options);
         if (error)
             return error;
         time1 = ffTimeGetNow();
-        ffTimeSleep(1000);
     }
+
+    if (ioCounters1.length == 0)
+        return "No network interfaces found";
 
     uint64_t time2 = ffTimeGetNow();
     while (time2 - time1 < 1000)
@@ -34,7 +36,7 @@ const char* ffDetectNetUsage(FFlist* result)
         time2 = ffTimeGetNow();
     }
 
-    error = ffNetUsageGetIoCounters(result);
+    error = ffNetUsageGetIoCounters(result, options);
     if (error)
         return error;
 

@@ -112,6 +112,14 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
                 ffPrepareCPUUsage();
             break;
         }
+        case 'n': case 'N': {
+            if (ffStrEqualsIgnCase(type, FF_NETUSAGE_MODULE_NAME))
+            {
+                if (module) ffParseNetUsageJsonObject(&cfg->netUsage, module);
+                ffPrepareNetUsage(&cfg->netUsage);
+            }
+            break;
+        }
         case 'p': case 'P': {
             if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME))
             {

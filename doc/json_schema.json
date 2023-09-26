@@ -558,6 +558,7 @@
                             "media",
                             "memory",
                             "monitor",
+                            "netusage",
                             "opencl",
                             "opengl",
                             "os",
@@ -994,6 +995,36 @@
                                         "title": "Show all IPs in one line",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "namePrefix": {
+                                        "title": "Show IPs with given name prefix only",
+                                        "type": "string"
+                                    },
+                                    "defaultRouteOnly": {
+                                        "title": "Show ips that are used for default routing only",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Network throughput (usage)",
+                                "properties": {
+                                    "type": {
+                                        "const": "netusage"
                                     },
                                     "namePrefix": {
                                         "title": "Show IPs with given name prefix only",

@@ -3,6 +3,7 @@
 typedef struct FFNetUsageIoCounters
 {
     FFstrbuf name;
+    bool defaultRoute;
     uint64_t txBytes;
     uint64_t rxBytes;
     uint64_t txPackets;
@@ -13,4 +14,4 @@ typedef struct FFNetUsageIoCounters
     uint64_t txDrops;
 } FFNetUsageIoCounters;
 
-const char* ffDetectNetUsage(FFlist* result);
+const char* ffDetectNetUsage(FFlist* result, FFNetUsageOptions* options);

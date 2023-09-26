@@ -1,13 +1,13 @@
 #include "netusage.h"
 
-#include "common/io/io.h"
+#include "common/netif/netif.h"
 #include "util/mallocHelper.h"
 #include "util/windows/unicode.h"
 
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 
-const char* ffNetUsageGetIoCounters(FFlist* result)
+const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
 {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
@@ -37,14 +37,26 @@ const char* ffNetUsageGetIoCounters(FFlist* result)
             return "GetAdaptersAddresses() failed";
     }
 
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRoute();
+
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
+        bool isDefaultRoute = adapter->IfIndex == defaultRouteIfIndex;
+        if (options->defaultRouteOnly && !isDefaultRoute)
+            continue;
+
+        char name[128];
+        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, sizeof(name), NULL, NULL);
+        if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
+            continue;
+
         MIB_IF_ROW2 ifRow = { .InterfaceIndex = adapter->IfIndex };
         if (GetIfEntry2(&ifRow) == NO_ERROR)
         {
             FFNetUsageIoCounters* counters = (FFNetUsageIoCounters*) ffListAdd(result);
             *counters = (FFNetUsageIoCounters) {
+                .name = ffStrbufCreateS(name),
                 .txBytes = ifRow.OutOctets,
                 .rxBytes = ifRow.InOctets,
                 .txPackets = (ifRow.OutUcastPkts + ifRow.OutNUcastPkts),
@@ -53,8 +65,8 @@ const char* ffNetUsageGetIoCounters(FFlist* result)
                 .txErrors = ifRow.OutErrors,
                 .rxDrops = ifRow.InDiscards,
                 .txDrops = ifRow.OutDiscards,
+                .defaultRoute = isDefaultRoute,
             };
-            ffStrbufSetWS(&counters->name, adapter->FriendlyName);
         }
     }
 

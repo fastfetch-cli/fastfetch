@@ -50,7 +50,7 @@ void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
-void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
+FF_C_PRINTF(2, 3) void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);

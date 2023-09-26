@@ -8,4 +8,7 @@ typedef struct FFNetUsageOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    FFstrbuf namePrefix;
+    bool defaultRouteOnly;
 } FFNetUsageOptions;

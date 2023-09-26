@@ -61,7 +61,7 @@ void ffPrepareCommandOption(FFdata* data)
         ffPrepareCPUUsage();
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_NETUSAGE_MODULE_NAME))
-        ffPrepareNetUsage();
+        ffPrepareNetUsage(&instance.config.netUsage);
 
     if(instance.config.multithreading)
     {

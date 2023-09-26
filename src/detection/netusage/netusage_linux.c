@@ -1,10 +1,12 @@
 #include "netusage.h"
 
 #include "common/io/io.h"
+#include "common/netif/netif.h"
+#include "util/stringUtils.h"
 
 #include <net/if.h>
 
-const char* ffNetUsageGetIoCounters(FFlist* result)
+const char* ffNetUsageGetIoCounters(FFlist* result, FFNetUsageOptions* options)
 {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/net");
     if (!dirp) return "opendir(\"/sys/class/net\") == NULL";
@@ -12,10 +14,19 @@ const char* ffNetUsageGetIoCounters(FFlist* result)
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateA(64);
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
+    const char* defaultRouteIface = ffNetifGetDefaultRoute();
+
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
         if(entry->d_name[0] == '.')
+            continue;
+
+        bool isDefaultRoute = ffStrEquals(entry->d_name, defaultRouteIface);
+        if(options->defaultRouteOnly && !isDefaultRoute)
+            continue;
+
+        if (options->namePrefix.length && strncmp(entry->d_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
         ffStrbufSetF(&path, "/sys/class/net/%s/operstate", entry->d_name);
@@ -24,8 +35,9 @@ const char* ffNetUsageGetIoCounters(FFlist* result)
 
         FFNetUsageIoCounters* counters = (FFNetUsageIoCounters*) ffListAdd(result);
         ffStrbufInitS(&counters->name, entry->d_name);
+        counters->defaultRoute = isDefaultRoute;
 
-        ffStrbufSetF(&path, "/sys/class/net/%s/statistics/");
+        ffStrbufSetF(&path, "/sys/class/net/%s/statistics/", entry->d_name);
         uint32_t statLen = path.length;
 
         ffStrbufAppendS(&path, "rx_bytes");
