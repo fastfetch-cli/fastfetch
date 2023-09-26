@@ -60,6 +60,9 @@ void ffPrepareCommandOption(FFdata* data)
     if(ffStrbufContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME))
         ffPrepareCPUUsage();
 
+    if(ffStrbufContainIgnCaseS(&data->structure, FF_NETUSAGE_MODULE_NAME))
+        ffPrepareNetUsage();
+
     if(instance.config.multithreading)
     {
         if(ffStrbufContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME))

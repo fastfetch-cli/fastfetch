@@ -13,4 +13,4 @@ typedef struct FFNetUsageIoCounters
     uint64_t txDrops;
 } FFNetUsageIoCounters;
 
-const char* ffGetNetIoCounter(FFlist* result /* list of FFNetUsageIoCounters */);
+const char* ffDetectNetUsage(FFlist* result);

@@ -1,37 +1,10 @@
-#include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 
+#include "common/netif/netif.h"
 #include "util/mallocHelper.h"
 #include "util/windows/unicode.h"
 #include "localip.h"
-
-static void setDefaultRoute(FFlist* ips)
-{
-    ULONG size = 0;
-    if (GetIpForwardTable(NULL, &size, TRUE) != ERROR_INSUFFICIENT_BUFFER)
-        return;
-
-    FF_AUTO_FREE MIB_IPFORWARDTABLE* pIpForwardTable = (MIB_IPFORWARDTABLE*) malloc(size);
-    if (GetIpForwardTable(pIpForwardTable, &size, TRUE) != ERROR_SUCCESS)
-        return;
-
-    for (uint32_t i = 0; i < pIpForwardTable->dwNumEntries; ++i)
-    {
-        MIB_IPFORWARDROW* ipForwardRow = &pIpForwardTable->table[i];
-        if (ipForwardRow->dwForwardDest == 0 && ipForwardRow->dwForwardMask == 0)
-        {
-            FF_LIST_FOR_EACH(FFLocalIpResult, ip, *ips)
-            {
-                if (ip->ifIndex == ipForwardRow->dwForwardIfIndex)
-                {
-                    ip->defaultRoute = true;
-                    break;
-                }
-            }
-        }
-    }
-}
 
 static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, uint32_t ifIndex)
 {
@@ -143,7 +116,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         }
     }
 
-    setDefaultRoute(results);
+    uint32_t ifIndex;
+    if (ffNetifGetDefaultRoute(&ifIndex))
+    {
+        FF_LIST_FOR_EACH(FFLocalIpResult, ip, *results)
+        {
+            if (ip->ifIndex != ifIndex) continue;
+            ip->defaultRoute = true;
+        }
+    }
 
     return NULL;
 }

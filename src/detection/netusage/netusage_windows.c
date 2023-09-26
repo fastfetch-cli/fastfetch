@@ -7,7 +7,7 @@
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 
-const char* ffGetNetIoCounter(FFlist* result)
+const char* ffNetUsageGetIoCounters(FFlist* result)
 {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 

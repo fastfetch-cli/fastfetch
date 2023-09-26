@@ -13,14 +13,14 @@ static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
     return ffStrbufComp(&left->name, &right->name);
 }
 
-static void formatKey(const FFLocalIpOptions* options, const FFLocalIpResult* ip, uint32_t index, FFstrbuf* key)
+static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint32_t index, FFstrbuf* key)
 {
     if(options->moduleArgs.key.length == 0)
     {
-        if(ip->name.length)
-            ffStrbufSetF(key, FF_LOCALIP_DISPLAY_NAME " (%s)", ip->name.chars);
-        else
-            ffStrbufSetS(key, FF_LOCALIP_DISPLAY_NAME);
+        if(!ip->name.length)
+            ffStrbufSetF(&ip->name, "unknown %u", (unsigned) index);
+
+        ffStrbufSetF(key, FF_LOCALIP_DISPLAY_NAME " (%s)", ip->name.chars);
     }
     else
     {

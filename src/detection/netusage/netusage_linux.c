@@ -4,7 +4,7 @@
 
 #include <net/if.h>
 
-const char* ffGetNetIoCounter(FFlist* result)
+const char* ffNetUsageGetIoCounters(FFlist* result)
 {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/net");
     if (!dirp) return "opendir(\"/sys/class/net\") == NULL";

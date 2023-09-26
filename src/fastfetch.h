@@ -108,6 +108,7 @@ typedef struct FFconfig
     FFMediaOptions media;
     FFMemoryOptions memory;
     FFMonitorOptions monitor;
+    FFNetUsageOptions netUsage;
     FFOSOptions os;
     FFOpenCLOptions openCL;
     FFOpenGLOptions openGL;
