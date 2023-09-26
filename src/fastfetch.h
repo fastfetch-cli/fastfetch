@@ -14,6 +14,10 @@
     #include "3rdparty/yyjson/yyjson.h"
 #endif
 
+#ifdef _MSC_VER
+    #define __attribute__(x)
+#endif
+
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 #include "util/platform/FFPlatform.h"

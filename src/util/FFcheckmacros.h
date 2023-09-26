@@ -3,8 +3,14 @@
 #ifndef FASTFETCH_INCLUDED_FFCHECKMACROS
 #define FASTFETCH_INCLUDED_FFCHECKMACROS
 
+#ifdef _MSC_VER
+    #include <sal.h>
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
     #define FF_C_NODISCARD __attribute__((warn_unused_result))
+#elif defined(_MSC_VER)
+    #define FF_C_NODISCARD _Check_return_
 #else
     #define FF_C_NODISCARD
 #endif
