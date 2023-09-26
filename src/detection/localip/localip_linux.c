@@ -16,7 +16,7 @@
 #include <netpacket/packet.h>
 #endif
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, int type)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -33,7 +33,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type)
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
-        ip->defaultRoute = false;
+        ip->defaultRoute = defaultRoute;
     }
 
     switch (type)
@@ -56,9 +56,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     if(getifaddrs(&ifAddrStruct) < 0)
         return "getifaddrs(&ifAddrStruct) failed";
 
+    FF_STRBUF_AUTO_DESTROY defaultRouteIface = ffStrbufCreate();
+    ffNetifGetDefaultRoute(&defaultRouteIface);
+
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next)
     {
         if (!ifa->ifa_addr || !(ifa->ifa_flags & IFF_RUNNING))
+            continue;
+
+        if (options->defaultRouteOnly && !ffStrbufEqualS(&defaultRouteIface, ifa->ifa_name))
             continue;
 
         if ((ifa->ifa_flags & IFF_LOOPBACK) && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
@@ -75,7 +81,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             struct sockaddr_in* ipv4 = (struct sockaddr_in*) ifa->ifa_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET);
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, ffStrbufEqualS(&defaultRouteIface, ifa->ifa_name));
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
@@ -85,7 +91,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
             char addressBuffer[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6);
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, ffStrbufEqualS(&defaultRouteIface, ifa->ifa_name));
         }
         #if defined(__FreeBSD__) || defined(__APPLE__)
         else if (ifa->ifa_addr->sa_family == AF_LINK)
@@ -97,7 +103,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, ffStrbufEqualS(&defaultRouteIface, ifa->ifa_name));
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
@@ -109,18 +115,12 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, ffStrbufEqualS(&defaultRouteIface, ifa->ifa_name));
         }
         #endif
     }
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);
 
-    FF_STRBUF_AUTO_DESTROY iface = ffStrbufCreate();
-    if (ffNetifGetDefaultRoute(&iface))
-    {
-        FF_LIST_FOR_EACH(FFLocalIpResult, ip, *results)
-            ip->defaultRoute = ffStrbufEqual(&ip->name, &iface);
-    }
     return NULL;
 }

@@ -86,9 +86,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
-            if (options->defaultRouteOnly && !ip->defaultRoute)
-                continue;
-
             if (flag)
                 fputs(" - ", stdout);
             else
@@ -104,9 +101,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
-            if (options->defaultRouteOnly && !ip->defaultRoute)
-                continue;
-
             formatKey(options, ip, results.length == 1 ? 0 : index + 1, &key);
             if(options->moduleArgs.outputFormat.length == 0)
             {

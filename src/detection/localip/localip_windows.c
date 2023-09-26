@@ -6,7 +6,7 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
-static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, uint32_t ifIndex)
+static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, bool defaultRoute)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -17,8 +17,7 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
-        ip->defaultRoute = false;
-        ip->ifIndex = ifIndex;
+        ip->defaultRoute = defaultRoute;
     }
     else
     {
@@ -71,9 +70,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             return "GetAdaptersAddresses() failed";
     }
 
+    uint32_t defaultRouteIfIndex = (uint32_t)-1;
+    ffNetifGetDefaultRoute(&defaultRouteIfIndex);
+
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
+        if (options->defaultRouteOnly && adapter->IfIndex != defaultRouteIfIndex)
+            continue;
+
         bool isLoop = adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK;
         if (isLoop && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
             continue;
@@ -91,7 +96,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = adapter->PhysicalAddress;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, name, addressBuffer, -1, newIp, adapter->IfIndex);
+            addNewIp(results, name, addressBuffer, -1, newIp, adapter->IfIndex == defaultRouteIfIndex);
             newIp = false;
         }
 
@@ -102,7 +107,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET_ADDRSTRLEN];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, AF_INET, newIp, adapter->IfIndex);
+                addNewIp(results, name, addressBuffer, AF_INET, newIp, adapter->IfIndex == defaultRouteIfIndex);
                 newIp = false;
             }
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
@@ -110,19 +115,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, AF_INET6, newIp, adapter->IfIndex);
+                addNewIp(results, name, addressBuffer, AF_INET6, newIp, adapter->IfIndex == defaultRouteIfIndex);
                 newIp = false;
             }
-        }
-    }
-
-    uint32_t ifIndex;
-    if (ffNetifGetDefaultRoute(&ifIndex))
-    {
-        FF_LIST_FOR_EACH(FFLocalIpResult, ip, *results)
-        {
-            if (ip->ifIndex != ifIndex) continue;
-            ip->defaultRoute = true;
         }
     }
 
