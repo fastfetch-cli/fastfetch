@@ -439,6 +439,7 @@ elseif(ANDROID)
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
         src/detection/monitor/monitor_nosupport.c
+        src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
