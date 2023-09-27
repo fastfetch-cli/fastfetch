@@ -70,7 +70,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             return "GetAdaptersAddresses() failed";
     }
 
-    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRoute();
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteIfIndex();
 
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)

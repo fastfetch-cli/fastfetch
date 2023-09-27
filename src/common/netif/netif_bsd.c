@@ -39,7 +39,7 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
     return NULL;
 }
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1])
+bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
 {
     //https://github.com/hashPirate/copenheimer-masscan-fork/blob/36f1ed9f7b751a7dccd5ed27874e2e703db7d481/src/rawsock-getif.c#L104
 
@@ -88,6 +88,7 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1])
                 assert(sdl->sdl_nlen <= IF_NAMESIZE);
                 memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);
                 iface[sdl->sdl_nlen] = '\0';
+                *ifIndex = sdl->sdl_index;
                 return true;
             }
             return false;

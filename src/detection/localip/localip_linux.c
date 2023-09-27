@@ -57,14 +57,14 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     if(getifaddrs(&ifAddrStruct) < 0)
         return "getifaddrs(&ifAddrStruct) failed";
 
-    const char* defaultRouteIface = ffNetifGetDefaultRoute();
+    const char* defaultRouteIfName = ffNetifGetDefaultRouteIfName();
 
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next)
     {
         if (!ifa->ifa_addr || !(ifa->ifa_flags & IFF_RUNNING))
             continue;
 
-        bool isDefaultRoute = ffStrEquals(defaultRouteIface, ifa->ifa_name);
+        bool isDefaultRoute = ffStrEquals(defaultRouteIfName, ifa->ifa_name);
         if (options->defaultRouteOnly && !isDefaultRoute)
             continue;
 

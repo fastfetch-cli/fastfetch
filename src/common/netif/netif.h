@@ -3,7 +3,7 @@
 #include "fastfetch.h"
 
 #ifndef _WIN32
-const char* ffNetifGetDefaultRoute();
-#else
-uint32_t ffNetifGetDefaultRoute();
+const char* ffNetifGetDefaultRouteIfName();
 #endif
+
+uint32_t ffNetifGetDefaultRouteIfIndex();

@@ -14,15 +14,15 @@
 
 const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 {
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteIfIndex();
+
     size_t bufSize = 0;
-    if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0 }, 6, NULL, &bufSize, 0, 0) < 0)
-        return "sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0 }, 6, NULL, &bufSize, 0, 0) failed";
+    if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, (options->defaultRouteOnly ? (int) defaultRouteIfIndex : 0) }, 6, NULL, &bufSize, 0, 0) < 0)
+        return "sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, ifIndex }, 6, NULL, &bufSize, 0, 0) failed";
 
     FF_AUTO_FREE struct if_msghdr2* buf = (struct if_msghdr2*) malloc(bufSize);
-    if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0 }, 6, buf, &bufSize, 0, 0) < 0)
-        return "sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0 }, 6, buf, &bufSize, 0, 0) failed";
-
-    const char* defaultRouteIface = ffNetifGetDefaultRoute();
+    if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, (options->defaultRouteOnly ? (int) defaultRouteIfIndex : 0) }, 6, buf, &bufSize, 0, 0) < 0)
+        return "sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, ifIndex }, 6, buf, &bufSize, 0, 0) failed";
 
     for (struct if_msghdr2* ifm = buf;
         ifm < (struct if_msghdr2*) ((uint8_t*) buf + bufSize);
@@ -35,10 +35,6 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
         if (sdl->sdl_type != IFT_ETHER && !(ifm->ifm_flags & IFF_LOOPBACK)) continue;
 
         sdl->sdl_data[sdl->sdl_nlen] = 0;
-
-        bool isDefaultRoute = ffStrEquals(sdl->sdl_data, defaultRouteIface);
-        if(options->defaultRouteOnly && !isDefaultRoute)
-            continue;
 
         if (options->namePrefix.length && strncmp(sdl->sdl_data, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
@@ -54,7 +50,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
             .rxErrors = ifm->ifm_data.ifi_ierrors,
             .txDrops = 0, // unsupported
             .rxDrops = ifm->ifm_data.ifi_iqdrops,
-            .defaultRoute = isDefaultRoute,
+            .defaultRoute = sdl->sdl_index == defaultRouteIfIndex,
         };
     }
 

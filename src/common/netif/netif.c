@@ -1,35 +1,30 @@
 #include "netif.h"
 
 #ifndef _WIN32
-#include <net/if.h>
-
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1]);
-
-const char* ffNetifGetDefaultRoute()
-{
-    static char iface[IF_NAMESIZE + 1];
-
-    if (*(uint16_t*) iface == 0)
-    {
-        if (!ffNetifGetDefaultRouteImpl(iface))
-            iface[1] = 1;
-    }
-
-    return iface;
-}
+    #include <net/if.h>
 #else
-bool ffNetifGetDefaultRouteImpl(uint32_t* ifIndex);
+    #define IF_NAMESIZE 16
+#endif
 
-uint32_t ffNetifGetDefaultRoute()
+bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex);
+enum { IF_INDEX_UNINITIALIZED = (uint32_t) -1, IF_INDEX_INVALID = (uint32_t) -2 };
+static uint32_t ifIndex = IF_INDEX_UNINITIALIZED;
+static char ifName[IF_NAMESIZE + 1];
+
+static inline void init()
 {
-    static uint32_t ifIndex = (uint32_t) -1;
+    if (ifIndex == (uint32_t) IF_INDEX_UNINITIALIZED && !ffNetifGetDefaultRouteImpl(ifName, &ifIndex))
+        ifIndex = (uint32_t) IF_INDEX_INVALID;
+}
 
-    if (ifIndex == (uint32_t) -1)
-    {
-        if (!ffNetifGetDefaultRouteImpl(&ifIndex))
-            ifIndex = (uint32_t) -2;
-    }
+const char* ffNetifGetDefaultRouteIfName()
+{
+    init();
+    return ifName;
+}
 
+uint32_t ffNetifGetDefaultRouteIfIndex()
+{
+    init();
     return ifIndex;
 }
-#endif
