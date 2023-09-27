@@ -109,9 +109,16 @@ static const FFlogo A[] = {
         .colors = {
             FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_YELLOW,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        }
+    },
+    // AmazonLinux
+    {
+        .names = {"Amazon Linux", "amzn"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AMAZON_LINUX,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_256 "178",
+        }
     },
     // AmogOS
     {

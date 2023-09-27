@@ -47,6 +47,7 @@ Logo:
 * Update AOSC OS
 * Update Ubuntu_old
 * Update Windows 11_small
+* Add Amazon Linux
 
 # 2.0.5
 
