@@ -49,6 +49,7 @@ Logo:
 * Update Ubuntu_old
 * Update Windows 11_small
 * Add Amazon Linux
+* Add LainOS
 
 # 2.0.5
 
