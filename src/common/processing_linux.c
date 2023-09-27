@@ -38,6 +38,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         close(pipes[0]);
         close(pipes[1]);
         close(useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+        setenv("LANG", "C", 1);
         execvp(argv[0], argv);
         exit(901);
     }
