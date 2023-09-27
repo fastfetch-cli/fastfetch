@@ -51,16 +51,6 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
         );
     }
 
-    if (cpu->name.length == 0)
-    {
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (!ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }))
-        {
-            ffParsePropLines(buffer.chars, "Model name:", &cpu->name);
-            if (ffStrbufEqualS(&cpu->name, "-")) ffStrbufClear(&cpu->name);
-        }
-    }
-
     return NULL;
 }
 
@@ -172,6 +162,18 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     #ifdef __ANDROID__
     detectAndroid(cpu);
+    #endif
+
+    #ifdef __linux__
+    if (cpu->name.length == 0)
+    {
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (!ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }))
+        {
+            ffParsePropLines(buffer.chars, "Model name:", &cpu->name);
+            if (ffStrbufEqualS(&cpu->name, "-")) ffStrbufClear(&cpu->name);
+        }
+    }
     #endif
 
     return NULL;
