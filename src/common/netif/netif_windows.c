@@ -3,7 +3,7 @@
 
 #include <iphlpapi.h>
 
-bool ffNetifGetDefaultRouteImpl(char* iface/* unsupported */, uint32_t* ifIndex)
+bool ffNetifGetDefaultRouteImpl(FF_MAYBE_UNUSED char* iface/* unsupported */, uint32_t* ifIndex)
 {
     ULONG size = 0;
     if (GetIpForwardTable(NULL, &size, TRUE) != ERROR_INSUFFICIENT_BUFFER)
