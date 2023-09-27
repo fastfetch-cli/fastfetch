@@ -128,6 +128,13 @@ static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("NU_VERSION"));
+    if (version->length) return true;
+    return getExeVersionRaw(exe, version); //0.73.0
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -158,7 +165,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
     if(strcasecmp(exeName, "csh") == 0 || strcasecmp(exeName, "tcsh") == 0)
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(strcasecmp(exeName, "nu") == 0)
-        return getExeVersionRaw(exe, version); //0.73.0
+        return getShellVersionNushell(exe, version);
     if(strcasecmp(exeName, "ksh") == 0)
         return getShellVersionKsh(exe, version);
     if(strcasecmp(exeName, "oksh") == 0)
