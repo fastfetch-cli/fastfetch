@@ -28,6 +28,7 @@ Features:
 * Support Windows Service Pack version detection (Kernel, Windows)
 * Support Debian point releases detection (OS, Linux)
 * Add new module `NetIO` which prints network throughput (usage) of specified interface. Note this module costs about 1 second to finish.
+* Use `lscpu` to detect CPU name for ARM CPUs (CPU, Linux)
 
 Bugfixes:
 * Fix fastfetch hanging in specific environment (#561)

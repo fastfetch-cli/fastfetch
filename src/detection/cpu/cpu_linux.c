@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "common/io/io.h"
+#include "common/processing.h"
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
 #include "util/mallocHelper.h"
@@ -48,6 +49,16 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) //For POWER
         );
+    }
+
+    if (cpu->name.length == 0)
+    {
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (!ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }))
+        {
+            ffParsePropLines(buffer.chars, "Model name:", &cpu->name);
+            if (ffStrbufEqualS(&cpu->name, "-")) ffStrbufClear(&cpu->name);
+        }
     }
 
     return NULL;
