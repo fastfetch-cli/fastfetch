@@ -21,21 +21,20 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     else
         ffStrbufAppend(result, &instance.state.platform.systemName);
 
-    #ifdef __APPLE__
-    if(os->codename.length > 0)
+    //Append code name if it is missing
+    if(os->codename.length > 0 && !ffStrbufContain(result, &os->versionID))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->codename);
     }
-    #endif
 
     //Append version if it is missing
-    if(os->versionID.length > 0 && ffStrbufFirstIndex(result, &os->versionID) == result->length)
+    if(os->versionID.length > 0 && !ffStrbufContain(result, &os->versionID))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->versionID);
     }
-    else if(os->versionID.length == 0 && os->version.length > 0 && ffStrbufFirstIndex(result, &os->version) == result->length)
+    else if(os->versionID.length == 0 && os->version.length > 0 && !ffStrbufContain(result, &os->version))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->version);
