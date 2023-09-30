@@ -7,9 +7,9 @@
 
 typedef enum FFDiskPhysicalType
 {
-    FF_DISK_TYPE_UNKNOWN,
-    FF_DISK_TYPE_HDD,
-    FF_DISK_TYPE_SSD,
+    FF_DISK_PHYSICAL_TYPE_UNKNOWN,
+    FF_DISK_PHYSICAL_TYPE_HDD,
+    FF_DISK_PHYSICAL_TYPE_SSD,
 } FFDiskPhysicalType;
 
 typedef struct FFDisk

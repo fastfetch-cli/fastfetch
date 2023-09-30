@@ -29,7 +29,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
         wchar_t volumeName[64];
 
-        disk->physicalType = FF_DISK_TYPE_UNKNOWN;
+        disk->physicalType = FF_DISK_PHYSICAL_TYPE_UNKNOWN;
         if(mountpoint[1] == ':')
         {
             memcpy(volumeName, L"\\\\.\\ :", sizeof(L"\\\\.\\ :"));
@@ -51,7 +51,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
                     NULL,
                     NULL
                 ))
-                    disk->physicalType = dspd.IncursSeekPenalty ? FF_DISK_TYPE_HDD : FF_DISK_TYPE_SSD;
+                    disk->physicalType = dspd.IncursSeekPenalty ? FF_DISK_PHYSICAL_TYPE_HDD : FF_DISK_PHYSICAL_TYPE_SSD;
             }
         }
 

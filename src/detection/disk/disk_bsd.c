@@ -71,7 +71,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
         #endif
 
         FFDisk* disk = ffListAdd(disks);
-        disk->physicalType = FF_DISK_TYPE_UNKNOWN;
+        disk->physicalType = FF_DISK_PHYSICAL_TYPE_UNKNOWN;
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
         disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;
