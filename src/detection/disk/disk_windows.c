@@ -1,7 +1,9 @@
 #include "disk.h"
+#include "common/io/io.h"
 #include "util/windows/unicode.h"
 
 #include <windows.h>
+#include <winioctl.h>
 #include <assert.h>
 
 const char* ffDetectDisksImpl(FFlist* disks)
@@ -26,8 +28,37 @@ const char* ffDetectDisksImpl(FFlist* disks)
         ffStrbufInitWS(&disk->mountpoint, mountpoint);
 
         wchar_t volumeName[64];
+
+        disk->physicalType = FF_DISK_TYPE_UNKNOWN;
+        if(mountpoint[1] == ':')
+        {
+            memcpy(volumeName, L"\\\\.\\ :", sizeof(L"\\\\.\\ :"));
+            volumeName[4] = mountpoint[0];
+            FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(volumeName, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+            if (handle != INVALID_HANDLE_VALUE)
+            {
+                DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
+                if(DeviceIoControl(
+                    handle,
+                    IOCTL_STORAGE_QUERY_PROPERTY,
+                    &(STORAGE_PROPERTY_QUERY) {
+                        .PropertyId = StorageDeviceSeekPenaltyProperty,
+                        .QueryType = PropertyStandardQuery,
+                    },
+                    sizeof(STORAGE_PROPERTY_QUERY),
+                    &dspd,
+                    sizeof(dspd),
+                    NULL,
+                    NULL
+                ))
+                    disk->physicalType = dspd.IncursSeekPenalty ? FF_DISK_TYPE_HDD : FF_DISK_TYPE_SSD;
+            }
+        }
+
         if(GetVolumeNameForVolumeMountPointW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
+        {
             ffStrbufInitWS(&disk->mountFrom, volumeName);
+        }
         else
             ffStrbufInit(&disk->mountFrom);
 

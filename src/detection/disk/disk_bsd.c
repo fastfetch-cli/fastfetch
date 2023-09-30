@@ -64,13 +64,14 @@ const char* ffDetectDisksImpl(FFlist* disks)
         if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
             continue;
 
-        FFDisk* disk = ffListAdd(disks);
-
         #ifdef __FreeBSD__
         // f_bavail and f_ffree are signed on FreeBSD...
         if(fs->f_bavail < 0) fs->f_bavail = 0;
         if(fs->f_ffree < 0) fs->f_ffree = 0;
         #endif
+
+        FFDisk* disk = ffListAdd(disks);
+        disk->physicalType = FF_DISK_TYPE_UNKNOWN;
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
         disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;
