@@ -2774,7 +2774,7 @@ static const FFlogo O[] = {
     },
     // Oracle
     {
-        .names = {"oracle", "oracle linux"},
+        .names = {"oracle", "oracle linux", "oracle linux server"},
         .lines = FASTFETCH_DATATEXT_LOGO_ORACLE,
         .colors = {
             FF_COLOR_FG_RED,
