@@ -3522,7 +3522,7 @@ static const FFlogo S[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_SLACKWARE,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
