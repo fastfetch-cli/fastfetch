@@ -1,0 +1,7 @@
+-c all
+--pipe
+--show-errors
+--no-buffer
+--publicip-timeout 1000
+--weather-timeout 1000
+--stat

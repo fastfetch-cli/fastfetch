@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.0.5
+    VERSION 2.1.0
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -67,6 +67,7 @@ cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embeded) yyjson library" OFF "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
@@ -98,10 +99,13 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration")
 
-if(WIN32)
+if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
+endif()
+
+if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
 endif()
 
@@ -112,8 +116,8 @@ if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
 endif()
 
 set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
-if(NOT WIN32)
-    set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address -fsanitize=undefined")
+if(NOT WIN32 AND NOT APPLE)
+    set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address")
 endif()
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
@@ -121,8 +125,8 @@ if(NOT WIN32)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -rdynamic")
 endif()
 
-
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Enabling LTO")
     include(CheckIPOSupported)
     check_ipo_supported(RESULT IPO_SUPPORTED)
     if(IPO_SUPPORTED)
@@ -259,6 +263,7 @@ set(LIBFASTFETCH_SRC
     src/common/jsonconfig.c
     src/common/library.c
     src/common/modules.c
+    src/common/netif/netif.c
     src/common/option.c
     src/common/parsing.c
     src/common/printing.c
@@ -267,20 +272,22 @@ set(LIBFASTFETCH_SRC
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
-    src/detection/datetime/datetime.c
     src/detection/disk/disk.c
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
     src/detection/locale/locale.c
     src/detection/media/media.c
+    src/detection/netio/netio.c
     src/detection/opencl/opencl.c
     src/detection/os/os.c
     src/detection/packages/packages.c
+    src/detection/publicip/publicip.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
     src/detection/vulkan/vulkan.c
+    src/detection/weather/weather.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c
@@ -314,6 +321,7 @@ set(LIBFASTFETCH_SRC
     src/modules/localip/localip.c
     src/modules/memory/memory.c
     src/modules/monitor/monitor.c
+    src/modules/netio/netio.c
     src/modules/opencl/opencl.c
     src/modules/opengl/opengl.c
     src/modules/os/os.c
@@ -354,6 +362,7 @@ if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
         src/common/io/io_unix.c
+        src/common/netif/netif_linux.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_linux.c
@@ -382,6 +391,7 @@ if(LINUX)
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
         src/detection/monitor/monitor_linux.c
+        src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -405,6 +415,7 @@ if(LINUX)
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
+        src/common/netif/netif_linux.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
@@ -428,6 +439,7 @@ elseif(ANDROID)
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
         src/detection/monitor/monitor_nosupport.c
+        src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
@@ -451,6 +463,7 @@ elseif(BSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
         src/common/io/io_unix.c
+        src/common/netif/netif_bsd.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
@@ -480,6 +493,7 @@ elseif(BSD)
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
         src/detection/monitor/monitor_nosupport.c
+        src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
@@ -503,6 +517,7 @@ elseif(BSD)
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
+        src/common/netif/netif_bsd.c
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
@@ -515,7 +530,6 @@ elseif(APPLE)
         src/detection/cpu/cpu_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
-        src/detection/disk/disk_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
@@ -528,6 +542,7 @@ elseif(APPLE)
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/monitor/monitor_apple.m
+        src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
@@ -552,6 +567,7 @@ elseif(APPLE)
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_windows.c
+        src/common/netif/netif_windows.c
         src/common/networking_windows.c
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c
@@ -575,6 +591,7 @@ elseif(WIN32)
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
         src/detection/monitor/monitor_windows.c
+        src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
@@ -601,6 +618,11 @@ elseif(WIN32)
     )
 endif()
 
+if(ENABLE_DIRECTX_HEADERS)
+    message(STATUS "Enabling DirectX headers for WSL")
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
+endif()
+
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
@@ -623,14 +645,17 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
     target_link_libraries(libfastfetch PRIVATE yyjson)
 endif()
 
-target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE)
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
+elseif(APPLE)
+    target_compile_definitions(libfastfetch PUBLIC _DARWIN_C_SOURCE)
 endif()
 
 if(HAVE_WCWIDTH)
@@ -773,6 +798,10 @@ ff_lib_enable(DDCUTIL
     "ddcutil"
     "Ddcutil"
 )
+ff_lib_enable(DIRECTX_HEADERS
+    "DirectX-Headers"
+    "DirectX-Headers"
+)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
@@ -876,6 +905,12 @@ target_compile_definitions(flashfetch
 target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
+
+# Prevent fastfetch from linking to libstdc++
+set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
+set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
     set(TARGET_NAME fastfetch)

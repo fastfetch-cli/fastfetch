@@ -9,7 +9,7 @@ void ffPrintColors(FFColorsOptions* options)
     if(instance.config.pipe)
         return;
 
-    ffLogoPrintLine();
+    ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
     if(options->paddingLeft > 0)
         ffPrintCharTimes(' ', options->paddingLeft);
@@ -57,7 +57,9 @@ void ffPrintColors(FFColorsOptions* options)
 
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors, NULL);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
     options->symbol = FF_COLORS_SYMBOL_BLOCK;
     options->paddingLeft = 0;
 }
@@ -66,6 +68,8 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
 {
     const char* subKey = ffOptionTestPrefix(key, FF_COLORS_MODULE_NAME);
     if (!subKey) return false;
+    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
 
     if (ffStrEqualsIgnCase(subKey, "symbol"))
     {
@@ -92,6 +96,7 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
 
 void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
 {
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
@@ -102,6 +107,9 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
     {
         const char* key = yyjson_get_str(key_);
         if(ffStrEqualsIgnCase(key, "type"))
+            continue;
+
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffStrEqualsIgnCase(key, "symbol"))

@@ -7,7 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-sign"
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 {
     BLUETOOTH_DEVICE_SEARCH_PARAMS btsp = {
         .fReturnConnected = TRUE,
@@ -25,7 +25,7 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
         return "BluetoothFindFirstDevice() failed or no devices found";
 
     do {
-        FFBluetoothDevice* device = ffListAdd(devices);
+        FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->address);
         ffStrbufInit(&device->type);
@@ -33,9 +33,14 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
         device->connected = !!btdi.fConnected;
 
         ffStrbufSetWS(&device->name, btdi.szName);
-        for (uint32_t i = 0; i < sizeof(btdi.Address.rgBytes) / sizeof(btdi.Address.rgBytes); ++i)
-            ffStrbufAppendF(&device->address, "%X:", btdi.Address.rgBytes[i]);
-        ffStrbufTrimRight(&device->name, ':');
+
+        ffStrbufAppendF(&device->address, "%02x:%02x:%02x:%02x:%02x:%02x",
+            btdi.Address.rgBytes[0],
+            btdi.Address.rgBytes[1],
+            btdi.Address.rgBytes[2],
+            btdi.Address.rgBytes[3],
+            btdi.Address.rgBytes[4],
+            btdi.Address.rgBytes[5]);
         //https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned%20Numbers.pdf
 
         if(BitTest(&btdi.ulClassofDevice, 13))

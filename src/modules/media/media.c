@@ -107,7 +107,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, ffGenerateMediaJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -141,4 +141,21 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
 
         ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateMediaJson(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFMediaResult* media = ffDetectMedia();
+
+    if(media->error.length > 0)
+    {
+        yyjson_mut_obj_add_strbuf(doc, module, "error", &media->error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "song", &media->song);
+    yyjson_mut_obj_add_strbuf(doc, obj, "artist", &media->artist);
+    yyjson_mut_obj_add_strbuf(doc, obj, "album", &media->album);
+    yyjson_mut_obj_add_strbuf(doc, obj, "status", &media->status);
 }

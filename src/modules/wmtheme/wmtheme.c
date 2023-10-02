@@ -32,7 +32,7 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -66,4 +66,16 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
 
         ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateWMThemeJson(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
+    if(!ffDetectWmTheme(&themeOrError))
+    {
+        yyjson_mut_obj_add_strbuf(doc, module, "error", &themeOrError);
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &themeOrError);
 }

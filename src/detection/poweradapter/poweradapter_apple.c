@@ -24,7 +24,7 @@ const char* ffDetectPowerAdapterImpl(FFlist* results)
             continue;
         }
 
-        PowerAdapterResult* adapter = ffListAdd(results);
+        FFPowerAdapterResult* adapter = ffListAdd(results);
 
         ffStrbufInit(&adapter->name);
         ffStrbufInit(&adapter->description);

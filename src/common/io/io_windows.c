@@ -44,15 +44,13 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
     bool success;
     while(
         (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &readed, NULL)) &&
-        (uint32_t) readed == free
+        readed > 0
     ) {
         buffer->length += (uint32_t) readed;
-        ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
+        if((uint32_t) readed == free)
+            ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
-
-    if(readed > 0)
-        buffer->length += (uint32_t) readed;
 
     buffer->chars[buffer->length] = '\0';
 
@@ -173,7 +171,7 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 
     while (true)
     {
-        if (WaitForSingleObjectEx(hInput, 35, TRUE) != WAIT_OBJECT_0)
+        if (WaitForSingleObjectEx(hInput, FF_IO_TERM_RESP_WAIT_MS, TRUE) != WAIT_OBJECT_0)
         {
             SetConsoleMode(hInput, prev_mode);
             return "WaitForSingleObject() failed or timeout";

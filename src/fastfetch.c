@@ -21,21 +21,6 @@
 
 #include "modules/modules.h"
 
-typedef struct FFCustomValue
-{
-    bool printKey;
-    FFstrbuf key;
-    FFstrbuf value;
-} FFCustomValue;
-
-// Things only needed by fastfetch
-typedef struct FFdata
-{
-    FFstrbuf structure;
-    FFlist customValues; // List of FFCustomValue
-    bool loadUserConfig;
-} FFdata;
-
 static void constructAndPrintCommandHelpFormat(const char* name, const char* def, uint32_t numArgs, ...)
 {
     va_list argp;
@@ -64,6 +49,19 @@ static inline void printCommandHelp(const char* command)
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
     else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "config"))
         puts(FASTFETCH_DATATEXT_HELP_CONFIG);
+    else if(ffStrEqualsIgnCase(command, "title-format"))
+    {
+        constructAndPrintCommandHelpFormat("title", "{6}{7}{8}", 8,
+            "User name",
+            "Host name",
+            "Home directory",
+            "Executable path of current process",
+            "User's default shell",
+            "User name (colored)",
+            "@ symbol (colored)",
+            "Host name (colored)"
+        );
+    }
     else if(ffStrEqualsIgnCase(command, "os-format"))
     {
         constructAndPrintCommandHelpFormat("os", "{3} {12}", 12,
@@ -144,7 +142,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "packages-format"))
     {
-        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis)", 23,
+        constructAndPrintCommandHelpFormat("packages", "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget)", 24,
             "Number of all packages",
             "Number of pacman packages",
             "Pacman branch on manjaro",
@@ -168,18 +166,18 @@ static inline void printCommandHelp(const char* command)
             "Number of choco packages",
             "Number of pkgtool packages",
             "Number of paludis packages"
+            "Number of winget packages"
         );
     }
     else if(ffStrEqualsIgnCase(command, "shell-format"))
     {
-        constructAndPrintCommandHelpFormat("shell", "{3} {4}", 7,
+        constructAndPrintCommandHelpFormat("shell", "{3} {4}", 6,
             "Shell process name",
             "Shell path with exe name",
             "Shell exe name",
             "Shell version",
-            "User shell path with exe name",
-            "User shell exe name",
-            "User shell version"
+            "Shell pid",
+            "Shell pretty name"
         );
     }
     else if(ffStrEqualsIgnCase(command, "display-format"))
@@ -276,13 +274,9 @@ static inline void printCommandHelp(const char* command)
             "Terminal process name",
             "Terminal path with exe name",
             "Terminal exe name",
-            "Shell process name",
-            "Shell path with exe name",
-            "Shell exe name",
-            "Shell version",
-            "User shell path with exe name",
-            "User shell exe name",
-            "User shell version"
+            "Terminal pid",
+            "Terminal pretty name",
+            "Terminal version"
         );
     }
     else if(ffStrEqualsIgnCase(command, "terminalfont-format"))
@@ -307,9 +301,9 @@ static inline void printCommandHelp(const char* command)
             "Temperature"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "cpu-usage-format"))
+    else if(ffStrEqualsIgnCase(command, "cpuusage-format"))
     {
-        constructAndPrintCommandHelpFormat("cpu-usage", "{0}%", 1,
+        constructAndPrintCommandHelpFormat("cpuusage", "{0}%", 1,
             "CPU usage without percent mark"
         );
     }
@@ -387,16 +381,29 @@ static inline void printCommandHelp(const char* command)
             "Locale code"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "local-ip-format"))
+    else if(ffStrEqualsIgnCase(command, "localip-format"))
     {
-        constructAndPrintCommandHelpFormat("local-ip", "{}", 1,
-            "Local IP address"
+        constructAndPrintCommandHelpFormat("localip", "{}", 5,
+            "Local IPv4 address",
+            "Local IPv6 address",
+            "Physical (MAC) address",
+            "Interface name",
+            "Is default route"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "public-ip-format"))
+    else if(ffStrEqualsIgnCase(command, "publicip-format"))
     {
-        constructAndPrintCommandHelpFormat("public-ip", "{}", 1,
+        constructAndPrintCommandHelpFormat("publicip", "{}", 1,
             "Public IP address"
+        );
+    }
+    else if(ffStrEqualsIgnCase(command, "netio-format"))
+    {
+        constructAndPrintCommandHelpFormat("netio", "{}", 3,
+            "Size of data received per second (formatted)",
+            "Size of data sent per second (formatted)",
+            "Interface name",
+            "Is default route"
         );
     }
     else if(ffStrEqualsIgnCase(command, "wifi-format"))
@@ -465,7 +472,9 @@ static inline void printCommandHelp(const char* command)
             "Version tweak",
             "Build type (debug or release)",
             "Architecture",
-            "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)"
+            "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)",
+            "Date time when compiling",
+            "Compiler used"
         );
     }
     else if(ffStrEqualsIgnCase(command, "vulkan-format"))
@@ -836,25 +845,25 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         puts(FASTFETCH_PROJECT_VERSION);
         exit(0);
     }
-    else if(ffStrStartsWithIgnCase(key, "--print"))
+    else if(ffStrStartsWithIgnCase(key, "--print-"))
     {
-        const char* subkey = key + strlen("--print");
-        if(ffStrEqualsIgnCase(subkey, "-config-system"))
+        const char* subkey = key + strlen("--print-");
+        if(ffStrEqualsIgnCase(subkey, "config-system"))
         {
             puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-config-user"))
+        else if(ffStrEqualsIgnCase(subkey, "config-user"))
         {
             puts(FASTFETCH_DATATEXT_CONFIG_USER);
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-structure"))
+        else if(ffStrEqualsIgnCase(subkey, "structure"))
         {
             puts(FASTFETCH_DATATEXT_STRUCTURE);
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-logos"))
+        else if(ffStrEqualsIgnCase(subkey, "logos"))
         {
             ffLogoBuiltinPrint();
             exit(0);
@@ -862,35 +871,35 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         else
             goto error;
     }
-    else if(ffStrStartsWithIgnCase(key, "--list"))
+    else if(ffStrStartsWithIgnCase(key, "--list-"))
     {
-        const char* subkey = key + strlen("--list");
-        if(ffStrEqualsIgnCase(subkey, "-modules"))
+        const char* subkey = key + strlen("--list-");
+        if(ffStrEqualsIgnCase(subkey, "modules"))
         {
             listModules();
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-presets"))
+        else if(ffStrEqualsIgnCase(subkey, "presets"))
         {
             listAvailablePresets();
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-config-paths"))
+        else if(ffStrEqualsIgnCase(subkey, "config-paths"))
         {
             listConfigPaths();
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-data-paths"))
+        else if(ffStrEqualsIgnCase(subkey, "data-paths"))
         {
             listDataPaths();
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-features"))
+        else if(ffStrEqualsIgnCase(subkey, "features"))
         {
             ffListFeatures();
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-logos"))
+        else if(ffStrEqualsIgnCase(subkey, "logos"))
         {
             puts("Builtin logos:");
             ffLogoBuiltinList();
@@ -898,7 +907,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
             listAvailableLogos();
             exit(0);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-logos-autocompletion"))
+        else if(ffStrEqualsIgnCase(subkey, "logos-autocompletion"))
         {
             ffLogoBuiltinListAutocompletion();
             exit(0);
@@ -906,12 +915,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         else
             goto error;
     }
-    else if(ffStrStartsWithIgnCase(key, "--set"))
+    else if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
     {
-        const char* subkey = key + strlen("--set");
-        if(*subkey != '\0' && !ffStrEqualsIgnCase(subkey, "-keyless"))
-            goto error;
-
         FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
         ffOptionParseString(key, value, &customValueStr);
         uint32_t index = ffStrbufFirstIndexC(&customValueStr, '=');
@@ -938,14 +943,14 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffStrbufInitMove(&customValue->key, &customKey);
         ffStrbufSubstrAfter(&customValueStr, index);
         ffStrbufInitMove(&customValue->value, &customValueStr);
-        customValue->printKey = *subkey == '\0';
+        customValue->printKey = key[5] == '\0';
     }
 
     ///////////////////
     //General options//
     ///////////////////
 
-    else if(ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
         generateConfigFile(false, value);
@@ -968,6 +973,30 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         data->loadUserConfig = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
         instance.config.processingTimeout = ffOptionParseInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--format"))
+    {
+        switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "default", 0},
+            { "json", 1 },
+            {},
+        }))
+        {
+            case 0:
+                if (instance.state.resultDoc)
+                {
+                    yyjson_mut_doc_free(instance.state.resultDoc);
+                    instance.state.resultDoc = NULL;
+                }
+                break;
+            case 1:
+                if (!instance.state.resultDoc)
+                {
+                    instance.state.resultDoc = yyjson_mut_doc_new(NULL);
+                    yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
+                }
+                break;
+        }
+    }
 
     #if defined(__linux__) || defined(__FreeBSD__)
     else if(ffStrEqualsIgnCase(key, "--player-name"))
@@ -1001,21 +1030,21 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffOptionParseString(key, value, &data->structure);
     else if(ffStrEqualsIgnCase(key, "--separator"))
         ffOptionParseString(key, value, &instance.config.keyValueSeparator);
-    else if(ffStrStartsWith(key, "--color"))
+    else if(ffStrEqualsIgnCase(key, "--color"))
     {
-        const char* subkey = key + strlen("--color");
-        if(*subkey == '\0')
+        optionCheckString(key, value, &instance.config.colorKeys);
+        ffOptionParseColor(value, &instance.config.colorKeys);
+        ffStrbufSet(&instance.config.colorTitle, &instance.config.colorKeys);
+    }
+    else if(ffStrStartsWithIgnCase(key, "--color-"))
+    {
+        const char* subkey = key + strlen("--color-");
+        if(ffStrEqualsIgnCase(subkey, "keys"))
         {
             optionCheckString(key, value, &instance.config.colorKeys);
             ffOptionParseColor(value, &instance.config.colorKeys);
-            ffStrbufSet(&instance.config.colorTitle, &instance.config.colorKeys);
         }
-        else if(ffStrEqualsIgnCase(subkey, "-keys"))
-        {
-            optionCheckString(key, value, &instance.config.colorKeys);
-            ffOptionParseColor(value, &instance.config.colorKeys);
-        }
-        else if(ffStrEqualsIgnCase(subkey, "-title"))
+        else if(ffStrEqualsIgnCase(subkey, "title"))
         {
             optionCheckString(key, value, &instance.config.colorTitle);
             ffOptionParseColor(value, &instance.config.colorTitle);
@@ -1071,16 +1100,16 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         instance.config.percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         instance.config.noBuffer = ffOptionParseBoolean(value);
-    else if(ffStrStartsWithIgnCase(key, "--bar"))
+    else if(ffStrStartsWithIgnCase(key, "--bar-"))
     {
-        const char* subkey = key + strlen("--bar");
-        if(ffStrEqualsIgnCase(subkey, "-char-elapsed"))
+        const char* subkey = key + strlen("--bar-");
+        if(ffStrEqualsIgnCase(subkey, "char-elapsed"))
             ffOptionParseString(key, value, &instance.config.barCharElapsed);
-        else if(ffStrEqualsIgnCase(subkey, "-char-total"))
+        else if(ffStrEqualsIgnCase(subkey, "char-total"))
             ffOptionParseString(key, value, &instance.config.barCharTotal);
-        else if(ffStrEqualsIgnCase(subkey, "-width"))
+        else if(ffStrEqualsIgnCase(subkey, "width"))
             instance.config.barWidth = (uint8_t) ffOptionParseUInt32(key, value);
-        else if(ffStrEqualsIgnCase(subkey, "-border"))
+        else if(ffStrEqualsIgnCase(subkey, "border"))
             instance.config.barBorder = ffOptionParseBoolean(value);
         else
             goto error;
@@ -1090,56 +1119,56 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //Library options//
     ///////////////////
 
-    else if(ffStrStartsWithIgnCase(key, "--lib"))
+    else if(ffStrStartsWithIgnCase(key, "--lib-"))
     {
-        const char* subkey = key + strlen("--lib");
-        if(ffStrEqualsIgnCase(subkey, "-PCI"))
+        const char* subkey = key + strlen("--lib-");
+        if(ffStrEqualsIgnCase(subkey, "PCI"))
             ffOptionParseString(key, value, &instance.config.libPCI);
-        else if(ffStrEqualsIgnCase(subkey, "-vulkan"))
+        else if(ffStrEqualsIgnCase(subkey, "vulkan"))
             ffOptionParseString(key, value, &instance.config.libVulkan);
-        else if(ffStrEqualsIgnCase(subkey, "-freetype"))
+        else if(ffStrEqualsIgnCase(subkey, "freetype"))
             ffOptionParseString(key, value, &instance.config.libfreetype);
-        else if(ffStrEqualsIgnCase(subkey, "-wayland"))
+        else if(ffStrEqualsIgnCase(subkey, "wayland"))
             ffOptionParseString(key, value, &instance.config.libWayland);
-        else if(ffStrEqualsIgnCase(subkey, "-xcb-randr"))
+        else if(ffStrEqualsIgnCase(subkey, "xcb-randr"))
             ffOptionParseString(key, value, &instance.config.libXcbRandr);
-        else if(ffStrEqualsIgnCase(subkey, "-xcb"))
+        else if(ffStrEqualsIgnCase(subkey, "xcb"))
             ffOptionParseString(key, value, &instance.config.libXcb);
-        else if(ffStrEqualsIgnCase(subkey, "-Xrandr"))
+        else if(ffStrEqualsIgnCase(subkey, "Xrandr"))
             ffOptionParseString(key, value, &instance.config.libXrandr);
-        else if(ffStrEqualsIgnCase(subkey, "-X11"))
+        else if(ffStrEqualsIgnCase(subkey, "X11"))
             ffOptionParseString(key, value, &instance.config.libX11);
-        else if(ffStrEqualsIgnCase(subkey, "-gio"))
+        else if(ffStrEqualsIgnCase(subkey, "gio"))
             ffOptionParseString(key, value, &instance.config.libGIO);
-        else if(ffStrEqualsIgnCase(subkey, "-DConf"))
+        else if(ffStrEqualsIgnCase(subkey, "DConf"))
             ffOptionParseString(key, value, &instance.config.libDConf);
-        else if(ffStrEqualsIgnCase(subkey, "-dbus"))
+        else if(ffStrEqualsIgnCase(subkey, "dbus"))
             ffOptionParseString(key, value, &instance.config.libDBus);
-        else if(ffStrEqualsIgnCase(subkey, "-XFConf"))
+        else if(ffStrEqualsIgnCase(subkey, "XFConf"))
             ffOptionParseString(key, value, &instance.config.libXFConf);
-        else if(ffStrEqualsIgnCase(subkey, "-sqlite") || ffStrEqualsIgnCase(subkey, "-sqlite3"))
+        else if(ffStrEqualsIgnCase(subkey, "sqlite") || ffStrEqualsIgnCase(subkey, "sqlite3"))
             ffOptionParseString(key, value, &instance.config.libSQLite3);
-        else if(ffStrEqualsIgnCase(subkey, "-rpm"))
+        else if(ffStrEqualsIgnCase(subkey, "rpm"))
             ffOptionParseString(key, value, &instance.config.librpm);
-        else if(ffStrEqualsIgnCase(subkey, "-imagemagick"))
+        else if(ffStrEqualsIgnCase(subkey, "imagemagick"))
             ffOptionParseString(key, value, &instance.config.libImageMagick);
-        else if(ffStrEqualsIgnCase(subkey, "-z"))
+        else if(ffStrEqualsIgnCase(subkey, "z"))
             ffOptionParseString(key, value, &instance.config.libZ);
-        else if(ffStrEqualsIgnCase(subkey, "-chafa"))
+        else if(ffStrEqualsIgnCase(subkey, "chafa"))
             ffOptionParseString(key, value, &instance.config.libChafa);
-        else if(ffStrEqualsIgnCase(subkey, "-egl"))
+        else if(ffStrEqualsIgnCase(subkey, "egl"))
             ffOptionParseString(key, value, &instance.config.libEGL);
-        else if(ffStrEqualsIgnCase(subkey, "-glx"))
+        else if(ffStrEqualsIgnCase(subkey, "glx"))
             ffOptionParseString(key, value, &instance.config.libGLX);
-        else if(ffStrEqualsIgnCase(subkey, "-osmesa"))
+        else if(ffStrEqualsIgnCase(subkey, "osmesa"))
             ffOptionParseString(key, value, &instance.config.libOSMesa);
-        else if(ffStrEqualsIgnCase(subkey, "-opencl"))
+        else if(ffStrEqualsIgnCase(subkey, "opencl"))
             ffOptionParseString(key, value, &instance.config.libOpenCL);
-        else if(ffStrEqualsIgnCase(key, "-pulse"))
+        else if(ffStrEqualsIgnCase(subkey, "pulse"))
             ffOptionParseString(key, value, &instance.config.libPulse);
-        else if(ffStrEqualsIgnCase(subkey, "-nm"))
+        else if(ffStrEqualsIgnCase(subkey, "nm"))
             ffOptionParseString(key, value, &instance.config.libnm);
-        else if(ffStrEqualsIgnCase(subkey, "-ddcutil"))
+        else if(ffStrEqualsIgnCase(subkey, "ddcutil"))
             ffOptionParseString(key, value, &instance.config.libDdcutil);
         else
             goto error;
@@ -1219,27 +1248,6 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
     }
 }
 
-static void parseStructureCommand(const char* line, FFlist* customValues)
-{
-    // handle `--set` and `--set-keyless`
-    FF_LIST_FOR_EACH(FFCustomValue, customValue, *customValues)
-    {
-        if (ffStrbufEqualS(&customValue->key, line))
-        {
-            __attribute__((__cleanup__(ffDestroyCustomOptions))) FFCustomOptions options;
-            ffInitCustomOptions(&options);
-            if (customValue->printKey)
-                ffStrbufAppend(&options.moduleArgs.key, &customValue->key);
-            ffStrbufAppend(&options.moduleArgs.outputFormat, &customValue->value);
-            ffPrintCustom(&options);
-            return;
-        }
-    }
-
-    if(!ffParseModuleCommand(line))
-        ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
-}
-
 int main(int argc, const char** argv)
 {
     ffInitInstance();
@@ -1273,25 +1281,9 @@ int main(int argc, const char** argv)
     const bool useJsonConfig = data.structure.length == 0 && instance.state.configDoc;
 
     if(useJsonConfig)
-        ffPrintJsonConfig(true);
+        ffPrintJsonConfig(true /* prepare */);
     else
-    {
-        //If we don't have a custom structure, use the default one
-        if(data.structure.length == 0)
-            ffStrbufAppendS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE);
-
-        if(ffStrbufContainIgnCaseS(&data.structure, FF_CPUUSAGE_MODULE_NAME))
-            ffPrepareCPUUsage();
-
-        if(instance.config.multithreading)
-        {
-            if(ffStrbufContainIgnCaseS(&data.structure, FF_PUBLICIP_MODULE_NAME))
-                ffPreparePublicIp(&instance.config.publicIP);
-
-            if(ffStrbufContainIgnCaseS(&data.structure, FF_WEATHER_MODULE_NAME))
-                ffPrepareWeather(&instance.config.weather);
-        }
-    }
+        ffPrepareCommandOption(&data);
 
     ffStart();
 
@@ -1300,40 +1292,13 @@ int main(int argc, const char** argv)
     #endif
 
     if (useJsonConfig)
-    {
         ffPrintJsonConfig(false);
-    }
     else
+        ffPrintCommandOption(&data);
+
+    if (instance.state.resultDoc)
     {
-        //Parse the structure and call the modules
-        uint32_t startIndex = 0;
-        while (startIndex < data.structure.length)
-        {
-            uint32_t colonIndex = ffStrbufNextIndexC(&data.structure, startIndex, ':');
-            data.structure.chars[colonIndex] = '\0';
-
-            uint64_t ms = 0;
-            if(__builtin_expect(instance.config.stat, false))
-                ms = ffTimeGetTick();
-
-            parseStructureCommand(data.structure.chars + startIndex, &data.customValues);
-
-            if(__builtin_expect(instance.config.stat, false))
-            {
-                char str[32];
-                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ffTimeGetTick() - ms);
-                if(instance.config.pipe)
-                    puts(str);
-                else
-                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
-            }
-
-            #if defined(_WIN32)
-                if (!instance.config.noBuffer) fflush(stdout);
-            #endif
-
-            startIndex = colonIndex + 1;
-        }
+        yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
     }
 
     ffFinish();

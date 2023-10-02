@@ -166,6 +166,11 @@
                             "title": "If true, regenerate image logo cache",
                             "default": false
                         },
+                        "separate": {
+                            "type": "boolean",
+                            "title": "If true, print modules at bottom of the logo",
+                            "default": false
+                        },
                         "chafa": {
                             "type": "object",
                             "title": "Chafa configuration. See chafa document for details",
@@ -269,6 +274,11 @@
                     "type": "integer",
                     "title": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only",
                     "default": 5000
+                },
+                "processingTimeout": {
+                    "type": "integer",
+                    "title": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
+                    "default": 1000
                 }
             },
             "additionalProperties": false
@@ -548,6 +558,7 @@
                             "media",
                             "memory",
                             "monitor",
+                            "netio",
                             "opencl",
                             "opengl",
                             "os",
@@ -989,7 +1000,37 @@
                                         "title": "Show IPs with given name prefix only",
                                         "type": "string"
                                     },
-                                    "showDefaultRouteOnly": {
+                                    "defaultRouteOnly": {
+                                        "title": "Show ips that are used for default routing only",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Network throughput (usage)",
+                                "properties": {
+                                    "type": {
+                                        "const": "netio"
+                                    },
+                                    "namePrefix": {
+                                        "title": "Show IPs with given name prefix only",
+                                        "type": "string"
+                                    },
+                                    "defaultRouteOnly": {
                                         "title": "Show ips that are used for default routing only",
                                         "type": "boolean",
                                         "default": false

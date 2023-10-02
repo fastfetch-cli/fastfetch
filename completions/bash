@@ -24,7 +24,7 @@ __fastfetch_complete_help()
         "terminal-format"
         "terminalfont-format"
         "cpu-format"
-        "cpu-usage-format"
+        "cpuusage-format"
         "gpu-format"
         "memory-format"
         "swap-format"

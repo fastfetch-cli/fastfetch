@@ -379,10 +379,6 @@ const FFTerminalShellResult* ffDetectTerminalShell(void)
     ffStrbufInit(&result.terminalPrettyName);
     result.terminalPid = 0;
 
-    ffStrbufInit(&result.userShellExe);
-    result.userShellExeName = "";
-    ffStrbufInit(&result.userShellVersion);
-
     uint32_t ppid;
     if(!getProcessInfo(0, &ppid, NULL, NULL, NULL))
         goto exit;

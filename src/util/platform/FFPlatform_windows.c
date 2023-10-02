@@ -2,9 +2,15 @@
 #include "common/io/io.h"
 #include "util/stringUtils.h"
 #include "util/windows/unicode.h"
+#include "util/windows/registry.h"
 
+#include <winternl.h>
 #include <Windows.h>
 #include <shlobj.h>
+
+NTSTATUS NTAPI RtlGetVersion(
+    _Inout_ PRTL_OSVERSIONINFOW lpVersionInformation
+);
 
 static void getExePath(FFPlatform* platform)
 {
@@ -130,63 +136,51 @@ static void getHostName(FFPlatform* platform)
         ffStrbufSetWS(&platform->hostName, buffer);
 }
 
-static void getDomainName(FFPlatform* platform)
+static void getUserShell(FFPlatform* platform)
 {
-    wchar_t buffer[128];
-    DWORD len = sizeof(buffer) / sizeof(*buffer);
-    if(GetComputerNameExW(ComputerNameDnsDomain, buffer, &len))
-        ffStrbufSetWS(&platform->domainName, buffer);
-}
-
-static void getSystemName(FFPlatform* platform)
-{
-    ffStrbufAppendS(&platform->systemName, getenv("OS"));
+    // Works in MSYS2
+    ffStrbufAppendS(&platform->userShell, getenv("SHELL"));
+    ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
 }
 
 static void getSystemReleaseAndVersion(FFPlatform* platform)
 {
-    HKEY hKey;
-    if(RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+    RTL_OSVERSIONINFOW osVersion = { .dwOSVersionInfoSize = sizeof(osVersion) };
+    if (!NT_SUCCESS(RtlGetVersion(&osVersion)))
         return;
 
-    DWORD bufSize;
+    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
+        return;
 
-    char currentVersion[32];
+    uint32_t ubr = 0;
+    ffRegReadUint(hKey, L"UBR", &ubr, NULL);
 
+    ffStrbufAppendF(&platform->systemRelease,
+        "%u.%u.%u.%u",
+        (unsigned) osVersion.dwMajorVersion,
+        (unsigned) osVersion.dwMinorVersion,
+        (unsigned) osVersion.dwBuildNumber,
+        (unsigned) ubr);
+
+    ffStrbufInit(&platform->systemDisplayVersion);
+    if(!ffRegReadStrbuf(hKey, L"DisplayVersion", &platform->systemDisplayVersion, NULL) && osVersion.szCSDVersion[0])
+        ffStrbufSetWS(&platform->systemDisplayVersion, osVersion.szCSDVersion);
+
+    ffRegReadStrbuf(hKey, L"BuildLabEx", &platform->systemVersion, NULL);
+
+    switch (osVersion.dwPlatformId)
     {
-        DWORD currentMajorVersionNumber;
-        DWORD currentMinorVersionNumber;
-        bufSize = sizeof(currentMajorVersionNumber);
-        if(RegGetValueW(hKey, NULL, L"CurrentMajorVersionNumber", RRF_RT_REG_DWORD, NULL, &currentMajorVersionNumber, &bufSize) == ERROR_SUCCESS &&
-            RegGetValueW(hKey, NULL, L"CurrentMinorVersionNumber", RRF_RT_REG_DWORD, NULL, &currentMinorVersionNumber, &bufSize) == ERROR_SUCCESS
-        )
-            snprintf(currentVersion, sizeof(currentVersion), "%u.%u", (unsigned)currentMajorVersionNumber, (unsigned)currentMinorVersionNumber);
-        else
-        {
-            bufSize = sizeof(currentVersion);
-            if(RegGetValueA(hKey, NULL, "CurrentVersion", RRF_RT_REG_SZ, NULL, currentVersion, &bufSize) != ERROR_SUCCESS)
-                strcpy(currentVersion, "0.0");
-        }
+    case VER_PLATFORM_WIN32s:
+        ffStrbufAppendS(&platform->systemName, "WIN32s");
+        break;
+    case VER_PLATFORM_WIN32_WINDOWS:
+        ffStrbufAppendS(&platform->systemName, "WIN32_WINDOWS");
+        break;
+    case VER_PLATFORM_WIN32_NT:
+        ffStrbufAppendS(&platform->systemName, "WIN32_NT");
+        break;
     }
-
-    char currentBuildNumber[32];
-    bufSize = sizeof(currentBuildNumber);
-    if(RegGetValueA(hKey, NULL, "CurrentBuildNumber", RRF_RT_REG_SZ, NULL, currentBuildNumber, &bufSize) != ERROR_SUCCESS)
-        strcpy(currentBuildNumber, "0");
-
-    DWORD ubr;
-    bufSize = sizeof(ubr);
-    if(RegGetValueW(hKey, NULL, L"UBR", RRF_RT_REG_DWORD, NULL, &ubr, &bufSize) != ERROR_SUCCESS || bufSize != sizeof(ubr))
-        ubr = 0;
-
-    ffStrbufAppendF(&platform->systemRelease, "%s.%s.%u", currentVersion, currentBuildNumber, (unsigned)ubr);
-
-    ffStrbufEnsureFree(&platform->systemVersion, 256);
-    bufSize = (DWORD) ffStrbufGetFree(&platform->systemVersion);
-    if(RegGetValueA(hKey, NULL, "DisplayVersion", RRF_RT_REG_SZ, NULL, platform->systemVersion.chars, &bufSize) == ERROR_SUCCESS)
-        platform->systemVersion.length = (uint32_t) bufSize;
-
-    RegCloseKey(hKey);
 }
 
 static void getSystemArchitecture(FFPlatform* platform)
@@ -233,9 +227,8 @@ void ffPlatformInitImpl(FFPlatform* platform)
 
     getUserName(platform);
     getHostName(platform);
-    getDomainName(platform);
+    getUserShell(platform);
 
-    getSystemName(platform);
     getSystemReleaseAndVersion(platform);
     getSystemArchitecture(platform);
 }

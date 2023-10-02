@@ -32,7 +32,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -66,4 +66,18 @@ void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
 
         ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateThemeJson(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY theme = ffStrbufCreate();
+    const char* error = ffDetectTheme(&theme);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &theme);
 }

@@ -41,7 +41,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -75,4 +75,21 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
 
         ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateTerminalSizeJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFTerminalSizeResult result;
+
+    if(!ffDetectTerminalSize(&result))
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect terminal size");
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_uint(doc, obj, "columns", result.columns);
+    yyjson_mut_obj_add_uint(doc, obj, "rows", result.rows);
+    yyjson_mut_obj_add_uint(doc, obj, "width", result.width);
+    yyjson_mut_obj_add_uint(doc, obj, "height", result.height);
 }

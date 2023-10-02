@@ -15,13 +15,13 @@ typedef struct FFPlatform {
 
     FFstrbuf userName;
     FFstrbuf hostName;
-    FFstrbuf domainName;
     FFstrbuf userShell;
 
     FFstrbuf systemName;
     FFstrbuf systemRelease;
     FFstrbuf systemVersion;
     FFstrbuf systemArchitecture;
+    FFstrbuf systemDisplayVersion;
 } FFPlatform;
 
 void ffPlatformInit(FFPlatform* platform);

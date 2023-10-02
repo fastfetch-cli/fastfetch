@@ -5,6 +5,15 @@
 
 #include "fastfetch.h"
 
-void ffDetectUsers(FFlist* users /* List of FFstrbuf */, FFstrbuf* error);
+typedef struct FFUserResult
+{
+    FFstrbuf name;
+    FFstrbuf hostName;
+    FFstrbuf clientIp;
+    FFstrbuf tty;
+    uint64_t loginTime; // ms
+} FFUserResult;
+
+const char* ffDetectUsers(FFlist* users);
 
 #endif

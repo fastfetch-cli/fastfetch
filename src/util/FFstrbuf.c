@@ -73,6 +73,14 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c)
     strbuf->chars[strbuf->length] = '\0';
 }
 
+void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c)
+{
+    ffStrbufEnsureFree(strbuf, num);
+    memset(&strbuf->chars[strbuf->length], c, num);
+    strbuf->length += num;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 {
     if(value == NULL || length == 0)
@@ -423,11 +431,11 @@ double ffStrbufToDouble(const FFstrbuf* strbuf)
     return str_end == strbuf->chars ? 0.0/0.0 : result;
 }
 
-uint16_t ffStrbufToUInt16(const FFstrbuf* strbuf, uint16_t defaultValue)
+uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue)
 {
     char* str_end;
-    unsigned long result = strtoul(strbuf->chars, &str_end, 10);
-    return str_end == strbuf->chars || result > UINT16_MAX ? defaultValue : (uint16_t)result;
+    unsigned long long result = strtoull(strbuf->chars, &str_end, 10);
+    return str_end == strbuf->chars ? defaultValue : (uint64_t)result;
 }
 
 void ffStrbufUpperCase(FFstrbuf* strbuf)

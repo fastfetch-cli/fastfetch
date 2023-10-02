@@ -1,20 +1,17 @@
-             .:+syhhhhys+:.
-         .ohNMMMMMMMMMMMMMMNho.
-      `+mMMMMMMMMMMmdmNMMMMMMMMm+`
-     +NMMMMMMMMMMMM/   `./smMMMMMN+
-   .mMMMMMMMMMMMMMMo        -yMMMMMm.
-  :NMMMMMMMMMMMMMMMs          .hMMMMN:
- .NMMMMhmMMMMMMMMMMm+/-         oMMMMN.
- dMMMMs  ./ymMMMMMMMMMMNy.       sMMMMd
--MMMMN`      oMMMMMMMMMMMN:      `NMMMM-
-/MMMMh       NMMMMMMMMMMMMm       hMMMM/
-/MMMMh       NMMMMMMMMMMMMm       hMMMM/
--MMMMN`      :MMMMMMMMMMMMy.     `NMMMM-
- dMMMMs       .yNMMMMMMMMMMMNy/. sMMMMd
- .NMMMMo         -/+sMMMMMMMMMMMmMMMMN.
-  :NMMMMh.          .MMMMMMMMMMMMMMMN:
-   .mMMMMMy-         NMMMMMMMMMMMMMm.
-     +NMMMMMms/.`    mMMMMMMMMMMMN+
-      `+mMMMMMMMMNmddMMMMMMMMMMm+`
-         .ohNMMMMMMMMMMMMMMNho.
-             .:+syhhhhys+:.
+                ${c2}__
+             ${c2}gpBBBBBBBBBP
+         ${c2}_gBBBBBBBBBRP
+       ${c2}4BBBBBBBBRP  ${c4},_____
+            ${c2}`"" ${c4}_g@@@@@@@@@@@@@%g>
+            ${c4}__@@@@@@@@@@@@@@@@P"  ${c1}___
+         ${c4}_g@@@@@@@@@@@@@@@N"` ${c1}_gN@@@@@N^
+     ${c4}_w@@@@@@@@@@@@@@@@P" ${c1}_g@@@@@@@P"
+  ${c4}_g@@@@@@@@@@@@@@@N"`  ${c1}VMNN@NNNM^`
+${c4}^MMM@@@@@@@@@@@MP" ${c3},ggppww__
+        ${c4}`""""" ${c3}_wNNNNNNNNNNNNNNNNNNN
+            ${c3}_gBNNNNNNNNNNNNNNNNNP"
+        ${c3}_wNNNNNNNNNNNNNNNNNNMP`
+     ${c3}_gBNNNNNNNNNNNNNNNNNP"
+ ${c3}_wNNNNNNNNNNNNNNNNNNNM^
+ ${c3}""Y^^MNNNNNNNNNNNNP`
+         ${c3}`"""""""

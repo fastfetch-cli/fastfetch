@@ -82,6 +82,7 @@ static FFModuleBaseInfo* M[] = {
 };
 
 static FFModuleBaseInfo* N[] = {
+    (void*) &instance.config.netIo,
     NULL,
 };
 

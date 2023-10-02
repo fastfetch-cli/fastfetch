@@ -85,6 +85,9 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
                 printf(" (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
+            if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
+                fputs(result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]", stdout);
+
             if(moduleIndex > 0 && result->primary)
                 printf(" *");
 
@@ -109,7 +112,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJson);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
@@ -183,5 +186,42 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateDisplayJson(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
+
+    if(dsResult->displays.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect display");
+        return;
+    }
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFDisplayResult, item, dsResult->displays)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_uint(doc, obj, "width", item->width);
+        yyjson_mut_obj_add_uint(doc, obj, "height", item->height);
+        yyjson_mut_obj_add_uint(doc, obj, "id", item->id);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_obj_add_bool(doc, obj, "primary", item->primary);
+        yyjson_mut_obj_add_real(doc, obj, "refreshRate", item->refreshRate);
+        yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
+        yyjson_mut_obj_add_uint(doc, obj, "scaledHeight", item->scaledHeight);
+        yyjson_mut_obj_add_uint(doc, obj, "scaledWidth", item->scaledWidth);
+        switch (item->type)
+        {
+            case FF_DISPLAY_TYPE_BUILTIN:
+                yyjson_mut_obj_add_str(doc, obj, "type", "Builtin");
+                break;
+            case FF_DISPLAY_TYPE_EXTERNAL:
+                yyjson_mut_obj_add_str(doc, obj, "type", "External");
+                break;
+            default:
+                yyjson_mut_obj_add_str(doc, obj, "type", "Unknown");
+                break;
+        }
     }
 }

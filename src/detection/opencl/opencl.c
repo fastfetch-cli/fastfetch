@@ -49,14 +49,17 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
     if(ffStrStartsWithIgnCase(version, "OpenCL "))
         versionPretty = version + strlen("OpenCL ");
     ffStrbufSetS(&result->version, versionPretty);
+    ffStrbufTrim(&result->version, ' ');
 
     ffStrbufEnsureFree(&result->device, 128);
     data->ffclGetDeviceInfo(deviceID, CL_DEVICE_NAME, result->device.allocated, result->device.chars, NULL);
     ffStrbufRecalculateLength(&result->device);
+    ffStrbufTrim(&result->device, ' ');
 
     ffStrbufEnsureFree(&result->vendor, 32);
     data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, result->vendor.allocated, result->vendor.chars, NULL);
     ffStrbufRecalculateLength(&result->vendor);
+    ffStrbufTrim(&result->vendor, ' ');
 
     return NULL;
 }

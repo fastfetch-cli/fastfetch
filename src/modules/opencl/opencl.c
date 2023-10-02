@@ -41,7 +41,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -75,4 +75,30 @@ void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
 
         ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateOpenCLJson(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFOpenCLResult opencl;
+    ffStrbufInit(&opencl.version);
+    ffStrbufInit(&opencl.device);
+    ffStrbufInit(&opencl.vendor);
+
+    const char* error = ffDetectOpenCL(&opencl);
+
+    if(error != NULL)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+    }
+    else
+    {
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+        yyjson_mut_obj_add_strbuf(doc, obj, "version", &opencl.version);
+        yyjson_mut_obj_add_strbuf(doc, obj, "device", &opencl.device);
+        yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &opencl.vendor);
+    }
+
+    ffStrbufDestroy(&opencl.version);
+    ffStrbufDestroy(&opencl.device);
+    ffStrbufDestroy(&opencl.vendor);
 }

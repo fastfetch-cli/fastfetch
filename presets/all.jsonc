@@ -51,6 +51,7 @@
         "sound",
         "gamepad",
         "weather",
+        "netio",
         "version",
         "break",
         "colors"

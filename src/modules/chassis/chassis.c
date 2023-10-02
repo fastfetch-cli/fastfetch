@@ -52,7 +52,7 @@ exit:
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -86,4 +86,36 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
 
         ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateChassisJson(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFChassisResult result;
+    ffStrbufInit(&result.type);
+    ffStrbufInit(&result.vendor);
+    ffStrbufInit(&result.version);
+
+    const char* error = ffDetectChassis(&result);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if(result.type.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "chassis_type is not set by O.E.M.");
+        goto exit;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
+    yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result.vendor);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
+
+exit:
+    ffStrbufDestroy(&result.type);
+    ffStrbufDestroy(&result.vendor);
+    ffStrbufDestroy(&result.version);
 }

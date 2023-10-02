@@ -20,7 +20,9 @@ static const char* detectWithWmi(FFlist* result)
         if(FFWmiVariant vtValue = record.get(L"CurrentBrightness"))
         {
             FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-            brightness->value = vtValue.get<uint8_t>();
+            brightness->max = 100;
+            brightness->min = 0;
+            brightness->current = vtValue.get<uint8_t>();
 
             ffStrbufInit(&brightness->name);
             if (FFWmiVariant vtName = record.get(L"InstanceName"))
@@ -51,7 +53,9 @@ static char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist*
                 else
                     ffStrbufInitWS(&brightness->name, physicalMonitor.szPhysicalMonitorDescription);
 
-                brightness->value = (float) (curr - min) * 100.f / (float) (max - min);
+                brightness->max = max;
+                brightness->min = min;
+                brightness->current = curr;
             }
         }
     }

@@ -527,16 +527,16 @@ extern "C" {
 #define YYJSON_VERSION_MAJOR  0
 
 /** The minor version of yyjson. */
-#define YYJSON_VERSION_MINOR  7
+#define YYJSON_VERSION_MINOR  8
 
 /** The patch version of yyjson. */
 #define YYJSON_VERSION_PATCH  0
 
 /** The version of yyjson in hex: `(major << 16) | (minor << 8) | (patch)`. */
-#define YYJSON_VERSION_HEX    0x000700
+#define YYJSON_VERSION_HEX    0x000800
 
 /** The version string of yyjson. */
-#define YYJSON_VERSION_STRING "0.7.0"
+#define YYJSON_VERSION_STRING "0.8.0"
 
 /** The version of yyjson in hex, same as `YYJSON_VERSION_HEX`. */
 yyjson_api uint32_t yyjson_version(void);
@@ -635,11 +635,11 @@ typedef struct yyjson_alc {
  function, but the amount of memory required to write a JSON cannot be directly 
  calculated.
  
- This is not a general-purpose allocator. If used to read multiple JSON 
- documents and only some of them are released, it may cause memory
- fragmentation, leading to performance degradation and memory waste. Therefore, 
- it is recommended to use this allocator only for reading or writing a single 
- JSON document.
+ This is not a general-purpose allocator. It is designed to handle a single JSON
+ data at a time. If it is used for overly complex memory tasks, such as parsing
+ multiple JSON documents using the same allocator but releasing only a few of
+ them, it may cause memory fragmentation, resulting in performance degradation
+ and memory waste.
  
  @param alc The allocator to be initialized.
     If this parameter is NULL, the function will fail and return false.
@@ -662,8 +662,30 @@ typedef struct yyjson_alc {
     yyjson_doc *doc = yyjson_read_opts(json, strlen(json), 0, &alc, NULL);
     // the memory of `doc` is on the stack
  @endcode
+ 
+ @warning This Allocator is not thread-safe.
  */
 yyjson_api bool yyjson_alc_pool_init(yyjson_alc *alc, void *buf, size_t size);
+
+/**
+ A dynamic allocator.
+ 
+ This allocator has a similar usage to the pool allocator above. However, when
+ there is not enough memory, this allocator will dynamically request more memory
+ using libc's `malloc` function, and frees it all at once when it is destroyed.
+ 
+ @return A new dynamic allocator, or NULL if memory allocation failed.
+ @note The returned value should be freed with `yyjson_alc_dyn_free()`.
+ 
+ @warning This Allocator is not thread-safe.
+ */
+yyjson_api yyjson_alc *yyjson_alc_dyn_new(void);
+
+/**
+ Free a dynamic allocator which is created by `yyjson_alc_dyn_new()`.
+ @param alc The dynamic allocator to be destroyed.
+ */
+yyjson_api void yyjson_alc_dyn_free(yyjson_alc *alc);
 
 
 
@@ -3556,7 +3578,7 @@ yyjson_api_inline bool yyjson_mut_obj_rotate(yyjson_mut_val *obj,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_null(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3566,7 +3588,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_null(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_true(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3576,7 +3598,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_true(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_false(yyjson_mut_doc *doc,
                                                 yyjson_mut_val *obj,
@@ -3586,7 +3608,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_false(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_bool(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3596,7 +3618,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_bool(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_uint(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3606,7 +3628,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_uint(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_sint(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3616,7 +3638,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_sint(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_int(yyjson_mut_doc *doc,
                                               yyjson_mut_val *obj,
@@ -3626,7 +3648,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_int(yyjson_mut_doc *doc,
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_real(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3636,7 +3658,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_real(yyjson_mut_doc *doc,
     The `key` and `val` should be null-terminated UTF-8 strings.
     This function allows duplicated key in one object.
     
-    @warning The key/value string are not copied, you should keep these strings
+    @warning The key/value strings are not copied, you should keep these strings
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_str(yyjson_mut_doc *doc,
                                               yyjson_mut_val *obj,
@@ -3648,7 +3670,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_str(yyjson_mut_doc *doc,
     The `len` should be the length of the `val`, in bytes.
     This function allows duplicated key in one object.
     
-    @warning The key/value string are not copied, you should keep these strings
+    @warning The key/value strings are not copied, you should keep these strings
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_strn(yyjson_mut_doc *doc,
                                                yyjson_mut_val *obj,
@@ -3660,7 +3682,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_strn(yyjson_mut_doc *doc,
     The value string is copied.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_strcpy(yyjson_mut_doc *doc,
                                                  yyjson_mut_val *obj,
@@ -3673,18 +3695,44 @@ yyjson_api_inline bool yyjson_mut_obj_add_strcpy(yyjson_mut_doc *doc,
     The `len` should be the length of the `val`, in bytes.
     This function allows duplicated key in one object.
     
-    @warning The key/value string are not copied, you should keep these strings
+    @warning The key/value strings are not copied, you should keep these strings
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_strncpy(yyjson_mut_doc *doc,
                                                   yyjson_mut_val *obj,
                                                   const char *key,
                                                   const char *val, size_t len);
 
+/**
+ Creates and adds a new array to the target object.
+ The `key` should be a null-terminated UTF-8 string.
+ This function allows duplicated key in one object.
+ 
+ @warning The key string is not copied, you should keep these strings
+          unmodified for the lifetime of this JSON document.
+ @return The new array, or NULL on error.
+ */
+yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_add_arr(yyjson_mut_doc *doc,
+                                                         yyjson_mut_val *obj,
+                                                         const char *key);
+
+/**
+ Creates and adds a new object to the target object.
+ The `key` should be a null-terminated UTF-8 string.
+ This function allows duplicated key in one object.
+ 
+ @warning The key string is not copied, you should keep these strings
+          unmodified for the lifetime of this JSON document.
+ @return The new object, or NULL on error.
+ */
+yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_add_obj(yyjson_mut_doc *doc,
+                                                         yyjson_mut_val *obj,
+                                                         const char *key);
+
 /** Adds a JSON value at the end of the object.
     The `key` should be a null-terminated UTF-8 string.
     This function allows duplicated key in one object.
     
-    @warning The key string are not copied, you should keep the string
+    @warning The key string is not copied, you should keep the string
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_val(yyjson_mut_doc *doc,
                                               yyjson_mut_val *obj,
@@ -6918,6 +6966,22 @@ yyjson_api_inline bool yyjson_mut_obj_add_strncpy(yyjson_mut_doc *doc,
         if (yyjson_unlikely(!val->uni.str)) return false;
         val->tag = ((uint64_t)_len << YYJSON_TAG_BIT) | YYJSON_TYPE_STR;
     });
+}
+
+yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_add_arr(yyjson_mut_doc *doc,
+                                                         yyjson_mut_val *obj,
+                                                         const char *_key) {
+    yyjson_mut_val *key = yyjson_mut_str(doc, _key);
+    yyjson_mut_val *val = yyjson_mut_arr(doc);
+    return yyjson_mut_obj_add(obj, key, val) ? val : NULL;
+}
+
+yyjson_api_inline yyjson_mut_val *yyjson_mut_obj_add_obj(yyjson_mut_doc *doc,
+                                                         yyjson_mut_val *obj,
+                                                         const char *_key) {
+    yyjson_mut_val *key = yyjson_mut_str(doc, _key);
+    yyjson_mut_val *val = yyjson_mut_obj(doc);
+    return yyjson_mut_obj_add(obj, key, val) ? val : NULL;
 }
 
 yyjson_api_inline bool yyjson_mut_obj_add_val(yyjson_mut_doc *doc,

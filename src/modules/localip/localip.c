@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
-#define FF_LOCALIP_NUM_FORMAT_ARGS 2
+#define FF_LOCALIP_NUM_FORMAT_ARGS 5
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
@@ -13,14 +13,14 @@ static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
     return ffStrbufComp(&left->name, &right->name);
 }
 
-static void formatKey(const FFLocalIpOptions* options, const FFLocalIpResult* ip, uint32_t index, FFstrbuf* key)
+static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint32_t index, FFstrbuf* key)
 {
     if(options->moduleArgs.key.length == 0)
     {
-        if(ip->name.length)
-            ffStrbufSetF(key, FF_LOCALIP_DISPLAY_NAME " (%s)", ip->name.chars);
-        else
-            ffStrbufSetS(key, FF_LOCALIP_DISPLAY_NAME);
+        if(!ip->name.length)
+            ffStrbufSetF(&ip->name, "unknown %u", (unsigned) index);
+
+        ffStrbufSetF(key, FF_LOCALIP_DISPLAY_NAME " (%s)", ip->name.chars);
     }
     else
     {
@@ -86,9 +86,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
-            if (options->defaultRouteOnly && !ip->defaultRoute)
-                continue;
-
             if (flag)
                 fputs(" - ", stdout);
             else
@@ -104,9 +101,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
         FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
         {
-            if (options->defaultRouteOnly && !ip->defaultRoute)
-                continue;
-
             formatKey(options, ip, results.length == 1 ? 0 : index + 1, &key);
             if(options->moduleArgs.outputFormat.length == 0)
             {
@@ -139,7 +133,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
@@ -291,5 +285,44 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateLocalIpJson(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
+
+    const char* error = ffDetectLocalIps(options, &results);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if(results.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect any IPs");
+        goto exit;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", ip->defaultRoute);
+        yyjson_mut_obj_add_strbuf(doc, obj, "ipv4", &ip->ipv4);
+        yyjson_mut_obj_add_strbuf(doc, obj, "ipv6", &ip->ipv6);
+        yyjson_mut_obj_add_strbuf(doc, obj, "mac", &ip->mac);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
+    }
+
+exit:
+    FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
+    {
+        ffStrbufDestroy(&ip->name);
+        ffStrbufDestroy(&ip->ipv4);
+        ffStrbufDestroy(&ip->ipv6);
+        ffStrbufDestroy(&ip->mac);
     }
 }

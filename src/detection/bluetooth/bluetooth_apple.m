@@ -2,7 +2,7 @@
 
 #import <IOBluetooth/IOBluetooth.h>
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 {
     NSArray<IOBluetoothDevice*>* ioDevices = IOBluetoothDevice.pairedDevices;
     if(!ioDevices)
@@ -10,7 +10,7 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothDevice */)
 
     for(IOBluetoothDevice* ioDevice in ioDevices)
     {
-        FFBluetoothDevice* device = ffListAdd(devices);
+        FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInitS(&device->name, ioDevice.name.UTF8String);
         ffStrbufInitS(&device->address, ioDevice.addressString.UTF8String);
         ffStrbufInit(&device->type);

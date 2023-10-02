@@ -17,6 +17,7 @@ void ffInitLogoOptions(FFLogoOptions* options)
     options->printRemaining = true;
     options->preserveAspectRadio = false;
     options->recache = false;
+    options->separate = false;
 
     options->chafaFgOnly = false;
     ffStrbufInitStatic(&options->chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
@@ -116,6 +117,8 @@ logoType:
             options->preserveAspectRadio = ffOptionParseBoolean(value);
         else if(strcasecmp(subKey, "recache") == 0)
             options->recache = ffOptionParseBoolean(value);
+        else if(strcasecmp(subKey, "separate") == 0)
+            options->separate = ffOptionParseBoolean(value);
         else
             return false;
     }
@@ -340,6 +343,11 @@ const char* ffParseLogoJsonConfig(void)
         else if (strcasecmp(key, "recache") == 0)
         {
             options->recache = yyjson_get_bool(val);
+            continue;
+        }
+        else if (strcasecmp(key, "separate") == 0)
+        {
+            options->separate = yyjson_get_bool(val);
             continue;
         }
         else if (strcasecmp(key, "chafa") == 0)

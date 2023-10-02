@@ -46,7 +46,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -80,4 +80,17 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
 
         ffPrintError(FF_CPUUSAGE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateCPUUsageJson(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    double percentage = 0.0/0.0;
+    const char* error = ffGetCpuUsageResult(&percentage);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+    yyjson_mut_obj_add_real(doc, module, "result", percentage);
 }

@@ -72,7 +72,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -105,5 +105,51 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
             continue;
 
         ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateWifiJson(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
+    const char* error = ffDetectWifi(&result);
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+    if(!result.length)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No Wifi interfaces found");
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFWifiResult, wifi, result)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+
+        yyjson_mut_val* inf = yyjson_mut_obj_add_obj(doc, obj, "inf");
+        yyjson_mut_obj_add_strbuf(doc, inf, "description", &wifi->inf.description);
+        yyjson_mut_obj_add_strbuf(doc, inf, "status", &wifi->inf.status);
+
+        yyjson_mut_val* conn = yyjson_mut_obj_add_obj(doc, obj, "conn");
+        yyjson_mut_obj_add_strbuf(doc, conn, "status", &wifi->conn.status);
+        yyjson_mut_obj_add_strbuf(doc, conn, "ssid", &wifi->conn.ssid);
+        yyjson_mut_obj_add_strbuf(doc, conn, "macAddress", &wifi->conn.macAddress);
+        yyjson_mut_obj_add_strbuf(doc, conn, "protocol", &wifi->conn.protocol);
+        yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
+        yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
+        yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
+    }
+
+    FF_LIST_FOR_EACH(FFWifiResult, item, result)
+    {
+        ffStrbufDestroy(&item->inf.description);
+        ffStrbufDestroy(&item->inf.status);
+        ffStrbufDestroy(&item->conn.status);
+        ffStrbufDestroy(&item->conn.ssid);
+        ffStrbufDestroy(&item->conn.macAddress);
+        ffStrbufDestroy(&item->conn.protocol);
+        ffStrbufDestroy(&item->conn.security);
     }
 }

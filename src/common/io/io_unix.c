@@ -54,24 +54,20 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
     uint32_t free = ffStrbufGetFree(buffer);
 
     while(
-        (readed = read(fd, buffer->chars + buffer->length, free)) > 0 &&
-        (uint32_t) readed == free
+        (readed = read(fd, buffer->chars + buffer->length, free)) > 0
     ) {
         buffer->length += (uint32_t) readed;
-        ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
+        if((uint32_t) readed == free)
+            ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
-
-    // In case of failure, read returns -1. We don't want to substract the length of the buffer.
-    if(readed > 0)
-        buffer->length += (uint32_t) readed;
 
     buffer->chars[buffer->length] = '\0';
 
     ffStrbufTrimRight(buffer, '\n');
     ffStrbufTrimRight(buffer, ' ');
 
-    return readed >= 0;
+    return buffer->length > 0;
 }
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
@@ -150,7 +146,7 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     fflush(stdout);
 
     //Give the terminal 35ms to respond
-    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, 35) <= 0)
+    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
     {
         tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
         return "poll() timeout or failed";

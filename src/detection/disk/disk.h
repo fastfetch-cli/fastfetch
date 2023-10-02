@@ -5,12 +5,21 @@
 
 #include "fastfetch.h"
 
+typedef enum FFDiskPhysicalType
+{
+    FF_DISK_PHYSICAL_TYPE_UNKNOWN,
+    FF_DISK_PHYSICAL_TYPE_HDD,
+    FF_DISK_PHYSICAL_TYPE_SSD,
+} FFDiskPhysicalType;
+
 typedef struct FFDisk
 {
+    FFstrbuf mountFrom;
     FFstrbuf mountpoint;
     FFstrbuf filesystem;
     FFstrbuf name;
     FFDiskVolumeType type;
+    FFDiskPhysicalType physicalType;
 
     uint64_t bytesUsed;
     uint64_t bytesFree;

@@ -9,8 +9,7 @@
 
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
-    FFlist results;
-    ffListInit(&results, sizeof(PowerAdapterResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
 
     const char* error = ffDetectPowerAdapterImpl(&results);
 
@@ -26,7 +25,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
     {
         for(uint8_t i = 0; i < (uint8_t) results.length; i++)
         {
-            PowerAdapterResult* result = ffListGet(&results, i);
+            FFPowerAdapterResult* result = ffListGet(&results, i);
 
             if(result->watts != FF_POWERADAPTER_UNSET)
             {
@@ -59,13 +58,11 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
             ffStrbufDestroy(&result->name);
         }
     }
-
-    ffListDestroy(&results);
 }
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter, ffGeneratePowerAdapterJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -98,5 +95,34 @@ void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* m
             continue;
 
         ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGeneratePowerAdapterJson(FF_MAYBE_UNUSED FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
+
+    const char* error = ffDetectPowerAdapterImpl(&results);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+    }
+    else if(results.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No power adapters found");
+    }
+    else
+    {
+        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+        FF_LIST_FOR_EACH(FFPowerAdapterResult, item, results)
+        {
+            yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+            yyjson_mut_obj_add_strbuf(doc, obj, "description", &item->description);
+            yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &item->manufacturer);
+            yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &item->modelName);
+            yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+            yyjson_mut_obj_add_int(doc, obj, "watts", item->watts);
+        }
     }
 }

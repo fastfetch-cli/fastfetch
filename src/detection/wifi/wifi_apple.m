@@ -63,7 +63,7 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
                 break;
         }
-        item->conn.signalQuality = inf.rssiValue >= -50 ? 100 : inf.rssiValue <= -100 ? 0 : (inf.rssiValue + 100) * 2;
+        item->conn.signalQuality = (double) (inf.rssiValue >= -50 ? 100 : inf.rssiValue <= -100 ? 0 : (inf.rssiValue + 100) * 2);
         item->conn.txRate = inf.transmitRate;
 
         switch(inf.security)

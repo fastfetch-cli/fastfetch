@@ -45,7 +45,7 @@ void ffPrintFont(FFFontOptions* options)
 
 void ffInitFontOptions(FFFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -79,4 +79,30 @@ void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
 
         ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateFontJson(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFFontResult font;
+    for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
+        ffStrbufInit(&font.fonts[i]);
+    ffStrbufInit(&font.display);
+
+    const char* error = ffDetectFont(&font);
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+    }
+    else
+    {
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+        yyjson_mut_obj_add_strbuf(doc, obj, "display", &font.display);
+        yyjson_mut_val* fontsArr = yyjson_mut_obj_add_arr(doc, obj, "fonts");
+        for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
+            yyjson_mut_arr_add_strbuf(doc, fontsArr, &font.fonts[i]);
+    }
+
+    ffStrbufDestroy(&font.display);
+    for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
+        ffStrbufDestroy(&font.fonts[i]);
 }

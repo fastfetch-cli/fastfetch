@@ -42,7 +42,7 @@ void ffPrintDE(FFDEOptions* options)
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -76,4 +76,20 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
 
         ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateDEJson(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFDisplayServerResult* result = ffConnectDisplayServer();
+
+    if(result->dePrettyName.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No DE found");
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->deProcessName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->dePrettyName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->deVersion);
 }

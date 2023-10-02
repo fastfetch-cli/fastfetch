@@ -4,7 +4,7 @@
 #include "modules/shell/shell.h"
 #include "util/stringUtils.h"
 
-#define FF_SHELL_NUM_FORMAT_ARGS 7
+#define FF_SHELL_NUM_FORMAT_ARGS 6
 
 void ffPrintShell(FFShellOptions* options)
 {
@@ -36,16 +36,15 @@ void ffPrintShell(FFShellOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
             {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->userShellExeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->userShellVersion}
+            {FF_FORMAT_ARG_TYPE_UINT, &result->shellPid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellPrettyName},
         });
     }
 }
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -79,4 +78,22 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
 
         ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateShellJson(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFTerminalShellResult* result = ffDetectTerminalShell();
+
+    if(result->shellProcessName.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect shell");
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->shellExe);
+    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->shellExeName);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", result->shellPid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->shellVersion);
 }

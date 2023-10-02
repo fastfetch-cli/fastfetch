@@ -128,6 +128,13 @@ static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("NU_VERSION"));
+    if (version->length) return true;
+    return getExeVersionRaw(exe, version); //0.73.0
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -158,7 +165,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
     if(strcasecmp(exeName, "csh") == 0 || strcasecmp(exeName, "tcsh") == 0)
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(strcasecmp(exeName, "nu") == 0)
-        return getExeVersionRaw(exe, version); //0.73.0
+        return getShellVersionNushell(exe, version);
     if(strcasecmp(exeName, "ksh") == 0)
         return getShellVersionKsh(exe, version);
     if(strcasecmp(exeName, "oksh") == 0)
@@ -263,6 +270,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* ver
     return version->length > 0;
 }
 
+static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
+{
+    const char* env = getenv("TERMINAL_VERSION_STRING");
+    if (env)
+    {
+        ffStrbufAppendS(version, env);
+        return true;
+    }
+    if(!getExeVersionRaw(exe, version)) return false;
+    // Contour Terminal Emulator 0.3.12.262
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -296,7 +317,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 {
     #ifdef __ANDROID__
 
-    if(ffStrbufEqualS(processName, "Termux"))
+    if(ffStrbufEqualS(processName, "com.termux"))
         return getTerminalVersionTermux(version);
 
     #endif
@@ -360,6 +381,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "alacritty"))
         return getExeVersionGeneral(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "contour"))
+        return getTerminalVersionContour(exe, version);
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)

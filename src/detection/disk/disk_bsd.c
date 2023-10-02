@@ -1,48 +1,77 @@
 #include "disk.h"
+#include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <sys/mount.h>
 
 #ifdef __FreeBSD__
-#include "util/stringUtils.h"
-
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
     if(ffStrbufEqualS(&disk->filesystem, "zfs"))
     {
-        disk->type = !ffStrStartsWith(fs->f_mntfromname, "zroot/") || ffStrStartsWith(fs->f_mntfromname, "zroot/ROOT/")
+        disk->type = !ffStrbufStartsWithS(&disk->mountFrom, "zroot/") || ffStrbufStartsWithS(&disk->mountFrom, "zroot/ROOT/")
             ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
             : FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     }
-    else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/"))
+    else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(!(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-
-    ffStrbufInit(&disk->name);
 }
-#else
-void detectFsInfo(struct statfs* fs, FFDisk* disk);
+#elif __APPLE__
+#include <sys/attr.h>
+#include <unistd.h>
+
+struct VolAttrBuf {
+    uint32_t       length;
+    attrreference_t volNameRef;
+    char            volNameSpace[MAXPATHLEN];
+} __attribute__((aligned(4), packed));
+
+void detectFsInfo(struct statfs* fs, FFDisk* disk)
+{
+    if(fs->f_flags & MNT_DONTBROWSE)
+        disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+    else if(fs->f_flags & MNT_REMOVABLE || !(fs->f_flags & MNT_LOCAL))
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    else
+        disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+
+    struct VolAttrBuf attrBuf;
+    if (getattrlist(disk->mountpoint.chars, &(struct attrlist) {
+        .bitmapcount = ATTR_BIT_MAP_COUNT,
+        .volattr = ATTR_VOL_INFO | ATTR_VOL_NAME,
+    }, &attrBuf, sizeof(attrBuf), 0) == 0)
+        ffStrbufInitNS(&disk->name, attrBuf.volNameRef.attr_length - 1 /* excluding '\0' */, attrBuf.volNameSpace);
+}
 #endif
 
 const char* ffDetectDisksImpl(FFlist* disks)
 {
-    struct statfs* buf;
+    int size = getfsstat(NULL, 0, MNT_WAIT);
 
-    int size = getmntinfo(&buf, MNT_WAIT);
     if(size <= 0)
-        return "getmntinfo(&buf, MNT_WAIT) failed";
+        return "getfsstat(NULL, 0, MNT_WAIT) failed";
+
+    FF_AUTO_FREE struct statfs* buf = malloc(sizeof(*buf) * (unsigned) size);
+    if(getfsstat(buf, (int) (sizeof(*buf) * (unsigned) size), MNT_NOWAIT) <= 0)
+        return "getfsstat(buf, size, MNT_NOWAIT) failed";
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
-        FFDisk* disk = ffListAdd(disks);
+        if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
+            continue;
 
         #ifdef __FreeBSD__
         // f_bavail and f_ffree are signed on FreeBSD...
         if(fs->f_bavail < 0) fs->f_bavail = 0;
         if(fs->f_ffree < 0) fs->f_ffree = 0;
         #endif
+
+        FFDisk* disk = ffListAdd(disks);
+        disk->physicalType = FF_DISK_PHYSICAL_TYPE_UNKNOWN;
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
         disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;
@@ -52,8 +81,11 @@ const char* ffDetectDisksImpl(FFlist* disks)
         disk->filesTotal = (uint32_t) fs->f_files;
         disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs->f_ffree);
 
+        ffStrbufInitS(&disk->mountFrom, fs->f_mntfromname);
         ffStrbufInitS(&disk->mountpoint, fs->f_mntonname);
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
+        ffStrbufInit(&disk->name);
+        disk->type = 0;
         detectFsInfo(fs, disk);
 
         if(fs->f_flags & MNT_RDONLY)

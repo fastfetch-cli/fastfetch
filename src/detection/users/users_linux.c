@@ -11,7 +11,7 @@
     #define getutxent getutent
 #endif
 
-void ffDetectUsers(FFlist* users, FFstrbuf* error)
+const char* ffDetectUsers(FFlist* users)
 {
     struct utmpx* n = NULL;
     setutxent();
@@ -22,15 +22,24 @@ next:
         if(n->ut_type != USER_PROCESS)
             continue;
 
-        FF_LIST_FOR_EACH(FFstrbuf, user, *users)
+        FF_LIST_FOR_EACH(FFUserResult, user, *users)
         {
-            if(ffStrbufEqualS(user, n->ut_user))
+            if(ffStrbufEqualS(&user->name, n->ut_user))
                 goto next;
         }
 
-        ffStrbufInitS((FFstrbuf*)ffListAdd(users), n->ut_user);
+        FFUserResult* user = (FFUserResult*) ffListAdd(users);
+        ffStrbufInitS(&user->name, n->ut_user);
+        ffStrbufInitS(&user->hostName, n->ut_host);
+        ffStrbufInitS(&user->tty, n->ut_line);
+        #ifdef __linux__
+        if(n->ut_addr_v6[0] || n->ut_addr_v6[1] || n->ut_addr_v6[2] || n->ut_addr_v6[3])
+            ffStrbufInitF(&user->clientIp, "%u.%u.%u.%u", n->ut_addr_v6[0], n->ut_addr_v6[1], n->ut_addr_v6[2], n->ut_addr_v6[3]);
+        else
+        #endif
+        ffStrbufInit(&user->clientIp);
+        user->loginTime = (uint64_t) n->ut_tv.tv_sec * 1000 + (uint64_t) n->ut_tv.tv_usec / 1000;
     }
 
-    if(users->length == 0)
-        ffStrbufAppendS(error, "Unable to detect users");
+    return NULL;
 }

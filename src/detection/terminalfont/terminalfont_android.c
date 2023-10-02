@@ -55,7 +55,7 @@ exit:
 
 void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
-    if(ffStrbufCompS(&terminalShell->terminalProcessName, "Termux") != 0)
+    if(ffStrbufCompS(&terminalShell->terminalProcessName, "com.termux") != 0)
     {
         ffStrbufSetS(&terminalFont->error, "Unsupported terminal");
         return;

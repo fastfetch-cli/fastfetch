@@ -26,13 +26,16 @@ const char* ffDetectBrightness(FFlist* result)
         if(ioctl(blfd, BACKLIGHTGETSTATUS, &status) < 0)
             continue;
 
-        FFBrightnessResult* display = (FFBrightnessResult*) ffListAdd(result);
-        ffStrbufInit(&display->name);
-        display->value = (float) status.brightness / BACKLIGHTMAXLEVELS;
+        FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+        ffStrbufInit(&brightness->name);
+
+        brightness->max = BACKLIGHTMAXLEVELS;
+        brightness->min = 0;
+        brightness->current = status.brightness;
 
         struct backlight_info info;
         if(ioctl(blfd, BACKLIGHTGETINFO, &info) < 0)
-            ffStrbufAppendS(&display->name, info.name);
+            ffStrbufAppendS(&brightness->name, info.name);
     }
     return NULL;
 }

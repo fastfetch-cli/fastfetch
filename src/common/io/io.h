@@ -12,6 +12,7 @@
     typedef HANDLE FFNativeFD;
 #else
     #include <unistd.h>
+    #include <dirent.h>
     typedef int FFNativeFD;
 #endif
 
@@ -84,6 +85,8 @@ typedef enum FFPathType
 bool ffPathExists(const char* path, FFPathType pathType);
 bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
+#define FF_IO_TERM_RESP_WAIT_MS 100 // #554
+
 FF_C_SCANF(2, 3)
 const char* ffGetTerminalResponse(const char* request, const char* format, ...);
 
@@ -129,5 +132,26 @@ static inline bool wrapFclose(FILE** pfile)
     return true;
 }
 #define FF_AUTO_CLOSE_FILE __attribute__((__cleanup__(wrapFclose)))
+
+#ifndef _WIN32
+static inline bool wrapClosedir(DIR** pdir)
+{
+    assert(pdir);
+    if (!*pdir)
+        return false;
+    closedir(*pdir);
+    return true;
+}
+#else
+static inline bool wrapClosedir(HANDLE* pdir)
+{
+    assert(pdir);
+    if (!*pdir)
+        return false;
+    FindClose(*pdir);
+    return true;
+}
+#endif
+#define FF_AUTO_CLOSE_DIR __attribute__((__cleanup__(wrapClosedir)))
 
 #endif // FF_INCLUDED_common_io_io

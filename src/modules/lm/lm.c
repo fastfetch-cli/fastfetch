@@ -51,7 +51,7 @@ void ffPrintLM(FFLMOptions* options)
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, NULL);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -85,4 +85,35 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
 
         ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateLMJson(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFLMResult result;
+    ffStrbufInit(&result.service);
+    ffStrbufInit(&result.type);
+    ffStrbufInit(&result.version);
+    const char* error = ffDetectLM(&result);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if(result.service.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No LM service found");
+        goto exit;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "service", &result.service);
+    yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
+
+exit:
+    ffStrbufDestroy(&result.service);
+    ffStrbufDestroy(&result.type);
+    ffStrbufDestroy(&result.version);
 }

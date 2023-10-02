@@ -233,6 +233,23 @@ static void getXFCE4(FFDisplayServerResult* result)
     ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_XFCE4);
     ffParsePropFileData("gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
 
+    #ifdef __FreeBSD__
+    if(result->deVersion.length == 0)
+    {
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/usr/local/share/licenses/");
+        if (dirp)
+        {
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(!ffStrStartsWith(entry->d_name, "xfce-") || !isdigit(entry->d_name[5]))
+                    continue;
+                ffStrbufAppendS(&result->deVersion, &entry->d_name[5]);
+            }
+        }
+    }
+    #endif
+
     if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
     {
         //This is somewhat slow

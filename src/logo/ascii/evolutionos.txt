@@ -1,18 +1,21 @@
-    dddddddddddddddddddddddd
-.dddd''''''''''''''''''''''dddd.
-dd:   dddddddddddddddddddd;   dd:
-dd:   ldl:''''''''''''''''    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl: ddddddd;  ddddd;   dd:
-dd:   ldl: '''''''   '''''    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl:                    dd:
-dd:   ldl: ddddddddddddddd;   dd:
-dddd:.'''  '''''''''''''''  dddd:
-   dddddddddddddddddddddddddd;;'
-    '''''''''''''''''''''''''
+               $2.':ldxxxxdo:,.
+           .lXMMMMMMMMMMMMMMMMNo'
+         dWMMMMMMMMMMMMMMMMMMMMMMWk
+      .OMMMMWWWWWWWWWWWWWWWWWWWMMMMM0;
+     kMMMMM$1XxxxxkkkkkkkkkkkkkkkK$2WMMMMMK.
+   .kMMMMMM$1Xddd0KKKKKKKKKKKKKKKN$2MMMMMMMN.
+   KMMMMMMM$1XdddX$2MMMMMMMMMMMMMMMMMMMMMMMMX.
+  cMMMMMMMM$1XdddX$2MMMMMMMMMMMMMMMMMMMMMMMMMo
+  KMMMMMMMM$1XdddX$2MMMMMMMMMMMMMMMMMMMMMMMMMN
+  XMMMMMMMM$1XdddX$2WO$1kkkkkkkK$2WK$1OOOX$2MMMMMMMMMW
+  XMMMMMMMM$1XdddX$2WO$1kkkkkkkK$2WK$1OOOX$2MMMMMMMMMW
+  0MMMMMMMM$1XdddX$2MWWWWWWWWWMWWWWWMMMMMMMMMN
+  cMMMMMMMM$1XdddX$2MMMMMMMMMMMMMMMMMMMMMMMMMd
+  .kMMMMMMM$1XdddX$2MMMMMMMMMMMMMMMMMMMMMMMM0.
+   .kMMMMMM$1XxxxN$2W0$1OOOOOOOOOOOOOK$2MMMMMMMK.
+     oMMMMM$1XxxxN$2W0$1OOOOOOOOOOOOOK$2WMMMMMk.
+      '0MMMWNNNWMWWWWWWWWWWWWWWWMMMMX;
+         cWMMMMMMMMMMMMMMMMMMMMMMWd
+            :KWMMMMMMMMMMMMMMWXo.
+                .cdO0KK00xl'
+                     ..

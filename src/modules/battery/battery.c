@@ -8,7 +8,7 @@
 
 #define FF_BATTERY_NUM_FORMAT_ARGS 5
 
-static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8_t index)
+static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -76,8 +76,7 @@ static void printBattery(FFBatteryOptions* options, BatteryResult* result, uint8
 
 void ffPrintBattery(FFBatteryOptions* options)
 {
-    FFlist results;
-    ffListInitA(&results, sizeof(BatteryResult), 0);
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 
     const char* error = ffDetectBattery(options, &results);
 
@@ -89,7 +88,7 @@ void ffPrintBattery(FFBatteryOptions* options)
     {
         for(uint8_t i = 0; i < (uint8_t) results.length; i++)
         {
-            BatteryResult* result = ffListGet(&results, i);
+            FFBatteryResult* result = ffListGet(&results, i);
             printBattery(options, result, i);
 
             ffStrbufDestroy(&result->manufacturer);
@@ -100,13 +99,11 @@ void ffPrintBattery(FFBatteryOptions* options)
         if(results.length == 0)
             ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
     }
-
-    ffListDestroy(&results);
 }
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJson);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
@@ -176,5 +173,38 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
+
+    const char* error = ffDetectBattery(options, &results);
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+
+    FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_real(doc, obj, "capacity", battery->capacity);
+        yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &battery->manufacturer);
+        yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &battery->modelName);
+        yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
+        yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
+        yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
+    }
+
+    FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
+    {
+        ffStrbufDestroy(&battery->manufacturer);
+        ffStrbufDestroy(&battery->modelName);
+        ffStrbufDestroy(&battery->technology);
+        ffStrbufDestroy(&battery->status);
     }
 }

@@ -79,7 +79,7 @@ void ffPrintCPU(FFCPUOptions* options)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 }
@@ -126,4 +126,45 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 
         ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFCPUResult cpu;
+    cpu.temperature = FF_CPU_TEMP_UNSET;
+    cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
+    cpu.frequencyMax = cpu.frequencyMin = 0;
+    ffStrbufInit(&cpu.name);
+    ffStrbufInit(&cpu.vendor);
+
+    const char* error = ffDetectCPU(options, &cpu);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+    }
+    else if(cpu.vendor.length == 0 && cpu.name.length == 0 && cpu.coresOnline <= 1)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No CPU detected");
+    }
+    else
+    {
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+        yyjson_mut_obj_add_strbuf(doc, obj, "cpu", &cpu.name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &cpu.vendor);
+
+        yyjson_mut_val* cores = yyjson_mut_obj_add_obj(doc, obj, "cores");
+        yyjson_mut_obj_add_uint(doc, cores, "physical", cpu.coresPhysical);
+        yyjson_mut_obj_add_uint(doc, cores, "logical", cpu.coresLogical);
+        yyjson_mut_obj_add_uint(doc, cores, "online", cpu.coresOnline);
+
+        yyjson_mut_val* frequency = yyjson_mut_obj_add_obj(doc, obj, "frequency");
+        yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
+        yyjson_mut_obj_add_real(doc, frequency, "max", cpu.frequencyMax);
+
+        yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
+    }
+
+    ffStrbufDestroy(&cpu.name);
+    ffStrbufDestroy(&cpu.vendor);
 }

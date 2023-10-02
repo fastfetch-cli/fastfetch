@@ -56,6 +56,16 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     VERIFY(strbuf.length == 0);
 
+    //append(N)C
+
+    ffStrbufAppendC(&strbuf, '1');
+    VERIFY(ffStrbufEqualS(&strbuf, "1"));
+    VERIFY(strbuf.allocated >= 1);
+    ffStrbufAppendNC(&strbuf, 5, '2');
+    VERIFY(ffStrbufEqualS(&strbuf, "122222"));
+    VERIFY(strbuf.allocated >= 6);
+    ffStrbufClear(&strbuf);
+
     //appendS
 
     ffStrbufAppendS(&strbuf, "12345");
@@ -113,7 +123,7 @@ int main(void)
     //toNumber
 
     VERIFY(ffStrbufToDouble(&strbuf) == 123456789.0);
-    VERIFY(ffStrbufToUInt16(&strbuf, 999) == 999); //overflow
+    VERIFY(ffStrbufToUInt(&strbuf, 999) == 123456789);
 
     //countC
 

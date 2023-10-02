@@ -75,7 +75,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -109,4 +109,20 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
 
         ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateSwapJson(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFSwapResult storage;
+    const char* error = ffDetectSwap(&storage);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_uint(doc, obj, "total", storage.bytesTotal);
+    yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }

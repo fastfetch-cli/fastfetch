@@ -55,7 +55,7 @@ exit:
 
 void ffInitBiosOptions(FFBiosOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -89,4 +89,39 @@ void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
 
         ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateBiosJson(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFBiosResult bios;
+    ffStrbufInit(&bios.date);
+    ffStrbufInit(&bios.release);
+    ffStrbufInit(&bios.vendor);
+    ffStrbufInit(&bios.version);
+
+    const char* error = ffDetectBios(&bios);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        goto exit;
+    }
+
+    if (bios.version.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "bios_version is not set.");
+        goto exit;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "date", &bios.date);
+    yyjson_mut_obj_add_strbuf(doc, obj, "release", &bios.release);
+    yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &bios.vendor);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &bios.version);
+
+exit:
+    ffStrbufDestroy(&bios.date);
+    ffStrbufDestroy(&bios.release);
+    ffStrbufDestroy(&bios.vendor);
+    ffStrbufDestroy(&bios.version);
 }

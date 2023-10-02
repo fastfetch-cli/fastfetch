@@ -4,13 +4,13 @@
 #include "modules/uptime/uptime.h"
 #include "util/stringUtils.h"
 
-#define FF_UPTIME_NUM_FORMAT_ARGS 4
+#define FF_UPTIME_NUM_FORMAT_ARGS 7
 
 void ffPrintUptime(FFUptimeOptions* options)
 {
-    uint64_t uptime;
+    FFUptimeResult result;
 
-    const char* error = ffDetectUptime(&uptime);
+    const char* error = ffDetectUptime(&result);
 
     if(error)
     {
@@ -18,10 +18,17 @@ void ffPrintUptime(FFUptimeOptions* options)
         return;
     }
 
-    uint32_t days    = (uint32_t)  uptime / 86400;
-    uint32_t hours   = (uint32_t) (uptime - (days * 86400)) / 3600;
-    uint32_t minutes = (uint32_t) (uptime - (days * 86400) - (hours * 3600)) / 60;
-    uint32_t seconds = (uint32_t)  uptime - (days * 86400) - (hours * 3600) - (minutes * 60);
+    uint64_t uptime = result.uptime;
+
+    uint32_t milliseconds = (uint32_t) (uptime % 1000);
+    uptime /= 1000;
+    uint32_t seconds = (uint32_t) (uptime % 60);
+    uptime /= 60;
+    uint32_t minutes = (uint32_t) (uptime % 60);
+    uptime /= 60;
+    uint32_t hours = (uint32_t) (uptime % 24);
+    uptime /= 24;
+    uint32_t days = (uint32_t) uptime;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -74,14 +81,17 @@ void ffPrintUptime(FFUptimeOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &days},
             {FF_FORMAT_ARG_TYPE_UINT, &hours},
             {FF_FORMAT_ARG_TYPE_UINT, &minutes},
-            {FF_FORMAT_ARG_TYPE_UINT, &seconds}
+            {FF_FORMAT_ARG_TYPE_UINT, &seconds},
+            {FF_FORMAT_ARG_TYPE_UINT, &milliseconds},
+            {FF_FORMAT_ARG_TYPE_UINT64, &result.uptime},
+            {FF_FORMAT_ARG_TYPE_UINT64, &result.bootTime},
         });
     }
 }
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -115,4 +125,20 @@ void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
 
         ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateUptimeJson(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFUptimeResult result;
+    const char* error = ffDetectUptime(&result);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_uint(doc, obj, "uptime", result.uptime);
+    yyjson_mut_obj_add_uint(doc, obj, "bootTime", result.bootTime);
 }

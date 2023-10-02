@@ -4,17 +4,20 @@
 #include <windows.h>
 #include <wtsapi32.h>
 
-void ffDetectUsers(FFlist* users, FFstrbuf* error)
+static inline uint64_t to_ms(uint64_t ret)
+{
+    ret -= 116444736000000000ull;
+    return ret / 10000ull;
+}
+
+const char* ffDetectUsers(FFlist* users)
 {
     WTS_SESSION_INFO_1W* sessionInfo;
     DWORD sessionCount;
     DWORD level = 1;
 
     if(!WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE, &level, 0, &sessionInfo, &sessionCount))
-    {
-        ffStrbufAppendS(error, "WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE) failed");
-        return;
-    }
+        return "WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE) failed";
 
     for (DWORD i = 0; i < sessionCount; i++)
     {
@@ -22,14 +25,33 @@ void ffDetectUsers(FFlist* users, FFstrbuf* error)
         if(session->State != WTSActive)
             continue;
 
-        FF_STRBUF_AUTO_DESTROY domainName = ffStrbufCreateWS(session->pDomainName);
-        FF_STRBUF_AUTO_DESTROY userName = ffStrbufCreateWS(session->pUserName);
+        FFUserResult* user = (FFUserResult*) ffListAdd(users);
+        ffStrbufInitWS(&user->name, session->pUserName);
+        ffStrbufInitWS(&user->hostName, session->pHostName);
 
-        ffStrbufInitF((FFstrbuf*)ffListAdd(users), "%s\\%s", domainName.chars, userName.chars);
+        DWORD bytes = 0;
+        PWTS_CLIENT_ADDRESS address = NULL;
+        if (WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE, session->SessionId, WTSClientAddress, (LPWSTR *) &address, &bytes))
+        {
+            if (address->AddressFamily == 2 /*AF_INET*/)
+                ffStrbufInitF(&user->clientIp, "%u.%u.%u.%u", address->Address[2], address->Address[3], address->Address[4], address->Address[5]);
+            WTSFreeMemory(address);
+        }
+        else
+            ffStrbufInitS(&user->clientIp, "0.0.0.0");
+
+        bytes = 0;
+        PWTSINFOW wtsInfo = NULL;
+        if (WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE, session->SessionId, WTSSessionInfo, (LPWSTR *) &wtsInfo, &bytes))
+        {
+            user->loginTime = to_ms(*(uint64_t*) &wtsInfo->LogonTime);
+            WTSFreeMemory(wtsInfo);
+        }
+        else
+            user->loginTime = 0;
     }
 
     WTSFreeMemoryExW(WTSTypeSessionInfoLevel1, sessionInfo, 1);
 
-    if(users->length == 0)
-        ffStrbufAppendS(error, "Unable to detect users");
+    return NULL;
 }

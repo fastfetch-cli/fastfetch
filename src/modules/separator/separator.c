@@ -29,7 +29,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
     uint32_t titleLength = 1 // @
         + getWcsWidth(&platform->userName, wstr, &state) // user name
-        + (fqdn ? platform->domainName.length : platform->hostName.length); // host name
+        + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
     ffLogoPrintLine();
 
     if(options->string.length == 0)
@@ -77,7 +77,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator, NULL);
     ffStrbufInit(&options->string);
 }
 

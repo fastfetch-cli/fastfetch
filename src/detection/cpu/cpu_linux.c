@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "common/io/io.h"
+#include "common/processing.h"
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
 #include "util/mallocHelper.h"
@@ -128,7 +129,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
     if (error) return error;
 
-    cpu->coresPhysical = ffStrbufToUInt16(&physicalCoresBuffer, 1);
+    cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, 1);
 
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
@@ -161,6 +162,18 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     #ifdef __ANDROID__
     detectAndroid(cpu);
+    #endif
+
+    #ifdef __linux__
+    if (cpu->name.length == 0)
+    {
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (!ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }))
+        {
+            ffParsePropLines(buffer.chars, "Model name:", &cpu->name);
+            if (ffStrbufEqualS(&cpu->name, "-")) ffStrbufClear(&cpu->name);
+        }
+    }
     #endif
 
     return NULL;

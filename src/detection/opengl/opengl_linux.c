@@ -363,7 +363,7 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
 
     #else
 
-        FF_UNUSED(result);
+        FF_UNUSED(options, result);
         return "Fastfetch was built without gl support.";
 
     #endif //FF_HAVE_GL

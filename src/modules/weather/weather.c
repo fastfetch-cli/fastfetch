@@ -1,50 +1,22 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/networking.h"
+#include "detection/weather/weather.h"
 #include "modules/weather/weather.h"
 #include "util/stringUtils.h"
 
 #define FF_WEATHER_NUM_FORMAT_ARGS 1
 
-static FFNetworkingState state;
-static int status = -1;
-
-void ffPrepareWeather(FFWeatherOptions* options)
-{
-    if (status != -1)
-    {
-        fputs("Error: " FF_WEATHER_MODULE_NAME " can only be used once due to internal limitations\n", stderr);
-        exit(1);
-    }
-
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/");
-    if (options->location.length)
-        ffStrbufAppend(&path, &options->location);
-    ffStrbufAppendS(&path, "?format=");
-    ffStrbufAppend(&path, &options->outputFormat);
-    status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
-}
-
 void ffPrintWeather(FFWeatherOptions* options)
 {
-    if(status == -1)
-        ffPrepareWeather(options);
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+    const char* error = ffDetectWeather(options, &result);
 
-    if(status == 0)
+    if(error)
     {
-        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Failed to connect to 'wttr.in'");
+        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(4096);
-    bool success = ffNetworkingRecvHttpResponse(&state, &result, options->timeout);
-    if (success) ffStrbufSubstrAfterFirstS(&result, "\r\n\r\n");
-
-    if(!success || result.length == 0)
-    {
-        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Failed to receive the server response");
-        return;
-    }
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -61,7 +33,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, ffGenerateWeatherJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);
@@ -137,4 +109,18 @@ void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 
         ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateWeatherJson(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+    const char* error = ffDetectWeather(options, &result);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }

@@ -1,12 +1,15 @@
 #include "uptime.h"
+#include "common/time.h"
 
-#include <sys/sysinfo.h>
-
-const char* ffDetectUptime(uint64_t* result)
+const char* ffDetectUptime(FFUptimeResult* result)
 {
-    struct sysinfo info;
-    if(sysinfo(&info) != 0)
-        return "sysinfo() failed";
-    *result = (uint64_t) info.uptime;
+    struct timespec uptime;
+    if (clock_gettime(CLOCK_BOOTTIME, &uptime) != 0)
+        return "clock_gettime(CLOCK_BOOTTIME) failed";
+
+    result->uptime = (uint64_t) uptime.tv_sec * 1000 + (uint64_t) uptime.tv_nsec / 1000000;
+
+    result->bootTime = ffTimeGetNow() + result->uptime;
+
     return NULL;
 }

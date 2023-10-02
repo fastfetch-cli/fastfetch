@@ -44,7 +44,7 @@ array [                                                     //root
 ]
 */
 
-static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothDevice* device)
+static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothResult* device)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
         return;
@@ -72,7 +72,7 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
         ffDBusGetBool(dbus, &dictIter, &device->connected);
 }
 
-static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothDevice* device)
+static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothResult* device)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
         return;
@@ -130,7 +130,7 @@ static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessage
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    FFBluetoothDevice* device = ffListAdd(devices);
+    FFBluetoothResult* device = ffListAdd(devices);
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->address);
     ffStrbufInit(&device->type);
@@ -193,7 +193,7 @@ static const char* detectBluetooth(FFlist* devices)
 
 #endif
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothDevice */)
+const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothResult */)
 {
     #ifdef FF_HAVE_DBUS
         return detectBluetooth(devices);

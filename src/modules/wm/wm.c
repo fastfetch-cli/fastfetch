@@ -43,7 +43,7 @@ void ffPrintWM(FFWMOptions* options)
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM, ffGenerateWMJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -77,4 +77,19 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
 
         ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateWMJson(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    const FFDisplayServerResult* result = ffConnectDisplayServer();
+
+    if(result->wmPrettyName.length == 0)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No WM found");
+        return;
+    }
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->wmProcessName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->wmPrettyName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "protocolName", &result->wmProtocolName);
 }

@@ -68,7 +68,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -102,4 +102,20 @@ void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
 
         ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateMemoryJson(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FFMemoryResult storage;
+    const char* error = ffDetectMemory(&storage);
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_uint(doc, obj, "total", storage.bytesTotal);
+    yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }

@@ -77,7 +77,8 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
 bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout)
 {
     #ifdef FF_HAVE_THREADS
-        ffThreadJoin(state->thread);
+        if (!ffThreadJoin(state->thread, timeout))
+            return false;
     #endif
     if(state->sockfd == -1)
         return false;
@@ -85,8 +86,8 @@ bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, ui
     if(timeout > 0)
     {
         struct timeval timev;
-        timev.tv_sec = 0;
-        timev.tv_usec = (__typeof__(timev.tv_usec)) (timeout * 1000); //milliseconds to microseconds
+        timev.tv_sec = timeout / 1000;
+        timev.tv_usec = (__typeof__(timev.tv_usec)) ((timeout % 1000) * 1000); //milliseconds to microseconds
         setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
 

@@ -36,7 +36,7 @@ void ffPrintCommand(FFCommandOptions* options)
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInitStatic(&options->shell,
@@ -106,4 +106,33 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
 
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateCommandJson(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+    const char* error = ffProcessAppendStdOut(&result, (char* const[]){
+        options->shell.chars,
+        #ifdef _WIN32
+        "/c",
+        #else
+        "-c",
+        #endif
+        options->text.chars,
+        NULL
+    });
+
+    if(error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    if(!result.length)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", "No result printed");
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }

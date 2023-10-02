@@ -130,7 +130,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             if (hHidFile && HidD_GetProductString(hHidFile, displayName, sizeof(wchar_t) * 126))
                 ffStrbufSetWS(&device->name, displayName);
             else
-                ffStrbufSetF(&device->name, "Unknown gamepad %4X-%4X", rdi.hid.dwVendorId, rdi.hid.dwProductId);
+                ffStrbufSetF(&device->name, "Unknown gamepad %4X-%4X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
         }
     }
 

@@ -12,6 +12,8 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
         ffStrbufAppendF(buffer, "%i", *(int*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT)
         ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
+    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT64)
+        ffStrbufAppendF(buffer, "%" PRIu64, *(uint64_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT16)
         ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
     else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
@@ -253,8 +255,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
         ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
     }
-
-    ffStrbufTrimRight(buffer, ' ');
 
     ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }

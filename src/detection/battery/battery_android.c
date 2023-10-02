@@ -33,7 +33,7 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results)
     if (!yyjson_is_obj(root))
         return "Battery info result is not a JSON object";
 
-    BatteryResult* battery = ffListAdd(results);
+    FFBatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
@@ -68,7 +68,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
         return NULL;
     ffStrbufClear(&temp);
 
-    BatteryResult* battery = ffListAdd(results);
+    FFBatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
@@ -78,7 +78,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     if (ffParsePropLines(start, "AC powered: ", &temp) && ffStrbufEqualS(&temp, "true"))
         ffStrbufAppendS(&battery->status, "AC powered");
     ffStrbufClear(&temp);
-    
+
     if (ffParsePropLines(start, "USB powered: ", &temp) && ffStrbufEqualS(&temp, "true"))
     {
         if (battery->status.length) ffStrbufAppendS(&battery->status, ", ");

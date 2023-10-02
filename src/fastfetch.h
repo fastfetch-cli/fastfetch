@@ -14,6 +14,10 @@
     #include "3rdparty/yyjson/yyjson.h"
 #endif
 
+#ifdef _MSC_VER
+    #define __attribute__(x)
+#endif
+
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 #include "util/platform/FFPlatform.h"
@@ -108,6 +112,7 @@ typedef struct FFconfig
     FFMediaOptions media;
     FFMemoryOptions memory;
     FFMonitorOptions monitor;
+    FFNetIOOptions netIo;
     FFOSOptions os;
     FFOpenCLOptions openCL;
     FFOpenGLOptions openGL;
@@ -169,6 +174,7 @@ typedef struct FFstate
 
     FFPlatform platform;
     yyjson_doc* configDoc;
+    yyjson_mut_doc* resultDoc;
 } FFstate;
 
 typedef struct FFinstance

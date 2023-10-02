@@ -56,7 +56,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
         exe->chars, &size,
         NULL, 0
     ))
-        exe->length = (uint32_t)size;
+        exe->length = (uint32_t)size - 1;
 
     #endif
 
@@ -237,7 +237,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
         getenv("TERMUX_VERSION") != NULL ||
         getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
         getenv("TMUX_TMPDIR") != NULL
-    )) term = "Termux";
+    )) term = "com.termux";
     #endif
 
     #ifdef __linux__
@@ -269,18 +269,12 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
 
 static void getUserShellFromEnv(FFTerminalShellResult* result)
 {
-    ffStrbufSet(&result->userShellExe, &instance.state.platform.userShell);
-    if(result->userShellExe.length == 0)
-        return;
-
-    setExeName(&result->userShellExe, &result->userShellExeName);
-
     //If shell detection via processes failed
-    if(result->shellProcessName.length == 0 && result->userShellExe.length > 0)
+    if(result->shellProcessName.length == 0 && instance.state.platform.userShell.length > 0)
     {
-        ffStrbufAppendS(&result->shellProcessName, result->userShellExeName);
-        ffStrbufSet(&result->shellExe, &result->userShellExe);
+        ffStrbufSet(&result->shellExe, &instance.state.platform.userShell);
         setExeName(&result->shellExe, &result->shellExeName);
+        ffStrbufAppendS(&result->shellProcessName, result->shellExeName);
     }
 }
 
@@ -331,6 +325,8 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     const uint32_t exePathLen = PROC_PIDPATHINFO_MAXSIZE;
     #elif defined(MAXPATH)
     const uint32_t exePathLen = MAXPATH;
+    #elif defined(PATH_MAX)
+    const uint32_t exePathLen = PATH_MAX;
     #else
     const uint32_t exePathLen = 260;
     #endif
@@ -346,10 +342,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     result.terminalExeName = result.terminalExe.chars;
     result.terminalPid = 0;
 
-    ffStrbufInit(&result.userShellExe);
-    result.userShellExeName = result.userShellExe.chars;
-    ffStrbufInit(&result.userShellVersion);
-
     getTerminalShell(&result, getppid());
 
     getTerminalFromEnv(&result);
@@ -357,11 +349,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
 
     ffStrbufClear(&result.shellVersion);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
-
-    if(strcasecmp(result.shellExeName, result.userShellExeName) != 0)
-        getShellVersion(&result.userShellExe, result.userShellExeName, &result.userShellVersion);
-    else
-        ffStrbufSet(&result.userShellVersion, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
         ffStrbufInitStatic(&result.shellPrettyName, "PowerShell");
@@ -388,7 +375,13 @@ const FFTerminalShellResult* ffDetectTerminalShell()
 
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
         ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
-    #if defined(__linux__) || defined(__FreeBSD__)
+
+    #if defined(__ANDROID__)
+
+    else if(ffStrbufEqualS(&result.terminalProcessName, "com.termux"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "Termux");
+
+    #elif defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
         ffStrbufInitStatic(&result.terminalPrettyName, "gnome-terminal");

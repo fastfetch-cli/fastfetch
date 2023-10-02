@@ -32,7 +32,7 @@ void ffPrintIcons(FFIconsOptions* options)
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJson);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -66,4 +66,18 @@ void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
 
         ffPrintError(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateIconsJson(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
+    const char* error = ffDetectIcons(&icons);
+
+    if (error)
+    {
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &icons);
 }
