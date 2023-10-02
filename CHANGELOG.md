@@ -50,6 +50,7 @@ Logo:
 * Update Windows 11_small
 * Add Amazon Linux
 * Add LainOS
+* Fix colors of Slackware
 
 # 2.0.5
 
