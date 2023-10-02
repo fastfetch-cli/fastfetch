@@ -1,5 +1,6 @@
 #include "displayserver_linux.h"
 #include "common/io/io.h"
+#include "common/time.h"
 #include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
@@ -80,6 +81,8 @@ static void parseDRM(FFDisplayServerResult* result)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
+    uint64_t start = ffTimeGetTick();
+    printf("DS start: %lums\n", ffTimeGetTick() - start);
     ffStrbufInit(&ds->wmProcessName);
     ffStrbufInit(&ds->wmPrettyName);
     ffStrbufInit(&ds->wmProtocolName);
@@ -90,10 +93,12 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 
     if (!instance.config.dsForceDrm)
     {
+        printf("DS Wayland start: %lums\n", ffTimeGetTick() - start);
         //We try wayland as our prefered display server, as it supports the most features.
         //This method can't detect the name of our WM / DE
         ffdsConnectWayland(ds);
 
+        printf("DS XcbRandr start: %lums\n", ffTimeGetTick() - start);
         //Try the x11 libs, from most feature rich to least.
         //We use the display list to detect if a connection is needed.
         //They respect wmProtocolName, and only detect display if it is set.
@@ -101,21 +106,27 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         if(ds->displays.length == 0)
             ffdsConnectXcbRandr(ds);
 
+        printf("DS Xrandr start: %lums\n", ffTimeGetTick() - start);
         if(ds->displays.length == 0)
             ffdsConnectXrandr(ds);
 
+        printf("DS Xcb start: %lums\n", ffTimeGetTick() - start);
         if(ds->displays.length == 0)
             ffdsConnectXcb(ds);
 
+        printf("DS Xlib start: %lums\n", ffTimeGetTick() - start);
         if(ds->displays.length == 0)
             ffdsConnectXlib(ds);
     }
 
+    printf("DS DRM start: %lums\n", ffTimeGetTick() - start);
     //This display detection method is display server independent.
     //Use it if all connections failed
     if(ds->displays.length == 0)
         parseDRM(ds);
 
+    printf("DS WMDE start: %lums\n", ffTimeGetTick() - start);
     //This fills in missing information about WM / DE by using env vars and iterating processes
     ffdsDetectWMDE(ds);
+    printf("DS end: %lums\n", ffTimeGetTick() - start);
 }
