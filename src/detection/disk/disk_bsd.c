@@ -21,14 +21,64 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
 #elif __APPLE__
+#include "util/apple/cf_helpers.h"
+
 #include <sys/attr.h>
 #include <unistd.h>
+#include <IOKit/IOKitLib.h>
+#include <IOKit/storage/IOStorageDeviceCharacteristics.h>
 
 struct VolAttrBuf {
     uint32_t       length;
     attrreference_t volNameRef;
     char            volNameSpace[MAXPATHLEN];
 } __attribute__((aligned(4), packed));
+
+void detectDiskType(FFDisk* disk) // Not thread safe
+{
+    if (!ffStrbufStartsWithS(&disk->mountFrom, "/dev/disk")) return;
+
+    static uint8_t cache[100]; // disk_id => physical_type + 1
+    const char* numStart = disk->mountFrom.chars + strlen("/dev/disk");
+    char* numEnd = NULL;
+    unsigned long diskId = strtoul(numStart, &numEnd, 10);
+    if (numEnd == numStart || diskId >= 100)
+        return;
+
+    if (cache[diskId])
+    {
+        disk->physicalType = cache[diskId] - 1;
+        return;
+    }
+
+    io_iterator_t iterator;
+    char temp = *numEnd; *numEnd = '\0'; // Check for root disk directly
+    CFMutableDictionaryRef matchDict = IOBSDNameMatching(MACH_PORT_NULL, 0, disk->mountFrom.chars + strlen("/dev/"));
+    *numEnd = temp;
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) == kIOReturnSuccess)
+    {
+        for (io_registry_entry_t registryEntry = IOIteratorNext(iterator); registryEntry; IORegistryEntryGetParentEntry(registryEntry, kIOServicePlane, &registryEntry))
+        {
+            FF_CFTYPE_AUTO_RELEASE CFDictionaryRef deviceCharacteristics = (CFDictionaryRef) IORegistryEntryCreateCFProperty(registryEntry, CFSTR(kIOPropertyDeviceCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
+            if (!deviceCharacteristics)
+                continue;
+
+            CFStringRef diskType = (CFStringRef) CFDictionaryGetValue(deviceCharacteristics, CFSTR(kIOPropertyMediumTypeKey));
+            if (diskType)
+            {
+                if (CFStringCompare(diskType, CFSTR(kIOPropertyMediumTypeSolidStateKey), 0) == 0)
+                    disk->physicalType = FF_DISK_PHYSICAL_TYPE_SSD;
+                else if (CFStringCompare(diskType, CFSTR(kIOPropertyMediumTypeRotationalKey), 0) == 0)
+                    disk->physicalType = FF_DISK_PHYSICAL_TYPE_HDD;
+            }
+            break;
+        }
+
+        IOObjectRelease(iterator);
+    }
+
+    cache[diskId] = (uint8_t) (disk->physicalType + 1);
+}
 
 void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
@@ -45,6 +95,8 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
         .volattr = ATTR_VOL_INFO | ATTR_VOL_NAME,
     }, &attrBuf, sizeof(attrBuf), 0) == 0)
         ffStrbufInitNS(&disk->name, attrBuf.volNameRef.attr_length - 1 /* excluding '\0' */, attrBuf.volNameSpace);
+
+    detectDiskType(disk);
 }
 #endif
 
