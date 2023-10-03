@@ -1,3 +1,9 @@
+# 2.1.1
+
+Bugfixes:
+* Fix possible crashes on Windows 7 (Disk, Windows)
+* Fix possible crashes caused by uninitialized strings (Users, Windows)
+
 # 2.1.0
 
 This release introduces a new output format: JSON result
