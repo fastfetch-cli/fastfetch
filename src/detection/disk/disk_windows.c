@@ -38,6 +38,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
             if (handle != INVALID_HANDLE_VALUE)
             {
                 DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
+                DWORD retSize = 0;
                 if(DeviceIoControl(
                     handle,
                     IOCTL_STORAGE_QUERY_PROPERTY,
@@ -48,9 +49,9 @@ const char* ffDetectDisksImpl(FFlist* disks)
                     sizeof(STORAGE_PROPERTY_QUERY),
                     &dspd,
                     sizeof(dspd),
-                    NULL,
+                    &retSize,
                     NULL
-                ))
+                ) && retSize == sizeof(dspd))
                     disk->physicalType = dspd.IncursSeekPenalty ? FF_DISK_PHYSICAL_TYPE_HDD : FF_DISK_PHYSICAL_TYPE_SSD;
             }
         }
