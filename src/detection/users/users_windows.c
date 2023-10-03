@@ -28,17 +28,17 @@ const char* ffDetectUsers(FFlist* users)
         FFUserResult* user = (FFUserResult*) ffListAdd(users);
         ffStrbufInitWS(&user->name, session->pUserName);
         ffStrbufInitWS(&user->hostName, session->pHostName);
+        ffStrbufInitS(&user->clientIp, "0.0.0.0");
+        user->loginTime = 0;
 
         DWORD bytes = 0;
         PWTS_CLIENT_ADDRESS address = NULL;
         if (WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE, session->SessionId, WTSClientAddress, (LPWSTR *) &address, &bytes))
         {
             if (address->AddressFamily == 2 /*AF_INET*/)
-                ffStrbufInitF(&user->clientIp, "%u.%u.%u.%u", address->Address[2], address->Address[3], address->Address[4], address->Address[5]);
+                ffStrbufSetF(&user->clientIp, "%u.%u.%u.%u", address->Address[2], address->Address[3], address->Address[4], address->Address[5]);
             WTSFreeMemory(address);
         }
-        else
-            ffStrbufInitS(&user->clientIp, "0.0.0.0");
 
         bytes = 0;
         PWTSINFOW wtsInfo = NULL;
@@ -47,8 +47,6 @@ const char* ffDetectUsers(FFlist* users)
             user->loginTime = to_ms(*(uint64_t*) &wtsInfo->LogonTime);
             WTSFreeMemory(wtsInfo);
         }
-        else
-            user->loginTime = 0;
     }
 
     WTSFreeMemoryExW(WTSTypeSessionInfoLevel1, sessionInfo, 1);
