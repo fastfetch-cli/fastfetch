@@ -173,7 +173,12 @@ void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_bool(doc, obj, "active", item->active);
         yyjson_mut_obj_add_bool(doc, obj, "main", item->main);
-        yyjson_mut_obj_add_uint(doc, obj, "volume", item->volume);
+
+        if (item->volume != FF_SOUND_VOLUME_UNKNOWN)
+            yyjson_mut_obj_add_uint(doc, obj, "volume", item->volume);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "volumne");
+
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
     }
