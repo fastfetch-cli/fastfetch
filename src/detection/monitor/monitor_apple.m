@@ -1,11 +1,11 @@
 #include "monitor.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/apple/cf_helpers.h"
-#include "util/apple/ddcci.h"
 #include "util/edidHelper.h"
 
 #import <AppKit/NSScreen.h>
 #import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
 
