@@ -439,7 +439,7 @@ static inline void printCommandHelp(const char* command)
             "Album name"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "datetime-format") == 0 || ffStrEqualsIgnCase(command, "date-format") || ffStrEqualsIgnCase(command, "time-format"))
+    else if(ffStrEqualsIgnCase(command, "datetime-format") || ffStrEqualsIgnCase(command, "date-format") || ffStrEqualsIgnCase(command, "time-format"))
     {
         constructAndPrintCommandHelpFormat("[date][time]", "{1}-{4}-{11} {14}:{18}:{20}", 20,
             "year",
@@ -528,7 +528,7 @@ static inline void printCommandHelp(const char* command)
         );
     }
     else
-        fprintf(stderr, "No specific help for command %s provided\n", command);
+        fprintf(stderr, "No specific help for command \'%s\' provided\n", command);
 }
 
 static void listAvailablePresets(void)
