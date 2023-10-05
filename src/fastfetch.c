@@ -94,7 +94,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "bios-format"))
     {
-        constructAndPrintCommandHelpFormat("bios", "{2} {3}", 4,
+        constructAndPrintCommandHelpFormat("bios", "{4} ({2})", 4,
             "bios date",
             "bios release",
             "bios vendor",
@@ -103,7 +103,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "board-format"))
     {
-        constructAndPrintCommandHelpFormat("board", "{2} {3}", 3,
+        constructAndPrintCommandHelpFormat("board", "{1} ({3})", 3,
             "board name",
             "board vendor",
             "board version"
@@ -111,7 +111,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "chassis-format"))
     {
-        constructAndPrintCommandHelpFormat("chassis", "{2} {3}", 4,
+        constructAndPrintCommandHelpFormat("chassis", "{1}", 3,
             "chassis type",
             "chassis vendor",
             "chassis version"
@@ -127,7 +127,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "uptime-format"))
     {
-        constructAndPrintCommandHelpFormat("uptime", "{} days {} hours {} mins", 4,
+        constructAndPrintCommandHelpFormat("uptime", "{1} days {2} hours {3} mins", 4,
             "Days",
             "Hours",
             "Minutes",
@@ -136,7 +136,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "processes-format"))
     {
-        constructAndPrintCommandHelpFormat("processes", "{}", 1,
+        constructAndPrintCommandHelpFormat("processes", "{1}", 1,
             "Count"
         );
     }
@@ -182,7 +182,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "display-format"))
     {
-        constructAndPrintCommandHelpFormat("display", "{}x{} @ {}Hz", 7,
+        constructAndPrintCommandHelpFormat("display", "{1}x{2} @ {3}Hz", 8,
             "Screen width",
             "Screen height",
             "Screen refresh rate",
@@ -202,7 +202,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "monitor-format"))
     {
-        constructAndPrintCommandHelpFormat("monitor", "{}", 6,
+        constructAndPrintCommandHelpFormat("monitor", "{2}x{3} px - {4}x{5} mm ({6} inches, {7} ppi)", 7,
             "Display name",
             "Display native resolution width in pixels",
             "Display native resolution height in pixels",
@@ -230,31 +230,31 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "wmtheme-format"))
     {
-        constructAndPrintCommandHelpFormat("wmtheme", "{}", 1,
+        constructAndPrintCommandHelpFormat("wmtheme", "{1}", 1,
             "WM theme name"
         );
     }
     else if(ffStrEqualsIgnCase(command, "theme-format"))
     {
-        constructAndPrintCommandHelpFormat("theme", "{}", 1,
+        constructAndPrintCommandHelpFormat("theme", "{1}", 1,
             "Combined themes"
         );
     }
     else if(ffStrEqualsIgnCase(command, "icons-format"))
     {
-        constructAndPrintCommandHelpFormat("icons", "{}", 1,
+        constructAndPrintCommandHelpFormat("icons", "{1}", 1,
             "Combined icons"
         );
     }
     else if(ffStrEqualsIgnCase(command, "wallpaper-format"))
     {
-        constructAndPrintCommandHelpFormat("wallpaper", "{}", 1,
+        constructAndPrintCommandHelpFormat("wallpaper", "{1}", 1,
             "Wallpaper image file"
         );
     }
     else if(ffStrEqualsIgnCase(command, "font-format"))
     {
-        constructAndPrintCommandHelpFormat("font", "{} [QT], {} [GTK2], {} [GTK3], {} [GTK4]", 4,
+        constructAndPrintCommandHelpFormat("font", "{1} [QT], {2} [GTK2], {3} [GTK3], {4} [GTK4]", 4,
             "Font 1",
             "Font 2",
             "Font 3",
@@ -263,14 +263,14 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "cursor-format"))
     {
-        constructAndPrintCommandHelpFormat("cursor", "{} ({}pt)", 2,
+        constructAndPrintCommandHelpFormat("cursor", "{1}", 2,
             "Cursor theme",
             "Cursor size"
         );
     }
     else if(ffStrEqualsIgnCase(command, "terminal-format"))
     {
-        constructAndPrintCommandHelpFormat("terminal", "{3}", 10,
+        constructAndPrintCommandHelpFormat("terminal", "{5} {6}", 6,
             "Terminal process name",
             "Terminal path with exe name",
             "Terminal exe name",
@@ -281,7 +281,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "terminalfont-format"))
     {
-        constructAndPrintCommandHelpFormat("terminalfont", "{}", 4,
+        constructAndPrintCommandHelpFormat("terminalfont", "{1}", 4,
             "Terminal font",
             "Terminal font name",
             "Termianl font size",
@@ -290,7 +290,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "cpu-format"))
     {
-        constructAndPrintCommandHelpFormat("cpu", "{1} ({5}) @ {7}GHz", 8,
+        constructAndPrintCommandHelpFormat("cpu", "{1} ({5}) @ {7} GHz", 8,
             "Name",
             "Vendor",
             "Physical core count",
@@ -303,13 +303,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "cpuusage-format"))
     {
-        constructAndPrintCommandHelpFormat("cpuusage", "{0}%", 1,
+        constructAndPrintCommandHelpFormat("cpuusage", "{1}", 1,
             "CPU usage without percent mark"
         );
     }
     else if(ffStrEqualsIgnCase(command, "gpu-format"))
     {
-        constructAndPrintCommandHelpFormat("gpu", "{} {}", 6,
+        constructAndPrintCommandHelpFormat("gpu", "{1} {2}", 6,
             "GPU vendor",
             "GPU name",
             "GPU driver",
@@ -320,7 +320,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "memory-format"))
     {
-        constructAndPrintCommandHelpFormat("memory", "{} / {} ({}%)", 3,
+        constructAndPrintCommandHelpFormat("memory", "{1} / {2} ({3})", 3,
             "Used size",
             "Total size",
             "Percentage used"
@@ -328,7 +328,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "swap-format"))
     {
-        constructAndPrintCommandHelpFormat("swap", "{} / {} ({}%)", 3,
+        constructAndPrintCommandHelpFormat("swap", "{1} / {2} ({3})", 3,
             "Used size",
             "Total size",
             "Percentage used"
@@ -336,7 +336,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "disk-format"))
     {
-        constructAndPrintCommandHelpFormat("disk", "{1} / {2} ({3}%)", 9,
+        constructAndPrintCommandHelpFormat("disk", "{1} / {2} ({3}) - {9}", 9,
             "Size used",
             "Size total",
             "Size percentage",
@@ -370,20 +370,21 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "lm-format"))
     {
-        constructAndPrintCommandHelpFormat("lm", "{} ({})", 2,
+        constructAndPrintCommandHelpFormat("lm", "{1} {3} ({2})", 3,
             "LM service",
-            "LM type"
+            "LM type",
+            "LM version"
         );
     }
     else if(ffStrEqualsIgnCase(command, "locale-format"))
     {
-        constructAndPrintCommandHelpFormat("locale", "{}", 1,
+        constructAndPrintCommandHelpFormat("locale", "{1}", 1,
             "Locale code"
         );
     }
     else if(ffStrEqualsIgnCase(command, "localip-format"))
     {
-        constructAndPrintCommandHelpFormat("localip", "{}", 5,
+        constructAndPrintCommandHelpFormat("localip", "{1}{5}", 5,
             "Local IPv4 address",
             "Local IPv6 address",
             "Physical (MAC) address",
@@ -393,13 +394,14 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "publicip-format"))
     {
-        constructAndPrintCommandHelpFormat("publicip", "{}", 1,
-            "Public IP address"
+        constructAndPrintCommandHelpFormat("publicip", "{1} ({2})", 2,
+            "Public IP address",
+            "Location"
         );
     }
     else if(ffStrEqualsIgnCase(command, "netio-format"))
     {
-        constructAndPrintCommandHelpFormat("netio", "{}", 3,
+        constructAndPrintCommandHelpFormat("netio", "{1} (IN) - {2} (OUT){4}", 4,
             "Size of data received per second (formatted)",
             "Size of data sent per second (formatted)",
             "Interface name",
@@ -408,7 +410,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "wifi-format"))
     {
-        constructAndPrintCommandHelpFormat("wifi", "{4} - {6}", 3,
+        constructAndPrintCommandHelpFormat("wifi", "{4} - {10}", 10,
             "Interface description",
             "Interface status",
             "Connection status",
@@ -439,7 +441,7 @@ static inline void printCommandHelp(const char* command)
             "Album name"
         );
     }
-    else if(ffStrEqualsIgnCase(command, "datetime-format") == 0 || ffStrEqualsIgnCase(command, "date-format") || ffStrEqualsIgnCase(command, "time-format"))
+    else if(ffStrEqualsIgnCase(command, "datetime-format"))
     {
         constructAndPrintCommandHelpFormat("[date][time]", "{1}-{4}-{11} {14}:{18}:{20}", 20,
             "year",
@@ -466,7 +468,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "version-format"))
     {
-        constructAndPrintCommandHelpFormat("version", "{1} {2}{3} (5)", 6,
+        constructAndPrintCommandHelpFormat("version", "{1} {2}{3} ({5})", 8,
             "Project name",
             "Version",
             "Version tweak",
@@ -487,7 +489,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "opengl-format"))
     {
-        constructAndPrintCommandHelpFormat("opengl", "{}", 3,
+        constructAndPrintCommandHelpFormat("opengl", "{1}", 4,
             "version",
             "renderer",
             "vendor",
@@ -513,7 +515,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "sound-format"))
     {
-        constructAndPrintCommandHelpFormat("sound", "{2} (3%)", 4,
+        constructAndPrintCommandHelpFormat("sound", "{2} ({3}%)", 4,
             "Main",
             "Name",
             "Volume",
@@ -522,13 +524,13 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "gamepad-format"))
     {
-        constructAndPrintCommandHelpFormat("gamepad", "{1}", 1,
+        constructAndPrintCommandHelpFormat("gamepad", "{1}", 2,
             "Name",
             "Identifier"
         );
     }
     else
-        fprintf(stderr, "No specific help for command %s provided\n", command);
+        fprintf(stderr, "No specific help for command '%s' provided\n", command);
 }
 
 static void listAvailablePresets(void)
