@@ -468,7 +468,7 @@ static inline void printCommandHelp(const char* command)
     }
     else if(ffStrEqualsIgnCase(command, "version-format"))
     {
-        constructAndPrintCommandHelpFormat("version", "{1} {2}{3} ({5})", 8,
+        constructAndPrintCommandHelpFormat("version", "{1} {2}{3} ({5})", 9,
             "Project name",
             "Version",
             "Version tweak",

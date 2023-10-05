@@ -385,6 +385,7 @@ if(LINUX)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
@@ -433,6 +434,7 @@ elseif(ANDROID)
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
+        src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
@@ -488,6 +490,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/libc/libc_nosupport.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
@@ -537,6 +540,7 @@ elseif(APPLE)
         src/detection/host/host_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
+        src/detection/libc/libc_nosupport.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
@@ -585,6 +589,7 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
+        src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c

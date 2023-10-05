@@ -1,10 +1,11 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "detection/libc/libc.h"
 #include "detection/version/version.h"
 #include "modules/version/version.h"
 #include "util/stringUtils.h"
 
-#define FF_VERSION_NUM_FORMAT_ARGS 8
+#define FF_VERSION_NUM_FORMAT_ARGS 9
 
 void ffPrintVersion(FFVersionOptions* options)
 {
@@ -18,6 +19,18 @@ void ffPrintVersion(FFVersionOptions* options)
     }
     else
     {
+        FFLibcResult libcResult;
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        if (!ffDetectLibc(&libcResult))
+        {
+            ffStrbufSetS(&buf, libcResult.name);
+            if (libcResult.version)
+            {
+                ffStrbufAppendC(&buf, ' ');
+                ffStrbufAppendS(&buf, libcResult.version);
+            }
+        }
+
         ffPrintFormat(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_VERSION_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, result.projectName},
             {FF_FORMAT_ARG_TYPE_STRING, result.version},
@@ -27,6 +40,7 @@ void ffPrintVersion(FFVersionOptions* options)
             {FF_FORMAT_ARG_TYPE_STRING, result.cmakeBuiltType},
             {FF_FORMAT_ARG_TYPE_STRING, result.compileTime},
             {FF_FORMAT_ARG_TYPE_STRING, result.compiler},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &buf},
         });
     }
 }
@@ -83,4 +97,20 @@ void ffGenerateVersionJson(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut
     yyjson_mut_obj_add_str(doc, obj, "compileTime", result.compileTime);
     yyjson_mut_obj_add_str(doc, obj, "compiler", result.compiler);
     yyjson_mut_obj_add_bool(doc, obj, "debugMode", result.debugMode);
+
+    FFLibcResult libcResult;
+    if (ffDetectLibc(&libcResult))
+    {
+        yyjson_mut_obj_add_null(doc, obj, "libc");
+    }
+    else
+    {
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreateS(libcResult.name);
+        if (libcResult.version)
+        {
+            ffStrbufAppendC(&buf, ' ');
+            ffStrbufAppendS(&buf, libcResult.version);
+        }
+        yyjson_mut_obj_add_strbuf(doc, obj, "libc", &buf);
+    }
 }
