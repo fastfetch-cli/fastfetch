@@ -1,0 +1,18 @@
+${c3}ddddddddddddddc  ${c1},cc:
+${c3}ddddddddddddddc  ${c1},cc:
+${c3}ddddddddddddddd  ${c1},cc:
+${c3}ddddddddddddl:'  ${c1},cc:
+${c3}dddddddddl'    ${c1}..;cc:
+${c3}dddddddo.   ${c1},:cccccc:
+${c3}ddddddl   ${c1},ccc:'''''
+${c3}dddddo.  ${c1};ccc.          ............
+        .ccc.           cccccccccccc
+${c2}......  ${c1}.ccc.          .ccc'''''''''
+${c2}OOOOOk.  ${c1};ccc.        .ccc;   ......
+${c2}OOOOOOd   ${c1}'ccc:,....,:ccc'   ${c4}coooooo
+${c2}OOOOOOOx.   ${c1}':cccccccc:'   ${c4}.looooooo
+${c2}OOOOOOOOOd,     ${c1}`'''`     ${c4}.coooooooo
+${c2}OOOOOOOOOOOOdc,.    ${c4}..,coooooooooooo
+${c2}OOOOOOOOOOOOOOOO'  ${c4}.oooooooooooooooo
+${c2}OOOOOOOOOOOOOOOO'  ${c4}.oooooooooooooooo
+${c2}OOOOOOOOOOOOOOOO'  ${c4}.oooooooooooooooo
