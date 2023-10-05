@@ -826,6 +826,19 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Chimera Linux
+    {
+        .names = {"Chimera Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERALINUX,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // ChonkySealOS
     {
         .names = {"ChonkySealOS"},
