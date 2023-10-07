@@ -7,6 +7,7 @@ Bugfixes:
 * Fix possible crashes on Windows 7 (Disk, Windows)
 * Fix possible crashes caused by uninitialized strings (Users, Windows)
 * Improve support of `--help *-format` and several bugs are found and fixed
+* Don't incorrectly print `No active sound devices found` when using a non-controllable sound device (Sound, macOS)
 
 # 2.1.0
 

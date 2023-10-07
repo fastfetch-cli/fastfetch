@@ -41,6 +41,14 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         }, 0, NULL, &dataSize, &name) != kAudioHardwareNoError)
             continue;
 
+        // Ignore input devices
+        if(AudioObjectGetPropertyDataSize(deviceId, &(AudioObjectPropertyAddress){
+            kAudioDevicePropertyStreams,
+            kAudioObjectPropertyScopeInput,
+            kAudioObjectPropertyElementMain
+        }, 0, NULL, &dataSize) == kAudioHardwareNoError && dataSize > 0)
+            continue;
+
         uint32_t connected;
         dataSize = sizeof(connected);
         if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
