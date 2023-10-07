@@ -19,6 +19,7 @@ typedef struct FFPackagesResult
     uint32_t nixDefault;
     uint32_t nixSystem;
     uint32_t nixUser;
+    uint32_t opkg;
     uint32_t pacman;
     uint32_t paludis;
     uint32_t pkg;

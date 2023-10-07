@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 24
+#define FF_PACKAGES_NUM_FORMAT_ARGS 25
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -64,6 +64,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(pkgtool)
         FF_PRINT_PACKAGE(paludis)
         FF_PRINT_PACKAGE(winget)
+        FF_PRINT_PACKAGE(opkg)
 
         putchar('\n');
     }
@@ -94,6 +95,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pkgtool},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.paludis},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.winget},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.opkg},
         });
     }
 
@@ -183,7 +185,7 @@ void ffGeneratePackagesJson(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_m
 
 void ffPrintPackagesHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget)", FF_PACKAGES_NUM_FORMAT_ARGS, (const char* []) {
+    ffPrintModuleFormatHelp(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg)", FF_PACKAGES_NUM_FORMAT_ARGS, (const char* []) {
         "Number of all packages",
         "Number of pacman packages",
         "Pacman branch on manjaro",
@@ -206,7 +208,8 @@ void ffPrintPackagesHelpFormat(void)
         "Number of scoop packages",
         "Number of choco packages",
         "Number of pkgtool packages",
-        "Number of paludis packages"
-        "Number of winget packages"
+        "Number of paludis packages",
+        "Number of winget packages",
+        "Number of opkg packages"
     });
 }
