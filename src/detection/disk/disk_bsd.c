@@ -53,9 +53,8 @@ void detectDiskType(FFDisk* disk) // Not thread safe
 
     io_iterator_t iterator;
     char temp = *numEnd; *numEnd = '\0'; // Check for root disk directly
-    CFMutableDictionaryRef matchDict = IOBSDNameMatching(MACH_PORT_NULL, 0, disk->mountFrom.chars + strlen("/dev/"));
     *numEnd = temp;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) == kIOReturnSuccess)
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOBSDNameMatching(MACH_PORT_NULL, 0, disk->mountFrom.chars + strlen("/dev/")), &iterator) == kIOReturnSuccess)
     {
         for (io_registry_entry_t registryEntry = IOIteratorNext(iterator); registryEntry; IORegistryEntryGetParentEntry(registryEntry, kIOServicePlane, &registryEntry))
         {

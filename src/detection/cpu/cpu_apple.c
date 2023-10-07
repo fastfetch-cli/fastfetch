@@ -29,12 +29,8 @@ static const char* detectFrequency(FFCPUResult* cpu)
 {
     // https://github.com/giampaolo/psutil/pull/2222/files
 
-    CFMutableDictionaryRef matchDict = IOServiceMatching("AppleARMIODevice");
-    if (matchDict == NULL)
-        return "IOServiceMatching(\"AppleARMIODevice\") failed";
-
     io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleARMIODevice"), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;

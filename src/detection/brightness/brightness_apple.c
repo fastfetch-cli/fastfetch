@@ -57,12 +57,8 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
     if (!IOAVServiceCreate || !IOAVServiceReadI2C)
         return "IOAVService is not available";
 
-    CFMutableDictionaryRef matchDict = IOServiceMatching("DCPAVServiceProxy");
-    if (matchDict == NULL)
-        return "IOServiceMatching(\"DCPAVServiceProxy\") failed";
-
     io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("DCPAVServiceProxy"), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     FF_STRBUF_AUTO_DESTROY location = ffStrbufCreate();

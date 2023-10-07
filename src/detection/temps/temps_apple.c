@@ -140,12 +140,8 @@ static const char *smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
 
 static const char *smcOpen(io_connect_t *conn)
 {
-    CFMutableDictionaryRef matchDict = IOServiceMatching("AppleSMC");
-    if (matchDict == NULL)
-        return "IOServiceMatching(\"AppleSmartBattery\") failed";
-
     io_iterator_t iterator;
-    if (IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSMC"), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_object_t device = IOIteratorNext(iterator);
