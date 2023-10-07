@@ -99,6 +99,7 @@ typedef struct FFconfig
     FFDEOptions de;
     FFDateTimeOptions dateTime;
     FFDiskOptions disk;
+    FFDiskIOOptions diskio;
     FFDisplayOptions display;
     FFFontOptions font;
     FFGPUOptions gpu;

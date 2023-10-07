@@ -273,6 +273,7 @@ set(LIBFASTFETCH_SRC
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
     src/detection/disk/disk.c
+    src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
@@ -310,6 +311,7 @@ set(LIBFASTFETCH_SRC
     src/modules/datetime/datetime.c
     src/modules/de/de.c
     src/modules/disk/disk.c
+    src/modules/diskio/diskio.c
     src/modules/font/font.c
     src/modules/gpu/gpu.c
     src/modules/host/host.c
@@ -375,6 +377,7 @@ if(LINUX)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
@@ -534,6 +537,7 @@ elseif(APPLE)
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
+        src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
@@ -584,6 +588,7 @@ elseif(WIN32)
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
+        src/detection/diskio/diskio_windows.c
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c

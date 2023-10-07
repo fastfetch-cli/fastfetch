@@ -57,9 +57,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
         }
 
         if(GetVolumeNameForVolumeMountPointW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
-        {
             ffStrbufInitWS(&disk->mountFrom, volumeName);
-        }
         else
             ffStrbufInit(&disk->mountFrom);
 
