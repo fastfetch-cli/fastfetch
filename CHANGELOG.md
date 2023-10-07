@@ -1,8 +1,12 @@
 # 2.1.1
 
+Features:
+* Support opkg (Packages, Linux)
+
 Bugfixes:
 * Fix possible crashes on Windows 7 (Disk, Windows)
 * Fix possible crashes caused by uninitialized strings (Users, Windows)
+* Improve support of `--help *-format` and several bugs are found and fixed
 
 # 2.1.0
 
