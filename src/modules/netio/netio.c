@@ -200,10 +200,18 @@ void ffGenerateNetIOJson(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mu
 
 void ffPrintNetIOHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT){4}", FF_NETIO_NUM_FORMAT_ARGS, (const char* []) {
+    ffPrintModuleFormatHelp(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT)", FF_NETIO_NUM_FORMAT_ARGS, (const char* []) {
         "Size of data received per second (formatted)",
         "Size of data sent per second (formatted)",
         "Interface name",
-        "Is default route"
+        "Is default route",
+        "Size of data received per second (in bytes)",
+        "Size of data sent per second (in bytes)",
+        "Number of packets received per second",
+        "Number of packets sent per second",
+        "Number of errors received per second",
+        "Number of errors sent per second",
+        "Number of packets dropped when receiving per second",
+        "Number of packets dropped when sending per second",
     });
 }
