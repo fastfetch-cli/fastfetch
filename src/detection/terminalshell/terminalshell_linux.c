@@ -150,6 +150,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
 
     //Known shells
     if (
+        strcasecmp(name, "ash")       == 0 ||
         strcasecmp(name, "bash")      == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
