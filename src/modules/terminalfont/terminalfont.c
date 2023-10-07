@@ -49,7 +49,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJson, ffPrintTerminalFontHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -123,4 +123,14 @@ void ffGenerateTerminalFontJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjs
     ffStrbufDestroy(&result.error);
     ffFontDestroy(&result.font);
     ffFontDestroy(&result.fallback);
+}
+
+void ffPrintTerminalFontHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_TERMINALFONT_MODULE_NAME, "{1}", FF_TERMINALFONT_NUM_FORMAT_ARGS, (const char* []) {
+        "Terminal font combined",
+        "Terminal font name",
+        "Terminal font size",
+        "Terminal font styles"
+    });
 }

@@ -218,7 +218,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJson, ffPrintDiskHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);
@@ -451,4 +451,19 @@ void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_
         ffStrbufDestroy(&item->filesystem);
         ffStrbufDestroy(&item->name);
     }
+}
+
+void ffPrintDiskHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_DISK_MODULE_NAME, "{1} / {2} ({3}) - {9}", FF_DISK_NUM_FORMAT_ARGS, (const char* []) {
+        "Size used",
+        "Size total",
+        "Size percentage",
+        "Files used",
+        "Files total",
+        "Files percentage",
+        "True if external volume",
+        "True if hidden volume",
+        "Filesystem"
+    });
 }

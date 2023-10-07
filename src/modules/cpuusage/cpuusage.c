@@ -46,7 +46,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJson, ffPrintCPUUsageHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -93,4 +93,11 @@ void ffGenerateCPUUsageJson(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yyjson_m
         return;
     }
     yyjson_mut_obj_add_real(doc, module, "result", percentage);
+}
+
+void ffPrintCPUUsageHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_CPUUSAGE_MODULE_NAME, "{1}", FF_CPUUSAGE_NUM_FORMAT_ARGS, (const char* []) {
+        "CPU usage (percentage)"
+    });
 }

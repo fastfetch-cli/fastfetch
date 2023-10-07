@@ -85,7 +85,7 @@ void ffPrintSound(FFSoundOptions* options)
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJson, ffPrintSoundHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
@@ -188,4 +188,14 @@ void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
     }
+}
+
+void ffPrintSoundHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_SOUND_MODULE_NAME, "{2} ({3}%)", FF_SOUND_NUM_FORMAT_ARGS, (const char* []) {
+        "Is main sound device",
+        "Device name",
+        "Volume",
+        "Identifier"
+    });
 }

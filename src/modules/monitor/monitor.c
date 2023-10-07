@@ -77,7 +77,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJson, ffPrintMonitorHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -146,4 +146,17 @@ void ffGenerateMonitorJson(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut
     {
         ffStrbufDestroy(&item->name);
     }
+}
+
+void ffPrintMonitorHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_MONITOR_MODULE_NAME, "{2}x{3} px - {4}x{5} mm ({6} inches, {7} ppi)", FF_MONITOR_NUM_FORMAT_ARGS, (const char* []) {
+        "Display name",
+        "Display native resolution width in pixels",
+        "Display native resolution height in pixels",
+        "Display physical width in millimeters",
+        "Display physical height in millimeters",
+        "Display physical diagonal length in inches",
+        "Display physical pixels per inch (PPI)"
+    });
 }

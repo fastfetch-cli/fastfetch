@@ -51,7 +51,7 @@ void ffPrintLM(FFLMOptions* options)
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, ffGenerateLMJson, ffPrintLMHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -116,4 +116,13 @@ exit:
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.version);
+}
+
+void ffPrintLMHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_LM_MODULE_NAME, "{1} {3} ({2})", FF_LM_NUM_FORMAT_ARGS, (const char* []) {
+        "LM service",
+        "LM type",
+        "LM version"
+    });
 }

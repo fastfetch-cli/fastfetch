@@ -34,6 +34,15 @@ static inline bool ffStrEndsWith(const char* str, const char* compareTo)
     return memcmp(str + strLength - compareToLength, compareTo, compareToLength) == 0;
 }
 
+static inline bool ffStrEndsWithIgnCase(const char* str, const char* compareTo)
+{
+    size_t strLength = strlen(str);
+    size_t compareToLength = strlen(compareTo);
+    if (strLength < compareToLength)
+        return false;
+    return strncasecmp(str + strLength - compareToLength, compareTo, compareToLength) == 0;
+}
+
 static inline bool ffStrEquals(const char* str, const char* compareTo)
 {
     return strcmp(str, compareTo) == 0;

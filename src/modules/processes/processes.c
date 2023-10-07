@@ -33,7 +33,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJson, ffPrintProcessesHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -81,4 +81,11 @@ void ffGenerateProcessesJson(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson
     }
 
     yyjson_mut_obj_add_uint(doc, module, "result", result);
+}
+
+void ffPrintProcessesHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_PROCESSES_MODULE_NAME, "{1}", FF_PROCESSES_NUM_FORMAT_ARGS, (const char* []) {
+        "Count"
+    });
 }

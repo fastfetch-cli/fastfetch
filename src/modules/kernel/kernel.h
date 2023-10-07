@@ -10,3 +10,4 @@ bool ffParseKernelCommandOptions(FFKernelOptions* options, const char* key, cons
 void ffDestroyKernelOptions(FFKernelOptions* options);
 void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module);
 void ffGenerateKernelJson(FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintKernelHelpFormat(void);

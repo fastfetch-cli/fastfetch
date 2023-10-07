@@ -52,7 +52,7 @@ void ffPrintCursor(FFCursorOptions* options)
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, ffGenerateCursorJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, ffGenerateCursorJson, ffPrintCursorHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -110,4 +110,12 @@ void ffGenerateCursorJson(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_d
     ffStrbufDestroy(&result.error);
     ffStrbufDestroy(&result.theme);
     ffStrbufDestroy(&result.size);
+}
+
+void ffPrintCursorHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_CURSOR_MODULE_NAME, "{1} ({2}px)", FF_CURSOR_NUM_FORMAT_ARGS, (const char* []) {
+        "Cursor theme",
+        "Cursor size"
+    });
 }

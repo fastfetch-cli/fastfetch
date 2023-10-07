@@ -10,3 +10,4 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
 void ffDestroyDiskOptions(FFDiskOptions* options);
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module);
 void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintDiskHelpFormat(void);

@@ -10,3 +10,4 @@ bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* 
 void ffDestroyOSOptions(FFOSOptions* options);
 void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module);
 void ffGenerateOSJson(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintOSHelpFormat(void);

@@ -101,7 +101,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
 
 void ffInitNetIOOptions(FFNetIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJson, ffPrintNetIOHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
@@ -196,4 +196,14 @@ void ffGenerateNetIOJson(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mu
     {
         ffStrbufDestroy(&inf->name);
     }
+}
+
+void ffPrintNetIOHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT){4}", FF_NETIO_NUM_FORMAT_ARGS, (const char* []) {
+        "Size of data received per second (formatted)",
+        "Size of data sent per second (formatted)",
+        "Interface name",
+        "Is default route"
+    });
 }

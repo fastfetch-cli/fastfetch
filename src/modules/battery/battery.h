@@ -11,3 +11,4 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
 void ffDestroyBatteryOptions(FFBatteryOptions* options);
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module);
 void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintBatteryHelpFormat(void);

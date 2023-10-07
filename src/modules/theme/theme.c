@@ -32,7 +32,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJson, ffPrintThemeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -80,4 +80,11 @@ void ffGenerateThemeJson(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &theme);
+}
+
+void ffPrintThemeHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_THEME_MODULE_NAME, "{1}", FF_THEME_NUM_FORMAT_ARGS, (const char* []) {
+        "Combined themes"
+    });
 }

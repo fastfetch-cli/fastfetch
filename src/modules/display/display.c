@@ -112,7 +112,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJson, ffPrintDisplayHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
@@ -224,4 +224,18 @@ void ffGenerateDisplayJson(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut
                 break;
         }
     }
+}
+
+void ffPrintDisplayHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_DISPLAY_MODULE_NAME, "{1}x{2} @ {3}Hz (as {4}x{5}) [{7}]", FF_DISPLAY_NUM_FORMAT_ARGS, (const char* []) {
+        "Screen width (in pixels)",
+        "Screen height (in pixels)",
+        "Screen refresh rate (in Hz)",
+        "Screen scaled width (in pixels)",
+        "Screen scaled height (in pixels)",
+        "Screen name",
+        "Screen type (builtin, external or unknown)",
+        "Screen rotation (in degrees)",
+    });
 }

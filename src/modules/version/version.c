@@ -47,7 +47,7 @@ void ffPrintVersion(FFVersionOptions* options)
 
 void ffInitVersionOptions(FFVersionOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJson, ffPrintVersionHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -113,4 +113,19 @@ void ffGenerateVersionJson(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut
         }
         yyjson_mut_obj_add_strbuf(doc, obj, "libc", &buf);
     }
+}
+
+void ffPrintVersionHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_VERSION_MODULE_NAME, "{1} {2}{3} ({5})", FF_VERSION_NUM_FORMAT_ARGS, (const char* []) {
+        "Project name",
+        "Version",
+        "Version tweak",
+        "Build type (debug or release)",
+        "Architecture",
+        "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)",
+        "Date time when compiling",
+        "Compiler used",
+        "Libc used"
+    });
 }

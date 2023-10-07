@@ -67,7 +67,7 @@ exit:
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJson, ffPrintHostHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -138,4 +138,15 @@ exit:
     ffStrbufDestroy(&host.productVersion);
     ffStrbufDestroy(&host.productSku);
     ffStrbufDestroy(&host.sysVendor);
+}
+
+void ffPrintHostHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_HOST_MODULE_NAME, "{2} {3}", FF_HOST_NUM_FORMAT_ARGS, (const char* []) {
+        "product family",
+        "product name",
+        "product version",
+        "product sku",
+        "sys vendor"
+    });
 }

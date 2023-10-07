@@ -4,6 +4,8 @@
 #include "modules/command/command.h"
 #include "util/stringUtils.h"
 
+#define FF_COMMAND_NUM_FORMAT_ARGS 1
+
 void ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
@@ -30,13 +32,22 @@ void ffPrintCommand(FFCommandOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-    ffStrbufPutTo(&result, stdout);
+    if (options->moduleArgs.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffStrbufPutTo(&result, stdout);
+    }
+    else
+    {
+        ffPrintFormat(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_COMMAND_NUM_FORMAT_ARGS, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result}
+        });
+    }
 }
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJson, ffPrintCommandHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInitStatic(&options->shell,
@@ -135,4 +146,11 @@ void ffGenerateCommandJson(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
+}
+
+void ffPrintCommandHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, (const char* []) {
+        "Command result"
+    });
 }

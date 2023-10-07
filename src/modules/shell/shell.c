@@ -44,7 +44,7 @@ void ffPrintShell(FFShellOptions* options)
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJson, ffPrintShellHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -96,4 +96,16 @@ void ffGenerateShellJson(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->shellPid);
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->shellVersion);
+}
+
+void ffPrintShellHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_SHELL_MODULE_NAME, "{3} {4}", FF_SHELL_NUM_FORMAT_ARGS, (const char* []) {
+        "Shell process name",
+        "Shell path with exe name",
+        "Shell exe name",
+        "Shell version",
+        "Shell pid",
+        "Shell pretty name"
+    });
 }

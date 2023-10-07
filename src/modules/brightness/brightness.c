@@ -86,7 +86,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJson, ffPrintBrightnessHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -156,4 +156,15 @@ void ffGenerateBrightnessJson(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjs
     {
         ffStrbufDestroy(&item->name);
     }
+}
+
+void ffPrintBrightnessHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_BRIGHTNESS_MODULE_NAME, "{1}", FF_BRIGHTNESS_NUM_FORMAT_ARGS, (const char* []) {
+        "Screen brightness (percentage)",
+        "Screen name",
+        "Maximum brightness value",
+        "Minimum brightness value",
+        "Current brightness value",
+    });
 }

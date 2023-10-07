@@ -93,7 +93,7 @@ void ffPrintUsers(FFUsersOptions* options)
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson, ffPrintUsersHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->compact = false;
@@ -174,4 +174,15 @@ exit:
         ffStrbufDestroy(&user->tty);
         ffStrbufDestroy(&user->name);
     }
+}
+
+void ffPrintUsersHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_USERS_MODULE_NAME, "{1}@{2} - login time {5}", FF_USERS_NUM_FORMAT_ARGS, (const char* []) {
+        "User name",
+        "Host name",
+        "TTY name",
+        "Client IP",
+        "Login Time"
+    });
 }

@@ -10,3 +10,4 @@ bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const 
 void ffDestroyMediaOptions(FFMediaOptions* options);
 void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module);
 void ffGenerateMediaJson(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintMediaHelpFormat(void);

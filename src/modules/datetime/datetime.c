@@ -143,7 +143,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJson, ffPrintDateTimeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -182,4 +182,30 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 void ffGenerateDateTimeJson(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_obj_add_uint(doc, module, "result", ffTimeGetNow());
+}
+
+void ffPrintDateTimeHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_DATETIME_MODULE_NAME, "{1}-{4}-{11} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, (const char* []) {
+        "year",
+        "last two digits of year",
+        "month",
+        "month with leading zero",
+        "month name",
+        "month name short",
+        "week number on year",
+        "weekday",
+        "weekday short",
+        "day in year",
+        "day in month",
+        "day in Week",
+        "hour",
+        "hour with leading zero",
+        "hour 12h format",
+        "hour 12h format with leading zero",
+        "minute",
+        "minute with leading zero",
+        "second",
+        "second with leading zero"
+    });
 }

@@ -41,7 +41,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJson, ffPrintTerminalSizeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -92,4 +92,14 @@ void ffGenerateTerminalSizeJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjs
     yyjson_mut_obj_add_uint(doc, obj, "rows", result.rows);
     yyjson_mut_obj_add_uint(doc, obj, "width", result.width);
     yyjson_mut_obj_add_uint(doc, obj, "height", result.height);
+}
+
+void ffPrintTerminalSizeHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_TERMINALSIZE_MODULE_NAME, "{1} columns x {2} rows ({3}px x {4}px)", FF_TERMINALSIZE_NUM_FORMAT_ARGS, (const char* []) {
+        "Terminal rows",
+        "Terminal columns",
+        "Terminal width (in pixels)",
+        "Terminal height (in pixels)"
+    });
 }

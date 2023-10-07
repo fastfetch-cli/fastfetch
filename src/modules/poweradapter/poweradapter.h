@@ -10,3 +10,4 @@ bool ffParsePowerAdapterCommandOptions(FFPowerAdapterOptions* options, const cha
 void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options);
 void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* module);
 void ffGeneratePowerAdapterJson(FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintPowerAdapterHelpFormat(void);

@@ -79,7 +79,7 @@ void ffPrintCPU(FFCPUOptions* options)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson, ffPrintCPUHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 }
@@ -167,4 +167,18 @@ void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
+}
+
+void ffPrintCPUHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_CPU_MODULE_NAME, "{1} ({5}) @ {7} GHz", FF_CPU_NUM_FORMAT_ARGS, (const char* []) {
+        "Name",
+        "Vendor",
+        "Physical core count",
+        "Logical core count",
+        "Online core count",
+        "Min frequency",
+        "Max frequency",
+        "Temperature"
+    });
 }

@@ -42,7 +42,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJson, ffPrintTerminalHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -95,4 +95,16 @@ void ffGenerateTerminalJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_m
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->terminalPid);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->terminalPrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->terminalVersion);
+}
+
+void ffPrintTerminalHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_TERMINAL_MODULE_NAME, "{5} {6}", FF_TERMINAL_NUM_FORMAT_ARGS, (const char* []) {
+        "Terminal process name",
+        "Terminal path with exe name",
+        "Terminal exe name",
+        "Terminal pid",
+        "Terminal pretty name",
+        "Terminal version"
+    });
 }

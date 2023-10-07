@@ -77,7 +77,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator, NULL, NULL);
     ffStrbufInit(&options->string);
 }
 

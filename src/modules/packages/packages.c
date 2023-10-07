@@ -102,7 +102,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJson, ffPrintPackagesHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -179,4 +179,34 @@ void ffGeneratePackagesJson(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_m
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
+}
+
+void ffPrintPackagesHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget)", FF_PACKAGES_NUM_FORMAT_ARGS, (const char* []) {
+        "Number of all packages",
+        "Number of pacman packages",
+        "Pacman branch on manjaro",
+        "Number of dpkg packages",
+        "Number of rpm packages",
+        "Number of emerge packages",
+        "Number of eopkg packages",
+        "Number of xbps packages",
+        "Number of nix-system packages",
+        "Number of nix-user packages",
+        "Number of nix-default packages",
+        "Number of apk packages",
+        "Number of pkg packages",
+        "Number of flatpak-system packages",
+        "Number of flatpak-user packages",
+        "Number of snap packages",
+        "Number of brew packages",
+        "Number of brew-cask packages",
+        "Number of macports packages",
+        "Number of scoop packages",
+        "Number of choco packages",
+        "Number of pkgtool packages",
+        "Number of paludis packages"
+        "Number of winget packages"
+    });
 }

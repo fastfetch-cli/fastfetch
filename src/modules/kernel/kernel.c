@@ -32,7 +32,7 @@ void ffPrintKernel(FFKernelOptions* options)
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJson, ffPrintKernelHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -76,4 +76,13 @@ void ffGenerateKernelJson(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_d
     yyjson_mut_obj_add_strbuf(doc, obj, "release", &instance.state.platform.systemRelease);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &instance.state.platform.systemVersion);
     yyjson_mut_obj_add_strbuf(doc, obj, "displayVersion", &instance.state.platform.systemDisplayVersion);
+}
+
+void ffPrintKernelHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_KERNEL_MODULE_NAME, "{2}", FF_KERNEL_NUM_FORMAT_ARGS, (const char* []) {
+        "Kernel sysname",
+        "Kernel release",
+        "Kernel version"
+    });
 }

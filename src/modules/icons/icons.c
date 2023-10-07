@@ -32,7 +32,7 @@ void ffPrintIcons(FFIconsOptions* options)
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJson, ffPrintIconsHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -80,4 +80,11 @@ void ffGenerateIconsJson(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &icons);
+}
+
+void ffPrintIconsHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_ICONS_MODULE_NAME, "{1}", FF_ICONS_NUM_FORMAT_ARGS, (const char* []) {
+        "Combined icons"
+    });
 }

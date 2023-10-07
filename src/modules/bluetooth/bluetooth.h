@@ -10,3 +10,4 @@ bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options);
 void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module);
 void ffGenerateBluetoothJson(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintBluetoothHelpFormat(void);

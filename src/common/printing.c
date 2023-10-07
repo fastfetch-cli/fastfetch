@@ -132,3 +132,18 @@ void ffPrintCharTimes(char c, uint32_t times)
     if(remaining > 0)
         fwrite(str, 1, remaining, stdout);
 }
+
+void ffPrintModuleFormatHelp(const char* name, const char* def, uint32_t numArgs, const char* args[])
+{
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateS(name);
+    ffStrbufLowerCase(&buffer);
+    printf("--%s-format:\n", buffer.chars);
+    printf("Sets the format string for %s output.\n", name);
+    puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
+    puts("The following values are passed:");
+
+    for(unsigned i = 0; i < numArgs; i++)
+        printf("        {%u}: %s\n", i, args[i]);
+
+    printf("The default is something similar to \"%s\".\n", def);
+}

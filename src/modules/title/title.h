@@ -10,3 +10,4 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
 void ffDestroyTitleOptions(FFTitleOptions* options);
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module);
 void ffGenerateTitleJson(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintTitleHelpFormat(void);

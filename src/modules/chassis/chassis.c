@@ -52,7 +52,7 @@ exit:
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJson, ffPrintChassisHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -118,4 +118,13 @@ exit:
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
+}
+
+void ffPrintChassisHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_CHASSIS_MODULE_NAME, "{1}", FF_CHASSIS_NUM_FORMAT_ARGS, (const char* []) {
+        "chassis type",
+        "chassis vendor",
+        "chassis version"
+    });
 }

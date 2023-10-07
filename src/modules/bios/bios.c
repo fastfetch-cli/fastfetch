@@ -55,7 +55,7 @@ exit:
 
 void ffInitBiosOptions(FFBiosOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJson, ffPrintBiosHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -124,4 +124,14 @@ exit:
     ffStrbufDestroy(&bios.release);
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
+}
+
+void ffPrintBiosHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_BIOS_MODULE_NAME, "{4} ({2})", FF_BIOS_NUM_FORMAT_ARGS, (const char* []) {
+        "bios date",
+        "bios release",
+        "bios vendor",
+        "bios version"
+    });
 }

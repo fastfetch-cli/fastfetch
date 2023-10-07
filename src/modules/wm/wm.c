@@ -43,7 +43,7 @@ void ffPrintWM(FFWMOptions* options)
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM, ffGenerateWMJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM, ffGenerateWMJson, ffPrintWMHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -92,4 +92,13 @@ void ffGenerateWMJson(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->wmProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->wmPrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "protocolName", &result->wmProtocolName);
+}
+
+void ffPrintWMHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_WM_MODULE_NAME, "{2} ({3})", FF_WM_NUM_FORMAT_ARGS, (const char* []) {
+        "WM process name",
+        "WM pretty name",
+        "WM protocol name"
+    });
 }
