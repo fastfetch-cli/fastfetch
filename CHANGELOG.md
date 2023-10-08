@@ -3,6 +3,7 @@
 Features:
 * Support opkg (Packages, Linux)
 * Support GNOME Console terminal version and font detection (Terminal, Linux)
+* Add `--cpu-freq-ndigits` to set number of digits for CPU frequency (CPU)
 
 Bugfixes:
 * Fix possible crashes on Windows 7 (Disk, Windows)

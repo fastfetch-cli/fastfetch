@@ -737,6 +737,13 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "freqNdigits": {
+                                        "title": "Set the number of digits to keep after the decimal point when printing CPU frequency",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9,
+                                        "default": 2
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

@@ -138,11 +138,12 @@ Module specific options:
     --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
-    --cpu-temp  <?value>:                    Detect and display CPU temperature if supported. Default is false
-    --gpu-temp  <?value>:                    Detect and display GPU temperature if supported. Default is false
-    --gpu-force-vulkan  <?value>:            Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
+    --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
+    --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
+    --gpu-temp <?value>:                     Detect and display GPU temperature if supported. Default is false
+    --gpu-force-vulkan <?value>:             Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
     --gpu-hide-type <?value>:                Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
-    --battery-temp  <?value>:                Detect and display Battery temperature if supported. Default is false
+    --battery-temp <?value>:                 Detect and display Battery temperature if supported. Default is false
     --localip-show-ipv4 <?value>:            Show IPv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
     --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
