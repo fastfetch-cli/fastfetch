@@ -38,8 +38,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 uint32_t index = ffStrbufFirstIndexC(&device->name, '\\');
                 if (index != device->name.length)
                     ffStrbufAppendNS(&device->type, index, device->name.chars); // SCSI
-                ffStrbufSubstrAfterFirstS(&device->name, "&Prod_");
                 ffStrbufSubstrBeforeLastC(&device->name, '\\');
+                ffStrbufSubstrAfterFirstS(&device->name, "&Ven_");
+                ffStrbufRemoveS(&device->name, "&Prod");
                 ffStrbufReplaceAllC(&device->name, '_', ' ');
             }
             else
