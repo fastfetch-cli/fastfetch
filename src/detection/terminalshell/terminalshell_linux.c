@@ -385,7 +385,9 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     #elif defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "gnome-terminal");
+        ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Terminal");
+    else if(ffStrbufStartsWithS(&result.terminalProcessName, "kgx"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Console");
 
     #elif defined(__APPLE__)
 
