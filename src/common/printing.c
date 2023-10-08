@@ -143,7 +143,7 @@ void ffPrintModuleFormatHelp(const char* name, const char* def, uint32_t numArgs
     puts("The following values are passed:");
 
     for(unsigned i = 0; i < numArgs; i++)
-        printf("        {%u}: %s\n", i, args[i]);
+        printf("        {%u}: %s\n", i + 1, args[i]);
 
     printf("The default is something similar to \"%s\".\n", def);
 }
