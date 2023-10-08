@@ -94,7 +94,7 @@ static const char* detectWithBacklight(FFlist* result)
 
 static const char* detectWithDdcci(FFlist* result)
 {
-    FF_LIBRARY_LOAD(libddcutil, &instance.config.libDdcutil, "dlopen ddcutil failed", "libddcutil" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_LOAD(libddcutil, &instance.config.libDdcutil, "dlopen ddcutil failed", "libddcutil" FF_LIBRARY_EXTENSION, 5);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_display_info_list2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_open_display2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)
