@@ -30,6 +30,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         if (IORegistryEntryGetName(registryEntry, deviceName) != KERN_SUCCESS)
             continue;
 
+        if (options->namePrefix.length && strncmp(deviceName, options->namePrefix.chars, options->namePrefix.length) != 0)
+            continue;
+
         FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDriver = 0;
         if (IORegistryEntryGetParentEntry(entryPartition, kIOServicePlane, &entryDriver) != KERN_SUCCESS)
             continue;

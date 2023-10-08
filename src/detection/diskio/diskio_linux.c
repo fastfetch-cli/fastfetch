@@ -82,6 +82,14 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         }
         ffStrbufReplaceAllC(&device->name, '_', ' ');
 
+        if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
+        {
+            ffStrbufDestroy(&device->name);
+            ffStrbufDestroy(&device->type);
+            result->length--;
+            continue;
+        }
+
         ffStrbufInitS(&device->devPath, pathDev1);
         device->bytesRead = sectorRead * 512;
         device->bytesWritten = sectorWritten * 512;

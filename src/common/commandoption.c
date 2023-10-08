@@ -60,6 +60,9 @@ void ffPrepareCommandOption(FFdata* data)
     if(ffStrbufContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME))
         ffPrepareCPUUsage();
 
+    if(ffStrbufContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME))
+        ffPrepareDiskIO(&instance.config.diskIo);
+
     if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
         ffPrepareNetIO(&instance.config.netIo);
 

@@ -30,7 +30,7 @@ static FFModuleBaseInfo* D[] = {
     (void*) &instance.config.de,
     (void*) &instance.config.display,
     (void*) &instance.config.disk,
-    (void*) &instance.config.diskio,
+    (void*) &instance.config.diskIo,
     NULL,
 };
 

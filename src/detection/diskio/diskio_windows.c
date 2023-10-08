@@ -45,6 +45,14 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             else
                 ffStrbufSetWS(&device->name, szDevice);
 
+            if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
+            {
+                ffStrbufDestroy(&device->name);
+                ffStrbufDestroy(&device->type);
+                result->length--;
+                continue;
+            }
+
             ffStrbufInitWS(&device->devPath, szDevice);
             device->bytesRead = (uint64_t) diskPerformance.BytesRead.QuadPart;
             device->readCount = (uint64_t) diskPerformance.ReadCount;
