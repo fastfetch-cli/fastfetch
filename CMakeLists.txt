@@ -663,6 +663,15 @@ if(yyjson_FOUND)
     target_link_libraries(libfastfetch PRIVATE yyjson)
 endif()
 
+if(LINUX AND EXISTS "/lib/ld-musl-x86_64.so.1")
+    execute_process(COMMAND "/lib/ld-musl-x86_64.so.1"
+                    ERROR_VARIABLE LD_MUSL_VERSION)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" LD_MUSL_VERSION "${LD_MUSL_VERSION}")
+    if(NOT LD_MUSL_VERSION STREQUAL "")
+        target_compile_definitions(libfastfetch PUBLIC FF_MUSL_VERSION="${LD_MUSL_VERSION}")
+    endif()
+endif()
+
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
