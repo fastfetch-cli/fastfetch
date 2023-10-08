@@ -38,4 +38,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         // NSLog(@"%@", props);
     }
+
+    IOObjectRelease(iterator);
+
+    return NULL;
 }
