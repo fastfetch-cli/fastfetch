@@ -9,7 +9,7 @@ static uint64_t time1;
 
 void ffPrepareDiskIO(FFDiskIOOptions* options)
 {
-    ffListInit(&ioCounters1, sizeof(FFDiskIOOptions));
+    ffListInit(&ioCounters1, sizeof(FFDiskIOResult));
     ffDiskIOGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();
 }
