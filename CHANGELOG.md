@@ -2,6 +2,7 @@
 
 Features:
 * Support opkg (Packages, Linux)
+* Support GNOME Console terminal version and font detection (Terminal, Linux)
 
 Bugfixes:
 * Fix possible crashes on Windows 7 (Disk, Windows)

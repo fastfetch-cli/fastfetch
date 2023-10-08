@@ -29,7 +29,7 @@ static const char* getSystemMonospaceFont(void)
 
 static void detectKgx(FFTerminalFontResult* terminalFont)
 {
-    // kgx (gnome terminal) doesn't support profiles
+    // kgx (gnome console) doesn't support profiles
     if(!ffSettingsGet("/org/gnome/Console/use-system-font", "org.gnome.Console", NULL, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
     {
         FF_AUTO_FREE const char* fontName = ffSettingsGet("/org/gnome/Console/custom-font", "org.gnome.Console", NULL, "custom-font", FF_VARIANT_TYPE_STRING).strValue;
