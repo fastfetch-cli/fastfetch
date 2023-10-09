@@ -28,7 +28,6 @@ static void formatKey(const FFDiskIOOptions* options, FFDiskIOResult* dev, uint3
         ffParseFormatString(key, &options->moduleArgs.key, 2, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &index},
             {FF_FORMAT_ARG_TYPE_STRBUF, &dev->name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &dev->type},
             {FF_FORMAT_ARG_TYPE_STRBUF, &dev->devPath},
         });
     }
@@ -75,11 +74,26 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
             ffParseSize(dev->bytesWritten, &buffer2);
             ffStrbufAppendS(&buffer2, "/s");
 
+            const char* physicalType;
+            switch(dev->type)
+            {
+                case FF_DISKIO_PHYSICAL_TYPE_HDD:
+                    physicalType = "HDD";
+                    break;
+                case FF_DISKIO_PHYSICAL_TYPE_SSD:
+                    physicalType = "SSD";
+                    break;
+                default:
+                    physicalType = "Unknown";
+                    break;
+            }
+
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISKIO_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer2},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->name},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &dev->type},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &dev->interconnect},
+                {FF_FORMAT_ARG_TYPE_STRING, physicalType},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->devPath},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->bytesRead},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->bytesWritten},
@@ -93,7 +107,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
     FF_LIST_FOR_EACH(FFDiskIOResult, dev, result)
     {
         ffStrbufDestroy(&dev->name);
-        ffStrbufDestroy(&dev->type);
+        ffStrbufDestroy(&dev->interconnect);
         ffStrbufDestroy(&dev->devPath);
     }
 }
@@ -163,22 +177,36 @@ void ffGenerateDiskIOJson(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-    FF_LIST_FOR_EACH(FFDiskIOResult, counter, result)
+    FF_LIST_FOR_EACH(FFDiskIOResult, dev, result)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_strbuf(doc, obj, "name", &counter->name);
-        yyjson_mut_obj_add_strbuf(doc, obj, "type", &counter->type);
-        yyjson_mut_obj_add_strbuf(doc, obj, "devPath", &counter->devPath);
-        yyjson_mut_obj_add_uint(doc, obj, "bytesRead", counter->bytesRead);
-        yyjson_mut_obj_add_uint(doc, obj, "bytesWritten", counter->bytesWritten);
-        yyjson_mut_obj_add_uint(doc, obj, "readCount", counter->readCount);
-        yyjson_mut_obj_add_uint(doc, obj, "writeCount", counter->writeCount);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &dev->name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "interconnect", &dev->interconnect);
+        yyjson_mut_obj_add_strbuf(doc, obj, "devPath", &dev->devPath);
+
+        switch(dev->type)
+        {
+            case FF_DISKIO_PHYSICAL_TYPE_HDD:
+                yyjson_mut_obj_add_str(doc, obj, "type", "HDD");
+                break;
+            case FF_DISKIO_PHYSICAL_TYPE_SSD:
+                yyjson_mut_obj_add_str(doc, obj, "type", "SSD");
+                break;
+            default:
+                yyjson_mut_obj_add_null(doc, obj, "type");
+                break;
+        }
+
+        yyjson_mut_obj_add_uint(doc, obj, "bytesRead", dev->bytesRead);
+        yyjson_mut_obj_add_uint(doc, obj, "bytesWritten", dev->bytesWritten);
+        yyjson_mut_obj_add_uint(doc, obj, "readCount", dev->readCount);
+        yyjson_mut_obj_add_uint(doc, obj, "writeCount", dev->writeCount);
     }
 
     FF_LIST_FOR_EACH(FFDiskIOResult, dev, result)
     {
         ffStrbufDestroy(&dev->name);
-        ffStrbufDestroy(&dev->type);
+        ffStrbufDestroy(&dev->interconnect);
         ffStrbufDestroy(&dev->devPath);
     }
 }

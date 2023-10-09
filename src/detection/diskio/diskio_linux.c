@@ -53,10 +53,10 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         }
         if (flag) continue;
 
-        char pathSysBlockStat[PATH_MAX];
-        snprintf(pathSysBlockStat, PATH_MAX, "/sys/block/%s/stat", devName);
+        char pathSysBlock[PATH_MAX];
+        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/stat", devName);
 
-        FF_AUTO_CLOSE_FILE FILE* sysBlockStat = fopen(pathSysBlockStat, "r");
+        FF_AUTO_CLOSE_FILE FILE* sysBlockStat = fopen(pathSysBlock, "r");
         if (!sysBlockStat) continue;
 
         // I/Os merges sectors ticks ...
@@ -73,19 +73,19 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 ffStrbufInitNS(&device->name, (uint32_t) (slash2 - slash - 1), slash + 1);
             else
                 ffStrbufInitS(&device->name, slash + 1);
-            ffStrbufInitNS(&device->type, (uint32_t) (slash - entry->d_name), entry->d_name);
+            ffStrbufInitNS(&device->interconnect, (uint32_t) (slash - entry->d_name), entry->d_name);
         }
         else
         {
             ffStrbufInitS(&device->name, entry->d_name);
-            ffStrbufInit(&device->type);
+            ffStrbufInit(&device->interconnect);
         }
         ffStrbufReplaceAllC(&device->name, '_', ' ');
 
         if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
         {
             ffStrbufDestroy(&device->name);
-            ffStrbufDestroy(&device->type);
+            ffStrbufDestroy(&device->interconnect);
             result->length--;
             continue;
         }
@@ -95,6 +95,13 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         device->bytesWritten = sectorWritten * 512;
         device->readCount = nRead;
         device->writeCount = nWritten;
+
+        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/queue/rotational", devName);
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (ffReadFileBuffer(pathSysBlock, &buffer))
+            device->type = ffStrbufEqualS(&buffer, "1") ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
+        else
+            device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
     }
 
     return NULL;

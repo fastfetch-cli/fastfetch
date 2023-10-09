@@ -29,13 +29,13 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInitF(&device->devPath, "/dev/%s", deviceName);
-
-        ffStrbufInit(&device->type);
+        device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        ffStrbufInit(&device->interconnect);
         switch (current->device_type & DEVSTAT_TYPE_IF_MASK)
         {
-            case DEVSTAT_TYPE_IF_SCSI: ffStrbufAppendS(&device->type, "SCSI"); break;
-            case DEVSTAT_TYPE_IF_IDE: ffStrbufAppendS(&device->type, "IDE"); break;
-            case DEVSTAT_TYPE_IF_OTHER: ffStrbufAppendS(&device->type, "OTHER"); break;
+            case DEVSTAT_TYPE_IF_SCSI: ffStrbufAppendS(&device->interconnect, "SCSI"); break;
+            case DEVSTAT_TYPE_IF_IDE: ffStrbufAppendS(&device->interconnect, "IDE"); break;
+            case DEVSTAT_TYPE_IF_OTHER: ffStrbufAppendS(&device->interconnect, "OTHER"); break;
         }
         device->bytesRead = current->bytes[DEVSTAT_READ];
         device->readCount = current->operations[DEVSTAT_READ];

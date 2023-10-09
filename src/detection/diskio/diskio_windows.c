@@ -31,14 +31,14 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         {
             FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
             ffStrbufInit(&device->name);
-            ffStrbufInit(&device->type);
+            ffStrbufInit(&device->interconnect);
             if (ffRegReadStrbuf(hKey, pNum, &device->name, NULL))
             {
                 // SCSI\Disk&Ven_NVMe&Prod_WDC_PC_SN810_SDC\5&19cebb7&0&000000
                 uint32_t index = ffStrbufFirstIndexC(&device->name, '\\');
                 if (index != device->name.length)
                 {
-                    ffStrbufAppendNS(&device->type, index, device->name.chars); // SCSI
+                    ffStrbufAppendNS(&device->interconnect, index, device->name.chars); // SCSI
                     ffStrbufSubstrAfter(&device->name, index + 1);
                 }
                 ffStrbufSubstrBeforeLastC(&device->name, '\\');
@@ -53,7 +53,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
             {
                 ffStrbufDestroy(&device->name);
-                ffStrbufDestroy(&device->type);
+                ffStrbufDestroy(&device->interconnect);
                 result->length--;
                 continue;
             }
@@ -63,6 +63,25 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             device->readCount = (uint64_t) diskPerformance.ReadCount;
             device->bytesWritten = (uint64_t) diskPerformance.BytesWritten.QuadPart;
             device->writeCount = (uint64_t) diskPerformance.WriteCount;
+
+            DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
+            DWORD retSize = 0;
+            if(DeviceIoControl(
+                hDevice,
+                IOCTL_STORAGE_QUERY_PROPERTY,
+                &(STORAGE_PROPERTY_QUERY) {
+                    .PropertyId = StorageDeviceSeekPenaltyProperty,
+                    .QueryType = PropertyStandardQuery,
+                },
+                sizeof(STORAGE_PROPERTY_QUERY),
+                &dspd,
+                sizeof(dspd),
+                &retSize,
+                NULL
+            ) && retSize == sizeof(dspd))
+                device->type = dspd.IncursSeekPenalty ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
+            else
+                device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
         }
     }
 
