@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_DISKIO_DISPLAY_NAME "Disk IO"
-#define FF_DISKIO_NUM_FORMAT_ARGS 7
+#define FF_DISKIO_NUM_FORMAT_ARGS 10
 
 static int sortDevices(const FFDiskIOResult* left, const FFDiskIOResult* right)
 {
@@ -181,19 +181,19 @@ void ffGenerateDiskIOJson(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &dev->name);
-        yyjson_mut_obj_add_strbuf(doc, obj, "interconnect", &dev->interconnect);
+        yyjson_mut_obj_add_strbuf(doc, obj, "interconnectType", &dev->interconnect);
         yyjson_mut_obj_add_strbuf(doc, obj, "devPath", &dev->devPath);
 
         switch(dev->type)
         {
             case FF_DISKIO_PHYSICAL_TYPE_HDD:
-                yyjson_mut_obj_add_str(doc, obj, "type", "HDD");
+                yyjson_mut_obj_add_str(doc, obj, "physicalType", "HDD");
                 break;
             case FF_DISKIO_PHYSICAL_TYPE_SSD:
-                yyjson_mut_obj_add_str(doc, obj, "type", "SSD");
+                yyjson_mut_obj_add_str(doc, obj, "physicalType", "SSD");
                 break;
             default:
-                yyjson_mut_obj_add_null(doc, obj, "type");
+                yyjson_mut_obj_add_null(doc, obj, "physicalType");
                 break;
         }
 
@@ -217,7 +217,8 @@ void ffPrintDiskIOHelpFormat(void)
         "Size of data read per second (formatted)",
         "Size of data written per second (formatted)",
         "Device name",
-        "Device type",
+        "Device interconnect type",
+        "Device physical type (SSD / HDD)",
         "Device raw file path",
         "Size of data read per second (in bytes)",
         "Size of data written per second (in bytes)",
