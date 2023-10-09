@@ -37,11 +37,15 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 // SCSI\Disk&Ven_NVMe&Prod_WDC_PC_SN810_SDC\5&19cebb7&0&000000
                 uint32_t index = ffStrbufFirstIndexC(&device->name, '\\');
                 if (index != device->name.length)
+                {
                     ffStrbufAppendNS(&device->type, index, device->name.chars); // SCSI
+                    ffStrbufSubstrAfter(&device->name, index + 1);
+                }
                 ffStrbufSubstrBeforeLastC(&device->name, '\\');
                 ffStrbufSubstrAfterFirstS(&device->name, "&Ven_");
                 ffStrbufRemoveS(&device->name, "&Prod");
                 ffStrbufReplaceAllC(&device->name, '_', ' ');
+                ffStrbufTrim(&device->name, ' ');
             }
             else
                 ffStrbufSetWS(&device->name, szDevice);
