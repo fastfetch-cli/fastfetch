@@ -108,7 +108,7 @@ All categories not listed here should work without needing a specific implementa
 
 ##### Available Modules
 ```
-Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, Display, Font, Gamepad, GPU, Host, Icons, Kernel, LM, Locale, LocalIP, Media, Memory, Monitor, NetIO, OpenCL, OpenGL, OS, Packages, Player, Power Adapter, Processes, PublicIP, Separator, Shell, Sound, Swap, Terminal, Terminal Font, Terminal Size, Theme, Time, Title, Uptime, Version, Vulkan, Wallpaper, Weather, Wifi, WM, WMTheme
+Battery, Bios, Bluetooth, Board, Break, Brightness, Colors, Command, CPU, CPUUsage, Cursor, Custom, Date, DateTime, DE, Disk, DiskIO, Display, Font, Gamepad, GPU, Host, Icons, Kernel, LM, Locale, LocalIP, Media, Memory, Monitor, NetIO, OpenCL, OpenGL, OS, Packages, Player, Power Adapter, Processes, PublicIP, Separator, Shell, Sound, Swap, Terminal, Terminal Font, Terminal Size, Theme, Time, Title, Uptime, Version, Vulkan, Wallpaper, Weather, Wifi, WM, WMTheme
 ```
 
 ##### Builtin logos
