@@ -80,6 +80,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer2},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->type},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &dev->devPath},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->bytesRead},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->bytesWritten},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->readCount},
@@ -167,6 +168,7 @@ void ffGenerateDiskIOJson(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &counter->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "type", &counter->type);
+        yyjson_mut_obj_add_strbuf(doc, obj, "devPath", &counter->devPath);
         yyjson_mut_obj_add_uint(doc, obj, "bytesRead", counter->bytesRead);
         yyjson_mut_obj_add_uint(doc, obj, "bytesWritten", counter->bytesWritten);
         yyjson_mut_obj_add_uint(doc, obj, "readCount", counter->readCount);
@@ -188,6 +190,7 @@ void ffPrintDiskIOHelpFormat(void)
         "Size of data written per second (formatted)",
         "Device name",
         "Device type",
+        "Device raw file path",
         "Size of data read per second (in bytes)",
         "Size of data written per second (in bytes)",
         "Number of reads",
