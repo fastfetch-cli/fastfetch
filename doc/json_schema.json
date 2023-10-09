@@ -545,6 +545,7 @@
                             "datetime",
                             "display",
                             "disk",
+                            "diskio",
                             "de",
                             "font",
                             "gamepad",
@@ -916,6 +917,31 @@
                                         "type": "boolean",
                                         "title": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Physical disk throughput (usage)",
+                                "properties": {
+                                    "type": {
+                                        "const": "diskio"
+                                    },
+                                    "namePrefix": {
+                                        "title": "Show disks with given name prefix only",
+                                        "type": "string"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
