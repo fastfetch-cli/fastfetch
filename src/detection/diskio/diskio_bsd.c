@@ -17,6 +17,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
     for (int i = 0; i < stats.dinfo->numdevs; i++)
     {
         struct devstat* current = &stats.dinfo->devices[i];
+        if (current->device_type & DEVSTAT_TYPE_PASS)
+            continue;
 
         char deviceName[128];
         snprintf(deviceName, sizeof(deviceName), "%s%d", current->device_name, current->unit_number);
