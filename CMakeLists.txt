@@ -546,7 +546,7 @@ elseif(APPLE)
         src/detection/host/host_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
-        src/detection/libc/libc_nosupport.c
+        src/detection/libc/libc_apple.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
@@ -668,6 +668,13 @@ if(LINUX AND EXISTS "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1")
                     ERROR_VARIABLE LD_MUSL_RESULT)
     if("${LD_MUSL_RESULT}" MATCHES "Version ([0-9]+\\.[0-9]+\\.[0-9]+)")
         target_compile_definitions(libfastfetch PUBLIC FF_MUSL_VERSION="${CMAKE_MATCH_1}")
+    endif()
+endif()
+if(APPLE AND EXISTS "/usr/bin/otool")
+    execute_process(COMMAND /usr/bin/otool -L /usr/bin/otool
+                    OUTPUT_VARIABLE OTOOL_OTOOL_RESULT)
+    if("${OTOOL_OTOOL_RESULT}" MATCHES "libSystem\\.B\\.dylib \\(.*current version ([0-9]+\\.[0-9]+\\.[0-9]+)\\)")
+        target_compile_definitions(libfastfetch PUBLIC FF_LIBSYSTEM_VERSION="${CMAKE_MATCH_1}")
     endif()
 endif()
 
