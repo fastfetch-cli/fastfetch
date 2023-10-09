@@ -665,10 +665,9 @@ endif()
 
 if(LINUX AND EXISTS "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1")
     execute_process(COMMAND "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1"
-                    ERROR_VARIABLE LD_MUSL_VERSION)
-    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" LD_MUSL_VERSION "${LD_MUSL_VERSION}")
-    if(NOT LD_MUSL_VERSION STREQUAL "")
-        target_compile_definitions(libfastfetch PUBLIC FF_MUSL_VERSION="${LD_MUSL_VERSION}")
+                    ERROR_VARIABLE LD_MUSL_RESULT)
+    if("${LD_MUSL_RESULT}" MATCHES "Version ([0-9]+\\.[0-9]+\\.[0-9]+)")
+        target_compile_definitions(libfastfetch PUBLIC FF_MUSL_VERSION="${CMAKE_MATCH_1}")
     endif()
 endif()
 
