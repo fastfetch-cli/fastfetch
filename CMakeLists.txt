@@ -495,7 +495,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
-        src/detection/libc/libc_nosupport.c
+        src/detection/libc/libc_bsd.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
@@ -675,6 +675,13 @@ if(APPLE AND EXISTS "/usr/bin/otool")
                     OUTPUT_VARIABLE OTOOL_OTOOL_RESULT)
     if("${OTOOL_OTOOL_RESULT}" MATCHES "libSystem\\.B\\.dylib \\(.*current version ([0-9]+\\.[0-9]+\\.[0-9]+)\\)")
         target_compile_definitions(libfastfetch PUBLIC FF_LIBSYSTEM_VERSION="${CMAKE_MATCH_1}")
+    endif()
+endif()
+if(BSD AND EXISTS "/usr/local/bin/objdump")
+    execute_process(COMMAND /bin/sh -c "/usr/local/bin/objdump -T /lib/libc.so.* | grep 'FBSD_[^ )]*' -o | sort -Vru | head -1"
+                    OUTPUT_VARIABLE OBJDUMP_T_RESULT)
+    if("${OBJDUMP_T_RESULT}" MATCHES "FBSD_([0-9]+\\.[0-9]+)")
+        target_compile_definitions(libfastfetch PUBLIC FF_FBSD_VERSION="${CMAKE_MATCH_1}")
     endif()
 endif()
 
