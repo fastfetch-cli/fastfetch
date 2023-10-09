@@ -663,8 +663,8 @@ if(yyjson_FOUND)
     target_link_libraries(libfastfetch PRIVATE yyjson)
 endif()
 
-if(LINUX AND EXISTS "/lib/ld-musl-x86_64.so.1")
-    execute_process(COMMAND "/lib/ld-musl-x86_64.so.1"
+if(LINUX AND EXISTS "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1")
+    execute_process(COMMAND "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1"
                     ERROR_VARIABLE LD_MUSL_VERSION)
     string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" LD_MUSL_VERSION "${LD_MUSL_VERSION}")
     if(NOT LD_MUSL_VERSION STREQUAL "")
