@@ -15,6 +15,7 @@ Bugfixes:
 
 Logo:
 * Add Chimera Linux
+* Add EndeavourSmall
 
 # 2.1.0
 

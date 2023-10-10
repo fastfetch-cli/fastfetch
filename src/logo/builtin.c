@@ -1277,6 +1277,17 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // EndeavourSmall
+    {
+        .names = {"Endeavour_small", "endeavour-linux_small", "endeavouros_small", "endeavouros-linux_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR_SMALL,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // Endless
     {
         .names = {"Endless"},
