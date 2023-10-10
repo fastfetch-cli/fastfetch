@@ -21,7 +21,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
         return "fscanf() first line failed";
 
     uint64_t user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
-    while (fscanf(procStat, "cpu%*d%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64, &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7)
+    while (fscanf(procStat, "cpu%*d%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%*[^\n]\n", &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7)
     {
         uint64_t inUse = user + nice + system;
         uint64_t total = inUse + idle + iowait + irq + softirq;
