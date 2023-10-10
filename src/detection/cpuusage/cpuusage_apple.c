@@ -6,18 +6,23 @@
 
 const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
 {
-	host_cpu_load_info_data_t cpustats;
-	mach_msg_type_number_t count = HOST_CPU_LOAD_INFO_COUNT;
-
+    natural_t numCPUs = 0U;
+    processor_info_array_t cpuInfo;
+    mach_msg_type_number_t numCpuInfo;
     *inUseAll = *totalAll = 0;
 
-    if (host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, (host_info_t)(&cpustats), &count) != KERN_SUCCESS)
-        return "host_statistics() failed";
+    if (host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &numCPUs, &cpuInfo, &numCpuInfo) != KERN_SUCCESS)
+        return "host_processor_info() failed";
+    if (numCPUs * CPU_STATE_MAX != numCpuInfo)
+        return "Unexpected host_processor_info() result";
 
-    *inUseAll = cpustats.cpu_ticks[CPU_STATE_USER]
-        + cpustats.cpu_ticks[CPU_STATE_SYSTEM]
-        + cpustats.cpu_ticks[CPU_STATE_NICE];
-    *totalAll = *inUseAll + cpustats.cpu_ticks[CPU_STATE_IDLE];
-
+    for (natural_t i = 0U; i < numCPUs; ++i) {
+        integer_t inUse = cpuInfo[CPU_STATE_MAX * i + CPU_STATE_USER]
+            + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_SYSTEM]
+            + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_NICE];
+        integer_t total = inUse + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_IDLE];
+        *inUseAll += (uint64_t)inUse;
+        *totalAll += (uint64_t)total;
+    }
     return NULL;
 }
