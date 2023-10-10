@@ -6,7 +6,7 @@
 #include <ntstatus.h>
 #include <winternl.h>
 
-const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
+const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
     ULONG size = 0;
     if(NtQuerySystemInformation(SystemProcessorPerformanceInformation, NULL, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
@@ -15,8 +15,6 @@ const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
     SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* FF_AUTO_FREE pinfo = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*)malloc(size);
     if(!NT_SUCCESS(NtQuerySystemInformation(SystemProcessorPerformanceInformation, pinfo, size, &size)))
         return "NtQuerySystemInformation(SystemProcessorPerformanceInformation, size) failed";
-
-    *inUseAll = *totalAll = 0;
 
     for (uint32_t i = 0; i < size / sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION); ++i)
     {
@@ -28,9 +26,14 @@ const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
         coreInfo->KernelTime.QuadPart -= coreInfo->IdleTime.QuadPart;
         coreInfo->KernelTime.QuadPart += dpcTime + interruptTime;
 
-        LONGLONG inUse = coreInfo->UserTime.QuadPart + coreInfo->KernelTime.QuadPart;
-        *inUseAll += (uint64_t)inUse;
-        *totalAll += (uint64_t)(inUse + coreInfo->IdleTime.QuadPart);
+        uint64_t inUse = (uint64_t) (coreInfo->UserTime.QuadPart + coreInfo->KernelTime.QuadPart);
+        uint64_t total = inUse + (uint64_t)coreInfo->IdleTime.QuadPart;
+
+        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        *info = (FFCpuUsageInfo) {
+            .inUseAll = (uint64_t)inUse,
+            .totalAll = (uint64_t)total,
+        };
     }
 
     return NULL;

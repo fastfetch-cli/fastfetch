@@ -90,6 +90,11 @@ static inline void ffListDestroy(FFlist* list)
     list->data = NULL;
 }
 
+static inline void ffListClear(FFlist* list)
+{
+    list->length = 0;
+}
+
 #define FF_LIST_FOR_EACH(itemType, itemVarName, listVar) \
     assert(sizeof(itemType) == (listVar).elementSize); \
     for(itemType* itemVarName = (itemType*)(listVar).data; \

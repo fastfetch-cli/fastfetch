@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
+const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
     FF_AUTO_CLOSE_FILE FILE* procStat = fopen("/proc/stat", "r");
     if(procStat == NULL)
@@ -20,16 +20,17 @@ const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
     if (fscanf(procStat, "cpu%*[^\n]\n") < 0)
         return "fscanf() first line failed";
 
-    *inUseAll = 0;
-    *totalAll = 0;
-
     uint64_t user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
     while (fscanf(procStat, "cpu%*d%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64, &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7)
     {
         uint64_t inUse = user + nice + system;
         uint64_t total = inUse + idle + iowait + irq + softirq;
-        *inUseAll += inUse;
-        *totalAll += total;
+
+        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        *info = (FFCpuUsageInfo) {
+            .inUseAll = (uint64_t)inUse,
+            .totalAll = (uint64_t)total,
+        };
     }
 
     return NULL;

@@ -4,42 +4,54 @@
 
 #include <stdint.h>
 
-// We need to use uint64_t because sizeof(long) == 4 on Windows
-const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll);
-
-static uint64_t inUseAll1, totalAll1;
+static FFlist cpuTimes1;
 
 void ffPrepareCPUUsage(void)
 {
-    ffGetCpuUsageInfo(&inUseAll1, &totalAll1);
+    assert(cpuTimes1.elementSize == 0);
+    ffListInit(&cpuTimes1, sizeof(FFCpuUsageInfo));
+    ffGetCpuUsageInfo(&cpuTimes1);
 }
 
-const char* ffGetCpuUsageResult(double* result)
+const char* ffGetCpuUsageResult(FFlist* result)
 {
     const char* error = NULL;
-    if(inUseAll1 == 0 && totalAll1 == 0)
+    if(cpuTimes1.elementSize == 0)
     {
-        error = ffGetCpuUsageInfo(&inUseAll1, &totalAll1);
-        if(error)
-            return error;
+        ffListInit(&cpuTimes1, sizeof(FFCpuUsageInfo));
+        error = ffGetCpuUsageInfo(&cpuTimes1);
+        if(error) return error;
         ffTimeSleep(200);
     }
 
-    while(true)
-    {
-        uint64_t inUseAll2, totalAll2;
-        error = ffGetCpuUsageInfo(&inUseAll2, &totalAll2);
-        if(error)
-            return error;
+    if(cpuTimes1.length == 0) return "No CPU cores found";
 
-        if(inUseAll2 != inUseAll1)
+    FF_LIST_AUTO_DESTROY cpuTimes2 = ffListCreate(sizeof(FFCpuUsageInfo));
+
+retry:
+    error = ffGetCpuUsageInfo(&cpuTimes2);
+    if(error) return error;
+    if(cpuTimes1.length != cpuTimes2.length) return "Unexpected CPU usage result";
+
+    for (uint32_t i = 0; i < cpuTimes1.length; ++i)
+    {
+        FFCpuUsageInfo* cpuTime1 = ffListGet(&cpuTimes1, i);
+        FFCpuUsageInfo* cpuTime2 = ffListGet(&cpuTimes2, i);
+        if (cpuTime2->totalAll <= cpuTime1->totalAll)
         {
-            *result = (double)(inUseAll2 - inUseAll1) / (double)(totalAll2 - totalAll1) * 100;
-            inUseAll1 = inUseAll2;
-            totalAll1 = totalAll2;
-            return NULL;
-        }
-        else
+            ffListClear(&cpuTimes2);
             ffTimeSleep(200);
+            goto retry;
+        }
     }
+
+    for (uint32_t i = 0; i < cpuTimes1.length; ++i)
+    {
+        FFCpuUsageInfo* cpuTime1 = ffListGet(&cpuTimes1, i);
+        FFCpuUsageInfo* cpuTime2 = ffListGet(&cpuTimes2, i);
+        *(double*) ffListAdd(result) = (double)(cpuTime2->inUseAll - cpuTime1->inUseAll) / (double)(cpuTime2->totalAll - cpuTime1->totalAll) * 100;
+        cpuTime1->inUseAll = cpuTime2->inUseAll;
+        cpuTime1->totalAll = cpuTime2->totalAll;
+    }
+    return NULL;
 }
