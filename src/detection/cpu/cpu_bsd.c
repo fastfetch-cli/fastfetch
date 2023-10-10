@@ -16,7 +16,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->temperature = FF_CPU_TEMP_UNSET;
 
     if (options->temp)
-        ffDetectThermalTemp(&cpu->temperature);
+    {
+        if (!ffDetectCpuTemp(&cpu->temperature))
+            ffDetectThermalTemp(&cpu->temperature);
+    }
 
     return NULL;
 }
