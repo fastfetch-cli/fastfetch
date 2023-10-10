@@ -28,7 +28,8 @@ const char* ffDetectUsers(FFlist* users)
         FFUserResult* user = (FFUserResult*) ffListAdd(users);
         ffStrbufInitWS(&user->name, session->pUserName);
         ffStrbufInitWS(&user->hostName, session->pHostName);
-        ffStrbufInitS(&user->clientIp, "0.0.0.0");
+        ffStrbufInitWS(&user->sessionName, session->pSessionName);
+        ffStrbufInit(&user->clientIp);
         user->loginTime = 0;
 
         DWORD bytes = 0;
