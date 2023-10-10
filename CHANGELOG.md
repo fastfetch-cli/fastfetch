@@ -5,6 +5,7 @@ Features:
 * Support GNOME Console terminal version and font detection (Terminal, Linux)
 * Add `--cpu-freq-ndigits` to set number of digits for CPU frequency (CPU)
 * New module to detect physical disk I/O usage (DiskIO)
+* Add `--cpuusage-separate` to display CPU usage per CPU logical core
 
 Bugfixes:
 * Fix possible crashes on Windows 7 (Disk, Windows)

@@ -632,10 +632,6 @@
                                                 "description": "Print chassis type (desktop, laptop, etc)"
                                             },
                                             {
-                                                "const": "cpuusage",
-                                                "description": "Print CPU usage. Costs some time to collect data"
-                                            },
-                                            {
                                                 "const": "cursor",
                                                 "description": "Print cursor style name"
                                             },
@@ -875,6 +871,20 @@
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            {
+                                "title": "CPU Usage",
+                                "properties": {
+                                    "type": {
+                                        "const": "cpuusage",
+                                        "description": "Print CPU usage. Costs some time to collect data"
+                                    },
+                                    "separate": {
+                                        "type": "boolean",
+                                        "description": "Display CPU usage per CPU logical core, instead of an average result",
+                                        "default": false
+                                    }
+                                }
                             },
                             {
                                 "title": "Colors",

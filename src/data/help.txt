@@ -141,6 +141,7 @@ Module specific options:
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
     --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
+    --cpuusage-separate <?value>:            Display CPU usage per CPU logical core, instead of an average result. Default is false
     --gpu-temp <?value>:                     Detect and display GPU temperature if supported. Default is false
     --gpu-force-vulkan <?value>:             Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
     --gpu-hide-type <?value>:                Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none

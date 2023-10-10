@@ -45,7 +45,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         ffPrintLogoAndKey(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-        if (options->displayType == FF_CPUUSAGE_DISPLAY_TYPE_DEFAULT)
+        if (!options->separate)
         {
             if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                 ffAppendPercentBar(&str, avgValue, 0, 50, 80);
@@ -98,13 +98,9 @@ bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(subKey, "display-type"))
+    if (ffStrEqualsIgnCase(subKey, "separate"))
     {
-        options->displayType = (FFCPUUsageDisplayType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "default", FF_CPUUSAGE_DISPLAY_TYPE_DEFAULT },
-            { "separate", FF_CPUUSAGE_DISPLAY_TYPE_SEPARATE },
-            {},
-        });
+        options->separate = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -129,18 +125,9 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "display-type"))
+        if (ffStrEqualsIgnCase(key, "separate"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "default", FF_CPUUSAGE_DISPLAY_TYPE_DEFAULT },
-                { "separate", FF_CPUUSAGE_DISPLAY_TYPE_SEPARATE },
-                {},
-            });
-            if (error)
-                ffPrintErrorString(FF_CPUUSAGE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
-            else
-                options->displayType = (FFCPUUsageDisplayType) value;
+            options->separate = yyjson_get_bool(val);
             continue;
         }
 
