@@ -39,7 +39,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 if (index != device->name.length)
                 {
                     ffStrbufAppendNS(&device->interconnect, index, device->name.chars); // SCSI
-                    ffStrbufSubstrAfter(&device->name, index + 1);
+                    ffStrbufSubstrAfter(&device->name, index);
                 }
                 ffStrbufSubstrBeforeLastC(&device->name, '\\');
                 ffStrbufSubstrAfterFirstS(&device->name, "&Ven_");
