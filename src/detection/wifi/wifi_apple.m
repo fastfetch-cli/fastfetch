@@ -1,6 +1,7 @@
 #include "wifi.h"
 
 #import <CoreWLAN/CoreWLAN.h>
+#import <CoreLocation/CLLocationManager.h>
 
 const char* ffDetectWifi(FFlist* result)
 {
@@ -31,7 +32,12 @@ const char* ffDetectWifi(FFlist* result)
         if(!inf.serviceActive)
             continue;
 
-        ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
+        [CLLocationManager.new requestAlwaysAuthorization];
+        if (inf.ssid)
+            ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
+        else
+            ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
+
         ffStrbufAppendS(&item->conn.macAddress, inf.hardwareAddress.UTF8String);
         switch(inf.activePHYMode)
         {
@@ -115,6 +121,9 @@ const char* ffDetectWifi(FFlist* result)
                 break;
             case 15 /*kCWSecurityOWETransition*/:
                 ffStrbufAppendS(&item->conn.security, "OWE Transition");
+                break;
+            case kCWSecurityUnknown:
+                // Ignore
                 break;
             default:
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);
