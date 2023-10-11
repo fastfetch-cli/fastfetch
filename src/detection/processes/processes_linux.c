@@ -1,13 +1,25 @@
 #include "processes.h"
 
-#include <sys/sysinfo.h>
+#include "common/io/io.h"
+
+#include <ctype.h>
 
 const char* ffDetectProcesses(uint32_t* result)
 {
-    struct sysinfo info;
-    if(sysinfo(&info) != 0)
-        return "sysinfo() failed";
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
+    if(dir == NULL)
+        return "opendir(\"/proc\") failed";
 
-    *result = (uint32_t) info.procs;
+    uint32_t num = 0;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_type == DT_DIR && isdigit(entry->d_name[0]))
+            ++num;
+    }
+
+    *result = num;
+
     return NULL;
 }
