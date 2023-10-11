@@ -222,6 +222,9 @@ fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
+if(APPLE)
+    configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
+endif()
 
 ####################
 # Ascii image data #
@@ -956,6 +959,13 @@ if(WIN32)
     set(TARGET_NAME flashfetch)
     target_sources(flashfetch
         PRIVATE src/util/windows/version.rc
+    )
+elseif(APPLE)
+    target_link_options(fastfetch
+        PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+    )
+    target_link_options(flashfetch
+        PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
     )
 endif()
 
