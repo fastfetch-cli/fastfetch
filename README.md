@@ -98,7 +98,7 @@ For the image logo, WezTerm with iterm image protocol is known to work, surprisi
 
 * [`freetype`](https://www.freetype.org/): Used for Termux font detection. [`freetype`](https://github.com/termux/termux-packages/tree/master/packages/freetype)
 * [`libvulkan`](https://www.vulkan.org/): Vulkan module, also used for GPU detection. Usually has been provided by Android system. [`vulkan-loader-android`](https://github.com/termux/termux-packages/tree/master/packages/vulkan-loader-android) [`vulkan-headers`](https://github.com/termux/termux-packages/tree/master/packages/vulkan-headers)
-* [`termux-api`](https://github.com/termux/termux-api-package): Used for Wifi / Battery detection. Read [the official doc](https://wiki.termux.com/wiki/Termux:API) for detail or if you hang on these modules (IMPORTANT). [`termux-api`](https://github.com/termux/termux-packages/tree/master/packages/termux-api)
+* [`termux-api`](https://github.com/termux/termux-api-package): Used for Wifi / Battery detection. Both the package [termux-api](https://github.com/termux/termux-packages/tree/master/packages/termux-api) and the Android app [Termux API](https://github.com/termux/termux-api) must be installed and the app `Termux API` must be configured to be able to self-running. In order to make Wifi detection actuall work, location privilege must be granted to the app `Termux API`. Read [the official doc](https://wiki.termux.com/wiki/Termux:API) for detail.
 * [`libandroid-wordexp-static`](https://github.com/termux/termux-packages/tree/master/packages/libandroid-wordexp): `wordexp.h` support for Android.
 
 For the image logo, [Termux Monet](https://github.com/HardcodedCat/termux-monet) supports iterm image protocol.
