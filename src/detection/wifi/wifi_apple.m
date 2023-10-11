@@ -1,7 +1,6 @@
 #include "wifi.h"
 
 #import <CoreWLAN/CoreWLAN.h>
-#import <CoreLocation/CLLocationManager.h>
 
 const char* ffDetectWifi(FFlist* result)
 {
@@ -32,7 +31,6 @@ const char* ffDetectWifi(FFlist* result)
         if(!inf.serviceActive)
             continue;
 
-        [CLLocationManager.new requestAlwaysAuthorization];
         if (inf.ssid)
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
         else
