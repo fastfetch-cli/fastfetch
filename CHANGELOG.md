@@ -1,5 +1,8 @@
 # 2.1.1
 
+Changes:
+* SSID detection no longer works in macOS Sonoma. It will be marked as `<unknown ssid>` before I find a solution (Wifi, macOS)
+
 Features:
 * Support opkg (Packages, Linux)
 * Support GNOME Console terminal version and font detection (Terminal, Linux)
