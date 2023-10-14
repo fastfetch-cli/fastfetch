@@ -11,7 +11,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
-    const char* error = ffDetectBrightness(&result);
+    const char* error = ffDetectBrightness(options, &result);
 
     if(error)
     {
@@ -88,6 +88,8 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
     ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJson, ffPrintBrightnessHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->ddcciSleep = 10;
 }
 
 bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
@@ -96,6 +98,12 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
+
+    if (ffStrEqualsIgnCase(key, "ddcci-sleep"))
+    {
+        options->ddcciSleep = ffOptionParseUInt32(key, value);
+        return true;
+    }
 
     return false;
 }
@@ -118,6 +126,12 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffStrEqualsIgnCase(key, "ddcciSleep"))
+        {
+            options->ddcciSleep = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -126,7 +140,7 @@ void ffGenerateBrightnessJson(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjs
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
-    const char* error = ffDetectBrightness(&result);
+    const char* error = ffDetectBrightness(options, &result);
 
     if (error)
     {

@@ -52,7 +52,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
 #ifdef __aarch64__
 // https://github.com/waydabber/m1ddc
 // Works for Apple Silicon and USB-C adapter connection ( but not HTMI )
-static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* displayServer, FFlist* result)
+static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result)
 {
     if (!IOAVServiceCreate || !IOAVServiceReadI2C)
         return "IOAVService is not available";
@@ -93,7 +93,7 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
             for (uint32_t i = 0; i < 2; ++i)
             {
                 IOAVServiceWriteI2C(service, 0x37, 0x51, i2cIn, sizeof(i2cIn));
-                usleep(10000);
+                usleep(options->ddcciSleep * 1000);
             }
         }
 
@@ -121,7 +121,7 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
     return NULL;
 }
 #else
-static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist* result)
+static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result)
 {
     if (!CGSServiceForDisplayNumber) return "CGSServiceForDisplayNumber is not available";
 
@@ -156,7 +156,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                 .sendTransactionType = kIOI2CSimpleTransactionType,
                 .sendBuffer = (vm_address_t) i2cIn,
                 .sendBytes = sizeof(i2cIn) / sizeof(i2cIn[0]),
-                .minReplyDelay = 10,
+                .minReplyDelay = options->ddcciSleep,
                 .replyAddress = 0x6F,
                 .replySubAddress = 0x51,
                 .replyTransactionType = kIOI2CDDCciReplyTransactionType,
@@ -186,14 +186,14 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
 }
 #endif
 
-const char* ffDetectBrightness(FFlist* result)
+const char* ffDetectBrightness(FFBrightnessOptions* options, FFlist* result)
 {
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
 
     detectWithDisplayServices(displayServer, result);
 
     if (displayServer->displays.length > result->length)
-        detectWithDdcci(displayServer, result);
+        detectWithDdcci(displayServer, options, result);
 
     return NULL;
 }

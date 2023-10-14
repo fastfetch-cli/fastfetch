@@ -624,10 +624,6 @@
                                                 "description": "Print mather board name and other info"
                                             },
                                             {
-                                                "const": "brightness",
-                                                "description": "Print brightness of your monitors"
-                                            },
-                                            {
                                                 "const": "chassis",
                                                 "description": "Print chassis type (desktop, laptop, etc)"
                                             },
@@ -837,6 +833,22 @@
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            {
+                                "title": "Brightness",
+                                "properties": {
+                                    "type": {
+                                        "const": "brightness",
+                                        "description": "Print current brightness / luminance of your monitors"
+                                    },
+                                    "ddcciSleep": {
+                                        "type": "integer",
+                                        "description": "Set the sleep times (in ms) when sending DDC/CI requests.\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail",
+                                        "minimum": 0,
+                                        "maximum": 400,
+                                        "default": 10
+                                    }
+                                }
                             },
                             {
                                 "title": "CPU",

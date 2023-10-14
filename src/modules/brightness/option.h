@@ -8,4 +8,6 @@ typedef struct FFBrightnessOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    uint32_t ddcciSleep; // ms
 } FFBrightnessOptions;

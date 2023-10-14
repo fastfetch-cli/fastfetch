@@ -6,6 +6,7 @@ Features:
 * Add `--cpu-freq-ndigits` to set number of digits for CPU frequency (CPU)
 * New module to detect physical disk I/O usage (DiskIO)
 * Add `--cpuusage-separate` to display CPU usage per CPU logical core
+* Add `--brightness-ddcci-sleep` to set the sleep times (in ms) when sending DDC/CI requests (Brightness, #580)
 
 Bugfixes:
 * Fix possible crashes on Windows 7 (Disk, Windows)

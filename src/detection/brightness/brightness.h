@@ -12,6 +12,6 @@ typedef struct FFBrightnessResult
     double min, max, current;
 } FFBrightnessResult;
 
-const char* ffDetectBrightness(FFlist* result); // list of FFBrightnessResult
+const char* ffDetectBrightness(FFBrightnessOptions* options, FFlist* result); // list of FFBrightnessResult
 
 #endif

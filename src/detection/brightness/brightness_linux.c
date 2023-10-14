@@ -92,7 +92,7 @@ static const char* detectWithBacklight(FFlist* result)
 
 #include <ddcutil_c_api.h>
 
-static const char* detectWithDdcci(FFlist* result)
+static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
 {
     FF_LIBRARY_LOAD(libddcutil, &instance.config.libDdcutil, "dlopen ddcutil failed", "libddcutil" FF_LIBRARY_EXTENSION, 5);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_display_info_list2)
@@ -100,7 +100,10 @@ static const char* detectWithDdcci(FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_set_default_sleep_multiplier)
     libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
+
+    ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (__builtin_expect(ffddca_get_display_info_list2(false, &infoList) < 0, 0))
@@ -137,14 +140,14 @@ static const char* detectWithDdcci(FFlist* result)
 }
 #endif
 
-const char* ffDetectBrightness(FFlist* result)
+const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
 {
     detectWithBacklight(result);
 
     #ifdef FF_HAVE_DDCUTIL
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
     if (result->length < displayServer->displays.length)
-        detectWithDdcci(result);
+        detectWithDdcci(options, result);
     #endif
 
     return NULL;

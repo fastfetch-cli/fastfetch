@@ -137,6 +137,7 @@ Module specific options:
     --display-compact-type: <?string>:       Set if all displays should be printed in one line. Default is none
     --display-detect-name: <?value>:         Set if display name should be detected and printed (if supported). Default is false
     --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
+    --brightness-ddcci-sleep: <num>          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
     --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
     --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
