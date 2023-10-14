@@ -88,10 +88,6 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
     ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJson, ffPrintBrightnessHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
-
-    #ifdef __linux__
-    ffListInit(&options->busNos, sizeof(int));
-    #endif
 }
 
 bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
@@ -107,10 +103,6 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
 void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    #ifdef __linux__
-    ffListDestroy(&options->busNos);
-    #endif
 }
 
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
@@ -125,22 +117,6 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
-
-        #ifdef __linux__
-        if(ffStrEqualsIgnCase(key, "busNos"))
-        {
-            if (!yyjson_is_arr(val)) continue;
-
-            yyjson_val* item;
-            size_t idx, max;
-            yyjson_arr_foreach(val, idx, max, item)
-            {
-                if (!yyjson_is_int(item)) continue;
-                *(int*) ffListAdd(&options->busNos) = yyjson_get_int(item);
-            }
-            continue;
-        }
-        #endif
 
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }

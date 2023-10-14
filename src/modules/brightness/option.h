@@ -8,8 +8,4 @@ typedef struct FFBrightnessOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
-
-#ifdef __linux__
-    FFlist busNos;
-#endif
 } FFBrightnessOptions;
