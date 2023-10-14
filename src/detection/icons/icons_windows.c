@@ -4,11 +4,12 @@
 const char* ffDetectIcons(FFstrbuf* result)
 {
     FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL))
-        return "ffRegOpenKeyForRead(Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu) failed";
+    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
+       !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL))
+        return "ffRegOpenKeyForRead(Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\{NewStartPanel|ClassicStartMenu}) failed";
 
     // Whether these icons are hidden
-    uint32_t ThisPC = 0, UsersFiles = 0, RemoteNetwork = 0, RecycleBin = 0, ControlPanel = 0;
+    uint32_t ThisPC = 1, UsersFiles = 1, RemoteNetwork = 1, RecycleBin = 0 /* Shown by default */, ControlPanel = 1;
     ffRegReadUint(hKey, L"{20D04FE0-3AEA-1069-A2D8-08002B30309D}", &ThisPC, NULL);
     ffRegReadUint(hKey, L"{59031a47-3f72-44a7-89c5-5595fe6b30ee}", &UsersFiles, NULL);
     ffRegReadUint(hKey, L"{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}", &RemoteNetwork, NULL);
