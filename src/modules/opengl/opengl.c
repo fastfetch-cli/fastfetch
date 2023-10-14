@@ -44,7 +44,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJson, ffPrintOpenGLHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)
@@ -142,4 +142,14 @@ void ffGenerateOpenGLJson(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson_mut_d
     ffStrbufDestroy(&result.renderer);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.slv);
+}
+
+void ffPrintOpenGLHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_OPENGL_MODULE_NAME, "{1}", FF_OPENGL_NUM_FORMAT_ARGS, (const char* []) {
+        "version",
+        "renderer",
+        "vendor",
+        "shading language version"
+    });
 }

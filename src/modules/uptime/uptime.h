@@ -10,3 +10,4 @@ bool ffParseUptimeCommandOptions(FFUptimeOptions* options, const char* key, cons
 void ffDestroyUptimeOptions(FFUptimeOptions* options);
 void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module);
 void ffGenerateUptimeJson(FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintUptimeHelpFormat(void);

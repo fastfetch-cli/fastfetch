@@ -75,7 +75,7 @@ void ffPrintUsers(FFUsersOptions* options)
             ffPrintFormat(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_USERS_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostName},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->tty},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &user->sessionName},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->clientIp},
                 {FF_FORMAT_ARG_TYPE_UINT64, &user->loginTime},
             });
@@ -86,14 +86,14 @@ void ffPrintUsers(FFUsersOptions* options)
     {
         ffStrbufDestroy(&user->clientIp);
         ffStrbufDestroy(&user->hostName);
-        ffStrbufDestroy(&user->tty);
+        ffStrbufDestroy(&user->sessionName);
         ffStrbufDestroy(&user->name);
     }
 }
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson, ffPrintUsersHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->compact = false;
@@ -159,11 +159,11 @@ void ffGenerateUsersJson(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc
     FF_LIST_FOR_EACH(FFUserResult, user, results)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_strbuf(doc, obj, "clientIp", &user->clientIp);
-        yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &user->hostName);
-        yyjson_mut_obj_add_uint(doc, obj, "loginTime", user->loginTime);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &user->name);
-        yyjson_mut_obj_add_strbuf(doc, obj, "tty", &user->tty);
+        yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &user->hostName);
+        yyjson_mut_obj_add_strbuf(doc, obj, "sessionName", &user->sessionName);
+        yyjson_mut_obj_add_strbuf(doc, obj, "clientIp", &user->clientIp);
+        yyjson_mut_obj_add_uint(doc, obj, "loginTime", user->loginTime);
     }
 
 exit:
@@ -171,7 +171,18 @@ exit:
     {
         ffStrbufDestroy(&user->clientIp);
         ffStrbufDestroy(&user->hostName);
-        ffStrbufDestroy(&user->tty);
+        ffStrbufDestroy(&user->sessionName);
         ffStrbufDestroy(&user->name);
     }
+}
+
+void ffPrintUsersHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_USERS_MODULE_NAME, "{1}@{2} - login time {5}", FF_USERS_NUM_FORMAT_ARGS, (const char* []) {
+        "User name",
+        "Host name",
+        "Session name",
+        "Client IP",
+        "Login Time"
+    });
 }

@@ -32,7 +32,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJson, ffPrintLocaleHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -80,4 +80,11 @@ void ffGenerateLocaleJson(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_d
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &locale);
+}
+
+void ffPrintLocaleHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_LOCALE_MODULE_NAME, "{1}", FF_LOCALE_NUM_FORMAT_ARGS, (const char* []) {
+        "Locale code"
+    });
 }

@@ -52,6 +52,7 @@
         "gamepad",
         "weather",
         "netio",
+        "diskio",
         "version",
         "break",
         "colors"

@@ -280,6 +280,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
     packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
     packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
     packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
+    packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts)

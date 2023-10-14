@@ -18,6 +18,7 @@ typedef struct FFModuleBaseInfo
     void (*parseJsonObject)(void* options, struct yyjson_val *module);
     void (*printModule)(void* options);
     void (*generateJson)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* module);
+    void (*printHelpFormat)(void);
 } FFModuleBaseInfo;
 
 static inline void ffOptionInitModuleBaseInfo(
@@ -26,7 +27,8 @@ static inline void ffOptionInitModuleBaseInfo(
     void* parseCommandOptions, // bool (*const parseCommandOptions)(void* options, const char* key, const char* value)
     void* parseJsonObject, // void (*const parseJsonObject)(void* options, yyjson_val *module)
     void* printModule, // void (*const printModule)(void* options)
-    void* generateJson // void (*const generateJson)(void* options, yyjson_mut_doc* doc, yyjson_mut_val* obj)
+    void* generateJson, // void (*const generateJson)(void* options, yyjson_mut_doc* doc, yyjson_mut_val* obj)
+    void (*printHelpFormat)(void)
 )
 {
     baseInfo->name = name;
@@ -34,6 +36,7 @@ static inline void ffOptionInitModuleBaseInfo(
     baseInfo->parseJsonObject = (__typeof__(baseInfo->parseJsonObject)) parseJsonObject;
     baseInfo->printModule = (__typeof__(baseInfo->printModule)) printModule;
     baseInfo->generateJson = (__typeof__(baseInfo->generateJson)) generateJson;
+    baseInfo->printHelpFormat = printHelpFormat;
 }
 
 typedef struct FFModuleArgs

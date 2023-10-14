@@ -75,7 +75,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJson, ffPrintSwapHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -125,4 +125,13 @@ void ffGenerateSwapJson(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_uint(doc, obj, "total", storage.bytesTotal);
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
+}
+
+void ffPrintSwapHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_SWAP_MODULE_NAME, "{1} / {2} ({3})", FF_SWAP_NUM_FORMAT_ARGS, (const char* []) {
+        "Used size",
+        "Total size",
+        "Percentage used"
+    });
 }

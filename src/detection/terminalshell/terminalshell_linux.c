@@ -150,6 +150,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
 
     //Known shells
     if (
+        strcasecmp(name, "ash")       == 0 ||
         strcasecmp(name, "bash")      == 0 ||
         strcasecmp(name, "zsh")       == 0 ||
         strcasecmp(name, "ksh")       == 0 ||
@@ -384,7 +385,9 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     #elif defined(__linux__) || defined(__FreeBSD__)
 
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "gnome-terminal");
+        ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Terminal");
+    else if(ffStrbufStartsWithS(&result.terminalProcessName, "kgx"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Console");
 
     #elif defined(__APPLE__)
 

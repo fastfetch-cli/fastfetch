@@ -107,7 +107,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, ffGenerateMediaJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, ffGenerateMediaJson, ffPrintMediaHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -158,4 +158,15 @@ void ffGenerateMediaJson(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "artist", &media->artist);
     yyjson_mut_obj_add_strbuf(doc, obj, "album", &media->album);
     yyjson_mut_obj_add_strbuf(doc, obj, "status", &media->status);
+}
+
+void ffPrintMediaHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_MEDIA_MODULE_NAME, "{3} - {1} ({5})", FF_MEDIA_NUM_FORMAT_ARGS, (const char* []) {
+        "Pretty media name",
+        "Media name",
+        "Artist name",
+        "Album name",
+        "Status",
+    });
 }

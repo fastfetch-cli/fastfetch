@@ -12,3 +12,4 @@ bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const 
 void ffDestroyNetIOOptions(FFNetIOOptions* options);
 void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module);
 void ffGenerateNetIOJson(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintNetIOHelpFormat(void);

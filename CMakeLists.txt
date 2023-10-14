@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.1.0
+    VERSION 2.1.1
     LANGUAGES C
     DESCRIPTION "Fast system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -222,6 +222,9 @@ fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
+if(APPLE)
+    configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
+endif()
 
 ####################
 # Ascii image data #
@@ -273,6 +276,7 @@ set(LIBFASTFETCH_SRC
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
     src/detection/disk/disk.c
+    src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
@@ -310,6 +314,7 @@ set(LIBFASTFETCH_SRC
     src/modules/datetime/datetime.c
     src/modules/de/de.c
     src/modules/disk/disk.c
+    src/modules/diskio/diskio.c
     src/modules/font/font.c
     src/modules/gpu/gpu.c
     src/modules/host/host.c
@@ -375,6 +380,7 @@ if(LINUX)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
@@ -385,6 +391,7 @@ if(LINUX)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
@@ -428,11 +435,13 @@ elseif(ANDROID)
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/font/font_nosupport.c
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
+        src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
@@ -477,6 +486,7 @@ elseif(BSD)
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
+        src/detection/diskio/diskio_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
@@ -488,6 +498,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/libc/libc_bsd.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
@@ -531,12 +542,14 @@ elseif(APPLE)
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
+        src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
         src/detection/host/host_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
+        src/detection/libc/libc_apple.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
@@ -580,11 +593,13 @@ elseif(WIN32)
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
+        src/detection/diskio/diskio_windows.c
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
+        src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
@@ -649,6 +664,28 @@ add_library(libfastfetch OBJECT
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
     target_link_libraries(libfastfetch PRIVATE yyjson)
+endif()
+
+if(LINUX AND EXISTS "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1")
+    execute_process(COMMAND "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1"
+                    ERROR_VARIABLE LD_MUSL_RESULT)
+    if("${LD_MUSL_RESULT}" MATCHES "Version ([0-9]+\\.[0-9]+\\.[0-9]+)")
+        target_compile_definitions(libfastfetch PUBLIC FF_MUSL_VERSION="${CMAKE_MATCH_1}")
+    endif()
+endif()
+if(APPLE AND EXISTS "/usr/bin/otool")
+    execute_process(COMMAND /usr/bin/otool -L /usr/bin/otool
+                    OUTPUT_VARIABLE OTOOL_OTOOL_RESULT)
+    if("${OTOOL_OTOOL_RESULT}" MATCHES "libSystem\\.B\\.dylib \\(.*current version ([0-9]+\\.[0-9]+\\.[0-9]+)\\)")
+        target_compile_definitions(libfastfetch PUBLIC FF_LIBSYSTEM_VERSION="${CMAKE_MATCH_1}")
+    endif()
+endif()
+if(BSD AND EXISTS "/usr/local/bin/objdump")
+    execute_process(COMMAND /bin/sh -c "/usr/local/bin/objdump -T /lib/libc.so.* | grep 'FBSD_[^ )]*' -o | sort -Vru | head -1"
+                    OUTPUT_VARIABLE OBJDUMP_T_RESULT)
+    if("${OBJDUMP_T_RESULT}" MATCHES "FBSD_([0-9]+\\.[0-9]+)")
+        target_compile_definitions(libfastfetch PUBLIC FF_FBSD_VERSION="${CMAKE_MATCH_1}")
+    endif()
 endif()
 
 target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1)
@@ -856,6 +893,7 @@ elseif(BSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "usbhid"
+        PRIVATE "devstat"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
@@ -921,6 +959,13 @@ if(WIN32)
     set(TARGET_NAME flashfetch)
     target_sources(flashfetch
         PRIVATE src/util/windows/version.rc
+    )
+elseif(APPLE)
+    target_link_options(fastfetch
+        PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+    )
+    target_link_options(flashfetch
+        PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
     )
 endif()
 

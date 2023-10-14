@@ -103,7 +103,7 @@ void ffPrintBattery(FFBatteryOptions* options)
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJson, ffPrintBatteryHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
@@ -207,4 +207,15 @@ void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjso
         ffStrbufDestroy(&battery->technology);
         ffStrbufDestroy(&battery->status);
     }
+}
+
+void ffPrintBatteryHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_BATTERY_MODULE_NAME, "{4}, {5}", FF_BATTERY_NUM_FORMAT_ARGS, (const char* []) {
+        "Battery manufactor",
+        "Battery model",
+        "Battery technology",
+        "Battery capacity (percentage)",
+        "Battery status"
+    });
 }

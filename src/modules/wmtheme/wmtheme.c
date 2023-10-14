@@ -32,7 +32,7 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJson, ffPrintWMthemeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -78,4 +78,11 @@ void ffGenerateWMThemeJson(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &themeOrError);
+}
+
+void ffPrintWMthemeHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_WMTHEME_MODULE_NAME, "{1}", FF_WMTHEME_NUM_FORMAT_ARGS, (const char* []) {
+        "WM theme"
+    });
 }

@@ -71,7 +71,7 @@ void ffPrintTitle(FFTitleOptions* options)
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJson, ffPrintTitleHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 
@@ -171,4 +171,18 @@ void ffGenerateTitleJson(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
+}
+
+void ffPrintTitleHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_TITLE_MODULE_NAME, "{6}{7}{8}", FF_TITLE_NUM_FORMAT_ARGS, (const char* []) {
+        "User name",
+        "Host name",
+        "Home directory",
+        "Executable path of current process",
+        "User's default shell",
+        "User name (colored)",
+        "@ symbol (colored)",
+        "Host name (colored)"
+    });
 }

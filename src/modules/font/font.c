@@ -45,7 +45,7 @@ void ffPrintFont(FFFontOptions* options)
 
 void ffInitFontOptions(FFFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJson, ffPrintFontHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -105,4 +105,15 @@ void ffGenerateFontJson(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* 
     ffStrbufDestroy(&font.display);
     for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufDestroy(&font.fonts[i]);
+}
+
+void ffPrintFontHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_FONT_MODULE_NAME, "{5}", FF_FONT_NUM_FORMAT_ARGS, (const char* []) {
+        "Font 1",
+        "Font 2",
+        "Font 3",
+        "Font 4",
+        "Combined fonts"
+    });
 }

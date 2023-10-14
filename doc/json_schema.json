@@ -545,6 +545,7 @@
                             "datetime",
                             "display",
                             "disk",
+                            "diskio",
                             "de",
                             "font",
                             "gamepad",
@@ -595,7 +596,6 @@
                         ],
                         "properties": {
                             "type": {
-                                "title": "Module type",
                                 "type": "string"
                             }
                         },
@@ -614,45 +614,151 @@
                                 "title": "No additional properties",
                                 "properties": {
                                     "type": {
-                                        "enum": [
-                                            "bios",
-                                            "board",
-                                            "brightness",
-                                            "chassis",
-                                            "cpuusage",
-                                            "cursor",
-                                            "datetime",
-                                            "de",
-                                            "font",
-                                            "gamepad",
-                                            "host",
-                                            "icons",
-                                            "kernel",
-                                            "lm",
-                                            "locale",
-                                            "media",
-                                            "memory",
-                                            "monitor",
-                                            "opencl",
-                                            "os",
-                                            "packages",
-                                            "player",
-                                            "poweradapter",
-                                            "processes",
-                                            "shell",
-                                            "swap",
-                                            "terminal",
-                                            "terminalfont",
-                                            "terminalsize",
-                                            "theme",
-                                            "uptime",
-                                            "users",
-                                            "version",
-                                            "vulkan",
-                                            "wallpaper",
-                                            "wm",
-                                            "wifi",
-                                            "wmtheme"
+                                        "anyOf": [
+                                            {
+                                                "const": "bios",
+                                                "description": "Print BIOS name, version, release date, etc"
+                                            },
+                                            {
+                                                "const": "board",
+                                                "description": "Print mather board name and other info"
+                                            },
+                                            {
+                                                "const": "chassis",
+                                                "description": "Print chassis type (desktop, laptop, etc)"
+                                            },
+                                            {
+                                                "const": "cursor",
+                                                "description": "Print cursor style name"
+                                            },
+                                            {
+                                                "const": "datetime",
+                                                "description": "Print current date and time"
+                                            },
+                                            {
+                                                "const": "de",
+                                                "description": "Print desktop environment name"
+                                            },
+                                            {
+                                                "const": "font",
+                                                "description": "Print system font name"
+                                            },
+                                            {
+                                                "const": "gamepad",
+                                                "description": "List connected gamepads"
+                                            },
+                                            {
+                                                "const": "host",
+                                                "description": "Print product name of your computer"
+                                            },
+                                            {
+                                                "const": "icons",
+                                                "description": "Print icon style name"
+                                            },
+                                            {
+                                                "const": "kernel",
+                                                "description": "Print system kernel version"
+                                            },
+                                            {
+                                                "const": "lm",
+                                                "description": "Print login manager (desktop manager) name and version"
+                                            },
+                                            {
+                                                "const": "locale",
+                                                "description": "Print system locale name"
+                                            },
+                                            {
+                                                "const": "media",
+                                                "description": "Print playing song name"
+                                            },
+                                            {
+                                                "const": "memory",
+                                                "description": "Print system memory usage info"
+                                            },
+                                            {
+                                                "const": "monitor",
+                                                "description": "Print connected physical monitor information"
+                                            },
+                                            {
+                                                "const": "opencl",
+                                                "description": "Print highest OpenCL version supported by the GPU"
+                                            },
+                                            {
+                                                "const": "os",
+                                                "description": "Print operating system name and version"
+                                            },
+                                            {
+                                                "const": "packages",
+                                                "description": "List installed package managers and count of installed packages"
+                                            },
+                                            {
+                                                "const": "player",
+                                                "description": "Print music player name"
+                                            },
+                                            {
+                                                "const": "poweradapter",
+                                                "description": "Print power adapter name and charging watts"
+                                            },
+                                            {
+                                                "const": "processes",
+                                                "description": "Count running processes"
+                                            },
+                                            {
+                                                "const": "shell",
+                                                "description": "Print current shell name and version"
+                                            },
+                                            {
+                                                "const": "swap",
+                                                "description": "Print swap (paging file) space usage"
+                                            },
+                                            {
+                                                "const": "terminal",
+                                                "description": "Print current terminal name and version"
+                                            },
+                                            {
+                                                "const": "terminalfont",
+                                                "description": "Print font name and size used by current terminal"
+                                            },
+                                            {
+                                                "const": "terminalsize",
+                                                "description": "Print current terminal size"
+                                            },
+                                            {
+                                                "const": "theme",
+                                                "description": "Print current theme information"
+                                            },
+                                            {
+                                                "const": "uptime",
+                                                "description": "Print system uptime"
+                                            },
+                                            {
+                                                "const": "users",
+                                                "description": "List users currently logged in"
+                                            },
+                                            {
+                                                "const": "version",
+                                                "description": "Print Fastfetch version"
+                                            },
+                                            {
+                                                "const": "vulkan",
+                                                "description": "Print highest Vulkan version supported by the GPU"
+                                            },
+                                            {
+                                                "const": "wallpaper",
+                                                "description": "Print image file path of current wallpaper"
+                                            },
+                                            {
+                                                "const": "wm",
+                                                "description": "Print window manager name and version"
+                                            },
+                                            {
+                                                "const": "wifi",
+                                                "description": "Print connected Wi-Fi info (SSID, connection and security protocol)"
+                                            },
+                                            {
+                                                "const": "wmtheme",
+                                                "description": "Print current theme of window manager"
+                                            }
                                         ]
                                     },
                                     "key": {
@@ -674,7 +780,8 @@
                                 "title": "Battery",
                                 "properties": {
                                     "type": {
-                                        "const": "battery"
+                                        "const": "battery",
+                                        "description": "Print battery capacity, status, etc"
                                     },
                                     "dir": {
                                         "title": "The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only",
@@ -704,6 +811,7 @@
                                 "title": "Bluetooth",
                                 "properties": {
                                     "type": {
+                                        "description": "List bluetooth devices",
                                         "const": "bluetooth"
                                     },
                                     "showDisconnected": {
@@ -727,15 +835,39 @@
                                 "additionalProperties": false
                             },
                             {
+                                "title": "Brightness",
+                                "properties": {
+                                    "type": {
+                                        "const": "brightness",
+                                        "description": "Print current brightness / luminance of your monitors"
+                                    },
+                                    "ddcciSleep": {
+                                        "type": "integer",
+                                        "description": "Set the sleep times (in ms) when sending DDC/CI requests.\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail",
+                                        "minimum": 0,
+                                        "maximum": 400,
+                                        "default": 10
+                                    }
+                                }
+                            },
+                            {
                                 "title": "CPU",
                                 "properties": {
                                     "type": {
+                                        "description": "Print CPU name, frequency, etc",
                                         "const": "cpu"
                                     },
                                     "temp": {
                                         "title": "Detect and display CPU temperature if supported",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "freqNdigits": {
+                                        "title": "Set the number of digits to keep after the decimal point when printing CPU frequency",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 9,
+                                        "default": 2
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -753,9 +885,24 @@
                                 "additionalProperties": false
                             },
                             {
+                                "title": "CPU Usage",
+                                "properties": {
+                                    "type": {
+                                        "const": "cpuusage",
+                                        "description": "Print CPU usage. Costs some time to collect data"
+                                    },
+                                    "separate": {
+                                        "type": "boolean",
+                                        "description": "Display CPU usage per CPU logical core, instead of an average result",
+                                        "default": false
+                                    }
+                                }
+                            },
+                            {
                                 "title": "Colors",
                                 "properties": {
                                     "type": {
+                                        "description": "Print some colored blocks",
                                         "const": "colors"
                                     },
                                     "symbol": {
@@ -783,6 +930,7 @@
                                 "title": "Command",
                                 "properties": {
                                     "type": {
+                                        "description": "Running custom shell scripts",
                                         "const": "command"
                                     },
                                     "shell": {
@@ -810,9 +958,9 @@
                             },
                             {
                                 "title": "Custom",
-                                "description": "Print a custom string, with or without key",
                                 "properties": {
                                     "type": {
+                                        "description": "Print a custom string, with or without key",
                                         "const": "custom"
                                     },
                                     "key": {
@@ -839,6 +987,7 @@
                                 "title": "Display",
                                 "properties": {
                                     "type": {
+                                        "description": "Print resolutions, refresh rates, etc",
                                         "const": "display"
                                     },
                                     "compactType": {
@@ -874,6 +1023,7 @@
                                 "title": "Disk",
                                 "properties": {
                                     "type": {
+                                        "description": "Print partitions, space usage, disk type, etc",
                                         "const": "disk"
                                     },
                                     "folders": {
@@ -926,9 +1076,36 @@
                                 "additionalProperties": false
                             },
                             {
+                                "title": "DiskIO",
+                                "properties": {
+                                    "type": {
+                                        "description": "Print physical disk I/O throughput",
+                                        "const": "diskio"
+                                    },
+                                    "namePrefix": {
+                                        "title": "Show disks with given name prefix only",
+                                        "type": "string"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
                                 "title": "GPU",
                                 "properties": {
                                     "type": {
+                                        "description": "Print GPU names, graphic memory size, type, etc",
                                         "const": "gpu"
                                     },
                                     "temp": {
@@ -969,6 +1146,7 @@
                                 "title": "Local IP",
                                 "properties": {
                                     "type": {
+                                        "description": "List local IP addresses (v4 or v6), MAC addresses, etc",
                                         "const": "localip"
                                     },
                                     "showIpv4": {
@@ -1021,9 +1199,10 @@
                                 "additionalProperties": false
                             },
                             {
-                                "title": "Network throughput (usage)",
+                                "title": "NetIO",
                                 "properties": {
                                     "type": {
+                                        "description": "Print network I/O throughput",
                                         "const": "netio"
                                     },
                                     "namePrefix": {
@@ -1054,6 +1233,7 @@
                                 "title": "OpenGL",
                                 "properties": {
                                     "type": {
+                                        "description": "Print highest OpenGL version supported by the GPU",
                                         "const": "opengl"
                                     },
                                     "library": {
@@ -1085,6 +1265,7 @@
                                 "title": "Public IP",
                                 "properties": {
                                     "type": {
+                                        "description": "Print your public IP address, etc",
                                         "const": "publicip"
                                     },
                                     "url": {
@@ -1118,6 +1299,7 @@
                                 "title": "Separator",
                                 "properties": {
                                     "type": {
+                                        "description": "Print a separator line",
                                         "const": "separator"
                                     },
                                     "string": {
@@ -1132,6 +1314,7 @@
                                 "title": "Sound",
                                 "properties": {
                                     "type": {
+                                        "description": "Print sound devices, volume, etc",
                                         "const": "sound"
                                     },
                                     "soundType": {
@@ -1163,6 +1346,7 @@
                                 "title": "Title",
                                 "properties": {
                                     "type": {
+                                        "description": "Print title, which contains your user name, hostname",
                                         "const": "title"
                                     },
                                     "fqdn": {
@@ -1207,6 +1391,7 @@
                                 "title": "Weather",
                                 "properties": {
                                     "type": {
+                                        "description": "Print weather information",
                                         "const": "weather"
                                     },
                                     "location": {

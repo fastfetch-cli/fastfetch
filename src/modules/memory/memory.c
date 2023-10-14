@@ -68,7 +68,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJson, ffPrintMemoryHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -118,4 +118,13 @@ void ffGenerateMemoryJson(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_d
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_uint(doc, obj, "total", storage.bytesTotal);
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
+}
+
+void ffPrintMemoryHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_MEMORY_MODULE_NAME, "{1} / {2} ({3})", FF_MEMORY_NUM_FORMAT_ARGS, (const char* []) {
+        "Used size",
+        "Total size",
+        "Percentage used"
+    });
 }

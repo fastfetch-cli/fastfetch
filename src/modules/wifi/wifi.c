@@ -72,7 +72,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJson, ffPrintWifiHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -152,4 +152,20 @@ void ffGenerateWifiJson(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* 
         ffStrbufDestroy(&item->conn.protocol);
         ffStrbufDestroy(&item->conn.security);
     }
+}
+
+void ffPrintWifiHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_WIFI_MODULE_NAME, "{4} - {10}", FF_WIFI_NUM_FORMAT_ARGS, (const char* []) {
+        "Interface description",
+        "Interface status",
+        "Connection status",
+        "Connection SSID",
+        "Connection mac address",
+        "Connection protocol",
+        "Connection signal quality (percentage)",
+        "Connection RX rate",
+        "Connection TX rate",
+        "Connection Security algorithm"
+    });
 }

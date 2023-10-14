@@ -21,6 +21,8 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
 #elif __APPLE__
+#include "util/apple/cf_helpers.h"
+
 #include <sys/attr.h>
 #include <unistd.h>
 
@@ -71,7 +73,6 @@ const char* ffDetectDisksImpl(FFlist* disks)
         #endif
 
         FFDisk* disk = ffListAdd(disks);
-        disk->physicalType = FF_DISK_PHYSICAL_TYPE_UNKNOWN;
 
         disk->bytesTotal = fs->f_blocks * fs->f_bsize;
         disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;

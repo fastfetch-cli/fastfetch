@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "common/processing.h"
 
 #import <CoreWLAN/CoreWLAN.h>
 
@@ -31,7 +32,22 @@ const char* ffDetectWifi(FFlist* result)
         if(!inf.serviceActive)
             continue;
 
-        ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
+        if (inf.ssid)
+            ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
+        else if (!ffProcessAppendStdOut(&item->conn.ssid, (char* []) {
+            "/usr/sbin/networksetup",
+            "-getairportnetwork",
+            item->inf.description.chars,
+            NULL
+        }) && item->conn.ssid.length > 0)
+        {
+            uint32_t index = ffStrbufFirstIndexC(&item->conn.ssid, ':');
+            if (index < item->conn.ssid.length)
+                ffStrbufSubstrAfter(&item->conn.ssid, index + 1);
+        }
+        else
+            ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
+
         ffStrbufAppendS(&item->conn.macAddress, inf.hardwareAddress.UTF8String);
         switch(inf.activePHYMode)
         {
@@ -115,6 +131,9 @@ const char* ffDetectWifi(FFlist* result)
                 break;
             case 15 /*kCWSecurityOWETransition*/:
                 ffStrbufAppendS(&item->conn.security, "OWE Transition");
+                break;
+            case kCWSecurityUnknown:
+                // Ignore
                 break;
             default:
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);

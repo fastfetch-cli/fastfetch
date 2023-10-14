@@ -10,3 +10,4 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
 void ffDestroyDisplayOptions(FFDisplayOptions* options);
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module);
 void ffGenerateDisplayJson(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintDisplayHelpFormat(void);

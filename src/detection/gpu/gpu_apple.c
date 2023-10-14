@@ -30,9 +30,8 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
-    CFMutableDictionaryRef matchDict = IOServiceMatching(kIOAcceleratorClassName);
     io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOAcceleratorClassName), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;

@@ -34,9 +34,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
     else
     {
-        ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+        ffParseFormatString(&key, &options->moduleArgs.key, 3, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountFrom},
         });
     }
 
@@ -111,19 +112,6 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
-        const char* physicalType;
-        switch(disk->physicalType)
-        {
-            case FF_DISK_PHYSICAL_TYPE_HDD:
-                physicalType = "HDD";
-                break;
-            case FF_DISK_PHYSICAL_TYPE_SSD:
-                physicalType = "SSD";
-                break;
-            default:
-                physicalType = "Unknown";
-                break;
-        }
         ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
@@ -136,7 +124,6 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
             {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly},
-            {FF_FORMAT_ARG_TYPE_STRING, physicalType}
         });
     }
 }
@@ -217,7 +204,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJson, ffPrintDiskHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);
@@ -428,19 +415,6 @@ void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_
             yyjson_mut_arr_add_str(doc, typeArr, "Hidden");
         if(item->type & FF_DISK_VOLUME_TYPE_READONLY_BIT)
             yyjson_mut_arr_add_str(doc, typeArr, "Read-only");
-
-        switch(item->physicalType)
-        {
-            case FF_DISK_PHYSICAL_TYPE_HDD:
-                yyjson_mut_obj_add_str(doc, obj, "physicalType", "HDD");
-                break;
-            case FF_DISK_PHYSICAL_TYPE_SSD:
-                yyjson_mut_obj_add_str(doc, obj, "physicalType", "SSD");
-                break;
-            default:
-                yyjson_mut_obj_add_null(doc, obj, "physicalType");
-                break;
-        }
     }
 
     FF_LIST_FOR_EACH(FFDisk, item, disks)
@@ -450,4 +424,19 @@ void ffGenerateDiskJson(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_
         ffStrbufDestroy(&item->filesystem);
         ffStrbufDestroy(&item->name);
     }
+}
+
+void ffPrintDiskHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_DISK_MODULE_NAME, "{1} / {2} ({3}) - {9}", FF_DISK_NUM_FORMAT_ARGS, (const char* []) {
+        "Size used",
+        "Size total",
+        "Size percentage",
+        "Files used",
+        "Files total",
+        "Files percentage",
+        "True if external volume",
+        "True if hidden volume",
+        "Filesystem"
+    });
 }

@@ -75,7 +75,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJson, ffPrintPlayerHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -125,4 +125,14 @@ void ffGeneratePlayerJson(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_do
     yyjson_mut_obj_add_strbuf(doc, obj, "player", &media->player);
     yyjson_mut_obj_add_strbuf(doc, obj, "playerId", &media->playerId);
     yyjson_mut_obj_add_strbuf(doc, obj, "url", &media->url);
+}
+
+void ffPrintPlayerHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_PLAYER_MODULE_NAME, "{1}", FF_PLAYER_NUM_FORMAT_ARGS, (const char* []) {
+        "Pretty player name",
+        "Player name",
+        "Player Identifier",
+        "URL name"
+    });
 }

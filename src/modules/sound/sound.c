@@ -85,7 +85,7 @@ void ffPrintSound(FFSoundOptions* options)
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJson, ffPrintSoundHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
@@ -173,7 +173,12 @@ void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_bool(doc, obj, "active", item->active);
         yyjson_mut_obj_add_bool(doc, obj, "main", item->main);
-        yyjson_mut_obj_add_uint(doc, obj, "volume", item->volume);
+
+        if (item->volume != FF_SOUND_VOLUME_UNKNOWN)
+            yyjson_mut_obj_add_uint(doc, obj, "volume", item->volume);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "volume");
+
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
     }
@@ -183,4 +188,14 @@ void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
     }
+}
+
+void ffPrintSoundHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_SOUND_MODULE_NAME, "{2} ({3}%)", FF_SOUND_NUM_FORMAT_ARGS, (const char* []) {
+        "Is main sound device",
+        "Device name",
+        "Volume",
+        "Identifier"
+    });
 }

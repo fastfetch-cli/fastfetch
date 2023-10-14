@@ -17,12 +17,8 @@ static double detectBatteryTemp(void)
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    CFMutableDictionaryRef matchDict = IOServiceMatching("AppleSmartBattery");
-    if (matchDict == NULL)
-        return "IOServiceMatching(\"AppleSmartBattery\") failed";
-
     io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, matchDict, &iterator) != kIOReturnSuccess)
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSmartBattery"), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;

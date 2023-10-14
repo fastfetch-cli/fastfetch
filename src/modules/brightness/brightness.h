@@ -10,3 +10,4 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
 void ffDestroyBrightnessOptions(FFBrightnessOptions* options);
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module);
 void ffGenerateBrightnessJson(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintBrightnessHelpFormat(void);

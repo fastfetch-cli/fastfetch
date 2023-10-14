@@ -44,10 +44,13 @@ jobs:
         run: ctest
 
       - name: run fastfetch
-        run: ./fastfetch --stat --show-errors --no-buffer --load-config presets/all
+        run: time ./fastfetch -c presets/ci
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci --format json
 
       - name: run flashfetch
-        run: ./flashfetch
+        run: time ./flashfetch
 
   linux:
     name: Linux
@@ -83,6 +86,9 @@ jobs:
 
       - name: run fastfetch
         run: time ./fastfetch -c presets/ci
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci --format json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -136,6 +142,9 @@ jobs:
       - name: run fastfetch
         run: time ./fastfetch -c presets/ci
 
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci --format json
+
       - name: run flashfetch
         run: time ./flashfetch
 
@@ -165,12 +174,13 @@ jobs:
         uses: vmactions/freebsd-vm@v0
         with:
           prepare: |
-            pkg install -y cmake git pkgconf pciutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
+            pkg install -y cmake git pkgconf binutils pciutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci
+            time ./fastfetch -c presets/ci --format json
             time ./flashfetch
             ldd fastfetch
             ctest
@@ -226,6 +236,9 @@ jobs:
 
       - name: run fastfetch
         run: time ./fastfetch -c presets/ci
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci --format json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -290,6 +303,9 @@ jobs:
 
       - name: run fastfetch
         run: time ./fastfetch -c presets/ci
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci --format json
 
       - name: run flashfetch
         run: time ./flashfetch

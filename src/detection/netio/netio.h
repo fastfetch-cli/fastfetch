@@ -1,3 +1,5 @@
+#pragma once
+
 #include "fastfetch.h"
 
 typedef struct FFNetIOResult

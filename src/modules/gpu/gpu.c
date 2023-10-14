@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#define FF_GPU_NUM_FORMAT_ARGS 6
+#define FF_GPU_NUM_FORMAT_ARGS 10
 
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
 {
@@ -77,6 +77,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
             {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
             {FF_FORMAT_ARG_TYPE_STRING, type},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.total},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.used},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.total},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used},
         });
     }
 }
@@ -121,7 +125,7 @@ void ffPrintGPU(FFGPUOptions* options)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJson, ffPrintGPUHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;
@@ -276,4 +280,20 @@ void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         ffStrbufDestroy(&gpu->name);
         ffStrbufDestroy(&gpu->driver);
     }
+}
+
+void ffPrintGPUHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_GPU_MODULE_NAME, "{1} {2}", FF_GPU_NUM_FORMAT_ARGS, (const char* []) {
+        "GPU vendor",
+        "GPU name",
+        "GPU driver",
+        "GPU temperature",
+        "GPU core count",
+        "GPU type",
+        "GPU total dedicated memory",
+        "GPU used dedicated memory",
+        "GPU total shared memory",
+        "GPU used shared memory",
+    });
 }

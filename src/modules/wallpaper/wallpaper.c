@@ -44,7 +44,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJson, ffPrintWallpaperHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -90,4 +90,11 @@ void ffGenerateWallpaperJson(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson
         return;
     }
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
+}
+
+void ffPrintWallpaperHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_WALLPAPER_MODULE_NAME, "{1}", FF_WALLPAPER_NUM_FORMAT_ARGS, (const char* []) {
+        "Wallpaper image file"
+    });
 }

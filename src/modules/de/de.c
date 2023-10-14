@@ -42,7 +42,7 @@ void ffPrintDE(FFDEOptions* options)
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJson, ffPrintDEHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -92,4 +92,13 @@ void ffGenerateDEJson(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->deProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->dePrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->deVersion);
+}
+
+void ffPrintDEHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_DE_MODULE_NAME, "{2} {3}", FF_DE_NUM_FORMAT_ARGS, (const char* []) {
+        "DE process name",
+        "DE pretty name",
+        "DE version"
+    });
 }

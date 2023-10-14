@@ -112,6 +112,14 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
                 ffPrepareCPUUsage();
             break;
         }
+        case 'd': case 'D': {
+            if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME))
+            {
+                if (module) ffParseDiskIOJsonObject(&cfg->diskIo, module);
+                ffPrepareDiskIO(&cfg->diskIo);
+            }
+            break;
+        }
         case 'n': case 'N': {
             if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME))
             {

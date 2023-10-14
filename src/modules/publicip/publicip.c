@@ -42,7 +42,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, ffGeneratePublicIpJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, ffGeneratePublicIpJson, ffPrintPublicIpHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->url);
@@ -126,4 +126,12 @@ void ffGeneratePublicIpJson(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyj
 
     ffStrbufDestroy(&result.ip);
     ffStrbufDestroy(&result.location);
+}
+
+void ffPrintPublicIpHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_PUBLICIP_MODULE_NAME, "{1} ({2})", FF_PUBLICIP_NUM_FORMAT_ARGS, (const char* []) {
+        "Public IP address",
+        "Location"
+    });
 }

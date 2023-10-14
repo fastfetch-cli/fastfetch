@@ -31,7 +31,7 @@ next:
         FFUserResult* user = (FFUserResult*) ffListAdd(users);
         ffStrbufInitS(&user->name, n->ut_user);
         ffStrbufInitS(&user->hostName, n->ut_host);
-        ffStrbufInitS(&user->tty, n->ut_line);
+        ffStrbufInitS(&user->sessionName, n->ut_line);
         #ifdef __linux__
         if(n->ut_addr_v6[0] || n->ut_addr_v6[1] || n->ut_addr_v6[2] || n->ut_addr_v6[3])
             ffStrbufInitF(&user->clientIp, "%u.%u.%u.%u", n->ut_addr_v6[0], n->ut_addr_v6[1], n->ut_addr_v6[2], n->ut_addr_v6[3]);

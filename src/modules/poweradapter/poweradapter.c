@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
-#define FF_POWERADAPTER_MODULE_ARGS 5
+#define FF_POWERADAPTER_NUM_FORMAT_ARGS 5
 
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
@@ -42,7 +42,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
                 }
                 else
                 {
-                    ffPrintFormat(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_POWERADAPTER_MODULE_ARGS, (FFformatarg[]){
+                    ffPrintFormat(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_POWERADAPTER_NUM_FORMAT_ARGS, (FFformatarg[]){
                         {FF_FORMAT_ARG_TYPE_INT, &result->watts},
                         {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
                         {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
@@ -62,7 +62,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter, ffGeneratePowerAdapterJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter, ffGeneratePowerAdapterJson, ffPrintPowerAdapterHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -125,4 +125,15 @@ void ffGeneratePowerAdapterJson(FF_MAYBE_UNUSED FFPowerAdapterOptions* options, 
             yyjson_mut_obj_add_int(doc, obj, "watts", item->watts);
         }
     }
+}
+
+void ffPrintPowerAdapterHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_POWERADAPTER_MODULE_NAME, "{1}W", FF_POWERADAPTER_NUM_FORMAT_ARGS, (const char* []) {
+        "PowerAdapter watts",
+        "PowerAdapter name",
+        "PowerAdapter manufacturer",
+        "PowerAdapter model",
+        "PowerAdapter description"
+    });
 }

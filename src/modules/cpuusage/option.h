@@ -8,4 +8,6 @@ typedef struct FFCPUUsageOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    bool separate;
 } FFCPUUsageOptions;

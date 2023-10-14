@@ -132,17 +132,21 @@ Module specific options:
     --disk-show-readonly <?value>:           Set if read only volumes should be printed. Default is false
     --disk-show-unknown <?value>:            Set if unknown (unable to detect sizes) volumes should be printed. Default is false
     --disk-use-available <?value>:           Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes. Default is false
+    --diskio-name-prefix <str>:              Show disks with given name prefix only. Default is empty
     --bluetooth-show-disconnected: <?value>: Set if disconnected bluetooth devices should be printed. Default is false
     --display-compact-type: <?string>:       Set if all displays should be printed in one line. Default is none
     --display-detect-name: <?value>:         Set if display name should be detected and printed (if supported). Default is false
     --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
+    --brightness-ddcci-sleep: <num>          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
     --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
-    --cpu-temp  <?value>:                    Detect and display CPU temperature if supported. Default is false
-    --gpu-temp  <?value>:                    Detect and display GPU temperature if supported. Default is false
-    --gpu-force-vulkan  <?value>:            Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
+    --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
+    --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
+    --cpuusage-separate <?value>:            Display CPU usage per CPU logical core, instead of an average result. Default is false
+    --gpu-temp <?value>:                     Detect and display GPU temperature if supported. Default is false
+    --gpu-force-vulkan <?value>:             Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
     --gpu-hide-type <?value>:                Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
-    --battery-temp  <?value>:                Detect and display Battery temperature if supported. Default is false
+    --battery-temp <?value>:                 Detect and display Battery temperature if supported. Default is false
     --localip-show-ipv4 <?value>:            Show IPv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
     --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
@@ -150,8 +154,8 @@ Module specific options:
     --localip-name-prefix <str>:             Show interfaces with given interface name prefix only. Default is empty
     --localip-default-route-only <?value>:   Show the interface that is used for default routing only. Default is false
     --localip-compact <?value>:              Show all IPs in one line. Default is false
-    --netio-name-prefix <str>:            Show interfaces with given name prefix only. Default is empty
-    --netio-default-route-only <?value>:  Show the interfac that is used for default routing only. Default is false
+    --netio-name-prefix <str>:               Show interfaces with given name prefix only. Default is empty
+    --netio-default-route-only <?value>:     Show the interfac that is used for default routing only. Default is false
     --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url:                          The URL of public IP detection server to be used.
     --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).

@@ -133,7 +133,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJson, ffPrintLocalIpHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
@@ -325,4 +325,15 @@ exit:
         ffStrbufDestroy(&ip->ipv6);
         ffStrbufDestroy(&ip->mac);
     }
+}
+
+void ffPrintLocalIpHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_LOCALIP_MODULE_NAME, "{1}", FF_LOCALIP_NUM_FORMAT_ARGS, (const char* []) {
+        "Local IPv4 address",
+        "Local IPv6 address",
+        "Physical (MAC) address",
+        "Interface name",
+        "Is default route"
+    });
 }

@@ -9,7 +9,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-const char* ffDetectBrightness(FFlist* result)
+const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
 {
     // https://man.freebsd.org/cgi/man.cgi?query=backlight&sektion=9
     char path[] = "/dev/backlight/backlight0";
@@ -42,7 +42,7 @@ const char* ffDetectBrightness(FFlist* result)
 
 #else
 
-const char* ffDetectBrightness(FF_MAYBE_UNUSED FFlist* result)
+const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FF_MAYBE_UNUSED FFlist* result)
 {
     return "Backlight is supported only on FreeBSD 13 and newer";
 }

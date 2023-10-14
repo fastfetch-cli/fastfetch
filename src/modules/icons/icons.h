@@ -10,3 +10,4 @@ bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const 
 void ffDestroyIconsOptions(FFIconsOptions* options);
 void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module);
 void ffGenerateIconsJson(FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintIconsHelpFormat(void);

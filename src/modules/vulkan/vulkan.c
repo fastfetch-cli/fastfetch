@@ -46,7 +46,7 @@ void ffPrintVulkan(FFVulkanOptions* options)
 
 void ffInitVulkanOptions(FFVulkanOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJson, ffPrintVulkanHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -135,4 +135,13 @@ void ffGenerateVulkanJson(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_d
 
         yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", vulkanGpu->vulkanDeviceId);
     }
+}
+
+void ffPrintVulkanHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_VULKAN_MODULE_NAME, "{2} - {1}", FF_VULKAN_NUM_FORMAT_ARGS, (const char* []) {
+        "Driver name",
+        "API version",
+        "Conformance version"
+    });
 }

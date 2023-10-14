@@ -10,3 +10,4 @@ bool ffParseGamepadCommandOptions(FFGamepadOptions* options, const char* key, co
 void ffDestroyGamepadOptions(FFGamepadOptions* options);
 void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module);
 void ffGenerateGamepadJson(FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintGamepadHelpFormat(void);

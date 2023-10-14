@@ -93,6 +93,7 @@ static void defaultConfig(void)
     ffInitDEOptions(&instance.config.de);
     ffInitDateTimeOptions(&instance.config.dateTime);
     ffInitDiskOptions(&instance.config.disk);
+    ffInitDiskIOOptions(&instance.config.diskIo);
     ffInitDisplayOptions(&instance.config.display);
     ffInitFontOptions(&instance.config.font);
     ffInitGPUOptions(&instance.config.gpu);
@@ -307,6 +308,7 @@ static void destroyConfig(void)
     ffDestroyDEOptions(&instance.config.de);
     ffDestroyDateTimeOptions(&instance.config.dateTime);
     ffDestroyDiskOptions(&instance.config.disk);
+    ffDestroyDiskIOOptions(&instance.config.diskIo);
     ffDestroyDisplayOptions(&instance.config.display);
     ffDestroyFontOptions(&instance.config.font);
     ffDestroyGPUOptions(&instance.config.gpu);
@@ -468,6 +470,9 @@ void ffListFeatures(void)
         #endif
         #ifdef FF_HAVE_DDCUTIL
             "libddcutil\n"
+        #endif
+        #ifdef FF_HAVE_DIRECTX_HEADERS
+            "Directx Headers\n"
         #endif
         ""
     , stdout);

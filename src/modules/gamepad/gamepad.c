@@ -51,7 +51,7 @@ void ffPrintGamepad(FFGamepadOptions* options)
 
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad, ffGenerateGamepadJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad, ffGenerateGamepadJson, ffPrintGamepadHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -118,4 +118,12 @@ void ffGenerateGamepadJson(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjson_mut
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
     }
+}
+
+void ffPrintGamepadHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_GAMEPAD_MODULE_NAME, "{1}", FF_GAMEPAD_NUM_FORMAT_ARGS, (const char* []) {
+        "Name",
+        "Identifier"
+    });
 }

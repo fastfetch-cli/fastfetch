@@ -17,6 +17,7 @@
 #include "modules/custom/custom.h"
 #include "modules/datetime/datetime.h"
 #include "modules/disk/disk.h"
+#include "modules/diskio/diskio.h"
 #include "modules/display/display.h"
 #include "modules/de/de.h"
 #include "modules/font/font.h"

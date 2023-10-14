@@ -10,3 +10,4 @@ bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, co
 void ffDestroyMonitorOptions(FFMonitorOptions* options);
 void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module);
 void ffGenerateMonitorJson(FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintMonitorHelpFormat(void);

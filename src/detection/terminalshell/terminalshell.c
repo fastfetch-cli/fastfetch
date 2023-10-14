@@ -206,6 +206,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
     return true;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionKgx(FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        "gnome-terminal",
+        "--version",
+        NULL
+    })) return false;
+
+    //# KGX 45.0 using VTE 0.74.0 +BIDI +GNUTLS +ICU +SYSTEMD
+    ffStrbufSubstrAfterFirstS(version, "KGX ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* version)
 {
     const char* konsoleVersion = getenv("KONSOLE_VERSION");

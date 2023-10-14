@@ -195,7 +195,7 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
     return false;
 }
 
-static bool detectPhysicalTypeAndReturnRemovable(FFDisk* currentDisk)
+static bool isRemovable(FFDisk* currentDisk)
 {
     // https://stackoverflow.com/a/73302025
     // Note my USB mobile hard disk isn't detected as removable, but my USB flash disk does.
@@ -218,20 +218,10 @@ static bool detectPhysicalTypeAndReturnRemovable(FFDisk* currentDisk)
 
         if (!ffStrStartsWith(partitionName, entry->d_name)) continue;
 
-        ffStrbufAppendS(&basePath, entry->d_name);
-        index = basePath.length;
-        // /sys/block/sdx/queue/rotational
-        ffStrbufAppendS(&basePath, "/queue/rotational");
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (ffReadFileBuffer(basePath.chars, &buffer))
-            currentDisk->physicalType = ffStrbufEqualS(&buffer, "1") ? FF_DISK_PHYSICAL_TYPE_HDD : FF_DISK_PHYSICAL_TYPE_SSD;
-        else
-            currentDisk->physicalType = FF_DISK_PHYSICAL_TYPE_UNKNOWN;
-        ffStrbufSubstrBefore(&basePath, index);
-
         // /sys/block/sdx/removable
+        ffStrbufAppendS(&basePath, entry->d_name);
         ffStrbufAppendS(&basePath, "/removable");
-
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         return ffReadFileBuffer(basePath.chars, &buffer) && ffStrbufEqualS(&buffer, "1");
     }
 
@@ -240,10 +230,9 @@ static bool detectPhysicalTypeAndReturnRemovable(FFDisk* currentDisk)
 
 static void detectType(const FFlist* disks, FFDisk* currentDisk)
 {
-    bool isRemovable = detectPhysicalTypeAndReturnRemovable(currentDisk);
-
     if(currentDisk->type != FF_DISK_VOLUME_TYPE_NONE) return;
-    if(isRemovable)
+
+    if(isRemovable(currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
@@ -289,7 +278,6 @@ const char* ffDetectDisksImpl(FFlist* disks)
         //We have a valid device, add it to the list
         FFDisk* disk = ffListAdd(disks);
         disk->type = FF_DISK_VOLUME_TYPE_NONE;
-        disk->physicalType = FF_DISK_PHYSICAL_TYPE_UNKNOWN;
 
         //detect mountFrom
         ffStrbufInitS(&disk->mountFrom, device->mnt_fsname);

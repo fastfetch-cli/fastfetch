@@ -51,7 +51,7 @@ exit:
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, NULL);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJson, ffPrintBoardHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -117,4 +117,13 @@ exit:
     ffStrbufDestroy(&board.name);
     ffStrbufDestroy(&board.vendor);
     ffStrbufDestroy(&board.version);
+}
+
+void ffPrintBoardHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_BOARD_MODULE_NAME, "{1} ({3})", FF_BOARD_NUM_FORMAT_ARGS, (const char* []) {
+        "board name",
+        "board vendor",
+        "board version"
+    });
 }

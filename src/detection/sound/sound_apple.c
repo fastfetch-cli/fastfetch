@@ -32,14 +32,31 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
     {
         AudioDeviceID deviceId = deviceIds[index];
 
-        uint32_t muted;
-        dataSize = sizeof(muted);
+        FF_CFTYPE_AUTO_RELEASE CFStringRef name = NULL;
+        dataSize = sizeof(name);
         if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
-            kAudioDevicePropertyMute,
+            kAudioObjectPropertyName,
             kAudioObjectPropertyScopeOutput,
             kAudioObjectPropertyElementMain
-        }, 0, NULL, &dataSize, &muted) != kAudioHardwareNoError)
+        }, 0, NULL, &dataSize, &name) != kAudioHardwareNoError)
             continue;
+
+        // Ignore input devices
+        if(AudioObjectGetPropertyDataSize(deviceId, &(AudioObjectPropertyAddress){
+            kAudioDevicePropertyStreams,
+            kAudioObjectPropertyScopeInput,
+            kAudioObjectPropertyElementMain
+        }, 0, NULL, &dataSize) == kAudioHardwareNoError && dataSize > 0)
+            continue;
+
+        uint32_t connected;
+        dataSize = sizeof(connected);
+        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+            kAudioDevicePropertyJackIsConnected,
+            kAudioObjectPropertyScopeOutput,
+            kAudioObjectPropertyElementMain
+        }, 0, NULL, &dataSize, &connected) == kAudioHardwareNoError)
+            if (!connected) continue;
 
         FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
         device->main = deviceId == mainDeviceId;
@@ -47,6 +64,16 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         device->volume = FF_SOUND_VOLUME_UNKNOWN;
         ffStrbufInitF(&device->identifier, "%u", (unsigned) deviceId);
         ffStrbufInit(&device->name);
+        ffCfStrGetString(name, &device->name);
+
+        uint32_t muted;
+        dataSize = sizeof(muted);
+        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+            kAudioDevicePropertyMute,
+            kAudioObjectPropertyScopeOutput,
+            kAudioObjectPropertyElementMain
+        }, 0, NULL, &dataSize, &muted) != kAudioHardwareNoError)
+            muted = false; // Device may not support volume control
 
         uint32_t active;
         dataSize = sizeof(active);
@@ -95,18 +122,6 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
                     }
                 }
             }
-        }
-
-        CFStringRef name;
-        dataSize = sizeof(name);
-        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
-            kAudioObjectPropertyName,
-            kAudioObjectPropertyScopeOutput,
-            kAudioObjectPropertyElementMain
-        }, 0, NULL, &dataSize, &name) == kAudioHardwareNoError)
-        {
-            ffCfStrGetString(name, &device->name);
-            CFRelease(name);
         }
     }
 

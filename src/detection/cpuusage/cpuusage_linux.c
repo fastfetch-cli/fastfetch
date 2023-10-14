@@ -1,14 +1,13 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
+#include "common/io/io.h"
 
 #include <stdio.h>
 #include <inttypes.h>
 
-const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
+const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
-    uint64_t user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
-
-    FILE* procStat = fopen("/proc/stat", "r");
+    FF_AUTO_CLOSE_FILE FILE* procStat = fopen("/proc/stat", "r");
     if(procStat == NULL)
     {
         #ifdef __ANDROID__
@@ -17,16 +16,22 @@ const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
         return "fopen(\"""/proc/stat\", \"r\") == NULL";
         #endif
     }
+    // Skip first line
+    if (fscanf(procStat, "cpu%*[^\n]\n") < 0)
+        return "fscanf() first line failed";
 
-    if (fscanf(procStat, "cpu%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64, &user, &nice, &system, &idle, &iowait, &irq, &softirq) < 0)
+    uint64_t user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
+    while (fscanf(procStat, "cpu%*d%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%*[^\n]\n", &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7)
     {
-        fclose(procStat);
-        return "fscanf() failed";
-    }
-    *inUseAll = user + nice + system;
-    *totalAll = *inUseAll + idle + iowait + irq + softirq;
+        uint64_t inUse = user + nice + system;
+        uint64_t total = inUse + idle + iowait + irq + softirq;
 
-    fclose(procStat);
+        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        *info = (FFCpuUsageInfo) {
+            .inUseAll = (uint64_t)inUse,
+            .totalAll = (uint64_t)total,
+        };
+    }
 
     return NULL;
 }

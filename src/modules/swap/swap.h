@@ -10,3 +10,4 @@ bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const ch
 void ffDestroySwapOptions(FFSwapOptions* options);
 void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module);
 void ffGenerateSwapJson(FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffPrintSwapHelpFormat(void);

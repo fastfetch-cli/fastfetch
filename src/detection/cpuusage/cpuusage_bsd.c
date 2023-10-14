@@ -1,19 +1,36 @@
 #include "detection/cpuusage/cpuusage.h"
+#include "util/mallocHelper.h"
 
 #include <sys/types.h>
-#include <sys/user.h>
 #include <sys/sysctl.h>
+#include <sys/resource.h>
+#include <stdlib.h>
 
-const char* ffGetCpuUsageInfo(uint64_t* inUseAll, uint64_t* totalAll)
+const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
-    // interrupt processing, user processes, system processing, lock spinning, and idling
-    uint64_t cpTime[5];
-    size_t neededLength = sizeof(cpTime);
-    if(sysctlbyname("kern.cp_time", cpTime, &neededLength, NULL, 0) != 0)
-        return "sysctlbyname(kern.cp_time) failed";
+    size_t neededLength = 0;
+    if(sysctlbyname("kern.cp_times", NULL, &neededLength, NULL, 0) != 0)
+        return "sysctlbyname(kern.cp_times, NULL) failed";
 
-    *inUseAll = cpTime[0] + cpTime[1] + cpTime[2] + cpTime[3];
-    *totalAll = *inUseAll + cpTime[4];
+    uint32_t coreCount = neededLength / (CPUSTATES * (uint32_t) sizeof(uint64_t));
+    assert(coreCount > 0);
+
+    FF_AUTO_FREE uint64_t (*cpTimes)[CPUSTATES] = malloc(neededLength);
+    if(sysctlbyname("kern.cp_times", cpTimes, &neededLength, NULL, 0) != 0)
+        return "sysctlbyname(kern.cp_times, cpTime) failed";
+
+    for (uint32_t i = 0; i < coreCount; ++i)
+    {
+        uint64_t* cpTime = cpTimes[i];
+        uint64_t inUse = cpTime[CP_USER] + cpTime[CP_NICE] + cpTime[CP_SYS];
+        uint64_t total = cpTime[CP_INTR] + cpTime[CP_IDLE];
+
+        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        *info = (FFCpuUsageInfo) {
+            .inUseAll = (uint64_t)inUse,
+            .totalAll = (uint64_t)total,
+        };
+    }
 
     return NULL;
 }

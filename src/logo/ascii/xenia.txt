@@ -1,0 +1,21 @@
+${c2}      ,c.                       .c;
+${c2}    .${c1}KMMMk${c2}....             ....${c1}kMMMK${c2}.
+${c2}   .${c1}WMMMMMX${c2}.....         .....${c1}KMMMMMW.
+${c1}   XMMMMMMM0${c2}.....        ....${c1}OMMMMMMMN
+${c1}  dMMMMMMMMM;${c2}.... ..... ....,${c1}MMMMMMMMMd
+${c1}  WMMMMMMMMMl;${c3}okKKKKKKKKKOo${c1};cMMMMMMMMMM
+${c1} 'MMMMMMMNX${c2}K0${c3}KKKKKKKKKKKKKKK${c2}0K${c1}XNMMMMMMM;
+${c1} oMMMMMMM${c2}Oxo${c3}KKKKKKKKKKKKKKKKK${c2}oxO${c1}MMMMMMMd
+${c1} dMMMMMMM${c2}dxxx${c3}KKKKKKKKKKKKKKK${c2}xxxd${c1}NMMMMMMk
+${c1} :MMMMX0${c2}xxxxxx${c3}0KKKKKKKK0KK0${c2}xxxxxx0${c1}XMMMMc
+${c1}  MMMO${c2}xxxxxxxxdx${c3}kdd${c2}0x0${c3}ddk${c2}xdxxxxxxxx${c1}OMMM
+${c1} ;${c2}xxkxddxxxxdodxxxxdxdxxxxdodxxxxddxkxx${c1};
+${c1}dxd${c2}KMMMWXo${c1}'.....'${c2}cdxxxdc${c1}'.....'${c2}lXWMMMX${c1}dxd
+${c1}cxd${c2}XMMMN${c1},..........${c2}dxd${c1}'.........'${c2}XMMMN${c1}dxl
+${c1} .xx${c2}WMMl${c1}...''....'.;k:.'....''...${c2}lMMW${c1}xx.
+${c1}..:kXMMx..'....''..kMk..''....'..xMMXkc..
+${c1} dMMMMMMd.....'...xMMMx...''....dMMMMMMx
+${c1}    kMMMMWOoc:coOkolllokOoc:coOWMMMMO
+${c1}         .MMMMMMMMl${c2}...${c1}lNMMMMMMM.
+${c1}            KMMMMMMX${c2}l${c1}KMMMMMMX
+${c1}               .MMMMMMMMM.

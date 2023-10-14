@@ -826,6 +826,19 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Chimera Linux
+    {
+        .names = {"Chimera Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERALINUX,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // ChonkySealOS
     {
         .names = {"ChonkySealOS"},
@@ -1263,6 +1276,17 @@ static const FFlogo E[] = {
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_RED,
+    },
+    // EndeavourSmall
+    {
+        .names = {"Endeavour_small", "endeavour-linux_small", "endeavouros_small", "endeavouros-linux_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR_SMALL,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
     },
     // Endless
     {
@@ -4136,6 +4160,16 @@ static const FFlogo W[] = {
 };
 
 static const FFlogo X[] = {
+    // Xenia
+    {
+        .names = {"Xenia"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XENIA,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_RED,
+        }
+    },
     // Xferience
     {
         .names = {"Xferience"},

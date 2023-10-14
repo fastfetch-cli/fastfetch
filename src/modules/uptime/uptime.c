@@ -91,7 +91,7 @@ void ffPrintUptime(FFUptimeOptions* options)
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJson, ffPrintUptimeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -141,4 +141,14 @@ void ffGenerateUptimeJson(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_d
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_uint(doc, obj, "uptime", result.uptime);
     yyjson_mut_obj_add_uint(doc, obj, "bootTime", result.bootTime);
+}
+
+void ffPrintUptimeHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_UPTIME_MODULE_NAME, "{1} days {2} hours {3} mins", FF_UPTIME_NUM_FORMAT_ARGS, (const char* []) {
+        "Days",
+        "Hours",
+        "Minutes",
+        "Seconds"
+    });
 }

@@ -1,3 +1,26 @@
+# 2.1.1
+
+Features:
+* Support opkg (Packages, Linux)
+* Support GNOME Console terminal version and font detection (Terminal, Linux)
+* Add `--cpu-freq-ndigits` to set number of digits for CPU frequency (CPU)
+* New module to detect physical disk I/O usage (DiskIO)
+* Add `--cpuusage-separate` to display CPU usage per CPU logical core
+* Add `--brightness-ddcci-sleep` to set the sleep times (in ms) when sending DDC/CI requests (Brightness, #580)
+
+Bugfixes:
+* Fix possible crashes on Windows 7 (Disk, Windows)
+* Fix possible crashes caused by uninitialized strings (Users, Windows)
+* Improve support of `--help *-format` and several bugs are found and fixed
+* Don't incorrectly print `No active sound devices found` when using a non-controllable sound device (Sound, macOS)
+* Fix implementation processes counting (Processes, Linux)
+* Work around a issue that SSID cannot be detected on macOS Sonoma (Wifi, macOS)
+
+Logo:
+* Add Chimera Linux
+* Add EndeavourSmall
+* Add Xenia
+
 # 2.1.0
 
 This release introduces a new output format: JSON result

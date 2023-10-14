@@ -48,7 +48,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
             if(cpu.frequencyMax > 0.0)
-                ffStrbufAppendF(&str, " @ %.9g GHz", cpu.frequencyMax);
+                ffStrbufAppendF(&str, " @ %.*f GHz", options->freqNdigits, cpu.frequencyMax);
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
             {
@@ -79,9 +79,10 @@ void ffPrintCPU(FFCPUOptions* options)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson, ffPrintCPUHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
+    options->freqNdigits = 2;
 }
 
 bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value)
@@ -94,6 +95,12 @@ bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char
     if (ffStrEqualsIgnCase(subKey, "temp"))
     {
         options->temp = ffOptionParseBoolean(value);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "freq-ndigits"))
+    {
+        options->freqNdigits = (uint8_t) ffOptionParseUInt32(key, value);
         return true;
     }
 
@@ -121,6 +128,12 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "temp"))
         {
             options->temp = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "freqNdigits"))
+        {
+            options->freqNdigits = (uint8_t) yyjson_get_uint(val);
             continue;
         }
 
@@ -167,4 +180,18 @@ void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
+}
+
+void ffPrintCPUHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_CPU_MODULE_NAME, "{1} ({5}) @ {7} GHz", FF_CPU_NUM_FORMAT_ARGS, (const char* []) {
+        "Name",
+        "Vendor",
+        "Physical core count",
+        "Logical core count",
+        "Online core count",
+        "Min frequency",
+        "Max frequency",
+        "Temperature"
+    });
 }

@@ -75,7 +75,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, ffGenerateBluetoothJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, ffGenerateBluetoothJson, ffPrintBluetoothHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->showDisconnected = false;
 }
@@ -155,4 +155,14 @@ void ffGenerateBluetoothJson(FF_MAYBE_UNUSED FFBluetoothOptions* options, yyjson
         ffStrbufDestroy(&device->type);
         ffStrbufDestroy(&device->address);
     }
+}
+
+void ffPrintBluetoothHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_BLUETOOTH_MODULE_NAME, "{1} ({4})", FF_BLUETOOTH_NUM_FORMAT_ARGS, (const char* []) {
+        "Name",
+        "Address",
+        "Type",
+        "Battery percentage"
+    });
 }

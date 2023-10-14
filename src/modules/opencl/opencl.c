@@ -41,7 +41,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJson, ffPrintOpenCLHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -101,4 +101,13 @@ void ffGenerateOpenCLJson(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_d
     ffStrbufDestroy(&opencl.version);
     ffStrbufDestroy(&opencl.device);
     ffStrbufDestroy(&opencl.vendor);
+}
+
+void ffPrintOpenCLHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_OPENCL_MODULE_NAME, "{1}", FF_OPENCL_NUM_FORMAT_ARGS, (const char* []) {
+        "version",
+        "device",
+        "vendor"
+    });
 }

@@ -138,7 +138,7 @@ void ffPrintOS(FFOSOptions* options)
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJson);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJson, ffPrintOSHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -195,4 +195,22 @@ void ffGenerateOSJson(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, obj, "variantID", &os->variantID);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &os->version);
     yyjson_mut_obj_add_strbuf(doc, obj, "versionID", &os->versionID);
+}
+
+void ffPrintOSHelpFormat(void)
+{
+    ffPrintModuleFormatHelp(FF_OS_MODULE_NAME, "{3} {10} {12}", FF_OS_NUM_FORMAT_ARGS, (const char* []) {
+        "Name of the kernel (Linux, WIN32_NT, Darwin, FreeBSD)",
+        "Name of the OS",
+        "Pretty name of the OS",
+        "ID of the OS",
+        "ID like of the OS",
+        "Variant of the OS",
+        "Variant ID of the OS",
+        "Version of the OS",
+        "Version ID of the OS",
+        "Version codename of the OS",
+        "Build ID of the OS",
+        "Architecture of the OS"
+    });
 }
