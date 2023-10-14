@@ -14,6 +14,7 @@ Bugfixes:
 * Improve support of `--help *-format` and several bugs are found and fixed
 * Don't incorrectly print `No active sound devices found` when using a non-controllable sound device (Sound, macOS)
 * Fix implementation processes counting (Processes, Linux)
+* Work around a issue that SSID cannot be detected on macOS Sonoma (Wifi, macOS)
 
 Logo:
 * Add Chimera Linux
