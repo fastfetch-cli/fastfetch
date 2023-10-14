@@ -18,6 +18,7 @@ Bugfixes:
 Logo:
 * Add Chimera Linux
 * Add EndeavourSmall
+* Add Xenia
 
 # 2.1.0
 
