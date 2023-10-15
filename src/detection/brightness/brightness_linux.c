@@ -100,10 +100,8 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_set_default_sleep_multiplier)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_set_sleep_multiplier)
     libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
-
-    ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (__builtin_expect(ffddca_get_display_info_list2(false, &infoList) < 0, 0))
@@ -119,6 +117,8 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
         DDCA_Display_Handle handle;
         if (ffddca_open_display2(display->dref, false, &handle) >= 0)
         {
+            ffddca_set_sleep_multiplier(options->ddcciSleep / 40.0); // As of ddcutil 1.5, it sets the sleep multiplier for open display on the current thread
+
             DDCA_Any_Vcp_Value* vcpValue = NULL;
             if (ffddca_get_any_vcp_value_using_explicit_type(handle, 0x10 /*brightness*/, DDCA_NON_TABLE_VCP_VALUE, &vcpValue) >= 0)
             {
