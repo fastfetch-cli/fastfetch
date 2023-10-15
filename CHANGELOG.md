@@ -1,3 +1,10 @@
+# 2.1.2
+
+Bugfixes:
+* Fix icon detection on Windows. It shows enabled system icons in desktop (`This PC`, `Recycle Bin`, etc) (Icon, Windows)
+* Fix compatibility with ddcutil 2.0 (Brightness, Linux)
+* Fix a compile warning (CPUUsage, FreeBSD)
+
 # 2.1.1
 
 Features:
