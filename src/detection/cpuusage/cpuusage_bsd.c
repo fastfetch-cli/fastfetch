@@ -12,7 +12,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
     if(sysctlbyname("kern.cp_times", NULL, &neededLength, NULL, 0) != 0)
         return "sysctlbyname(kern.cp_times, NULL) failed";
 
-    uint32_t coreCount = neededLength / (CPUSTATES * (uint32_t) sizeof(uint64_t));
+    uint32_t coreCount = (uint32_t) (neededLength / (CPUSTATES * sizeof(uint64_t)));
     assert(coreCount > 0);
 
     FF_AUTO_FREE uint64_t (*cpTimes)[CPUSTATES] = malloc(neededLength);
