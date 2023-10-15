@@ -90,7 +90,6 @@ static const char* detectWithBacklight(FFlist* result)
 #include "common/library.h"
 #include "util/mallocHelper.h"
 
-#include <ddcutil_status_codes.h>
 #include <ddcutil_macros.h>
 #include <ddcutil_c_api.h>
 
@@ -107,11 +106,12 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
-    libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
 
     __typeof__(&ddca_set_default_sleep_multiplier) ffddca_set_default_sleep_multiplier = dlsym(libddcutil, "ddca_set_default_sleep_multiplier");
     if (ffddca_set_default_sleep_multiplier)
         ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
+
+    libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (ffddca_get_display_info_list2(false, &infoList) < 0)
