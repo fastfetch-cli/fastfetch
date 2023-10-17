@@ -574,6 +574,16 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // BlackMesa
+    {
+        .names = {"BlackMesa", "black-mesa"},
+        .lines = FASTFETCH_DATATEXT_LOGO_BLACKMESA,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_BLACK,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // BlackPanther
     {
         .names = {"BlackPanther"},
