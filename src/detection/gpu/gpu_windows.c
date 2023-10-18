@@ -12,9 +12,11 @@ static int isGpuNameEqual(const FFGPUResult* gpu, const FFstrbuf* name)
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(displayDevice) };
-    wchar_t regKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Control\\Video\\{";
-    const uint32_t regKeyPrefixLength = (uint32_t) wcslen(regKey);
-    const uint32_t deviceKeyPrefixLength = strlen("\\Registry\\Machine\\") + regKeyPrefixLength;
+    wchar_t regDirectxKey[MAX_PATH] = L"SOFTWARE\\Microsoft\\DirectX\\{";
+    const uint32_t regDirectxKeyPrefixLength = (uint32_t) wcslen(regDirectxKey);
+    wchar_t regControlVideoKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Control\\Video\\{";
+    const uint32_t regControlVideoKeyPrefixLength = (uint32_t) wcslen(regControlVideoKey);
+    const uint32_t deviceKeyPrefixLength = strlen("\\Registry\\Machine\\") + regControlVideoKeyPrefixLength;
 
     for (DWORD i = 0; EnumDisplayDevicesW(NULL, i, &displayDevice, 0); ++i)
     {
@@ -43,9 +45,9 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (deviceKeyLength == 100 && displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
         {
-            wmemcpy(regKey + regKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, 100 - regKeyPrefixLength + 1);
+            wmemcpy(regControlVideoKey + regControlVideoKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, strlen("00000000-0000-0000-0000-000000000000}\\0000"));
             FF_HKEY_AUTO_DESTROY hKey = NULL;
-            if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regKey, &hKey, NULL)) continue;
+            if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regControlVideoKey, &hKey, NULL)) continue;
 
             ffRegReadStrbuf(hKey, L"DriverVersion", &gpu->driver, NULL);
             ffRegReadStrbuf(hKey, L"ProviderName", &gpu->vendor, NULL);
@@ -57,13 +59,29 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
                 ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 
-            if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
+            wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, strlen("00000000-0000-0000-0000-000000000000}"));
+            FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
+            if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDirectxKey, &hDirectxKey, NULL))
+            {
+                uint64_t dedicatedVideoMemory = 0;
+                if(ffRegReadUint64(hDirectxKey, L"DedicatedVideoMemory", &dedicatedVideoMemory, NULL))
+                    gpu->type = dedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+
+                uint64_t dedicatedSystemMemory, sharedSystemMemory;
+                if(ffRegReadUint64(hDirectxKey, L"DedicatedSystemMemory", &dedicatedSystemMemory, NULL) &&
+                    ffRegReadUint64(hDirectxKey, L"SharedSystemMemory", &sharedSystemMemory, NULL))
+                {
+                    gpu->dedicated.total = dedicatedVideoMemory + dedicatedSystemMemory;
+                    gpu->shared.total = sharedSystemMemory;
+                }
+            }
+            else if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
             {
                 uint32_t vmem = 0;
                 if (ffRegReadUint(hKey, L"HardwareInformation.MemorySize", &vmem, NULL))
                     gpu->dedicated.total = vmem;
+                gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
             }
-            gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
         }
     }
 
