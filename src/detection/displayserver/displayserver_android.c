@@ -75,7 +75,7 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
 {
     // Only for MiUI
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    ;
+
     if (ffSettingsGetAndroidProperty("persist.sys.miui_resolution", &buffer) &&
         ffStrbufContainC(&buffer, ','))
     {
