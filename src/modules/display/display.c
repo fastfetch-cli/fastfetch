@@ -49,9 +49,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
         ffStrbufClear(&key);
         if(options->moduleArgs.key.length == 0)
         {
-            const char* subkey = result->name.length ? result->name.chars : displayType;
-            if (subkey)
-                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, subkey);
+            if (result->name.length)
+                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
             else if (moduleIndex > 0)
                 ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
             else
