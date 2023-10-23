@@ -164,7 +164,7 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
     #ifdef __linux__
-    if (!ffStrbufEquals(&defaultOptions.dir, &options->dir))
+    if (!ffStrbufEqual(&defaultOptions.dir, &options->dir))
         yyjson_mut_obj_add_strbuf(doc, module, "dir", &options->dir);
     #endif
 
