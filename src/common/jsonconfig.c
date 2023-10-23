@@ -77,8 +77,8 @@ static inline yyjson_mut_val* genJson(FFModuleBaseInfo* baseInfo)
 
     yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
     yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
-    if (baseInfo->generateJson)
-        baseInfo->generateJson(baseInfo, doc, module);
+    if (baseInfo->generateJsonResult)
+        baseInfo->generateJsonResult(baseInfo, doc, module);
     else
         yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
     return module;
