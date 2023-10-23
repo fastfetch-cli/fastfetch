@@ -157,7 +157,16 @@ void ffPrintBluetoothHelpFormat(void)
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, ffGenerateBluetoothJsonResult, ffPrintBluetoothHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BLUETOOTH_MODULE_NAME,
+        ffParseBluetoothCommandOptions,
+        ffParseBluetoothJsonObject,
+        ffPrintBluetooth,
+        ffGenerateBluetoothJsonResult,
+        ffPrintBluetoothHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->showDisconnected = false;
 }

@@ -94,7 +94,16 @@ void ffPrintDEHelpFormat(void)
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJsonResult, ffPrintDEHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DE_MODULE_NAME,
+        ffParseDECommandOptions,
+        ffParseDEJsonObject,
+        ffPrintDE,
+        ffGenerateDEJsonResult,
+        ffPrintDEHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

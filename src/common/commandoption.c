@@ -1,6 +1,7 @@
 #include "commandoption.h"
 #include "common/printing.h"
 #include "common/time.h"
+#include "common/jsonconfig.h"
 #include "fastfetch_datatext.h"
 #include "modules/modules.h"
 #include "util/stringUtils.h"
@@ -8,7 +9,27 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-static inline yyjson_mut_val* genJson(FFModuleBaseInfo* baseInfo)
+static inline yyjson_mut_val* genJsonConfig(FFModuleBaseInfo* baseInfo)
+{
+    yyjson_mut_doc* doc = instance.state.migrateConfigDoc;
+    if (__builtin_expect(!doc, true)) return NULL;
+
+    yyjson_mut_val* modules = yyjson_mut_obj_get(doc->root, "modules");
+    if (!modules)
+        modules = yyjson_mut_obj_add_arr(doc, doc->root, "modules");
+
+    yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, modules);
+    FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
+    ffStrbufLowerCase(&type);
+    yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
+
+    if (baseInfo->generateJsonConfig)
+        baseInfo->generateJsonConfig(baseInfo, doc, module);
+
+    return module;
+}
+
+static inline yyjson_mut_val* genJsonResult(FFModuleBaseInfo* baseInfo)
 {
     yyjson_mut_doc* doc = instance.state.resultDoc;
     if (__builtin_expect(!doc, true)) return NULL;
@@ -31,7 +52,7 @@ bool ffParseModuleCommand(const char* type)
         FFModuleBaseInfo* baseInfo = *modules;
         if (ffStrEqualsIgnCase(type, baseInfo->name))
         {
-            if (!genJson(baseInfo))
+            if (!genJsonConfig(baseInfo) && !genJsonResult(baseInfo))
                 baseInfo->printModule(baseInfo);
             return true;
         }
@@ -88,7 +109,7 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
             if (customValue->printKey)
                 ffStrbufAppend(&options.moduleArgs.key, &customValue->key);
             ffStrbufAppend(&options.moduleArgs.outputFormat, &customValue->value);
-            ffPrintCustom(&options);
+            if (!genJsonConfig((FFModuleBaseInfo*) &options)) ffPrintCustom(&options);
             return;
         }
     }
@@ -135,9 +156,19 @@ void ffPrintCommandOption(FFdata* data)
         }
 
         #if defined(_WIN32)
-            if (!instance.config.noBuffer) fflush(stdout);
+            if (!resultDoc && !instance.config.noBuffer) fflush(stdout);
         #endif
 
         startIndex = colonIndex + 1;
     }
+}
+
+void ffMigrateCommandOptionToJsonc(FFdata* data)
+{
+    //If we don't have a custom structure, use the default one
+    if(data->structure.length == 0)
+        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
+    instance.config.stat = false;
+    ffPrintCommandOption(data);
+    yyjson_mut_write_fp(stdout, instance.state.migrateConfigDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
 }

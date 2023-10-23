@@ -80,7 +80,16 @@ void ffPrintLocaleHelpFormat(void)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJsonResult, ffPrintLocaleHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_LOCALE_MODULE_NAME,
+        ffParseLocaleCommandOptions,
+        ffParseLocaleJsonObject,
+        ffPrintLocale,
+        ffGenerateLocaleJsonResult,
+        ffPrintLocaleHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

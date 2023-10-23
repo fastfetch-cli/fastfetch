@@ -206,7 +206,16 @@ void ffPrintPackagesHelpFormat(void)
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJsonResult, ffPrintPackagesHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_PACKAGES_MODULE_NAME,
+        ffParsePackagesCommandOptions,
+        ffParsePackagesJsonObject,
+        ffPrintPackages,
+        ffGeneratePackagesJsonResult,
+        ffPrintPackagesHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

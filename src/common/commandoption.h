@@ -24,5 +24,6 @@ bool ffParseModuleCommand(const char* type);
 bool ffParseModuleOptions(const char* key, const char* value);
 void ffPrepareCommandOption(FFdata* data);
 void ffPrintCommandOption(FFdata* data);
+void ffMigrateCommandOptionToJsonc(FFdata* data);
 
 #endif

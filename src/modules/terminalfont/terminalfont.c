@@ -126,7 +126,16 @@ void ffPrintTerminalFontHelpFormat(void)
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJsonResult, ffPrintTerminalFontHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TERMINALFONT_MODULE_NAME,
+        ffParseTerminalFontCommandOptions,
+        ffParseTerminalFontJsonObject,
+        ffPrintTerminalFont,
+        ffGenerateTerminalFontJsonResult,
+        ffPrintTerminalFontHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

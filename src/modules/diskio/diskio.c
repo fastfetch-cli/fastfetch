@@ -215,7 +215,16 @@ void ffPrintDiskIOHelpFormat(void)
 
 void ffInitDiskIOOptions(FFDiskIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISKIO_MODULE_NAME, ffParseDiskIOCommandOptions, ffParseDiskIOJsonObject, ffPrintDiskIO, ffGenerateDiskIOJsonResult, ffPrintDiskIOHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DISKIO_MODULE_NAME,
+        ffParseDiskIOCommandOptions,
+        ffParseDiskIOJsonObject,
+        ffPrintDiskIO,
+        ffGenerateDiskIOJsonResult,
+        ffPrintDiskIOHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);

@@ -285,7 +285,16 @@ void ffPrintGPUHelpFormat(void)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJsonResult, ffPrintGPUHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_GPU_MODULE_NAME,
+        ffParseGPUCommandOptions,
+        ffParseGPUJsonObject,
+        ffPrintGPU,
+        ffGenerateGPUJsonResult,
+        ffPrintGPUHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;

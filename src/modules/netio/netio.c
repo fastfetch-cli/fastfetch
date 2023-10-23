@@ -203,7 +203,16 @@ void ffPrintNetIOHelpFormat(void)
 
 void ffInitNetIOOptions(FFNetIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJsonResult, ffPrintNetIOHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_NETIO_MODULE_NAME,
+        ffParseNetIOCommandOptions,
+        ffParseNetIOJsonObject,
+        ffPrintNetIO,
+        ffGenerateNetIOJsonResult,
+        ffPrintNetIOHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);

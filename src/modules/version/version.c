@@ -121,7 +121,16 @@ void ffPrintVersionHelpFormat(void)
 
 void ffInitVersionOptions(FFVersionOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJsonResult, ffPrintVersionHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_VERSION_MODULE_NAME,
+        ffParseVersionCommandOptions,
+        ffParseVersionJsonObject,
+        ffPrintVersion,
+        ffGenerateVersionJsonResult,
+        ffPrintVersionHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

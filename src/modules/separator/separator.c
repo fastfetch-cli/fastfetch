@@ -111,7 +111,16 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator, NULL, NULL);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SEPARATOR_MODULE_NAME,
+        ffParseSeparatorCommandOptions,
+        ffParseSeparatorJsonObject,
+        ffPrintSeparator,
+        NULL,
+        NULL,
+        NULL
+    );
     ffStrbufInit(&options->string);
 }
 

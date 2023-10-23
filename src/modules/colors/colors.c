@@ -129,7 +129,16 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors, NULL, NULL);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_COLORS_MODULE_NAME,
+        ffParseColorsCommandOptions,
+        ffParseColorsJsonObject,
+        ffPrintColors,
+        NULL,
+        NULL,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
     options->symbol = FF_COLORS_SYMBOL_BLOCK;

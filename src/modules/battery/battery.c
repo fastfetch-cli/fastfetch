@@ -156,6 +156,22 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBatteryOptions))) FFBatteryOptions defaultOptions;
+    ffInitBatteryOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef __linux__
+    if (!ffStrbufEquals(&defaultOptions.dir, &options->dir))
+        yyjson_mut_obj_add_strbuf(doc, module, "dir", &options->dir);
+    #endif
+
+    if (options->temp != defaultOptions.temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+}
+
 void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
@@ -202,7 +218,16 @@ void ffPrintBatteryHelpFormat(void)
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJsonResult, ffPrintBatteryHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BATTERY_MODULE_NAME,
+        ffParseBatteryCommandOptions,
+        ffParseBatteryJsonObject,
+        ffPrintBattery,
+        ffGenerateBatteryJsonResult,
+        ffPrintBatteryHelpFormat,
+        ffGenerateBatteryJsonConfig
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 

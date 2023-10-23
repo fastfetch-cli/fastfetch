@@ -144,7 +144,16 @@ void ffPrintUptimeHelpFormat(void)
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJsonResult, ffPrintUptimeHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_UPTIME_MODULE_NAME,
+        ffParseUptimeCommandOptions,
+        ffParseUptimeJsonObject,
+        ffPrintUptime,
+        ffGenerateUptimeJsonResult,
+        ffPrintUptimeHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

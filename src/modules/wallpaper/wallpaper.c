@@ -90,7 +90,16 @@ void ffPrintWallpaperHelpFormat(void)
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJsonResult, ffPrintWallpaperHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WALLPAPER_MODULE_NAME,
+        ffParseWallpaperCommandOptions,
+        ffParseWallpaperJsonObject,
+        ffPrintWallpaper,
+        ffGenerateWallpaperJsonResult,
+        ffPrintWallpaperHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

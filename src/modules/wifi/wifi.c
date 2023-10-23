@@ -161,7 +161,16 @@ void ffPrintWifiHelpFormat(void)
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJsonResult, ffPrintWifiHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WIFI_MODULE_NAME,
+        ffParseWifiCommandOptions,
+        ffParseWifiJsonObject,
+        ffPrintWifi,
+        ffGenerateWifiJsonResult,
+        ffPrintWifiHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

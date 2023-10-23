@@ -100,7 +100,16 @@ void ffPrintTerminalHelpFormat(void)
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJsonResult, ffPrintTerminalHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TERMINAL_MODULE_NAME,
+        ffParseTerminalCommandOptions,
+        ffParseTerminalJsonObject,
+        ffPrintTerminal,
+        ffGenerateTerminalJsonResult,
+        ffPrintTerminalHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

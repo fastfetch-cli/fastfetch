@@ -206,7 +206,16 @@ void ffPrintOSHelpFormat(void)
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJsonResult, ffPrintOSHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_OS_MODULE_NAME,
+        ffParseOSCommandOptions,
+        ffParseOSJsonObject,
+        ffPrintOS,
+        ffGenerateOSJsonResult,
+        ffPrintOSHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -95,7 +95,16 @@ void ffPrintTerminalSizeHelpFormat(void)
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJsonResult, ffPrintTerminalSizeHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TERMINALSIZE_MODULE_NAME,
+        ffParseTerminalSizeCommandOptions,
+        ffParseTerminalSizeJsonObject,
+        ffPrintTerminalSize,
+        ffGenerateTerminalSizeJsonResult,
+        ffPrintTerminalSizeHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

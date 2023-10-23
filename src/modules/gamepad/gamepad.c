@@ -119,7 +119,16 @@ void ffPrintGamepadHelpFormat(void)
 
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad, ffGenerateGamepadJsonResult, ffPrintGamepadHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_GAMEPAD_MODULE_NAME,
+        ffParseGamepadCommandOptions,
+        ffParseGamepadJsonObject,
+        ffPrintGamepad,
+        ffGenerateGamepadJsonResult,
+        ffPrintGamepadHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

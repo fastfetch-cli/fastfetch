@@ -111,7 +111,16 @@ void ffPrintCursorHelpFormat(void)
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, ffGenerateCursorJsonResult, ffPrintCursorHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CURSOR_MODULE_NAME,
+        ffParseCursorCommandOptions,
+        ffParseCursorJsonObject,
+        ffPrintCursor,
+        ffGenerateCursorJsonResult,
+        ffPrintCursorHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

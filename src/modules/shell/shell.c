@@ -101,7 +101,16 @@ void ffPrintShellHelpFormat(void)
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJsonResult, ffPrintShellHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SHELL_MODULE_NAME,
+        ffParseShellCommandOptions,
+        ffParseShellJsonObject,
+        ffPrintShell,
+        ffGenerateShellJsonResult,
+        ffPrintShellHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -119,7 +119,16 @@ void ffPrintBoardHelpFormat(void)
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJsonResult, ffPrintBoardHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BOARD_MODULE_NAME,
+        ffParseBoardCommandOptions,
+        ffParseBoardJsonObject,
+        ffPrintBoard,
+        ffGenerateBoardJsonResult,
+        ffPrintBoardHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

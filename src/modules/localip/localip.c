@@ -324,7 +324,16 @@ void ffPrintLocalIpHelpFormat(void)
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJsonResult, ffPrintLocalIpHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_LOCALIP_MODULE_NAME,
+        ffParseLocalIpCommandOptions,
+        ffParseLocalIpJsonObject,
+        ffPrintLocalIp,
+        ffGenerateLocalIpJsonResult,
+        ffPrintLocalIpHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;

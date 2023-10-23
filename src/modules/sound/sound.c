@@ -189,7 +189,16 @@ void ffPrintSoundHelpFormat(void)
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJsonResult, ffPrintSoundHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SOUND_MODULE_NAME,
+        ffParseSoundCommandOptions,
+        ffParseSoundJsonObject,
+        ffPrintSound,
+        ffGenerateSoundJsonResult,
+        ffPrintSoundHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;

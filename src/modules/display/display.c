@@ -228,7 +228,16 @@ void ffPrintDisplayHelpFormat(void)
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJsonResult, ffPrintDisplayHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DISPLAY_MODULE_NAME,
+        ffParseDisplayCommandOptions,
+        ffParseDisplayJsonObject,
+        ffPrintDisplay,
+        ffGenerateDisplayJsonResult,
+        ffPrintDisplayHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;

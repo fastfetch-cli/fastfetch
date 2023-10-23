@@ -176,7 +176,16 @@ void ffPrintUsersHelpFormat(void)
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJsonResult, ffPrintUsersHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_USERS_MODULE_NAME,
+        ffParseUsersCommandOptions,
+        ffParseUsersJsonObject,
+        ffPrintUsers,
+        ffGenerateUsersJsonResult,
+        ffPrintUsersHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->compact = false;

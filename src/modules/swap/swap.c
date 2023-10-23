@@ -127,7 +127,16 @@ void ffPrintSwapHelpFormat(void)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJsonResult, ffPrintSwapHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SWAP_MODULE_NAME,
+        ffParseSwapCommandOptions,
+        ffParseSwapJsonObject,
+        ffPrintSwap,
+        ffGenerateSwapJsonResult,
+        ffPrintSwapHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

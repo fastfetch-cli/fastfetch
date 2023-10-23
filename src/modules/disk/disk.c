@@ -428,7 +428,16 @@ void ffPrintDiskHelpFormat(void)
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJsonResult, ffPrintDiskHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DISK_MODULE_NAME,
+        ffParseDiskCommandOptions,
+        ffParseDiskJsonObject,
+        ffPrintDisk,
+        ffGenerateDiskJsonResult,
+        ffPrintDiskHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->folders);

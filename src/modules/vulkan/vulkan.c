@@ -137,7 +137,16 @@ void ffPrintVulkanHelpFormat(void)
 
 void ffInitVulkanOptions(FFVulkanOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJsonResult, ffPrintVulkanHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_VULKAN_MODULE_NAME,
+        ffParseVulkanCommandOptions,
+        ffParseVulkanJsonObject,
+        ffPrintVulkan,
+        ffGenerateVulkanJsonResult,
+        ffPrintVulkanHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

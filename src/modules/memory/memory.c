@@ -120,7 +120,16 @@ void ffPrintMemoryHelpFormat(void)
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJsonResult, ffPrintMemoryHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_MEMORY_MODULE_NAME,
+        ffParseMemoryCommandOptions,
+        ffParseMemoryJsonObject,
+        ffPrintMemory,
+        ffGenerateMemoryJsonResult,
+        ffPrintMemoryHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

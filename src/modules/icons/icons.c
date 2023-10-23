@@ -80,7 +80,16 @@ void ffPrintIconsHelpFormat(void)
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJsonResult, ffPrintIconsHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_ICONS_MODULE_NAME,
+        ffParseIconsCommandOptions,
+        ffParseIconsJsonObject,
+        ffPrintIcons,
+        ffGenerateIconsJsonResult,
+        ffPrintIconsHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

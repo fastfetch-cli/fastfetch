@@ -481,6 +481,26 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         generateConfigFile(false, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
         generateConfigFile(true, value);
+    else if (ffStrEqualsIgnCase(key, "--migrate-config"))
+    {
+        yyjson_mut_doc_free(instance.state.migrateConfigDoc);
+
+        if (ffOptionParseBoolean(value))
+        {
+            if (instance.state.configDoc)
+            {
+                fputs("Error: existing jsonc config file detected. Exiting\n", stderr);
+                exit(477);
+            }
+
+            yyjson_mut_doc* doc = instance.state.migrateConfigDoc = yyjson_mut_doc_new(NULL);
+            yyjson_mut_val* root = yyjson_mut_obj(doc);
+            yyjson_mut_doc_set_root(doc, root);
+            yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json");
+        }
+        else
+            instance.state.migrateConfigDoc = NULL;
+    }
     else if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
         instance.config.multithreading = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--stat"))
@@ -719,20 +739,22 @@ error:
 
 static void parseConfigFiles(FFdata* data)
 {
-    for(uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+    if (__builtin_expect(!instance.state.migrateConfigDoc, true))
     {
-        FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
-        uint32_t dirLength = dir->length;
+        for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+        {
+            FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
+            uint32_t dirLength = dir->length;
 
-        ffStrbufAppendS(dir, "fastfetch/config.jsonc");
-        bool success = parseJsoncFile(dir->chars);
-        ffStrbufSubstrBefore(dir, dirLength);
-        if (success) return;
+            ffStrbufAppendS(dir, "fastfetch/config.jsonc");
+            bool success = parseJsoncFile(dir->chars);
+            ffStrbufSubstrBefore(dir, dirLength);
+            if (success) return;
+        }
     }
-
-    for(uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+    for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
     {
-        if(!data->loadUserConfig)
+        if (!data->loadUserConfig)
             return;
 
         FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
@@ -773,20 +795,8 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
     }
 }
 
-int main(int argc, const char** argv)
+static void ffRun(FFdata* data)
 {
-    ffInitInstance();
-
-    //Data stores things only needed for the configuration of fastfetch
-    FFdata data;
-    ffStrbufInit(&data.structure);
-    ffListInit(&data.customValues, sizeof(FFCustomValue));
-    data.loadUserConfig = true;
-
-    if(!getenv("NO_CONFIG"))
-        parseConfigFiles(&data);
-    parseArguments(&data, argc, argv);
-
     if (instance.state.configDoc)
     {
         const char* error = NULL;
@@ -803,12 +813,12 @@ int main(int argc, const char** argv)
         }
     }
 
-    const bool useJsonConfig = data.structure.length == 0 && instance.state.configDoc;
+    const bool useJsonConfig = data->structure.length == 0 && instance.state.configDoc;
 
-    if(useJsonConfig)
+    if (useJsonConfig)
         ffPrintJsonConfig(true /* prepare */);
     else
-        ffPrepareCommandOption(&data);
+        ffPrepareCommandOption(data);
 
     ffStart();
 
@@ -819,14 +829,33 @@ int main(int argc, const char** argv)
     if (useJsonConfig)
         ffPrintJsonConfig(false);
     else
-        ffPrintCommandOption(&data);
+        ffPrintCommandOption(data);
 
     if (instance.state.resultDoc)
-    {
         yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
-    }
+    else
+        ffFinish();
+}
 
-    ffFinish();
+int main(int argc, const char** argv)
+{
+    ffInitInstance();
+
+    //Data stores things only needed for the configuration of fastfetch
+    FFdata data = {
+        .structure = ffStrbufCreate(),
+        .customValues = ffListCreate(sizeof(FFCustomValue)),
+        .loadUserConfig = true,
+    };
+
+    if(!getenv("NO_CONFIG"))
+        parseConfigFiles(&data);
+    parseArguments(&data, argc, argv);
+
+    if (__builtin_expect(!instance.state.migrateConfigDoc, true))
+        ffRun(&data);
+    else
+        ffMigrateCommandOptionToJsonc(&data); // Migrate
 
     ffStrbufDestroy(&data.structure);
     FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)

@@ -20,7 +20,16 @@ void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UN
 
 void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BREAK_MODULE_NAME, ffParseBreakCommandOptions, ffParseBreakJsonObject, ffPrintBreak, NULL, NULL);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BREAK_MODULE_NAME,
+        ffParseBreakCommandOptions,
+        ffParseBreakJsonObject,
+        ffPrintBreak,
+        NULL,
+        NULL,
+        NULL
+    );
 }
 
 void ffDestroyBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)

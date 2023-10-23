@@ -118,7 +118,16 @@ void ffPrintLMHelpFormat(void)
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, ffGenerateLMJsonResult, ffPrintLMHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_LM_MODULE_NAME,
+        ffParseLMCommandOptions,
+        ffParseLMJsonObject,
+        ffPrintLM,
+        ffGenerateLMJsonResult,
+        ffPrintLMHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

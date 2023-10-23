@@ -78,7 +78,16 @@ void ffPrintKernelHelpFormat(void)
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJsonResult, ffPrintKernelHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_KERNEL_MODULE_NAME,
+        ffParseKernelCommandOptions,
+        ffParseKernelJsonObject,
+        ffPrintKernel,
+        ffGenerateKernelJsonResult,
+        ffPrintKernelHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

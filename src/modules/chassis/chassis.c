@@ -120,7 +120,16 @@ void ffPrintChassisHelpFormat(void)
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJsonResult, ffPrintChassisHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CHASSIS_MODULE_NAME,
+        ffParseChassisCommandOptions,
+        ffParseChassisJsonObject,
+        ffPrintChassis,
+        ffGenerateChassisJsonResult,
+        ffPrintChassisHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

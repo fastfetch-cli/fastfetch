@@ -109,7 +109,16 @@ void ffPrintFontHelpFormat(void)
 
 void ffInitFontOptions(FFFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJsonResult, ffPrintFontHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_FONT_MODULE_NAME,
+        ffParseFontCommandOptions,
+        ffParseFontJsonObject,
+        ffPrintFont,
+        ffGenerateFontJsonResult,
+        ffPrintFontHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -128,7 +128,16 @@ void ffPrintPlayerHelpFormat(void)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJsonResult, ffPrintPlayerHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_PLAYER_MODULE_NAME,
+        ffParsePlayerCommandOptions,
+        ffParsePlayerJsonObject,
+        ffPrintPlayer,
+        ffGeneratePlayerJsonResult,
+        ffPrintPlayerHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -134,7 +134,16 @@ void ffPrintCommandHelpFormat(void)
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJsonResult, ffPrintCommandHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_COMMAND_MODULE_NAME,
+        ffParseCommandCommandOptions,
+        ffParseCommandJsonObject,
+        ffPrintCommand,
+        ffGenerateCommandJsonResult,
+        ffPrintCommandHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInitStatic(&options->shell,

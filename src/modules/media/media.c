@@ -162,7 +162,16 @@ void ffPrintMediaHelpFormat(void)
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, ffGenerateMediaJsonResult, ffPrintMediaHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_MEDIA_MODULE_NAME,
+        ffParseMediaCommandOptions,
+        ffParseMediaJsonObject,
+        ffPrintMedia,
+        ffGenerateMediaJsonResult,
+        ffPrintMediaHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -201,7 +201,16 @@ void ffPrintDateTimeHelpFormat(void)
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJsonResult, ffPrintDateTimeHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DATETIME_MODULE_NAME,
+        ffParseDateTimeCommandOptions,
+        ffParseDateTimeJsonObject,
+        ffPrintDateTime,
+        ffGenerateDateTimeJsonResult,
+        ffPrintDateTimeHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

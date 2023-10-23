@@ -103,7 +103,16 @@ void ffPrintOpenCLHelpFormat(void)
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJsonResult, ffPrintOpenCLHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_OPENCL_MODULE_NAME,
+        ffParseOpenCLCommandOptions,
+        ffParseOpenCLJsonObject,
+        ffPrintOpenCL,
+        ffGenerateOpenCLJsonResult,
+        ffPrintOpenCLHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -80,7 +80,16 @@ void ffPrintThemeHelpFormat(void)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJsonResult, ffPrintThemeHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_THEME_MODULE_NAME,
+        ffParseThemeCommandOptions,
+        ffParseThemeJsonObject,
+        ffPrintTheme,
+        ffGenerateThemeJsonResult,
+        ffPrintThemeHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

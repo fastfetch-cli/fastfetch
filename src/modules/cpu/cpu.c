@@ -185,7 +185,16 @@ void ffPrintCPUHelpFormat(void)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJsonResult, ffPrintCPUHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CPU_MODULE_NAME,
+        ffParseCPUCommandOptions,
+        ffParseCPUJsonObject,
+        ffPrintCPU,
+        ffGenerateCPUJsonResult,
+        ffPrintCPUHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
     options->freqNdigits = 2;

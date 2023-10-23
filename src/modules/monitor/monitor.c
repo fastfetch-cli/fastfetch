@@ -152,7 +152,16 @@ void ffPrintMonitorHelpFormat(void)
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJsonResult, ffPrintMonitorHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_MONITOR_MODULE_NAME,
+        ffParseMonitorCommandOptions,
+        ffParseMonitorJsonObject,
+        ffPrintMonitor,
+        ffGenerateMonitorJsonResult,
+        ffPrintMonitorHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

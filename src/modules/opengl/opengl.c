@@ -141,7 +141,16 @@ void ffPrintOpenGLHelpFormat(void)
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJsonResult, ffPrintOpenGLHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_OPENGL_MODULE_NAME,
+        ffParseOpenGLCommandOptions,
+        ffParseOpenGLJsonObject,
+        ffPrintOpenGL,
+        ffGenerateOpenGLJsonResult,
+        ffPrintOpenGLHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)

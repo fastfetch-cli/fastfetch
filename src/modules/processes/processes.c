@@ -81,7 +81,16 @@ void ffPrintProcessesHelpFormat(void)
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJsonResult, ffPrintProcessesHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_PROCESSES_MODULE_NAME,
+        ffParseProcessesCommandOptions,
+        ffParseProcessesJsonObject,
+        ffPrintProcesses,
+        ffGenerateProcessesJsonResult,
+        ffPrintProcessesHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

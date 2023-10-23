@@ -142,7 +142,16 @@ void ffPrintHostHelpFormat(void)
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJsonResult, ffPrintHostHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_HOST_MODULE_NAME,
+        ffParseHostCommandOptions,
+        ffParseHostJsonObject,
+        ffPrintHost,
+        ffGenerateHostJsonResult,
+        ffPrintHostHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

@@ -94,7 +94,16 @@ void ffPrintWMHelpFormat(void)
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM, ffGenerateWMJsonResult, ffPrintWMHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WM_MODULE_NAME,
+        ffParseWMCommandOptions,
+        ffParseWMJsonObject,
+        ffPrintWM,
+        ffGenerateWMJsonResult,
+        ffPrintWMHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

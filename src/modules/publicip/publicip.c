@@ -122,7 +122,16 @@ void ffPrintPublicIpHelpFormat(void)
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, ffGeneratePublicIpJsonResult, ffPrintPublicIpHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_PUBLICIP_MODULE_NAME,
+        ffParsePublicIpCommandOptions,
+        ffParsePublicIpJsonObject,
+        ffPrintPublicIp,
+        ffGeneratePublicIpJsonResult,
+        ffPrintPublicIpHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->url);

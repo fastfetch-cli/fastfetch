@@ -172,7 +172,16 @@ void ffPrintBrightnessHelpFormat(void)
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJsonResult, ffPrintBrightnessHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BRIGHTNESS_MODULE_NAME,
+        ffParseBrightnessCommandOptions,
+        ffParseBrightnessJsonObject,
+        ffPrintBrightness,
+        ffGenerateBrightnessJsonResult,
+        ffPrintBrightnessHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->ddcciSleep = 10;

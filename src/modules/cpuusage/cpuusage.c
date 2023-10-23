@@ -154,7 +154,16 @@ void ffPrintCPUUsageHelpFormat(void)
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJsonResult, ffPrintCPUUsageHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CPUUSAGE_MODULE_NAME,
+        ffParseCPUUsageCommandOptions,
+        ffParseCPUUsageJsonObject,
+        ffPrintCPUUsage,
+        ffGenerateCPUUsageJsonResult,
+        ffPrintCPUUsageHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

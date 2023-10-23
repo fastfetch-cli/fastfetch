@@ -78,7 +78,16 @@ void ffPrintWMthemeHelpFormat(void)
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJsonResult, ffPrintWMthemeHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WMTHEME_MODULE_NAME,
+        ffParseWMThemeCommandOptions,
+        ffParseWMThemeJsonObject,
+        ffPrintWMTheme,
+        ffGenerateWMThemeJsonResult,
+        ffPrintWMthemeHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 

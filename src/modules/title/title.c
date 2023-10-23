@@ -169,7 +169,16 @@ void ffPrintTitleHelpFormat(void)
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJsonResult, ffPrintTitleHelpFormat);
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TITLE_MODULE_NAME,
+        ffParseTitleCommandOptions,
+        ffParseTitleJsonObject,
+        ffPrintTitle,
+        ffGenerateTitleJsonResult,
+        ffPrintTitleHelpFormat,
+        NULL
+    );
     ffOptionInitModuleArg(&options->moduleArgs);
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 
