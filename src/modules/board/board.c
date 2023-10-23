@@ -76,6 +76,14 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBoardOptions))) FFBoardOptions defaultOptions;
+    ffInitBoardOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFBoardResult board;
@@ -127,7 +135,7 @@ void ffInitBoardOptions(FFBoardOptions* options)
         ffPrintBoard,
         ffGenerateBoardJsonResult,
         ffPrintBoardHelpFormat,
-        NULL
+        ffGenerateBoardJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
