@@ -28,6 +28,10 @@ static void getHostProductName(FFstrbuf* name)
     if(ffIsSmbiosValueSet(name))
         return;
 
+    ffReadFileBuffer("/sys/firmware/devicetree/base/banner-name", name);
+    if(ffIsSmbiosValueSet(name))
+        return;
+
     //does a clear before the read
     ffReadFileBuffer("/tmp/sysinfo/model", name);
     if(ffIsSmbiosValueSet(name))
