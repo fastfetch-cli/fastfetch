@@ -14,8 +14,6 @@ bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYB
 
 void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
 {
-    ffPrintBreak(options);
-    return;
 }
 
 void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
