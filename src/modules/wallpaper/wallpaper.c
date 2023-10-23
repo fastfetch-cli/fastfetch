@@ -44,7 +44,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJson, ffPrintWallpaperHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJsonResult, ffPrintWallpaperHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -80,7 +80,7 @@ void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateWallpaperJson(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
     const char* error = ffDetectWallpaper(&fullpath);

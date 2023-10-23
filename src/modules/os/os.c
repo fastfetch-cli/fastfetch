@@ -138,7 +138,7 @@ void ffPrintOS(FFOSOptions* options)
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJson, ffPrintOSHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJsonResult, ffPrintOSHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -174,7 +174,7 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateOSJson(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFOSResult* os = ffDetectOS();
 

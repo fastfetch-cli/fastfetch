@@ -32,7 +32,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJson, ffPrintThemeHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJsonResult, ffPrintThemeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -68,7 +68,7 @@ void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateThemeJson(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY theme = ffStrbufCreate();
     const char* error = ffDetectTheme(&theme);

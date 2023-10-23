@@ -47,7 +47,7 @@ void ffPrintVersion(FFVersionOptions* options)
 
 void ffInitVersionOptions(FFVersionOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJson, ffPrintVersionHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJsonResult, ffPrintVersionHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -83,7 +83,7 @@ void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateVersionJson(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFVersionResult result;
     ffDetectVersion(&result);

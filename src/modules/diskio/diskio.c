@@ -114,7 +114,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
 
 void ffInitDiskIOOptions(FFDiskIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISKIO_MODULE_NAME, ffParseDiskIOCommandOptions, ffParseDiskIOJsonObject, ffPrintDiskIO, ffGenerateDiskIOJson, ffPrintDiskIOHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISKIO_MODULE_NAME, ffParseDiskIOCommandOptions, ffParseDiskIOJsonObject, ffPrintDiskIO, ffGenerateDiskIOJsonResult, ffPrintDiskIOHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
@@ -165,7 +165,7 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateDiskIOJson(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFDiskIOResult));
     const char* error = ffDetectDiskIO(&result, options);

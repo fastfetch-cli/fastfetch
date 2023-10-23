@@ -72,7 +72,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJson, ffPrintWifiHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJsonResult, ffPrintWifiHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -108,7 +108,7 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateWifiJson(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
     const char* error = ffDetectWifi(&result);

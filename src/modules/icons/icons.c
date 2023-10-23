@@ -32,7 +32,7 @@ void ffPrintIcons(FFIconsOptions* options)
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJson, ffPrintIconsHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJsonResult, ffPrintIconsHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -68,7 +68,7 @@ void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateIconsJson(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
     const char* error = ffDetectIcons(&icons);

@@ -33,7 +33,7 @@ void ffPrintWeather(FFWeatherOptions* options)
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, ffGenerateWeatherJson, ffPrintWeatherHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, ffGenerateWeatherJsonResult, ffPrintWeatherHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->location);
@@ -111,7 +111,7 @@ void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateWeatherJson(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffDetectWeather(options, &result);

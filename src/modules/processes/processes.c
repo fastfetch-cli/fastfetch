@@ -33,7 +33,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJson, ffPrintProcessesHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJsonResult, ffPrintProcessesHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -69,7 +69,7 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateProcessesJson(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     uint32_t result;
     const char* error = ffDetectProcesses(&result);

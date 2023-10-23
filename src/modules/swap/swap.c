@@ -75,7 +75,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJson, ffPrintSwapHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJsonResult, ffPrintSwapHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -111,7 +111,7 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateSwapJson(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFSwapResult storage;
     const char* error = ffDetectSwap(&storage);

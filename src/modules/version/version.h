@@ -9,5 +9,5 @@ void ffInitVersionOptions(FFVersionOptions* options);
 bool ffParseVersionCommandOptions(FFVersionOptions* options, const char* key, const char* value);
 void ffDestroyVersionOptions(FFVersionOptions* options);
 void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module);
-void ffGenerateVersionJson(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffGenerateVersionJsonResult(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
 void ffPrintVersionHelpFormat(void);

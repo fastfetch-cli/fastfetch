@@ -55,7 +55,7 @@ exit:
 
 void ffInitBiosOptions(FFBiosOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJson, ffPrintBiosHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJsonResult, ffPrintBiosHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -91,7 +91,7 @@ void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateBiosJson(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFBiosResult bios;
     ffStrbufInit(&bios.date);

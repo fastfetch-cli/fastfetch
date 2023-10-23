@@ -11,5 +11,5 @@ void ffInitWeatherOptions(FFWeatherOptions* options);
 bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, const char* value);
 void ffDestroyWeatherOptions(FFWeatherOptions* options);
 void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module);
-void ffGenerateWeatherJson(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
 void ffPrintWeatherHelpFormat(void);

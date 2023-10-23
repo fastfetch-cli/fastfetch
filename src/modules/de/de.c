@@ -42,7 +42,7 @@ void ffPrintDE(FFDEOptions* options)
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJson, ffPrintDEHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJsonResult, ffPrintDEHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -78,7 +78,7 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateDEJson(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 

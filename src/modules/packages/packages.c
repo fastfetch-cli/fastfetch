@@ -104,7 +104,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJson, ffPrintPackagesHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJsonResult, ffPrintPackagesHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -140,7 +140,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
     }
 }
 
-void ffGeneratePackagesJson(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);

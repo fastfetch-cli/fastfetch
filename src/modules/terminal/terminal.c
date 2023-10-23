@@ -42,7 +42,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJson, ffPrintTerminalHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJsonResult, ffPrintTerminalHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -78,7 +78,7 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateTerminalJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFTerminalShellResult* result = ffDetectTerminalShell();
 

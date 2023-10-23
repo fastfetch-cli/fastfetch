@@ -32,7 +32,7 @@ void ffPrintLocale(FFLocaleOptions* options)
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJson, ffPrintLocaleHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJsonResult, ffPrintLocaleHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -68,7 +68,7 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateLocaleJson(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
 

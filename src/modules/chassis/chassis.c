@@ -52,7 +52,7 @@ exit:
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJson, ffPrintChassisHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJsonResult, ffPrintChassisHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -88,7 +88,7 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateChassisJson(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFChassisResult result;
     ffStrbufInit(&result.type);

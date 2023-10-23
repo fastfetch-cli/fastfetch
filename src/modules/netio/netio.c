@@ -101,7 +101,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
 
 void ffInitNetIOOptions(FFNetIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJson, ffPrintNetIOHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJsonResult, ffPrintNetIOHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
@@ -165,7 +165,7 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateNetIOJson(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
     const char* error = ffDetectNetIO(&result, options);

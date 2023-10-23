@@ -68,7 +68,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJson, ffPrintMemoryHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJsonResult, ffPrintMemoryHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -104,7 +104,7 @@ void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateMemoryJson(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFMemoryResult storage;
     const char* error = ffDetectMemory(&storage);

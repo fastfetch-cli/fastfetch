@@ -9,5 +9,5 @@ void ffInitLocaleOptions(FFLocaleOptions* options);
 bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, const char* value);
 void ffDestroyLocaleOptions(FFLocaleOptions* options);
 void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module);
-void ffGenerateLocaleJson(FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffGenerateLocaleJsonResult(FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
 void ffPrintLocaleHelpFormat(void);

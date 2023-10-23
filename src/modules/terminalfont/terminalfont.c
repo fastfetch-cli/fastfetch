@@ -49,7 +49,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJson, ffPrintTerminalFontHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJsonResult, ffPrintTerminalFontHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -85,7 +85,7 @@ void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* m
     }
 }
 
-void ffGenerateTerminalFontJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalFontResult result;
     ffFontInit(&result.font);

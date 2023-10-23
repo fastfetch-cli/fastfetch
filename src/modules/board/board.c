@@ -51,7 +51,7 @@ exit:
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJson, ffPrintBoardHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJsonResult, ffPrintBoardHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -87,7 +87,7 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateBoardJson(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFBoardResult board;
     ffStrbufInit(&board.name);

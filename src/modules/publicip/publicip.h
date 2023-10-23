@@ -11,5 +11,5 @@ void ffInitPublicIpOptions(FFPublicIpOptions* options);
 bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, const char* value);
 void ffDestroyPublicIpOptions(FFPublicIpOptions* options);
 void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module);
-void ffGeneratePublicIpJson(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
 void ffPrintPublicIpHelpFormat(void);

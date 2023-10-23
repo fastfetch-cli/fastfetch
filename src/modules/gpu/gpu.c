@@ -125,7 +125,7 @@ void ffPrintGPU(FFGPUOptions* options)
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJson, ffPrintGPUHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJsonResult, ffPrintGPUHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->forceVulkan = false;
@@ -215,7 +215,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);

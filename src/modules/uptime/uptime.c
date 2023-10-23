@@ -91,7 +91,7 @@ void ffPrintUptime(FFUptimeOptions* options)
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJson, ffPrintUptimeHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJsonResult, ffPrintUptimeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -127,7 +127,7 @@ void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateUptimeJson(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFUptimeResult result;
     const char* error = ffDetectUptime(&result);

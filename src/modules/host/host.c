@@ -67,7 +67,7 @@ exit:
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJson, ffPrintHostHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJsonResult, ffPrintHostHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -103,7 +103,7 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateHostJson(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFHostResult host;
     ffStrbufInit(&host.productFamily);

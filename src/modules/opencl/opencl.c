@@ -41,7 +41,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJson, ffPrintOpenCLHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJsonResult, ffPrintOpenCLHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -77,7 +77,7 @@ void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateOpenCLJson(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFOpenCLResult opencl;
     ffStrbufInit(&opencl.version);

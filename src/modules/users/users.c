@@ -93,7 +93,7 @@ void ffPrintUsers(FFUsersOptions* options)
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson, ffPrintUsersHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJsonResult, ffPrintUsersHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->compact = false;
@@ -143,7 +143,7 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateUsersJson(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
 

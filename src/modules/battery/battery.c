@@ -103,7 +103,7 @@ void ffPrintBattery(FFBatteryOptions* options)
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJson, ffPrintBatteryHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJsonResult, ffPrintBatteryHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
@@ -176,7 +176,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 

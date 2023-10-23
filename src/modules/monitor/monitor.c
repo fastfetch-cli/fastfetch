@@ -77,7 +77,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJson, ffPrintMonitorHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJsonResult, ffPrintMonitorHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -113,7 +113,7 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateMonitorJson(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFMonitorResult));
 

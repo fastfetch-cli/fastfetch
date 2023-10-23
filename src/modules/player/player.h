@@ -10,5 +10,5 @@ void ffInitPlayerOptions(FFPlayerOptions* options);
 bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, const char* value);
 void ffDestroyPlayerOptions(FFPlayerOptions* options);
 void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module);
-void ffGeneratePlayerJson(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
+void ffGeneratePlayerJsonResult(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
 void ffPrintPlayerHelpFormat(void);

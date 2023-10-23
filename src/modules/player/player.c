@@ -75,7 +75,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJson, ffPrintPlayerHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJsonResult, ffPrintPlayerHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -111,7 +111,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
     }
 }
 
-void ffGeneratePlayerJson(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFMediaResult* media = ffDetectMedia();
 

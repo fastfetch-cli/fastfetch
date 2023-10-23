@@ -79,7 +79,7 @@ void ffPrintCPU(FFCPUOptions* options)
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson, ffPrintCPUHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJsonResult, ffPrintCPUHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
     options->freqNdigits = 2;
@@ -141,7 +141,7 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFCPUResult cpu;
     cpu.temperature = FF_CPU_TEMP_UNSET;

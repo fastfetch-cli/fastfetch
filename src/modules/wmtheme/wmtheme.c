@@ -32,7 +32,7 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJson, ffPrintWMthemeHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJsonResult, ffPrintWMthemeHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 }
 
@@ -68,7 +68,7 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateWMThemeJson(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
     if(!ffDetectWmTheme(&themeOrError))

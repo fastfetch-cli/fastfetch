@@ -44,7 +44,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJson, ffPrintOpenGLHelpFormat);
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJsonResult, ffPrintOpenGLHelpFormat);
     ffOptionInitModuleArg(&options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)
@@ -116,7 +116,7 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateOpenGLJson(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFOpenGLResult result;
     ffStrbufInit(&result.version);
