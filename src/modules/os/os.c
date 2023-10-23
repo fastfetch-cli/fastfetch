@@ -136,12 +136,6 @@ void ffPrintOS(FFOSOptions* options)
     }
 }
 
-void ffInitOSOptions(FFOSOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJsonResult, ffPrintOSHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_OS_MODULE_NAME);
@@ -150,11 +144,6 @@ bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* 
         return true;
 
     return false;
-}
-
-void ffDestroyOSOptions(FFOSOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
@@ -213,4 +202,15 @@ void ffPrintOSHelpFormat(void)
         "Build ID of the OS",
         "Architecture of the OS"
     });
+}
+
+void ffInitOSOptions(FFOSOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJsonResult, ffPrintOSHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyOSOptions(FFOSOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

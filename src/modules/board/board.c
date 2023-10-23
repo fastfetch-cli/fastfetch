@@ -49,12 +49,6 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-void ffInitBoardOptions(FFBoardOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJsonResult, ffPrintBoardHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BOARD_MODULE_NAME);
@@ -63,11 +57,6 @@ bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyBoardOptions(FFBoardOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
@@ -126,4 +115,15 @@ void ffPrintBoardHelpFormat(void)
         "board vendor",
         "board version"
     });
+}
+
+void ffInitBoardOptions(FFBoardOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJsonResult, ffPrintBoardHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyBoardOptions(FFBoardOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

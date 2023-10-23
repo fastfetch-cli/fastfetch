@@ -65,12 +65,6 @@ exit:
     ffStrbufDestroy(&host.sysVendor);
 }
 
-void ffInitHostOptions(FFHostOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJsonResult, ffPrintHostHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_HOST_MODULE_NAME);
@@ -79,11 +73,6 @@ bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyHostOptions(FFHostOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
@@ -149,4 +138,15 @@ void ffPrintHostHelpFormat(void)
         "product sku",
         "sys vendor"
     });
+}
+
+void ffInitHostOptions(FFHostOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJsonResult, ffPrintHostHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyHostOptions(FFHostOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

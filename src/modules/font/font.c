@@ -43,12 +43,6 @@ void ffPrintFont(FFFontOptions* options)
         ffStrbufDestroy(&font.fonts[i]);
 }
 
-void ffInitFontOptions(FFFontOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJsonResult, ffPrintFontHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseFontCommandOptions(FFFontOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_FONT_MODULE_NAME);
@@ -57,11 +51,6 @@ bool ffParseFontCommandOptions(FFFontOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyFontOptions(FFFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
@@ -116,4 +105,15 @@ void ffPrintFontHelpFormat(void)
         "Font 4",
         "Combined fonts"
     });
+}
+
+void ffInitFontOptions(FFFontOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJsonResult, ffPrintFontHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyFontOptions(FFFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

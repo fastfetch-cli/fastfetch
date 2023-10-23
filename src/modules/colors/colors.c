@@ -55,15 +55,6 @@ void ffPrintColors(FFColorsOptions* options)
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffInitColorsOptions(FFColorsOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors, NULL, NULL);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
-    options->symbol = FF_COLORS_SYMBOL_BLOCK;
-    options->paddingLeft = 0;
-}
-
 bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_COLORS_MODULE_NAME);
@@ -92,11 +83,6 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
     }
 
     return false;
-}
-
-void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
@@ -139,4 +125,18 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 
         ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
+}
+
+void ffInitColorsOptions(FFColorsOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors, NULL, NULL);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+    options->symbol = FF_COLORS_SYMBOL_BLOCK;
+    options->paddingLeft = 0;
+}
+
+void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

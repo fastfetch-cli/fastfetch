@@ -123,16 +123,6 @@ void ffPrintGPU(FFGPUOptions* options)
     }
 }
 
-void ffInitGPUOptions(FFGPUOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJsonResult, ffPrintGPUHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->forceVulkan = false;
-    options->temp = false;
-    options->hideType = FF_GPU_TYPE_UNKNOWN;
-}
-
 bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_GPU_MODULE_NAME);
@@ -163,11 +153,6 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     }
 
     return false;
-}
-
-void ffDestroyGPUOptions(FFGPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
@@ -296,4 +281,19 @@ void ffPrintGPUHelpFormat(void)
         "GPU total shared memory",
         "GPU used shared memory",
     });
+}
+
+void ffInitGPUOptions(FFGPUOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJsonResult, ffPrintGPUHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->forceVulkan = false;
+    options->temp = false;
+    options->hideType = FF_GPU_TYPE_UNKNOWN;
+}
+
+void ffDestroyGPUOptions(FFGPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

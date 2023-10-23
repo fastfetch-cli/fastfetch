@@ -45,22 +45,6 @@ void ffPrintCommand(FFCommandOptions* options)
     }
 }
 
-void ffInitCommandOptions(FFCommandOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJsonResult, ffPrintCommandHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInitStatic(&options->shell,
-        #ifdef _WIN32
-        "cmd.exe"
-        #else
-        "/bin/sh"
-        #endif
-    );
-
-    ffStrbufInit(&options->text);
-}
-
 bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_COMMAND_MODULE_NAME);
@@ -81,13 +65,6 @@ bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyCommandOptions(FFCommandOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->shell);
-    ffStrbufDestroy(&options->text);
 }
 
 void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
@@ -153,4 +130,27 @@ void ffPrintCommandHelpFormat(void)
     ffPrintModuleFormatHelp(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, (const char* []) {
         "Command result"
     });
+}
+
+void ffInitCommandOptions(FFCommandOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJsonResult, ffPrintCommandHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInitStatic(&options->shell,
+        #ifdef _WIN32
+        "cmd.exe"
+        #else
+        "/bin/sh"
+        #endif
+    );
+
+    ffStrbufInit(&options->text);
+}
+
+void ffDestroyCommandOptions(FFCommandOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->shell);
+    ffStrbufDestroy(&options->text);
 }

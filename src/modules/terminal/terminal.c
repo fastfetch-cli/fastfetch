@@ -40,12 +40,6 @@ void ffPrintTerminal(FFTerminalOptions* options)
     }
 }
 
-void ffInitTerminalOptions(FFTerminalOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJsonResult, ffPrintTerminalHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseTerminalCommandOptions(FFTerminalOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TERMINAL_MODULE_NAME);
@@ -54,11 +48,6 @@ bool ffParseTerminalCommandOptions(FFTerminalOptions* options, const char* key, 
         return true;
 
     return false;
-}
-
-void ffDestroyTerminalOptions(FFTerminalOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
@@ -107,4 +96,15 @@ void ffPrintTerminalHelpFormat(void)
         "Terminal pretty name",
         "Terminal version"
     });
+}
+
+void ffInitTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJsonResult, ffPrintTerminalHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

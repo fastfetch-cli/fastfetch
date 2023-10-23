@@ -73,12 +73,6 @@ void ffPrintPlayer(FFPlayerOptions* options)
     }
 }
 
-void ffInitPlayerOptions(FFPlayerOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJsonResult, ffPrintPlayerHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_PLAYER_MODULE_NAME);
@@ -87,11 +81,6 @@ bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyPlayerOptions(FFPlayerOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
@@ -135,4 +124,15 @@ void ffPrintPlayerHelpFormat(void)
         "Player Identifier",
         "URL name"
     });
+}
+
+void ffInitPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PLAYER_MODULE_NAME, ffParsePlayerCommandOptions, ffParsePlayerJsonObject, ffPrintPlayer, ffGeneratePlayerJsonResult, ffPrintPlayerHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

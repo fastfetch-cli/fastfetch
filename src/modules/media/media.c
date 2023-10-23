@@ -105,12 +105,6 @@ void ffPrintMedia(FFMediaOptions* options)
     }
 }
 
-void ffInitMediaOptions(FFMediaOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, ffGenerateMediaJsonResult, ffPrintMediaHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_MEDIA_MODULE_NAME);
@@ -119,11 +113,6 @@ bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyMediaOptions(FFMediaOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
@@ -169,4 +158,15 @@ void ffPrintMediaHelpFormat(void)
         "Album name",
         "Status",
     });
+}
+
+void ffInitMediaOptions(FFMediaOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEDIA_MODULE_NAME, ffParseMediaCommandOptions, ffParseMediaJsonObject, ffPrintMedia, ffGenerateMediaJsonResult, ffPrintMediaHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyMediaOptions(FFMediaOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

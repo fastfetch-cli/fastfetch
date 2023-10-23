@@ -70,12 +70,6 @@ void ffPrintWifi(FFWifiOptions* options)
     }
 }
 
-void ffInitWifiOptions(FFWifiOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJsonResult, ffPrintWifiHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_WIFI_MODULE_NAME);
@@ -84,11 +78,6 @@ bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyWifiOptions(FFWifiOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
@@ -168,4 +157,15 @@ void ffPrintWifiHelpFormat(void)
         "Connection TX rate",
         "Connection Security algorithm"
     });
+}
+
+void ffInitWifiOptions(FFWifiOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJsonResult, ffPrintWifiHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyWifiOptions(FFWifiOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

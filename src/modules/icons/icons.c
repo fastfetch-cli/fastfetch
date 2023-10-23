@@ -30,12 +30,6 @@ void ffPrintIcons(FFIconsOptions* options)
     }
 }
 
-void ffInitIconsOptions(FFIconsOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJsonResult, ffPrintIconsHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_ICONS_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyIconsOptions(FFIconsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
@@ -87,4 +76,15 @@ void ffPrintIconsHelpFormat(void)
     ffPrintModuleFormatHelp(FF_ICONS_MODULE_NAME, "{1}", FF_ICONS_NUM_FORMAT_ARGS, (const char* []) {
         "Combined icons"
     });
+}
+
+void ffInitIconsOptions(FFIconsOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJsonResult, ffPrintIconsHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyIconsOptions(FFIconsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

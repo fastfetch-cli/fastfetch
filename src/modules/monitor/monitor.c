@@ -75,12 +75,6 @@ void ffPrintMonitor(FFMonitorOptions* options)
     }
 }
 
-void ffInitMonitorOptions(FFMonitorOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJsonResult, ffPrintMonitorHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_MONITOR_MODULE_NAME);
@@ -89,11 +83,6 @@ bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyMonitorOptions(FFMonitorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
@@ -159,4 +148,15 @@ void ffPrintMonitorHelpFormat(void)
         "Display physical diagonal length in inches",
         "Display physical pixels per inch (PPI)"
     });
+}
+
+void ffInitMonitorOptions(FFMonitorOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJsonResult, ffPrintMonitorHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyMonitorOptions(FFMonitorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

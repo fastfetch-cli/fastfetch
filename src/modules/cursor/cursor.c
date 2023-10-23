@@ -50,12 +50,6 @@ void ffPrintCursor(FFCursorOptions* options)
     ffStrbufDestroy(&result.size);
 }
 
-void ffInitCursorOptions(FFCursorOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, ffGenerateCursorJsonResult, ffPrintCursorHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseCursorCommandOptions(FFCursorOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CURSOR_MODULE_NAME);
@@ -64,11 +58,6 @@ bool ffParseCursorCommandOptions(FFCursorOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyCursorOptions(FFCursorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
@@ -118,4 +107,15 @@ void ffPrintCursorHelpFormat(void)
         "Cursor theme",
         "Cursor size"
     });
+}
+
+void ffInitCursorOptions(FFCursorOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CURSOR_MODULE_NAME, ffParseCursorCommandOptions, ffParseCursorJsonObject, ffPrintCursor, ffGenerateCursorJsonResult, ffPrintCursorHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyCursorOptions(FFCursorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

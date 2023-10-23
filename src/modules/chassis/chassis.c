@@ -50,12 +50,6 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-void ffInitChassisOptions(FFChassisOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJsonResult, ffPrintChassisHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseChassisCommandOptions(FFChassisOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CHASSIS_MODULE_NAME);
@@ -64,11 +58,6 @@ bool ffParseChassisCommandOptions(FFChassisOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyChassisOptions(FFChassisOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
@@ -127,4 +116,15 @@ void ffPrintChassisHelpFormat(void)
         "chassis vendor",
         "chassis version"
     });
+}
+
+void ffInitChassisOptions(FFChassisOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJsonResult, ffPrintChassisHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyChassisOptions(FFChassisOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

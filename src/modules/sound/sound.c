@@ -83,14 +83,6 @@ void ffPrintSound(FFSoundOptions* options)
 }
 
 
-void ffInitSoundOptions(FFSoundOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJsonResult, ffPrintSoundHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->soundType = FF_SOUND_TYPE_MAIN;
-}
-
 bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SOUND_MODULE_NAME);
@@ -110,11 +102,6 @@ bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroySoundOptions(FFSoundOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
@@ -198,4 +185,17 @@ void ffPrintSoundHelpFormat(void)
         "Volume",
         "Identifier"
     });
+}
+
+void ffInitSoundOptions(FFSoundOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJsonResult, ffPrintSoundHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->soundType = FF_SOUND_TYPE_MAIN;
+}
+
+void ffDestroySoundOptions(FFSoundOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

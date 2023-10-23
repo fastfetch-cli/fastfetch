@@ -31,12 +31,6 @@ void ffPrintProcesses(FFProcessesOptions* options)
     }
 }
 
-void ffInitProcessesOptions(FFProcessesOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJsonResult, ffPrintProcessesHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseProcessesCommandOptions(FFProcessesOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_PROCESSES_MODULE_NAME);
@@ -45,11 +39,6 @@ bool ffParseProcessesCommandOptions(FFProcessesOptions* options, const char* key
         return true;
 
     return false;
-}
-
-void ffDestroyProcessesOptions(FFProcessesOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
@@ -88,4 +77,15 @@ void ffPrintProcessesHelpFormat(void)
     ffPrintModuleFormatHelp(FF_PROCESSES_MODULE_NAME, "{1}", FF_PROCESSES_NUM_FORMAT_ARGS, (const char* []) {
         "Count"
     });
+}
+
+void ffInitProcessesOptions(FFProcessesOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PROCESSES_MODULE_NAME, ffParseProcessesCommandOptions, ffParseProcessesJsonObject, ffPrintProcesses, ffGenerateProcessesJsonResult, ffPrintProcessesHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyProcessesOptions(FFProcessesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

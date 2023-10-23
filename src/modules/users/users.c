@@ -91,14 +91,6 @@ void ffPrintUsers(FFUsersOptions* options)
     }
 }
 
-void ffInitUsersOptions(FFUsersOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJsonResult, ffPrintUsersHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->compact = false;
-}
-
 bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_USERS_MODULE_NAME);
@@ -113,11 +105,6 @@ bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroyUsersOptions(FFUsersOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
@@ -185,4 +172,17 @@ void ffPrintUsersHelpFormat(void)
         "Client IP",
         "Login Time"
     });
+}
+
+void ffInitUsersOptions(FFUsersOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJsonResult, ffPrintUsersHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->compact = false;
+}
+
+void ffDestroyUsersOptions(FFUsersOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

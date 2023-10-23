@@ -30,12 +30,6 @@ void ffPrintTheme(FFThemeOptions* options)
     }
 }
 
-void ffInitThemeOptions(FFThemeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJsonResult, ffPrintThemeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_THEME_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyThemeOptions(FFThemeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
@@ -87,4 +76,15 @@ void ffPrintThemeHelpFormat(void)
     ffPrintModuleFormatHelp(FF_THEME_MODULE_NAME, "{1}", FF_THEME_NUM_FORMAT_ARGS, (const char* []) {
         "Combined themes"
     });
+}
+
+void ffInitThemeOptions(FFThemeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJsonResult, ffPrintThemeHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyThemeOptions(FFThemeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

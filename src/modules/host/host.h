@@ -6,8 +6,4 @@
 
 void ffPrintHost(FFHostOptions* options);
 void ffInitHostOptions(FFHostOptions* options);
-bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value);
 void ffDestroyHostOptions(FFHostOptions* options);
-void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module);
-void ffGenerateHostJsonResult(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
-void ffPrintHostHelpFormat(void);

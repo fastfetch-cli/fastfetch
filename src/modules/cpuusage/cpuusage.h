@@ -8,8 +8,4 @@ void ffPrepareCPUUsage();
 
 void ffPrintCPUUsage(FFCPUUsageOptions* options);
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options);
-bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, const char* value);
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options);
-void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module);
-void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module);
-void ffPrintCPUUsageHelpFormat(void);

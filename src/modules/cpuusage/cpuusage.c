@@ -85,12 +85,6 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
 }
 
-void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJsonResult, ffPrintCPUUsageHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CPUUSAGE_MODULE_NAME);
@@ -105,11 +99,6 @@ bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, 
     }
 
     return false;
-}
-
-void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
@@ -161,4 +150,15 @@ void ffPrintCPUUsageHelpFormat(void)
         "CPU usage (percentage, minimum)",
         "CPU core index of minimum usage",
     });
+}
+
+void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJsonResult, ffPrintCPUUsageHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

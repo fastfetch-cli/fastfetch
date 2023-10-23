@@ -141,12 +141,6 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     puts(buffer);
 }
 
-void ffInitDateTimeOptions(FFDateTimeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJsonResult, ffPrintDateTimeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DATETIME_MODULE_NAME);
@@ -155,11 +149,6 @@ bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, 
         return true;
 
     return false;
-}
-
-void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
@@ -208,4 +197,15 @@ void ffPrintDateTimeHelpFormat(void)
         "second",
         "second with leading zero"
     });
+}
+
+void ffInitDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJsonResult, ffPrintDateTimeHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -202,16 +202,6 @@ void ffPrintDisk(FFDiskOptions* options)
     }
 }
 
-void ffInitDiskOptions(FFDiskOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJsonResult, ffPrintDiskHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->folders);
-    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
-    options->calcType = FF_DISK_CALC_TYPE_FREE;
-}
-
 bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DISK_MODULE_NAME);
@@ -289,11 +279,6 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
     }
 
     return false;
-}
-
-void ffDestroyDiskOptions(FFDiskOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
@@ -439,4 +424,19 @@ void ffPrintDiskHelpFormat(void)
         "True if hidden volume",
         "Filesystem"
     });
+}
+
+void ffInitDiskOptions(FFDiskOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISK_MODULE_NAME, ffParseDiskCommandOptions, ffParseDiskJsonObject, ffPrintDisk, ffGenerateDiskJsonResult, ffPrintDiskHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->folders);
+    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
+    options->calcType = FF_DISK_CALC_TYPE_FREE;
+}
+
+void ffDestroyDiskOptions(FFDiskOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

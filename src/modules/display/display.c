@@ -109,14 +109,6 @@ void ffPrintDisplay(FFDisplayOptions* options)
     }
 }
 
-void ffInitDisplayOptions(FFDisplayOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJsonResult, ffPrintDisplayHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    options->preciseRefreshRate = false;
-}
-
 bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DISPLAY_MODULE_NAME);
@@ -142,11 +134,6 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyDisplayOptions(FFDisplayOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
@@ -237,4 +224,17 @@ void ffPrintDisplayHelpFormat(void)
         "Screen type (builtin, external or unknown)",
         "Screen rotation (in degrees)",
     });
+}
+
+void ffInitDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJsonResult, ffPrintDisplayHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+    options->preciseRefreshRate = false;
+}
+
+void ffDestroyDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

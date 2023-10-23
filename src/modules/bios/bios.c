@@ -53,12 +53,6 @@ exit:
     ffStrbufDestroy(&bios.version);
 }
 
-void ffInitBiosOptions(FFBiosOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJsonResult, ffPrintBiosHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BIOS_MODULE_NAME);
@@ -67,11 +61,6 @@ bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyBiosOptions(FFBiosOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
@@ -134,4 +123,15 @@ void ffPrintBiosHelpFormat(void)
         "bios vendor",
         "bios version"
     });
+}
+
+void ffInitBiosOptions(FFBiosOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJsonResult, ffPrintBiosHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyBiosOptions(FFBiosOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -42,16 +42,6 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufDestroy(&result.slv);
 }
 
-void ffInitOpenGLOptions(FFOpenGLOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJsonResult, ffPrintOpenGLHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    #if defined(__linux__) || defined(__FreeBSD__)
-    options->library = FF_OPENGL_LIBRARY_AUTO;
-    #endif
-}
-
 bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_OPENGL_MODULE_NAME);
@@ -73,11 +63,6 @@ bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, cons
     #endif
 
     return false;
-}
-
-void ffDestroyOpenGLOptions(FFOpenGLOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
@@ -152,4 +137,19 @@ void ffPrintOpenGLHelpFormat(void)
         "vendor",
         "shading language version"
     });
+}
+
+void ffInitOpenGLOptions(FFOpenGLOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENGL_MODULE_NAME, ffParseOpenGLCommandOptions, ffParseOpenGLJsonObject, ffPrintOpenGL, ffGenerateOpenGLJsonResult, ffPrintOpenGLHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+    options->library = FF_OPENGL_LIBRARY_AUTO;
+    #endif
+}
+
+void ffDestroyOpenGLOptions(FFOpenGLOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

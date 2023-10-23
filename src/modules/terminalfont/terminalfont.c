@@ -47,12 +47,6 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
     ffFontDestroy(&terminalFont.fallback);
 }
 
-void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJsonResult, ffPrintTerminalFontHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TERMINALFONT_MODULE_NAME);
@@ -61,11 +55,6 @@ bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const cha
         return true;
 
     return false;
-}
-
-void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module)
@@ -133,4 +122,15 @@ void ffPrintTerminalFontHelpFormat(void)
         "Terminal font size",
         "Terminal font styles"
     });
+}
+
+void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJsonResult, ffPrintTerminalFontHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -66,12 +66,6 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
 }
 
-void ffInitMemoryOptions(FFMemoryOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJsonResult, ffPrintMemoryHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_MEMORY_MODULE_NAME);
@@ -80,11 +74,6 @@ bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyMemoryOptions(FFMemoryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
@@ -127,4 +116,15 @@ void ffPrintMemoryHelpFormat(void)
         "Total size",
         "Percentage used"
     });
+}
+
+void ffInitMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MEMORY_MODULE_NAME, ffParseMemoryCommandOptions, ffParseMemoryJsonObject, ffPrintMemory, ffGenerateMemoryJsonResult, ffPrintMemoryHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

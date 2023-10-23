@@ -99,15 +99,6 @@ void ffPrintNetIO(FFNetIOOptions* options)
     }
 }
 
-void ffInitNetIOOptions(FFNetIOOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJsonResult, ffPrintNetIOHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = false;
-}
-
 bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_NETIO_MODULE_NAME);
@@ -128,12 +119,6 @@ bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroyNetIOOptions(FFNetIOOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
 }
 
 void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
@@ -214,4 +199,19 @@ void ffPrintNetIOHelpFormat(void)
         "Number of packets dropped when receiving per second",
         "Number of packets dropped when sending per second",
     });
+}
+
+void ffInitNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJsonResult, ffPrintNetIOHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly = false;
+}
+
+void ffDestroyNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
 }

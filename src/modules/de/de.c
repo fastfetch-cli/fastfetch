@@ -40,12 +40,6 @@ void ffPrintDE(FFDEOptions* options)
     }
 }
 
-void ffInitDEOptions(FFDEOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJsonResult, ffPrintDEHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DE_MODULE_NAME);
@@ -54,11 +48,6 @@ bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* 
         return true;
 
     return false;
-}
-
-void ffDestroyDEOptions(FFDEOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
@@ -101,4 +90,15 @@ void ffPrintDEHelpFormat(void)
         "DE pretty name",
         "DE version"
     });
+}
+
+void ffInitDEOptions(FFDEOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DE_MODULE_NAME, ffParseDECommandOptions, ffParseDEJsonObject, ffPrintDE, ffGenerateDEJsonResult, ffPrintDEHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyDEOptions(FFDEOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

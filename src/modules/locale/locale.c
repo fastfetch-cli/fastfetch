@@ -30,12 +30,6 @@ void ffPrintLocale(FFLocaleOptions* options)
     }
 }
 
-void ffInitLocaleOptions(FFLocaleOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJsonResult, ffPrintLocaleHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_LOCALE_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyLocaleOptions(FFLocaleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
@@ -87,4 +76,15 @@ void ffPrintLocaleHelpFormat(void)
     ffPrintModuleFormatHelp(FF_LOCALE_MODULE_NAME, "{1}", FF_LOCALE_NUM_FORMAT_ARGS, (const char* []) {
         "Locale code"
     });
+}
+
+void ffInitLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJsonResult, ffPrintLocaleHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

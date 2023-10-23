@@ -42,12 +42,6 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
     }
 }
 
-void ffInitWallpaperOptions(FFWallpaperOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJsonResult, ffPrintWallpaperHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseWallpaperCommandOptions(FFWallpaperOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_WALLPAPER_MODULE_NAME);
@@ -56,11 +50,6 @@ bool ffParseWallpaperCommandOptions(FFWallpaperOptions* options, const char* key
         return true;
 
     return false;
-}
-
-void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
@@ -97,4 +86,15 @@ void ffPrintWallpaperHelpFormat(void)
     ffPrintModuleFormatHelp(FF_WALLPAPER_MODULE_NAME, "{1}", FF_WALLPAPER_NUM_FORMAT_ARGS, (const char* []) {
         "Wallpaper image file"
     });
+}
+
+void ffInitWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WALLPAPER_MODULE_NAME, ffParseWallpaperCommandOptions, ffParseWallpaperJsonObject, ffPrintWallpaper, ffGenerateWallpaperJsonResult, ffPrintWallpaperHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

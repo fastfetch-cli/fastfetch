@@ -39,12 +39,6 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
     }
 }
 
-void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJsonResult, ffPrintTerminalSizeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseTerminalSizeCommandOptions(FFTerminalSizeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TERMINALSIZE_MODULE_NAME);
@@ -53,11 +47,6 @@ bool ffParseTerminalSizeCommandOptions(FFTerminalSizeOptions* options, const cha
         return true;
 
     return false;
-}
-
-void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* module)
@@ -102,4 +91,15 @@ void ffPrintTerminalSizeHelpFormat(void)
         "Terminal width (in pixels)",
         "Terminal height (in pixels)"
     });
+}
+
+void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJsonResult, ffPrintTerminalSizeHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

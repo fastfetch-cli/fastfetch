@@ -42,12 +42,6 @@ void ffPrintShell(FFShellOptions* options)
     }
 }
 
-void ffInitShellOptions(FFShellOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJsonResult, ffPrintShellHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseShellCommandOptions(FFShellOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SHELL_MODULE_NAME);
@@ -56,11 +50,6 @@ bool ffParseShellCommandOptions(FFShellOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyShellOptions(FFShellOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
@@ -108,4 +97,15 @@ void ffPrintShellHelpFormat(void)
         "Shell pid",
         "Shell pretty name"
     });
+}
+
+void ffInitShellOptions(FFShellOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SHELL_MODULE_NAME, ffParseShellCommandOptions, ffParseShellJsonObject, ffPrintShell, ffGenerateShellJsonResult, ffPrintShellHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyShellOptions(FFShellOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

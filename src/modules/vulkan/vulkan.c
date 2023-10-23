@@ -44,12 +44,6 @@ void ffPrintVulkan(FFVulkanOptions* options)
     }
 }
 
-void ffInitVulkanOptions(FFVulkanOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJsonResult, ffPrintVulkanHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseVulkanCommandOptions(FFVulkanOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_VULKAN_MODULE_NAME);
@@ -58,11 +52,6 @@ bool ffParseVulkanCommandOptions(FFVulkanOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyVulkanOptions(FFVulkanOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
@@ -144,4 +133,15 @@ void ffPrintVulkanHelpFormat(void)
         "API version",
         "Conformance version"
     });
+}
+
+void ffInitVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJsonResult, ffPrintVulkanHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

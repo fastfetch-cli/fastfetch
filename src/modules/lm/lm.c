@@ -49,12 +49,6 @@ void ffPrintLM(FFLMOptions* options)
     ffStrbufDestroy(&result.version);
 }
 
-void ffInitLMOptions(FFLMOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, ffGenerateLMJsonResult, ffPrintLMHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseLMCommandOptions(FFLMOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_LM_MODULE_NAME);
@@ -63,11 +57,6 @@ bool ffParseLMCommandOptions(FFLMOptions* options, const char* key, const char* 
         return true;
 
     return false;
-}
-
-void ffDestroyLMOptions(FFLMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
@@ -125,4 +114,15 @@ void ffPrintLMHelpFormat(void)
         "LM type",
         "LM version"
     });
+}
+
+void ffInitLMOptions(FFLMOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, ffGenerateLMJsonResult, ffPrintLMHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyLMOptions(FFLMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

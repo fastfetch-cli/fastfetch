@@ -30,12 +30,6 @@ void ffPrintKernel(FFKernelOptions* options)
     }
 }
 
-void ffInitKernelOptions(FFKernelOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJsonResult, ffPrintKernelHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseKernelCommandOptions(FFKernelOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_KERNEL_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseKernelCommandOptions(FFKernelOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyKernelOptions(FFKernelOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
@@ -85,4 +74,15 @@ void ffPrintKernelHelpFormat(void)
         "Kernel release",
         "Kernel version"
     });
+}
+
+void ffInitKernelOptions(FFKernelOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJsonResult, ffPrintKernelHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyKernelOptions(FFKernelOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

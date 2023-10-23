@@ -69,18 +69,6 @@ void ffPrintTitle(FFTitleOptions* options)
     }
 }
 
-void ffInitTitleOptions(FFTitleOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJsonResult, ffPrintTitleHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
-
-    options->fqdn = false;
-    ffStrbufInit(&options->colorUser);
-    ffStrbufInit(&options->colorAt);
-    ffStrbufInit(&options->colorHost);
-}
-
 bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TITLE_MODULE_NAME);
@@ -113,14 +101,6 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroyTitleOptions(FFTitleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->colorUser);
-    ffStrbufDestroy(&options->colorAt);
-    ffStrbufDestroy(&options->colorHost);
 }
 
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
@@ -185,4 +165,24 @@ void ffPrintTitleHelpFormat(void)
         "@ symbol (colored)",
         "Host name (colored)"
     });
+}
+
+void ffInitTitleOptions(FFTitleOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJsonResult, ffPrintTitleHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+
+    options->fqdn = false;
+    ffStrbufInit(&options->colorUser);
+    ffStrbufInit(&options->colorAt);
+    ffStrbufInit(&options->colorHost);
+}
+
+void ffDestroyTitleOptions(FFTitleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->colorUser);
+    ffStrbufDestroy(&options->colorAt);
+    ffStrbufDestroy(&options->colorHost);
 }

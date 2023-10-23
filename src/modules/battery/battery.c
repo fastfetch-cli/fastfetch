@@ -101,17 +101,6 @@ void ffPrintBattery(FFBatteryOptions* options)
     }
 }
 
-void ffInitBatteryOptions(FFBatteryOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJsonResult, ffPrintBatteryHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->temp = false;
-
-    #ifdef __linux__
-        ffStrbufInit(&options->dir);
-    #endif
-}
-
 bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BATTERY_MODULE_NAME);
@@ -134,15 +123,6 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
     #endif
 
     return false;
-}
-
-void ffDestroyBatteryOptions(FFBatteryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    #ifdef __linux__
-        ffStrbufDestroy(&options->dir);
-    #endif
 }
 
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
@@ -218,4 +198,24 @@ void ffPrintBatteryHelpFormat(void)
         "Battery capacity (percentage)",
         "Battery status"
     });
+}
+
+void ffInitBatteryOptions(FFBatteryOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJsonResult, ffPrintBatteryHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->temp = false;
+
+    #ifdef __linux__
+        ffStrbufInit(&options->dir);
+    #endif
+}
+
+void ffDestroyBatteryOptions(FFBatteryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    #ifdef __linux__
+        ffStrbufDestroy(&options->dir);
+    #endif
 }

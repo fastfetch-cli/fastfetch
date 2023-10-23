@@ -45,12 +45,6 @@ void ffPrintVersion(FFVersionOptions* options)
     }
 }
 
-void ffInitVersionOptions(FFVersionOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJsonResult, ffPrintVersionHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseVersionCommandOptions(FFVersionOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_VERSION_MODULE_NAME);
@@ -59,11 +53,6 @@ bool ffParseVersionCommandOptions(FFVersionOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyVersionOptions(FFVersionOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
@@ -128,4 +117,15 @@ void ffPrintVersionHelpFormat(void)
         "Compiler used",
         "Libc used"
     });
+}
+
+void ffInitVersionOptions(FFVersionOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJsonResult, ffPrintVersionHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyVersionOptions(FFVersionOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

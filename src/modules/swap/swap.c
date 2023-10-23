@@ -73,12 +73,6 @@ void ffPrintSwap(FFSwapOptions* options)
     }
 }
 
-void ffInitSwapOptions(FFSwapOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJsonResult, ffPrintSwapHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SWAP_MODULE_NAME);
@@ -87,11 +81,6 @@ bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroySwapOptions(FFSwapOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
@@ -134,4 +123,15 @@ void ffPrintSwapHelpFormat(void)
         "Total size",
         "Percentage used"
     });
+}
+
+void ffInitSwapOptions(FFSwapOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJsonResult, ffPrintSwapHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroySwapOptions(FFSwapOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

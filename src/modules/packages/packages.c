@@ -102,12 +102,6 @@ void ffPrintPackages(FFPackagesOptions* options)
     ffStrbufDestroy(&counts.pacmanBranch);
 }
 
-void ffInitPackagesOptions(FFPackagesOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJsonResult, ffPrintPackagesHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_PACKAGES_MODULE_NAME);
@@ -116,11 +110,6 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
         return true;
 
     return false;
-}
-
-void ffDestroyPackagesOptions(FFPackagesOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
@@ -213,4 +202,15 @@ void ffPrintPackagesHelpFormat(void)
         "Number of winget packages",
         "Number of opkg packages"
     });
+}
+
+void ffInitPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJsonResult, ffPrintPackagesHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

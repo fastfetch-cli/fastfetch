@@ -39,12 +39,6 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
     ffStrbufDestroy(&opencl.vendor);
 }
 
-void ffInitOpenCLOptions(FFOpenCLOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJsonResult, ffPrintOpenCLHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_OPENCL_MODULE_NAME);
@@ -53,11 +47,6 @@ bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
@@ -110,4 +99,15 @@ void ffPrintOpenCLHelpFormat(void)
         "device",
         "vendor"
     });
+}
+
+void ffInitOpenCLOptions(FFOpenCLOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJsonResult, ffPrintOpenCLHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

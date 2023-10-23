@@ -31,16 +31,6 @@ void ffPrintWeather(FFWeatherOptions* options)
     }
 }
 
-void ffInitWeatherOptions(FFWeatherOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, ffGenerateWeatherJsonResult, ffPrintWeatherHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->location);
-    ffStrbufInitStatic(&options->outputFormat, "%t+-+%C+(%l)");
-    options->timeout = 0;
-}
-
 bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_WEATHER_MODULE_NAME);
@@ -67,13 +57,6 @@ bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyWeatherOptions(FFWeatherOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    ffStrbufDestroy(&options->outputFormat);
 }
 
 void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
@@ -130,4 +113,21 @@ void ffPrintWeatherHelpFormat(void)
     ffPrintModuleFormatHelp(FF_WEATHER_MODULE_NAME, "{1}", FF_WEATHER_NUM_FORMAT_ARGS, (const char* []) {
         "Weather result"
     });
+}
+
+void ffInitWeatherOptions(FFWeatherOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WEATHER_MODULE_NAME, ffParseWeatherCommandOptions, ffParseWeatherJsonObject, ffPrintWeather, ffGenerateWeatherJsonResult, ffPrintWeatherHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->location);
+    ffStrbufInitStatic(&options->outputFormat, "%t+-+%C+(%l)");
+    options->timeout = 0;
+}
+
+void ffDestroyWeatherOptions(FFWeatherOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    ffStrbufDestroy(&options->outputFormat);
 }

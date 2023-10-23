@@ -84,14 +84,6 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     }
 }
 
-void ffInitBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJsonResult, ffPrintBrightnessHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->ddcciSleep = 10;
-}
-
 bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BRIGHTNESS_MODULE_NAME);
@@ -106,11 +98,6 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
     }
 
     return false;
-}
-
-void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
@@ -181,4 +168,17 @@ void ffPrintBrightnessHelpFormat(void)
         "Minimum brightness value",
         "Current brightness value",
     });
+}
+
+void ffInitBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJsonResult, ffPrintBrightnessHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->ddcciSleep = 10;
+}
+
+void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

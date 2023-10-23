@@ -89,12 +89,6 @@ void ffPrintUptime(FFUptimeOptions* options)
     }
 }
 
-void ffInitUptimeOptions(FFUptimeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJsonResult, ffPrintUptimeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseUptimeCommandOptions(FFUptimeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_UPTIME_MODULE_NAME);
@@ -103,11 +97,6 @@ bool ffParseUptimeCommandOptions(FFUptimeOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyUptimeOptions(FFUptimeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
@@ -151,4 +140,15 @@ void ffPrintUptimeHelpFormat(void)
         "Minutes",
         "Seconds"
     });
+}
+
+void ffInitUptimeOptions(FFUptimeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_UPTIME_MODULE_NAME, ffParseUptimeCommandOptions, ffParseUptimeJsonObject, ffPrintUptime, ffGenerateUptimeJsonResult, ffPrintUptimeHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyUptimeOptions(FFUptimeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

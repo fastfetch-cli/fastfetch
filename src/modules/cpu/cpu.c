@@ -77,14 +77,6 @@ void ffPrintCPU(FFCPUOptions* options)
     ffStrbufDestroy(&cpu.vendor);
 }
 
-void ffInitCPUOptions(FFCPUOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJsonResult, ffPrintCPUHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->temp = false;
-    options->freqNdigits = 2;
-}
-
 bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CPU_MODULE_NAME);
@@ -105,11 +97,6 @@ bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char
     }
 
     return false;
-}
-
-void ffDestroyCPUOptions(FFCPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
@@ -194,4 +181,17 @@ void ffPrintCPUHelpFormat(void)
         "Max frequency",
         "Temperature"
     });
+}
+
+void ffInitCPUOptions(FFCPUOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJsonResult, ffPrintCPUHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->temp = false;
+    options->freqNdigits = 2;
+}
+
+void ffDestroyCPUOptions(FFCPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

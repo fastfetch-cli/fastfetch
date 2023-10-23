@@ -60,12 +60,6 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
     }
 }
 
-void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter, ffGeneratePowerAdapterJsonResult, ffPrintPowerAdapterHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParsePowerAdapterCommandOptions(FFPowerAdapterOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_POWERADAPTER_MODULE_NAME);
@@ -74,11 +68,6 @@ bool ffParsePowerAdapterCommandOptions(FFPowerAdapterOptions* options, const cha
         return true;
 
     return false;
-}
-
-void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* module)
@@ -136,4 +125,15 @@ void ffPrintPowerAdapterHelpFormat(void)
         "PowerAdapter model",
         "PowerAdapter description"
     });
+}
+
+void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_POWERADAPTER_MODULE_NAME, ffParsePowerAdapterCommandOptions, ffParsePowerAdapterJsonObject, ffPrintPowerAdapter, ffGeneratePowerAdapterJsonResult, ffPrintPowerAdapterHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

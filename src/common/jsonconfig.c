@@ -115,7 +115,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
         case 'd': case 'D': {
             if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME))
             {
-                if (module) ffParseDiskIOJsonObject(&cfg->diskIo, module);
+                if (module) cfg->diskIo.moduleInfo.parseJsonObject(&cfg->diskIo, module);
                 ffPrepareDiskIO(&cfg->diskIo);
             }
             break;
@@ -123,7 +123,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
         case 'n': case 'N': {
             if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME))
             {
-                if (module) ffParseNetIOJsonObject(&cfg->netIo, module);
+                if (module) cfg->netIo.moduleInfo.parseJsonObject(&cfg->netIo, module);
                 ffPrepareNetIO(&cfg->netIo);
             }
             break;
@@ -131,7 +131,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
         case 'p': case 'P': {
             if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME))
             {
-                if (module) ffParsePublicIpJsonObject(&cfg->publicIP, module);
+                if (module) cfg->publicIP.moduleInfo.parseJsonObject(&cfg->publicIP, module);
                 ffPreparePublicIp(&cfg->publicIP);
             }
             break;
@@ -139,7 +139,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
         case 'w': case 'W': {
             if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME))
             {
-                if (module) ffParseWeatherJsonObject(&cfg->weather, module);
+                if (module) cfg->weather.moduleInfo.parseJsonObject(&cfg->weather, module);
                 ffPrepareWeather(&cfg->weather);
             }
             break;

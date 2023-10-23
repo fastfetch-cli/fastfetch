@@ -131,16 +131,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
     }
 }
 
-void ffInitLocalIpOptions(FFLocalIpOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJsonResult, ffPrintLocalIpHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = false;
-}
-
 bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_LOCALIP_MODULE_NAME);
@@ -206,12 +196,6 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
 }
 
 void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
@@ -336,4 +320,20 @@ void ffPrintLocalIpHelpFormat(void)
         "Interface name",
         "Is default route"
     });
+}
+
+void ffInitLocalIpOptions(FFLocalIpOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJsonResult, ffPrintLocalIpHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly = false;
+}
+
+void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
 }

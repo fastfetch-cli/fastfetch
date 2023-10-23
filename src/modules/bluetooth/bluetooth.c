@@ -73,13 +73,6 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
     }
 }
 
-void ffInitBluetoothOptions(FFBluetoothOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, ffGenerateBluetoothJsonResult, ffPrintBluetoothHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->showDisconnected = false;
-}
-
 bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BLUETOOTH_MODULE_NAME);
@@ -94,11 +87,6 @@ bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key
     }
 
     return false;
-}
-
-void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
@@ -165,4 +153,16 @@ void ffPrintBluetoothHelpFormat(void)
         "Type",
         "Battery percentage"
     });
+}
+
+void ffInitBluetoothOptions(FFBluetoothOptions* options)
+{
+    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BLUETOOTH_MODULE_NAME, ffParseBluetoothCommandOptions, ffParseBluetoothJsonObject, ffPrintBluetooth, ffGenerateBluetoothJsonResult, ffPrintBluetoothHelpFormat);
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->showDisconnected = false;
+}
+
+void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
