@@ -366,6 +366,8 @@ const FFTerminalShellResult* ffDetectTerminalShell(void)
     }
     init = true;
 
+    ffStrbufInit(&result.terminalPlugins);
+
     ffStrbufInit(&result.shellProcessName);
     ffStrbufInitA(&result.shellExe, 128);
     result.shellExeName = "";

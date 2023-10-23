@@ -20,6 +20,7 @@ typedef struct FFTerminalShellResult
     const char* terminalExeName; //pointer to a char in terminalExe
     FFstrbuf terminalVersion;
     uint32_t terminalPid;
+    FFstrbuf terminalPlugins;
 } FFTerminalShellResult;
 
 const FFTerminalShellResult* ffDetectTerminalShell();
