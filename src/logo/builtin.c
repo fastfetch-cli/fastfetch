@@ -1044,6 +1044,16 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // cycledream
+    {
+        .names = {"cycledream"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CYCLEDREAM,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
     // LAST
     {},
 };
