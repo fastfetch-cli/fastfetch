@@ -300,6 +300,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionUrxvt(FF_MAYBE_UNUSED FFstrbuf* ex
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionSt(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdErr(version, (char* const[]){
+        exe->chars,
+        "-v",
+        NULL
+    })) return false;
+
+    //st 0.9
+    ffStrbufSubstrAfterFirstC(version, ' ');
+
+    return version->length > 0;
+}
+
 static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
 {
     const char* env = getenv("TERMINAL_VERSION_STRING");
@@ -386,6 +400,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "xterm"))
         return getTerminalVersionXterm(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "st"))
+        return getTerminalVersionSt(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "urxvt") ||
         ffStrbufIgnCaseEqualS(processName, "urxvtd") ||
