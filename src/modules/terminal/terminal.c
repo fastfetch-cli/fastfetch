@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#define FF_TERMINAL_NUM_FORMAT_ARGS 7
+#define FF_TERMINAL_NUM_FORMAT_ARGS 6
 
 void ffPrintTerminal(FFTerminalOptions* options)
 {
@@ -22,18 +22,10 @@ void ffPrintTerminal(FFTerminalOptions* options)
     {
         ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        ffStrbufWriteTo(&result->terminalPrettyName, stdout);
-
         if(result->terminalVersion.length)
-        {
-            putchar(' ');
-            ffStrbufWriteTo(&result->terminalVersion, stdout);
-        }
-
-        if(result->terminalPlugins.length)
-            printf(" (with %s)", result->terminalPlugins.chars);
-
-        putchar('\n');
+            printf("%s %s\n", result->terminalPrettyName.chars, result->terminalVersion.chars);
+        else
+            ffStrbufPutTo(&result->terminalPrettyName, stdout);
     }
     else
     {
@@ -44,7 +36,6 @@ void ffPrintTerminal(FFTerminalOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &result->terminalPid},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalPrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalPlugins},
         });
     }
 }
@@ -93,7 +84,6 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->terminalPid);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->terminalPrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->terminalVersion);
-    yyjson_mut_obj_add_strbuf(doc, obj, "plugins", &result->terminalPlugins);
 }
 
 void ffPrintTerminalHelpFormat(void)
@@ -104,8 +94,7 @@ void ffPrintTerminalHelpFormat(void)
         "Terminal exe name",
         "Terminal pid",
         "Terminal pretty name",
-        "Terminal version",
-        "Terminal plugins (e.g. tmux)"
+        "Terminal version"
     });
 }
 

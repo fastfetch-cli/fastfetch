@@ -176,18 +176,6 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         return;
     }
 
-    if (ffStrStartsWith(name, "tmux: "))
-    {
-        if (result->terminalPlugins.length)
-            ffStrbufAppendS(&result->terminalPlugins, ", ");
-        ffStrbufAppendS(&result->terminalPlugins, "tmux ");
-        ffStrbufAppendS(&result->terminalPlugins, getenv("TERM_PROGRAM_VERSION"));
-        ffStrbufTrimRight(&result->terminalPlugins, ' ');
-
-        getTerminalShell(result, ppid);
-        return;
-    }
-
     #ifdef __APPLE__
     // https://github.com/fastfetch-cli/fastfetch/discussions/501
     if (ffStrEndsWith(name, " (figterm)"))
@@ -248,7 +236,8 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     //Termux
     if(!ffStrSet(term) && (
         getenv("TERMUX_VERSION") != NULL ||
-        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL
+        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
+        getenv("TMUX_TMPDIR") != NULL
     )) term = "com.termux";
     #endif
 
@@ -342,8 +331,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     #else
     const uint32_t exePathLen = 260;
     #endif
-
-    ffStrbufInit(&result.terminalPlugins);
 
     ffStrbufInit(&result.shellProcessName);
     ffStrbufInitA(&result.shellExe, exePathLen);
