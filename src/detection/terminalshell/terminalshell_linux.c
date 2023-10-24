@@ -236,8 +236,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     //Termux
     if(!ffStrSet(term) && (
         getenv("TERMUX_VERSION") != NULL ||
-        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
-        getenv("TMUX_TMPDIR") != NULL
+        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL
     )) term = "com.termux";
     #endif
 
@@ -373,9 +372,10 @@ const FFTerminalShellResult* ffDetectTerminalShell()
             result.terminalExeName + 1);
     }
 
-
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
         ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
+    if(ffStrbufStartsWithS(&result.terminalProcessName, "tmux:"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "tmux");
 
     #if defined(__ANDROID__)
 
