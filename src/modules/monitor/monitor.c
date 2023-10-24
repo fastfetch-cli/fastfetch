@@ -102,6 +102,14 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateMonitorJsonConfig(FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyMonitorOptions))) FFMonitorOptions defaultOptions;
+    ffInitMonitorOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFMonitorResult));
@@ -160,7 +168,7 @@ void ffInitMonitorOptions(FFMonitorOptions* options)
         ffPrintMonitor,
         ffGenerateMonitorJsonResult,
         ffPrintMonitorHelpFormat,
-        NULL
+        ffGenerateMonitorJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

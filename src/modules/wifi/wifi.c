@@ -97,6 +97,14 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyWifiOptions))) FFWifiOptions defaultOptions;
+    ffInitWifiOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
@@ -169,7 +177,7 @@ void ffInitWifiOptions(FFWifiOptions* options)
         ffPrintWifi,
         ffGenerateWifiJsonResult,
         ffPrintWifiHelpFormat,
-        NULL
+        ffGenerateWifiJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

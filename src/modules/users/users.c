@@ -130,6 +130,17 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyUsersOptions))) FFUsersOptions defaultOptions;
+    ffInitUsersOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->compact != defaultOptions.compact)
+        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+}
+
 void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
@@ -184,7 +195,7 @@ void ffInitUsersOptions(FFUsersOptions* options)
         ffPrintUsers,
         ffGenerateUsersJsonResult,
         ffPrintUsersHelpFormat,
-        NULL
+        ffGenerateUsersJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

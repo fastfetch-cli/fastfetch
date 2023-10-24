@@ -82,7 +82,6 @@ void ffPrintSound(FFSoundOptions* options)
     }
 }
 
-
 bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SOUND_MODULE_NAME);
@@ -134,6 +133,30 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
         }
 
         ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+    }
+}
+
+void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroySoundOptions))) FFSoundOptions defaultOptions;
+    ffInitSoundOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.soundType != options->soundType)
+    {
+        switch (options->soundType)
+        {
+            case FF_SOUND_TYPE_MAIN:
+                yyjson_mut_obj_add_str(doc, module, "soundType", "main");
+                break;
+            case FF_SOUND_TYPE_ACTIVE:
+                yyjson_mut_obj_add_str(doc, module, "soundType", "active");
+                break;
+            case FF_SOUND_TYPE_ALL:
+                yyjson_mut_obj_add_str(doc, module, "soundType", "all");
+                break;
+        }
     }
 }
 
@@ -197,7 +220,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
         ffPrintSound,
         ffGenerateSoundJsonResult,
         ffPrintSoundHelpFormat,
-        NULL
+        ffGenerateSoundJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

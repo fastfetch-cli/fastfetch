@@ -129,6 +129,14 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
     }
 }
 
+void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyPackagesOptions))) FFPackagesOptions defaultOptions;
+    ffInitPackagesOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPackagesResult counts = {};
@@ -214,7 +222,7 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
         ffPrintPackages,
         ffGeneratePackagesJsonResult,
         ffPrintPackagesHelpFormat,
-        NULL
+        ffGeneratePackagesJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

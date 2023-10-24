@@ -116,6 +116,14 @@ void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateUptimeJsonConfig(FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyUptimeOptions))) FFUptimeOptions defaultOptions;
+    ffInitUptimeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFUptimeResult result;
@@ -152,7 +160,7 @@ void ffInitUptimeOptions(FFUptimeOptions* options)
         ffPrintUptime,
         ffGenerateUptimeJsonResult,
         ffPrintUptimeHelpFormat,
-        NULL
+        ffGenerateUptimeJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

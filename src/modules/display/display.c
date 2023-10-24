@@ -175,6 +175,33 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyDisplayOptions))) FFDisplayOptions defaultOptions;
+    ffInitDisplayOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->compactType != defaultOptions.compactType)
+    {
+        switch (options->compactType)
+        {
+            case FF_DISPLAY_COMPACT_TYPE_NONE:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "none");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "original");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "scaled");
+                break;
+        }
+    }
+
+    if (options->preciseRefreshRate != defaultOptions.preciseRefreshRate)
+        yyjson_mut_obj_add_bool(doc, module, "preciseRefreshRate", options->preciseRefreshRate);
+}
+
 void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
@@ -236,7 +263,7 @@ void ffInitDisplayOptions(FFDisplayOptions* options)
         ffPrintDisplay,
         ffGenerateDisplayJsonResult,
         ffPrintDisplayHelpFormat,
-        NULL
+        ffGenerateDisplayJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;

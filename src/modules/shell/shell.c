@@ -69,6 +69,14 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyShellOptions))) FFShellOptions defaultOptions;
+    ffInitShellOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFTerminalShellResult* result = ffDetectTerminalShell();
@@ -109,7 +117,7 @@ void ffInitShellOptions(FFShellOptions* options)
         ffPrintShell,
         ffGenerateShellJsonResult,
         ffPrintShellHelpFormat,
-        NULL
+        ffGenerateShellJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

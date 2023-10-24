@@ -77,6 +77,14 @@ void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyCursorOptions))) FFCursorOptions defaultOptions;
+    ffInitCursorOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFCursorResult result;
@@ -119,7 +127,7 @@ void ffInitCursorOptions(FFCursorOptions* options)
         ffPrintCursor,
         ffGenerateCursorJsonResult,
         ffPrintCursorHelpFormat,
-        NULL
+        ffGenerateCursorJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

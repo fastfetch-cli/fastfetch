@@ -132,6 +132,14 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateMediaJsonConfig(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyMediaOptions))) FFMediaOptions defaultOptions;
+    ffInitMediaOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFMediaResult* media = ffDetectMedia();
@@ -170,7 +178,7 @@ void ffInitMediaOptions(FFMediaOptions* options)
         ffPrintMedia,
         ffGenerateMediaJsonResult,
         ffPrintMediaHelpFormat,
-        NULL
+        ffGenerateMediaJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

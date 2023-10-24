@@ -57,6 +57,14 @@ void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateThemeJsonConfig(FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyThemeOptions))) FFThemeOptions defaultOptions;
+    ffInitThemeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY theme = ffStrbufCreate();
@@ -88,7 +96,7 @@ void ffInitThemeOptions(FFThemeOptions* options)
         ffPrintTheme,
         ffGenerateThemeJsonResult,
         ffPrintThemeHelpFormat,
-        NULL
+        ffGenerateThemeJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

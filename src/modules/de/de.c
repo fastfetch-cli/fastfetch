@@ -67,6 +67,14 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyDEOptions))) FFDEOptions defaultOptions;
+    ffInitDEOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
@@ -102,7 +110,7 @@ void ffInitDEOptions(FFDEOptions* options)
         ffPrintDE,
         ffGenerateDEJsonResult,
         ffPrintDEHelpFormat,
-        NULL
+        ffGenerateDEJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

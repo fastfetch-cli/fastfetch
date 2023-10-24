@@ -68,6 +68,14 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateWMJsonConfig(FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyWMOptions))) FFWMOptions defaultOptions;
+    ffInitWMOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
@@ -102,7 +110,7 @@ void ffInitWMOptions(FFWMOptions* options)
         ffPrintWM,
         ffGenerateWMJsonResult,
         ffPrintWMHelpFormat,
-        NULL
+        ffGenerateWMJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

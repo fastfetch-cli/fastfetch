@@ -123,6 +123,17 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
     }
 }
 
+void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBrightnessOptions))) FFBrightnessOptions defaultOptions;
+    ffInitBrightnessOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.ddcciSleep != options->ddcciSleep)
+        yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+}
+
 void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
@@ -180,7 +191,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
         ffPrintBrightness,
         ffGenerateBrightnessJsonResult,
         ffPrintBrightnessHelpFormat,
-        NULL
+        ffGenerateBrightnessJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

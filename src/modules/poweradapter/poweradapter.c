@@ -70,6 +70,14 @@ bool ffParsePowerAdapterCommandOptions(FFPowerAdapterOptions* options, const cha
     return false;
 }
 
+void ffGeneratePowerAdapterJsonConfig(FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyPowerAdapterOptions))) FFPowerAdapterOptions defaultOptions;
+    ffInitPowerAdapterOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* module)
 {
     yyjson_val *key_, *val;
@@ -137,7 +145,7 @@ void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
         ffPrintPowerAdapter,
         ffGeneratePowerAdapterJsonResult,
         ffPrintPowerAdapterHelpFormat,
-        NULL
+        ffGeneratePowerAdapterJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

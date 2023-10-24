@@ -72,6 +72,14 @@ void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyVersionOptions))) FFVersionOptions defaultOptions;
+    ffInitVersionOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFVersionResult result;
@@ -129,7 +137,7 @@ void ffInitVersionOptions(FFVersionOptions* options)
         ffPrintVersion,
         ffGenerateVersionJsonResult,
         ffPrintVersionHelpFormat,
-        NULL
+        ffGenerateVersionJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

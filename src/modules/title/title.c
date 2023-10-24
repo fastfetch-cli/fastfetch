@@ -143,6 +143,31 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyTitleOptions))) FFTitleOptions defaultOptions;
+    ffInitTitleOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.fqdn != options->fqdn)
+        yyjson_mut_obj_add_bool(doc, module, "fqdn", options->fqdn);
+
+    yyjson_mut_val* color = yyjson_mut_obj(doc);
+
+    if (!ffStrbufEqual(&options->colorUser, &defaultOptions.colorUser))
+        yyjson_mut_obj_add_strbuf(doc, color, "user", &options->colorUser);
+
+    if (!ffStrbufEqual(&options->colorAt, &defaultOptions.colorAt))
+        yyjson_mut_obj_add_strbuf(doc, color, "at", &options->colorAt);
+
+    if (!ffStrbufEqual(&options->colorHost, &defaultOptions.colorHost))
+        yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
+
+    if (yyjson_mut_obj_size(color))
+        yyjson_mut_obj_add_val(doc, module, "color", color);
+}
+
 void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -177,7 +202,7 @@ void ffInitTitleOptions(FFTitleOptions* options)
         ffPrintTitle,
         ffGenerateTitleJsonResult,
         ffPrintTitleHelpFormat,
-        NULL
+        ffGenerateTitleJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     ffStrbufSetStatic(&options->moduleArgs.key, " ");

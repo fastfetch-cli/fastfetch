@@ -127,6 +127,30 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyColorsOptions))) FFColorsOptions defaultOptions;
+    ffInitColorsOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.symbol != options->symbol)
+    {
+        switch (options->symbol)
+        {
+            case FF_COLORS_SYMBOL_CIRCLE: yyjson_mut_obj_add_str(doc, module, "symbol", "circle"); break;
+            case FF_COLORS_SYMBOL_DIAMOND: yyjson_mut_obj_add_str(doc, module, "symbol", "diamond"); break;
+            case FF_COLORS_SYMBOL_TRIANGLE: yyjson_mut_obj_add_str(doc, module, "symbol", "triangle"); break;
+            case FF_COLORS_SYMBOL_SQUARE: yyjson_mut_obj_add_str(doc, module, "symbol", "square"); break;
+            case FF_COLORS_SYMBOL_STAR: yyjson_mut_obj_add_str(doc, module, "symbol", "star"); break;
+            default: yyjson_mut_obj_add_str(doc, module, "symbol", "block"); break;
+        }
+    }
+
+    if (defaultOptions.paddingLeft != options->paddingLeft)
+        yyjson_mut_obj_add_uint(doc, module, "paddingLeft", options->paddingLeft);
+}
+
 void ffInitColorsOptions(FFColorsOptions* options)
 {
     ffOptionInitModuleBaseInfo(
@@ -137,7 +161,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
         ffPrintColors,
         NULL,
         NULL,
-        NULL
+        ffGenerateColorsJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     ffStrbufSetStatic(&options->moduleArgs.key, " ");

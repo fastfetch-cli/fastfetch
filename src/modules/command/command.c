@@ -96,6 +96,20 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyCommandOptions))) FFCommandOptions defaultOptions;
+    ffInitCommandOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (!ffStrbufEqual(&defaultOptions.shell, &options->shell))
+        yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
+
+    if (!ffStrbufEqual(&defaultOptions.text, &options->text))
+        yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
+}
+
 void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
@@ -142,7 +156,7 @@ void ffInitCommandOptions(FFCommandOptions* options)
         ffPrintCommand,
         ffGenerateCommandJsonResult,
         ffPrintCommandHelpFormat,
-        NULL
+        ffGenerateCommandJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

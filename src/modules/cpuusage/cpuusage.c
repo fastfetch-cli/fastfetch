@@ -124,6 +124,17 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyCPUUsageOptions))) FFCPUUsageOptions defaultOptions;
+    ffInitCPUUsageOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->separate != defaultOptions.separate)
+        yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
+}
+
 void ffGenerateCPUUsageJsonResult(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
@@ -162,7 +173,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
         ffPrintCPUUsage,
         ffGenerateCPUUsageJsonResult,
         ffPrintCPUUsageHelpFormat,
-        NULL
+        ffGenerateCPUUsageJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

@@ -70,6 +70,14 @@ void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateFontJsonConfig(FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyFontOptions))) FFFontOptions defaultOptions;
+    ffInitFontOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFFontResult font;
@@ -117,7 +125,7 @@ void ffInitFontOptions(FFFontOptions* options)
         ffPrintFont,
         ffGenerateFontJsonResult,
         ffPrintFontHelpFormat,
-        NULL
+        ffGenerateFontJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

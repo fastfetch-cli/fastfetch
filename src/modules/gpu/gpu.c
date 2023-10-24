@@ -200,6 +200,36 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyGPUOptions))) FFGPUOptions defaultOptions;
+    ffInitGPUOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->forceVulkan != defaultOptions.forceVulkan)
+        yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
+
+    if (options->temp != defaultOptions.temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+
+    if (options->hideType != defaultOptions.hideType)
+    {
+        switch (options->hideType)
+        {
+            case FF_GPU_TYPE_UNKNOWN:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "none");
+                break;
+            case FF_GPU_TYPE_INTEGRATED:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "intergrated");
+                break;
+            case FF_GPU_TYPE_DISCRETE:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
+                break;
+        }
+    }
+}
+
 void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
@@ -293,7 +323,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
         ffPrintGPU,
         ffGenerateGPUJsonResult,
         ffPrintGPUHelpFormat,
-        NULL
+        ffGenerateGPUJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

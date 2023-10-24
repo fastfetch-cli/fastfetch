@@ -101,6 +101,19 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateOpenGLJsonConfig(FFOpenGLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyOpenGLOptions))) FFOpenGLOptions defaultOptions;
+    ffInitOpenGLOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+    if (!ffStrbufEqual(&options->library, &defaultOptions.library))
+        yyjson_mut_obj_add_strbuf(doc, module, "library", &options->library);
+    #endif
+}
+
 void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFOpenGLResult result;
@@ -149,7 +162,7 @@ void ffInitOpenGLOptions(FFOpenGLOptions* options)
         ffPrintOpenGL,
         ffGenerateOpenGLJsonResult,
         ffPrintOpenGLHelpFormat,
-        NULL
+        ffGenerateOpenGLJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

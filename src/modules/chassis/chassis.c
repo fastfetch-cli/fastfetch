@@ -77,6 +77,14 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyChassisOptions))) FFChassisOptions defaultOptions;
+    ffInitChassisOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFChassisResult result;
@@ -128,7 +136,7 @@ void ffInitChassisOptions(FFChassisOptions* options)
         ffPrintChassis,
         ffGenerateChassisJsonResult,
         ffPrintChassisHelpFormat,
-        NULL
+        ffGenerateChassisJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

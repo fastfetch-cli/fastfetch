@@ -358,6 +358,38 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyDiskOptions))) FFDiskOptions defaultOptions;
+    ffInitDiskOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.showTypes != options->showTypes)
+    {
+        if (options->showTypes & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showExternal", true);
+
+        if (options->showTypes & FF_DISK_VOLUME_TYPE_HIDDEN_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showHidden", true);
+
+        if (options->showTypes & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showSubvolumes", true);
+
+        if (options->showTypes & FF_DISK_VOLUME_TYPE_READONLY_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showReadOnly", true);
+
+        if (options->showTypes & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showUnknown", true);
+    }
+
+    if (!ffStrbufEqual(&options->folders, &defaultOptions.folders))
+        yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
+
+    if (defaultOptions.calcType != options->calcType)
+        yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
+}
+
 void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
@@ -436,7 +468,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
         ffPrintDisk,
         ffGenerateDiskJsonResult,
         ffPrintDiskHelpFormat,
-        NULL
+        ffGenerateDiskJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

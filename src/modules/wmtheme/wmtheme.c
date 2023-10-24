@@ -57,6 +57,14 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateWMThemeJsonConfig(FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyWMThemeOptions))) FFWMThemeOptions defaultOptions;
+    ffInitWMThemeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
@@ -86,7 +94,7 @@ void ffInitWMThemeOptions(FFWMThemeOptions* options)
         ffPrintWMTheme,
         ffGenerateWMThemeJsonResult,
         ffPrintWMthemeHelpFormat,
-        NULL
+        ffGenerateWMThemeJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

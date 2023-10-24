@@ -91,6 +91,17 @@ void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
     }
 }
 
+void ffGeneratePublicIpJsonConfig(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIpOptions defaultOptions;
+    ffInitPublicIpOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (!ffStrbufEqual(&options->url, &defaultOptions.url))
+        yyjson_mut_obj_add_strbuf(doc, module, "url", &options->url);
+}
+
 void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPublicIpResult result;
@@ -130,7 +141,7 @@ void ffInitPublicIpOptions(FFPublicIpOptions* options)
         ffPrintPublicIp,
         ffGeneratePublicIpJsonResult,
         ffPrintPublicIpHelpFormat,
-        NULL
+        ffGeneratePublicIpJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 

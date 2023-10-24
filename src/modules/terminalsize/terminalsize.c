@@ -66,6 +66,14 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
     }
 }
 
+void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyTerminalSizeOptions))) FFTerminalSizeOptions defaultOptions;
+    ffInitTerminalSizeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalSizeResult result;
@@ -103,7 +111,7 @@ void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
         ffPrintTerminalSize,
         ffGenerateTerminalSizeJsonResult,
         ffPrintTerminalSizeHelpFormat,
-        NULL
+        ffGenerateTerminalSizeJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }

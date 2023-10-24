@@ -100,6 +100,14 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
     }
 }
 
+void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroySwapOptions))) FFSwapOptions defaultOptions;
+    ffInitSwapOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
 void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFSwapResult storage;
@@ -135,7 +143,7 @@ void ffInitSwapOptions(FFSwapOptions* options)
         ffPrintSwap,
         ffGenerateSwapJsonResult,
         ffPrintSwapHelpFormat,
-        NULL
+        ffGenerateSwapJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 }
