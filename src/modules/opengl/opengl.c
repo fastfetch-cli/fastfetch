@@ -109,8 +109,24 @@ void ffGenerateOpenGLJsonConfig(FFOpenGLOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
     #if defined(__linux__) || defined(__FreeBSD__)
-    if (!ffStrbufEqual(&options->library, &defaultOptions.library))
-        yyjson_mut_obj_add_strbuf(doc, module, "library", &options->library);
+    if (options->library != defaultOptions.library)
+    {
+        switch (options->library)
+        {
+        case FF_OPENGL_LIBRARY_AUTO:
+            yyjson_mut_obj_add_str(doc, module, "library", "auto");
+            break;
+        case FF_OPENGL_LIBRARY_EGL:
+            yyjson_mut_obj_add_str(doc, module, "library", "egl");
+            break;
+        case FF_OPENGL_LIBRARY_GLX:
+            yyjson_mut_obj_add_str(doc, module, "library", "glx");
+            break;
+        case FF_OPENGL_LIBRARY_OSMESA:
+            yyjson_mut_obj_add_str(doc, module, "library", "osmesa");
+            break;
+        }
+    }
     #endif
 }
 
