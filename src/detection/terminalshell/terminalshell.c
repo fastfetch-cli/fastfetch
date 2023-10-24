@@ -284,6 +284,22 @@ FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* ver
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionUrxvt(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdErr(version, (char* const[]){
+        "urxvt", // Don't use exe because of urxvtd
+        "-invalid",
+        NULL
+    })) return false;
+
+    //urxvt: "invalid": unknown or malformed option.
+    //rxvt-unicode (urxvt) v9.31 - released: 2023-01-02
+    ffStrbufSubstrAfterFirstS(version, "(urxvt) v");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+
+    return version->length > 0;
+}
+
 static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
 {
     const char* env = getenv("TERMINAL_VERSION_STRING");
@@ -370,6 +386,13 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "xterm"))
         return getTerminalVersionXterm(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "urxvt") ||
+        ffStrbufIgnCaseEqualS(processName, "urxvtd") ||
+        ffStrbufIgnCaseEqualS(processName, "rxvt") ||
+        ffStrbufIgnCaseEqualS(processName, "rxvt-unicode")
+    )
+        return getTerminalVersionUrxvt(exe, version);
 
     #endif
 

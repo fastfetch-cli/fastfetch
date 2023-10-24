@@ -388,6 +388,11 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Terminal");
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "kgx"))
         ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Console");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "urxvt") ||
+        ffStrbufEqualS(&result.terminalProcessName, "urxvtd") ||
+        ffStrbufEqualS(&result.terminalProcessName, "rxvt")
+    )
+        ffStrbufInitStatic(&result.terminalPrettyName, "rxvt-unicode");
 
     #elif defined(__APPLE__)
 
