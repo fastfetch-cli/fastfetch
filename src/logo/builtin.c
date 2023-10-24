@@ -1342,7 +1342,7 @@ static const FFlogo E[] = {
     },
     // evolinx
     {
-        .names = {"Evolinx", "evolinx", },
+        .names = {"Evolinx"},
         .lines = FASTFETCH_DATATEXT_LOGO_EVOLINX,
         .colors = {
             FF_COLOR_FG_BLUE,
