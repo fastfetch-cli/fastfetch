@@ -795,7 +795,7 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
     }
 }
 
-static void ffRun(FFdata* data)
+static void run(FFdata* data)
 {
     if (instance.state.configDoc)
     {
@@ -837,6 +837,12 @@ static void ffRun(FFdata* data)
         ffFinish();
 }
 
+static void migrateConfig(FFdata* data)
+{
+    ffGenerateLogoJsonConfig(&instance.config.logo, instance.state.migrateConfigDoc);
+    ffMigrateCommandOptionToJsonc(data);
+}
+
 int main(int argc, const char** argv)
 {
     ffInitInstance();
@@ -853,9 +859,9 @@ int main(int argc, const char** argv)
     parseArguments(&data, argc, argv);
 
     if (__builtin_expect(!instance.state.migrateConfigDoc, true))
-        ffRun(&data);
+        run(&data);
     else
-        ffMigrateCommandOptionToJsonc(&data); // Migrate
+        migrateConfig(&data);
 
     ffStrbufDestroy(&data.structure);
     FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)
