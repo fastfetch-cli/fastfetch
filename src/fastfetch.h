@@ -24,7 +24,7 @@
 #include "util/unused.h"
 
 #include "modules/options.h"
-#include "logo/option.h"
+#include "options/logo.h"
 
 typedef enum FFBinaryPrefixType
 {

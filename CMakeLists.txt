@@ -297,7 +297,6 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im7.c
     src/logo/image/image.c
     src/logo/logo.c
-    src/logo/option.c
     src/modules/battery/battery.c
     src/modules/bios/bios.c
     src/modules/bluetooth/bluetooth.c
@@ -355,6 +354,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
+    src/options/logo.c
     src/util/edidHelper.c
     src/util/FFlist.c
     src/util/FFstrbuf.c

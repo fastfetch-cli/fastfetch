@@ -32,11 +32,4 @@ extern const FFlogo ffLogoUnknown;
 //image/image.c
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError);
 
-//option.c
-void ffInitLogoOptions(FFLogoOptions* options);
-bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const char* value);
-void ffDestroyLogoOptions(FFLogoOptions* options);
-const char* ffParseLogoJsonConfig(FFLogoOptions* options);
-void ffGenerateLogoJsonConfig(FFLogoOptions* options, yyjson_mut_doc* doc);
-
 #endif

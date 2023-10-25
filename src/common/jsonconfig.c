@@ -82,7 +82,7 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline yyjson_mut_val* genJson(FFModuleBaseInfo* baseInfo)
+static inline yyjson_mut_val* genJsonResult(FFModuleBaseInfo* baseInfo)
 {
     yyjson_mut_doc* doc = instance.state.resultDoc;
     if (__builtin_expect(!doc, true)) return NULL;
@@ -106,7 +106,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
         if (ffStrEqualsIgnCase(type, baseInfo->name))
         {
             if (jsonVal) baseInfo->parseJsonObject(baseInfo, jsonVal);
-            if (!genJson(baseInfo))
+            if (!genJsonResult(baseInfo))
                 baseInfo->printModule(baseInfo);
             return true;
         }
