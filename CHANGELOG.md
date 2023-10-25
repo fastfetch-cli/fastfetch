@@ -1,3 +1,22 @@
+# 2.2.0
+
+Features:
+* Quirks for MIPS platforms (CPU, Linux)
+* Use devicetree path for OBP hosts (Host, Linux)
+* Detect `tmux: server` as tmux (Terminal, Linux)
+* Support urxvt version detection (Terminal, Linux)
+* Support st version detection (Terminal, Linux)
+* Support st terminal font detection (TerminalFont, Linux)
+
+Bugfixes:
+* Better GPU memory and type detection (GPU, Windows)
+* Don't print display type twice (Display)
+
+Logos:
+* Add Black Mesa
+* Add cycledream
+* Add Evolinx
+
 # 2.1.2
 
 Bugfixes:
