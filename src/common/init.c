@@ -32,7 +32,7 @@ static void initState(FFstate* state)
 
 static void defaultConfig(void)
 {
-    ffInitLogoOptions(&instance.config.logo);
+    ffOptionsInitLogo(&instance.config.logo);
     ffOptionsInitGeneral(&instance.config.general);
 
     ffStrbufInit(&instance.config.colorKeys);
@@ -268,7 +268,8 @@ void ffFinish(void)
 
 static void destroyConfig(void)
 {
-    ffDestroyLogoOptions(&instance.config.logo);
+    ffOptionsDestroyLogo(&instance.config.logo);
+    ffOptionsDestroyGeneral(&instance.config.general);
 
     ffStrbufDestroy(&instance.config.colorKeys);
     ffStrbufDestroy(&instance.config.colorTitle);

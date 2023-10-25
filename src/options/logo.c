@@ -3,7 +3,7 @@
 #include "common/jsonconfig.h"
 #include "util/stringUtils.h"
 
-void ffInitLogoOptions(FFLogoOptions* options)
+void ffOptionsInitLogo(FFOptionsLogo* options)
 {
     ffStrbufInit(&options->source);
     options->type = FF_LOGO_TYPE_AUTO;
@@ -26,7 +26,7 @@ void ffInitLogoOptions(FFLogoOptions* options)
     options->chafaDitherMode = UINT32_MAX;
 }
 
-bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const char* value)
+bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value)
 {
     if (strcasecmp(key, "-l") == 0)
         goto logoType;
@@ -203,7 +203,7 @@ logoType:
     return true;
 }
 
-void ffDestroyLogoOptions(FFLogoOptions* options)
+void ffOptionsDestroyLogo(FFOptionsLogo* options)
 {
     ffStrbufDestroy(&options->source);
     ffStrbufDestroy(&options->chafaSymbols);
@@ -211,7 +211,7 @@ void ffDestroyLogoOptions(FFLogoOptions* options)
         ffStrbufDestroy(&options->colors[i]);
 }
 
-const char* ffParseLogoJsonConfig(FFLogoOptions* options, yyjson_val* root)
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root)
 {
     yyjson_val* object = yyjson_obj_get(root, "logo");
     if (!object) return NULL;
@@ -412,10 +412,10 @@ const char* ffParseLogoJsonConfig(FFLogoOptions* options, yyjson_val* root)
     return NULL;
 }
 
-void ffGenerateLogoJsonConfig(FFLogoOptions* options, yyjson_mut_doc* doc)
+void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc)
 {
-    __attribute__((__cleanup__(ffDestroyLogoOptions))) FFLogoOptions defaultOptions;
-    ffInitLogoOptions(&defaultOptions);
+    __attribute__((__cleanup__(ffOptionsDestroyLogo))) FFOptionsLogo defaultOptions;
+    ffOptionsInitLogo(&defaultOptions);
 
     yyjson_mut_val* obj = yyjson_mut_obj(doc);
 

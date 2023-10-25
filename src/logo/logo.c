@@ -18,7 +18,7 @@ typedef enum FFLogoSize
 
 static void ffLogoPrintCharsRaw(const char* data, size_t length)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
     if (!options->width || !options->height)
@@ -55,7 +55,7 @@ static void ffLogoPrintCharsRaw(const char* data, size_t length)
 
 void ffLogoPrintChars(const char* data, bool doColorReplacement)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     uint32_t currentlineLength = 0;
 
@@ -301,7 +301,7 @@ static void logoPrintStruct(const FFlogo* logo)
 {
     logoApplyColors(logo);
 
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     const char* const* colors = logo->colors;
     for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
@@ -344,7 +344,7 @@ static inline void logoPrintDetected(FFLogoSize size)
 
 static bool logoPrintData(bool doColorReplacement)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
     if(options->source.length == 0)
         return false;
 
@@ -355,7 +355,7 @@ static bool logoPrintData(bool doColorReplacement)
 
 static void updateLogoPath(void)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     if(ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
         return;
@@ -384,7 +384,7 @@ static void updateLogoPath(void)
 
 static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
 
@@ -417,7 +417,7 @@ static bool logoPrintImageIfExists(FFLogoType logo, bool printError)
 
 static bool logoTryKnownType(void)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     if(options->type == FF_LOGO_TYPE_NONE)
     {
@@ -469,7 +469,7 @@ void ffLogoPrint(void)
         return;
     }
 
-    const FFLogoOptions* options = &instance.config.logo;
+    const FFOptionsLogo* options = &instance.config.logo;
 
     if (options->type == FF_LOGO_TYPE_NONE)
     {
@@ -535,7 +535,7 @@ void ffLogoPrintRemaining(void)
 
 void ffLogoBuiltinPrint(void)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     for(uint8_t ch = 0; ch < 26; ++ch)
     {

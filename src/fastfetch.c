@@ -538,7 +538,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //Logo options//
     ////////////////
 
-    else if(ffParseLogoCommandOptions(&instance.config.logo, key, value)) {}
+    else if(ffOptionsParseLogoCommandLine(&instance.config.logo, key, value)) {}
 
     ///////////////////
     //Display options//
@@ -793,7 +793,7 @@ static void run(FFdata* data)
 
         if (
             error ||
-            (error = ffParseLogoJsonConfig(&instance.config.logo, root)) ||
+            (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
             (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
             (error = ffParseDisplayJsonConfig(&instance.config)) ||
             (error = ffParseLibraryJsonConfig(&instance.config)) ||
@@ -830,7 +830,7 @@ static void run(FFdata* data)
 
 static void migrateConfig(FFdata* data)
 {
-    ffGenerateLogoJsonConfig(&instance.config.logo, instance.state.migrateConfigDoc);
+    ffOptionsGenerateLogoJsonConfig(&instance.config.logo, instance.state.migrateConfigDoc);
     ffMigrateCommandOptionToJsonc(data);
 }
 

@@ -43,7 +43,7 @@ typedef enum FFTemperatureUnit
 
 typedef struct FFconfig
 {
-    FFLogoOptions logo;
+    FFOptionsLogo logo;
     FFOptionsGeneral general;
 
     //If one of those is empty, ffLogoPrint will set them
