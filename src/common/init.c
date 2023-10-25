@@ -15,8 +15,6 @@
     #include <signal.h>
 #endif
 
-#include "modules/modules.h"
-
 FFinstance instance; // Global singleton
 
 static void initState(FFstate* state)
@@ -34,6 +32,7 @@ static void defaultConfig(void)
 {
     ffOptionsInitLogo(&instance.config.logo);
     ffOptionsInitGeneral(&instance.config.general);
+    ffOptionsInitModules(&instance.config.modules);
 
     ffStrbufInit(&instance.config.colorKeys);
     ffStrbufInit(&instance.config.colorTitle);
@@ -65,64 +64,6 @@ static void defaultConfig(void)
     instance.config.barBorder = true;
     instance.config.percentType = 1;
     instance.config.percentNdigits = 0;
-
-    ffInitBatteryOptions(&instance.config.battery);
-    ffInitBiosOptions(&instance.config.bios);
-    ffInitBluetoothOptions(&instance.config.bluetooth);
-    ffInitBoardOptions(&instance.config.board);
-    ffInitBreakOptions(&instance.config.break_);
-    ffInitBrightnessOptions(&instance.config.brightness);
-    ffInitCPUOptions(&instance.config.cpu);
-    ffInitCPUUsageOptions(&instance.config.cpuUsage);
-    ffInitChassisOptions(&instance.config.chassis);
-    ffInitColorsOptions(&instance.config.colors);
-    ffInitCommandOptions(&instance.config.command);
-    ffInitCursorOptions(&instance.config.cursor);
-    ffInitCustomOptions(&instance.config.custom);
-    ffInitDEOptions(&instance.config.de);
-    ffInitDateTimeOptions(&instance.config.dateTime);
-    ffInitDiskOptions(&instance.config.disk);
-    ffInitDiskIOOptions(&instance.config.diskIo);
-    ffInitDisplayOptions(&instance.config.display);
-    ffInitFontOptions(&instance.config.font);
-    ffInitGPUOptions(&instance.config.gpu);
-    ffInitGamepadOptions(&instance.config.gamepad);
-    ffInitHostOptions(&instance.config.host);
-    ffInitIconsOptions(&instance.config.icons);
-    ffInitKernelOptions(&instance.config.kernel);
-    ffInitLMOptions(&instance.config.lm);
-    ffInitLocalIpOptions(&instance.config.localIP);
-    ffInitLocaleOptions(&instance.config.locale);
-    ffInitMediaOptions(&instance.config.media);
-    ffInitMemoryOptions(&instance.config.memory);
-    ffInitMonitorOptions(&instance.config.monitor);
-    ffInitNetIOOptions(&instance.config.netIo);
-    ffInitOSOptions(&instance.config.os);
-    ffInitOpenCLOptions(&instance.config.openCL);
-    ffInitOpenGLOptions(&instance.config.openGL);
-    ffInitPackagesOptions(&instance.config.packages);
-    ffInitPlayerOptions(&instance.config.player);
-    ffInitPowerAdapterOptions(&instance.config.powerAdapter);
-    ffInitProcessesOptions(&instance.config.processes);
-    ffInitPublicIpOptions(&instance.config.publicIP);
-    ffInitSeparatorOptions(&instance.config.separator);
-    ffInitShellOptions(&instance.config.shell);
-    ffInitSoundOptions(&instance.config.sound);
-    ffInitSwapOptions(&instance.config.swap);
-    ffInitTerminalFontOptions(&instance.config.terminalFont);
-    ffInitTerminalOptions(&instance.config.terminal);
-    ffInitTerminalSizeOptions(&instance.config.terminalSize);
-    ffInitThemeOptions(&instance.config.theme);
-    ffInitTitleOptions(&instance.config.title);
-    ffInitUptimeOptions(&instance.config.uptime);
-    ffInitUsersOptions(&instance.config.users);
-    ffInitVersionOptions(&instance.config.version);
-    ffInitVulkanOptions(&instance.config.vulkan);
-    ffInitWMOptions(&instance.config.wm);
-    ffInitWMThemeOptions(&instance.config.wmTheme);
-    ffInitWallpaperOptions(&instance.config.wallpaper);
-    ffInitWeatherOptions(&instance.config.weather);
-    ffInitWifiOptions(&instance.config.wifi);
 
     ffStrbufInit(&instance.config.libPCI);
     ffStrbufInit(&instance.config.libVulkan);
@@ -270,70 +211,13 @@ static void destroyConfig(void)
 {
     ffOptionsDestroyLogo(&instance.config.logo);
     ffOptionsDestroyGeneral(&instance.config.general);
+    ffOptionsDestroyModules(&instance.config.modules);
 
     ffStrbufDestroy(&instance.config.colorKeys);
     ffStrbufDestroy(&instance.config.colorTitle);
     ffStrbufDestroy(&instance.config.keyValueSeparator);
     ffStrbufDestroy(&instance.config.barCharElapsed);
     ffStrbufDestroy(&instance.config.barCharTotal);
-
-    ffDestroyBatteryOptions(&instance.config.battery);
-    ffDestroyBiosOptions(&instance.config.bios);
-    ffDestroyBluetoothOptions(&instance.config.bluetooth);
-    ffDestroyBoardOptions(&instance.config.board);
-    ffDestroyBreakOptions(&instance.config.break_);
-    ffDestroyBrightnessOptions(&instance.config.brightness);
-    ffDestroyCPUOptions(&instance.config.cpu);
-    ffDestroyCPUUsageOptions(&instance.config.cpuUsage);
-    ffDestroyChassisOptions(&instance.config.chassis);
-    ffDestroyColorsOptions(&instance.config.colors);
-    ffDestroyCommandOptions(&instance.config.command);
-    ffDestroyCursorOptions(&instance.config.cursor);
-    ffDestroyCustomOptions(&instance.config.custom);
-    ffDestroyDEOptions(&instance.config.de);
-    ffDestroyDateTimeOptions(&instance.config.dateTime);
-    ffDestroyDiskOptions(&instance.config.disk);
-    ffDestroyDiskIOOptions(&instance.config.diskIo);
-    ffDestroyDisplayOptions(&instance.config.display);
-    ffDestroyFontOptions(&instance.config.font);
-    ffDestroyGPUOptions(&instance.config.gpu);
-    ffDestroyGamepadOptions(&instance.config.gamepad);
-    ffDestroyHostOptions(&instance.config.host);
-    ffDestroyIconsOptions(&instance.config.icons);
-    ffDestroyKernelOptions(&instance.config.kernel);
-    ffDestroyLMOptions(&instance.config.lm);
-    ffDestroyLocalIpOptions(&instance.config.localIP);
-    ffDestroyLocaleOptions(&instance.config.locale);
-    ffDestroyMediaOptions(&instance.config.media);
-    ffDestroyMemoryOptions(&instance.config.memory);
-    ffDestroyMonitorOptions(&instance.config.monitor);
-    ffDestroyNetIOOptions(&instance.config.netIo);
-    ffDestroyOSOptions(&instance.config.os);
-    ffDestroyOpenCLOptions(&instance.config.openCL);
-    ffDestroyOpenGLOptions(&instance.config.openGL);
-    ffDestroyPackagesOptions(&instance.config.packages);
-    ffDestroyPlayerOptions(&instance.config.player);
-    ffDestroyPowerAdapterOptions(&instance.config.powerAdapter);
-    ffDestroyProcessesOptions(&instance.config.processes);
-    ffDestroyPublicIpOptions(&instance.config.publicIP);
-    ffDestroySeparatorOptions(&instance.config.separator);
-    ffDestroyShellOptions(&instance.config.shell);
-    ffDestroySoundOptions(&instance.config.sound);
-    ffDestroySwapOptions(&instance.config.swap);
-    ffDestroyTerminalFontOptions(&instance.config.terminalFont);
-    ffDestroyTerminalOptions(&instance.config.terminal);
-    ffDestroyTerminalSizeOptions(&instance.config.terminalSize);
-    ffDestroyThemeOptions(&instance.config.theme);
-    ffDestroyTitleOptions(&instance.config.title);
-    ffDestroyUptimeOptions(&instance.config.uptime);
-    ffDestroyUsersOptions(&instance.config.users);
-    ffDestroyVersionOptions(&instance.config.version);
-    ffDestroyVulkanOptions(&instance.config.vulkan);
-    ffDestroyWMOptions(&instance.config.wm);
-    ffDestroyWMThemeOptions(&instance.config.wmTheme);
-    ffDestroyWallpaperOptions(&instance.config.wallpaper);
-    ffDestroyWeatherOptions(&instance.config.weather);
-    ffDestroyWifiOptions(&instance.config.wifi);
 
     ffStrbufDestroy(&instance.config.libPCI);
     ffStrbufDestroy(&instance.config.libVulkan);

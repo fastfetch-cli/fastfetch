@@ -23,7 +23,7 @@
 #include "util/platform/FFPlatform.h"
 #include "util/unused.h"
 
-#include "modules/options.h"
+#include "options/modules.h"
 #include "options/logo.h"
 #include "options/general.h"
 
@@ -45,6 +45,7 @@ typedef struct FFconfig
 {
     FFOptionsLogo logo;
     FFOptionsGeneral general;
+    FFOptionsModules modules;
 
     //If one of those is empty, ffLogoPrint will set them
     FFstrbuf colorKeys;
@@ -71,64 +72,6 @@ typedef struct FFconfig
     uint8_t percentNdigits;
     bool noBuffer;
     uint32_t keyWidth;
-
-    FFBatteryOptions battery;
-    FFBiosOptions bios;
-    FFBluetoothOptions bluetooth;
-    FFBoardOptions board;
-    FFBreakOptions break_;
-    FFBrightnessOptions brightness;
-    FFCPUOptions cpu;
-    FFCPUUsageOptions cpuUsage;
-    FFChassisOptions chassis;
-    FFColorsOptions colors;
-    FFCommandOptions command;
-    FFCursorOptions cursor;
-    FFCustomOptions custom;
-    FFDEOptions de;
-    FFDateTimeOptions dateTime;
-    FFDiskOptions disk;
-    FFDiskIOOptions diskIo;
-    FFDisplayOptions display;
-    FFFontOptions font;
-    FFGPUOptions gpu;
-    FFGamepadOptions gamepad;
-    FFHostOptions host;
-    FFIconsOptions icons;
-    FFKernelOptions kernel;
-    FFLMOptions lm;
-    FFLocalIpOptions localIP;
-    FFLocaleOptions locale;
-    FFMediaOptions media;
-    FFMemoryOptions memory;
-    FFMonitorOptions monitor;
-    FFNetIOOptions netIo;
-    FFOSOptions os;
-    FFOpenCLOptions openCL;
-    FFOpenGLOptions openGL;
-    FFPackagesOptions packages;
-    FFPlayerOptions player;
-    FFPowerAdapterOptions powerAdapter;
-    FFProcessesOptions processes;
-    FFPublicIpOptions publicIP;
-    FFSeparatorOptions separator;
-    FFShellOptions shell;
-    FFSoundOptions sound;
-    FFSwapOptions swap;
-    FFTerminalFontOptions terminalFont;
-    FFTerminalOptions terminal;
-    FFTerminalSizeOptions terminalSize;
-    FFThemeOptions theme;
-    FFTitleOptions title;
-    FFUptimeOptions uptime;
-    FFUsersOptions users;
-    FFVersionOptions version;
-    FFVulkanOptions vulkan;
-    FFWMOptions wm;
-    FFWMThemeOptions wmTheme;
-    FFWallpaperOptions wallpaper;
-    FFWeatherOptions weather;
-    FFWifiOptions wifi;
 
     FFstrbuf libPCI;
     FFstrbuf libVulkan;

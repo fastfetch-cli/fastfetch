@@ -74,6 +74,7 @@ bool ffParseModuleOptions(const char* key, const char* value)
 
 void ffPrepareCommandOption(FFdata* data)
 {
+    FFOptionsModules* const options = &instance.config.modules;
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
         ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
@@ -82,18 +83,18 @@ void ffPrepareCommandOption(FFdata* data)
         ffPrepareCPUUsage();
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME))
-        ffPrepareDiskIO(&instance.config.diskIo);
+        ffPrepareDiskIO(&options->diskIo);
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
-        ffPrepareNetIO(&instance.config.netIo);
+        ffPrepareNetIO(&options->netIo);
 
     if(instance.config.general.multithreading)
     {
         if(ffStrbufContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME))
-            ffPreparePublicIp(&instance.config.publicIP);
+            ffPreparePublicIp(&options->publicIP);
 
         if(ffStrbufContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME))
-            ffPrepareWeather(&instance.config.weather);
+            ffPrepareWeather(&options->weather);
     }
 }
 

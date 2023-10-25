@@ -21,7 +21,7 @@ static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate
 void ffPrintSeparator(FFSeparatorOptions* options)
 {
     mbstate_t state = {};
-    bool fqdn = instance.config.title.fqdn;
+    bool fqdn = instance.config.modules.title.fqdn;
     const FFPlatform* platform = &instance.state.platform;
 
     FF_AUTO_FREE wchar_t* wstr = malloc((max(
