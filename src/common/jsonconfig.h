@@ -5,9 +5,9 @@
 bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs* moduleArgs);
 const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair pairs[]);
 void ffPrintJsonConfig(bool prepare);
-const char* ffParseGeneralJsonConfig(void);
-const char* ffParseDisplayJsonConfig(void);
-const char* ffParseLibraryJsonConfig(void);
+const char* ffParseGeneralJsonConfig(FFconfig* config);
+const char* ffParseDisplayJsonConfig(FFconfig* config);
+const char* ffParseLibraryJsonConfig(FFconfig* config);
 void ffJsonConfigGenerateModuleArgsConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFModuleArgs* defaultModuleArgs, FFModuleArgs* moduleArgs);
 
 yyjson_api_inline bool yyjson_mut_obj_add_strbuf(yyjson_mut_doc *doc,

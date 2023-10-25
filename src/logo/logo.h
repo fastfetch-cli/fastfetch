@@ -36,6 +36,6 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError);
 void ffInitLogoOptions(FFLogoOptions* options);
 bool ffParseLogoCommandOptions(FFLogoOptions* options, const char* key, const char* value);
 void ffDestroyLogoOptions(FFLogoOptions* options);
-const char* ffParseLogoJsonConfig();
+const char* ffParseLogoJsonConfig(FFLogoOptions* options);
 
 #endif

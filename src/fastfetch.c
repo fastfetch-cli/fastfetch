@@ -802,10 +802,10 @@ static void ffRun(FFdata* data)
         const char* error = NULL;
 
         if (
-            (error = ffParseLogoJsonConfig()) ||
-            (error = ffParseGeneralJsonConfig()) ||
-            (error = ffParseDisplayJsonConfig()) ||
-            (error = ffParseLibraryJsonConfig()) ||
+            (error = ffParseLogoJsonConfig(&instance.config.logo)) ||
+            (error = ffParseGeneralJsonConfig(&instance.config)) ||
+            (error = ffParseDisplayJsonConfig(&instance.config)) ||
+            (error = ffParseLibraryJsonConfig(&instance.config)) ||
             false
         ) {
             fputs(error, stderr);

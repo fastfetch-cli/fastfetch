@@ -227,10 +227,8 @@ static const char* printJsonConfig(bool prepare)
     return NULL;
 }
 
-const char* ffParseGeneralJsonConfig(void)
+const char* ffParseGeneralJsonConfig(FFconfig* config)
 {
-    FFconfig* config = &instance.config;
-
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
@@ -282,10 +280,8 @@ const char* ffParseGeneralJsonConfig(void)
     return NULL;
 }
 
-const char* ffParseDisplayJsonConfig(void)
+const char* ffParseDisplayJsonConfig(FFconfig* config)
 {
-    FFconfig* config = &instance.config;
-
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
@@ -416,10 +412,8 @@ const char* ffParseDisplayJsonConfig(void)
     return NULL;
 }
 
-const char* ffParseLibraryJsonConfig(void)
+const char* ffParseLibraryJsonConfig(FFconfig* config)
 {
-    FFconfig* config = &instance.config;
-
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
 
