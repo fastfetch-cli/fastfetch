@@ -33,7 +33,7 @@ static void initState(FFstate* state)
 static void defaultConfig(void)
 {
     ffInitLogoOptions(&instance.config.logo);
-    ffInitGeneralOptions(&instance.config.general);
+    ffOptionsInitGeneral(&instance.config.general);
 
     ffStrbufInit(&instance.config.colorKeys);
     ffStrbufInit(&instance.config.colorTitle);

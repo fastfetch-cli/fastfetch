@@ -2,7 +2,7 @@
 
 #include "util/FFstrbuf.h"
 
-typedef struct FFGeneralOptions
+typedef struct FFOptionsGeneral
 {
     bool allowSlowOperations;
     bool multithreading;
@@ -17,9 +17,9 @@ typedef struct FFGeneralOptions
     #elif defined(_WIN32)
     int32_t wmiTimeout;
     #endif
-} FFGeneralOptions;
+} FFOptionsGeneral;
 
-const char* ffParseGeneralJsonConfig(FFGeneralOptions* options, yyjson_val* root);
-bool ffParseGeneralCommandOptions(FFGeneralOptions* options, const char* key, const char* value);
-void ffInitGeneralOptions(FFGeneralOptions* options);
-void ffDestroyGeneralOptions(FFGeneralOptions* options);
+const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_val* root);
+bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key, const char* value);
+void ffOptionsInitGeneral(FFOptionsGeneral* options);
+void ffOptionsDestroyGeneral(FFOptionsGeneral* options);

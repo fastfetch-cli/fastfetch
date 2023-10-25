@@ -532,7 +532,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //General options//
     ///////////////////
 
-    else if(ffParseGeneralCommandOptions(&instance.config.general, key, value)) {}
+    else if(ffOptionsParseGeneralCommandLine(&instance.config.general, key, value)) {}
 
     ////////////////
     //Logo options//
@@ -794,7 +794,7 @@ static void run(FFdata* data)
         if (
             error ||
             (error = ffParseLogoJsonConfig(&instance.config.logo, root)) ||
-            (error = ffParseGeneralJsonConfig(&instance.config.general, root)) ||
+            (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
             (error = ffParseDisplayJsonConfig(&instance.config)) ||
             (error = ffParseLibraryJsonConfig(&instance.config)) ||
             false

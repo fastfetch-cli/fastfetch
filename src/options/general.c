@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-const char* ffParseGeneralJsonConfig(FFGeneralOptions* options, yyjson_val* root)
+const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_val* root)
 {
     yyjson_val* object = yyjson_obj_get(root, "general");
     if (!object) return NULL;
@@ -44,7 +44,7 @@ const char* ffParseGeneralJsonConfig(FFGeneralOptions* options, yyjson_val* root
     return NULL;
 }
 
-bool ffParseGeneralCommandOptions(FFGeneralOptions* options, const char* key, const char* value)
+bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key, const char* value)
 {
     if(ffStrEqualsIgnCase(key, "--allow-slow-operations"))
         options->allowSlowOperations = ffOptionParseBoolean(value);
@@ -73,7 +73,7 @@ bool ffParseGeneralCommandOptions(FFGeneralOptions* options, const char* key, co
     return true;
 }
 
-void ffInitGeneralOptions(FFGeneralOptions* options)
+void ffOptionsInitGeneral(FFOptionsGeneral* options)
 {
     options->processingTimeout = 1000;
     options->allowSlowOperations = false;
@@ -89,7 +89,7 @@ void ffInitGeneralOptions(FFGeneralOptions* options)
     #endif
 }
 
-void ffDestroyGeneralOptions(FF_MAYBE_UNUSED FFGeneralOptions* options)
+void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 {
     #if defined(__linux__) || defined(__FreeBSD__)
     ffStrbufDestroy(&options->playerName);
