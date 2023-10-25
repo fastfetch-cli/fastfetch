@@ -116,7 +116,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     }
     ffStrbufInit(&ds->wmProtocolName);
 
-    if(instance.config.allowSlowOperations)
+    if(instance.config.general.allowSlowOperations)
     {
         FF_STRBUF_AUTO_DESTROY name;
         ffStrbufInit(&name);

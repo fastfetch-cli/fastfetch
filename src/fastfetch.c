@@ -471,9 +471,9 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         customValue->printKey = key[5] == '\0';
     }
 
-    ///////////////////
-    //General options//
-    ///////////////////
+    ////////////
+    //Switches//
+    ////////////
 
     else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
@@ -501,23 +501,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         else
             instance.state.migrateConfigDoc = NULL;
     }
-    else if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
-        instance.config.multithreading = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--stat"))
-    {
-        if((instance.config.stat = ffOptionParseBoolean(value)))
-            instance.config.showErrors = true;
-    }
-    else if(ffStrEqualsIgnCase(key, "--allow-slow-operations"))
-        instance.config.allowSlowOperations = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
-        instance.config.escapeBedrock = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--pipe"))
-        instance.config.pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
-        instance.config.processingTimeout = ffOptionParseInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--format"))
     {
         switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
@@ -543,17 +528,11 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         }
     }
 
-    #if defined(__linux__) || defined(__FreeBSD__)
-    else if(ffStrEqualsIgnCase(key, "--player-name"))
-        ffOptionParseString(key, value, &instance.config.playerName);
-    else if (ffStrEqualsIgnCase(key, "--os-file"))
-        ffOptionParseString(key, value, &instance.config.osFile);
-    else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
-        instance.config.dsForceDrm = ffOptionParseBoolean(value);
-    #elif defined(_WIN32)
-    else if (ffStrEqualsIgnCase(key, "--wmi-timeout"))
-        instance.config.wmiTimeout = ffOptionParseInt32(key, value);
-    #endif
+    ///////////////////
+    //General options//
+    ///////////////////
+
+    else if(ffParseGeneralCommandOptions(&instance.config.general, key, value)) {}
 
     ////////////////
     //Logo options//
@@ -565,6 +544,13 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     //Display options//
     ///////////////////
 
+    else if(ffStrEqualsIgnCase(key, "--stat"))
+    {
+        if((instance.config.stat = ffOptionParseBoolean(value)))
+            instance.config.showErrors = true;
+    }
+    else if(ffStrEqualsIgnCase(key, "--pipe"))
+        instance.config.pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--show-errors"))
         instance.config.showErrors = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
@@ -801,9 +787,14 @@ static void run(FFdata* data)
     {
         const char* error = NULL;
 
+        yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
+        if (!yyjson_is_obj(root))
+            error = "Invalid JSON config format. Root value must be an object";
+
         if (
-            (error = ffParseLogoJsonConfig(&instance.config.logo)) ||
-            (error = ffParseGeneralJsonConfig(&instance.config)) ||
+            error ||
+            (error = ffParseLogoJsonConfig(&instance.config.logo, root)) ||
+            (error = ffParseGeneralJsonConfig(&instance.config.general, root)) ||
             (error = ffParseDisplayJsonConfig(&instance.config)) ||
             (error = ffParseLibraryJsonConfig(&instance.config)) ||
             false

@@ -161,8 +161,8 @@ static const char* getMedia(FFMediaResult* result)
 
     // FIXME: This is shared for both player and media module.
     // However it uses an option in one specific module
-    if(instance.config.playerName.length > 0)
-        getCustomBus(&data, &instance.config.playerName, result);
+    if(instance.config.general.playerName.length > 0)
+        getCustomBus(&data, &instance.config.general.playerName, result);
     else
         getBestBus(&data, result);
 

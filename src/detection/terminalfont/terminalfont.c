@@ -247,7 +247,7 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
         {"font_size ", &fontSize},
     };
 
-    if(instance.config.allowSlowOperations)
+    if(instance.config.general.allowSlowOperations)
     {
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
         if(!ffProcessAppendStdOut(&buf, (char* const[]){

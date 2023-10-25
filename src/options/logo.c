@@ -211,14 +211,8 @@ void ffDestroyLogoOptions(FFLogoOptions* options)
         ffStrbufDestroy(&options->colors[i]);
 }
 
-const char* ffParseLogoJsonConfig(FFLogoOptions* options)
+const char* ffParseLogoJsonConfig(FFLogoOptions* options, yyjson_val* root)
 {
-    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
-    assert(root);
-
-    if (!yyjson_is_obj(root))
-        return "Invalid JSON config format. Root value must be an object";
-
     yyjson_val* object = yyjson_obj_get(root, "logo");
     if (!object) return NULL;
     if (yyjson_is_null(object))

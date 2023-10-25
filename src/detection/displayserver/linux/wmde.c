@@ -154,7 +154,7 @@ static void getKDE(FFDisplayServerResult* result)
     if(result->deVersion.length == 0)
         ffParsePropFileData("wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
 
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.general.allowSlowOperations)
     {
         if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "plasmashell",
@@ -214,7 +214,7 @@ static void getMate(FFDisplayServerResult* result)
 
     ffParseSemver(&result->deVersion, &major, &minor, &micro);
 
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.general.allowSlowOperations)
     {
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
             "mate-session",
@@ -250,7 +250,7 @@ static void getXFCE4(FFDisplayServerResult* result)
     }
     #endif
 
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.general.allowSlowOperations)
     {
         //This is somewhat slow
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){
@@ -276,7 +276,7 @@ static void getLXQt(FFDisplayServerResult* result)
     if(result->deVersion.length == 0)
         ffParsePropFileData("cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
 
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
+    if(result->deVersion.length == 0 && instance.config.general.allowSlowOperations)
     {
         //This is really, really, really slow. Thank you, LXQt developers
         ffProcessAppendStdOut(&result->deVersion, (char* const[]){

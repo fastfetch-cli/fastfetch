@@ -227,59 +227,6 @@ static const char* printJsonConfig(bool prepare)
     return NULL;
 }
 
-const char* ffParseGeneralJsonConfig(FFconfig* config)
-{
-    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
-    assert(root);
-
-    if (!yyjson_is_obj(root))
-        return "Invalid JSON config format. Root value must be an object";
-
-    yyjson_val* object = yyjson_obj_get(root, "general");
-    if (!object) return NULL;
-    if (!yyjson_is_obj(object)) return "Property 'general' must be an object";
-
-    yyjson_val *key_, *val;
-    size_t idx, max;
-    yyjson_obj_foreach(object, idx, max, key_, val)
-    {
-        const char* key = yyjson_get_str(key_);
-
-        if (ffStrEqualsIgnCase(key, "allowSlowOperations"))
-            config->allowSlowOperations = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "thread") || ffStrEqualsIgnCase(key, "multithreading"))
-            config->multithreading = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "stat"))
-        {
-            if ((config->stat = yyjson_get_bool(val)))
-                config->showErrors = true;
-        }
-        else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
-            config->escapeBedrock = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "pipe"))
-            config->pipe = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "processingTimeout"))
-            config->processingTimeout = (int32_t) yyjson_get_int(val);
-
-        #if defined(__linux__) || defined(__FreeBSD__)
-        else if (ffStrEqualsIgnCase(key, "playerName"))
-            ffStrbufSetS(&config->playerName, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "osFile"))
-            ffStrbufSetS(&config->osFile, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
-            config->dsForceDrm = yyjson_get_bool(val);
-        #elif defined(_WIN32)
-        else if (ffStrEqualsIgnCase(key, "wmiTimeout"))
-            config->wmiTimeout = (int32_t) yyjson_get_int(val);
-        #endif
-
-        else
-            return "Unknown general property";
-    }
-
-    return NULL;
-}
-
 const char* ffParseDisplayJsonConfig(FFconfig* config)
 {
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
@@ -298,7 +245,14 @@ const char* ffParseDisplayJsonConfig(FFconfig* config)
     {
         const char* key = yyjson_get_str(key_);
 
-        if (ffStrEqualsIgnCase(key, "showErrors"))
+        if (ffStrEqualsIgnCase(key, "stat"))
+        {
+            if ((config->stat = yyjson_get_bool(val)))
+                config->showErrors = true;
+        }
+        else if (ffStrEqualsIgnCase(key, "pipe"))
+            config->pipe = yyjson_get_bool(val);
+        else if (ffStrEqualsIgnCase(key, "showErrors"))
             config->showErrors = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "disableLinewrap"))
             config->disableLinewrap = yyjson_get_bool(val);

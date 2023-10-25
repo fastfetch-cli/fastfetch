@@ -67,7 +67,7 @@ FF_MAYBE_UNUSED static const char* detectWithWmi(FFChassisResult* result)
 extern "C"
 const char* ffDetectChassis(FFChassisResult* result)
 {
-    if (instance.config.allowSlowOperations)
+    if (instance.config.general.allowSlowOperations)
         return detectWithWmi(result);
     return detectWithRegistry(result);
 }

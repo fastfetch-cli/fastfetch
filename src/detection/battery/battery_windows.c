@@ -32,7 +32,7 @@ static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    if(instance.config.allowSlowOperations)
+    if(instance.config.general.allowSlowOperations)
     {
         //https://learn.microsoft.com/en-us/windows/win32/power/enumerating-battery-devices
         HDEVINFO hdev __attribute__((__cleanup__(wrapSetupDiDestroyDeviceInfoList))) =

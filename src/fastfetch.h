@@ -25,6 +25,7 @@
 
 #include "modules/options.h"
 #include "options/logo.h"
+#include "options/general.h"
 
 typedef enum FFBinaryPrefixType
 {
@@ -43,6 +44,7 @@ typedef enum FFTemperatureUnit
 typedef struct FFconfig
 {
     FFLogoOptions logo;
+    FFGeneralOptions general;
 
     //If one of those is empty, ffLogoPrint will set them
     FFstrbuf colorKeys;
@@ -52,11 +54,11 @@ typedef struct FFconfig
 
     FFstrbuf keyValueSeparator;
 
+    bool stat;
+    bool pipe; //disables logo and all escape sequences
     bool showErrors;
-    bool allowSlowOperations;
     bool disableLinewrap;
     bool hideCursor;
-    bool escapeBedrock;
     FFBinaryPrefixType binaryPrefixType;
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
@@ -67,21 +69,8 @@ typedef struct FFconfig
     bool barBorder;
     uint8_t percentType;
     uint8_t percentNdigits;
-    bool pipe; //disables logo and all escape sequences
-    bool multithreading;
-    bool stat;
     bool noBuffer;
-    int32_t processingTimeout;
     uint32_t keyWidth;
-
-    // Module options that cannot be put in module option structure
-    #if defined(__linux__) || defined(__FreeBSD__)
-    FFstrbuf playerName;
-    FFstrbuf osFile;
-    bool dsForceDrm;
-    #elif defined(_WIN32)
-    int32_t wmiTimeout;
-    #endif
 
     FFBatteryOptions battery;
     FFBiosOptions bios;

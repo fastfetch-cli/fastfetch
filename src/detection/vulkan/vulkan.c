@@ -119,7 +119,7 @@ static const char* detectVulkan(FFVulkanResult* result)
 
     PFN_vkGetPhysicalDeviceMemoryProperties ffvkGetPhysicalDeviceMemoryProperties = NULL;
     PFN_vkGetPhysicalDeviceMemoryProperties2 ffvkGetPhysicalDeviceMemoryProperties2 =
-        instance.config.allowSlowOperations ? (PFN_vkGetPhysicalDeviceMemoryProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties2") : NULL; // 1.1
+        instance.config.general.allowSlowOperations ? (PFN_vkGetPhysicalDeviceMemoryProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties2") : NULL; // 1.1
     if(!ffvkGetPhysicalDeviceMemoryProperties2)
         ffvkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties");
 

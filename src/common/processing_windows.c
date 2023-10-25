@@ -8,7 +8,7 @@ enum { FF_PIPE_BUFSIZ = 4096 };
 
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
-    int timeout = instance.config.processingTimeout;
+    int timeout = instance.config.general.processingTimeout;
 
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = CreateNamedPipeW(
         L"\\\\.\\pipe\\LOCAL\\",

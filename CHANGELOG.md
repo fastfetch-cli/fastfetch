@@ -1,5 +1,8 @@
 # 2.2.0
 
+Changes:
+* `--pipe` and `--stat` are moved from `general` options to `display` options. This affects cjson configuration.
+
 Features:
 * Quirks for MIPS platforms (CPU, Linux)
 * Use devicetree path for OBP hosts (Host, Linux)

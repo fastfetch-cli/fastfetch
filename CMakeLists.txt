@@ -355,6 +355,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
     src/options/logo.c
+    src/options/general.c
     src/util/edidHelper.c
     src/util/FFlist.c
     src/util/FFstrbuf.c

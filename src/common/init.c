@@ -33,23 +33,14 @@ static void initState(FFstate* state)
 static void defaultConfig(void)
 {
     ffInitLogoOptions(&instance.config.logo);
+    ffInitGeneralOptions(&instance.config.general);
 
     ffStrbufInit(&instance.config.colorKeys);
     ffStrbufInit(&instance.config.colorTitle);
     instance.config.brightColor = true;
     ffStrbufInitStatic(&instance.config.keyValueSeparator, ": ");
-    instance.config.processingTimeout = 1000;
-
-    #if defined(__linux__) || defined(__FreeBSD__)
-    ffStrbufInit(&instance.config.playerName);
-    ffStrbufInit(&instance.config.osFile);
-    instance.config.dsForceDrm = false;
-    #elif defined(_WIN32)
-    instance.config.wmiTimeout = 5000;
-    #endif
 
     instance.config.showErrors = false;
-    instance.config.allowSlowOperations = false;
     instance.config.pipe = !isatty(STDOUT_FILENO);
 
     #ifdef NDEBUG
@@ -60,12 +51,10 @@ static void defaultConfig(void)
     instance.config.hideCursor = false;
     #endif
 
-    instance.config.escapeBedrock = true;
     instance.config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
     instance.config.sizeNdigits = 2;
     instance.config.sizeMaxPrefix = UINT8_MAX;
     instance.config.temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
-    instance.config.multithreading = true;
     instance.config.stat = false;
     instance.config.noBuffer = false;
     instance.config.keyWidth = 0;
@@ -233,7 +222,7 @@ static void exitSignalHandler(int signal)
 void ffStart(void)
 {
     #ifdef FF_START_DETECTION_THREADS
-        if(instance.config.multithreading)
+        if(instance.config.general.multithreading)
             startDetectionThreads();
     #endif
 
@@ -286,11 +275,6 @@ static void destroyConfig(void)
     ffStrbufDestroy(&instance.config.keyValueSeparator);
     ffStrbufDestroy(&instance.config.barCharElapsed);
     ffStrbufDestroy(&instance.config.barCharTotal);
-
-    #if defined(__linux__) || defined(__FreeBSD__)
-    ffStrbufDestroy(&instance.config.playerName);
-    ffStrbufDestroy(&instance.config.osFile);
-    #endif
 
     ffDestroyBatteryOptions(&instance.config.battery);
     ffDestroyBiosOptions(&instance.config.bios);

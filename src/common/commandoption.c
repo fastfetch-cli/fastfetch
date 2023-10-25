@@ -87,7 +87,7 @@ void ffPrepareCommandOption(FFdata* data)
     if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
         ffPrepareNetIO(&instance.config.netIo);
 
-    if(instance.config.multithreading)
+    if(instance.config.general.multithreading)
     {
         if(ffStrbufContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME))
             ffPreparePublicIp(&instance.config.publicIP);

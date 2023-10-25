@@ -242,20 +242,10 @@
                     "title": "Alias of multithreading",
                     "default": true
                 },
-                "stat": {
-                    "type": "boolean",
-                    "title": "Show time usage (in ms) for individual modules",
-                    "default": false
-                },
                 "escapeBedrock": {
                     "type": "boolean",
                     "title": "On Bedrock Linux, whether to escape the bedrock jail",
                     "default": true
-                },
-                "pipe": {
-                    "type": "boolean",
-                    "title": "Whether to enable pipe mode (disable logo and all escape sequences)",
-                    "default": false
                 },
                 "playerName": {
                     "type": "string",
@@ -287,6 +277,16 @@
             "title": "Configure how things to be displayed",
             "type": "object",
             "properties": {
+                "stat": {
+                    "type": "boolean",
+                    "title": "Show time usage (in ms) for individual modules",
+                    "default": false
+                },
+                "pipe": {
+                    "type": "boolean",
+                    "title": "Whether to enable pipe mode (disable logo and all escape sequences)",
+                    "default": false
+                },
                 "showErrors": {
                     "type": "boolean",
                     "title": "Print occurring errors to the console. False to ignore errored modules",

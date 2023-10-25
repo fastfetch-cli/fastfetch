@@ -48,7 +48,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
 
-    int timeout = instance.config.processingTimeout;
+    int timeout = instance.config.general.processingTimeout;
     if (timeout >= 0)
         fcntl(childPipeFd, F_SETFL, fcntl(childPipeFd, F_GETFL) | O_NONBLOCK);
 

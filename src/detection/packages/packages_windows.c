@@ -110,6 +110,6 @@ void ffDetectPackagesImpl(FFPackagesResult* result)
     detectScoop(result);
     detectChoco(result);
     detectPacman(result);
-    if (instance.config.allowSlowOperations)
+    if (instance.config.general.allowSlowOperations)
         detectWinget(result);
 }
