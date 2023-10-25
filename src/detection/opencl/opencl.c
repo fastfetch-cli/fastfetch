@@ -72,7 +72,7 @@ const char* ffDetectOpenCL(FFOpenCLResult* result)
 
     OpenCLData data;
 
-    FF_LIBRARY_LOAD(opencl, &instance.config.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
+    FF_LIBRARY_LOAD(opencl, &instance.config.library.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
     #ifdef _WIN32
         "OpenCL"FF_LIBRARY_EXTENSION, -1,
     #endif

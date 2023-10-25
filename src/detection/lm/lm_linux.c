@@ -55,7 +55,7 @@ static const char* getSshdVersion(FFstrbuf* version)
 
 static const char* getSddmVersion(FFstrbuf* version)
 {
-    FF_LIBRARY_LOAD(zlib, &instance.config.libZ, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(zlib, &instance.config.library.libZ, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzopen);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzread);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzerror);

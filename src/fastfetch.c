@@ -649,61 +649,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     ///////////////////
     //Library options//
     ///////////////////
-
-    else if(ffStrStartsWithIgnCase(key, "--lib-"))
-    {
-        const char* subkey = key + strlen("--lib-");
-        if(ffStrEqualsIgnCase(subkey, "PCI"))
-            ffOptionParseString(key, value, &instance.config.libPCI);
-        else if(ffStrEqualsIgnCase(subkey, "vulkan"))
-            ffOptionParseString(key, value, &instance.config.libVulkan);
-        else if(ffStrEqualsIgnCase(subkey, "freetype"))
-            ffOptionParseString(key, value, &instance.config.libfreetype);
-        else if(ffStrEqualsIgnCase(subkey, "wayland"))
-            ffOptionParseString(key, value, &instance.config.libWayland);
-        else if(ffStrEqualsIgnCase(subkey, "xcb-randr"))
-            ffOptionParseString(key, value, &instance.config.libXcbRandr);
-        else if(ffStrEqualsIgnCase(subkey, "xcb"))
-            ffOptionParseString(key, value, &instance.config.libXcb);
-        else if(ffStrEqualsIgnCase(subkey, "Xrandr"))
-            ffOptionParseString(key, value, &instance.config.libXrandr);
-        else if(ffStrEqualsIgnCase(subkey, "X11"))
-            ffOptionParseString(key, value, &instance.config.libX11);
-        else if(ffStrEqualsIgnCase(subkey, "gio"))
-            ffOptionParseString(key, value, &instance.config.libGIO);
-        else if(ffStrEqualsIgnCase(subkey, "DConf"))
-            ffOptionParseString(key, value, &instance.config.libDConf);
-        else if(ffStrEqualsIgnCase(subkey, "dbus"))
-            ffOptionParseString(key, value, &instance.config.libDBus);
-        else if(ffStrEqualsIgnCase(subkey, "XFConf"))
-            ffOptionParseString(key, value, &instance.config.libXFConf);
-        else if(ffStrEqualsIgnCase(subkey, "sqlite") || ffStrEqualsIgnCase(subkey, "sqlite3"))
-            ffOptionParseString(key, value, &instance.config.libSQLite3);
-        else if(ffStrEqualsIgnCase(subkey, "rpm"))
-            ffOptionParseString(key, value, &instance.config.librpm);
-        else if(ffStrEqualsIgnCase(subkey, "imagemagick"))
-            ffOptionParseString(key, value, &instance.config.libImageMagick);
-        else if(ffStrEqualsIgnCase(subkey, "z"))
-            ffOptionParseString(key, value, &instance.config.libZ);
-        else if(ffStrEqualsIgnCase(subkey, "chafa"))
-            ffOptionParseString(key, value, &instance.config.libChafa);
-        else if(ffStrEqualsIgnCase(subkey, "egl"))
-            ffOptionParseString(key, value, &instance.config.libEGL);
-        else if(ffStrEqualsIgnCase(subkey, "glx"))
-            ffOptionParseString(key, value, &instance.config.libGLX);
-        else if(ffStrEqualsIgnCase(subkey, "osmesa"))
-            ffOptionParseString(key, value, &instance.config.libOSMesa);
-        else if(ffStrEqualsIgnCase(subkey, "opencl"))
-            ffOptionParseString(key, value, &instance.config.libOpenCL);
-        else if(ffStrEqualsIgnCase(subkey, "pulse"))
-            ffOptionParseString(key, value, &instance.config.libPulse);
-        else if(ffStrEqualsIgnCase(subkey, "nm"))
-            ffOptionParseString(key, value, &instance.config.libnm);
-        else if(ffStrEqualsIgnCase(subkey, "ddcutil"))
-            ffOptionParseString(key, value, &instance.config.libDdcutil);
-        else
-            goto error;
-    }
+    else if(ffOptionsParseLibraryCommandLine(&instance.config.library, key, value)) {}
 
     ///////////////////////
     //Module args options//
@@ -796,7 +742,7 @@ static void run(FFdata* data)
             (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
             (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
             (error = ffParseDisplayJsonConfig(&instance.config)) ||
-            (error = ffParseLibraryJsonConfig(&instance.config)) ||
+            (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
             false
         ) {
             fputs(error, stderr);

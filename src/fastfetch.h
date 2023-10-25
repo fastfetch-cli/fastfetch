@@ -26,6 +26,7 @@
 #include "options/modules.h"
 #include "options/logo.h"
 #include "options/general.h"
+#include "options/library.h"
 
 typedef enum FFBinaryPrefixType
 {
@@ -73,30 +74,7 @@ typedef struct FFconfig
     bool noBuffer;
     uint32_t keyWidth;
 
-    FFstrbuf libPCI;
-    FFstrbuf libVulkan;
-    FFstrbuf libWayland;
-    FFstrbuf libXcbRandr;
-    FFstrbuf libXcb;
-    FFstrbuf libXrandr;
-    FFstrbuf libX11;
-    FFstrbuf libGIO;
-    FFstrbuf libDConf;
-    FFstrbuf libDBus;
-    FFstrbuf libXFConf;
-    FFstrbuf libSQLite3;
-    FFstrbuf librpm;
-    FFstrbuf libImageMagick;
-    FFstrbuf libZ;
-    FFstrbuf libChafa;
-    FFstrbuf libEGL;
-    FFstrbuf libGLX;
-    FFstrbuf libOSMesa;
-    FFstrbuf libOpenCL;
-    FFstrbuf libfreetype;
-    FFstrbuf libPulse;
-    FFstrbuf libnm;
-    FFstrbuf libDdcutil;
+    FFOptionsLibrary library;
 } FFconfig;
 
 typedef struct FFstate

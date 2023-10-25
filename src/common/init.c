@@ -65,30 +65,7 @@ static void defaultConfig(void)
     instance.config.percentType = 1;
     instance.config.percentNdigits = 0;
 
-    ffStrbufInit(&instance.config.libPCI);
-    ffStrbufInit(&instance.config.libVulkan);
-    ffStrbufInit(&instance.config.libWayland);
-    ffStrbufInit(&instance.config.libXcbRandr);
-    ffStrbufInit(&instance.config.libXcb);
-    ffStrbufInit(&instance.config.libXrandr);
-    ffStrbufInit(&instance.config.libX11);
-    ffStrbufInit(&instance.config.libGIO);
-    ffStrbufInit(&instance.config.libDConf);
-    ffStrbufInit(&instance.config.libDBus);
-    ffStrbufInit(&instance.config.libXFConf);
-    ffStrbufInit(&instance.config.libSQLite3);
-    ffStrbufInit(&instance.config.librpm);
-    ffStrbufInit(&instance.config.libImageMagick);
-    ffStrbufInit(&instance.config.libZ);
-    ffStrbufInit(&instance.config.libChafa);
-    ffStrbufInit(&instance.config.libEGL);
-    ffStrbufInit(&instance.config.libGLX);
-    ffStrbufInit(&instance.config.libOSMesa);
-    ffStrbufInit(&instance.config.libOpenCL);
-    ffStrbufInit(&instance.config.libfreetype);
-    ffStrbufInit(&instance.config.libPulse);
-    ffStrbufInit(&instance.config.libnm);
-    ffStrbufInit(&instance.config.libDdcutil);
+    ffOptionsInitLibrary(&instance.config.library);
 }
 
 void ffInitInstance(void)
@@ -219,30 +196,7 @@ static void destroyConfig(void)
     ffStrbufDestroy(&instance.config.barCharElapsed);
     ffStrbufDestroy(&instance.config.barCharTotal);
 
-    ffStrbufDestroy(&instance.config.libPCI);
-    ffStrbufDestroy(&instance.config.libVulkan);
-    ffStrbufDestroy(&instance.config.libWayland);
-    ffStrbufDestroy(&instance.config.libXcbRandr);
-    ffStrbufDestroy(&instance.config.libXcb);
-    ffStrbufDestroy(&instance.config.libXrandr);
-    ffStrbufDestroy(&instance.config.libX11);
-    ffStrbufDestroy(&instance.config.libGIO);
-    ffStrbufDestroy(&instance.config.libDConf);
-    ffStrbufDestroy(&instance.config.libDBus);
-    ffStrbufDestroy(&instance.config.libXFConf);
-    ffStrbufDestroy(&instance.config.libSQLite3);
-    ffStrbufDestroy(&instance.config.librpm);
-    ffStrbufDestroy(&instance.config.libImageMagick);
-    ffStrbufDestroy(&instance.config.libZ);
-    ffStrbufDestroy(&instance.config.libChafa);
-    ffStrbufDestroy(&instance.config.libEGL);
-    ffStrbufDestroy(&instance.config.libGLX);
-    ffStrbufDestroy(&instance.config.libOSMesa);
-    ffStrbufDestroy(&instance.config.libOpenCL);
-    ffStrbufDestroy(&instance.config.libfreetype);
-    ffStrbufDestroy(&instance.config.libPulse);
-    ffStrbufDestroy(&instance.config.libnm);
-    ffStrbufDestroy(&instance.config.libDdcutil);
+    ffOptionsDestroyLibrary(&instance.config.library);
 }
 
 static void destroyState(void)

@@ -276,7 +276,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
 bool detectWayland(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(wayland, &instance.config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(wayland, &instance.config.library.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)
