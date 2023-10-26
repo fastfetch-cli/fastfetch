@@ -1,5 +1,6 @@
 #include "fastfetch.h"
-#include "options/library.h"
+#include "common/jsonconfig.h"
+#include "options/general.h"
 #include "util/stringUtils.h"
 
 const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_val* root)
@@ -82,7 +83,7 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libfreetype);
         else if(ffStrEqualsIgnCase(subkey, "wayland"))
             ffOptionParseString(key, value, &options->libWayland);
-        else if(ffStrEqualsIgnCase(subkey, "xcb-randr"))
+        else if(ffStrEqualsIgnCase(subkey, "xcbRandr"))
             ffOptionParseString(key, value, &options->libXcbRandr);
         else if(ffStrEqualsIgnCase(subkey, "xcb"))
             ffOptionParseString(key, value, &options->libXcb);
@@ -185,4 +186,84 @@ void ffOptionsDestroyLibrary(FFOptionsLibrary* options)
     ffStrbufDestroy(&options->libPulse);
     ffStrbufDestroy(&options->libnm);
     ffStrbufDestroy(&options->libDdcutil);
+}
+
+void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_doc* doc)
+{
+    __attribute__((__cleanup__(ffOptionsDestroyLibrary))) FFOptionsLibrary defaultOptions;
+    ffOptionsInitLibrary(&defaultOptions);
+
+    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+
+    if (!ffStrbufEqual(&options->libPCI, &defaultOptions.libPCI))
+        yyjson_mut_obj_add_strbuf(doc, obj, "PCI", &options->libPCI);
+
+    if (!ffStrbufEqual(&options->libVulkan, &defaultOptions.libVulkan))
+        yyjson_mut_obj_add_strbuf(doc, obj, "vulkan", &options->libVulkan);
+
+    if (!ffStrbufEqual(&options->libWayland, &defaultOptions.libWayland))
+        yyjson_mut_obj_add_strbuf(doc, obj, "wayland", &options->libWayland);
+
+    if (!ffStrbufEqual(&options->libXcbRandr, &defaultOptions.libXcbRandr))
+        yyjson_mut_obj_add_strbuf(doc, obj, "xcbRandr", &options->libXcbRandr);
+
+    if (!ffStrbufEqual(&options->libXcb, &defaultOptions.libXcb))
+        yyjson_mut_obj_add_strbuf(doc, obj, "xcb", &options->libXcb);
+
+    if (!ffStrbufEqual(&options->libXrandr, &defaultOptions.libXrandr))
+        yyjson_mut_obj_add_strbuf(doc, obj, "Xrandr", &options->libXrandr);
+
+    if (!ffStrbufEqual(&options->libX11, &defaultOptions.libX11))
+        yyjson_mut_obj_add_strbuf(doc, obj, "X11", &options->libX11);
+
+    if (!ffStrbufEqual(&options->libGIO, &defaultOptions.libGIO))
+        yyjson_mut_obj_add_strbuf(doc, obj, "gio", &options->libGIO);
+
+    if (!ffStrbufEqual(&options->libDConf, &defaultOptions.libDConf))
+        yyjson_mut_obj_add_strbuf(doc, obj, "DConf", &options->libDConf);
+
+    if (!ffStrbufEqual(&options->libDBus, &defaultOptions.libDBus))
+        yyjson_mut_obj_add_strbuf(doc, obj, "dbus", &options->libDBus);
+
+    if (!ffStrbufEqual(&options->libXFConf, &defaultOptions.libXFConf))
+        yyjson_mut_obj_add_strbuf(doc, obj, "XFConf", &options->libXFConf);
+
+    if (!ffStrbufEqual(&options->libSQLite3, &defaultOptions.libSQLite3))
+        yyjson_mut_obj_add_strbuf(doc, obj, "sqlite", &options->libSQLite3);
+
+    if (!ffStrbufEqual(&options->librpm, &defaultOptions.librpm))
+        yyjson_mut_obj_add_strbuf(doc, obj, "rpm", &options->librpm);
+
+    if (!ffStrbufEqual(&options->libImageMagick, &defaultOptions.libImageMagick))
+        yyjson_mut_obj_add_strbuf(doc, obj, "ImageMagick", &options->libImageMagick);
+
+    if (!ffStrbufEqual(&options->libZ, &defaultOptions.libZ))
+        yyjson_mut_obj_add_strbuf(doc, obj, "z", &options->libZ);
+
+    if (!ffStrbufEqual(&options->libChafa, &defaultOptions.libChafa))
+        yyjson_mut_obj_add_strbuf(doc, obj, "chafa", &options->libChafa);
+
+    if (!ffStrbufEqual(&options->libEGL, &defaultOptions.libEGL))
+        yyjson_mut_obj_add_strbuf(doc, obj, "egl", &options->libEGL);
+
+    if (!ffStrbufEqual(&options->libGLX, &defaultOptions.libGLX))
+        yyjson_mut_obj_add_strbuf(doc, obj, "glx", &options->libGLX);
+
+    if (!ffStrbufEqual(&options->libOSMesa, &defaultOptions.libOSMesa))
+        yyjson_mut_obj_add_strbuf(doc, obj, "OSMesa", &options->libOSMesa);
+
+    if (!ffStrbufEqual(&options->libOpenCL, &defaultOptions.libOpenCL))
+        yyjson_mut_obj_add_strbuf(doc, obj, "OpenCL", &options->libOpenCL);
+
+    if (!ffStrbufEqual(&options->libPulse, &defaultOptions.libPulse))
+        yyjson_mut_obj_add_strbuf(doc, obj, "pulse", &options->libPulse);
+
+    if (!ffStrbufEqual(&options->libnm, &defaultOptions.libnm))
+        yyjson_mut_obj_add_strbuf(doc, obj, "nm", &options->libnm);
+
+    if (!ffStrbufEqual(&options->libDdcutil, &defaultOptions.libDdcutil))
+        yyjson_mut_obj_add_strbuf(doc, obj, "ddcutil", &options->libDdcutil);
+
+    if (yyjson_mut_obj_size(obj) > 0)
+        yyjson_mut_obj_add_val(doc, doc->root, "library", obj);
 }

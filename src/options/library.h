@@ -34,3 +34,4 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
 bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key, const char* value);
 void ffOptionsInitLibrary(FFOptionsLibrary* options);
 void ffOptionsDestroyLibrary(FFOptionsLibrary* options);
+void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_doc* doc);
