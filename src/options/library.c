@@ -15,10 +15,22 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
     {
         const char* key = yyjson_get_str(key_);
 
-        if (ffStrEqualsIgnCase(key, "pci"))
-            ffStrbufSetS(&options->libPCI, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "vulkan"))
+        if (ffStrEqualsIgnCase(key, "vulkan"))
             ffStrbufSetS(&options->libVulkan, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "opencl"))
+            ffStrbufSetS(&options->libOpenCL, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "sqlite") || ffStrEqualsIgnCase(key, "sqlite3"))
+            ffStrbufSetS(&options->libSQLite3, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "imagemagick"))
+            ffStrbufSetS(&options->libImageMagick, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "chafa"))
+            ffStrbufSetS(&options->libChafa, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "z"))
+            ffStrbufSetS(&options->libZ, yyjson_get_str(val));
+
+#if defined(__linux__) || defined(__FreeBSD__)
+        else if (ffStrEqualsIgnCase(key, "pci"))
+            ffStrbufSetS(&options->libPCI, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "freetype"))
             ffStrbufSetS(&options->libfreetype, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "wayland"))
@@ -39,30 +51,22 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
             ffStrbufSetS(&options->libDBus, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "XFConf"))
             ffStrbufSetS(&options->libXFConf, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "sqlite") || ffStrEqualsIgnCase(key, "sqlite3"))
-            ffStrbufSetS(&options->libSQLite3, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "rpm"))
             ffStrbufSetS(&options->librpm, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "imagemagick"))
-            ffStrbufSetS(&options->libImageMagick, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "z"))
-            ffStrbufSetS(&options->libZ, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "chafa"))
-            ffStrbufSetS(&options->libChafa, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "egl"))
             ffStrbufSetS(&options->libEGL, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "glx"))
             ffStrbufSetS(&options->libGLX, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "osmesa"))
             ffStrbufSetS(&options->libOSMesa, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "opencl"))
-            ffStrbufSetS(&options->libOpenCL, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "pulse"))
             ffStrbufSetS(&options->libPulse, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "nm"))
             ffStrbufSetS(&options->libnm, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "ddcutil"))
             ffStrbufSetS(&options->libDdcutil, yyjson_get_str(val));
+#endif
+
         else
             return "Unknown library property";
     }
@@ -75,10 +79,22 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
     if(ffStrStartsWithIgnCase(key, "--lib-"))
     {
         const char* subkey = key + strlen("--lib-");
-        if(ffStrEqualsIgnCase(subkey, "PCI"))
-            ffOptionParseString(key, value, &options->libPCI);
-        else if(ffStrEqualsIgnCase(subkey, "vulkan"))
+        if(ffStrEqualsIgnCase(subkey, "vulkan"))
             ffOptionParseString(key, value, &options->libVulkan);
+        else if(ffStrEqualsIgnCase(subkey, "opencl"))
+            ffOptionParseString(key, value, &options->libOpenCL);
+        else if(ffStrEqualsIgnCase(subkey, "sqlite") || ffStrEqualsIgnCase(subkey, "sqlite3"))
+            ffOptionParseString(key, value, &options->libSQLite3);
+        else if(ffStrEqualsIgnCase(subkey, "imagemagick"))
+            ffOptionParseString(key, value, &options->libImageMagick);
+        else if(ffStrEqualsIgnCase(subkey, "chafa"))
+            ffOptionParseString(key, value, &options->libChafa);
+        else if(ffStrEqualsIgnCase(subkey, "z"))
+            ffOptionParseString(key, value, &options->libZ);
+
+#if defined(__linux__) || defined(__FreeBSD__)
+        else if(ffStrEqualsIgnCase(subkey, "PCI"))
+            ffOptionParseString(key, value, &options->libPCI);
         else if(ffStrEqualsIgnCase(subkey, "freetype"))
             ffOptionParseString(key, value, &options->libfreetype);
         else if(ffStrEqualsIgnCase(subkey, "wayland"))
@@ -99,30 +115,22 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libDBus);
         else if(ffStrEqualsIgnCase(subkey, "XFConf"))
             ffOptionParseString(key, value, &options->libXFConf);
-        else if(ffStrEqualsIgnCase(subkey, "sqlite") || ffStrEqualsIgnCase(subkey, "sqlite3"))
-            ffOptionParseString(key, value, &options->libSQLite3);
         else if(ffStrEqualsIgnCase(subkey, "rpm"))
             ffOptionParseString(key, value, &options->librpm);
-        else if(ffStrEqualsIgnCase(subkey, "imagemagick"))
-            ffOptionParseString(key, value, &options->libImageMagick);
-        else if(ffStrEqualsIgnCase(subkey, "z"))
-            ffOptionParseString(key, value, &options->libZ);
-        else if(ffStrEqualsIgnCase(subkey, "chafa"))
-            ffOptionParseString(key, value, &options->libChafa);
         else if(ffStrEqualsIgnCase(subkey, "egl"))
             ffOptionParseString(key, value, &options->libEGL);
         else if(ffStrEqualsIgnCase(subkey, "glx"))
             ffOptionParseString(key, value, &options->libGLX);
         else if(ffStrEqualsIgnCase(subkey, "osmesa"))
             ffOptionParseString(key, value, &options->libOSMesa);
-        else if(ffStrEqualsIgnCase(subkey, "opencl"))
-            ffOptionParseString(key, value, &options->libOpenCL);
         else if(ffStrEqualsIgnCase(subkey, "pulse"))
             ffOptionParseString(key, value, &options->libPulse);
         else if(ffStrEqualsIgnCase(subkey, "nm"))
             ffOptionParseString(key, value, &options->libnm);
         else if(ffStrEqualsIgnCase(subkey, "ddcutil"))
             ffOptionParseString(key, value, &options->libDdcutil);
+#endif
+
         else
             return false;
     }
@@ -134,8 +142,15 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
 
 void ffOptionsInitLibrary(FFOptionsLibrary* options)
 {
-    ffStrbufInit(&options->libPCI);
     ffStrbufInit(&options->libVulkan);
+    ffStrbufInit(&options->libOpenCL);
+    ffStrbufInit(&options->libSQLite3);
+    ffStrbufInit(&options->libImageMagick);
+    ffStrbufInit(&options->libChafa);
+    ffStrbufInit(&options->libZ);
+
+#if defined(__linux__) || defined(__FreeBSD__)
+    ffStrbufInit(&options->libPCI);
     ffStrbufInit(&options->libWayland);
     ffStrbufInit(&options->libXcbRandr);
     ffStrbufInit(&options->libXcb);
@@ -145,25 +160,28 @@ void ffOptionsInitLibrary(FFOptionsLibrary* options)
     ffStrbufInit(&options->libDConf);
     ffStrbufInit(&options->libDBus);
     ffStrbufInit(&options->libXFConf);
-    ffStrbufInit(&options->libSQLite3);
     ffStrbufInit(&options->librpm);
-    ffStrbufInit(&options->libImageMagick);
-    ffStrbufInit(&options->libZ);
-    ffStrbufInit(&options->libChafa);
     ffStrbufInit(&options->libEGL);
     ffStrbufInit(&options->libGLX);
     ffStrbufInit(&options->libOSMesa);
-    ffStrbufInit(&options->libOpenCL);
     ffStrbufInit(&options->libfreetype);
     ffStrbufInit(&options->libPulse);
     ffStrbufInit(&options->libnm);
     ffStrbufInit(&options->libDdcutil);
+#endif
 }
 
 void ffOptionsDestroyLibrary(FFOptionsLibrary* options)
 {
-    ffStrbufDestroy(&options->libPCI);
     ffStrbufDestroy(&options->libVulkan);
+    ffStrbufDestroy(&options->libOpenCL);
+    ffStrbufDestroy(&options->libSQLite3);
+    ffStrbufDestroy(&options->libImageMagick);
+    ffStrbufDestroy(&options->libChafa);
+    ffStrbufDestroy(&options->libZ);
+
+#if defined(__linux__) || defined(__FreeBSD__)
+    ffStrbufDestroy(&options->libPCI);
     ffStrbufDestroy(&options->libWayland);
     ffStrbufDestroy(&options->libXcbRandr);
     ffStrbufDestroy(&options->libXcb);
@@ -173,19 +191,15 @@ void ffOptionsDestroyLibrary(FFOptionsLibrary* options)
     ffStrbufDestroy(&options->libDConf);
     ffStrbufDestroy(&options->libDBus);
     ffStrbufDestroy(&options->libXFConf);
-    ffStrbufDestroy(&options->libSQLite3);
     ffStrbufDestroy(&options->librpm);
-    ffStrbufDestroy(&options->libImageMagick);
-    ffStrbufDestroy(&options->libZ);
-    ffStrbufDestroy(&options->libChafa);
     ffStrbufDestroy(&options->libEGL);
     ffStrbufDestroy(&options->libGLX);
     ffStrbufDestroy(&options->libOSMesa);
-    ffStrbufDestroy(&options->libOpenCL);
     ffStrbufDestroy(&options->libfreetype);
     ffStrbufDestroy(&options->libPulse);
     ffStrbufDestroy(&options->libnm);
     ffStrbufDestroy(&options->libDdcutil);
+#endif
 }
 
 void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_doc* doc)
@@ -195,11 +209,27 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
 
     yyjson_mut_val* obj = yyjson_mut_obj(doc);
 
-    if (!ffStrbufEqual(&options->libPCI, &defaultOptions.libPCI))
-        yyjson_mut_obj_add_strbuf(doc, obj, "PCI", &options->libPCI);
-
     if (!ffStrbufEqual(&options->libVulkan, &defaultOptions.libVulkan))
         yyjson_mut_obj_add_strbuf(doc, obj, "vulkan", &options->libVulkan);
+
+    if (!ffStrbufEqual(&options->libOpenCL, &defaultOptions.libOpenCL))
+        yyjson_mut_obj_add_strbuf(doc, obj, "OpenCL", &options->libOpenCL);
+
+    if (!ffStrbufEqual(&options->libSQLite3, &defaultOptions.libSQLite3))
+        yyjson_mut_obj_add_strbuf(doc, obj, "sqlite", &options->libSQLite3);
+
+    if (!ffStrbufEqual(&options->libImageMagick, &defaultOptions.libImageMagick))
+        yyjson_mut_obj_add_strbuf(doc, obj, "ImageMagick", &options->libImageMagick);
+
+    if (!ffStrbufEqual(&options->libChafa, &defaultOptions.libChafa))
+        yyjson_mut_obj_add_strbuf(doc, obj, "chafa", &options->libChafa);
+
+    if (!ffStrbufEqual(&options->libZ, &defaultOptions.libZ))
+        yyjson_mut_obj_add_strbuf(doc, obj, "z", &options->libZ);
+
+#if defined(__linux__) || defined(__FreeBSD__)
+    if (!ffStrbufEqual(&options->libPCI, &defaultOptions.libPCI))
+        yyjson_mut_obj_add_strbuf(doc, obj, "PCI", &options->libPCI);
 
     if (!ffStrbufEqual(&options->libWayland, &defaultOptions.libWayland))
         yyjson_mut_obj_add_strbuf(doc, obj, "wayland", &options->libWayland);
@@ -228,20 +258,8 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
     if (!ffStrbufEqual(&options->libXFConf, &defaultOptions.libXFConf))
         yyjson_mut_obj_add_strbuf(doc, obj, "XFConf", &options->libXFConf);
 
-    if (!ffStrbufEqual(&options->libSQLite3, &defaultOptions.libSQLite3))
-        yyjson_mut_obj_add_strbuf(doc, obj, "sqlite", &options->libSQLite3);
-
     if (!ffStrbufEqual(&options->librpm, &defaultOptions.librpm))
         yyjson_mut_obj_add_strbuf(doc, obj, "rpm", &options->librpm);
-
-    if (!ffStrbufEqual(&options->libImageMagick, &defaultOptions.libImageMagick))
-        yyjson_mut_obj_add_strbuf(doc, obj, "ImageMagick", &options->libImageMagick);
-
-    if (!ffStrbufEqual(&options->libZ, &defaultOptions.libZ))
-        yyjson_mut_obj_add_strbuf(doc, obj, "z", &options->libZ);
-
-    if (!ffStrbufEqual(&options->libChafa, &defaultOptions.libChafa))
-        yyjson_mut_obj_add_strbuf(doc, obj, "chafa", &options->libChafa);
 
     if (!ffStrbufEqual(&options->libEGL, &defaultOptions.libEGL))
         yyjson_mut_obj_add_strbuf(doc, obj, "egl", &options->libEGL);
@@ -252,9 +270,6 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
     if (!ffStrbufEqual(&options->libOSMesa, &defaultOptions.libOSMesa))
         yyjson_mut_obj_add_strbuf(doc, obj, "OSMesa", &options->libOSMesa);
 
-    if (!ffStrbufEqual(&options->libOpenCL, &defaultOptions.libOpenCL))
-        yyjson_mut_obj_add_strbuf(doc, obj, "OpenCL", &options->libOpenCL);
-
     if (!ffStrbufEqual(&options->libPulse, &defaultOptions.libPulse))
         yyjson_mut_obj_add_strbuf(doc, obj, "pulse", &options->libPulse);
 
@@ -263,6 +278,7 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
 
     if (!ffStrbufEqual(&options->libDdcutil, &defaultOptions.libDdcutil))
         yyjson_mut_obj_add_strbuf(doc, obj, "ddcutil", &options->libDdcutil);
+#endif
 
     if (yyjson_mut_obj_size(obj) > 0)
         yyjson_mut_obj_add_val(doc, doc->root, "library", obj);

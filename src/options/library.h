@@ -4,8 +4,15 @@
 
 typedef struct FFOptionsLibrary
 {
-    FFstrbuf libPCI;
     FFstrbuf libVulkan;
+    FFstrbuf libOpenCL;
+    FFstrbuf libSQLite3;
+    FFstrbuf libImageMagick;
+    FFstrbuf libChafa;
+    FFstrbuf libZ;
+
+#if defined(__linux__) || defined(__FreeBSD__)
+    FFstrbuf libPCI;
     FFstrbuf libWayland;
     FFstrbuf libXcbRandr;
     FFstrbuf libXcb;
@@ -15,19 +22,15 @@ typedef struct FFOptionsLibrary
     FFstrbuf libDConf;
     FFstrbuf libDBus;
     FFstrbuf libXFConf;
-    FFstrbuf libSQLite3;
     FFstrbuf librpm;
-    FFstrbuf libImageMagick;
-    FFstrbuf libZ;
-    FFstrbuf libChafa;
     FFstrbuf libEGL;
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
-    FFstrbuf libOpenCL;
     FFstrbuf libfreetype;
     FFstrbuf libPulse;
     FFstrbuf libnm;
     FFstrbuf libDdcutil;
+#endif
 } FFOptionsLibrary;
 
 const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_val* root);
