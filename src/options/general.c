@@ -1,6 +1,7 @@
 #include "fastfetch.h"
-#include "util/stringUtils.h"
+#include "common/jsonconfig.h"
 #include "options/general.h"
+#include "util/stringUtils.h"
 
 #include <unistd.h>
 
@@ -95,4 +96,45 @@ void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
     ffStrbufDestroy(&options->playerName);
     ffStrbufDestroy(&options->osFile);
     #endif
+}
+
+void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_doc* doc)
+{
+    __attribute__((__cleanup__(ffOptionsDestroyGeneral))) FFOptionsGeneral defaultOptions;
+    ffOptionsInitGeneral(&defaultOptions);
+
+    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+
+    if (options->allowSlowOperations != defaultOptions.allowSlowOperations)
+        yyjson_mut_obj_add_bool(doc, obj, "allowSlowOperations", options->allowSlowOperations);
+
+    if (options->multithreading != defaultOptions.multithreading)
+        yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);
+
+    if (options->processingTimeout != defaultOptions.processingTimeout)
+        yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
+
+    #if defined(__linux__) || defined(__FreeBSD__)
+
+    if (options->escapeBedrock != defaultOptions.escapeBedrock)
+        yyjson_mut_obj_add_bool(doc, obj, "escapeBedrock", options->escapeBedrock);
+
+    if (!ffStrbufEqual(&options->playerName, &defaultOptions.playerName))
+        yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
+
+    if (!ffStrbufEqual(&options->osFile, &defaultOptions.osFile))
+        yyjson_mut_obj_add_strbuf(doc, obj, "osFile", &options->osFile);
+
+    if (options->dsForceDrm != defaultOptions.dsForceDrm)
+        yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", options->dsForceDrm);
+
+    #elif defined(_WIN32)
+
+    if (options->wmiTimeout != defaultOptions.wmiTimeout)
+        yyjson_mut_obj_add_int(doc, obj, "wmiTimeout", options->wmiTimeout);
+
+    #endif
+
+    if (yyjson_mut_obj_size(obj) > 0)
+        yyjson_mut_obj_add_val(doc, doc->root, "general", obj);
 }

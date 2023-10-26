@@ -23,3 +23,4 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
 bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key, const char* value);
 void ffOptionsInitGeneral(FFOptionsGeneral* options);
 void ffOptionsDestroyGeneral(FFOptionsGeneral* options);
+void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_doc* doc);
