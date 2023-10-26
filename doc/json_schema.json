@@ -344,10 +344,19 @@
                 "binaryPrefix": {
                     "type": "string",
                     "title": "Set the binary prefix to used when printing bytes",
-                    "enum": [
-                        "iec",
-                        "si",
-                        "jedec"
+                    "oneOf": [
+                        {
+                            "const": "iec",
+                            "description": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)"
+                        },
+                        {
+                            "const": "si",
+                            "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
+                        },
+                        {
+                            "const": "jedec",
+                            "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
+                        }
                     ]
                 },
                 "sizeNdigits": {
@@ -602,10 +611,10 @@
                         "oneOf": [
                             {
                                 "title": "Break",
-                                "description": "Print a empty line",
                                 "properties": {
                                     "type": {
-                                        "const": "break"
+                                        "const": "break",
+                                        "description": "Print a empty line"
                                     }
                                 },
                                 "additionalProperties": false

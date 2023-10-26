@@ -49,3 +49,4 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key, const char* value);
 void ffOptionsInitDisplay(FFOptionsDisplay* options);
 void ffOptionsDestroyDisplay(FFOptionsDisplay* options);
+void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_doc* doc);

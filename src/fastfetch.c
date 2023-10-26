@@ -652,6 +652,7 @@ static void run(FFdata* data)
 static void migrateConfig(FFdata* data)
 {
     ffOptionsGenerateLogoJsonConfig(&instance.config.logo, instance.state.migrateConfigDoc);
+    ffOptionsGenerateDisplayJsonConfig(&instance.config.display, instance.state.migrateConfigDoc);
     ffMigrateCommandOptionToJsonc(data);
 }
 
