@@ -19,17 +19,15 @@ static inline yyjson_mut_val* genJsonConfig(FFModuleBaseInfo* baseInfo)
         modules = yyjson_mut_obj_add_arr(doc, doc->root, "modules");
 
     yyjson_mut_val* module = yyjson_mut_obj(doc);
+    FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
+    ffStrbufLowerCase(&type);
+    yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
+
     if (baseInfo->generateJsonConfig)
         baseInfo->generateJsonConfig(baseInfo, doc, module);
 
-    FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
-    ffStrbufLowerCase(&type);
-
-    if (yyjson_mut_obj_size(module) > 0)
-    {
-        yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
+    if (yyjson_mut_obj_size(module) > 1)
         yyjson_mut_arr_add_val(modules, module);
-    }
     else
         yyjson_mut_arr_add_strbuf(doc, modules, &type);
 
