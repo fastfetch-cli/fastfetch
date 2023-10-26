@@ -628,7 +628,7 @@ static void run(FFdata* data)
     const bool useJsonConfig = data->structure.length == 0 && instance.state.configDoc;
 
     if (useJsonConfig)
-        ffPrintJsonConfig(true /* prepare */);
+        ffPrintJsonConfig(true /* prepare */, instance.state.resultDoc);
     else
         ffPrepareCommandOption(data);
 
@@ -639,9 +639,9 @@ static void run(FFdata* data)
     #endif
 
     if (useJsonConfig)
-        ffPrintJsonConfig(false);
+        ffPrintJsonConfig(false, instance.state.resultDoc);
     else
-        ffPrintCommandOption(data);
+        ffPrintCommandOption(data, instance.state.resultDoc);
 
     if (instance.state.resultDoc)
         yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
@@ -655,7 +655,8 @@ static void migrateConfig(FFdata* data)
     ffOptionsGenerateDisplayJsonConfig(&instance.config.display, instance.state.migrateConfigDoc);
     ffOptionsGenerateGeneralJsonConfig(&instance.config.general, instance.state.migrateConfigDoc);
     ffOptionsGenerateLibraryJsonConfig(&instance.config.library, instance.state.migrateConfigDoc);
-    ffMigrateCommandOptionToJsonc(data);
+    ffMigrateCommandOptionToJsonc(data, instance.state.migrateConfigDoc);
+    yyjson_mut_write_fp(stdout, instance.state.migrateConfigDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
 }
 
 int main(int argc, const char** argv)

@@ -82,21 +82,17 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline yyjson_mut_val* genJsonResult(FFModuleBaseInfo* baseInfo)
+static inline void genJsonResult(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
 {
-    yyjson_mut_doc* doc = instance.state.resultDoc;
-    if (__builtin_expect(!doc, true)) return NULL;
-
     yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
     yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
     if (baseInfo->generateJsonResult)
         baseInfo->generateJsonResult(baseInfo, doc, module);
     else
         yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
-    return module;
 }
 
-static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
+static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_mut_doc* jsonDoc)
 {
     if(!isalpha(type[0])) return false;
 
@@ -106,7 +102,9 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal)
         if (ffStrEqualsIgnCase(type, baseInfo->name))
         {
             if (jsonVal) baseInfo->parseJsonObject(baseInfo, jsonVal);
-            if (!genJsonResult(baseInfo))
+            if (__builtin_expect(jsonDoc != NULL, false))
+                genJsonResult(baseInfo, jsonDoc);
+            else
                 baseInfo->printModule(baseInfo);
             return true;
         }
@@ -159,7 +157,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
     }
 }
 
-static const char* printJsonConfig(bool prepare)
+static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
 {
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
     assert(root);
@@ -170,8 +168,6 @@ static const char* printJsonConfig(bool prepare)
     yyjson_val* modules = yyjson_obj_get(root, "modules");
     if (!modules) return NULL;
     if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
-
-    yyjson_mut_doc* resultDoc = instance.state.resultDoc;
 
     yyjson_val* item;
     size_t idx, max;
@@ -197,16 +193,16 @@ static const char* printJsonConfig(bool prepare)
 
         if(prepare)
             prepareModuleJsonObject(type, module);
-        else if(!parseModuleJsonObject(type, module))
+        else if(!parseModuleJsonObject(type, module, jsonDoc))
             return "Unknown module type";
 
         if(!prepare && instance.config.display.stat)
         {
             ms = ffTimeGetTick() - ms;
-            if (resultDoc)
+            if (jsonDoc)
             {
-                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(resultDoc->root);
-                yyjson_mut_obj_add_uint(resultDoc, moduleJson, "stat", ms);
+                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(jsonDoc->root);
+                yyjson_mut_obj_add_uint(jsonDoc, moduleJson, "stat", ms);
             }
             else
             {
@@ -220,16 +216,25 @@ static const char* printJsonConfig(bool prepare)
         }
 
         #if defined(_WIN32)
-        if (!instance.config.display.noBuffer && !resultDoc) fflush(stdout);
+        if (!instance.config.display.noBuffer && !jsonDoc) fflush(stdout);
         #endif
     }
 
     return NULL;
 }
 
-void ffPrintJsonConfig(bool prepare)
+void ffPrintJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
 {
-    const char* error = printJsonConfig(prepare);
+    const char* error = printJsonConfig(prepare, jsonDoc);
     if (error)
-        ffPrintErrorString("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
+    {
+        if (jsonDoc)
+        {
+            yyjson_mut_val* obj = yyjson_mut_obj(jsonDoc);
+            yyjson_mut_obj_add_str(jsonDoc, obj, "error", error);
+            yyjson_mut_doc_set_root(jsonDoc, obj);
+        }
+        else
+            ffPrintErrorString("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
+    }
 }
