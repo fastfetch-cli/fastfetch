@@ -4,7 +4,8 @@ This release introduces a new option `--migrate-config`, which migrates old flag
 
 Changes:
 * `--pipe` and `--stat` are moved from `general` options to `display` options. This affects cjson configuration.
-* With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in the future
+* With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in 3.0.0 (next major version)
+* Support of `--gen-config conf` is deprecated accordingly, and will be removed in 2.3.0 (next minor version)
 
 Features:
 * Quirks for MIPS platforms (CPU, Linux)

@@ -14,8 +14,8 @@ Informative options:
     --print-config-system:      Print the default system config
     --print-config-user:        Print the default user config
     --print-structure:          Print the default structure
-    --gen-config <?type>:       Generate a sample config file in the default path. Param `type` can be `jsonc` or `conf`
-    --gen-config-force <?type>: Generate a sample config file in the default path. Overwrite the existing one
+    --gen-config <type>:        Generate a sample config file in the default path. Param `type` can be `jsonc` or deprecated `conf`
+    --gen-config-force <type>:  Generate a sample config file in the default path. Overwrite the existing one
 
 General options:
     --load-config <file>:             Load a config file or preset (+)

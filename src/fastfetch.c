@@ -236,18 +236,24 @@ static bool parseConfigFile(FFdata* data, const char* path)
 
 static void generateConfigFile(bool force, const char* type)
 {
+    if (!type)
+    {
+        fputs("Error: the config type (`jsonc` or `conf`) must be specified\n", stderr);
+        exit(1);
+    }
+
     FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0);
     // Paths generated in `init.c/initConfigDirs` end with `/`
-    bool isJsonc = false;
-    if (type)
+    bool isJsonc = ffStrEqualsIgnCase(type, "jsonc");
+    if (!isJsonc)
     {
-        if (ffStrEqualsIgnCase(type, "jsonc"))
-            isJsonc = true;
-        else if (!ffStrEqualsIgnCase(type, "conf"))
+        if (!ffStrEqualsIgnCase(type, "conf"))
         {
-            fputs("config type can only be `jsonc` or `conf`\n", stderr);
+            fputs("Error: config type can only be `jsonc` or `conf`\n", stderr);
             exit(1);
         }
+        else
+            fputs("Warning: support of flag based config type `conf` is deprecated, and may be removed in the future\n", stderr);
     }
 
     ffStrbufAppendS(filename, isJsonc ? "fastfetch/config.jsonc" : "fastfetch/config.conf");

@@ -27,6 +27,8 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 With customization and speed being two competing goals, this project actually builds two executables:
 
+<!-- TODO: Better JSONC config format introduction -->
+
 * The main one is `fastfetch`, which can be very greatly configured via flags. These flags can be made persistent by modifying `$XDG_CONFIG_HOME/fastfetch/config.conf`. Use `fastfetch --gen-config conf` to generate one. To view the available options, run `fastfetch --help`.
 * The second executable is called `flashfetch`, which is configured at compile time to eliminate any possible overhead. Configuration of it can be very easily done in [`src/flashfetch.c`](src/flashfetch.c).
 
