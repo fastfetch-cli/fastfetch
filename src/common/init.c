@@ -167,7 +167,7 @@ static void destroyState(void)
     ffPlatformDestroy(&instance.state.platform);
     yyjson_doc_free(instance.state.configDoc);
     yyjson_mut_doc_free(instance.state.resultDoc);
-    yyjson_mut_doc_free(instance.state.migrateConfigDoc);
+    ffStrbufDestroy(&instance.state.migrateConfigPath);
 }
 
 void ffDestroyInstance(void)

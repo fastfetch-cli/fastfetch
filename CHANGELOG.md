@@ -1,7 +1,10 @@
 # 2.2.0
 
+This release introduces a new option `--migrate-config`, which migrates old flag based config file to new JSONC format
+
 Changes:
 * `--pipe` and `--stat` are moved from `general` options to `display` options. This affects cjson configuration.
+* With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in the future
 
 Features:
 * Quirks for MIPS platforms (CPU, Linux)
@@ -10,6 +13,7 @@ Features:
 * Support urxvt version detection (Terminal, Linux)
 * Support st version detection (Terminal, Linux)
 * Support st terminal font detection (TerminalFont, Linux)
+* Add option `--migrate-config <?target-file-path>`
 
 Bugfixes:
 * Better GPU memory and type detection (GPU, Windows)

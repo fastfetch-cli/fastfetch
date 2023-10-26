@@ -473,23 +473,19 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         generateConfigFile(true, value);
     else if (ffStrEqualsIgnCase(key, "--migrate-config"))
     {
-        yyjson_mut_doc_free(instance.state.migrateConfigDoc);
-
-        if (ffOptionParseBoolean(value))
+        if (instance.state.configDoc)
         {
-            if (instance.state.configDoc)
-            {
-                fputs("Error: existing jsonc config file detected. Exiting\n", stderr);
-                exit(477);
-            }
+            fputs("Error: existing jsonc config file detected. Aborting\n", stderr);
+            exit(477);
+        }
 
-            yyjson_mut_doc* doc = instance.state.migrateConfigDoc = yyjson_mut_doc_new(NULL);
-            yyjson_mut_val* root = yyjson_mut_obj(doc);
-            yyjson_mut_doc_set_root(doc, root);
-            yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json");
+        if (!value)
+        {
+            ffStrbufSet(&instance.state.migrateConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
+            ffStrbufAppendS(&instance.state.migrateConfigPath, "fastfetch/config.jsonc");
         }
         else
-            instance.state.migrateConfigDoc = NULL;
+            ffStrbufSetS(&instance.state.migrateConfigPath, value);
     }
     else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);
@@ -546,7 +542,7 @@ error:
 
 static void parseConfigFiles(FFdata* data)
 {
-    if (__builtin_expect(!instance.state.migrateConfigDoc, true))
+    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
     {
         for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
         {
@@ -649,14 +645,33 @@ static void run(FFdata* data)
         ffFinish();
 }
 
-static void migrateConfig(FFdata* data)
+static void migrateConfig(FFdata* data, const FFstrbuf* filename)
 {
-    ffOptionsGenerateLogoJsonConfig(&instance.config.logo, instance.state.migrateConfigDoc);
-    ffOptionsGenerateDisplayJsonConfig(&instance.config.display, instance.state.migrateConfigDoc);
-    ffOptionsGenerateGeneralJsonConfig(&instance.config.general, instance.state.migrateConfigDoc);
-    ffOptionsGenerateLibraryJsonConfig(&instance.config.library, instance.state.migrateConfigDoc);
-    ffMigrateCommandOptionToJsonc(data, instance.state.migrateConfigDoc);
-    yyjson_mut_write_fp(stdout, instance.state.migrateConfigDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+    yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
+    yyjson_mut_val* root = yyjson_mut_obj(doc);
+    yyjson_mut_doc_set_root(doc, root);
+    yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json");
+
+    ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
+    ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
+    ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
+    ffOptionsGenerateLibraryJsonConfig(&instance.config.library, doc);
+    ffMigrateCommandOptionToJsonc(data, doc);
+
+    if (ffStrbufEqualS(filename, "-"))
+        yyjson_mut_write_fp(stdout, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+    else
+    {
+        if (yyjson_mut_write_file(filename->chars, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL))
+            printf("The migrated config file has been written in `%s`\nYou may remove the old config file if everything works fine\n", filename->chars);
+        else
+        {
+            printf("Error: failed to write file in `%s`\n", filename->chars);
+            exit(1);
+        }
+    }
+
+    yyjson_mut_doc_free(doc);
 }
 
 int main(int argc, const char** argv)
@@ -674,10 +689,10 @@ int main(int argc, const char** argv)
         parseConfigFiles(&data);
     parseArguments(&data, argc, argv);
 
-    if (__builtin_expect(!instance.state.migrateConfigDoc, true))
+    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
         run(&data);
     else
-        migrateConfig(&data);
+        migrateConfig(&data, &instance.state.migrateConfigPath);
 
     ffStrbufDestroy(&data.structure);
     FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)
