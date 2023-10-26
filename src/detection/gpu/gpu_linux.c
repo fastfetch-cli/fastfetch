@@ -1,5 +1,6 @@
 #include "detection/gpu/gpu.h"
 #include "detection/vulkan/vulkan.h"
+#include "detection/temps/temps_nvidia.h"
 
 #ifdef FF_HAVE_LIBPCI
 #include "common/library.h"
@@ -35,7 +36,7 @@ typedef struct PCIData
 
 static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
-    ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(device->vendor_id));
+    ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(device->vendor_id));
 
     if(gpu->vendor.length > 0)
         return;
@@ -45,11 +46,11 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufRecalculateLength(&gpu->vendor);
 
     if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
-        ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
     else if(ffStrbufContainS(&gpu->vendor, "Intel"))
-        ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
     else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
-        ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
 static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
@@ -240,6 +241,9 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     if(options->temp)
         pciDetectTemp(gpu, device);
     #endif
+
+    if (gpu->temperature != gpu->temperature && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+        ffDetectNvidiaGpuTemp(&gpu->temperature, device->device_id);
 }
 
 jmp_buf pciInitJmpBuf;

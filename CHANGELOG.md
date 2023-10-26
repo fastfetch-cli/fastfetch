@@ -15,6 +15,7 @@ Features:
 * Support st version detection (Terminal, Linux)
 * Support st terminal font detection (TerminalFont, Linux)
 * Add option `--migrate-config <?target-file-path>`
+* Support Nvidia GPU temp detection via nvml (GPU)
 
 Bugfixes:
 * Better GPU memory and type detection (GPU, Windows)

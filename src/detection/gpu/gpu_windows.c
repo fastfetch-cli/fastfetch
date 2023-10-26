@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "detection/temps/temps_nvidia.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
 
@@ -53,11 +54,11 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             ffRegReadStrbuf(hKey, L"ProviderName", &gpu->vendor, NULL);
 
             if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
-                ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
             else if(ffStrbufContainS(&gpu->vendor, "Intel"))
-                ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
             else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
-                ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 
             wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, strlen("00000000-0000-0000-0000-000000000000}"));
             FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
@@ -73,6 +74,13 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 {
                     gpu->dedicated.total = dedicatedVideoMemory + dedicatedSystemMemory;
                     gpu->shared.total = sharedSystemMemory;
+                }
+
+                if (options->temp && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+                {
+                    uint32_t deviceId;
+                    if(ffRegReadUint(hDirectxKey, L"DeviceId", &deviceId, NULL))
+                        ffDetectNvidiaGpuTemp(&gpu->temperature, deviceId);
                 }
             }
             else if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))

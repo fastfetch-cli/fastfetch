@@ -412,6 +412,7 @@ if(LINUX)
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
+        src/detection/temps/temps_nvidia.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
@@ -518,6 +519,7 @@ elseif(BSD)
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_bsd.c
+        src/detection/temps/temps_nvidia.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
@@ -622,6 +624,7 @@ elseif(WIN32)
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
         src/detection/temps/temps_windows.cpp
+        src/detection/temps/temps_nvidia.c
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
