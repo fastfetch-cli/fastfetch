@@ -16,13 +16,13 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         bool showStatus =
-            !(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
+            !(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
         if(result->capacity >= 0)
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 if(result->capacity <= 20)
                     ffAppendPercentBar(&str, result->capacity, 100, 100, 0);
@@ -32,7 +32,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                     ffAppendPercentBar(&str, result->capacity, 0, 100, 100);
             }
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');

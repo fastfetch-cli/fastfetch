@@ -8,19 +8,19 @@
 
 static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
 {
-    if (!instance.config.pipe)
+    if (!instance.config.display.pipe)
     {
-        if (instance.config.brightColor)
+        if (instance.config.display.brightColor)
             ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_BOLT);
         if (color->length > 0)
             ffStrbufAppendF(output, "\e[%sm", color->chars);
-        else if (instance.config.colorTitle.length > 0)
-            ffStrbufAppendF(output, "\e[%sm", instance.config.colorTitle.chars);
+        else if (instance.config.display.colorTitle.length > 0)
+            ffStrbufAppendF(output, "\e[%sm", instance.config.display.colorTitle.chars);
     }
 
     ffStrbufAppend(output, text);
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
         ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
@@ -37,7 +37,7 @@ void ffPrintTitle(FFTitleOptions* options)
     appendText(&hostNameColored, &hostName, &options->colorHost);
 
     FF_STRBUF_AUTO_DESTROY atColored = ffStrbufCreate();
-    if (!instance.config.pipe && options->colorAt.length > 0)
+    if (!instance.config.display.pipe && options->colorAt.length > 0)
     {
         ffStrbufAppendF(&atColored, "\e[%sm", options->colorAt.chars);
         ffStrbufAppendC(&atColored, '@');

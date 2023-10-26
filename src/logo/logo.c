@@ -61,7 +61,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
 
-    if (instance.config.brightColor)
+    if (instance.config.display.brightColor)
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
 
     ffStrbufAppendNC(&result, options->paddingTop, '\n');
@@ -212,11 +212,11 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
 static void logoApplyColors(const FFlogo* logo)
 {
-    if(instance.config.colorTitle.length == 0)
-        ffStrbufAppendS(&instance.config.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
+    if(instance.config.display.colorTitle.length == 0)
+        ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
 
-    if(instance.config.colorKeys.length == 0)
-        ffStrbufAppendS(&instance.config.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
+    if(instance.config.display.colorKeys.length == 0)
+        ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
 }
 
 static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small)
@@ -462,7 +462,7 @@ void ffLogoPrint(void)
     //In pipe mode, we don't have a logo or padding.
     //We also don't need to set main color, because it won't be printed anyway.
     //So we can return quickly here.
-    if(instance.config.pipe || instance.state.resultDoc)
+    if(instance.config.display.pipe || instance.state.resultDoc)
     {
         instance.state.logoHeight = 0;
         instance.state.logoWidth = 0;

@@ -354,6 +354,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
+    src/options/display.c
     src/options/modules.c
     src/options/logo.c
     src/options/general.c

@@ -50,12 +50,12 @@ void ffPrintBrightness(FFBrightnessOptions* options)
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, percent, 0, 100, 100);
             }
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');

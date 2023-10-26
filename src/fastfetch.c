@@ -332,16 +332,6 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
     exit(414);
 }
 
-static inline void optionCheckString(const char* key, const char* value, FFstrbuf* buffer)
-{
-    if(value == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <str>\n", key);
-        exit(477);
-    }
-    ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
-}
-
 static void printVersion()
 {
     FFVersionResult result = {};
@@ -527,135 +517,20 @@ static void parseOption(FFdata* data, const char* key, const char* value)
                 break;
         }
     }
-
-    ///////////////////
-    //General options//
-    ///////////////////
-
-    else if(ffOptionsParseGeneralCommandLine(&instance.config.general, key, value)) {}
-
-    ////////////////
-    //Logo options//
-    ////////////////
-
-    else if(ffOptionsParseLogoCommandLine(&instance.config.logo, key, value)) {}
-
-    ///////////////////
-    //Display options//
-    ///////////////////
-
-    else if(ffStrEqualsIgnCase(key, "--stat"))
-    {
-        if((instance.config.stat = ffOptionParseBoolean(value)))
-            instance.config.showErrors = true;
-    }
-    else if(ffStrEqualsIgnCase(key, "--pipe"))
-        instance.config.pipe = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--show-errors"))
-        instance.config.showErrors = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
-        instance.config.disableLinewrap = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--hide-cursor"))
-        instance.config.hideCursor = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
         ffOptionParseString(key, value, &data->structure);
-    else if(ffStrEqualsIgnCase(key, "--separator"))
-        ffOptionParseString(key, value, &instance.config.keyValueSeparator);
-    else if(ffStrEqualsIgnCase(key, "--color"))
-    {
-        optionCheckString(key, value, &instance.config.colorKeys);
-        ffOptionParseColor(value, &instance.config.colorKeys);
-        ffStrbufSet(&instance.config.colorTitle, &instance.config.colorKeys);
-    }
-    else if(ffStrStartsWithIgnCase(key, "--color-"))
-    {
-        const char* subkey = key + strlen("--color-");
-        if(ffStrEqualsIgnCase(subkey, "keys"))
-        {
-            optionCheckString(key, value, &instance.config.colorKeys);
-            ffOptionParseColor(value, &instance.config.colorKeys);
-        }
-        else if(ffStrEqualsIgnCase(subkey, "title"))
-        {
-            optionCheckString(key, value, &instance.config.colorTitle);
-            ffOptionParseColor(value, &instance.config.colorTitle);
-        }
-        else
-            goto error;
-    }
-    else if(ffStrEqualsIgnCase(key, "--key-width"))
-        instance.config.keyWidth = ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--bright-color"))
-        instance.config.brightColor = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--binary-prefix"))
-    {
-        instance.config.binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-            { "si", FF_BINARY_PREFIX_TYPE_SI },
-            { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
-            {}
-        });
-    }
-    else if(ffStrEqualsIgnCase(key, "--size-ndigits"))
-        instance.config.sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--size-max-prefix"))
-    {
-        instance.config.sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "B", 0 },
-            { "kB", 1 },
-            { "MB", 2 },
-            { "GB", 3 },
-            { "TB", 4 },
-            { "PB", 5 },
-            { "EB", 6 },
-            { "ZB", 7 },
-            { "YB", 8 },
-            {}
-        });
-    }
-    else if(ffStrEqualsIgnCase(key, "--temperature-unit"))
-    {
-        instance.config.temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
-            { "C", FF_TEMPERATURE_UNIT_CELSIUS },
-            { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-            { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-            { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
-            { "K", FF_TEMPERATURE_UNIT_KELVIN },
-            {},
-        });
-    }
-    else if(ffStrEqualsIgnCase(key, "--percent-type"))
-        instance.config.percentType = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--percent-ndigits"))
-        instance.config.percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--no-buffer"))
-        instance.config.noBuffer = ffOptionParseBoolean(value);
-    else if(ffStrStartsWithIgnCase(key, "--bar-"))
-    {
-        const char* subkey = key + strlen("--bar-");
-        if(ffStrEqualsIgnCase(subkey, "char-elapsed"))
-            ffOptionParseString(key, value, &instance.config.barCharElapsed);
-        else if(ffStrEqualsIgnCase(subkey, "char-total"))
-            ffOptionParseString(key, value, &instance.config.barCharTotal);
-        else if(ffStrEqualsIgnCase(subkey, "width"))
-            instance.config.barWidth = (uint8_t) ffOptionParseUInt32(key, value);
-        else if(ffStrEqualsIgnCase(subkey, "border"))
-            instance.config.barBorder = ffOptionParseBoolean(value);
-        else
-            goto error;
-    }
 
-    ///////////////////
-    //Library options//
-    ///////////////////
-    else if(ffOptionsParseLibraryCommandLine(&instance.config.library, key, value)) {}
+    ///////////
+    //Options//
+    ///////////
 
-    ///////////////////////
-    //Module args options//
-    ///////////////////////
-
-    else if(ffParseModuleOptions(key, value)) {}
+    else if(
+        ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
+        ffOptionsParseLogoCommandLine(&instance.config.logo, key, value) ||
+        ffOptionsParseDisplayCommandLine(&instance.config.display, key, value) ||
+        ffOptionsParseLibraryCommandLine(&instance.config.library, key, value) ||
+        ffParseModuleOptions(key, value)
+    ) {}
 
     //////////////////
     //Unknown option//
@@ -741,7 +616,7 @@ static void run(FFdata* data)
             error ||
             (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
             (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
-            (error = ffParseDisplayJsonConfig(&instance.config)) ||
+            (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
             (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
             false
         ) {
@@ -760,7 +635,7 @@ static void run(FFdata* data)
     ffStart();
 
     #if defined(_WIN32)
-        if (!instance.config.noBuffer) fflush(stdout);
+        if (!instance.config.display.noBuffer) fflush(stdout);
     #endif
 
     if (useJsonConfig)

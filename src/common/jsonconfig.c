@@ -178,7 +178,7 @@ static const char* printJsonConfig(bool prepare)
     yyjson_arr_foreach(modules, idx, max, item)
     {
         uint64_t ms = 0;
-        if(!prepare && instance.config.stat)
+        if(!prepare && instance.config.display.stat)
             ms = ffTimeGetTick();
 
         yyjson_val* module = item;
@@ -200,7 +200,7 @@ static const char* printJsonConfig(bool prepare)
         else if(!parseModuleJsonObject(type, module))
             return "Unknown module type";
 
-        if(!prepare && instance.config.stat)
+        if(!prepare && instance.config.display.stat)
         {
             ms = ffTimeGetTick() - ms;
             if (resultDoc)
@@ -212,7 +212,7 @@ static const char* printJsonConfig(bool prepare)
             {
                 char str[32];
                 int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
-                if(instance.config.pipe)
+                if(instance.config.display.pipe)
                     puts(str);
                 else
                     printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
@@ -220,147 +220,8 @@ static const char* printJsonConfig(bool prepare)
         }
 
         #if defined(_WIN32)
-        if (!instance.config.noBuffer && !resultDoc) fflush(stdout);
+        if (!instance.config.display.noBuffer && !resultDoc) fflush(stdout);
         #endif
-    }
-
-    return NULL;
-}
-
-const char* ffParseDisplayJsonConfig(FFconfig* config)
-{
-    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
-    assert(root);
-
-    if (!yyjson_is_obj(root))
-        return "Invalid JSON config format. Root value must be an object";
-
-    yyjson_val* object = yyjson_obj_get(root, "display");
-    if (!object) return NULL;
-    if (!yyjson_is_obj(object)) return "Property 'display' must be an object";
-
-    yyjson_val *key_, *val;
-    size_t idx, max;
-    yyjson_obj_foreach(object, idx, max, key_, val)
-    {
-        const char* key = yyjson_get_str(key_);
-
-        if (ffStrEqualsIgnCase(key, "stat"))
-        {
-            if ((config->stat = yyjson_get_bool(val)))
-                config->showErrors = true;
-        }
-        else if (ffStrEqualsIgnCase(key, "pipe"))
-            config->pipe = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "showErrors"))
-            config->showErrors = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "disableLinewrap"))
-            config->disableLinewrap = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "hideCursor"))
-            config->hideCursor = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "separator"))
-            ffStrbufSetS(&config->keyValueSeparator, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "color"))
-        {
-            if (yyjson_is_str(val))
-            {
-                ffOptionParseColor(yyjson_get_str(val), &config->colorKeys);
-                ffStrbufSet(&config->colorTitle, &config->colorKeys);
-            }
-            else if (yyjson_is_obj(val))
-            {
-                const char* colorKeys = yyjson_get_str(yyjson_obj_get(val, "keys"));
-                if (colorKeys)
-                    ffOptionParseColor(colorKeys, &config->colorKeys);
-                const char* colorTitle = yyjson_get_str(yyjson_obj_get(val, "title"));
-                if (colorTitle)
-                    ffOptionParseColor(colorTitle, &config->colorTitle);
-            }
-            else
-                return "display.color must be either a string or an object";
-        }
-        else if (ffStrEqualsIgnCase(key, "brightColor"))
-            config->brightColor = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
-        {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-                { "si", FF_BINARY_PREFIX_TYPE_SI },
-                { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
-                {},
-            });
-            if (error) return error;
-            config->binaryPrefixType = (FFBinaryPrefixType) value;
-        }
-        else if (ffStrEqualsIgnCase(key, "sizeNdigits"))
-            config->sizeNdigits = (uint8_t) yyjson_get_uint(val);
-        else if (ffStrEqualsIgnCase(key, "sizeMaxPrefix"))
-        {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "B", 0 },
-                { "kB", 1 },
-                { "MB", 2 },
-                { "GB", 3 },
-                { "TB", 4 },
-                { "PB", 5 },
-                { "EB", 6 },
-                { "ZB", 7 },
-                { "YB", 8 },
-                {}
-            });
-            if (error) return error;
-            config->sizeMaxPrefix = (uint8_t) value;
-        }
-        else if (ffStrEqualsIgnCase(key, "temperatureUnit"))
-        {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
-                { "C", FF_TEMPERATURE_UNIT_CELSIUS },
-                { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-                { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-                { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
-                { "K", FF_TEMPERATURE_UNIT_KELVIN },
-                {},
-            });
-            if (error) return error;
-            config->temperatureUnit = (FFTemperatureUnit) value;
-        }
-        else if (ffStrEqualsIgnCase(key, "percentType"))
-            config->percentType = (uint8_t) yyjson_get_uint(val);
-        else if (ffStrEqualsIgnCase(key, "percentNdigits"))
-            config->percentNdigits = (uint8_t) yyjson_get_uint(val);
-        else if (ffStrEqualsIgnCase(key, "bar"))
-        {
-            if (yyjson_is_obj(val))
-            {
-                const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
-                if (charElapsed)
-                    ffStrbufSetS(&config->barCharElapsed, charElapsed);
-
-                const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
-                if (charTotal)
-                    ffStrbufSetS(&config->barCharTotal, charTotal);
-
-                yyjson_val* border = yyjson_obj_get(val, "border");
-                if (border)
-                    config->barBorder = yyjson_get_bool(border);
-
-                yyjson_val* width = yyjson_obj_get(val, "width");
-                if (width)
-                    config->barWidth = (uint8_t) yyjson_get_uint(width);
-            }
-            else
-                return "display.bar must be an object";
-        }
-        else if (ffStrEqualsIgnCase(key, "noBuffer"))
-            config->noBuffer = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "keyWidth"))
-            config->keyWidth = (uint32_t) yyjson_get_uint(val);
-        else
-            return "Unknown display property";
     }
 
     return NULL;

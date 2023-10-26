@@ -131,12 +131,12 @@ void ffPrintCommandOption(FFdata* data)
         data->structure.chars[colonIndex] = '\0';
 
         uint64_t ms = 0;
-        if(instance.config.stat)
+        if(instance.config.display.stat)
             ms = ffTimeGetTick();
 
         parseStructureCommand(data->structure.chars + startIndex, &data->customValues);
 
-        if(instance.config.stat)
+        if(instance.config.display.stat)
         {
             ms = ffTimeGetTick() - ms;
 
@@ -149,7 +149,7 @@ void ffPrintCommandOption(FFdata* data)
             {
                 char str[32];
                 int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
-                if(instance.config.pipe)
+                if(instance.config.display.pipe)
                     puts(str);
                 else
                     printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
@@ -157,7 +157,7 @@ void ffPrintCommandOption(FFdata* data)
         }
 
         #if defined(_WIN32)
-            if (!resultDoc && !instance.config.noBuffer) fflush(stdout);
+            if (!resultDoc && !instance.config.display.noBuffer) fflush(stdout);
         #endif
 
         startIndex = colonIndex + 1;
@@ -169,7 +169,7 @@ void ffMigrateCommandOptionToJsonc(FFdata* data)
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
         ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
-    instance.config.stat = false;
+    instance.config.display.stat = false;
     ffPrintCommandOption(data);
     yyjson_mut_write_fp(stdout, instance.state.migrateConfigDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
 }

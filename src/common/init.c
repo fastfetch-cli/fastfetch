@@ -33,38 +33,7 @@ static void defaultConfig(void)
     ffOptionsInitLogo(&instance.config.logo);
     ffOptionsInitGeneral(&instance.config.general);
     ffOptionsInitModules(&instance.config.modules);
-
-    ffStrbufInit(&instance.config.colorKeys);
-    ffStrbufInit(&instance.config.colorTitle);
-    instance.config.brightColor = true;
-    ffStrbufInitStatic(&instance.config.keyValueSeparator, ": ");
-
-    instance.config.showErrors = false;
-    instance.config.pipe = !isatty(STDOUT_FILENO);
-
-    #ifdef NDEBUG
-    instance.config.disableLinewrap = !instance.config.pipe;
-    instance.config.hideCursor = !instance.config.pipe;
-    #else
-    instance.config.disableLinewrap = false;
-    instance.config.hideCursor = false;
-    #endif
-
-    instance.config.binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
-    instance.config.sizeNdigits = 2;
-    instance.config.sizeMaxPrefix = UINT8_MAX;
-    instance.config.temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
-    instance.config.stat = false;
-    instance.config.noBuffer = false;
-    instance.config.keyWidth = 0;
-
-    ffStrbufInitStatic(&instance.config.barCharElapsed, "■");
-    ffStrbufInitStatic(&instance.config.barCharTotal, "-");
-    instance.config.barWidth = 10;
-    instance.config.barBorder = true;
-    instance.config.percentType = 1;
-    instance.config.percentNdigits = 0;
-
+    ffOptionsInitDisplay(&instance.config.display);
     ffOptionsInitLibrary(&instance.config.library);
 }
 
@@ -144,11 +113,11 @@ void ffStart(void)
             startDetectionThreads();
     #endif
 
-    ffDisableLinewrap = instance.config.disableLinewrap && !instance.config.pipe && !instance.state.resultDoc;
-    ffHideCursor = instance.config.hideCursor && !instance.config.pipe && !instance.state.resultDoc;
+    ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe && !instance.state.resultDoc;
+    ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe && !instance.state.resultDoc;
 
     #ifdef _WIN32
-    setvbuf(stdout, NULL, _IOFBF, instance.config.noBuffer ? 0 : 4096);
+    setvbuf(stdout, NULL, _IOFBF, instance.config.display.noBuffer ? 0 : 4096);
     SetConsoleCtrlHandler(consoleHandler, TRUE);
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
@@ -156,7 +125,7 @@ void ffStart(void)
     SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     SetConsoleOutputCP(CP_UTF8);
     #else
-    if (instance.config.noBuffer) setvbuf(stdout, NULL, _IONBF, 0);
+    if (instance.config.display.noBuffer) setvbuf(stdout, NULL, _IONBF, 0);
     struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
@@ -164,7 +133,7 @@ void ffStart(void)
     #endif
 
     //reset everything to default before we start printing
-    if(!instance.config.pipe && !instance.state.resultDoc)
+    if(!instance.config.display.pipe && !instance.state.resultDoc)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     if(ffHideCursor)
@@ -189,13 +158,7 @@ static void destroyConfig(void)
     ffOptionsDestroyLogo(&instance.config.logo);
     ffOptionsDestroyGeneral(&instance.config.general);
     ffOptionsDestroyModules(&instance.config.modules);
-
-    ffStrbufDestroy(&instance.config.colorKeys);
-    ffStrbufDestroy(&instance.config.colorTitle);
-    ffStrbufDestroy(&instance.config.keyValueSeparator);
-    ffStrbufDestroy(&instance.config.barCharElapsed);
-    ffStrbufDestroy(&instance.config.barCharTotal);
-
+    ffOptionsDestroyDisplay(&instance.config.display);
     ffOptionsDestroyLibrary(&instance.config.library);
 }
 

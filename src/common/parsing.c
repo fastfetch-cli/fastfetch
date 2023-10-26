@@ -65,7 +65,7 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
     double size = (double) bytes;
     uint8_t counter = 0;
 
-    while(size >= base && counter < instance.config.sizeMaxPrefix && prefixes[counter + 1])
+    while(size >= base && counter < instance.config.display.sizeMaxPrefix && prefixes[counter + 1])
     {
         size /= base;
         counter++;
@@ -74,12 +74,12 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
     if(counter == 0)
         ffStrbufAppendF(result, "%"PRIu64" %s", bytes, prefixes[0]);
     else
-        ffStrbufAppendF(result, "%.*f %s", instance.config.sizeNdigits, size, prefixes[counter]);
+        ffStrbufAppendF(result, "%.*f %s", instance.config.display.sizeNdigits, size, prefixes[counter]);
 }
 
 void ffParseSize(uint64_t bytes, FFstrbuf* result)
 {
-    switch (instance.config.binaryPrefixType)
+    switch (instance.config.display.binaryPrefixType)
     {
         case FF_BINARY_PREFIX_TYPE_IEC:
             parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
@@ -98,7 +98,7 @@ void ffParseSize(uint64_t bytes, FFstrbuf* result)
 
 void ffParseTemperature(double celsius, FFstrbuf* buffer)
 {
-    switch (instance.config.temperatureUnit)
+    switch (instance.config.display.temperatureUnit)
     {
         case FF_TEMPERATURE_UNIT_CELSIUS:
             ffStrbufAppendF(buffer, "%.1f°C", celsius);

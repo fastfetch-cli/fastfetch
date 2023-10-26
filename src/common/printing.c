@@ -14,16 +14,16 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     if(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " "))
         return;
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
-        if (instance.config.brightColor)
+        if (instance.config.display.brightColor)
             fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
 
         if(moduleArgs && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_COLOR) && moduleArgs->keyColor.length > 0)
             ffPrintColor(&moduleArgs->keyColor);
         else
-            ffPrintColor(&instance.config.colorKeys);
+            ffPrintColor(&instance.config.display.colorKeys);
     }
 
     //NULL check is required for modules with custom keys, e.g. disk with the folder path
@@ -43,18 +43,18 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         ffStrbufWriteTo(&key, stdout);
     }
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
-    ffStrbufWriteTo(&instance.config.keyValueSeparator, stdout);
+    ffStrbufWriteTo(&instance.config.display.keyValueSeparator, stdout);
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
 
-    if (!instance.config.pipe && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
+    if (!instance.config.display.pipe && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
     {
-        uint32_t keyWidth = moduleArgs && moduleArgs->keyWidth > 0 ? moduleArgs->keyWidth : instance.config.keyWidth;
+        uint32_t keyWidth = moduleArgs && moduleArgs->keyWidth > 0 ? moduleArgs->keyWidth : instance.config.display.keyWidth;
         if (keyWidth > 0)
             printf("\e[%uG", (unsigned) (keyWidth + instance.state.logoWidth));
     }
@@ -77,17 +77,17 @@ void ffPrintFormatString(const char* moduleName, uint8_t moduleIndex, const FFMo
 
 static void printError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, va_list arguments)
 {
-    if(!instance.config.showErrors)
+    if(!instance.config.display.showErrors)
         return;
 
     ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stdout);
 
     vprintf(message, arguments);
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     putchar('\n');

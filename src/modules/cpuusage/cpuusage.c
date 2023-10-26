@@ -47,9 +47,9 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (!options->separate)
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                 ffAppendPercentBar(&str, avgValue, 0, 50, 80);
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');

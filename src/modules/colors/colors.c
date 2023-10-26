@@ -6,7 +6,7 @@
 
 void ffPrintColors(FFColorsOptions* options)
 {
-    if(instance.config.pipe)
+    if(instance.config.display.pipe)
         return;
 
     ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);

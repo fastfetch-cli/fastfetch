@@ -15,7 +15,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
     if(options->moduleArgs.key.length == 0)
     {
-        if(instance.config.pipe)
+        if(instance.config.display.pipe)
             ffStrbufAppendF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
         else
         {
@@ -57,16 +57,16 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
         if(disk->bytesTotal > 0)
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, bytesPercentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 ffAppendPercentNum(&str, bytesPercentage, 50, 80, str.length > 0);
                 ffStrbufAppendC(&str, ' ');
@@ -75,7 +75,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         else
             ffStrbufAppendS(&str, "Unknown ");
 
-        if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
         {
             if(disk->filesystem.length)
                 ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);

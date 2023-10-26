@@ -38,16 +38,16 @@ void ffPrintMemory(FFMemoryOptions* options)
         {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, percentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffAppendPercentNum(&str, percentage, 50, 80, str.length > 0);
 
             ffStrbufTrimRight(&str, ' ');
