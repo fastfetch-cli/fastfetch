@@ -16,6 +16,7 @@ Informative options:
     --print-structure:          Print the default structure
     --gen-config <type>:        Generate a sample config file in the default path. Param `type` can be `jsonc` or deprecated `conf`
     --gen-config-force <type>:  Generate a sample config file in the default path. Overwrite the existing one
+    --migrate-config <?path>:   Migrate old flag based config file to new JSONC format. Optional param `path` is the file path that new file should be write to
 
 General options:
     --load-config <file>:             Load a config file or preset (+)
