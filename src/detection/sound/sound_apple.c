@@ -49,14 +49,23 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         }, 0, NULL, &dataSize) == kAudioHardwareNoError && dataSize > 0)
             continue;
 
-        uint32_t connected;
-        dataSize = sizeof(connected);
+        uint32_t dataSource;
+        dataSize = sizeof(dataSource);
         if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
-            kAudioDevicePropertyJackIsConnected,
+            kAudioDevicePropertyDataSource,
             kAudioObjectPropertyScopeOutput,
             kAudioObjectPropertyElementMain
-        }, 0, NULL, &dataSize, &connected) == kAudioHardwareNoError)
-            if (!connected) continue;
+        }, 0, NULL, &dataSize, &dataSource) == kAudioHardwareNoError && dataSource == 'hdpn')
+        {
+            uint32_t connected;
+            dataSize = sizeof(connected);
+            if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+                kAudioDevicePropertyJackIsConnected,
+                kAudioObjectPropertyScopeOutput,
+                kAudioObjectPropertyElementMain
+            }, 0, NULL, &dataSize, &connected) == kAudioHardwareNoError)
+                if (!connected) continue;
+        }
 
         FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
         device->main = deviceId == mainDeviceId;
