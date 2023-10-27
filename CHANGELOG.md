@@ -27,6 +27,7 @@ Logos:
 * Add Black Mesa
 * Add cycledream
 * Add Evolinx
+* Add azos
 
 # 2.1.2
 

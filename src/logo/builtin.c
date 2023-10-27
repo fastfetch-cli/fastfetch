@@ -524,6 +524,15 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Azos
+    {
+        .names = {"Azos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AZOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_RED,
+        }
+    },
     // LAST
     {},
 };
