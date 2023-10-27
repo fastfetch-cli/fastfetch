@@ -3,6 +3,27 @@
 
 #import <CoreWLAN/CoreWLAN.h>
 
+struct Apple80211; // https://code.google.com/archive/p/iphone-wireless/wikis/Apple80211.wiki
+
+// 0 is sucessful; < 0 is failure
+int Apple80211Open(struct Apple80211 **handle) __attribute__((weak_import));
+int Apple80211BindToInterface(struct Apple80211 *handle, CFStringRef interface) __attribute__((weak_import));
+int Apple80211GetInfoCopy(struct Apple80211 *handle, CFDictionaryRef *info) __attribute__((weak_import));
+int Apple80211Close(struct Apple80211 *handle) __attribute__((weak_import));
+
+static NSDictionary* getWifiInfoByApple80211(NSString* ifName)
+{
+    if (!Apple80211Open || !Apple80211BindToInterface || !Apple80211GetInfoCopy || !Apple80211Close) return NULL;
+
+    struct Apple80211* handle = NULL;
+    if (Apple80211Open(&handle) < 0) return NULL;
+    if (Apple80211BindToInterface(handle, (CFStringRef)ifName) < 0) return NULL;
+    CFDictionaryRef result;
+    if (Apple80211GetInfoCopy(handle, &result) < 0) return NULL;
+    Apple80211Close(handle);
+    return CFBridgingRelease(result);
+}
+
 const char* ffDetectWifi(FFlist* result)
 {
     NSArray<CWInterface*>* interfaces = CWWiFiClient.sharedWiFiClient.interfaces;
@@ -28,27 +49,24 @@ const char* ffDetectWifi(FFlist* result)
         if(!inf.powerOn)
             continue;
 
-        ffStrbufSetStatic(&item->conn.status, inf.serviceActive ? "Active" : "Inactive");
+        ffStrbufSetStatic(&item->conn.status, inf.interfaceMode != kCWInterfaceModeNone ? "Active" : "Inactive");
         if(!inf.serviceActive)
             continue;
 
-        if (inf.ssid)
+        NSDictionary* apple = NULL;
+
+        if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        else if (!ffProcessAppendStdOut(&item->conn.ssid, (char* []) {
-            "/usr/sbin/networksetup",
-            "-getairportnetwork",
-            item->inf.description.chars,
-            NULL
-        }) && item->conn.ssid.length > 0)
-        {
-            uint32_t index = ffStrbufFirstIndexC(&item->conn.ssid, ':');
-            if (index < item->conn.ssid.length)
-                ffStrbufSubstrAfter(&item->conn.ssid, index + 1);
-        }
+        else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+            ffStrbufAppendS(&item->conn.ssid, [[apple valueForKey:@"SSID_STR"] UTF8String]);
         else
             ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
 
-        ffStrbufAppendS(&item->conn.macAddress, inf.hardwareAddress.UTF8String);
+        if (inf.bssid)
+            ffStrbufAppendS(&item->conn.macAddress, inf.bssid.UTF8String);
+        else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+            ffStrbufAppendS(&item->conn.macAddress, [[apple valueForKey:@"BSSID"] UTF8String]);
+
         switch(inf.activePHYMode)
         {
             case kCWPHYModeNone:
@@ -134,28 +152,35 @@ const char* ffDetectWifi(FFlist* result)
                 break;
             case kCWSecurityUnknown:
                 // Sonoma...
+                if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
                 {
-                    if (!ffProcessAppendStdOut(&item->conn.security, (char* []) {
-                        "/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport",
-                        "-I",
-                        NULL
-                    }))
+                    NSDictionary* authType = [apple valueForKey:@"AUTH_TYPE"];
+                    if (authType)
                     {
-                        {
-                            uint32_t ssidIndex = ffStrbufFirstIndexS(&item->conn.security, " SSID: ");
-                            if (ssidIndex == item->conn.security.length) break;
-                            ssidIndex += (uint32_t) strlen(" SSID: ");
-                            uint32_t ssidEndIndex = ffStrbufNextIndexC(&item->conn.security, ssidIndex, '\n');
-                            if (item->conn.ssid.length != ssidEndIndex - ssidIndex) break;
-                        }
+                        if ([[authType valueForKey:@"AUTH_LOWER"] intValue] != 1) break; // APPLE80211_AUTH_TYPE_UNICAST?
 
-                        uint32_t linkAuthIndex = ffStrbufFirstIndexS(&item->conn.security, "  link auth: ");
-                        if (linkAuthIndex == item->conn.security.length) break;
-                        linkAuthIndex += (uint32_t) strlen("  link auth: ");
-                        uint32_t linkAuthEndIndex = ffStrbufNextIndexC(&item->conn.security, linkAuthIndex, '\n');
-                        ffStrbufSubstrBefore(&item->conn.security, linkAuthEndIndex);
-                        ffStrbufSubstrAfter(&item->conn.security, linkAuthIndex - 1);
-                        ffStrbufUpperCase(&item->conn.security);
+                        NSNumber* authUpper = [authType valueForKey:@"AUTH_UPPER"];
+                        if (!authUpper)
+                            ffStrbufSetStatic(&item->conn.security, "Insecure");
+                        else
+                        {
+                            int authUpperValue = [authUpper intValue];
+                            switch (authUpperValue)
+                            {
+                                case 4096:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA3-SAE");
+                                    break;
+                                case 8:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA2-PSK");
+                                    break;
+                                case 4:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA2");
+                                    break;
+                                default: // TODO: support more auth types
+                                    ffStrbufAppendF(&item->conn.security, "To be supported (%d)", authUpperValue);
+                                    break;
+                            }
+                        }
                     }
                 }
                 break;

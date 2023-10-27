@@ -877,6 +877,7 @@ elseif(APPLE)
         PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-weak_framework DisplayServices -F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework MediaRemote -F /System/Library/PrivateFrameworks"
+        PRIVATE "-weak_framework IO80211 -F /System/Library/PrivateFrameworks"
     )
 elseif(WIN32)
     target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
