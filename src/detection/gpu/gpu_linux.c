@@ -243,7 +243,11 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     #endif
 
     if (gpu->temperature != gpu->temperature && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
-        ffDetectNvidiaGpuTemp(&gpu->temperature, device->device_id);
+    {
+        char pciDeviceId[32];
+        snprintf(pciDeviceId, sizeof(pciDeviceId) - 1, "%04x:%02x:%02x.%d", device->domain, device->bus, device->dev, device->func);
+        ffDetectNvidiaGpuTemp(&gpu->temperature, pciDeviceId, 0, 0);
+    }
 }
 
 jmp_buf pciInitJmpBuf;

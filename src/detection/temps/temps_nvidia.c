@@ -6,13 +6,17 @@
 struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetCount_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByIndex_v2)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByPciBusId_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetPciInfo_v3)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperature)
 
     bool inited;
 } nvmlData;
 
-const char* ffDetectNvidiaGpuTemp(double* temp, uint32_t deviceId)
+// Use pciBusId if not NULL; use pciDeviceId and pciSubSystemId otherwise
+// pciBusId = "domain:bus:device.function"
+// pciDeviceId = (deviceId << 16) | vendorId
+const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t pciDeviceId, uint32_t pciSubSystemId)
 {
     if (!nvmlData.inited)
     {
@@ -29,6 +33,7 @@ const char* ffDetectNvidiaGpuTemp(double* temp, uint32_t deviceId)
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlShutdown)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCount_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByIndex_v2)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByPciBusId_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetPciInfo_v3)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperature)
 
@@ -44,30 +49,40 @@ const char* ffDetectNvidiaGpuTemp(double* temp, uint32_t deviceId)
     if (nvmlData.ffnvmlDeviceGetTemperature == NULL)
         return "loading nvml library failed";
 
-    uint32_t count;
-    if (nvmlData.ffnvmlDeviceGetCount_v2(&count) != NVML_SUCCESS)
-        return "nvmlDeviceGetCount_v2() failed";
-
-    for (uint32_t i = 0; i < count; i++)
+    nvmlDevice_t device = NULL;
+    if (pciBusId)
     {
-        nvmlDevice_t device;
-        if (nvmlData.ffnvmlDeviceGetHandleByIndex_v2(i, &device) != NVML_SUCCESS)
-            continue;
+        nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(pciBusId, &device);
+        if (ret != NVML_SUCCESS)
+            return "nvmlDeviceGetHandleByPciBusId_v2() failed";
+    }
+    else
+    {
+        uint32_t count;
+        if (nvmlData.ffnvmlDeviceGetCount_v2(&count) != NVML_SUCCESS)
+            return "nvmlDeviceGetCount_v2() failed";
 
-        nvmlPciInfo_t pciInfo;
-        if (nvmlData.ffnvmlDeviceGetPciInfo_v3(device, &pciInfo) != NVML_SUCCESS)
-            continue;
+        for (uint32_t i = 0; i < count; i++, device = NULL)
+        {
+            if (nvmlData.ffnvmlDeviceGetHandleByIndex_v2(i, &device) != NVML_SUCCESS)
+                continue;
 
-        if (pciInfo.pciDeviceId >> 16 != deviceId)
-            continue;
+            nvmlPciInfo_t pciInfo;
+            if (nvmlData.ffnvmlDeviceGetPciInfo_v3(device, &pciInfo) != NVML_SUCCESS)
+                continue;
 
-        uint32_t value;
-        if (nvmlData.ffnvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) != NVML_SUCCESS)
-            return "nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) failed";
+            if (pciInfo.pciDeviceId != pciDeviceId || pciInfo.pciSubSystemId != pciSubSystemId)
+                continue;
 
-        *temp = value;
-        return NULL;
+            break;
+        }
+        if (!device) return "Device not found";
     }
 
-    return "Device not found";
+    uint32_t value;
+    if (nvmlData.ffnvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) != NVML_SUCCESS)
+        return "nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) failed";
+
+    *temp = value;
+    return NULL;
 }

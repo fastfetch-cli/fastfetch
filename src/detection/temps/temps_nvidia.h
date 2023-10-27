@@ -2,4 +2,4 @@
 
 #include <stdint.h>
 
-const char* ffDetectNvidiaGpuTemp(double* temp, uint32_t deviceId);
+const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t pciDeviceId, uint32_t pciSubSystemId);

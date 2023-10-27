@@ -75,13 +75,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->dedicated.total = dedicatedVideoMemory + dedicatedSystemMemory;
                     gpu->shared.total = sharedSystemMemory;
                 }
-
-                if (options->temp && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
-                {
-                    uint32_t deviceId;
-                    if(ffRegReadUint(hDirectxKey, L"DeviceId", &deviceId, NULL))
-                        ffDetectNvidiaGpuTemp(&gpu->temperature, deviceId);
-                }
             }
             else if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
             {
@@ -90,6 +83,15 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->dedicated.total = vmem;
                 gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
             }
+        }
+
+        if (options->temp && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+        {
+            uint32_t vendorId, deviceId, subSystemId;
+            // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
+            // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
+            if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x", &vendorId, &deviceId, &subSystemId) == 3)
+                ffDetectNvidiaGpuTemp(&gpu->temperature, NULL, (deviceId << 16) | vendorId, subSystemId);
         }
     }
 

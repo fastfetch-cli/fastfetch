@@ -1,6 +1,6 @@
 {
-    "home": "https://developer.nvidia.com/gpu-deployment-kit",
+    "home": "https://github.com/NVIDIA/nvidia-settings/blob/main/src/nvml.h",
     "license": "Embed in source",
-    "version": "v9",
+    "version": "545.23.06",
     "author": "NVIDIA Corporation"
 }
