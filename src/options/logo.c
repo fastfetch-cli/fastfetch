@@ -473,7 +473,10 @@ void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc
         for (int i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
         {
             if (!ffStrbufEqual(&options->colors[i], &defaultOptions.colors[i]))
-                yyjson_mut_obj_add_strbuf(doc, color, (const char [2]) { (char)('1' + i) }, &options->colors[i]);
+            {
+                char c = (char)('1' + i);
+                yyjson_mut_obj_add(color, yyjson_mut_strncpy(doc, &c, 1), yyjson_mut_strbuf(doc, &options->colors[i]));
+            }
         }
         if (yyjson_mut_obj_size(color) > 0)
             yyjson_mut_obj_add_val(doc, obj, "color", color);
