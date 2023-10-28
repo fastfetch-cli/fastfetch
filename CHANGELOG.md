@@ -4,6 +4,7 @@ This release introduces a new option `--migrate-config`, which migrates old flag
 
 Changes:
 * `--pipe` and `--stat` are moved from `general` options to `display` options. This affects cjson configuration.
+* Display keys `percent*` and `size*` in JSON config are restructured. `{ "sizeNdigits": 1 }` is now `{ "size": { "ndigits": 1 } }`
 * With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in 3.0.0 (next major version)
 * Support of `--gen-config conf` is deprecated accordingly, and will be removed in 2.3.0 (next minor version)
 

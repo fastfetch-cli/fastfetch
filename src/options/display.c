@@ -65,25 +65,33 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (error) return error;
             options->binaryPrefixType = (FFBinaryPrefixType) value;
         }
-        else if (ffStrEqualsIgnCase(key, "sizeNdigits"))
-            options->sizeNdigits = (uint8_t) yyjson_get_uint(val);
-        else if (ffStrEqualsIgnCase(key, "sizeMaxPrefix"))
+        else if (ffStrEqualsIgnCase(key, "size"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "B", 0 },
-                { "kB", 1 },
-                { "MB", 2 },
-                { "GB", 3 },
-                { "TB", 4 },
-                { "PB", 5 },
-                { "EB", 6 },
-                { "ZB", 7 },
-                { "YB", 8 },
-                {}
-            });
-            if (error) return error;
-            options->sizeMaxPrefix = (uint8_t) value;
+            if (!yyjson_is_obj(val))
+                return "display.size must be an object";
+
+            yyjson_val* maxPrefix = yyjson_obj_get(val, "maxPrefix");
+            if (maxPrefix)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(maxPrefix, &value, (FFKeyValuePair[]) {
+                    { "B", 0 },
+                    { "kB", 1 },
+                    { "MB", 2 },
+                    { "GB", 3 },
+                    { "TB", 4 },
+                    { "PB", 5 },
+                    { "EB", 6 },
+                    { "ZB", 7 },
+                    { "YB", 8 },
+                    {}
+                });
+                if (error) return error;
+                options->sizeMaxPrefix = (uint8_t) value;
+            }
+
+            yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+            if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
         }
         else if (ffStrEqualsIgnCase(key, "temperatureUnit"))
         {
@@ -100,10 +108,17 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (error) return error;
             options->temperatureUnit = (FFTemperatureUnit) value;
         }
-        else if (ffStrEqualsIgnCase(key, "percentType"))
-            options->percentType = (uint8_t) yyjson_get_uint(val);
-        else if (ffStrEqualsIgnCase(key, "percentNdigits"))
-            options->percentNdigits = (uint8_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "percent"))
+        {
+            if (!yyjson_is_obj(val))
+                return "display.percent must be an object";
+
+            yyjson_val* type = yyjson_obj_get(val, "type");
+            if (type) options->percentType = (uint8_t) yyjson_get_uint(type);
+
+            yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+            if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
+        }
         else if (ffStrEqualsIgnCase(key, "bar"))
         {
             if (yyjson_is_obj(val))
@@ -357,22 +372,26 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
         }
     }
 
-    if (options->sizeNdigits != defaultOptions.sizeNdigits)
-        yyjson_mut_obj_add_uint(doc, obj, "sizeNdigits", options->sizeNdigits);
-
-    if (options->sizeMaxPrefix != defaultOptions.sizeMaxPrefix && options->sizeMaxPrefix <= 8)
     {
-        yyjson_mut_obj_add_str(doc, obj, "sizeMaxPrefix", ((const char* []) {
-            "B",
-            "kB",
-            "MB",
-            "GB",
-            "TB",
-            "PB",
-            "EB",
-            "ZB",
-            "YB",
-        })[options->sizeMaxPrefix]);
+        yyjson_mut_val* size = yyjson_mut_obj(doc);
+        if (options->sizeNdigits != defaultOptions.sizeNdigits)
+            yyjson_mut_obj_add_uint(doc, size, "ndigits", options->sizeNdigits);
+        if (options->sizeMaxPrefix != defaultOptions.sizeMaxPrefix && options->sizeMaxPrefix <= 8)
+        {
+            yyjson_mut_obj_add_str(doc, size, "maxPrefix", ((const char* []) {
+                "B",
+                "kB",
+                "MB",
+                "GB",
+                "TB",
+                "PB",
+                "EB",
+                "ZB",
+                "YB",
+            })[options->sizeMaxPrefix]);
+        }
+        if (yyjson_mut_obj_size(size) > 0)
+            yyjson_mut_obj_add_val(doc, obj, "size", size);
     }
 
     if (options->temperatureUnit != defaultOptions.temperatureUnit)
@@ -391,11 +410,15 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
         }
     }
 
-    if (options->percentType != defaultOptions.percentType)
-        yyjson_mut_obj_add_uint(doc, obj, "percentType", options->percentType);
-
-    if (options->percentNdigits != defaultOptions.percentNdigits)
-        yyjson_mut_obj_add_uint(doc, obj, "percentNdigits", options->percentNdigits);
+    {
+        yyjson_mut_val* percent = yyjson_mut_obj(doc);
+        if (options->percentType != defaultOptions.percentType)
+            yyjson_mut_obj_add_uint(doc, percent, "type", options->percentType);
+        if (options->percentNdigits != defaultOptions.percentNdigits)
+            yyjson_mut_obj_add_uint(doc, percent, "ndigits", options->percentNdigits);
+        if (yyjson_mut_obj_size(percent) > 0)
+            yyjson_mut_obj_add_val(doc, obj, "percent", percent);
+    }
 
     {
         yyjson_mut_val* bar = yyjson_mut_obj(doc);
