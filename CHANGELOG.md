@@ -15,13 +15,14 @@ Features:
 * Support st version detection (Terminal, Linux)
 * Support st terminal font detection (TerminalFont, Linux)
 * Add option `--migrate-config <?target-file-path>`
-* Support Nvidia GPU temp detection via nvml (GPU)
+* Support Nvidia GPU temp and cuda core count detection via nvml (GPU)
 * Try supporting Wifi authentication type detection in macOS Sonoma. Please file a feature request if you get `to be supported (num)` with result of `/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport -I | grep auth` (Wifi, macOS)
 
 Bugfixes:
 * Better GPU memory and type detection (GPU, Windows)
 * Don't print display type twice (Display)
 * Detect BSSID instead of Wifi MAC address to align with other platforms (Wifi, macOS)
+* Remove support of used GPU memory detection, which is not reliable and only supported with `--gpu-force-vulkan`. (GPU)
 
 Logos:
 * Add Black Mesa

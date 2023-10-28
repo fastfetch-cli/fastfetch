@@ -117,11 +117,7 @@ static const char* detectVulkan(FFVulkanResult* result)
     if(!ffvkGetPhysicalDeviceProperties2)
         ffvkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceProperties");
 
-    PFN_vkGetPhysicalDeviceMemoryProperties ffvkGetPhysicalDeviceMemoryProperties = NULL;
-    PFN_vkGetPhysicalDeviceMemoryProperties2 ffvkGetPhysicalDeviceMemoryProperties2 =
-        instance.config.general.allowSlowOperations ? (PFN_vkGetPhysicalDeviceMemoryProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties2") : NULL; // 1.1
-    if(!ffvkGetPhysicalDeviceMemoryProperties2)
-        ffvkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties");
+    PFN_vkGetPhysicalDeviceMemoryProperties ffvkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceMemoryProperties");
 
     FFVersion maxDeviceApiVersion = FF_VERSION_INIT;
     FFVersion maxDeviceConformanceVersion = FF_VERSION_INIT;
@@ -187,38 +183,22 @@ static const char* detectVulkan(FFVulkanResult* result)
 
         gpu->vulkanDeviceId = physicalDeviceProperties.properties.deviceID;
 
-        ffStrbufInit(&gpu->name);
-        ffStrbufAppendS(&gpu->name, physicalDeviceProperties.properties.deviceName);
+        ffStrbufInitS(&gpu->name, physicalDeviceProperties.properties.deviceName);
 
-        if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-            gpu->type = FF_GPU_TYPE_DISCRETE;
-        else
-            gpu->type = FF_GPU_TYPE_INTEGRATED;
+        gpu->type = physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
         ffStrbufInitS(&gpu->vendor, ffGetGPUVendorString(physicalDeviceProperties.properties.vendorID));
         ffStrbufInitS(&gpu->driver, driverProperties.driverInfo);
 
-        VkPhysicalDeviceMemoryBudgetPropertiesEXT budgetProperties = {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT,
-        };
-        VkPhysicalDeviceMemoryProperties2 memoryProperties2 = {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2,
-            .pNext = &budgetProperties,
-        };
-
-        if(ffvkGetPhysicalDeviceMemoryProperties2)
-            ffvkGetPhysicalDeviceMemoryProperties2(physicalDevices[i], &memoryProperties2);
-        else
-            ffvkGetPhysicalDeviceMemoryProperties(physicalDevices[i], &memoryProperties2.memoryProperties);
+        VkPhysicalDeviceMemoryProperties memoryProperties = {};
+        ffvkGetPhysicalDeviceMemoryProperties(physicalDevices[i], &memoryProperties);
 
         gpu->dedicated.total = gpu->shared.total = 0;
-        gpu->dedicated.used = gpu->shared.used = ffvkGetPhysicalDeviceMemoryProperties2 ? 0 : FF_GPU_VMEM_SIZE_UNSET;
-        for(uint32_t index = 0; index < memoryProperties2.memoryProperties.memoryHeapCount; ++index)
+        gpu->dedicated.used = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+        for(uint32_t index = 0; index < memoryProperties.memoryHeapCount; ++index)
         {
-            const VkMemoryHeap* heap = &memoryProperties2.memoryProperties.memoryHeaps[index];
+            const VkMemoryHeap* heap = &memoryProperties.memoryHeaps[index];
             FFGPUMemory* vmem = gpu->type == FF_GPU_TYPE_DISCRETE && (heap->flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) ? &gpu->dedicated : &gpu->shared;
             vmem->total += heap->size;
-            if(ffvkGetPhysicalDeviceMemoryProperties2)
-                vmem->used += heap->size - budgetProperties.heapBudget[index];
         }
 
         //No way to detect those using vulkan
