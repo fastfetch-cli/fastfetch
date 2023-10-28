@@ -242,24 +242,25 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->temperature = FF_GPU_TEMP_UNSET;
 
-    #ifdef __linux__
-    if(options->temp)
-        pciDetectTemp(gpu, device);
-    #endif
-
-    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || instance.config.general.allowSlowOperations))
     {
         char pciDeviceId[32];
         snprintf(pciDeviceId, sizeof(pciDeviceId) - 1, "%04x:%02x:%02x.%d", device->domain, device->bus, device->dev, device->func);
 
         ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) { .pciBusId = pciDeviceId }, (FFGpuNvidiaResult) {
-            .temp = gpu->temperature != gpu->temperature ? &gpu->temperature : NULL,
-            .memory = &gpu->dedicated,
-            .coreCount = (uint32_t*) &gpu->coreCount,
+            .temp = options->temp ? &gpu->temperature : NULL,
+            .memory = instance.config.general.allowSlowOperations ? &gpu->dedicated : NULL,
+            .coreCount = instance.config.general.allowSlowOperations ? (uint32_t*) &gpu->coreCount : NULL,
         });
 
-        gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
+            gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
     }
+
+    #ifdef __linux__
+    if(options->temp && gpu->temperature != gpu->temperature)
+        pciDetectTemp(gpu, device);
+    #endif
 }
 
 jmp_buf pciInitJmpBuf;

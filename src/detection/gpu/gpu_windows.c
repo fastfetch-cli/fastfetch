@@ -97,8 +97,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .pciSubSystemId = subSystemId,
                 }, (FFGpuNvidiaResult) {
                     .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = &gpu->dedicated,
-                    .coreCount = (uint32_t*) &gpu->coreCount,
+                    .memory = instance.config.general.allowSlowOperations ? &gpu->dedicated : NULL,
+                    .coreCount = instance.config.general.allowSlowOperations ? (uint32_t*) &gpu->coreCount : NULL,
                 });
             }
         }
