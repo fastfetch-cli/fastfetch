@@ -3,6 +3,7 @@
 #include "detection/temps/temps_nvidia.h"
 
 #ifdef FF_HAVE_LIBPCI
+#include "common/io/io.h"
 #include "common/library.h"
 #include "common/properties.h"
 #include "common/parsing.h"
@@ -111,24 +112,28 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     #if PCI_LIB_VERSION >= 0x030800
         pci->ffpci_fill_info(device, PCI_FILL_DRIVER);
         ffStrbufAppendS(&gpu->driver, pci->ffpci_get_string_property(device, PCI_FILL_DRIVER));
-
-        if(gpu->driver.length > 0)
-            return;
     #endif
 
     const char* base = pci->ffpci_get_param(pci->access, "sysfs.path");
     if(!ffStrSet(base))
         return;
-
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateF("%s/devices/%04x:%02x:%02x.%d/driver", base, device->domain, device->bus, device->dev, device->func);
-    ffStrbufEnsureFree(&gpu->driver, 1023);
-    ssize_t resultLength = readlink(path.chars, gpu->driver.chars, gpu->driver.allocated - 1); //-1 for null terminator
-    if(resultLength > 0)
+    if (gpu->driver.length == 0)
     {
-        gpu->driver.length = (uint32_t) resultLength;
-        gpu->driver.chars[resultLength] = '\0';
-        ffStrbufSubstrAfterLastC(&gpu->driver, '/');
+        ffStrbufEnsureFree(&gpu->driver, 1023);
+        ssize_t resultLength = readlink(path.chars, gpu->driver.chars, gpu->driver.allocated - 1); //-1 for null terminator
+        if(resultLength > 0)
+        {
+            gpu->driver.length = (uint32_t) resultLength;
+            gpu->driver.chars[resultLength] = '\0';
+            ffStrbufSubstrAfterLastC(&gpu->driver, '/');
+        }
     }
+
+    ffStrbufAppendC(&gpu->driver, ' ');
+    ffStrbufAppendS(&path, "/module/version");
+    ffAppendFileBuffer(path.chars, &gpu->driver);
+    ffStrbufTrimRight(&gpu->driver, ' ');
 }
 
 FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, struct pci_dev* device)
