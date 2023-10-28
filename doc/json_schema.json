@@ -449,7 +449,7 @@
                 },
                 "xcbRandr": {
                     "type": "string",
-                    "title": ""
+                    "title": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
                 "xcb": {
                     "type": "string",

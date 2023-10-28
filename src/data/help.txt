@@ -14,21 +14,20 @@ Informative options:
     --print-config-system:      Print the default system config
     --print-config-user:        Print the default user config
     --print-structure:          Print the default structure
-    --gen-config <type>:        Generate a sample config file in the default path. Param `type` can be `jsonc` or deprecated `conf`
-    --gen-config-force <type>:  Generate a sample config file in the default path. Overwrite the existing one
-    --migrate-config <?path>:   Migrate old flag based config file to new JSONC format. Optional param `path` is the file path that new file should be write to
+
+Config options:
+    --load-config,--config,-c <file>:   Load a config file or preset (+)
+    --gen-config <type>:                Generate a sample config file in the default path. Param `type` can be `jsonc` or deprecated `conf`
+    --gen-config-force <type>:          Generate a sample config file in the default path. Overwrite the existing one
+    --migrate-config <?path>:           Migrate old flag based config file to new JSONC format. Optional param `path` is the file path that new file should be write to
 
 General options:
-    --load-config <file>:             Load a config file or preset (+)
-    --config <file>:                  Alias of --load-config (+)
-    --multithreading <?value>:        Use multiple threads to detect values
-    --stat <?value>:                  Show time usage (in ms) for individual modules
-    --allow-slow-operations <?value>: Allow operations that are usually very slow for more detailed output
-    --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
-    --pipe <?value>:                  Disable logo and all escape sequences
-    --wmi-timeout <num>:              Set the timeout (ms) for WMI queries. Windows only. Default is 5000
-    --processing-timeout <num>:       Set the timeout (ms) when waiting for child processes. Default is 1000
-    --ds-force-drm <?value>:          Set if only DRM should be used to detect displays. Default is false
+    --multithreading,--thread <?value>: Use multiple threads to detect values
+    --allow-slow-operations <?value>:   Allow operations that are usually very slow for more detailed output
+    --escape-bedrock <?value>:          On Bedrock Linux, whether to escape the bedrock jail
+    --wmi-timeout <num>:                Set the timeout (ms) for WMI queries. Windows only. Default is 5000
+    --processing-timeout <num>:         Set the timeout (ms) when waiting for child processes. Default is 1000
+    --ds-force-drm <?value>:            Set if only DRM should be used to detect displays. Default is false. Linux only
 
 Logo options:
     -l,--logo <logo>:                      Set the logo; if default, the name of a builtin logo or a path to a file
@@ -42,6 +41,7 @@ Logo options:
     --logo-padding-right <padding>:        Set the padding on the right of the logo
     --logo-padding-top <padding>:          Set the padding on the top of the logo
     --logo-print-remaining <?value>:       Whether to print the remaining logo, if it has more lines than modules to display
+    --logo-separate <?value>:              If true, print modules at bottom of the logo
     --logo-recache <?value>:               If true, regenerate image logo cache
     --file <file>:                         Short for --logo-type file --logo <file>
     --file-raw <file>:                     Short for --logo-type file-raw --logo <file>
@@ -59,6 +59,8 @@ Logo options:
 
 Display options:
     -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
+    --stat <?value>:             Show time usage (in ms) for individual modules
+    --pipe <?value>:             Disable logo and all escape sequences
     --color-keys <color>:        Set the color of the keys
     --color-title <color>:       Set the color of the title
     --color <color>:             Set the color of both the keys and title
@@ -124,7 +126,7 @@ Module specific options:
     --title-color-at <color>:                Set color of the @ symbol (middle part). Default is empty (use color of `--color-title`)
     --title-color-host <color>:              Set color of the host name (right part). Default is empty (use color of `--color-title`)
     --separator-string <str>:                Set the string printed by the separator module
-    --os-file <path>:                        Set the path to the file containing OS information
+    --os-file <path>:                        Set the path to the file containing OS information. Linux only
     --disk-folders <folders>:                A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
     --disk-show-regular <?value>:            Set if regular volume should be printed. Default is true
     --disk-show-external <?value>:           Set if external volume should be printed. Default is true
@@ -162,7 +164,7 @@ Module specific options:
     --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
-    --player-name:                           The name of the player to use
+    --player-name:                           The name of the player to use for module Media and Player. Linux only
     --opengl-library <value>:                Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, /bin/sh for *nix
     --command-key <str>:                     Set the module key to display
