@@ -90,32 +90,31 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     ffStrbufInit(&result.error);
 
     if(!ffDetectTerminalFont(&result))
-    {
         yyjson_mut_obj_add_strbuf(doc, module, "error", &result.error);
-        return;
-    }
-
-    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-
-    yyjson_mut_val* font = yyjson_mut_obj_add_obj(doc, obj, "font");
-    yyjson_mut_obj_add_strbuf(doc, font, "name", &result.font.name);
-    yyjson_mut_obj_add_strbuf(doc, font, "size", &result.font.size);
-    yyjson_mut_val* fontStyles = yyjson_mut_obj_add_arr(doc, font, "styles");
-    FF_LIST_FOR_EACH(FFstrbuf, style, result.font.styles)
+    else
     {
-        yyjson_mut_arr_add_strbuf(doc, fontStyles, style);
-    }
-    yyjson_mut_obj_add_strbuf(doc, font, "pretty", &result.font.pretty);
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
 
-    yyjson_mut_val* fallback = yyjson_mut_obj_add_obj(doc, obj, "fallback");
-    yyjson_mut_obj_add_strbuf(doc, fallback, "name", &result.fallback.name);
-    yyjson_mut_obj_add_strbuf(doc, fallback, "size", &result.fallback.size);
-    yyjson_mut_val* fallbackStyles = yyjson_mut_obj_add_arr(doc, fallback, "styles");
-    FF_LIST_FOR_EACH(FFstrbuf, style, result.fallback.styles)
-    {
-        yyjson_mut_arr_add_strbuf(doc, fallbackStyles, style);
+        yyjson_mut_val* font = yyjson_mut_obj_add_obj(doc, obj, "font");
+        yyjson_mut_obj_add_strbuf(doc, font, "name", &result.font.name);
+        yyjson_mut_obj_add_strbuf(doc, font, "size", &result.font.size);
+        yyjson_mut_val* fontStyles = yyjson_mut_obj_add_arr(doc, font, "styles");
+        FF_LIST_FOR_EACH(FFstrbuf, style, result.font.styles)
+        {
+            yyjson_mut_arr_add_strbuf(doc, fontStyles, style);
+        }
+        yyjson_mut_obj_add_strbuf(doc, font, "pretty", &result.font.pretty);
+
+        yyjson_mut_val* fallback = yyjson_mut_obj_add_obj(doc, obj, "fallback");
+        yyjson_mut_obj_add_strbuf(doc, fallback, "name", &result.fallback.name);
+        yyjson_mut_obj_add_strbuf(doc, fallback, "size", &result.fallback.size);
+        yyjson_mut_val* fallbackStyles = yyjson_mut_obj_add_arr(doc, fallback, "styles");
+        FF_LIST_FOR_EACH(FFstrbuf, style, result.fallback.styles)
+        {
+            yyjson_mut_arr_add_strbuf(doc, fallbackStyles, style);
+        }
+        yyjson_mut_obj_add_strbuf(doc, fallback, "pretty", &result.fallback.pretty);
     }
-    yyjson_mut_obj_add_strbuf(doc, fallback, "pretty", &result.fallback.pretty);
 
     ffStrbufDestroy(&result.error);
     ffFontDestroy(&result.font);
