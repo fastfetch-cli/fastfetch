@@ -97,7 +97,7 @@ endif()
 set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type")
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
 if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
@@ -392,6 +392,7 @@ if(LINUX)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_nvidia.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
@@ -412,7 +413,6 @@ if(LINUX)
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/temps/temps_linux.c
-        src/detection/temps/temps_nvidia.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
@@ -499,6 +499,7 @@ elseif(BSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_nvidia.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
@@ -519,7 +520,6 @@ elseif(BSD)
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_bsd.c
         src/detection/temps/temps_bsd.c
-        src/detection/temps/temps_nvidia.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
@@ -603,6 +603,7 @@ elseif(WIN32)
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
+        src/detection/gpu/gpu_nvidia.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
@@ -624,7 +625,6 @@ elseif(WIN32)
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
         src/detection/temps/temps_windows.cpp
-        src/detection/temps/temps_nvidia.c
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c

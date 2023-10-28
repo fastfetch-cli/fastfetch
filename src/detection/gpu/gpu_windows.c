@@ -1,5 +1,5 @@
 #include "gpu.h"
-#include "detection/temps/temps_nvidia.h"
+#include "detection/gpu/gpu_nvidia.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
 
@@ -85,13 +85,22 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             }
         }
 
-        if (options->temp && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || instance.config.general.allowSlowOperations))
         {
             uint32_t vendorId, deviceId, subSystemId;
             // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
             // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
             if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x", &vendorId, &deviceId, &subSystemId) == 3)
-                ffDetectNvidiaGpuTemp(&gpu->temperature, NULL, (deviceId << 16) | vendorId, subSystemId);
+            {
+                ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) {
+                    .pciDeviceId = (deviceId << 16) | vendorId,
+                    .pciSubSystemId = subSystemId,
+                }, (FFGpuNvidiaResult) {
+                    .temp = options->temp ? &gpu->temperature : NULL,
+                    .memory = &gpu->dedicated,
+                    .coreCount = (uint32_t*) &gpu->coreCount,
+                });
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 #include "detection/gpu/gpu.h"
+#include "detection/gpu/gpu_nvidia.h"
 #include "detection/vulkan/vulkan.h"
-#include "detection/temps/temps_nvidia.h"
 
 #ifdef FF_HAVE_LIBPCI
 #include "common/io/io.h"
@@ -247,11 +247,18 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         pciDetectTemp(gpu, device);
     #endif
 
-    if (gpu->temperature != gpu->temperature && gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
     {
         char pciDeviceId[32];
         snprintf(pciDeviceId, sizeof(pciDeviceId) - 1, "%04x:%02x:%02x.%d", device->domain, device->bus, device->dev, device->func);
-        ffDetectNvidiaGpuTemp(&gpu->temperature, pciDeviceId, 0, 0);
+
+        ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) { .pciBusId = pciDeviceId }, (FFGpuNvidiaResult) {
+            .temp = gpu->temperature != gpu->temperature ? &gpu->temperature : NULL,
+            .memory = &gpu->dedicated,
+            .coreCount = (uint32_t*) &gpu->coreCount,
+        });
+
+        gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
     }
 }
 

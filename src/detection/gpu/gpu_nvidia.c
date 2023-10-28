@@ -1,4 +1,4 @@
-#include "temps_nvidia.h"
+#include "gpu_nvidia.h"
 
 #include "3rdparty/nvml/nvml.h"
 #include "common/library.h"
@@ -9,14 +9,13 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByPciBusId_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetPciInfo_v3)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperature)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo_v2)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
 
     bool inited;
 } nvmlData;
 
-// Use pciBusId if not NULL; use pciDeviceId and pciSubSystemId otherwise
-// pciBusId = "domain:bus:device.function"
-// pciDeviceId = (deviceId << 16) | vendorId
-const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t pciDeviceId, uint32_t pciSubSystemId)
+const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult result)
 {
     if (!nvmlData.inited)
     {
@@ -27,7 +26,7 @@ const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t p
 #else
             "libnvidia-ml"
 #endif
-        FF_LIBRARY_EXTENSION, -1
+            FF_LIBRARY_EXTENSION, -1
         );
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlInit_v2)
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlShutdown)
@@ -36,23 +35,25 @@ const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t p
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByPciBusId_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetPciInfo_v3)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperature)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo_v2)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
 
         if (ffnvmlInit_v2() != NVML_SUCCESS)
         {
-            nvmlData.ffnvmlDeviceGetTemperature = NULL;
+            nvmlData.ffnvmlDeviceGetNumGpuCores = NULL;
             return "nvmlInit_v2() failed";
         }
         atexit((void*) ffnvmlShutdown);
         libnvml = NULL; // don't close nvml
     }
 
-    if (nvmlData.ffnvmlDeviceGetTemperature == NULL)
+    if (nvmlData.ffnvmlDeviceGetNumGpuCores == NULL)
         return "loading nvml library failed";
 
     nvmlDevice_t device = NULL;
-    if (pciBusId)
+    if (cond.pciBusId)
     {
-        nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(pciBusId, &device);
+        nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(cond.pciBusId, &device);
         if (ret != NVML_SUCCESS)
             return "nvmlDeviceGetHandleByPciBusId_v2() failed";
     }
@@ -71,7 +72,7 @@ const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t p
             if (nvmlData.ffnvmlDeviceGetPciInfo_v3(device, &pciInfo) != NVML_SUCCESS)
                 continue;
 
-            if (pciInfo.pciDeviceId != pciDeviceId || pciInfo.pciSubSystemId != pciSubSystemId)
+            if (pciInfo.pciDeviceId != cond.pciDeviceId || pciInfo.pciSubSystemId != cond.pciSubSystemId)
                 continue;
 
             break;
@@ -79,10 +80,25 @@ const char* ffDetectNvidiaGpuTemp(double* temp, const char* pciBusId, uint32_t p
         if (!device) return "Device not found";
     }
 
-    uint32_t value;
-    if (nvmlData.ffnvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) != NVML_SUCCESS)
-        return "nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) failed";
+    if (result.temp)
+    {
+        uint32_t value;
+        if (nvmlData.ffnvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) == NVML_SUCCESS)
+            *result.temp = value;
+    }
 
-    *temp = value;
+    if (result.memory)
+    {
+        nvmlMemory_v2_t memory = { .version = nvmlMemory_v2 };
+        if (nvmlData.ffnvmlDeviceGetMemoryInfo_v2(device, &memory) == NVML_SUCCESS)
+        {
+            result.memory->total = memory.used + memory.free;
+            result.memory->used = memory.used;
+        }
+    }
+
+    if (result.coreCount)
+        nvmlData.ffnvmlDeviceGetNumGpuCores(device, result.coreCount);
+
     return NULL;
 }
