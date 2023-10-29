@@ -709,10 +709,6 @@
                                                 "description": "Print operating system name and version"
                                             },
                                             {
-                                                "const": "packages",
-                                                "description": "List installed package managers and count of installed packages"
-                                            },
-                                            {
                                                 "const": "player",
                                                 "description": "Print music player name"
                                             },
@@ -1281,6 +1277,20 @@
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            {
+                                "title": "Packages",
+                                "properties": {
+                                    "type": {
+                                        "const": "packages",
+                                        "description": "List installed package managers and count of installed packages"
+                                    },
+                                    "winget": {
+                                        "description": "Set if winget package count should be detected.\nNote this is very slow operation. Please make sure `winget list` works before enable this option\nWindows only",
+                                        "type": "boolean",
+                                        "default": false
+                                    }
+                                }
                             },
                             {
                                 "title": "Public IP",

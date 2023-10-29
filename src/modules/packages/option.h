@@ -8,4 +8,8 @@ typedef struct FFPackagesOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+#ifdef _WIN32
+    bool winget;
+#endif
 } FFPackagesOptions;

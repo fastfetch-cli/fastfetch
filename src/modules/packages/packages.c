@@ -11,7 +11,7 @@ void ffPrintPackages(FFPackagesOptions* options)
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
-    const char* error = ffDetectPackages(&counts);
+    const char* error = ffDetectPackages(&counts, options);
 
     if(error)
     {
@@ -109,6 +109,14 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    #ifdef _WIN32
+    if(ffStrEqualsIgnCase(subKey, "winget"))
+    {
+        options->winget = ffOptionParseBoolean(value);
+        return true;
+    }
+    #endif
+
     return false;
 }
 
@@ -125,6 +133,14 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "winget"))
+        {
+            options->winget = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -135,6 +151,11 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     ffInitPackagesOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef _WIN32
+    if (options->winget != defaultOptions.winget)
+        yyjson_mut_obj_add_bool(doc, module, "winget", options->winget);
+    #endif
 }
 
 void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -142,7 +163,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
-    const char* error = ffDetectPackages(&counts);
+    const char* error = ffDetectPackages(&counts, options);
 
     if(error)
     {
@@ -225,6 +246,10 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
         ffGeneratePackagesJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    #ifdef _WIN32
+    options->winget = false;
+    #endif
 }
 
 void ffDestroyPackagesOptions(FFPackagesOptions* options)

@@ -7,6 +7,7 @@ Changes:
 * Display keys `percent*` and `size*` in JSON config are restructured. `{ "sizeNdigits": 1 }` is now `{ "size": { "ndigits": 1 } }`
 * With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in 3.0.0 (next major version)
 * Support of `--gen-config conf` is deprecated accordingly, and will be removed in 2.3.0 (next minor version)
+* A new flag `--packages-winget` is introduced to control whether `winget` packages count should be detected. It was controlled by `--allow-slow-operations` previously. Note it's a very slow operation, please enable it with caution.
 
 Features:
 * Quirks for MIPS platforms (CPU, Linux)

@@ -105,11 +105,11 @@ static void detectWinget(FFPackagesResult* result)
     result->winget = count;
 }
 
-void ffDetectPackagesImpl(FFPackagesResult* result)
+void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
     detectScoop(result);
     detectChoco(result);
     detectPacman(result);
-    if (instance.config.general.allowSlowOperations)
+    if (options->winget)
         detectWinget(result);
 }

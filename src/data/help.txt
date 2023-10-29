@@ -137,6 +137,7 @@ Module specific options:
     --disk-use-available <?value>:           Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes. Default is false
     --diskio-name-prefix <str>:              Show disks with given name prefix only. Default is empty
     --bluetooth-show-disconnected: <?value>: Set if disconnected bluetooth devices should be printed. Default is false
+    --packages-winget: <?value>:             Set if winget package count should be detected. Default is false
     --display-compact-type: <?string>:       Set if all displays should be printed in one line. Default is none
     --display-detect-name: <?value>:         Set if display name should be detected and printed (if supported). Default is false
     --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true

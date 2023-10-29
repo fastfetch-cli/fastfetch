@@ -68,7 +68,7 @@ static uint32_t getMacPortsPackages()
     return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/local");
 }
 
-void ffDetectPackagesImpl(FFPackagesResult* result)
+void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
 {
     getBrewPackages(result);
     result->port = getMacPortsPackages();

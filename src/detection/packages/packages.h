@@ -36,6 +36,6 @@ typedef struct FFPackagesResult
     FFstrbuf pacmanBranch;
 } FFPackagesResult;
 
-const char* ffDetectPackages(FFPackagesResult* result);
+const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* options);
 
 #endif
