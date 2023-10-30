@@ -242,15 +242,15 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->temperature = FF_GPU_TEMP_UNSET;
 
-    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || instance.config.general.allowSlowOperations))
+    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->useNvml))
     {
         char pciDeviceId[32];
         snprintf(pciDeviceId, sizeof(pciDeviceId) - 1, "%04x:%02x:%02x.%d", device->domain, device->bus, device->dev, device->func);
 
         ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) { .pciBusId = pciDeviceId }, (FFGpuNvidiaResult) {
             .temp = options->temp ? &gpu->temperature : NULL,
-            .memory = instance.config.general.allowSlowOperations ? &gpu->dedicated : NULL,
-            .coreCount = instance.config.general.allowSlowOperations ? (uint32_t*) &gpu->coreCount : NULL,
+            .memory = options->useNvml ? &gpu->dedicated : NULL,
+            .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
         });
 
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)

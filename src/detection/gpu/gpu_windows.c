@@ -85,7 +85,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             }
         }
 
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || instance.config.general.allowSlowOperations))
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->useNvml))
         {
             uint32_t vendorId, deviceId, subSystemId;
             // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
@@ -97,8 +97,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .pciSubSystemId = subSystemId,
                 }, (FFGpuNvidiaResult) {
                     .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = instance.config.general.allowSlowOperations ? &gpu->dedicated : NULL,
-                    .coreCount = instance.config.general.allowSlowOperations ? (uint32_t*) &gpu->coreCount : NULL,
+                    .memory = options->useNvml ? &gpu->dedicated : NULL,
+                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
                 });
             }
         }

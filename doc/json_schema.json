@@ -1130,6 +1130,11 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "useNvml": {
+                                        "description": "Use nvml (NVIDIA Management Library) to detect more detailed GPU information (memory usage, CUDA core count, etc)",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "forceVulkan": {
                                         "title": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
                                         "type": "boolean",

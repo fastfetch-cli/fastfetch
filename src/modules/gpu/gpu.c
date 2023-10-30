@@ -130,6 +130,12 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    if (ffStrEqualsIgnCase(subKey, "use-nvml"))
+    {
+        options->useNvml = ffOptionParseBoolean(value);
+        return true;
+    }
+
     if (ffStrEqualsIgnCase(subKey, "force-vulkan"))
     {
         options->forceVulkan = ffOptionParseBoolean(value);
@@ -174,6 +180,12 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "useNvml"))
+        {
+            options->useNvml = yyjson_get_bool(val);
+            continue;
+        }
+
         if (ffStrEqualsIgnCase(key, "forceVulkan"))
         {
             options->forceVulkan = yyjson_get_bool(val);
@@ -206,6 +218,9 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     ffInitGPUOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->useNvml != defaultOptions.useNvml)
+        yyjson_mut_obj_add_bool(doc, module, "useNvml", options->useNvml);
 
     if (options->forceVulkan != defaultOptions.forceVulkan)
         yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
@@ -330,6 +345,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
+    options->useNvml = false;
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;

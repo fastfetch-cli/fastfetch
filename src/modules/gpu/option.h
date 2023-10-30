@@ -18,5 +18,6 @@ typedef struct FFGPUOptions
 
     FFGPUType hideType;
     bool temp;
+    bool useNvml;
     bool forceVulkan;
 } FFGPUOptions;
