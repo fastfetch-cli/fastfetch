@@ -43,7 +43,6 @@ int main(void)
     ffPrintCPU(&options->cpu);
     ffPrintGPU(&options->gpu);
     ffPrintMemory(&options->memory);
-    ffPrintSwap(&options->swap);
     ffPrintDisk(&options->disk);
     ffPrintBattery(&options->battery);
     ffPrintPowerAdapter(&options->powerAdapter);
