@@ -10,6 +10,7 @@ Changes:
 * The global flag `--allow-slow-operations` is splitted into some explicit flags in differnet modules
     * `--packages-winget`: control whether `winget` packages count should be detected. Note it's a very slow operation, please enable it with caution.
     * `--chassis-use-wmi`: control whether `WMI` query should be used to detect chassis type, which detects more information, but slower. This flag only affects `--chassis-format` and `--format json`.
+    * `--battery-use-setup-api`: control whether `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower.
 
 Features:
 * Quirks for MIPS platforms (CPU, Linux)

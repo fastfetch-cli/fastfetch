@@ -144,7 +144,8 @@ Module specific options:
     --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --brightness-ddcci-sleep: <num>          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
     --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
-    --battery-dir <folder>:                  The directory where the battery folders are. Standard: /sys/class/power_supply/
+    --battery-dir <folder>:                  The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only
+    --battery-use-setup-api <?value>:        Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
     --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
     --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
     --cpuusage-separate <?value>:            Display CPU usage per CPU logical core, instead of an average result. Default is false

@@ -800,6 +800,11 @@
                                         "title": "The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only",
                                         "type": "string"
                                     },
+                                    "useSetupApi": {
+                                        "title": "Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "temp": {
                                         "title": "Detect and display Battery temperature if supported",
                                         "type": "boolean",

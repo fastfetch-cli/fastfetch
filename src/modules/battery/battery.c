@@ -122,6 +122,14 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
         }
     #endif
 
+    #ifdef _WIN32
+        if (ffStrEqualsIgnCase(subKey, "use-setup-api"))
+        {
+            options->useSetupApi = ffOptionParseBoolean(value);
+            return true;
+        }
+    #endif
+
     return false;
 }
 
@@ -146,6 +154,14 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         }
         #endif
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "useSetupApi"))
+        {
+            options->useSetupApi = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         if (ffStrEqualsIgnCase(key, "temp"))
         {
             options->temp = yyjson_get_bool(val);
@@ -166,6 +182,11 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
     #ifdef __linux__
     if (!ffStrbufEqual(&defaultOptions.dir, &options->dir))
         yyjson_mut_obj_add_strbuf(doc, module, "dir", &options->dir);
+    #endif
+
+    #ifdef _WIN32
+    if (defaultOptions.useSetupApi != options->useSetupApi)
+        yyjson_mut_obj_add_bool(doc, module, "useSetupApi", options->useSetupApi);
     #endif
 
     if (options->temp != defaultOptions.temp)
@@ -233,6 +254,8 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
 
     #ifdef __linux__
         ffStrbufInit(&options->dir);
+    #elif defined(_WIN32)
+        options->useSetupApi = false;
     #endif
 }
 
