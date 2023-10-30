@@ -79,7 +79,7 @@ The following libraries are used if present at runtime:
 <!-- All exported symbols can be found in `/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/PrivateFrameworks/*.framework/*.tbd` -->
 * [`MediaRemote`](https://iphonedev.wiki/index.php/MediaRemote.framework): Need for Media detection. It's a private framework provided by newer macOS system.
 * [`DisplayServices`](https://developer.apple.com/forums/thread/666383#663154022): Need for screen brightness detection. It's a private framework provided by newer macOS system.
-* [`IO80211`](https://code.google.com/archive/p/iphone-wireless/wikis): Need for Wifi detection on Sonoma (and maybe later). It's a private framework provided by newer macOS system.
+* [`Apple80211`](https://code.google.com/archive/p/iphone-wireless/wikis): Need for Wifi detection on Sonoma (and maybe later). It's a private framework provided by newer macOS system.
 * [`MoltenVK`](https://github.com/KhronosGroup/MoltenVK): Vulkan driver for macOS. [`molten-vk`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/molten-vk.rb)
 * [`libmagickcore` (ImageMagick)](https://www.imagemagick.org/): Images in terminal using sixel graphics protocol. [`imagemagick`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/imagemagick.rb)
 * [`libchafa`](https://github.com/hpjansson/chafa): Image output as ascii art. [`chafa`](https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/chafa.rb)
