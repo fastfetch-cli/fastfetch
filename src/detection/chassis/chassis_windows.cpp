@@ -36,7 +36,7 @@ FF_MAYBE_UNUSED static const char* detectWithWmi(FFChassisResult* result)
         {
             auto [arr, len] = vtProp.get<std::pair<const int32_t*, uint32_t>>();
             if(len == 0)
-                return "ChassisTypes contain no data failed";
+                return "ChassisTypes contain no data";
             for (uint32_t i = 0; i < len; ++i)
             {
                 if (i > 0)
@@ -65,9 +65,9 @@ FF_MAYBE_UNUSED static const char* detectWithWmi(FFChassisResult* result)
 }
 
 extern "C"
-const char* ffDetectChassis(FFChassisResult* result)
+const char* ffDetectChassis(FFChassisResult* result, FFChassisOptions* options)
 {
-    if (instance.config.general.allowSlowOperations)
+    if (options->useWmi)
         return detectWithWmi(result);
     return detectWithRegistry(result);
 }

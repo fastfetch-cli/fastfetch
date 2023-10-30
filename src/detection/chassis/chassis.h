@@ -12,7 +12,7 @@ typedef struct FFChassisResult
     FFstrbuf version;
 } FFChassisResult;
 
-const char* ffDetectChassis(FFChassisResult* result);
+const char* ffDetectChassis(FFChassisResult* result, FFChassisOptions* options);
 const char* ffChassisTypeToString(uint32_t type);
 
 #endif

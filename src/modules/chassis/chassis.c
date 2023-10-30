@@ -13,7 +13,7 @@ void ffPrintChassis(FFChassisOptions* options)
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
 
-    const char* error = ffDetectChassis(&result);
+    const char* error = ffDetectChassis(&result, options);
 
     if(error)
     {
@@ -57,6 +57,14 @@ bool ffParseChassisCommandOptions(FFChassisOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    #ifdef _WIN32
+    if (ffStrEqualsIgnCase(subKey, "use-wmi"))
+    {
+        options->useWmi = ffOptionParseBoolean(value);
+        return true;
+    }
+    #endif
+
     return false;
 }
 
@@ -73,6 +81,14 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "useWmi"))
+        {
+            options->useWmi = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -83,6 +99,11 @@ void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc,
     ffInitChassisOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef _WIN32
+    if (options->useWmi != defaultOptions.useWmi)
+        yyjson_mut_obj_add_bool(doc, module, "useWmi", options->useWmi);
+    #endif
 }
 
 void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -92,7 +113,7 @@ void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjs
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
 
-    const char* error = ffDetectChassis(&result);
+    const char* error = ffDetectChassis(&result, options);
 
     if (error)
     {
@@ -139,6 +160,10 @@ void ffInitChassisOptions(FFChassisOptions* options)
         ffGenerateChassisJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    #ifdef _WIN32
+    options->useWmi = false;
+    #endif
 }
 
 void ffDestroyChassisOptions(FFChassisOptions* options)

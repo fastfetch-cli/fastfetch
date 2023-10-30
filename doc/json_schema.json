@@ -645,10 +645,6 @@
                                                 "description": "Print mather board name and other info"
                                             },
                                             {
-                                                "const": "chassis",
-                                                "description": "Print chassis type (desktop, laptop, etc)"
-                                            },
-                                            {
                                                 "const": "cursor",
                                                 "description": "Print cursor style name"
                                             },
@@ -864,6 +860,20 @@
                                         "minimum": 0,
                                         "maximum": 400,
                                         "default": 10
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Chassis",
+                                "properties": {
+                                    "type": {
+                                        "const": "chassis",
+                                        "description": "Print chassis type (desktop, laptop, etc)"
+                                    },
+                                    "useWmi": {
+                                        "description": "Set if WMI query should be used on Windows, which detects more information but slower",
+                                        "type": "boolean",
+                                        "default": false
                                     }
                                 }
                             },

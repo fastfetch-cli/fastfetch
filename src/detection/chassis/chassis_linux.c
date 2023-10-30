@@ -17,7 +17,7 @@ static void getSmbiosValue(const char* devicesPath, const char* classPath, FFstr
     ffStrbufClear(buffer);
 }
 
-const char* ffDetectChassis(FFChassisResult* result)
+const char* ffDetectChassis(FFChassisResult* result, FF_MAYBE_UNUSED FFChassisOptions* options)
 {
     getSmbiosValue("/sys/devices/virtual/dmi/id/chassis_type", "/sys/class/dmi/id/chassis_type", &result->type);
     getSmbiosValue("/sys/devices/virtual/dmi/id/chassis_vendor", "/sys/class/dmi/id/chassis_vendor", &result->vendor);
