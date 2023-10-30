@@ -146,6 +146,10 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             options->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
             options->keyWidth = (uint32_t) yyjson_get_uint(val);
+        else if (ffStrStartsWithIgnCase(key, "percent"))
+            return "Property `display.percentX` has been changed to `display.percent.x`";
+        else if (ffStrStartsWithIgnCase(key, "size"))
+            return "Property `display.sizeX` has been changed to `display.size.x`";
         else
             return "Unknown display property";
     }

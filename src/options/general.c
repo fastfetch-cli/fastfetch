@@ -38,6 +38,11 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->wmiTimeout = (int32_t) yyjson_get_int(val);
         #endif
 
+        else if (ffStrEqualsIgnCase(key, "stat"))
+            return "Property `general.stat` has been changed to `display.stat`";
+        else if (ffStrEqualsIgnCase(key, "pipe"))
+            return "Property `general.pipe` has been changed to `display.pipe`";
+
         else
             return "Unknown general property";
     }

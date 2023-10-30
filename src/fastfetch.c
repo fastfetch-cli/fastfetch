@@ -622,7 +622,7 @@ static void run(FFdata* data)
             (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
             false
         ) {
-            fputs(error, stderr);
+            fprintf(stderr, "JsonConfig Error: %s\n", error);
             exit(477);
         }
     }
