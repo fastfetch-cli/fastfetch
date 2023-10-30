@@ -158,7 +158,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     ffStrbufInit(&ds->wmProtocolName);
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
-    ffStrbufInit(&ds->deVersion);
     ffListInit(&ds->displays, sizeof(FFDisplayResult));
 
     detectDisplays(ds);

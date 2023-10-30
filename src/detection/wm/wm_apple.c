@@ -1,4 +1,4 @@
-#include "wmde.h"
+#include "wm.h"
 
 #include "common/sysctl.h"
 #include "util/mallocHelper.h"
@@ -34,9 +34,4 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
     }
 
     return NULL;
-}
-
-const char* ffDetectDEVersion()
-{
-    return "No support";
 }

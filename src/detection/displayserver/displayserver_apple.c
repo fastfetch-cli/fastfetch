@@ -86,7 +86,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInitStatic(&ds->dePrettyName, "Aqua");
-    ffStrbufInit(&ds->deVersion);
 
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
     detectDisplays(ds);

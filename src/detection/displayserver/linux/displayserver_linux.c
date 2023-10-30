@@ -85,7 +85,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     ffStrbufInit(&ds->wmProtocolName);
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
-    ffStrbufInit(&ds->deVersion);
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
 
     if (!instance.config.general.dsForceDrm)

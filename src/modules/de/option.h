@@ -8,4 +8,6 @@ typedef struct FFDEOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    bool slowVersionDetection;
 } FFDEOptions;

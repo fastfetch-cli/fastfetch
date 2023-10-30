@@ -421,7 +421,8 @@ if(LINUX)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_linux.c
-        src/detection/wmde/wmde_linux.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -471,6 +472,8 @@ elseif(ANDROID)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_nosupport.c
         src/detection/wifi/wifi_android.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -530,6 +533,8 @@ elseif(BSD)
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_bsd.c
         src/detection/wmde/wmde_linux.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -580,7 +585,8 @@ elseif(APPLE)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.c
         src/detection/wifi/wifi_apple.m
-        src/detection/wmde/wmde_apple.c
+        src/detection/wm/wm_apple.c
+        src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
@@ -633,6 +639,8 @@ elseif(WIN32)
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
         src/detection/wifi/wifi_windows.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c
         src/util/windows/com.cpp

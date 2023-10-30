@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
-#include "detection/wmde/wmde.h"
+#include "detection/wm/wm.h"
 #include "modules/wm/wm.h"
 #include "util/stringUtils.h"
 

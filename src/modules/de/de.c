@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
+#include "detection/de/de.h"
 #include "modules/de/de.h"
 #include "util/stringUtils.h"
 
@@ -16,16 +17,19 @@ void ffPrintDE(FFDEOptions* options)
         return;
     }
 
+    FF_STRBUF_AUTO_DESTROY version = ffStrbufCreate();
+    ffDetectDEVersion(&result->dePrettyName, &version, options);
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&result->dePrettyName, stdout);
 
-        if(result->deVersion.length > 0)
+        if(version.length > 0)
         {
             putchar(' ');
-            ffStrbufWriteTo(&result->deVersion, stdout);
+            ffStrbufWriteTo(&version, stdout);
         }
 
         putchar('\n');
@@ -35,7 +39,7 @@ void ffPrintDE(FFDEOptions* options)
         ffPrintFormat(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->deVersion}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &version}
         });
     }
 }
@@ -46,6 +50,12 @@ bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* 
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
+
+    if (ffStrEqualsIgnCase(key, "slow-version-detection"))
+    {
+        options->slowVersionDetection = ffOptionParseBoolean(value);
+        return true;
+    }
 
     return false;
 }
@@ -63,6 +73,12 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffStrEqualsIgnCase(key, "slowVersionDetection"))
+        {
+            options->slowVersionDetection = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -73,6 +89,9 @@ void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffInitDEOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.slowVersionDetection != options->slowVersionDetection)
+        yyjson_mut_obj_add_bool(doc, module, "slowVersionDetection", options->slowVersionDetection);
 }
 
 void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -85,10 +104,13 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
         return;
     }
 
+    FF_STRBUF_AUTO_DESTROY version = ffStrbufCreate();
+    ffDetectDEVersion(&result->dePrettyName, &version, options);
+
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->deProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->dePrettyName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->deVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &version);
 }
 
 void ffPrintDEHelpFormat(void)
@@ -113,6 +135,8 @@ void ffInitDEOptions(FFDEOptions* options)
         ffGenerateDEJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->slowVersionDetection = false;
 }
 
 void ffDestroyDEOptions(FFDEOptions* options)
