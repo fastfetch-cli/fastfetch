@@ -421,6 +421,7 @@ if(LINUX)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_linux.c
+        src/detection/wmde/wmde_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -528,6 +529,7 @@ elseif(BSD)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_bsd.c
+        src/detection/wmde/wmde_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/util/platform/FFPlatform_unix.c
     )
@@ -578,6 +580,7 @@ elseif(APPLE)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.c
         src/detection/wifi/wifi_apple.m
+        src/detection/wmde/wmde_apple.c
         src/detection/wmtheme/wmtheme_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m

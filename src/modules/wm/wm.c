@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
+#include "detection/wmde/wmde.h"
 #include "modules/wm/wm.h"
 #include "util/stringUtils.h"
 
@@ -16,6 +17,10 @@ void ffPrintWM(FFWMOptions* options)
         return;
     }
 
+    FF_STRBUF_AUTO_DESTROY pluginName = ffStrbufCreate();
+    if(options->detectPlugin)
+        ffDetectWMPlugin(&pluginName);
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -26,6 +31,13 @@ void ffPrintWM(FFWMOptions* options)
         {
             fputs(" (", stdout);
             ffStrbufWriteTo(&result->wmProtocolName, stdout);
+            putchar(')');
+        }
+
+        if(pluginName.length > 0)
+        {
+            fputs(" (with ", stdout);
+            ffStrbufWriteTo(&pluginName, stdout);
             putchar(')');
         }
 
@@ -48,6 +60,12 @@ bool ffParseWMCommandOptions(FFWMOptions* options, const char* key, const char* 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    if (ffStrEqualsIgnCase(subKey, "detect-plugin"))
+    {
+        options->detectPlugin = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
@@ -64,6 +82,12 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffStrEqualsIgnCase(key, "detectPlugin"))
+        {
+            options->detectPlugin = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -74,6 +98,9 @@ void ffGenerateWMJsonConfig(FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffInitWMOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->detectPlugin != defaultOptions.detectPlugin)
+        yyjson_mut_obj_add_bool(doc, module, "detectPlugin", options->detectPlugin);
 }
 
 void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

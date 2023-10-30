@@ -1,10 +1,7 @@
 #include "displayserver.h"
-#include "common/sysctl.h"
 #include "util/apple/cf_helpers.h"
-#include "util/mallocHelper.h"
 
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <assert.h>
 #include <CoreGraphics/CGDirectDisplay.h>
@@ -70,35 +67,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
     }
 }
 
-static void detectWMPlugin(FFstrbuf* name)
-{
-    int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
-    u_int requestLength = sizeof(request) / sizeof(*request);
-
-    size_t length = 0;
-    FF_AUTO_FREE struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
-    if(processes == NULL)
-        return;
-
-    for(size_t i = 0; i < length / sizeof(struct kinfo_proc); i++)
-    {
-        const char* comm = processes[i].kp_proc.p_comm;
-
-        if(
-            strcasecmp(comm, "spectacle") != 0 &&
-            strcasecmp(comm, "amethyst") != 0 &&
-            strcasecmp(comm, "kwm") != 0 &&
-            strcasecmp(comm, "chunkwm") != 0 &&
-            strcasecmp(comm, "yabai") != 0 &&
-            strcasecmp(comm, "rectangle") != 0
-        ) continue;
-
-        ffStrbufAppendS(name, comm);
-        name->chars[0] = (char) toupper(name->chars[0]);
-        break;
-    }
-}
-
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     {
@@ -115,15 +83,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         }
     }
     ffStrbufInit(&ds->wmProtocolName);
-
-    if(instance.config.general.allowSlowOperations)
-    {
-        FF_STRBUF_AUTO_DESTROY name;
-        ffStrbufInit(&name);
-        detectWMPlugin(&name);
-        if(name.length)
-            ffStrbufAppendF(&ds->wmPrettyName, " (with %s)", name.chars);
-    }
 
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInitStatic(&ds->dePrettyName, "Aqua");

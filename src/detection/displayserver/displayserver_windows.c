@@ -143,15 +143,17 @@ static void detectDisplays(FFDisplayServerResult* ds)
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     BOOL enabled;
-    if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled == TRUE)
+    if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled)
     {
         ffStrbufInitStatic(&ds->wmProcessName, "dwm.exe");
         ffStrbufInitStatic(&ds->wmPrettyName, "Desktop Window Manager");
     }
     else
     {
+        // `explorer.exe` only provides a subset of WM functions, as well as the taskbar and desktop icons.
+        // While a window itself is drawn by kernel (GDI). Killing `explorer.exe` won't affect how windows are displayed generally.
         ffStrbufInitStatic(&ds->wmProcessName, "explorer.exe");
-        ffStrbufInitStatic(&ds->wmPrettyName, "Windows Explorer");
+        ffStrbufInitStatic(&ds->wmPrettyName, "Internal");
     }
     ffStrbufInit(&ds->wmProtocolName);
     ffStrbufInit(&ds->deProcessName);
