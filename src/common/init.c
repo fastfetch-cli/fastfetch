@@ -51,29 +51,6 @@ void ffInitInstance(void)
     defaultConfig();
 }
 
-#if defined(FF_HAVE_THREADS) && !(defined(__APPLE__) || defined(_WIN32) || defined(__ANDROID__))
-
-#include "detection/gtk_qt/gtk_qt.h"
-
-#define FF_START_DETECTION_THREADS
-
-FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(ffConnectDisplayServer)
-FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(ffDetectQt)
-FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(ffDetectGTK2)
-FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(ffDetectGTK3)
-FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(ffDetectGTK4)
-
-void startDetectionThreads(void)
-{
-    ffThreadDetach(ffThreadCreate(ffConnectDisplayServerThreadMain, NULL));
-    ffThreadDetach(ffThreadCreate(ffDetectQtThreadMain, NULL));
-    ffThreadDetach(ffThreadCreate(ffDetectGTK2ThreadMain, NULL));
-    ffThreadDetach(ffThreadCreate(ffDetectGTK3ThreadMain, NULL));
-    ffThreadDetach(ffThreadCreate(ffDetectGTK4ThreadMain, NULL));
-}
-
-#endif //FF_HAVE_THREADS
-
 static volatile bool ffDisableLinewrap = true;
 static volatile bool ffHideCursor = true;
 
