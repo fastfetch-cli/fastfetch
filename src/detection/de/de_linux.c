@@ -7,6 +7,8 @@
 #include "detection/displayserver/displayserver.h"
 #include "util/stringUtils.h"
 
+#include <ctype.h>
+
 static void getKDE(FFstrbuf* result, FFDEOptions* options)
 {
     ffParsePropFileValues("/usr/share/xsessions/plasmax11.desktop", 1, (FFpropquery[]) {
