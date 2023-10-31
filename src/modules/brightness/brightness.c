@@ -91,7 +91,7 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(key, "ddcci-sleep"))
+    if (ffStrEqualsIgnCase(subKey, "ddcci-sleep"))
     {
         options->ddcciSleep = ffOptionParseUInt32(key, value);
         return true;

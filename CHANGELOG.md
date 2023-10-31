@@ -30,6 +30,7 @@ Bugfixes:
 * Don't print display type twice (Display)
 * Detect BSSID instead of Wifi MAC address to align with other platforms (Wifi, macOS)
 * Remove support of used GPU memory detection, which is not reliable and only supported with `--gpu-force-vulkan`. (GPU)
+* Fix flag `--brightness-ddcci-sleep` (Brightness, Linux)
 
 Logos:
 * Add Black Mesa
