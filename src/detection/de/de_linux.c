@@ -1,9 +1,11 @@
 #include "de.h"
 
+#include "common/io/io.h"
 #include "common/parsing.h"
 #include "common/properties.h"
 #include "common/processing.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/stringUtils.h"
 
 static void getKDE(FFstrbuf* result, FFDEOptions* options)
 {
