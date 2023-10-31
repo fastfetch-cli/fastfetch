@@ -13,6 +13,7 @@ Changes:
     * `--battery-use-setup-api`: control whether `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower.
     * `--wm-detect-plugin`: control whether WM plugins should be detected. Note it's implemented with global processes enumeration and can report false results.
     * `--de-slow-version-detection`: control DE version should be detected with slow operations. It's usually not necessary and only provided as a backup.
+* `--localip-default-route-only` and `--netio-default-route-only` defaults to true to avoid large number of results
 
 Features:
 * Quirks for MIPS platforms (CPU, Linux)

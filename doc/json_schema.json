@@ -1243,7 +1243,7 @@
                                     "defaultRouteOnly": {
                                         "description": "Show ips that are used for default routing only",
                                         "type": "boolean",
-                                        "default": false
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1274,7 +1274,7 @@
                                     "defaultRouteOnly": {
                                         "description": "Show ips that are used for default routing only",
                                         "type": "boolean",
-                                        "default": false
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

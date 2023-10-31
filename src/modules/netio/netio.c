@@ -230,7 +230,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = false;
+    options->defaultRouteOnly = true;
 }
 
 void ffDestroyNetIOOptions(FFNetIOOptions* options)

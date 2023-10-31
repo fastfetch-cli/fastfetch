@@ -105,7 +105,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
             if(options->moduleArgs.outputFormat.length == 0)
             {
                 ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
-                printIp(ip, !options->defaultRouteOnly);
+                printIp(ip, true);
                 putchar('\n');
             }
             else
@@ -370,7 +370,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
     ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = false;
+    options->defaultRouteOnly = true;
 }
 
 void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
