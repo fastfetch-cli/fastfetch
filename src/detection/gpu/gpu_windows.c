@@ -99,7 +99,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .temp = options->temp ? &gpu->temperature : NULL,
                     .memory = options->useNvml ? &gpu->dedicated : NULL,
                     .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-                });
+                }, "nvml.dll");
             }
         }
     }

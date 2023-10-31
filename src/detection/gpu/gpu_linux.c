@@ -251,7 +251,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             .temp = options->temp ? &gpu->temperature : NULL,
             .memory = options->useNvml ? &gpu->dedicated : NULL,
             .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-        });
+        }, "libnvidia-ml.so");
 
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
             gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;

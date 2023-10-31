@@ -3,11 +3,11 @@
 #include "gpu.h"
 
 // Use pciBusId if not NULL; use pciDeviceId and pciSubSystemId otherwise
-// pciBusId = "domain:bus:device.function"
-// pciDeviceId = (deviceId << 16) | vendorId
 typedef struct FFGpuNvidiaCondition
 {
+    // "domain:bus:device.function"
     const char* pciBusId;
+    // (deviceId << 16) | vendorId
     uint32_t pciDeviceId;
     uint32_t pciSubSystemId;
 } FFGpuNvidiaCondition;
@@ -20,4 +20,4 @@ typedef struct FFGpuNvidiaResult
     uint32_t* coreCount;
 } FFGpuNvidiaResult;
 
-const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult result);
+const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult result, const char* soName);

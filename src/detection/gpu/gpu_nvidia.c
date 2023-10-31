@@ -15,19 +15,12 @@ struct FFNvmlData {
     bool inited;
 } nvmlData;
 
-const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult result)
+const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult result, const char* soName)
 {
     if (!nvmlData.inited)
     {
         nvmlData.inited = true;
-        FF_LIBRARY_LOAD(libnvml, NULL, "dlopen nvml failed",
-#ifdef _WIN32
-            "nvml"
-#else
-            "libnvidia-ml"
-#endif
-            FF_LIBRARY_EXTENSION, -1
-        );
+        FF_LIBRARY_LOAD(libnvml, NULL, "dlopen nvml failed", soName , 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlInit_v2)
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlShutdown)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCount_v2)
