@@ -9,6 +9,8 @@ const char* FF_GPU_VENDOR_NAME_NVIDIA = "NVIDIA";
 const char* FF_GPU_VENDOR_NAME_VMWARE = "VMware";
 const char* FF_GPU_VENDOR_NAME_PARALLEL = "Parallel";
 const char* FF_GPU_VENDOR_NAME_MICROSOFT = "Microsoft";
+const char* FF_GPU_VENDOR_NAME_REDHAT = "RedHat";
+const char* FF_GPU_VENDOR_NAME_ORACLE = "Oracle";
 
 static inline bool arrayContains(const unsigned arr[], unsigned vendorId, unsigned length)
 {
@@ -22,6 +24,7 @@ static inline bool arrayContains(const unsigned arr[], unsigned vendorId, unsign
 
 const char* ffGetGPUVendorString(unsigned vendorId)
 {
+    // https://devicehunt.com/all-pci-vendors
     if(vendorId == 0x106b)
         return FF_GPU_VENDOR_NAME_APPLE;
     if(arrayContains((const unsigned[]) {0x1002, 0x1022}, vendorId, 2))
@@ -32,10 +35,14 @@ const char* ffGetGPUVendorString(unsigned vendorId)
         return FF_GPU_VENDOR_NAME_NVIDIA;
     else if(arrayContains((const unsigned[]) {0x15ad}, vendorId, 1))
         return FF_GPU_VENDOR_NAME_VMWARE;
+    else if(arrayContains((const unsigned[]) {0x1af4}, vendorId, 1))
+        return FF_GPU_VENDOR_NAME_REDHAT;
     else if(arrayContains((const unsigned[]) {0x1ab8}, vendorId, 1))
         return FF_GPU_VENDOR_NAME_PARALLEL;
     else if(arrayContains((const unsigned[]) {0x1414}, vendorId, 1))
         return FF_GPU_VENDOR_NAME_MICROSOFT;
+    else if(arrayContains((const unsigned[]) {0x108e}, vendorId, 1))
+        return FF_GPU_VENDOR_NAME_ORACLE;
     return NULL;
 }
 
