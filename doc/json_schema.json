@@ -10,21 +10,21 @@
             ]
         },
         "key": {
-            "title": "Key of the module",
+            "description": "Key of the module",
             "type": "string"
         },
         "keyColor": {
-            "title": "Color of the module key. Left empty to use `display.color.keys`",
+            "description": "Color of the module key. Left empty to use `display.color.keys`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "title": "Width of the module key. Use 0 to use `display.keyWidth`",
+            "description": "Width of the module key. Use 0 to use `display.keyWidth`",
             "type": "integer",
             "minimum": 0,
             "default": 0
         },
         "format": {
-            "title": "Output format of the module",
+            "description": "Output format of the module",
             "type": "string"
         }
     },
@@ -34,26 +34,26 @@
     "properties": {
         "$schema": {
             "type": "string",
-            "title": "JSON schema URL, for JSON validation and IDE intelligence",
+            "description": "JSON schema URL, for JSON validation and IDE intelligence",
             "format": "uri",
             "default": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json"
         },
         "logo": {
             "oneOf": [
                 {
-                    "title": "Disable logo",
+                    "description": "Disable logo",
                     "type": "null"
                 },
                 {
-                    "title": "Set the source file of the logo",
+                    "description": "Set the source file of the logo",
                     "type": "string"
                 },
                 {
-                    "title": "Fastfetch logo configurations",
+                    "description": "Fastfetch logo configurations",
                     "type": "object",
                     "properties": {
                         "type": {
-                            "title": "Set the type of the logo given",
+                            "description": "Set the type of the logo given",
                             "enum": [
                                 "auto",
                                 "builtin",
@@ -74,46 +74,46 @@
                         },
                         "source": {
                             "type": "string",
-                            "title": "Set the source file of the logo"
+                            "description": "Set the source file of the logo"
                         },
                         "color": {
                             "type": "object",
-                            "title": "Overwrite a color in the logo",
+                            "description": "Overwrite a color in the logo",
                             "properties": {
                                 "1": {
-                                    "title": "Color 1",
+                                    "description": "Color 1",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "2": {
-                                    "title": "Color 2",
+                                    "description": "Color 2",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "3": {
-                                    "title": "Color 3",
+                                    "description": "Color 3",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "4": {
-                                    "title": "Color 4",
+                                    "description": "Color 4",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "5": {
-                                    "title": "Color 5",
+                                    "description": "Color 5",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "6": {
-                                    "title": "Color 6",
+                                    "description": "Color 6",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "7": {
-                                    "title": "Color 7",
+                                    "description": "Color 7",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "8": {
-                                    "title": "Color 8",
+                                    "description": "Color 8",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "9": {
-                                    "title": "Color 9",
+                                    "description": "Color 9",
                                     "$ref": "#/$defs/colors"
                                 }
                             },
@@ -121,31 +121,31 @@
                         },
                         "width": {
                             "type": "integer",
-                            "title": "Set the width of the logo (in characters). Required for iTerm image protocol",
+                            "description": "Set the width of the logo (in characters). Required for iTerm image protocol",
                             "minimum": 1
                         },
                         "height": {
                             "type": "integer",
-                            "title": "Set the height of the logo (in characters). Required for iTerm image protocol",
+                            "description": "Set the height of the logo (in characters). Required for iTerm image protocol",
                             "minimum": 1
                         },
                         "padding": {
                             "type": "object",
-                            "title": "Set the padding of the logo",
+                            "description": "Set the padding of the logo",
                             "properties": {
                                 "top": {
                                     "type": "integer",
-                                    "title": "Set the top padding of the logo",
+                                    "description": "Set the top padding of the logo",
                                     "minimum": 0
                                 },
                                 "left": {
                                     "type": "integer",
-                                    "title": "Set the left padding of the logo",
+                                    "description": "Set the left padding of the logo",
                                     "minimum": 0
                                 },
                                 "right": {
                                     "type": "integer",
-                                    "title": "Set the right padding of the logo",
+                                    "description": "Set the right padding of the logo",
                                     "minimum": 0
                                 }
                             },
@@ -153,40 +153,40 @@
                         },
                         "printRemaining": {
                             "type": "boolean",
-                            "title": "Whether to print the remaining logo, if it has more lines than modules to display",
+                            "description": "Whether to print the remaining logo, if it has more lines than modules to display",
                             "default": false
                         },
                         "preserveAspectRadio": {
                             "type": "boolean",
-                            "title": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
+                            "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
                             "default": false
                         },
                         "recache": {
                             "type": "boolean",
-                            "title": "If true, regenerate image logo cache",
+                            "description": "If true, regenerate image logo cache",
                             "default": false
                         },
                         "separate": {
                             "type": "boolean",
-                            "title": "If true, print modules at bottom of the logo",
+                            "description": "If true, print modules at bottom of the logo",
                             "default": false
                         },
                         "chafa": {
                             "type": "object",
-                            "title": "Chafa configuration. See chafa document for details",
+                            "description": "Chafa configuration. See chafa document for details",
                             "properties": {
                                 "fgOnly": {
                                     "type": "boolean",
-                                    "title": "Produce character-cell output using foreground colors only",
+                                    "description": "Produce character-cell output using foreground colors only",
                                     "default": false
                                 },
                                 "symbols": {
                                     "type": "string",
-                                    "title": "Specify character symbols to employ in final output"
+                                    "description": "Specify character symbols to employ in final output"
                                 },
                                 "canvasMode": {
                                     "type": "string",
-                                    "title": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
+                                    "description": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
                                     "enum": [
                                         "TRUECOLOR",
                                         "INDEXED_256",
@@ -200,7 +200,7 @@
                                 },
                                 "colorSpace": {
                                     "type": "string",
-                                    "title": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
+                                    "description": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
                                     "enum": [
                                         "RGB",
                                         "DIN99D"
@@ -208,7 +208,7 @@
                                 },
                                 "ditherMode": {
                                     "type": "string",
-                                    "title": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
+                                    "description": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
                                     "enum": [
                                         "NONE",
                                         "ORDERED",
@@ -224,100 +224,100 @@
             ]
         },
         "general": {
-            "title": "Fastfetch general configurations",
+            "description": "Fastfetch general configurations",
             "type": "object",
             "properties": {
                 "multithreading": {
                     "type": "boolean",
-                    "title": "Use multiple threads to detect values",
+                    "description": "Use multiple threads to detect values",
                     "default": true
                 },
                 "thread": {
                     "type": "boolean",
-                    "title": "Alias of multithreading",
+                    "description": "Alias of multithreading",
                     "default": true
                 },
                 "escapeBedrock": {
                     "type": "boolean",
-                    "title": "On Bedrock Linux, whether to escape the bedrock jail",
+                    "description": "On Bedrock Linux, whether to escape the bedrock jail",
                     "default": true
                 },
                 "playerName": {
                     "type": "string",
-                    "title": "The name of the player to use for module Media and Player. Linux only"
+                    "description": "The name of the player to use for module Media and Player. Linux only"
                 },
                 "osFile": {
                     "type": "string",
-                    "title": "Set the path to the file containing OS information. Linux only"
+                    "description": "Set the path to the file containing OS information. Linux only"
                 },
                 "dsForceDrm": {
                     "type": "boolean",
-                    "title": "Force display detection to use `/sys/class/drm`. Linux only",
+                    "description": "Force display detection to use `/sys/class/drm`. Linux only",
                     "default": false
                 },
                 "wmiTimeout": {
                     "type": "integer",
-                    "title": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only",
+                    "description": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only",
                     "default": 5000
                 },
                 "processingTimeout": {
                     "type": "integer",
-                    "title": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
+                    "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
                     "default": 1000
                 }
             },
             "additionalProperties": false
         },
         "display": {
-            "title": "Configure how things to be displayed",
+            "description": "Configure how things to be displayed",
             "type": "object",
             "properties": {
                 "stat": {
                     "type": "boolean",
-                    "title": "Show time usage (in ms) for individual modules",
+                    "description": "Show time usage (in ms) for individual modules",
                     "default": false
                 },
                 "pipe": {
                     "type": "boolean",
-                    "title": "Whether to enable pipe mode (disable logo and all escape sequences)",
+                    "description": "Whether to enable pipe mode (disable logo and all escape sequences)",
                     "default": false
                 },
                 "showErrors": {
                     "type": "boolean",
-                    "title": "Print occurring errors to the console. False to ignore errored modules",
+                    "description": "Print occurring errors to the console. False to ignore errored modules",
                     "default": false
                 },
                 "disableLinewrap": {
                     "type": "boolean",
-                    "title": "Whether to disable line wrap during the run",
+                    "description": "Whether to disable line wrap during the run",
                     "default": true
                 },
                 "hideCursor": {
                     "type": "boolean",
-                    "title": "Whether to hide the cursor during the run",
+                    "description": "Whether to hide the cursor during the run",
                     "default": true
                 },
                 "separator": {
                     "type": "string",
-                    "title": "Set the separator between key and value",
+                    "description": "Set the separator between key and value",
                     "default": ": "
                 },
                 "color": {
-                    "title": "Set the color of the keys and title",
+                    "description": "Set the color of the keys and title",
                     "oneOf": [
                         {
-                            "title": "Set the both color of the keys and title",
+                            "description": "Set the both color of the keys and title",
                             "$ref": "#/$defs/colors"
                         },
                         {
                             "type": "object",
                             "properties": {
                                 "keys": {
-                                    "title": "Set the color of the keys",
+                                    "description": "Set the color of the keys",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "title": {
-                                    "title": "Set the color of the title",
+                                    "description": "Set the color of the title",
                                     "$ref": "#/$defs/colors"
                                 }
                             },
@@ -326,19 +326,19 @@
                     ]
                 },
                 "brightColor": {
-                    "title": "Set if the keys, title and ASCII logo should be printed in bright color",
+                    "description": "Set if the keys, title and ASCII logo should be printed in bright color",
                     "type": "boolean",
                     "default": true
                 },
                 "keyWidth": {
-                    "title": "Align the width of keys to number of characters, 0 to disable",
+                    "description": "Align the width of keys to number of characters, 0 to disable",
                     "type": "integer",
                     "minimum": 0,
                     "default": 0
                 },
                 "binaryPrefix": {
                     "type": "string",
-                    "title": "Set the binary prefix to used when printing bytes",
+                    "description": "Set the binary prefix to used when printing bytes",
                     "oneOf": [
                         {
                             "const": "iec",
@@ -356,17 +356,17 @@
                 },
                 "size": {
                     "type": "object",
-                    "title": "Set how a size value should be displayed",
+                    "description": "Set how a size value should be displayed",
                     "properties": {
                         "maxPrefix": {
                             "type": "string",
-                            "title": "Set the largest binary prefix to use when formatting sizes",
+                            "description": "Set the largest binary prefix to use when formatting sizes",
                             "enum": ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
                             "default": "YB"
                         },
                         "ndigits": {
                             "type": "integer",
-                            "title": "Set the number of digits to keep after the decimal point when formatting sizes",
+                            "description": "Set the number of digits to keep after the decimal point when formatting sizes",
                             "minimum": 0,
                             "maximum": 9,
                             "default": 2
@@ -375,32 +375,32 @@
                 },
                 "temperatureUnit": {
                     "type": "string",
-                    "title": "Set the unit of the temperature",
+                    "description": "Set the unit of the temperature",
                     "enum": ["CELSIUS", "C", "FAHRENHEIT", "F", "KELVIN", "K"],
                     "default": "C"
                 },
                 "bar": {
                     "type": "object",
-                    "title": "Set the bar configuration",
+                    "description": "Set the bar configuration",
                     "properties": {
                         "charElapsed": {
                             "type": "string",
-                            "title": "Set the character to use in elapsed part",
+                            "description": "Set the character to use in elapsed part",
                             "default": "■"
                         },
                         "charTotal": {
                             "type": "string",
-                            "title": "Set the character to use in total part",
+                            "description": "Set the character to use in total part",
                             "default": "-"
                         },
                         "border": {
                             "type": "boolean",
-                            "title": "Whether to show a border around the bar",
+                            "description": "Whether to show a border around the bar",
                             "default": true
                         },
                         "width": {
                             "type": "integer",
-                            "title": "Set the width of the bar, in number of characters",
+                            "description": "Set the width of the bar, in number of characters",
                             "minimum": 1,
                             "default": 10
                         }
@@ -408,143 +408,143 @@
                 },
                 "percent": {
                     "type": "object",
-                    "title": "Set how a percentage value should be displayed",
+                    "description": "Set how a percentage value should be displayed",
                     "properties": {
                         "type": {
                             "type": "number",
-                            "title": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
+                            "description": "Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
                             "minimum": 0,
                             "maximum": 255,
                             "default": 1
                         },
                         "ndigits": {
                             "type": "number",
-                            "title": "Set the number of digits to keep after the decimal point when formatting percentage numbers",
+                            "description": "Set the number of digits to keep after the decimal point when formatting percentage numbers",
                             "minimum": 0,
                             "maximum": 9,
                             "default": 0
-                        },
+                        }
                     }
                 },
                 "noBuffer": {
                     "type": "boolean",
-                    "title": "Whether to disable the stdout application buffer",
+                    "description": "Whether to disable the stdout application buffer",
                     "default": false
                 }
             },
             "additionalProperties": false
         },
         "library": {
-            "title": "Set the path of a library to load",
+            "description": "Set the path of a library to load",
             "type": "object",
             "properties": {
                 "pci": {
                     "type": "string",
-                    "title": "GPU output (Linux and FreeBSD)"
+                    "description": "GPU output (Linux and FreeBSD)"
                 },
                 "vulkan": {
                     "type": "string",
-                    "title": "Vulkan module & fallback for GPU output"
+                    "description": "Vulkan module & fallback for GPU output"
                 },
                 "freetype": {
                     "type": "string",
-                    "title": "Used for Termux font detection (Android)"
+                    "description": "Used for Termux font detection (Android)"
                 },
                 "wayland": {
                     "type": "string",
-                    "title": "Better display performance and output in wayland sessions.\nSupports different refresh rates per monitor.\n(Linux)"
+                    "description": "Better display performance and output in wayland sessions.\nSupports different refresh rates per monitor.\n(Linux)"
                 },
                 "xcbRandr": {
                     "type": "string",
-                    "title": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
                 "xcb": {
                     "type": "string",
-                    "title": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
                 "xrandr": {
                     "type": "string",
-                    "title": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
                 "x11": {
                     "type": "string",
-                    "title": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
                 "gio": {
                     "type": "string",
-                    "title": "Needed for values that are only stored GSettings (Linux, FreeBSD)"
+                    "description": "Needed for values that are only stored GSettings (Linux, FreeBSD)"
                 },
                 "dconf": {
                     "type": "string",
-                    "title": "Needed for values that are only stored in DConf + Fallback for GSettings (Linux, FreeBSD)"
+                    "description": "Needed for values that are only stored in DConf + Fallback for GSettings (Linux, FreeBSD)"
                 },
                 "dbus": {
                     "type": "string",
-                    "title": "Bluetooth, Player & Media detection (Linux, FreeBSD)"
+                    "description": "Bluetooth, Player & Media detection (Linux, FreeBSD)"
                 },
                 "xfconf": {
                     "type": "string",
-                    "title": "Needed for XFWM theme and XFCE Terminal font (Linux, FreeBSD)"
+                    "description": "Needed for XFWM theme and XFCE Terminal font (Linux, FreeBSD)"
                 },
                 "sqlite3": {
                     "type": "string",
-                    "title": "Needed for pkg & rpm package count (Linux, FreeBSD)"
+                    "description": "Needed for pkg & rpm package count (Linux, FreeBSD)"
                 },
                 "rpm": {
                     "type": "string",
-                    "title": "Slower fallback for rpm package count. Needed on openSUSE & old CentOS / Redhat. (Linux)"
+                    "description": "Slower fallback for rpm package count. Needed on openSUSE & old CentOS / Redhat. (Linux)"
                 },
                 "imagemagick": {
                     "type": "string",
-                    "title": "Images in terminal using sixel or kitty graphics protocol (Linux, FreeBSD, macOS)"
+                    "description": "Images in terminal using sixel or kitty graphics protocol (Linux, FreeBSD, macOS)"
                 },
                 "z": {
-                    "title": "Libz. Faster image output when using kitty graphics protocol (Linux, FreeBSD, macOS)",
+                    "description": "Libz. Faster image output when using kitty graphics protocol (Linux, FreeBSD, macOS)",
                     "type": "string"
                 },
                 "chafa": {
                     "type": "string",
-                    "title": "Image output as ascii art (Linux, FreeBSD, macOS)"
+                    "description": "Image output as ascii art (Linux, FreeBSD, macOS)"
                 },
                 "egl": {
                     "type": "string",
-                    "title": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
+                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
                 },
                 "glx": {
                     "type": "string",
-                    "title": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
+                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
                 },
                 "osmesa": {
                     "type": "string",
-                    "title": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
+                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
                 },
                 "opencl": {
                     "type": "string",
-                    "title": "OpenCL module (Linux, FreeBSD, Windows)"
+                    "description": "OpenCL module (Linux, FreeBSD, Windows)"
                 },
                 "pulse": {
-                    "title": "Pulseaudio. Used for Sound detection (Linux, FreeBSD)",
+                    "description": "Pulseaudio. Used for Sound detection (Linux, FreeBSD)",
                     "type": "string"
                 },
                 "nm": {
-                    "title": "NetworkManager. Used for Wifi detection (Linux)",
+                    "description": "NetworkManager. Used for Wifi detection (Linux)",
                     "type": "string"
                 },
                 "ddcutil": {
-                    "title": "Used for brightness detection of external displays (Linux)",
+                    "description": "Used for brightness detection of external displays (Linux)",
                     "type": "string"
                 }
             },
             "additionalProperties": false
         },
         "modules": {
-            "title": "Fastfetch modules to run",
+            "description": "Fastfetch modules to run",
             "type": "array",
             "items": {
                 "anyOf": [
                     {
                         "type": "string",
-                        "title": "Run module with default configurations",
+                        "description": "Run module with default configurations",
                         "enum": [
                             "battery",
                             "bios",
@@ -606,7 +606,7 @@
                     },
                     {
                         "type": "object",
-                        "title": "Run module with custom configurations",
+                        "description": "Run module with custom configurations",
                         "required": [
                             "type"
                         ],
@@ -627,7 +627,7 @@
                                 "additionalProperties": false
                             },
                             {
-                                "title": "No additional properties",
+                                "description": "No additional properties",
                                 "properties": {
                                     "type": {
                                         "anyOf": [
@@ -784,16 +784,16 @@
                                         "description": "Print battery capacity, status, etc"
                                     },
                                     "dir": {
-                                        "title": "The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only",
+                                        "description": "The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only",
                                         "type": "string"
                                     },
                                     "useSetupApi": {
-                                        "title": "Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
+                                        "description": "Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "temp": {
-                                        "title": "Detect and display Battery temperature if supported",
+                                        "description": "Detect and display Battery temperature if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -820,7 +820,7 @@
                                         "const": "bluetooth"
                                     },
                                     "showDisconnected": {
-                                        "title": "Set if disconnected bluetooth devices should be printed",
+                                        "description": "Set if disconnected bluetooth devices should be printed",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -889,12 +889,12 @@
                                         "const": "cpu"
                                     },
                                     "temp": {
-                                        "title": "Detect and display CPU temperature if supported",
+                                        "description": "Detect and display CPU temperature if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "freqNdigits": {
-                                        "title": "Set the number of digits to keep after the decimal point when printing CPU frequency",
+                                        "description": "Set the number of digits to keep after the decimal point when printing CPU frequency",
                                         "type": "integer",
                                         "minimum": 0,
                                         "maximum": 9,
@@ -937,7 +937,7 @@
                                         "const": "colors"
                                     },
                                     "symbol": {
-                                        "title": "Set the symbol to use",
+                                        "description": "Set the symbol to use",
                                         "type": "string",
                                         "enum": [
                                             "block",
@@ -950,7 +950,7 @@
                                         "default": "block"
                                     },
                                     "paddingLeft": {
-                                        "title": "Set the number of white spaces to print before the symbol",
+                                        "description": "Set the number of white spaces to print before the symbol",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
@@ -965,11 +965,11 @@
                                         "const": "command"
                                     },
                                     "shell": {
-                                        "title": "Set the shell program to execute the command text\nDefault: cmd for Windows, /bin/sh for *nix",
+                                        "description": "Set the shell program to execute the command text\nDefault: cmd for Windows, /bin/sh for *nix",
                                         "type": "string"
                                     },
                                     "text": {
-                                        "title": "Set the command text to be executed",
+                                        "description": "Set the command text to be executed",
                                         "type": "string"
                                     },
                                     "key": {
@@ -995,7 +995,7 @@
                                         "const": "custom"
                                     },
                                     "key": {
-                                        "title": "Leave empty not to print the key",
+                                        "description": "Leave empty not to print the key",
                                         "type": "string"
                                     },
                                     "keyColor": {
@@ -1005,7 +1005,7 @@
                                         "$ref": "#/$defs/keyWidth"
                                     },
                                     "format": {
-                                        "title": "Text to print",
+                                        "description": "Text to print",
                                         "type": "string"
                                     }
                                 },
@@ -1027,11 +1027,11 @@
                                             "original",
                                             "scaled"
                                         ],
-                                        "title": "Set if all displays should be printed in one line",
+                                        "description": "Set if all displays should be printed in one line",
                                         "default": "none"
                                     },
                                     "preciseRefreshRate": {
-                                        "title": "Set if decimal refresh rates should not be rounded into integers when printing",
+                                        "description": "Set if decimal refresh rates should not be rounded into integers when printing",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -1059,36 +1059,36 @@
                                     },
                                     "folders": {
                                         "type": "string",
-                                        "title": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: \"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: \"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
                                     },
                                     "showExternal": {
                                         "type": "boolean",
-                                        "title": "Set if external volume should be printed",
+                                        "description": "Set if external volume should be printed",
                                         "default": true
                                     },
                                     "showHidden": {
                                         "type": "boolean",
-                                        "title": "Set if hidden volumes should be printed",
+                                        "description": "Set if hidden volumes should be printed",
                                         "default": false
                                     },
                                     "showSubvolumes": {
                                         "type": "boolean",
-                                        "title": "Set if subvolumes should be printed",
+                                        "description": "Set if subvolumes should be printed",
                                         "default": false
                                     },
                                     "showReadOnly": {
                                         "type": "boolean",
-                                        "title": "Set if read only volumes should be printed",
+                                        "description": "Set if read only volumes should be printed",
                                         "default": false
                                     },
                                     "showUnknown": {
                                         "type": "boolean",
-                                        "title": "Set if unknown (unable to detect sizes) volumes should be printed",
+                                        "description": "Set if unknown (unable to detect sizes) volumes should be printed",
                                         "default": false
                                     },
                                     "useAvailable": {
                                         "type": "boolean",
-                                        "title": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
+                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
                                         "default": false
                                     },
                                     "key": {
@@ -1114,7 +1114,7 @@
                                         "const": "diskio"
                                     },
                                     "namePrefix": {
-                                        "title": "Show disks with given name prefix only",
+                                        "description": "Show disks with given name prefix only",
                                         "type": "string"
                                     },
                                     "key": {
@@ -1166,7 +1166,7 @@
                                         "const": "gpu"
                                     },
                                     "temp": {
-                                        "title": "Detect and display GPU temperature if supported",
+                                        "description": "Detect and display GPU temperature if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1176,12 +1176,12 @@
                                         "default": false
                                     },
                                     "forceVulkan": {
-                                        "title": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
+                                        "description": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "hideType": {
-                                        "title": "Specify the type of GPUs should not be printed",
+                                        "description": "Specify the type of GPUs should not be printed",
                                         "enum": [
                                             "integrated",
                                             "discrete",
@@ -1212,36 +1212,36 @@
                                         "const": "localip"
                                     },
                                     "showIpv4": {
-                                        "title": "Show IPv4 addresses",
+                                        "description": "Show IPv4 addresses",
                                         "type": "boolean",
                                         "default": true
                                     },
                                     "showIpv6": {
-                                        "title": "Show IPv6 addresses",
+                                        "description": "Show IPv6 addresses",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "showMac": {
-                                        "title": "Show MAC addresses",
+                                        "description": "Show MAC addresses",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "showLoop": {
-                                        "title": "Show loop back addresses (127.0.0.1)",
+                                        "description": "Show loop back addresses (127.0.0.1)",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "compact": {
-                                        "title": "Show all IPs in one line",
+                                        "description": "Show all IPs in one line",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "namePrefix": {
-                                        "title": "Show IPs with given name prefix only",
+                                        "description": "Show IPs with given name prefix only",
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "title": "Show ips that are used for default routing only",
+                                        "description": "Show ips that are used for default routing only",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1268,11 +1268,11 @@
                                         "const": "netio"
                                     },
                                     "namePrefix": {
-                                        "title": "Show IPs with given name prefix only",
+                                        "description": "Show IPs with given name prefix only",
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "title": "Show ips that are used for default routing only",
+                                        "description": "Show ips that are used for default routing only",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1299,7 +1299,7 @@
                                         "const": "opengl"
                                     },
                                     "library": {
-                                        "title": "Set the OpenGL context creation library to use. Linux only",
+                                        "description": "Set the OpenGL context creation library to use. Linux only",
                                         "enum": [
                                             "auto",
                                             "egl",
@@ -1357,13 +1357,13 @@
                                         "const": "publicip"
                                     },
                                     "url": {
-                                        "title": "The URL of public IP detection server to be used. Only HTTP protocol is supported",
+                                        "description": "The URL of public IP detection server to be used. Only HTTP protocol is supported",
                                         "type": "string",
                                         "format": "url",
                                         "default": "http://ipinfo.io/ip"
                                     },
                                     "timeout": {
-                                        "title": "Time in milliseconds to wait for the public ip server to respond",
+                                        "description": "Time in milliseconds to wait for the public ip server to respond",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": "disabled (0)"
@@ -1391,7 +1391,7 @@
                                         "const": "separator"
                                     },
                                     "string": {
-                                        "title": "Set the string to be printed",
+                                        "description": "Set the string to be printed",
                                         "type": "string",
                                         "default": "-"
                                     }
@@ -1406,7 +1406,7 @@
                                         "const": "sound"
                                     },
                                     "soundType": {
-                                        "title": "Set what type of sound devices should be printed",
+                                        "description": "Set what type of sound devices should be printed",
                                         "type": "string",
                                         "enum": [
                                             "main",
@@ -1439,22 +1439,22 @@
                                     },
                                     "fqdn": {
                                         "type": "boolean",
-                                        "title": "Set if the title should use fully qualified domain name",
+                                        "description": "Set if the title should use fully qualified domain name",
                                         "default": false
                                     },
                                     "color": {
-                                        "title": "Set colors of the different part of title",
+                                        "description": "Set colors of the different part of title",
                                         "properties": {
                                             "user": {
-                                                "title": "Set color of the user name (left part)",
+                                                "description": "Set color of the user name (left part)",
                                                 "$ref": "#/$defs/colors"
                                             },
                                             "at": {
-                                                "title": "Set color of the @ symbol (middle part)",
+                                                "description": "Set color of the @ symbol (middle part)",
                                                 "$ref": "#/$defs/colors"
                                             },
                                             "host": {
-                                                "title": "Set color of the host name (right part)",
+                                                "description": "Set color of the host name (right part)",
                                                 "$ref": "#/$defs/colors"
                                             }
                                         },
@@ -1483,17 +1483,17 @@
                                         "const": "weather"
                                     },
                                     "location": {
-                                        "title": "The location to display",
+                                        "description": "The location to display",
                                         "type": "string"
                                     },
                                     "timeout": {
-                                        "title": "Time in milliseconds to wait for the weather server to respond",
+                                        "description": "Time in milliseconds to wait for the weather server to respond",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": "disabled (0)"
                                     },
                                     "outputFormat": {
-                                        "title": "The output weather format to be used (must be URI encoded)",
+                                        "description": "The output weather format to be used (must be URI encoded)",
                                         "type": "string",
                                         "default": "%t+-+%C+(%l)"
                                     },
@@ -1520,7 +1520,7 @@
                                         "description": "Print window manager name and version"
                                     },
                                     "detectPlugin": {
-                                        "title": "Set if window manager plugin should be detected on supported platforms",
+                                        "description": "Set if window manager plugin should be detected on supported platforms",
                                         "type": "boolean",
                                         "default": false
                                     },
