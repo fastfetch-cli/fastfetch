@@ -4,7 +4,6 @@
 
 typedef struct FFOptionsGeneral
 {
-    bool allowSlowOperations;
     bool multithreading;
     int32_t processingTimeout;
 

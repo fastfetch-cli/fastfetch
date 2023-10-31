@@ -17,9 +17,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
     {
         const char* key = yyjson_get_str(key_);
 
-        if (ffStrEqualsIgnCase(key, "allowSlowOperations"))
-            options->allowSlowOperations = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "thread") || ffStrEqualsIgnCase(key, "multithreading"))
+        if (ffStrEqualsIgnCase(key, "thread") || ffStrEqualsIgnCase(key, "multithreading"))
             options->multithreading = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "processingTimeout"))
             options->processingTimeout = (int32_t) yyjson_get_int(val);
@@ -42,6 +40,8 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             return "Property `general.stat` has been changed to `display.stat`";
         else if (ffStrEqualsIgnCase(key, "pipe"))
             return "Property `general.pipe` has been changed to `display.pipe`";
+        else if (ffStrEqualsIgnCase(key, "allowSlowOperations"))
+            return "Property `general.allowSlowOperations` has been obsoleted. See CHANGELOG for detail";
 
         else
             return "Unknown general property";
@@ -52,9 +52,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
 
 bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key, const char* value)
 {
-    if(ffStrEqualsIgnCase(key, "--allow-slow-operations"))
-        options->allowSlowOperations = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
+    if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
         options->multithreading = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
         options->processingTimeout = ffOptionParseInt32(key, value);
@@ -82,7 +80,6 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
 void ffOptionsInitGeneral(FFOptionsGeneral* options)
 {
     options->processingTimeout = 1000;
-    options->allowSlowOperations = false;
     options->multithreading = true;
 
     #if defined(__linux__) || defined(__FreeBSD__)
@@ -109,9 +106,6 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
     ffOptionsInitGeneral(&defaultOptions);
 
     yyjson_mut_val* obj = yyjson_mut_obj(doc);
-
-    if (options->allowSlowOperations != defaultOptions.allowSlowOperations)
-        yyjson_mut_obj_add_bool(doc, obj, "allowSlowOperations", options->allowSlowOperations);
 
     if (options->multithreading != defaultOptions.multithreading)
         yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);

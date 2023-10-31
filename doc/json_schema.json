@@ -227,11 +227,6 @@
             "title": "Fastfetch general configurations",
             "type": "object",
             "properties": {
-                "allowSlowOperations": {
-                    "type": "boolean",
-                    "title": "Allow operations that can be very slow for more detailed output",
-                    "default": false
-                },
                 "multithreading": {
                     "type": "boolean",
                     "title": "Use multiple threads to detect values",
