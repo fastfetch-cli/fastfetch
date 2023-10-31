@@ -641,7 +641,7 @@ elseif(WIN32)
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
         src/detection/wifi/wifi_windows.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_windows.cpp
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/util/windows/getline.c

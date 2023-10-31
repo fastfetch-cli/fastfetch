@@ -130,7 +130,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     {
         ffStrbufClear(&result->shellPrettyName);
 
-        HANDLE snapshot;
+        FF_AUTO_CLOSE_FD HANDLE snapshot = NULL;
         while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
 
         if(snapshot)
@@ -147,7 +147,6 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
                     break;
                 }
             }
-            CloseHandle(snapshot);
         }
         if(result->shellPrettyName.length == 0)
             ffStrbufAppendS(&result->shellPrettyName, "Command Prompt");

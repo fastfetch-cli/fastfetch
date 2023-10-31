@@ -5,7 +5,7 @@
 #include "modules/wm/wm.h"
 #include "util/stringUtils.h"
 
-#define FF_WM_NUM_FORMAT_ARGS 3
+#define FF_WM_NUM_FORMAT_ARGS 4
 
 void ffPrintWM(FFWMOptions* options)
 {
@@ -48,7 +48,8 @@ void ffPrintWM(FFWMOptions* options)
         ffPrintFormat(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &pluginName},
         });
     }
 }
@@ -112,10 +113,16 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
         yyjson_mut_obj_add_str(doc, module, "error", "No WM found");
         return;
     }
+
+    FF_STRBUF_AUTO_DESTROY pluginName = ffStrbufCreate();
+    if(options->detectPlugin)
+        ffDetectWMPlugin(&pluginName);
+
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->wmProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->wmPrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "protocolName", &result->wmProtocolName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "pluginName", &pluginName);
 }
 
 void ffPrintWMHelpFormat(void)
@@ -123,7 +130,8 @@ void ffPrintWMHelpFormat(void)
     ffPrintModuleFormatHelp(FF_WM_MODULE_NAME, "{2} ({3})", FF_WM_NUM_FORMAT_ARGS, (const char* []) {
         "WM process name",
         "WM pretty name",
-        "WM protocol name"
+        "WM protocol name",
+        "WM plugin name"
     });
 }
 
