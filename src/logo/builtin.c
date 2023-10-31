@@ -2295,6 +2295,23 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // MainsailOS
+    {
+        .names = {"MainsailOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MAINSAILOS,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+    },
+    // MainsailOSSmall
+    {
+        .names = {"MainsailOS_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_MAINSAILOS_SMALL,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+    },
     // Mageia
     {
         .names = {"Mageia"},

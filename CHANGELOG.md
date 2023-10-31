@@ -64,6 +64,7 @@ Logo:
 * Add Chimera Linux
 * Add EndeavourSmall
 * Add Xenia
+* Add MainsailOS
 
 # 2.1.0
 
