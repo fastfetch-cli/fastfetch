@@ -149,6 +149,7 @@ Module specific options:
     --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
     --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
     --cpuusage-separate <?value>:            Display CPU usage per CPU logical core, instead of an average result. Default is false
+    --de-slow-version-detection <?value>:    Set if DE version should be detected with slow operations. Default is false
     --gpu-temp <?value>:                     Detect and display GPU temperature if supported. Default is false
     --gpu-use-nvml <?value>:                 Use nvml (NVIDIA Management Library) to detect more detailed GPU information (memory usage, CUDA core count, etc). Default is false
     --gpu-force-vulkan <?value>:             Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
@@ -168,6 +169,7 @@ Module specific options:
     --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
     --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format:                 The output weather format to be used. It must be URI encoded.
+    --wm-detect-plugin:                      Set if window manager plugin should be detected on supported platforms. Default is false
     --player-name:                           The name of the player to use for module Media and Player. Linux only
     --opengl-library <value>:                Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, /bin/sh for *nix

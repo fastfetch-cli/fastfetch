@@ -11,6 +11,8 @@ Changes:
     * `--packages-winget`: control whether `winget` packages count should be detected. Note it's a very slow operation, please enable it with caution.
     * `--chassis-use-wmi`: control whether `WMI` query should be used to detect chassis type, which detects more information, but slower. This flag only affects `--chassis-format` and `--format json`.
     * `--battery-use-setup-api`: control whether `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower.
+    * `--wm-detect-plugin`: control whether WM plugins should be detected. Note it's implemented with global processes enumeration and can report false results.
+    * `--de-slow-version-detection`: control DE version should be detected with slow operations. It's usually not necessary and only provided as a backup.
 
 Features:
 * Quirks for MIPS platforms (CPU, Linux)
@@ -65,6 +67,7 @@ Logo:
 * Add EndeavourSmall
 * Add Xenia
 * Add MainsailOS
+* Fix phyOS
 
 # 2.1.0
 

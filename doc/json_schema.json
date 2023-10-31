@@ -653,10 +653,6 @@
                                                 "description": "Print current date and time"
                                             },
                                             {
-                                                "const": "de",
-                                                "description": "Print desktop environment name"
-                                            },
-                                            {
                                                 "const": "font",
                                                 "description": "Print system font name"
                                             },
@@ -759,10 +755,6 @@
                                             {
                                                 "const": "wallpaper",
                                                 "description": "Print image file path of current wallpaper"
-                                            },
-                                            {
-                                                "const": "wm",
-                                                "description": "Print window manager name and version"
                                             },
                                             {
                                                 "const": "wifi",
@@ -879,6 +871,18 @@
                                         "description": "Set if WMI query should be used on Windows, which detects more information but slower",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 }
                             },
@@ -1134,6 +1138,32 @@
                                 "additionalProperties": false
                             },
                             {
+                                "title": "DE",
+                                "properties": {
+                                    "type": {
+                                        "const": "de",
+                                        "description": "Print desktop environment name"
+                                    },
+                                    "slowVersionDetection": {
+                                        "type": "boolean",
+                                        "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.",
+                                        "default": "false"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
                                 "title": "GPU",
                                 "properties": {
                                     "type": {
@@ -1309,6 +1339,18 @@
                                         "description": "Set if winget package count should be detected.\nNote this is very slow operation. Please make sure `winget list` works before enable this option\nWindows only",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 }
                             },
@@ -1474,6 +1516,32 @@
                                     }
                                 },
                                 "additionalProperties": false
+                            },
+                            {
+                                "title": "WM",
+                                "properties": {
+                                    "type": {
+                                        "const": "wm",
+                                        "description": "Print window manager name and version"
+                                    },
+                                    "detectPlugin": {
+                                        "title": "Set if window manager plugin should be detected on supported platforms",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
                             }
                         ]
                     }
