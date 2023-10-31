@@ -51,7 +51,7 @@ bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(key, "slow-version-detection"))
+    if (ffStrEqualsIgnCase(subKey, "slow-version-detection"))
     {
         options->slowVersionDetection = ffOptionParseBoolean(value);
         return true;
