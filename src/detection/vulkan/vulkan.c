@@ -228,15 +228,10 @@ static const char* detectVulkan(FFVulkanResult* result)
 FFVulkanResult* ffDetectVulkan(void)
 {
     static FFVulkanResult result;
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    ffThreadMutexLock(&mutex);
     if(init)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
     init = true;
 
     ffStrbufInit(&result.driver);
@@ -250,6 +245,5 @@ FFVulkanResult* ffDetectVulkan(void)
         result.error = "fastfetch was compiled without vulkan support";
     #endif
 
-    ffThreadMutexUnlock(&mutex);
     return &result;
 }

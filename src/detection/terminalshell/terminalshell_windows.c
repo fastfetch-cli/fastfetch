@@ -355,15 +355,10 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* vers
 
 const FFTerminalShellResult* ffDetectTerminalShell(void)
 {
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
-    ffThreadMutexLock(&mutex);
     if(init)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
     init = true;
 
     ffStrbufInit(&result.shellProcessName);
@@ -381,7 +376,7 @@ const FFTerminalShellResult* ffDetectTerminalShell(void)
 
     uint32_t ppid;
     if(!getProcessInfo(0, &ppid, NULL, NULL, NULL))
-        goto exit;
+        return &result;
 
     ppid = getShellInfo(&result, ppid);
     if(ppid)
@@ -393,7 +388,5 @@ const FFTerminalShellResult* ffDetectTerminalShell(void)
     ffStrbufInit(&result.terminalVersion);
     fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
-exit:
-    ffThreadMutexUnlock(&mutex);
     return &result;
 }

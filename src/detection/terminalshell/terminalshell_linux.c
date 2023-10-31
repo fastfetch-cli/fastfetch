@@ -310,15 +310,10 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* vers
 
 const FFTerminalShellResult* ffDetectTerminalShell()
 {
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
-    ffThreadMutexLock(&mutex);
     if(init)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
     init = true;
 
     #ifdef __APPLE__
@@ -413,6 +408,5 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     ffStrbufInit(&result.terminalVersion);
     fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
-    ffThreadMutexUnlock(&mutex);
     return &result;
 }

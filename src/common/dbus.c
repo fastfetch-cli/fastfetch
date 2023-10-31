@@ -33,9 +33,6 @@ static const FFDBusLibrary* loadLib(void)
     static FFDBusLibrary lib;
     static bool loaded = false;
     static bool loadSuccess = false;
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
-
-    ffThreadMutexLock(&mutex);
 
     if(!loaded)
     {
@@ -43,7 +40,6 @@ static const FFDBusLibrary* loadLib(void)
         loadSuccess = loadLibSymbols(&lib);
     }
 
-    ffThreadMutexUnlock(&mutex);
     return loadSuccess ? &lib : NULL;
 }
 

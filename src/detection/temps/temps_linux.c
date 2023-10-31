@@ -44,15 +44,10 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
 const FFTempsResult* ffDetectTemps(void)
 {
     static FFTempsResult result;
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
 
-    ffThreadMutexLock(&mutex);
     if(init)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
     init = true;
 
     ffListInitA(&result.values, sizeof(FFTempValue), 16);
@@ -64,10 +59,7 @@ const FFTempsResult* ffDetectTemps(void)
 
     DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
@@ -92,6 +84,5 @@ const FFTempsResult* ffDetectTemps(void)
 
     closedir(dirp);
 
-    ffThreadMutexUnlock(&mutex);
     return &result;
 }

@@ -36,8 +36,6 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
 
 static void detectGTKFromSettings(FFGTKResult* result)
 {
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
-
     static const char* themeName = NULL;
     static const char* iconsName = NULL;
     static const char* fontName = NULL;
@@ -47,11 +45,8 @@ static void detectGTKFromSettings(FFGTKResult* result)
 
     static bool init = false;
 
-    ffThreadMutexLock(&mutex);
-
     if(init)
     {
-        ffThreadMutexUnlock(&mutex);
         applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);
         return;
     }
@@ -103,7 +98,6 @@ static void detectGTKFromSettings(FFGTKResult* result)
         wallpaper = ffSettingsGet("/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
     }
 
-    ffThreadMutexUnlock(&mutex);
     applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);
 }
 
@@ -178,14 +172,10 @@ static void detectGTK(const char* version, FFGTKResult* result)
 }
 
 #define FF_DETECT_GTK_IMPL(version) \
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER; \
     static FFGTKResult result; \
     static bool init = false; \
-    ffThreadMutexLock(&mutex); \
-    if(init){ \
-        ffThreadMutexUnlock(&mutex);\
+    if(init) \
         return &result; \
-    } \
     init = true; \
     ffStrbufInit(&result.theme); \
     ffStrbufInit(&result.icons); \
@@ -194,7 +184,6 @@ static void detectGTK(const char* version, FFGTKResult* result)
     ffStrbufInit(&result.cursorSize); \
     ffStrbufInit(&result.wallpaper); \
     detectGTK(#version, &result); \
-    ffThreadMutexUnlock(&mutex); \
     return &result;
 
 const FFGTKResult* ffDetectGTK2(void)
