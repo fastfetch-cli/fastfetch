@@ -6,6 +6,8 @@
 
 #include <time.h>
 
+#pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
+
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
 

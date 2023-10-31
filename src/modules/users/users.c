@@ -6,6 +6,8 @@
 
 #include <time.h>
 
+#pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
+
 #define FF_USERS_NUM_FORMAT_ARGS 1
 
 void ffPrintUsers(FFUsersOptions* options)
