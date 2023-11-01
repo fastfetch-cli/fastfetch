@@ -1867,6 +1867,18 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Interix
+    {
+        .names = {"Interix"},
+        .lines = FASTFETCH_DATATEXT_LOGO_INTERIX,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+        },
+    },
     // IRIX
     {
         .names = {"IRIX"},
