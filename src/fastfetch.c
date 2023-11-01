@@ -481,7 +481,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     {
         if (instance.state.configDoc)
         {
-            fputs("Error: existing jsonc config file detected. Aborting\n", stderr);
+            fputs("Error: existing jsonc config detected. Aborting\n", stderr);
             exit(477);
         }
 
@@ -492,6 +492,12 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         }
         else
             ffStrbufSetS(&instance.state.migrateConfigPath, value);
+
+        if (ffPathExists(instance.state.migrateConfigPath.chars, FF_PATHTYPE_ANY))
+        {
+            fprintf(stderr, "Error: file `%s` exists. Aborting\n", instance.state.migrateConfigPath.chars);
+            exit(477);
+        }
     }
     else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);

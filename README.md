@@ -61,7 +61,8 @@ See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 * Run it with default configuration: `fastfetch`
 * Run it with [all supported modules](https://github.com/fastfetch-cli/fastfetch/wiki/Support+Status#available-modules) and find what you interest: `fastfetch -c all.jsonc`
 * Find all data that fastfetch detects: `fastfetch -s <module> --format json`
-* Get help messages: `fastfetch --help`
+* Display help messages: `fastfetch --help`
+* Generate config file based on command line arguments: `fastfetch --arg1 --arg2 --mirgrate-config`
 
 ## Customization
 
