@@ -139,6 +139,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "sshd")                 == 0 ||
         strcasecmp(name, "gdb")                  == 0 ||
         strcasecmp(name, "lldb")                 == 0 ||
+        strcasecmp(name, "login")                == 0 ||
         strcasecmp(name, "guake-wrapped")        == 0 ||
         strcasestr(name, "debug")             != NULL ||
         strcasestr(name, "command-not-found") != NULL ||
@@ -250,6 +251,9 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     //MacOS, mintty
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
+
+    if(!ffStrSet(term))
+        term = getenv("LC_TERMINAL");
 
     //Normal Terminal
     if(!ffStrSet(term))

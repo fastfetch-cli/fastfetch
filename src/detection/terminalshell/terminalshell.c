@@ -455,6 +455,22 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         }
     }
 
+    termProgramVersion = getenv("LC_TERMINAL_VERSION");
+    if(termProgramVersion)
+    {
+        const char* termProgram = getenv("LC_TERMINAL");
+        if(termProgram)
+        {
+            if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
+                (ffStrEquals(termProgram, "vscode") && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
+                (ffStrStartsWith(termProgram, "iTerm") && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
+            ) {
+                ffStrbufSetS(version, termProgramVersion);
+                return true;
+            }
+        }
+    }
+
     #ifdef _WIN32
 
     return getFileVersion(exe->chars, version);
