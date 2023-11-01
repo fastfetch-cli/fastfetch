@@ -204,11 +204,15 @@ FF_MAYBE_UNUSED static void pciDetectType(FFGPUResult* gpu)
 
 static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* results, PCIData* pci, struct pci_dev* device)
 {
+    puts("10");
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
+
+    puts("11");
 
     char class[1024];
     pci->ffpci_lookup_name(pci->access, class, sizeof(class) - 1, PCI_LOOKUP_CLASS, device->device_class);
 
+    puts("12");
     if(
         //https://pci-ids.ucw.cz/read/PD/03
         strcasecmp("VGA compatible controller", class) != 0 &&
@@ -217,18 +221,24 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         strcasecmp("Display controller", class)        != 0
     ) return;
 
+    puts("13");
     pci->ffpci_fill_info(device, PCI_FILL_IDENT);
 
     FFGPUResult* gpu = ffListAdd(results);
+    puts("14");
 
     ffStrbufInit(&gpu->vendor);
     pciDetectVendorName(gpu, pci, device);
+    puts("15");
 
     ffStrbufInit(&gpu->name);
     pciDetectDeviceName(gpu, pci, device);
+    puts("16");
 
     ffStrbufInit(&gpu->driver);
     pciDetectDriverName(gpu, pci, device);
+
+    puts("17");
 
     #if FF_USE_PCI_MEMORY
         // Libpci reports at least 2 false results (#495, #497)
@@ -238,12 +248,14 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->dedicated.used = gpu->shared.used = gpu->dedicated.total = gpu->shared.total = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
     #endif
+    puts("18");
 
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->temperature = FF_GPU_TEMP_UNSET;
 
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->useNvml))
     {
+    puts("19");
         char pciDeviceId[32];
         snprintf(pciDeviceId, sizeof(pciDeviceId) - 1, "%04x:%02x:%02x.%d", device->domain, device->bus, device->dev, device->func);
 
@@ -253,14 +265,17 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
         }, "libnvidia-ml.so");
 
+    puts("20");
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
             gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
     }
 
+    puts("21");
     #ifdef __linux__
     if(options->temp && gpu->temperature != gpu->temperature)
         pciDetectTemp(gpu, device);
     #endif
+    puts("22");
 }
 
 jmp_buf pciInitJmpBuf;
@@ -306,6 +321,8 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libpci, pci, pci_get_string_property);
     #endif
 
+    puts("1");
+
     pci.access = ffpci_alloc();
     pci.access->warning = handlePciWarning;
     pci.access->error = handlePciInitError;
@@ -315,7 +332,12 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         return "pcilib: Cannot find any working access method.";
     pci.access->error = handlePciGenericError; // set back to generic error so we don't mess up error handling in other places
 
+
+    puts("2");
+
     ffpci_scan_bus(pci.access);
+
+    puts("3");
 
     struct pci_dev* device = pci.access->devices;
     while(device != NULL)
@@ -323,6 +345,8 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         pciHandleDevice(options, gpus, &pci, device);
         device = device->next;
     }
+
+    puts("done");
 
     ffpci_cleanup(pci.access);
     return NULL;
